@@ -7,6 +7,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -23,6 +24,7 @@ public class YoArtifactPosition extends YoArtifact
    private final GraphicType graphicType;
    
    private final Point2d tempPoint = new Point2d();
+   private final Vector2d legendRadii = new Vector2d();
 
    public YoArtifactPosition(String namePrefix, String nameSuffix, GraphicType type, Color color, double radius, YoVariableRegistry registry)
    {
@@ -44,49 +46,48 @@ public class YoArtifactPosition extends YoArtifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
       graphics.setColor(color);
       graphics.setStroke(STROKE);
       
+      legendRadii.set(LEGEND_RADIUS, LEGEND_RADIUS);
+      
       switch (graphicType)
       {
          case BALL :
-            graphics.drawEmptyCircle(centerX, centerY, LEGEND_RADIUS, color);
+            graphics.drawOval(graphics.getScreenFrame(), origin, legendRadii);
             break;
          case SOLID_BALL :
-            graphics.drawFilledCircle(centerX, centerY, LEGEND_RADIUS, color);
+            graphics.drawOvalFilled(graphics.getScreenFrame(), origin, legendRadii);
             break;
          case CROSS :
-            graphics.drawCross(centerX, centerY, LEGEND_RADIUS, color);
+            graphics.drawCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
          case BALL_WITH_CROSS :
-            graphics.drawCircleWithCross(centerX, centerY, LEGEND_RADIUS, color);
+            graphics.drawCircleWithCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
          case ROTATED_CROSS :
-            graphics.drawRotatedCross(centerX, centerY, LEGEND_RADIUS, color);
+            graphics.drawRotatedCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
          case BALL_WITH_ROTATED_CROSS :
-            graphics.drawCircleWithRotatedCross(centerX, centerY, LEGEND_RADIUS, color);
+            graphics.drawCircleWithRotatedCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
          case DIAMOND :
-            graphics.drawDiamond(centerX, centerY, LEGEND_RADIUS, color);
+            graphics.drawDiamond(graphics.getScreenFrame(), origin, legendRadii);
             break;
          case DIAMOND_WITH_CROSS :
-            graphics.drawDiamondWithCross(centerX, centerY, LEGEND_RADIUS, color);
+            graphics.drawDiamondWithCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
          case SQUARE :
-            graphics.drawSquare(centerX, centerY, LEGEND_RADIUS, color);
+            graphics.drawRectangle(graphics.getScreenFrame(), origin, legendRadii);
             break;
          case SQUARE_WITH_CROSS :
-            graphics.drawSquareWithCross(centerX, centerY, LEGEND_RADIUS, color);
+            graphics.drawSquareWithCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
          case ELLIPSOID :
-            double radius = radii.getX();
-            radii.setX(radii.getX() * 1.2);
-            radii.setY(radii.getY() * 0.8);
-            graphics.drawEmptyCircle(centerX, centerY, LEGEND_RADIUS, color);
-            radii.set(radius, radius);
+            legendRadii.set(LEGEND_RADIUS * 1.2, LEGEND_RADIUS * 0.8);
+            graphics.drawOval(graphics.getScreenFrame(), origin, legendRadii);
             break;
       }
    }
@@ -110,18 +111,24 @@ public class YoArtifactPosition extends YoArtifact
       graphics.setColor(color);
       graphics.setStroke(STROKE);
       
+      if (Double.isNaN(tempPoint.getX()) || Double.isNaN(tempPoint.getY()))
+      {
+         return;
+      }
+      
       switch (graphicType)
       {
          case BALL :
-            graphics.drawEmptyCircle(tempPoint, radii);
+            graphics.drawOval(tempPoint, radii);
             break;
          case SOLID_BALL :
-            graphics.drawFilledCircle(tempPoint, radii);
+            graphics.drawOvalFilled(tempPoint, radii);
             break;
          case CROSS :
             graphics.drawCross(tempPoint, radii);
             break;
          case BALL_WITH_CROSS :
+            System.out.println("drawing ball w cross: " + tempPoint + " radi: " + radii);
             graphics.drawCircleWithCross(tempPoint, radii);
             break;
          case ROTATED_CROSS :
@@ -146,7 +153,7 @@ public class YoArtifactPosition extends YoArtifact
             double radius = radii.getX();
             radii.setX(radii.getX() * 1.2);
             radii.setY(radii.getY() * 0.8);
-            graphics.drawEmptyCircle(tempPoint, radii);
+            graphics.drawOval(tempPoint, radii);
             radii.set(radius, radius);
             break;
       }

@@ -25,9 +25,6 @@ public class SmartCMPProjectorTwo extends CMPProjector
    private final FramePoint2d intersection1 = new FramePoint2d();
    private final FramePoint2d intersection2 = new FramePoint2d();
    private final BooleanYoVariable cmpWasProjected = new BooleanYoVariable("CmpWasProjected", registry);
-   private final FramePoint2d desiredCMPlocal = new FramePoint2d();
-   private final FrameLine2d finalIcpToIcp = new FrameLine2d();
-   private final FramePoint2d capturePointLocal = new FramePoint2d();
 
    public SmartCMPProjectorTwo(YoVariableRegistry parentRegistry)
    {
@@ -37,56 +34,6 @@ public class SmartCMPProjectorTwo extends CMPProjector
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
-   }
-
-   @Override
-   public void projectCMPIntoSupportPolygonUsingFinalDesired(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon,
-         FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
-   {
-      ReferenceFrame returnFrame = desiredCMP.getReferenceFrame();
-
-      // if CMP is inside the support do nothing
-      desiredCMPlocal.setIncludingFrame(desiredCMP);
-      desiredCMPlocal.changeFrameAndProjectToXYPlane(supportPolygon.getReferenceFrame());
-      if (supportPolygon.isPointInside(desiredCMPlocal))
-      {
-         cmpWasProjected.set(false);
-         return;
-      }
-
-      // if the support area is small use its centroid
-      supportPolygon.getBoundingBox(tempBoundingBox);
-      double diagonalLength = Math.sqrt(tempBoundingBox.getDiagonalLengthSquared());
-      if (diagonalLength < 0.01)
-      {
-         supportPolygon.getCentroid(desiredCMP);
-         cmpWasProjected.set(true);
-         return;
-      }
-
-      // otherwise move the CMP inside the support such that the ICP is pushed towards its final desired position
-      finalIcpToIcp.setIncludingFrame(finalDesiredCapturePoint, capturePoint);
-      finalIcpToIcp.changeFrame(supportPolygon.getReferenceFrame());
-      capturePointLocal.setIncludingFrame(capturePoint);
-      capturePointLocal.changeFrame(supportPolygon.getReferenceFrame());
-      int intersections = supportPolygon.intersectionWithRay(finalIcpToIcp, intersection1, intersection2);
-
-      if (intersections == 1)
-         desiredCMP.setIncludingFrame(intersection1);
-      else if (intersections == 2)
-         desiredCMP.setIncludingFrame(closestIntersection(capturePointLocal, intersection1, intersection2));
-      else
-         supportPolygon.getClosestVertex(desiredCMP, capturePointLocal);
-
-      desiredCMP.changeFrame(returnFrame);
-      cmpWasProjected.set(true);
-   }
-
-   private FramePoint2d closestIntersection(FramePoint2d point, FramePoint2d candidate1, FramePoint2d candidate2)
-   {
-      if (point.distance(candidate1) <= point.distance(candidate2))
-         return candidate1;
-      return candidate2;
    }
 
    /**
@@ -104,7 +51,10 @@ public class SmartCMPProjectorTwo extends CMPProjector
       ReferenceFrame returnFrame = desiredCMP.getReferenceFrame();
 
       desiredCMP.changeFrame(supportPolygon.getReferenceFrame());
-      finalDesiredCapturePoint.changeFrame(supportPolygon.getReferenceFrame());
+      if (finalDesiredCapturePoint != null)
+      {
+         finalDesiredCapturePoint.changeFrame(supportPolygon.getReferenceFrame());
+      }
       capturePoint.changeFrame(supportPolygon.getReferenceFrame());
 
       projectCMPIntoSupportPolygonIfOutsideLocal(capturePoint, supportPolygon, finalDesiredCapturePoint, desiredCMP);

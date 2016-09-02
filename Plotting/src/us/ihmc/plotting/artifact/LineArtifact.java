@@ -6,7 +6,9 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.robotics.geometry.LineSegment2d;
 
 public class LineArtifact extends Artifact
 {
@@ -15,6 +17,8 @@ public class LineArtifact extends Artifact
    private final Point2d point1 = new Point2d();
    private final Point2d point2 = new Point2d(0.01, 0.01);
 
+   private final LineSegment2d tempLineSegment = new LineSegment2d();
+   
    public LineArtifact(String id)
    {
       super(id);
@@ -62,11 +66,12 @@ public class LineArtifact extends Artifact
       graphics.setColor(color);
       graphics.setStroke(STROKE);
       
-      graphics.drawLineSegment(point1.getX(), point1.getY(), point2.getX(), point2.getY());
+      tempLineSegment.set(point1, point2);
+      graphics.drawLineSegment(tempLineSegment);
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
    }
 

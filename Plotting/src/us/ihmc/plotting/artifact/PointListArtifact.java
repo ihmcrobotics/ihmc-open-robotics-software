@@ -11,6 +11,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 
 public class PointListArtifact extends Artifact
 {
@@ -184,7 +185,7 @@ public class PointListArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
    }
 
