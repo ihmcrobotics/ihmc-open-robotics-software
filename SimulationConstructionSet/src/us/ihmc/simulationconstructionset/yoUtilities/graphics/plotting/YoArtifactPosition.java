@@ -80,7 +80,7 @@ public class YoArtifactPosition extends YoArtifact
             graphics.drawDiamondWithCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
          case SQUARE :
-            graphics.drawSquare(graphics.getScreenFrame(), origin, legendRadii);
+            graphics.drawRectangle(graphics.getScreenFrame(), origin, legendRadii);
             break;
          case SQUARE_WITH_CROSS :
             graphics.drawSquareWithCross(graphics.getScreenFrame(), origin, legendRadii);

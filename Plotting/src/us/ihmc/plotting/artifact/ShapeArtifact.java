@@ -96,7 +96,7 @@ public class ShapeArtifact extends Artifact
       }
       else if (getType().equals("rectangle"))
       {
-         graphics.drawSquare(graphics.getScreenFrame(), tempCenter, tempRadii);
+         graphics.drawRectangle(graphics.getScreenFrame(), tempCenter, tempRadii);
       }
    }
 

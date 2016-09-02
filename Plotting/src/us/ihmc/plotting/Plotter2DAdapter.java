@@ -133,12 +133,12 @@ public class Plotter2DAdapter
    
    public void drawSquareWithCross(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
    {
-      drawSquare(frame, center, radii);
+      drawRectangle(frame, center, radii);
       drawLineSegment(frame, center.getX() - radii.getX(), center.getY(), center.getX() + radii.getX(), center.getY());
       drawLineSegment(frame, center.getX(), center.getY() - radii.getY(), center.getX(), center.getY() + radii.getY());
    }
 
-   public void drawSquare(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
+   public void drawRectangle(PlotterReferenceFrame frame, Point2d center, Vector2d radii)
    {
       PlotterPoint2d centerFramePoint = pointBin[0];
       PlotterVector2d radiiFrameVector = vectorBin[0];
@@ -495,90 +495,6 @@ public class Plotter2DAdapter
    public Graphics create()
    {
       return graphics2d.create();
-   }
-
-   @Deprecated
-   public Graphics create(int x, int y, int width, int height)
-   {
-      return graphics2d.create(x, y, width, height);
-   }
-
-   @Deprecated
-   public void clearRectangle(int x, int y, int width, int height)
-   {
-      graphics2d.clearRect(x, y, width, height);
-   }
-
-   @Deprecated
-   public void clipRectangle(int x, int y, int width, int height)
-   {
-      graphics2d.clipRect(x, y, width, height);
-   }
-
-   @Deprecated
-   public void setClip(int x, int y, int width, int height)
-   {
-      graphics2d.setClip(x, y, width, height);
-   }
-
-   @Deprecated
-   public void copyArea(int x, int y, int width, int height, int dx, int dy)
-   {
-      graphics2d.copyArea(x, y, width, height, dx, dy);
-   }
-
-   @Deprecated
-   public boolean hitClip(int x, int y, int width, int height)
-   {
-      return graphics2d.hitClip(x, y, width, height);
-   }
-
-   @Deprecated
-   public void setClip(Shape clip)
-   {
-      graphics2d.setClip(clip);
-   }
-
-   @Deprecated
-   public boolean hit(Rectangle rect, Shape s, boolean onStroke)
-   {
-      return graphics2d.hit(rect, s, onStroke);
-   }
-
-   @Deprecated
-   public Rectangle getClipBounds(Rectangle r)
-   {
-      return graphics2d.getClipBounds(r);
-   }
-
-   @Deprecated
-   public void clip(Shape s)
-   {
-      graphics2d.clip(s);
-   }
-
-   @Deprecated
-   public void setTransform(AffineTransform Tx)
-   {
-      graphics2d.setTransform(Tx);
-   }
-
-   @Deprecated
-   public AffineTransform getTransform()
-   {
-      return graphics2d.getTransform();
-   }
-
-   @Deprecated
-   public Shape getClip()
-   {
-      return graphics2d.getClip();
-   }
-
-   @Deprecated
-   public Rectangle getClipBounds()
-   {
-      return graphics2d.getClipBounds();
    }
 
    public Color getColor()

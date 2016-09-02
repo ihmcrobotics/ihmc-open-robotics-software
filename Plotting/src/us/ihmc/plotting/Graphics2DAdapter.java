@@ -61,7 +61,7 @@ public class Graphics2DAdapter
 
    public void drawSquare(Point2d center, Vector2d radii)
    {
-      plotter2dAdapter.drawSquare(plotter2dAdapter.getMetersFrame(), center, radii);
+      plotter2dAdapter.drawRectangle(plotter2dAdapter.getMetersFrame(), center, radii);
    }
 
    public void drawSquareWithCross(Point2d center, Vector2d radii)
