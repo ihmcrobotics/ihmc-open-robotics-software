@@ -199,11 +199,11 @@ public class FootCoPOccupancyGrid
       copToRegister.checkReferenceFrameMatch(soleFrame);
       copToRegister.get(tempPoint);
 
-      tempPoint.x -= gridOrigin.getX();
-      tempPoint.y -= gridOrigin.getY();
+      tempPoint.setX(tempPoint.getX() - gridOrigin.getX());
+      tempPoint.setY(tempPoint.getY() - gridOrigin.getY());
 
-      int xIndex = findXIndex(tempPoint.x);
-      int yIndex = findYIndex(tempPoint.y);
+      int xIndex = findXIndex(tempPoint.getX());
+      int yIndex = findYIndex(tempPoint.getY());
 
       currentXIndex.set(xIndex);
       currentYIndex.set(yIndex);
@@ -258,11 +258,11 @@ public class FootCoPOccupancyGrid
    {
       location.checkReferenceFrameMatch(soleFrame);
       location.get(tempPoint);
-      tempPoint.x -= gridOrigin.getX();
-      tempPoint.y -= gridOrigin.getY();
+      tempPoint.setX(tempPoint.getX() - gridOrigin.getX());
+      tempPoint.setY(tempPoint.getY() - gridOrigin.getY());
 
-      int xIndex = findXIndex(tempPoint.x);
-      int yIndex = findYIndex(tempPoint.y);
+      int xIndex = findXIndex(tempPoint.getX());
+      int yIndex = findYIndex(tempPoint.getY());
       if (checkIfIndicesAreValid(xIndex, yIndex))
          return occupancyGrid.get(xIndex, yIndex) > 0.9;
       else
@@ -621,8 +621,8 @@ public class FootCoPOccupancyGrid
          return false;
 
       lineToPack.setToZero(soleFrame);
-      lineToPack.setOrigin(lineOrigin);
-      lineToPack.setDirection(lineDirection);
+      lineToPack.setPoint(lineOrigin);
+      lineToPack.setVector(lineDirection);
       return true;
    }
 }

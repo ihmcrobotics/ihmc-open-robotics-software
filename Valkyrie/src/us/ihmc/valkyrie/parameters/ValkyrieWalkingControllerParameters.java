@@ -114,7 +114,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean doToeOffIfPossible()
    {
-      return true;
+      return !(target == DRCRobotModel.RobotTarget.REAL_ROBOT);
    }
 
    @Override
@@ -126,7 +126,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
-      return target != RobotTarget.REAL_ROBOT;
+      return true;
    }
 
    @Override
@@ -183,7 +183,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
    {
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+      return false;
    }
 
    @Override
@@ -195,13 +195,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
-      return 0.05;
+      return Double.POSITIVE_INFINITY;
    }
 
    @Override
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
-      return 0.70;
+      return getDefaultSwingTime();
    }
 
    @Override
@@ -512,10 +512,10 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = runningOnRealRobot ? 80.0 : 100.0;
-      double kpZ = runningOnRealRobot ? 80.0 : 100.0;
-      double zetaXY = runningOnRealRobot ? 0.8 : 0.8; // 0.7
-      double zetaZ = runningOnRealRobot ? 0.8 : 0.8; // 0.7
+      double kpXY = runningOnRealRobot ? 100.0 : 100.0; // 160.0
+      double kpZ = runningOnRealRobot ? 80.0 : 100.0; // 120.0
+      double zetaXY = runningOnRealRobot ? 0.9 : 0.8; // 0.7
+      double zetaZ = runningOnRealRobot ? 1.00 : 0.8; // 0.7
       double maxAccel = runningOnRealRobot ? 18.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 270.0 : 270.0;
 
@@ -751,13 +751,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getDefaultTransferTime()
    {
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 0.70 : 0.25;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 2.0 : 0.25;
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.20 : 0.60;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.5 : 0.60;
    }
 
    /** @inheritDoc */
@@ -944,7 +944,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       // This seems to be specific to Val's, probably because of its particular kinematics.
       // Shouldn't affect the rest of the body as long as the head is controlled w.r.t. to the chest.
       momentumOptimizationSettings.setHeadWeights(5.0, 500.0, 50.0);
-      momentumOptimizationSettings.setAngularMomentumWeight(0.0, 0.5);
       return momentumOptimizationSettings;
    }
 

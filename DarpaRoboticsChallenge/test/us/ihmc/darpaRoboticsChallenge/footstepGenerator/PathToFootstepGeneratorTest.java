@@ -536,8 +536,8 @@ public class PathToFootstepGeneratorTest
          Quat4d orientation = new Quat4d();
          double sign = (side == RobotSide.LEFT) ? 1 : -1;
          //sign * horizontalDistance
-         position.x = centerPoint.getX() + -1.0 * Math.sin(yaw) * sign * horizontalDistance;
-         position.y = centerPoint.getY() + 1.0 * Math.cos(yaw) * sign * horizontalDistance;
+         position.setX(centerPoint.getX() + -1.0 * Math.sin(yaw) * sign * horizontalDistance);
+         position.setY(centerPoint.getY() + 1.0 * Math.cos(yaw) * sign * horizontalDistance);
          RotationTools.computeQuaternionFromYawAndZNormal(yaw, verticalVector, orientation);
          FootstepDataMessage footstep = new FootstepDataMessage(side, position, orientation);
          snapper.snapFootstep(footstep, heightMap);

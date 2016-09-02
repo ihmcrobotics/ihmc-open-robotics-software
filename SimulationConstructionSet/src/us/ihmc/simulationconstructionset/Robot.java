@@ -1455,27 +1455,27 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
          copForce.add(tempForce);
 
          double fz = tempForce.getZ();
-         copPoint.x += gc.getX() * fz;
-         copPoint.y += gc.getY() * fz;
-         copPoint.z += gc.getZ() * fz;
+         copPoint.setX(copPoint.getX() + gc.getX() * fz);
+         copPoint.setY(copPoint.getY() + gc.getY() * fz);
+         copPoint.setZ(copPoint.getZ() + gc.getZ() * fz);
       }
 
-      if (copForce.z < 1e-14)
+      if (copForce.getZ() < 1e-14)
       {
          copPoint.set(Double.NaN, Double.NaN, Double.NaN);
          copMoment.set(0.0, 0.0, 0.0);
          return;
       }
         
-      copPoint.scale(1.0 / copForce.z);
+      copPoint.scale(1.0 / copForce.getZ());
 
       for (int i = 0; i < gcPoints.size(); i++)
       {
          GroundContactPoint gc = gcPoints.get(i);
 
-         tempRVector.x = copPoint.x - gc.getX();
-         tempRVector.y = copPoint.y - gc.getY();
-         tempRVector.z = copPoint.z - gc.getZ();
+         tempRVector.setX(copPoint.getX() - gc.getX());
+         tempRVector.setY(copPoint.getY() - gc.getY());
+         tempRVector.setZ(copPoint.getZ() - gc.getZ());
 
          gc.getForce(tempForce);
          tempRCrossF.cross(tempRVector, tempForce);

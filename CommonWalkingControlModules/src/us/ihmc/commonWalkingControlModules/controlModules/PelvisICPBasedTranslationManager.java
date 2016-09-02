@@ -406,6 +406,7 @@ public class PelvisICPBasedTranslationManager
       if (isFrozen.getBooleanValue())
       {
          desiredICPOffset.setAndMatchFrame(icpOffsetForFreezing);
+         desiredICPToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
          desiredICPToModify.add(icpOffsetForFreezing);
       }
 

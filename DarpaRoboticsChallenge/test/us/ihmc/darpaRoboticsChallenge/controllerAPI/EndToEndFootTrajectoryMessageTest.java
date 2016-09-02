@@ -309,9 +309,9 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          {
             if (robotSide == RobotSide.RIGHT)
                pointsOnSphere[i].negate();
-            pointsOnSphere[i].x *= radiusXY;
-            pointsOnSphere[i].y *= radiusXY;
-            pointsOnSphere[i].z *= radiusZ;
+            pointsOnSphere[i].setX(pointsOnSphere[i].getX() * radiusXY);
+            pointsOnSphere[i].setY(pointsOnSphere[i].getY() * radiusXY);
+            pointsOnSphere[i].setZ(pointsOnSphere[i].getZ() * radiusZ);
             tempPoint.setIncludingFrame(ankleFrame, pointsOnSphere[i]);
             tempPoint.add(sphereCenter);
             tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
@@ -943,15 +943,15 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       assertNumberOfWaypoints(robotSide, 2, scs);
 
       Point3d controllerDesiredPosition = findControllerDesiredPosition(robotSide, scs);
-      assertEquals(desiredPosition.getX(), controllerDesiredPosition.x, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredPosition.getY(), controllerDesiredPosition.y, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredPosition.getZ(), controllerDesiredPosition.z, EPSILON_FOR_DESIREDS);
+      assertEquals(desiredPosition.getX(), controllerDesiredPosition.getX(), EPSILON_FOR_DESIREDS);
+      assertEquals(desiredPosition.getY(), controllerDesiredPosition.getY(), EPSILON_FOR_DESIREDS);
+      assertEquals(desiredPosition.getZ(), controllerDesiredPosition.getZ(), EPSILON_FOR_DESIREDS);
 
       Quat4d controllerDesiredOrientation = findControllerDesiredOrientation(robotSide, scs);
-      assertEquals(desiredOrientation.getX(), controllerDesiredOrientation.x, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getY(), controllerDesiredOrientation.y, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getZ(), controllerDesiredOrientation.z, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getW(), controllerDesiredOrientation.w, EPSILON_FOR_DESIREDS);
+      assertEquals(desiredOrientation.getX(), controllerDesiredOrientation.getX(), EPSILON_FOR_DESIREDS);
+      assertEquals(desiredOrientation.getY(), controllerDesiredOrientation.getY(), EPSILON_FOR_DESIREDS);
+      assertEquals(desiredOrientation.getZ(), controllerDesiredOrientation.getZ(), EPSILON_FOR_DESIREDS);
+      assertEquals(desiredOrientation.getW(), controllerDesiredOrientation.getW(), EPSILON_FOR_DESIREDS);
    }
 
    public static void assertNumberOfWaypoints(RobotSide robotSide, int expectedNumberOfTrajectoryPoints, SimulationConstructionSet scs)

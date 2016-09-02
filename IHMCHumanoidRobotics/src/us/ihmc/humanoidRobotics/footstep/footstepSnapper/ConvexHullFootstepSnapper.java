@@ -227,8 +227,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       }
       else
       {
-         footstepMask.setPositionAndYaw(position.x, position.y, yaw);
-         pointList = heightMap.getAllPointsWithinArea(position.x, position.y, parameters.getBoundingSquareSizeLength(),
+         footstepMask.setPositionAndYaw(position.getX(), position.getY(), yaw);
+         pointList = heightMap.getAllPointsWithinArea(position.getX(), position.getY(), parameters.getBoundingSquareSizeLength(),
                  parameters.getBoundingSquareSizeLength(), footstepMask);
       }
 
@@ -307,7 +307,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
          // check the plane
          for (Point3d point : pointList)
          {
-            if (Math.abs(fittedPlane.getZOnPlane(point.x, point.y) - point.z) > tolerance)
+            if (Math.abs(fittedPlane.getZOnPlane(point.getX(), point.getY()) - point.getZ()) > tolerance)
             {
                notOnPlaneCount++;
 
@@ -345,9 +345,9 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
       for (Point3d point : pointList)
       {
-         if ((Double.isInfinite(height) || Double.isNaN(height)) || ((point.z > height) &&!Double.isInfinite(point.z) && !Double.isNaN(point.z)))
+         if ((Double.isInfinite(height) || Double.isNaN(height)) || ((point.getZ() > height) &&!Double.isInfinite(point.getZ()) && !Double.isNaN(point.getZ())))
          {
-            height = point.z;
+            height = point.getZ();
          }
       }
 
@@ -366,7 +366,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       boolean anInfinitePoint = false;
       for (Point3d point : points)
       {
-         if (Double.isInfinite(point.z))
+         if (Double.isInfinite(point.getZ()))
          {
             anInfinitePoint = true;
 
@@ -383,7 +383,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       Point3d position = footstep.getLocation();
       Quat4d orientation = footstep.getOrientation();
       double yaw = RotationTools.computeYaw(orientation);
-      addLowerBoundaryPointsToHullPointList(convexHullPointsList, position.x, position.y, yaw);
+      addLowerBoundaryPointsToHullPointList(convexHullPointsList, position.getX(), position.getY(), yaw);
 
 
       // Convert from points to possible support polygons
@@ -409,8 +409,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       List<FootstepDataMessage> possibleFootsteps = new ArrayList<FootstepDataMessage>();
       Plane3d facePlane = new Plane3d();
       Vector3d planeNormal = new Vector3d();
-      double x = position.x;
-      double y = position.y;
+      double x = position.getX();
+      double y = position.getY();
       double maxValue = Double.NEGATIVE_INFINITY;
       FootstepDataMessage maxValueFootstep = null;
       double valueOfCurrent;
@@ -469,8 +469,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       double minHeight = Double.POSITIVE_INFINITY;
       for (Point3d point : convexHullPointsList)
       {
-         if (point.z < minHeight)
-            minHeight = point.z;
+         if (point.getZ() < minHeight)
+            minHeight = point.getZ();
       }
 
       ConvexPolygon2d lowerBoundPolygon = parameters.getCollisionPolygon();
@@ -485,8 +485,8 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       for (int i = 0; i < numVertices; i++)
       {
          vertex = lowerBoundPolygon.getVertex(i);
-         xCoord = xOrigin + cosYaw * vertex.x - sinYaw * vertex.y;
-         yCoord = yOrigin + cosYaw * vertex.y + sinYaw * vertex.x;
+         xCoord = xOrigin + cosYaw * vertex.getX() - sinYaw * vertex.getY();
+         yCoord = yOrigin + cosYaw * vertex.getY() + sinYaw * vertex.getX();
          convexHullPointsList.add(new Point3d(xCoord, yCoord, minHeight - dropDistance));
       }
    }
@@ -518,7 +518,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       for (Point3d point : pointsNearPlane)
       {
          tempPoint.set(point);
-         tempPoint.setZ(footPlane.getZOnPlane(tempPoint.x, tempPoint.y));
+         tempPoint.setZ(footPlane.getZOnPlane(tempPoint.getX(), tempPoint.getY()));
          tempPoint.sub(footstepData.getLocation());
          rotationMatrix.transform(tempPoint);
 
@@ -527,7 +527,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
             System.out.println("Error in ComplexFootstepSnapper");
          }
 
-         pointsInFootstepFrame.add(new Point2d(tempPoint.x, tempPoint.y));
+         pointsInFootstepFrame.add(new Point2d(tempPoint.getX(), tempPoint.getY()));
       }
 
       // find the convex hull of all the points inside the supportPolgon convex hull
@@ -618,7 +618,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
          Point2d backwardsVector = new Point2d(previousVertexData.position);
          backwardsVector.sub(position);
 
-         area = Math.abs(forwardVector.x * backwardsVector.y - forwardVector.y * backwardsVector.x);
+         area = Math.abs(forwardVector.getX() * backwardsVector.getY() - forwardVector.getY() * backwardsVector.getX());
       }
    }
 

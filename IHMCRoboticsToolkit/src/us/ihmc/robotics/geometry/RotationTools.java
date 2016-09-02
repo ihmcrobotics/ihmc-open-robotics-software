@@ -196,7 +196,7 @@ public class RotationTools
     */
    public static double computeYaw(Matrix3d rotationMatrix)
    {
-      double yaw = Math.atan2(rotationMatrix.m10, rotationMatrix.m00);
+      double yaw = Math.atan2(rotationMatrix.getM10(), rotationMatrix.getM00());
       if (Double.isNaN(yaw))
       {
          throw new RuntimeException("Yaw is NaN! rotationMatrix = " + rotationMatrix);
@@ -227,7 +227,7 @@ public class RotationTools
     */
    public static double computePitch(Matrix3d rotationMatrix)
    {
-      double pitch = Math.asin(-rotationMatrix.m20);
+      double pitch = Math.asin(-rotationMatrix.getM20());
       if (Double.isNaN(pitch))
       {
          throw new RuntimeException("Pitch is NaN! rotationMatrix = " + rotationMatrix);
@@ -258,7 +258,7 @@ public class RotationTools
     */
    public static double computeRoll(Matrix3d rotationMatrix)
    {
-      double roll = Math.atan2(rotationMatrix.m21, rotationMatrix.m22);
+      double roll = Math.atan2(rotationMatrix.getM21(), rotationMatrix.getM22());
       if (Double.isNaN(roll))
       {
          throw new RuntimeException("Roll is NaN! rotationMatrix = " + rotationMatrix);
@@ -286,18 +286,18 @@ public class RotationTools
    {
       double Cx = 1.0;
       double Cy = Math.tan(yaw);
-      if (Math.abs(zNormal.z) < 1e-9)
+      if (Math.abs(zNormal.getZ()) < 1e-9)
       {
          quaternionToPack.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
          return;
       }
-      double Cz = -1.0 * (zNormal.x + Cy * zNormal.y) / zNormal.z;
+      double Cz = -1.0 * (zNormal.getX() + Cy * zNormal.getY()) / zNormal.getZ();
       double CT = Math.sqrt(Cx * Cx + Cy * Cy + Cz * Cz);
       if (CT < 1e-9)
          throw new RuntimeException("Error calculating Quaternion");
 
       Vector3d xAxis = new Vector3d(Cx / CT, Cy / CT, Cz / CT);
-      if (xAxis.x * Math.cos(yaw) + xAxis.y * Math.sin(yaw) < 0.0)
+      if (xAxis.getX() * Math.cos(yaw) + xAxis.getY() * Math.sin(yaw) < 0.0)
       {
          xAxis.negate();
       }
@@ -365,11 +365,11 @@ public class RotationTools
       if (s > -0.19)
       {
          // compute q0 and deduce q1, q2 and q3
-         quaternionToPack.w = 0.5 * FastMath.sqrt(s + 1.0);
-         double inv = 0.25 / quaternionToPack.w;
-         quaternionToPack.x = inv * (rotationMatrix.getElement(2, 1) - rotationMatrix.getElement(1, 2));
-         quaternionToPack.y = inv * (rotationMatrix.getElement(0, 2) - rotationMatrix.getElement(2, 0));
-         quaternionToPack.z = inv * (rotationMatrix.getElement(1, 0) - rotationMatrix.getElement(0, 1));
+         quaternionToPack.setW(0.5 * FastMath.sqrt(s + 1.0));
+         double inv = 0.25 / quaternionToPack.getW();
+         quaternionToPack.setX(inv * (rotationMatrix.getElement(2, 1) - rotationMatrix.getElement(1, 2)));
+         quaternionToPack.setY(inv * (rotationMatrix.getElement(0, 2) - rotationMatrix.getElement(2, 0)));
+         quaternionToPack.setZ(inv * (rotationMatrix.getElement(1, 0) - rotationMatrix.getElement(0, 1)));
       }
       else
       {
@@ -378,11 +378,11 @@ public class RotationTools
          if (s > -0.19)
          {
             // compute q1 and deduce q0, q2 and q3
-            quaternionToPack.x = 0.5 * FastMath.sqrt(s + 1.0);
-            double inv = 0.25 / quaternionToPack.x;
-            quaternionToPack.w = inv * (rotationMatrix.getElement(2, 1) - rotationMatrix.getElement(1, 2));
-            quaternionToPack.y = inv * (rotationMatrix.getElement(1, 0) + rotationMatrix.getElement(0, 1));
-            quaternionToPack.z = inv * (rotationMatrix.getElement(2, 0) + rotationMatrix.getElement(0, 2));
+            quaternionToPack.setX(0.5 * FastMath.sqrt(s + 1.0));
+            double inv = 0.25 / quaternionToPack.getX();
+            quaternionToPack.setW(inv * (rotationMatrix.getElement(2, 1) - rotationMatrix.getElement(1, 2)));
+            quaternionToPack.setY(inv * (rotationMatrix.getElement(1, 0) + rotationMatrix.getElement(0, 1)));
+            quaternionToPack.setZ(inv * (rotationMatrix.getElement(2, 0) + rotationMatrix.getElement(0, 2)));
          }
          else
          {
@@ -391,21 +391,21 @@ public class RotationTools
             if (s > -0.19)
             {
                // compute q2 and deduce q0, q1 and q3
-               quaternionToPack.y = 0.5 * FastMath.sqrt(s + 1.0);
-               double inv = 0.25 / quaternionToPack.y;
-               quaternionToPack.w = inv * (rotationMatrix.getElement(0, 2) - rotationMatrix.getElement(2, 0));
-               quaternionToPack.x = inv * (rotationMatrix.getElement(1, 0) + rotationMatrix.getElement(0, 1));
-               quaternionToPack.z = inv * (rotationMatrix.getElement(1, 2) + rotationMatrix.getElement(2, 1));
+               quaternionToPack.setY(0.5 * FastMath.sqrt(s + 1.0));
+               double inv = 0.25 / quaternionToPack.getY();
+               quaternionToPack.setW(inv * (rotationMatrix.getElement(0, 2) - rotationMatrix.getElement(2, 0)));
+               quaternionToPack.setX(inv * (rotationMatrix.getElement(1, 0) + rotationMatrix.getElement(0, 1)));
+               quaternionToPack.setZ(inv * (rotationMatrix.getElement(1, 2) + rotationMatrix.getElement(2, 1)));
             }
             else
             {
                // compute q3 and deduce q0, q1 and q2
                s = rotationMatrix.getElement(2, 2) - rotationMatrix.getElement(0, 0) - rotationMatrix.getElement(1, 1);
-               quaternionToPack.z = 0.5 * FastMath.sqrt(s + 1.0);
-               double inv = 0.25 / quaternionToPack.z;
-               quaternionToPack.w = inv * (rotationMatrix.getElement(1, 0) - rotationMatrix.getElement(0, 1));
-               quaternionToPack.x = inv * (rotationMatrix.getElement(2, 0) + rotationMatrix.getElement(0, 2));
-               quaternionToPack.y = inv * (rotationMatrix.getElement(1, 2) + rotationMatrix.getElement(2, 1));
+               quaternionToPack.setZ(0.5 * FastMath.sqrt(s + 1.0));
+               double inv = 0.25 / quaternionToPack.getZ();
+               quaternionToPack.setW(inv * (rotationMatrix.getElement(1, 0) - rotationMatrix.getElement(0, 1)));
+               quaternionToPack.setX(inv * (rotationMatrix.getElement(2, 0) + rotationMatrix.getElement(0, 2)));
+               quaternionToPack.setY(inv * (rotationMatrix.getElement(1, 2) + rotationMatrix.getElement(2, 1)));
             }
          }
       }
@@ -452,12 +452,12 @@ public class RotationTools
 
    public static void convertQuaternionToYawPitchRoll(Quat4d quaternion, double[] yawPitchRollToPack)
    {
-      convertQuaternionToYawPitchRoll(quaternion.x, quaternion.y, quaternion.z, quaternion.w, yawPitchRollToPack);
+      convertQuaternionToYawPitchRoll(quaternion.getX(), quaternion.getY(), quaternion.getZ(), quaternion.getW(), yawPitchRollToPack);
    }
 
    public static void convertQuaternionToYawPitchRoll(Quat4f quaternion, double[] yawPitchRollToPack)
    {
-      convertQuaternionToYawPitchRoll(quaternion.x, quaternion.y, quaternion.z, quaternion.w, yawPitchRollToPack);
+      convertQuaternionToYawPitchRoll(quaternion.getX(), quaternion.getY(), quaternion.getZ(), quaternion.getW(), yawPitchRollToPack);
    }
 
    public static void convertQuaternionToRotationVector(Quat4d quaternion, Vector3d rotationVectorToPack)
@@ -561,10 +561,10 @@ public class RotationTools
       double cRoll = Math.cos(halfRoll);
       double sRoll = Math.sin(halfRoll);
 
-      quaternionToPack.w = cYaw * cPitch * cRoll + sYaw * sPitch * sRoll;
-      quaternionToPack.x = cYaw * cPitch * sRoll - sYaw * sPitch * cRoll;
-      quaternionToPack.y = sYaw * cPitch * sRoll + cYaw * sPitch * cRoll;
-      quaternionToPack.z = sYaw * cPitch * cRoll - cYaw * sPitch * sRoll;
+      quaternionToPack.setW(cYaw * cPitch * cRoll + sYaw * sPitch * sRoll);
+      quaternionToPack.setX(cYaw * cPitch * sRoll - sYaw * sPitch * cRoll);
+      quaternionToPack.setY(sYaw * cPitch * sRoll + cYaw * sPitch * cRoll);
+      quaternionToPack.setZ(sYaw * cPitch * cRoll - cYaw * sPitch * sRoll);
    }
 
    public static void convertYawPitchRollToQuaternion(double[] yawPitchRoll, Quat4d quaternionToPack)
@@ -621,7 +621,7 @@ public class RotationTools
 
    public static double computeQuaternionNormSquared(Quat4d quaternion)
    {
-      return square(quaternion.w) + square(quaternion.x) + square(quaternion.y) + square(quaternion.z);
+      return square(quaternion.getW()) + square(quaternion.getX()) + square(quaternion.getY()) + square(quaternion.getZ());
    }
 
    public static boolean isQuaternionNormalized(Quat4d quaternion)
@@ -688,40 +688,40 @@ public class RotationTools
       while (++i < 11)
       {
          // Mt.Xn
-         mx.m00 = x.m00 * x.m00 + x.m10 * x.m10 + x.m20 * x.m20;
-         mx.m10 = x.m01 * x.m00 + x.m11 * x.m10 + x.m21 * x.m20;
-         mx.m20 = x.m02 * x.m00 + x.m12 * x.m10 + x.m22 * x.m20;
-         mx.m01 = x.m00 * x.m01 + x.m10 * x.m11 + x.m20 * x.m21;
-         mx.m11 = x.m01 * x.m01 + x.m11 * x.m11 + x.m21 * x.m21;
-         mx.m21 = x.m02 * x.m01 + x.m12 * x.m11 + x.m22 * x.m21;
-         mx.m02 = x.m00 * x.m02 + x.m10 * x.m12 + x.m20 * x.m22;
-         mx.m12 = x.m01 * x.m02 + x.m11 * x.m12 + x.m21 * x.m22;
-         mx.m22 = x.m02 * x.m02 + x.m12 * x.m12 + x.m22 * x.m22;
+         mx.setM00(x.getM00() * x.getM00() + x.getM10() * x.getM10() + x.getM20() * x.getM20());
+         mx.setM10(x.getM01() * x.getM00() + x.getM11() * x.getM10() + x.getM21() * x.getM20());
+         mx.setM20(x.getM02() * x.getM00() + x.getM12() * x.getM10() + x.getM22() * x.getM20());
+         mx.setM01(x.getM00() * x.getM01() + x.getM10() * x.getM11() + x.getM20() * x.getM21());
+         mx.setM11(x.getM01() * x.getM01() + x.getM11() * x.getM11() + x.getM21() * x.getM21());
+         mx.setM21(x.getM02() * x.getM01() + x.getM12() * x.getM11() + x.getM22() * x.getM21());
+         mx.setM02(x.getM00() * x.getM02() + x.getM10() * x.getM12() + x.getM20() * x.getM22());
+         mx.setM12(x.getM01() * x.getM02() + x.getM11() * x.getM12() + x.getM21() * x.getM22());
+         mx.setM22(x.getM02() * x.getM02() + x.getM12() * x.getM12() + x.getM22() * x.getM22());
 
          // Xn+1
-         rotationMatrixResultToPack.setElement(0, 0, x.m00 - 0.5 * (x.m00 * mx.m00 + x.m01 * mx.m10 + x.m02 * mx.m20 - x.m00));
-         rotationMatrixResultToPack.setElement(1, 0, x.m01 - 0.5 * (x.m00 * mx.m01 + x.m01 * mx.m11 + x.m02 * mx.m21 - x.m01));
-         rotationMatrixResultToPack.setElement(2, 0, x.m02 - 0.5 * (x.m00 * mx.m02 + x.m01 * mx.m12 + x.m02 * mx.m22 - x.m02));
-         rotationMatrixResultToPack.setElement(0, 1, x.m10 - 0.5 * (x.m10 * mx.m00 + x.m11 * mx.m10 + x.m12 * mx.m20 - x.m10));
-         rotationMatrixResultToPack.setElement(1, 1, x.m11 - 0.5 * (x.m10 * mx.m01 + x.m11 * mx.m11 + x.m12 * mx.m21 - x.m11));
-         rotationMatrixResultToPack.setElement(2, 1, x.m12 - 0.5 * (x.m10 * mx.m02 + x.m11 * mx.m12 + x.m12 * mx.m22 - x.m12));
-         rotationMatrixResultToPack.setElement(0, 2, x.m20 - 0.5 * (x.m20 * mx.m00 + x.m21 * mx.m10 + x.m22 * mx.m20 - x.m20));
-         rotationMatrixResultToPack.setElement(1, 2, x.m21 - 0.5 * (x.m20 * mx.m01 + x.m21 * mx.m11 + x.m22 * mx.m21 - x.m21));
-         rotationMatrixResultToPack.setElement(2, 2, x.m22 - 0.5 * (x.m20 * mx.m02 + x.m21 * mx.m12 + x.m22 * mx.m22 - x.m22));
+         rotationMatrixResultToPack.setElement(0, 0, x.getM00() - 0.5 * (x.getM00() * mx.getM00() + x.getM01() * mx.getM10() + x.getM02() * mx.getM20() - x.getM00()));
+         rotationMatrixResultToPack.setElement(1, 0, x.getM01() - 0.5 * (x.getM00() * mx.getM01() + x.getM01() * mx.getM11() + x.getM02() * mx.getM21() - x.getM01()));
+         rotationMatrixResultToPack.setElement(2, 0, x.getM02() - 0.5 * (x.getM00() * mx.getM02() + x.getM01() * mx.getM12() + x.getM02() * mx.getM22() - x.getM02()));
+         rotationMatrixResultToPack.setElement(0, 1, x.getM10() - 0.5 * (x.getM10() * mx.getM00() + x.getM11() * mx.getM10() + x.getM12() * mx.getM20() - x.getM10()));
+         rotationMatrixResultToPack.setElement(1, 1, x.getM11() - 0.5 * (x.getM10() * mx.getM01() + x.getM11() * mx.getM11() + x.getM12() * mx.getM21() - x.getM11()));
+         rotationMatrixResultToPack.setElement(2, 1, x.getM12() - 0.5 * (x.getM10() * mx.getM02() + x.getM11() * mx.getM12() + x.getM12() * mx.getM22() - x.getM12()));
+         rotationMatrixResultToPack.setElement(0, 2, x.getM20() - 0.5 * (x.getM20() * mx.getM00() + x.getM21() * mx.getM10() + x.getM22() * mx.getM20() - x.getM20()));
+         rotationMatrixResultToPack.setElement(1, 2, x.getM21() - 0.5 * (x.getM20() * mx.getM01() + x.getM21() * mx.getM11() + x.getM22() * mx.getM21() - x.getM21()));
+         rotationMatrixResultToPack.setElement(2, 2, x.getM22() - 0.5 * (x.getM20() * mx.getM02() + x.getM21() * mx.getM12() + x.getM22() * mx.getM22() - x.getM22()));
 
          // correction on each elements
-         corr.m00 = rotationMatrixResultToPack.getElement(0, 0) - x.m00;
-         corr.m01 = rotationMatrixResultToPack.getElement(1, 0) - x.m01;
-         corr.m02 = rotationMatrixResultToPack.getElement(2, 0) - x.m02;
-         corr.m10 = rotationMatrixResultToPack.getElement(0, 1) - x.m10;
-         corr.m11 = rotationMatrixResultToPack.getElement(1, 1) - x.m11;
-         corr.m12 = rotationMatrixResultToPack.getElement(2, 1) - x.m12;
-         corr.m20 = rotationMatrixResultToPack.getElement(0, 2) - x.m20;
-         corr.m21 = rotationMatrixResultToPack.getElement(1, 2) - x.m21;
-         corr.m22 = rotationMatrixResultToPack.getElement(2, 2) - x.m22;
+         corr.setM00(rotationMatrixResultToPack.getElement(0, 0) - x.getM00());
+         corr.setM01(rotationMatrixResultToPack.getElement(1, 0) - x.getM01());
+         corr.setM02(rotationMatrixResultToPack.getElement(2, 0) - x.getM02());
+         corr.setM10(rotationMatrixResultToPack.getElement(0, 1) - x.getM10());
+         corr.setM11(rotationMatrixResultToPack.getElement(1, 1) - x.getM11());
+         corr.setM12(rotationMatrixResultToPack.getElement(2, 1) - x.getM12());
+         corr.setM20(rotationMatrixResultToPack.getElement(0, 2) - x.getM20());
+         corr.setM21(rotationMatrixResultToPack.getElement(1, 2) - x.getM21());
+         corr.setM22(rotationMatrixResultToPack.getElement(2, 2) - x.getM22());
 
          // Frobenius norm of the correction
-         fn1 = corr.m00 * corr.m00 + corr.m01 * corr.m01 + corr.m02 * corr.m02 + corr.m10 * corr.m10 + corr.m11 * corr.m11 + corr.m12 * corr.m12 + corr.m20 * corr.m20 + corr.m21 * corr.m21 + corr.m22 * corr.m22;
+         fn1 = corr.getM00() * corr.getM00() + corr.getM01() * corr.getM01() + corr.getM02() * corr.getM02() + corr.getM10() * corr.getM10() + corr.getM11() * corr.getM11() + corr.getM12() * corr.getM12() + corr.getM20() * corr.getM20() + corr.getM21() * corr.getM21() + corr.getM22() * corr.getM22();
 
          // convergence test
          if (FastMath.abs(fn1 - fn) <= threshold)
@@ -730,15 +730,15 @@ public class RotationTools
          }
 
          // prepare next iteration
-         x.m00 = rotationMatrixResultToPack.getElement(0, 0);
-         x.m01 = rotationMatrixResultToPack.getElement(1, 0);
-         x.m02 = rotationMatrixResultToPack.getElement(2, 0);
-         x.m10 = rotationMatrixResultToPack.getElement(0, 1);
-         x.m11 = rotationMatrixResultToPack.getElement(1, 1);
-         x.m12 = rotationMatrixResultToPack.getElement(2, 1);
-         x.m20 = rotationMatrixResultToPack.getElement(0, 2);
-         x.m21 = rotationMatrixResultToPack.getElement(1, 2);
-         x.m22 = rotationMatrixResultToPack.getElement(2, 2);
+         x.setM00(rotationMatrixResultToPack.getElement(0, 0));
+         x.setM01(rotationMatrixResultToPack.getElement(1, 0));
+         x.setM02(rotationMatrixResultToPack.getElement(2, 0));
+         x.setM10(rotationMatrixResultToPack.getElement(0, 1));
+         x.setM11(rotationMatrixResultToPack.getElement(1, 1));
+         x.setM12(rotationMatrixResultToPack.getElement(2, 1));
+         x.setM20(rotationMatrixResultToPack.getElement(0, 2));
+         x.setM21(rotationMatrixResultToPack.getElement(1, 2));
+         x.setM22(rotationMatrixResultToPack.getElement(2, 2));
          fn = fn1;
       }
 
@@ -779,7 +779,7 @@ public class RotationTools
    public static void trimAxisAngleMinusPiToPi(AxisAngle4d axisAngle4d, AxisAngle4d axisAngleTrimmedToPack)
    {
       axisAngleTrimmedToPack.set(axisAngle4d);
-      axisAngleTrimmedToPack.angle = AngleTools.trimAngleMinusPiToPi(axisAngleTrimmedToPack.angle);
+      axisAngleTrimmedToPack.setAngle(AngleTools.trimAngleMinusPiToPi(axisAngleTrimmedToPack.getAngle()));
    }
 
    public static boolean axisAngleEpsilonEquals(AxisAngle4d original, AxisAngle4d result, double epsilon, AxisAngleComparisonMode mode)
@@ -795,11 +795,11 @@ public class RotationTools
          AxisAngle4d resultMinusPiToPi = resultAxisAngleForEpsilonEquals.get();
          trimAxisAngleMinusPiToPi(result, resultMinusPiToPi);
 
-         boolean originalAxisAngleIsZero = MathTools.epsilonEquals(originalMinusPiToPi.angle, 0.0, 0.1 * epsilon);
-         boolean resultAxisAngleIsZero = MathTools.epsilonEquals(resultMinusPiToPi.angle, 0.0, 0.1 * epsilon);
+         boolean originalAxisAngleIsZero = MathTools.epsilonEquals(originalMinusPiToPi.getAngle(), 0.0, 0.1 * epsilon);
+         boolean resultAxisAngleIsZero = MathTools.epsilonEquals(resultMinusPiToPi.getAngle(), 0.0, 0.1 * epsilon);
 
-         boolean originalAngleIs180 = MathTools.epsilonEquals(Math.abs(originalMinusPiToPi.angle), Math.PI, 0.1 * epsilon);
-         boolean resultAngleIs180 = MathTools.epsilonEquals(Math.abs(resultMinusPiToPi.angle), Math.PI, 0.1 * epsilon);
+         boolean originalAngleIs180 = MathTools.epsilonEquals(Math.abs(originalMinusPiToPi.getAngle()), Math.PI, 0.1 * epsilon);
+         boolean resultAngleIs180 = MathTools.epsilonEquals(Math.abs(resultMinusPiToPi.getAngle()), Math.PI, 0.1 * epsilon);
 
          if (originalAxisAngleIsZero && resultAxisAngleIsZero)
          {
@@ -830,10 +830,10 @@ public class RotationTools
       {
          AxisAngle4d originalNegated = originalAxisAngleForEpsilonEquals.get();
          originalNegated.set(original);
-         originalNegated.angle *= -1.0;
-         originalNegated.x *= -1.0;
-         originalNegated.y *= -1.0;
-         originalNegated.z *= -1.0;
+         originalNegated.setAngle(originalNegated.getAngle() * -1.0);
+         originalNegated.setX(originalNegated.getX() * -1.0);
+         originalNegated.setY(originalNegated.getY() * -1.0);
+         originalNegated.setZ(originalNegated.getZ() * -1.0);
 
          return originalNegated.epsilonEquals(result, epsilon);
       }

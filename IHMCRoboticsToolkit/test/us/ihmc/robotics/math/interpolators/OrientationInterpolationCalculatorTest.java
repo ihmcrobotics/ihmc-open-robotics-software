@@ -67,7 +67,7 @@ public class OrientationInterpolationCalculatorTest
          omegaTilde.mul(orientationTranspose);
          JUnitTools.assertSkewSymmetric(omegaTilde, 1e-3);
 
-         Vector3d angularVelocity = new Vector3d(-omegaTilde.m12, omegaTilde.m02, -omegaTilde.m01); // in world frame
+         Vector3d angularVelocity = new Vector3d(-omegaTilde.getM12(), omegaTilde.getM02(), -omegaTilde.getM01()); // in world frame
 
          // compute angular velocity using OrientationInterpolationAngularVelocityCalculator
          OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();

@@ -44,9 +44,9 @@ public class ContactableDoorRobotTest
       assertFalse(door.isClose(new Point3d(1e4, -1e4, 1e4)));
       assertTrue(door.isPointOnOrInside(tempPos));
       Point3d diagonal = new Point3d(
-            tempPos.x + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.x, 
-            tempPos.y + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.y, 
-            tempPos.z + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.z);
+            tempPos.getX() + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 
+            tempPos.getY() + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getY(), 
+            tempPos.getZ() + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getZ());
       assertTrue(door.isPointOnOrInside(diagonal));
    }
    

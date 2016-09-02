@@ -5,17 +5,18 @@ import java.util.List;
 
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-
-
-public class StateTransition <E extends Enum<E>>
+public class StateTransition<E extends Enum<E>>
 {
-   protected final E nextStateEnum;
-   protected final ArrayList<StateTransitionCondition> stateTransitionConditions = new ArrayList<StateTransitionCondition>();
-   protected ArrayList<DoubleYoVariable> timePassedYoVariables;
-   protected final ArrayList<StateTransitionAction> actions = new ArrayList<StateTransitionAction>();
+   private final E nextStateEnum;
+   private final ArrayList<StateTransitionCondition> stateTransitionConditions = new ArrayList<StateTransitionCondition>();
+   private ArrayList<DoubleYoVariable> timePassedYoVariables;
+   private final ArrayList<StateTransitionAction> actions = new ArrayList<StateTransitionAction>();
 
    public StateTransition(E nextStateEnum, DoubleYoVariable timePassedYoVariable, StateTransitionCondition condition, StateTransitionAction action)
    {
+      if (nextStateEnum == null)
+         throw new RuntimeException("Cannot create StateTransition with null nextStateEnum!");
+
       this.nextStateEnum = nextStateEnum;
       if (condition != null)
          this.stateTransitionConditions.add(condition);
@@ -23,16 +24,6 @@ public class StateTransition <E extends Enum<E>>
          this.actions.add(action);
       if (timePassedYoVariable != null)
          addTimePassedCondition(timePassedYoVariable);
-   }
-
-   public StateTransition(E nextStateEnum, DoubleYoVariable timePassedYoVariable, StateTransitionCondition condition)
-   {
-      this(nextStateEnum, timePassedYoVariable, condition, null);
-   }
-
-   public StateTransition(E nextStateEnum, DoubleYoVariable timePassedYoVariable, StateTransitionAction action)
-   {
-      this(nextStateEnum, timePassedYoVariable, null, action);
    }
 
    public StateTransition(E nextStateEnum, StateTransitionCondition condition, StateTransitionAction action)
@@ -78,7 +69,6 @@ public class StateTransition <E extends Enum<E>>
       this(nextStateEnum, stateTransitionConditions, (StateTransitionAction) null);
    }
 
-
    public void addStateTransitionCondition(StateTransitionCondition transitionCondition)
    {
       if (transitionCondition != null)
@@ -93,7 +83,7 @@ public class StateTransition <E extends Enum<E>>
          timePassedYoVariables.add(timePassedYoVariable);
    }
 
-   public E checkTransitionConditions(double timeInState)
+   final E checkTransitionConditions(double timeInState)
    {
       for (int i = 0; i < stateTransitionConditions.size(); i++)
       {
@@ -116,14 +106,18 @@ public class StateTransition <E extends Enum<E>>
       }
 
       return nextStateEnum;
-
    }
 
-   public void doAction()
+   final void doAction()
    {
-      for(int i = 0; i < actions.size(); i++)
+      for (int i = 0; i < actions.size(); i++)
       {
          actions.get(i).doTransitionAction();
       }
+   }
+
+   public E getNextStateEnum()
+   {
+      return nextStateEnum;
    }
 }

@@ -55,10 +55,10 @@ public class RigidBodyTransformTest
 
       for (double theta : thetaTest)
       {
-         axisAngle.x = Math.sin(theta);
-         axisAngle.y = Math.cos(theta);
-         axisAngle.z = 0;
-         axisAngle.angle = theta;
+         axisAngle.setX(Math.sin(theta));
+         axisAngle.setY(Math.cos(theta));
+         axisAngle.setZ(0);
+         axisAngle.setAngle(theta);
 
          transform.setRotationAndZeroTranslation(axisAngle);
          transform.getRotation(axisAngleToCheck);
@@ -68,10 +68,10 @@ public class RigidBodyTransformTest
 
       for (double theta : thetaTest)
       {
-         axisAngle.x = 0;
-         axisAngle.y = Math.cos(theta);
-         axisAngle.z = Math.sin(theta);
-         axisAngle.angle = theta;
+         axisAngle.setX(0);
+         axisAngle.setY(Math.cos(theta));
+         axisAngle.setZ(Math.sin(theta));
+         axisAngle.setAngle(theta);
 
          transform.setRotation(axisAngle);
          transform.getRotation(axisAngleToCheck);
@@ -81,10 +81,10 @@ public class RigidBodyTransformTest
 
       for (double theta : thetaTest)
       {         
-         axisAngle.x = Math.cos(theta);
-         axisAngle.y = 0;
-         axisAngle.z = Math.sin(theta);
-         axisAngle.angle = theta;
+         axisAngle.setX(Math.cos(theta));
+         axisAngle.setY(0);
+         axisAngle.setZ(Math.sin(theta));
+         axisAngle.setAngle(theta);
 
          transform.setRotation(axisAngle);
          transform.getRotation(axisAngleToCheck);
@@ -109,10 +109,10 @@ public class RigidBodyTransformTest
 
       for (double theta : thetaTest)
       {
-         axisAngle.x = Math.sin(theta);
-         axisAngle.y = Math.cos(theta);
-         axisAngle.z = 0;
-         axisAngle.angle = theta;
+         axisAngle.setX(Math.sin(theta));
+         axisAngle.setY(Math.cos(theta));
+         axisAngle.setZ(0);
+         axisAngle.setAngle(theta);
 
          randomizeVector(random, vector);
 
@@ -124,10 +124,10 @@ public class RigidBodyTransformTest
 
       for (double theta : thetaTest)
       {
-         axisAngle.x = 0;
-         axisAngle.y = Math.cos(theta);
-         axisAngle.z = Math.sin(theta);
-         axisAngle.angle = theta;
+         axisAngle.setX(0);
+         axisAngle.setY(Math.cos(theta));
+         axisAngle.setZ(Math.sin(theta));
+         axisAngle.setAngle(theta);
 
          randomizeVector(random, vector);
 
@@ -139,10 +139,10 @@ public class RigidBodyTransformTest
 
       for (double theta : thetaTest)
       {
-         axisAngle.x = Math.cos(theta);
-         axisAngle.y = 0;
-         axisAngle.z = Math.sin(theta);
-         axisAngle.angle = theta;
+         axisAngle.setX(Math.cos(theta));
+         axisAngle.setY(0);
+         axisAngle.setZ(Math.sin(theta));
+         axisAngle.setAngle(theta);
 
          randomizeVector(random, vector);
 
@@ -167,10 +167,10 @@ public class RigidBodyTransformTest
       
       for (double theta : thetaTest)
       {
-         axisAngle.x = Math.sin(theta);
-         axisAngle.y = Math.cos(theta);
-         axisAngle.z = 0;
-         axisAngle.angle = theta;
+         axisAngle.setX(Math.sin(theta));
+         axisAngle.setY(Math.cos(theta));
+         axisAngle.setZ(0);
+         axisAngle.setAngle(theta);
 
          RigidBodyTransform transform = new RigidBodyTransform(axisAngle, new Vector3d(0, 0, 0));
 
@@ -181,10 +181,10 @@ public class RigidBodyTransformTest
 
       for (double theta : thetaTest)
       {
-         axisAngle.x = 0;
-         axisAngle.y = Math.cos(theta);
-         axisAngle.z = Math.sin(theta);
-         axisAngle.angle = theta;
+         axisAngle.setX(0);
+         axisAngle.setY(Math.cos(theta));
+         axisAngle.setZ(Math.sin(theta));
+         axisAngle.setAngle(theta);
 
          RigidBodyTransform transform1 = new RigidBodyTransform(axisAngle, new Vector3d(0, 0, 0));
 
@@ -195,10 +195,10 @@ public class RigidBodyTransformTest
 
       for (double theta : thetaTest)
       {
-         axisAngle.x = Math.cos(theta);
-         axisAngle.y = 0;
-         axisAngle.z = Math.sin(theta);
-         axisAngle.angle = theta;
+         axisAngle.setX(Math.cos(theta));
+         axisAngle.setY(0);
+         axisAngle.setZ(Math.sin(theta));
+         axisAngle.setAngle(theta);
 
          RigidBodyTransform transform2 = new RigidBodyTransform(axisAngle, new Vector3d(0, 0, 0));
          transform2.getRotation(axisAngleToCheck);
@@ -223,55 +223,55 @@ public class RigidBodyTransformTest
       for (int i = 0; i < nTests; i++)
       {
          double theta = getRandomAngleEpsilonToPiMinusEpsilon(random, epsilon);
-         axisAngle.x = (float) Math.sin(theta);
-         axisAngle.y = (float) Math.cos(theta);
-         axisAngle.z = 0;
-         axisAngle.angle = (float) theta;
+         axisAngle.setX((float) Math.sin(theta));
+         axisAngle.setY((float) Math.cos(theta));
+         axisAngle.setZ(0);
+         axisAngle.setAngle((float) theta);
 
          transform.setRotationAndZeroTranslation(axisAngle);
          transform.normalizeRotationPart();
          transform.getRotation(axisAngleToCheck);
 
-         assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
-         assertEquals(axisAngle.y, axisAngleToCheck.y, epsilonAssert);
-         assertEquals(axisAngle.z, axisAngleToCheck.z, epsilonAssert);
-         assertEquals(axisAngle.angle, axisAngleToCheck.angle, epsilonAssert);
+         assertEquals(axisAngle.getX(), axisAngleToCheck.getX(), epsilonAssert);
+         assertEquals(axisAngle.getY(), axisAngleToCheck.getY(), epsilonAssert);
+         assertEquals(axisAngle.getZ(), axisAngleToCheck.getZ(), epsilonAssert);
+         assertEquals(axisAngle.getAngle(), axisAngleToCheck.getAngle(), epsilonAssert);
       }
 
       for (int i = 0; i < nTests; i++)
       {
          double theta = getRandomAngleEpsilonToPiMinusEpsilon(random, epsilon);
-         axisAngle.x = 0;
-         axisAngle.y = (float) Math.cos(theta);
-         axisAngle.z = (float) Math.sin(theta);
-         axisAngle.angle = (float) theta;
+         axisAngle.setX(0);
+         axisAngle.setY((float) Math.cos(theta));
+         axisAngle.setZ((float) Math.sin(theta));
+         axisAngle.setAngle((float) theta);
 
          transform.setRotationAndZeroTranslation(axisAngle);
          transform.normalizeRotationPart();
          transform.getRotation(axisAngleToCheck);
 
-         assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
-         assertEquals(axisAngle.y, axisAngleToCheck.y, epsilonAssert);
-         assertEquals(axisAngle.z, axisAngleToCheck.z, epsilonAssert);
-         assertEquals(axisAngle.angle, axisAngleToCheck.angle, epsilonAssert);
+         assertEquals(axisAngle.getX(), axisAngleToCheck.getX(), epsilonAssert);
+         assertEquals(axisAngle.getY(), axisAngleToCheck.getY(), epsilonAssert);
+         assertEquals(axisAngle.getZ(), axisAngleToCheck.getZ(), epsilonAssert);
+         assertEquals(axisAngle.getAngle(), axisAngleToCheck.getAngle(), epsilonAssert);
       }
 
       for (int i = 0; i < nTests; i++)
       {
          double theta = getRandomAngleEpsilonToPiMinusEpsilon(random, epsilon);
-         axisAngle.x = (float) Math.cos(theta);
-         axisAngle.y = 0;
-         axisAngle.z = (float) Math.sin(theta);
-         axisAngle.angle = (float) theta;
+         axisAngle.setX((float) Math.cos(theta));
+         axisAngle.setY(0);
+         axisAngle.setZ((float) Math.sin(theta));
+         axisAngle.setAngle((float) theta);
 
          transform.setRotationAndZeroTranslation(axisAngle);
          transform.normalizeRotationPart();
          transform.getRotation(axisAngleToCheck);
 
-         assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
-         assertEquals(axisAngle.y, axisAngleToCheck.y, epsilonAssert);
-         assertEquals(axisAngle.z, axisAngleToCheck.z, epsilonAssert);
-         assertEquals(axisAngle.angle, axisAngleToCheck.angle, epsilonAssert);
+         assertEquals(axisAngle.getX(), axisAngleToCheck.getX(), epsilonAssert);
+         assertEquals(axisAngle.getY(), axisAngleToCheck.getY(), epsilonAssert);
+         assertEquals(axisAngle.getZ(), axisAngleToCheck.getZ(), epsilonAssert);
+         assertEquals(axisAngle.getAngle(), axisAngleToCheck.getAngle(), epsilonAssert);
       }
    }
 
@@ -290,10 +290,10 @@ public class RigidBodyTransformTest
       for (int i = 0; i < nTests; i++)
       {
          double theta = getRandomAngleEpsilonToPiMinusEpsilon(random, epsilon);
-         axisAngle.x = (float) Math.sin(theta);
-         axisAngle.y = (float) Math.cos(theta);
-         axisAngle.z = 0;
-         axisAngle.angle = (float) theta;
+         axisAngle.setX((float) Math.sin(theta));
+         axisAngle.setY((float) Math.cos(theta));
+         axisAngle.setZ(0);
+         axisAngle.setAngle((float) theta);
 
          randomizeVector(random, vector);
 
@@ -301,19 +301,19 @@ public class RigidBodyTransformTest
          transform.normalizeRotationPart();
          transform.getRotation(axisAngleToCheck);
 
-         assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
-         assertEquals(axisAngle.y, axisAngleToCheck.y, epsilonAssert);
-         assertEquals(axisAngle.z, axisAngleToCheck.z, epsilonAssert);
-         assertEquals(axisAngle.angle, axisAngleToCheck.angle, epsilonAssert);
+         assertEquals(axisAngle.getX(), axisAngleToCheck.getX(), epsilonAssert);
+         assertEquals(axisAngle.getY(), axisAngleToCheck.getY(), epsilonAssert);
+         assertEquals(axisAngle.getZ(), axisAngleToCheck.getZ(), epsilonAssert);
+         assertEquals(axisAngle.getAngle(), axisAngleToCheck.getAngle(), epsilonAssert);
       }
 
       for (int i = 0; i < nTests; i++)
       {
          double theta = getRandomAngleEpsilonToPiMinusEpsilon(random, epsilon);
-         axisAngle.x = 0;
-         axisAngle.y = (float) Math.cos(theta);
-         axisAngle.z = (float) Math.sin(theta);
-         axisAngle.angle = (float) theta;
+         axisAngle.setX(0);
+         axisAngle.setY((float) Math.cos(theta));
+         axisAngle.setZ((float) Math.sin(theta));
+         axisAngle.setAngle((float) theta);
 
          randomizeVector(random, vector);
 
@@ -321,19 +321,19 @@ public class RigidBodyTransformTest
          transform.normalizeRotationPart();
          transform.getRotation(axisAngleToCheck);
 
-         assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
-         assertEquals(axisAngle.y, axisAngleToCheck.y, epsilonAssert);
-         assertEquals(axisAngle.z, axisAngleToCheck.z, epsilonAssert);
-         assertEquals(axisAngle.angle, axisAngleToCheck.angle, epsilonAssert);
+         assertEquals(axisAngle.getX(), axisAngleToCheck.getX(), epsilonAssert);
+         assertEquals(axisAngle.getY(), axisAngleToCheck.getY(), epsilonAssert);
+         assertEquals(axisAngle.getZ(), axisAngleToCheck.getZ(), epsilonAssert);
+         assertEquals(axisAngle.getAngle(), axisAngleToCheck.getAngle(), epsilonAssert);
       }
 
       for (int i = 0; i < nTests; i++)
       {
          double theta = getRandomAngleEpsilonToPiMinusEpsilon(random, epsilon);
-         axisAngle.x = (float) Math.cos(theta);
-         axisAngle.y = 0;
-         axisAngle.z = (float) Math.sin(theta);
-         axisAngle.angle = (float) theta;
+         axisAngle.setX((float) Math.cos(theta));
+         axisAngle.setY(0);
+         axisAngle.setZ((float) Math.sin(theta));
+         axisAngle.setAngle((float) theta);
 
          randomizeVector(random, vector);
 
@@ -341,10 +341,10 @@ public class RigidBodyTransformTest
          transform.normalizeRotationPart();
          transform.getRotation(axisAngleToCheck);
 
-         assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
-         assertEquals(axisAngle.y, axisAngleToCheck.y, epsilonAssert);
-         assertEquals(axisAngle.z, axisAngleToCheck.z, epsilonAssert);
-         assertEquals(axisAngle.angle, axisAngleToCheck.angle, epsilonAssert);
+         assertEquals(axisAngle.getX(), axisAngleToCheck.getX(), epsilonAssert);
+         assertEquals(axisAngle.getY(), axisAngleToCheck.getY(), epsilonAssert);
+         assertEquals(axisAngle.getZ(), axisAngleToCheck.getZ(), epsilonAssert);
+         assertEquals(axisAngle.getAngle(), axisAngleToCheck.getAngle(), epsilonAssert);
       }
 
    }
@@ -363,57 +363,57 @@ public class RigidBodyTransformTest
       for (int i = 0; i < nTests; i++)
       {
          double theta = getRandomAngleEpsilonToPiMinusEpsilon(random, epsilon);
-         axisAngle.x = (float) Math.sin(theta);
-         axisAngle.y = (float) Math.cos(theta);
-         axisAngle.z = 0;
-         axisAngle.angle = (float) theta;
+         axisAngle.setX((float) Math.sin(theta));
+         axisAngle.setY((float) Math.cos(theta));
+         axisAngle.setZ(0);
+         axisAngle.setAngle((float) theta);
 
          RigidBodyTransform transform = new RigidBodyTransform(axisAngle, new Vector3f(0,
                0, 0));
          transform.getRotation(axisAngleToCheck);
 
-         assertEquals(axisAngle.x, axisAngleToCheck.x, 1e-3);
-         assertEquals(axisAngle.y, axisAngleToCheck.y, 1e-3);
-         assertEquals(axisAngle.z, axisAngleToCheck.z, 1e-3);
-         assertEquals(axisAngle.angle, axisAngleToCheck.angle, 1e-3);
+         assertEquals(axisAngle.getX(), axisAngleToCheck.getX(), 1e-3);
+         assertEquals(axisAngle.getY(), axisAngleToCheck.getY(), 1e-3);
+         assertEquals(axisAngle.getZ(), axisAngleToCheck.getZ(), 1e-3);
+         assertEquals(axisAngle.getAngle(), axisAngleToCheck.getAngle(), 1e-3);
       }
 
       for (int i = 0; i < nTests; i++)
       {
          double theta = getRandomAngleEpsilonToPiMinusEpsilon(random, epsilon);
-         axisAngle.x = 0;
-         axisAngle.y = (float) Math.cos(theta);
-         axisAngle.z = (float) Math.sin(theta);
-         axisAngle.angle = (float) theta;
+         axisAngle.setX(0);
+         axisAngle.setY((float) Math.cos(theta));
+         axisAngle.setZ((float) Math.sin(theta));
+         axisAngle.setAngle((float) theta);
 
          RigidBodyTransform transform1 = new RigidBodyTransform(axisAngle, new Vector3f(0,
                0, 0));
          transform1.normalizeRotationPart();
          transform1.getRotation(axisAngleToCheck);
 
-         assertEquals(axisAngle.x, axisAngleToCheck.x, 1e-3);
-         assertEquals(axisAngle.y, axisAngleToCheck.y, 1e-3);
-         assertEquals(axisAngle.z, axisAngleToCheck.z, 1e-3);
-         assertEquals(axisAngle.angle, axisAngleToCheck.angle, 1e-3);
+         assertEquals(axisAngle.getX(), axisAngleToCheck.getX(), 1e-3);
+         assertEquals(axisAngle.getY(), axisAngleToCheck.getY(), 1e-3);
+         assertEquals(axisAngle.getZ(), axisAngleToCheck.getZ(), 1e-3);
+         assertEquals(axisAngle.getAngle(), axisAngleToCheck.getAngle(), 1e-3);
       }
 
       for (int i = 0; i < nTests; i++)
       {
          double theta = getRandomAngleEpsilonToPiMinusEpsilon(random, epsilon);
-         axisAngle.x = (float) Math.cos(theta);
-         axisAngle.y = 0;
-         axisAngle.z = (float) Math.sin(theta);
-         axisAngle.angle = (float) theta;
+         axisAngle.setX((float) Math.cos(theta));
+         axisAngle.setY(0);
+         axisAngle.setZ((float) Math.sin(theta));
+         axisAngle.setAngle((float) theta);
 
          RigidBodyTransform transform2 = new RigidBodyTransform(axisAngle, new Vector3f(0,
                0, 0));
          transform2.normalizeRotationPart();
          transform2.getRotation(axisAngleToCheck);
 
-         assertEquals(axisAngle.x, axisAngleToCheck.x, epsilonAssert);
-         assertEquals(axisAngle.y, axisAngleToCheck.y, epsilonAssert);
-         assertEquals(axisAngle.z, axisAngleToCheck.z, epsilonAssert);
-         assertEquals(axisAngle.angle, axisAngleToCheck.angle, epsilonAssert);
+         assertEquals(axisAngle.getX(), axisAngleToCheck.getX(), epsilonAssert);
+         assertEquals(axisAngle.getY(), axisAngleToCheck.getY(), epsilonAssert);
+         assertEquals(axisAngle.getZ(), axisAngleToCheck.getZ(), epsilonAssert);
+         assertEquals(axisAngle.getAngle(), axisAngleToCheck.getAngle(), epsilonAssert);
       }
 
    }
@@ -448,20 +448,20 @@ public class RigidBodyTransformTest
 
       for (int i = 0; i < nTests; i++)
       {
-         quat1.x = random.nextDouble();
-         quat1.y = random.nextDouble();
-         quat1.z = random.nextDouble();
-         quat1.w = random.nextDouble();
+         quat1.setX(random.nextDouble());
+         quat1.setY(random.nextDouble());
+         quat1.setZ(random.nextDouble());
+         quat1.setW(random.nextDouble());
          quat1.normalize();
 
          transform.setRotationAndZeroTranslation(quat1);
 
          transform.get(quatCheck, vec);
 
-         assertEquals(quat1.x, quatCheck.x, 1e-10);
-         assertEquals(quat1.y, quatCheck.y, 1e-10);
-         assertEquals(quat1.z, quatCheck.z, 1e-10);
-         assertEquals(quat1.w, quatCheck.w, 1e-10);
+         assertEquals(quat1.getX(), quatCheck.getX(), 1e-10);
+         assertEquals(quat1.getY(), quatCheck.getY(), 1e-10);
+         assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-10);
+         assertEquals(quat1.getW(), quatCheck.getW(), 1e-10);
       }
    }
 
@@ -478,23 +478,23 @@ public class RigidBodyTransformTest
       for (int i = 0; i < nTests; i++)
       {
          randomizeVector(random, trans);
-         quat1.x = random.nextDouble();
-         quat1.y = random.nextDouble();
-         quat1.z = random.nextDouble();
-         quat1.w = random.nextDouble();
+         quat1.setX(random.nextDouble());
+         quat1.setY(random.nextDouble());
+         quat1.setZ(random.nextDouble());
+         quat1.setW(random.nextDouble());
          quat1.normalize();
 
          RigidBodyTransform transform = new RigidBodyTransform(quat1, trans);
 
          transform.get(quatCheck, vec);
 
-         assertEquals(quat1.x, quatCheck.x, 1e-10);
-         assertEquals(quat1.y, quatCheck.y, 1e-10);
-         assertEquals(quat1.z, quatCheck.z, 1e-10);
-         assertEquals(quat1.w, quatCheck.w, 1e-10);
-         assertEquals(vec.x, trans.x, 1e-10);
-         assertEquals(vec.y, trans.y, 1e-10);
-         assertEquals(vec.z, trans.z, 1e-10);
+         assertEquals(quat1.getX(), quatCheck.getX(), 1e-10);
+         assertEquals(quat1.getY(), quatCheck.getY(), 1e-10);
+         assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-10);
+         assertEquals(quat1.getW(), quatCheck.getW(), 1e-10);
+         assertEquals(vec.getX(), trans.getX(), 1e-10);
+         assertEquals(vec.getY(), trans.getY(), 1e-10);
+         assertEquals(vec.getZ(), trans.getZ(), 1e-10);
       }
    }
 
@@ -511,23 +511,23 @@ public class RigidBodyTransformTest
       for (int i = 0; i < nTests; i++)
       {
          randomizeVector(random, trans);
-         quat1.x = random.nextFloat();
-         quat1.y = random.nextFloat();
-         quat1.z = random.nextFloat();
-         quat1.w = random.nextFloat();
+         quat1.setX(random.nextFloat());
+         quat1.setY(random.nextFloat());
+         quat1.setZ(random.nextFloat());
+         quat1.setW(random.nextFloat());
          quat1.normalize();
 
          RigidBodyTransform transform = new RigidBodyTransform(quat1, trans);
 
          transform.get(quatCheck, vec);
 
-         assertEquals(quat1.x, quatCheck.x, 1e-3);
-         assertEquals(quat1.y, quatCheck.y, 1e-3);
-         assertEquals(quat1.z, quatCheck.z, 1e-3);
-         assertEquals(quat1.w, quatCheck.w, 1e-3);
-         assertEquals(vec.x, trans.x, 1e-3);
-         assertEquals(vec.y, trans.y, 1e-3);
-         assertEquals(vec.z, trans.z, 1e-3);
+         assertEquals(quat1.getX(), quatCheck.getX(), 1e-3);
+         assertEquals(quat1.getY(), quatCheck.getY(), 1e-3);
+         assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-3);
+         assertEquals(quat1.getW(), quatCheck.getW(), 1e-3);
+         assertEquals(vec.getX(), trans.getX(), 1e-3);
+         assertEquals(vec.getY(), trans.getY(), 1e-3);
+         assertEquals(vec.getZ(), trans.getZ(), 1e-3);
       }
    }
 
@@ -542,10 +542,10 @@ public class RigidBodyTransformTest
 
       for (int i = 0; i < nTests; i++)
       {
-         quat1.x = random.nextDouble();
-         quat1.y = random.nextDouble();
-         quat1.z = random.nextDouble();
-         quat1.w = random.nextDouble();
+         quat1.setX(random.nextDouble());
+         quat1.setY(random.nextDouble());
+         quat1.setZ(random.nextDouble());
+         quat1.setW(random.nextDouble());
          quat1.normalize();
 
          RigidBodyTransform transform = new RigidBodyTransform(quat1,
@@ -554,13 +554,13 @@ public class RigidBodyTransformTest
          transform.getRotation(quatCheck);
          transform.getTranslation(trans);
 
-         assertEquals(quat1.x, quatCheck.x, 1e-10);
-         assertEquals(quat1.y, quatCheck.y, 1e-10);
-         assertEquals(quat1.z, quatCheck.z, 1e-10);
-         assertEquals(quat1.w, quatCheck.w, 1e-10);
-         assertEquals(0, trans.x, 1e-10);
-         assertEquals(0, trans.y, 1e-10);
-         assertEquals(0, trans.z, 1e-10);
+         assertEquals(quat1.getX(), quatCheck.getX(), 1e-10);
+         assertEquals(quat1.getY(), quatCheck.getY(), 1e-10);
+         assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-10);
+         assertEquals(quat1.getW(), quatCheck.getW(), 1e-10);
+         assertEquals(0, trans.getX(), 1e-10);
+         assertEquals(0, trans.getY(), 1e-10);
+         assertEquals(0, trans.getZ(), 1e-10);
       }
    }
 
@@ -576,10 +576,10 @@ public class RigidBodyTransformTest
 
       for (int i = 0; i < nTests; i++)
       {
-         quat1.x = random.nextDouble();
-         quat1.y = random.nextDouble();
-         quat1.z = random.nextDouble();
-         quat1.w = random.nextDouble();
+         quat1.setX(random.nextDouble());
+         quat1.setY(random.nextDouble());
+         quat1.setZ(random.nextDouble());
+         quat1.setW(random.nextDouble());
          quat1.normalize();
 
          transform.setRotationAndZeroTranslation(quat1);
@@ -587,13 +587,13 @@ public class RigidBodyTransformTest
          transform.getRotation(quatCheck);
          transform.getTranslation(trans);
 
-         assertEquals(quat1.x, quatCheck.x, 1e-10);
-         assertEquals(quat1.y, quatCheck.y, 1e-10);
-         assertEquals(quat1.z, quatCheck.z, 1e-10);
-         assertEquals(quat1.w, quatCheck.w, 1e-10);
-         assertEquals(0, trans.x, 1e-10);
-         assertEquals(0, trans.y, 1e-10);
-         assertEquals(0, trans.z, 1e-10);
+         assertEquals(quat1.getX(), quatCheck.getX(), 1e-10);
+         assertEquals(quat1.getY(), quatCheck.getY(), 1e-10);
+         assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-10);
+         assertEquals(quat1.getW(), quatCheck.getW(), 1e-10);
+         assertEquals(0, trans.getX(), 1e-10);
+         assertEquals(0, trans.getY(), 1e-10);
+         assertEquals(0, trans.getZ(), 1e-10);
       }
    }
 
@@ -610,10 +610,10 @@ public class RigidBodyTransformTest
 
       for (int i = 0; i < nTests; i++)
       {
-         quat1.x = random.nextDouble();
-         quat1.y = random.nextDouble();
-         quat1.z = random.nextDouble();
-         quat1.w = random.nextDouble();
+         quat1.setX(random.nextDouble());
+         quat1.setY(random.nextDouble());
+         quat1.setZ(random.nextDouble());
+         quat1.setW(random.nextDouble());
          quat1.normalize();
 
          randomizeVector(random, vector);
@@ -623,13 +623,13 @@ public class RigidBodyTransformTest
          transform.getRotation(quatCheck);
          transform.getTranslation(trans);
 
-         assertEquals(quat1.x, quatCheck.x, 1e-10);
-         assertEquals(quat1.y, quatCheck.y, 1e-10);
-         assertEquals(quat1.z, quatCheck.z, 1e-10);
-         assertEquals(quat1.w, quatCheck.w, 1e-10);
-         assertEquals(vector.x, trans.x, 1e-10);
-         assertEquals(vector.y, trans.y, 1e-10);
-         assertEquals(vector.z, trans.z, 1e-10);
+         assertEquals(quat1.getX(), quatCheck.getX(), 1e-10);
+         assertEquals(quat1.getY(), quatCheck.getY(), 1e-10);
+         assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-10);
+         assertEquals(quat1.getW(), quatCheck.getW(), 1e-10);
+         assertEquals(vector.getX(), trans.getX(), 1e-10);
+         assertEquals(vector.getY(), trans.getY(), 1e-10);
+         assertEquals(vector.getZ(), trans.getZ(), 1e-10);
       }
    }
 
@@ -645,10 +645,10 @@ public class RigidBodyTransformTest
 
       for (int i = 0; i < nTests; i++)
       {
-         quat1.x = random.nextFloat();
-         quat1.y = random.nextFloat();
-         quat1.z = random.nextFloat();
-         quat1.w = random.nextFloat();
+         quat1.setX(random.nextFloat());
+         quat1.setY(random.nextFloat());
+         quat1.setZ(random.nextFloat());
+         quat1.setW(random.nextFloat());
          quat1.normalize();
 
          transform.setRotationAndZeroTranslation(quat1);
@@ -656,13 +656,13 @@ public class RigidBodyTransformTest
          transform.getRotation(quatCheck);
          transform.getTranslation(trans);
 
-         assertEquals(quat1.x, quatCheck.x, 1e-5);
-         assertEquals(quat1.y, quatCheck.y, 1e-5);
-         assertEquals(quat1.z, quatCheck.z, 1e-5);
-         assertEquals(quat1.w, quatCheck.w, 1e-5);
-         assertEquals(0, trans.x, 1e-5);
-         assertEquals(0, trans.y, 1e-5);
-         assertEquals(0, trans.z, 1e-5);
+         assertEquals(quat1.getX(), quatCheck.getX(), 1e-5);
+         assertEquals(quat1.getY(), quatCheck.getY(), 1e-5);
+         assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-5);
+         assertEquals(quat1.getW(), quatCheck.getW(), 1e-5);
+         assertEquals(0, trans.getX(), 1e-5);
+         assertEquals(0, trans.getY(), 1e-5);
+         assertEquals(0, trans.getZ(), 1e-5);
       }
    }
 
@@ -679,10 +679,10 @@ public class RigidBodyTransformTest
 
       for (int i = 0; i < nTests; i++)
       {
-         quat1.x = random.nextFloat();
-         quat1.y = random.nextFloat();
-         quat1.z = random.nextFloat();
-         quat1.w = random.nextFloat();
+         quat1.setX(random.nextFloat());
+         quat1.setY(random.nextFloat());
+         quat1.setZ(random.nextFloat());
+         quat1.setW(random.nextFloat());
          quat1.normalize();
 
          randomizeVector(random, vector);
@@ -692,13 +692,13 @@ public class RigidBodyTransformTest
          transform.getRotation(quatCheck);
          transform.getTranslation(trans);
 
-         assertEquals(quat1.x, quatCheck.x, 1e-5);
-         assertEquals(quat1.y, quatCheck.y, 1e-5);
-         assertEquals(quat1.z, quatCheck.z, 1e-5);
-         assertEquals(quat1.w, quatCheck.w, 1e-5);
-         assertEquals(vector.x, trans.x, 1e-5);
-         assertEquals(vector.y, trans.y, 1e-5);
-         assertEquals(vector.z, trans.z, 1e-5);
+         assertEquals(quat1.getX(), quatCheck.getX(), 1e-5);
+         assertEquals(quat1.getY(), quatCheck.getY(), 1e-5);
+         assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-5);
+         assertEquals(quat1.getW(), quatCheck.getW(), 1e-5);
+         assertEquals(vector.getX(), trans.getX(), 1e-5);
+         assertEquals(vector.getY(), trans.getY(), 1e-5);
+         assertEquals(vector.getZ(), trans.getZ(), 1e-5);
       }
    }
 
@@ -730,10 +730,10 @@ public class RigidBodyTransformTest
 
       for (int i = 0; i < nTests; i++)
       {
-         quat1.x = random.nextFloat();
-         quat1.y = random.nextFloat();
-         quat1.z = random.nextFloat();
-         quat1.w = random.nextFloat();
+         quat1.setX(random.nextFloat());
+         quat1.setY(random.nextFloat());
+         quat1.setZ(random.nextFloat());
+         quat1.setW(random.nextFloat());
          quat1.normalize();
 
          RigidBodyTransform transform = new RigidBodyTransform(quat1,
@@ -741,13 +741,13 @@ public class RigidBodyTransformTest
 
          transform.get(quatCheck, trans);
 
-         assertEquals(quat1.x, quatCheck.x, 1e-3);
-         assertEquals(quat1.y, quatCheck.y, 1e-3);
-         assertEquals(quat1.z, quatCheck.z, 1e-3);
-         assertEquals(quat1.w, quatCheck.w, 1e-3);
-         assertEquals(0, trans.x, 1e-3);
-         assertEquals(0, trans.y, 1e-3);
-         assertEquals(0, trans.z, 1e-3);
+         assertEquals(quat1.getX(), quatCheck.getX(), 1e-3);
+         assertEquals(quat1.getY(), quatCheck.getY(), 1e-3);
+         assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-3);
+         assertEquals(quat1.getW(), quatCheck.getW(), 1e-3);
+         assertEquals(0, trans.getX(), 1e-3);
+         assertEquals(0, trans.getY(), 1e-3);
+         assertEquals(0, trans.getZ(), 1e-3);
       }
    }
 
@@ -761,10 +761,10 @@ public class RigidBodyTransformTest
 
       for (int i = 0; i < nTests; i++)
       {
-         quat1.x = random.nextFloat();
-         quat1.y = random.nextFloat();
-         quat1.z = random.nextFloat();
-         quat1.w = random.nextFloat();
+         quat1.setX(random.nextFloat());
+         quat1.setY(random.nextFloat());
+         quat1.setZ(random.nextFloat());
+         quat1.setW(random.nextFloat());
          quat1.normalize();
 
          RigidBodyTransform transform = new RigidBodyTransform(quat1,
@@ -772,10 +772,10 @@ public class RigidBodyTransformTest
 
          transform.getRotation(quatCheck);
 
-         assertEquals(quat1.x, quatCheck.x, 1e-3);
-         assertEquals(quat1.y, quatCheck.y, 1e-3);
-         assertEquals(quat1.z, quatCheck.z, 1e-3);
-         assertEquals(quat1.w, quatCheck.w, 1e-3);
+         assertEquals(quat1.getX(), quatCheck.getX(), 1e-3);
+         assertEquals(quat1.getY(), quatCheck.getY(), 1e-3);
+         assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-3);
+         assertEquals(quat1.getW(), quatCheck.getW(), 1e-3);
       }
    }
 
@@ -791,20 +791,20 @@ public class RigidBodyTransformTest
 
       for (int i = 0; i < nTests; i++)
       {
-         quat1.x = random.nextDouble();
-         quat1.y = random.nextDouble();
-         quat1.z = 0;
-         quat1.w = random.nextDouble();
+         quat1.setX(random.nextDouble());
+         quat1.setY(random.nextDouble());
+         quat1.setZ(0);
+         quat1.setW(random.nextDouble());
          quat1.normalize();
 
          transform.setRotationAndZeroTranslation(quat1);
 
          transform.get(quatCheck, vec);
 
-         assertEquals(quat1.x, quatCheck.x, 1e-7);
-         assertEquals(quat1.y, quatCheck.y, 1e-7);
-         assertEquals(quat1.z, quatCheck.z, 1e-7);
-         assertEquals(quat1.w, quatCheck.w, 1e-7);
+         assertEquals(quat1.getX(), quatCheck.getX(), 1e-7);
+         assertEquals(quat1.getY(), quatCheck.getY(), 1e-7);
+         assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-7);
+         assertEquals(quat1.getW(), quatCheck.getW(), 1e-7);
       }
    }
 
@@ -818,20 +818,20 @@ public class RigidBodyTransformTest
       Vector3d vec = new Vector3d();
       RigidBodyTransform transform = new RigidBodyTransform();
 
-      quat1.x = random.nextDouble();
-      quat1.y = random.nextDouble();
-      quat1.z = random.nextDouble();
-      quat1.w = 0;
+      quat1.setX(random.nextDouble());
+      quat1.setY(random.nextDouble());
+      quat1.setZ(random.nextDouble());
+      quat1.setW(0);
       quat1.normalize();
 
       transform.setRotationAndZeroTranslation(quat1);
 
       transform.get(quatCheck, vec);
 
-      assertEquals(quat1.x, quatCheck.x, 1e-7);
-      assertEquals(quat1.y, quatCheck.y, 1e-7);
-      assertEquals(quat1.z, quatCheck.z, 1e-7);
-      assertEquals(quat1.w, quatCheck.w, 1e-7);
+      assertEquals(quat1.getX(), quatCheck.getX(), 1e-7);
+      assertEquals(quat1.getY(), quatCheck.getY(), 1e-7);
+      assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-7);
+      assertEquals(quat1.getW(), quatCheck.getW(), 1e-7);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -846,10 +846,10 @@ public class RigidBodyTransformTest
 
       for (int i = 0; i < nTests; i++)
       {
-         quat1.x = random.nextFloat();
-         quat1.y = random.nextFloat();
-         quat1.z = random.nextFloat();
-         quat1.w = random.nextFloat();
+         quat1.setX(random.nextFloat());
+         quat1.setY(random.nextFloat());
+         quat1.setZ(random.nextFloat());
+         quat1.setW(random.nextFloat());
          quat1.normalize();
 
          transform.setRotation(quat1);
@@ -859,10 +859,10 @@ public class RigidBodyTransformTest
          // Having trouble getting quat.w to be more precise than 1e-3 here.
          // It has to be floating point precision issue, but haven't figure
          // out how to fix that.
-         assertEquals(quat1.x, quatCheck.x, 1e-3);
-         assertEquals(quat1.y, quatCheck.y, 1e-3);
-         assertEquals(quat1.z, quatCheck.z, 1e-3);
-         assertEquals(quat1.w, quatCheck.w, 1e-3);
+         assertEquals(quat1.getX(), quatCheck.getX(), 1e-3);
+         assertEquals(quat1.getY(), quatCheck.getY(), 1e-3);
+         assertEquals(quat1.getZ(), quatCheck.getZ(), 1e-3);
+         assertEquals(quat1.getW(), quatCheck.getW(), 1e-3);
       }
    }
 
@@ -1026,16 +1026,16 @@ public class RigidBodyTransformTest
       for (int i = 0; i < nTests; i++)
       {
          createRandomRotationMatrix(matrix, random);
-         matrix4.m00 = matrix.m00;
-         matrix4.m01 = matrix.m01;
-         matrix4.m02 = matrix.m02;
-         matrix4.m10 = matrix.m10;
-         matrix4.m11 = matrix.m11;
-         matrix4.m12 = matrix.m12;
-         matrix4.m20 = matrix.m20;
-         matrix4.m21 = matrix.m21;
-         matrix4.m22 = matrix.m22;
-         matrix4.m33 = 1;
+         matrix4.setM00(matrix.getM00());
+         matrix4.setM01(matrix.getM01());
+         matrix4.setM02(matrix.getM02());
+         matrix4.setM10(matrix.getM10());
+         matrix4.setM11(matrix.getM11());
+         matrix4.setM12(matrix.getM12());
+         matrix4.setM20(matrix.getM20());
+         matrix4.setM21(matrix.getM21());
+         matrix4.setM22(matrix.getM22());
+         matrix4.setM33(1);
 
          RigidBodyTransform transform = new RigidBodyTransform(matrix, new Vector3d(0, 0,
                0));
@@ -1058,22 +1058,22 @@ public class RigidBodyTransformTest
       for (int i = 0; i < nTests; i++)
       {
          createRandomRotationMatrix(matrix, random);
-         matrix4.m00 = matrix.m00;
-         matrix4.m01 = matrix.m01;
-         matrix4.m02 = matrix.m02;
-         matrix4.m03 = 0;
-         matrix4.m10 = matrix.m10;
-         matrix4.m11 = matrix.m11;
-         matrix4.m12 = matrix.m12;
-         matrix4.m13 = 0;
-         matrix4.m20 = matrix.m20;
-         matrix4.m21 = matrix.m21;
-         matrix4.m22 = matrix.m22;
-         matrix4.m23 = 0;
-         matrix4.m30 = 0;
-         matrix4.m31 = 0;
-         matrix4.m32 = 0;
-         matrix4.m33 = 1;
+         matrix4.setM00(matrix.getM00());
+         matrix4.setM01(matrix.getM01());
+         matrix4.setM02(matrix.getM02());
+         matrix4.setM03(0);
+         matrix4.setM10(matrix.getM10());
+         matrix4.setM11(matrix.getM11());
+         matrix4.setM12(matrix.getM12());
+         matrix4.setM13(0);
+         matrix4.setM20(matrix.getM20());
+         matrix4.setM21(matrix.getM21());
+         matrix4.setM22(matrix.getM22());
+         matrix4.setM23(0);
+         matrix4.setM30(0);
+         matrix4.setM31(0);
+         matrix4.setM32(0);
+         matrix4.setM33(1);
 
          transform.setRotationAndZeroTranslation(matrix);
 
@@ -1098,13 +1098,13 @@ public class RigidBodyTransformTest
          randomizeVector(random, vector);
 
          transform.setTranslationAndIdentityRotation(vector);
-         matrix4.m00 = 1;
-         matrix4.m11 = 1;
-         matrix4.m22 = 1;
-         matrix4.m33 = 1;
-         matrix4.m03 = vector.x;
-         matrix4.m13 = vector.y;
-         matrix4.m23 = vector.z;
+         matrix4.setM00(1);
+         matrix4.setM11(1);
+         matrix4.setM22(1);
+         matrix4.setM33(1);
+         matrix4.setM03(vector.getX());
+         matrix4.setM13(vector.getY());
+         matrix4.setM23(vector.getZ());
 
          transform.get(matrixCheck);
 
@@ -1127,13 +1127,13 @@ public class RigidBodyTransformTest
          randomizeVector(random, vector);
 
          transform.setTranslationAndIdentityRotation(vector);
-         matrix4.m00 = 1;
-         matrix4.m11 = 1;
-         matrix4.m22 = 1;
-         matrix4.m33 = 1;
-         matrix4.m03 = vector.x;
-         matrix4.m13 = vector.y;
-         matrix4.m23 = vector.z;
+         matrix4.setM00(1);
+         matrix4.setM11(1);
+         matrix4.setM22(1);
+         matrix4.setM33(1);
+         matrix4.setM03(vector.getX());
+         matrix4.setM13(vector.getY());
+         matrix4.setM23(vector.getZ());
 
          transform.get(matrixCheck);
 
@@ -1154,22 +1154,22 @@ public class RigidBodyTransformTest
       for (int i = 0; i < nTests; i++)
       {
          createRandomRotationMatrix(matrix, random);
-         matrix4.m00 = matrix.m00;
-         matrix4.m01 = matrix.m01;
-         matrix4.m02 = matrix.m02;
-         matrix4.m03 = 0;
-         matrix4.m10 = matrix.m10;
-         matrix4.m11 = matrix.m11;
-         matrix4.m12 = matrix.m12;
-         matrix4.m13 = 0;
-         matrix4.m20 = matrix.m20;
-         matrix4.m21 = matrix.m21;
-         matrix4.m22 = matrix.m22;
-         matrix4.m23 = 0;
-         matrix4.m30 = 0;
-         matrix4.m31 = 0;
-         matrix4.m32 = 0;
-         matrix4.m33 = 1;
+         matrix4.setM00(matrix.getM00());
+         matrix4.setM01(matrix.getM01());
+         matrix4.setM02(matrix.getM02());
+         matrix4.setM03(0);
+         matrix4.setM10(matrix.getM10());
+         matrix4.setM11(matrix.getM11());
+         matrix4.setM12(matrix.getM12());
+         matrix4.setM13(0);
+         matrix4.setM20(matrix.getM20());
+         matrix4.setM21(matrix.getM21());
+         matrix4.setM22(matrix.getM22());
+         matrix4.setM23(0);
+         matrix4.setM30(0);
+         matrix4.setM31(0);
+         matrix4.setM32(0);
+         matrix4.setM33(1);
 
          transform.setRotationAndZeroTranslation(matrix);
 
@@ -1224,16 +1224,16 @@ public class RigidBodyTransformTest
       for (int i = 0; i < nTests; i++)
       {
          createRandomRotationMatrix(matrix, random);
-         matrix4.m00 = matrix.m00;
-         matrix4.m01 = matrix.m01;
-         matrix4.m02 = matrix.m02;
-         matrix4.m10 = matrix.m10;
-         matrix4.m11 = matrix.m11;
-         matrix4.m12 = matrix.m12;
-         matrix4.m20 = matrix.m20;
-         matrix4.m21 = matrix.m21;
-         matrix4.m22 = matrix.m22;
-         matrix4.m33 = 1;
+         matrix4.setM00(matrix.getM00());
+         matrix4.setM01(matrix.getM01());
+         matrix4.setM02(matrix.getM02());
+         matrix4.setM10(matrix.getM10());
+         matrix4.setM11(matrix.getM11());
+         matrix4.setM12(matrix.getM12());
+         matrix4.setM20(matrix.getM20());
+         matrix4.setM21(matrix.getM21());
+         matrix4.setM22(matrix.getM22());
+         matrix4.setM33(1);
 
          RigidBodyTransform transform = new RigidBodyTransform(matrix, new Vector3f(0, 0,
                0));
@@ -2018,15 +2018,15 @@ public class RigidBodyTransformTest
       RigidBodyTransform transform = new RigidBodyTransform();
       for (int i = 0; i < nTests; i++)
       {
-         vector.x = -Math.PI + random.nextDouble() * 2 * Math.PI;
+         vector.setX(-Math.PI + random.nextDouble() * 2 * Math.PI);
          // Inverse Euler conversion is not defined for vector.y = 0 and the
          // solution switches for
          // vector.y outside of -pi/2 to pi/2. Separate tests can be created
          // if the whole range wants to be
          // tested. The inverse Euler transform is only used for testing
          // purposes, so it is not an issue.
-         vector.y = -(Math.PI / 2 - 0.01) * random.nextDouble() - 0.01;
-         vector.z = -Math.PI + random.nextDouble() * 2 * Math.PI;
+         vector.setY(-(Math.PI / 2 - 0.01) * random.nextDouble() - 0.01);
+         vector.setZ(-Math.PI + random.nextDouble() * 2 * Math.PI);
 
          transform.setRotationEulerAndZeroTranslation(vector);
 
@@ -2362,9 +2362,9 @@ public class RigidBodyTransformTest
       Matrix3d matrix = new Matrix3d();
       transform.getRotation(matrix);
 
-      Vector3d tmpVecX = new Vector3d(matrix.m00, matrix.m10, matrix.m20);
-      Vector3d tmpVecY = new Vector3d(matrix.m01, matrix.m11, matrix.m21);
-      Vector3d tmpVecZ = new Vector3d(matrix.m02, matrix.m12, matrix.m22);
+      Vector3d tmpVecX = new Vector3d(matrix.getM00(), matrix.getM10(), matrix.getM20());
+      Vector3d tmpVecY = new Vector3d(matrix.getM01(), matrix.getM11(), matrix.getM21());
+      Vector3d tmpVecZ = new Vector3d(matrix.getM02(), matrix.getM12(), matrix.getM22());
 
       return (tmpVecX.lengthSquared() - 1 < 1e-8)
             && (tmpVecY.lengthSquared() - 1 < 1e-8)
@@ -2373,30 +2373,30 @@ public class RigidBodyTransformTest
 
    private void randomizeVector(Random random, Vector3d vector)
    {
-      vector.x = random.nextDouble();
-      vector.y = random.nextDouble();
-      vector.z = random.nextDouble();
+      vector.setX(random.nextDouble());
+      vector.setY(random.nextDouble());
+      vector.setZ(random.nextDouble());
    }
 
    private void randomizeVector(Random random, Vector3f vector)
    {
-      vector.x = random.nextFloat();
-      vector.y = random.nextFloat();
-      vector.z = random.nextFloat();
+      vector.setX(random.nextFloat());
+      vector.setY(random.nextFloat());
+      vector.setZ(random.nextFloat());
    }
 
    private void randomizePoint3d(Random random, Point3d point)
    {
-      point.x = random.nextDouble();
-      point.y = random.nextDouble();
-      point.z = random.nextDouble();
+      point.setX(random.nextDouble());
+      point.setY(random.nextDouble());
+      point.setZ(random.nextDouble());
    }
 
    private void randomizePoint3f(Random random, Point3f point)
    {
-      point.x = random.nextFloat();
-      point.y = random.nextFloat();
-      point.z = random.nextFloat();
+      point.setX(random.nextFloat());
+      point.setY(random.nextFloat());
+      point.setZ(random.nextFloat());
    }
 
    private void createRandomTransformationMatrix(DenseMatrix64F matrix,
@@ -2415,18 +2415,18 @@ public class RigidBodyTransformTest
       rotX.mul(rotY);
       rotX.mul(rotZ);
 
-      matrix.set(0, 0, rotX.m00);
-      matrix.set(0, 1, rotX.m01);
-      matrix.set(0, 2, rotX.m02);
-      matrix.set(0, 3, trans.x);
-      matrix.set(1, 0, rotX.m10);
-      matrix.set(1, 1, rotX.m11);
-      matrix.set(1, 2, rotX.m12);
-      matrix.set(1, 3, trans.y);
-      matrix.set(2, 0, rotX.m20);
-      matrix.set(2, 1, rotX.m21);
-      matrix.set(2, 2, rotX.m22);
-      matrix.set(2, 3, trans.z);
+      matrix.set(0, 0, rotX.getM00());
+      matrix.set(0, 1, rotX.getM01());
+      matrix.set(0, 2, rotX.getM02());
+      matrix.set(0, 3, trans.getX());
+      matrix.set(1, 0, rotX.getM10());
+      matrix.set(1, 1, rotX.getM11());
+      matrix.set(1, 2, rotX.getM12());
+      matrix.set(1, 3, trans.getY());
+      matrix.set(2, 0, rotX.getM20());
+      matrix.set(2, 1, rotX.getM21());
+      matrix.set(2, 2, rotX.getM22());
+      matrix.set(2, 3, trans.getZ());
       matrix.set(3, 0, 0);
       matrix.set(3, 1, 0);
       matrix.set(3, 2, 0);
@@ -2448,15 +2448,15 @@ public class RigidBodyTransformTest
       rotX.mul(rotY);
       rotX.mul(rotZ);
 
-      matrix.m00 = rotX.m00;
-      matrix.m01 = rotX.m01;
-      matrix.m02 = rotX.m02;
-      matrix.m10 = rotX.m10;
-      matrix.m11 = rotX.m11;
-      matrix.m12 = rotX.m12;
-      matrix.m20 = rotX.m20;
-      matrix.m21 = rotX.m21;
-      matrix.m22 = rotX.m22;
+      matrix.setM00(rotX.getM00());
+      matrix.setM01(rotX.getM01());
+      matrix.setM02(rotX.getM02());
+      matrix.setM10(rotX.getM10());
+      matrix.setM11(rotX.getM11());
+      matrix.setM12(rotX.getM12());
+      matrix.setM20(rotX.getM20());
+      matrix.setM21(rotX.getM21());
+      matrix.setM22(rotX.getM22());
    }
 
    private void createRandomRotationMatrix(DenseMatrix64F matrix, Random random)
@@ -2474,15 +2474,15 @@ public class RigidBodyTransformTest
       rotX.mul(rotY);
       rotX.mul(rotZ);
 
-      matrix.set(0, 0, rotX.m00);
-      matrix.set(0, 1, rotX.m01);
-      matrix.set(0, 2, rotX.m02);
-      matrix.set(1, 0, rotX.m10);
-      matrix.set(1, 1, rotX.m11);
-      matrix.set(1, 2, rotX.m12);
-      matrix.set(2, 0, rotX.m20);
-      matrix.set(2, 1, rotX.m21);
-      matrix.set(2, 2, rotX.m22);
+      matrix.set(0, 0, rotX.getM00());
+      matrix.set(0, 1, rotX.getM01());
+      matrix.set(0, 2, rotX.getM02());
+      matrix.set(1, 0, rotX.getM10());
+      matrix.set(1, 1, rotX.getM11());
+      matrix.set(1, 2, rotX.getM12());
+      matrix.set(2, 0, rotX.getM20());
+      matrix.set(2, 1, rotX.getM21());
+      matrix.set(2, 2, rotX.getM22());
    }
 
    private void createRandomRotationMatrix(Matrix3f matrix, Random random)
@@ -2500,15 +2500,15 @@ public class RigidBodyTransformTest
       rotX.mul(rotY);
       rotX.mul(rotZ);
 
-      matrix.m00 = rotX.m00;
-      matrix.m01 = rotX.m01;
-      matrix.m02 = rotX.m02;
-      matrix.m10 = rotX.m10;
-      matrix.m11 = rotX.m11;
-      matrix.m12 = rotX.m12;
-      matrix.m20 = rotX.m20;
-      matrix.m21 = rotX.m21;
-      matrix.m22 = rotX.m22;
+      matrix.setM00(rotX.getM00());
+      matrix.setM01(rotX.getM01());
+      matrix.setM02(rotX.getM02());
+      matrix.setM10(rotX.getM10());
+      matrix.setM11(rotX.getM11());
+      matrix.setM12(rotX.getM12());
+      matrix.setM20(rotX.getM20());
+      matrix.setM21(rotX.getM21());
+      matrix.setM22(rotX.getM22());
    }
 
    private void createRandomTransformationMatrix(Matrix4d matrix, Random random)
@@ -2526,22 +2526,22 @@ public class RigidBodyTransformTest
       rotX.mul(rotY);
       rotX.mul(rotZ);
 
-      matrix.m00 = rotX.m00;
-      matrix.m01 = rotX.m01;
-      matrix.m02 = rotX.m02;
-      matrix.m03 = trans.x;
-      matrix.m10 = rotX.m10;
-      matrix.m11 = rotX.m11;
-      matrix.m12 = rotX.m12;
-      matrix.m13 = trans.y;
-      matrix.m20 = rotX.m20;
-      matrix.m21 = rotX.m21;
-      matrix.m22 = rotX.m22;
-      matrix.m23 = trans.z;
-      matrix.m30 = 0;
-      matrix.m31 = 0;
-      matrix.m32 = 0;
-      matrix.m33 = 1;
+      matrix.setM00(rotX.getM00());
+      matrix.setM01(rotX.getM01());
+      matrix.setM02(rotX.getM02());
+      matrix.setM03(trans.getX());
+      matrix.setM10(rotX.getM10());
+      matrix.setM11(rotX.getM11());
+      matrix.setM12(rotX.getM12());
+      matrix.setM13(trans.getY());
+      matrix.setM20(rotX.getM20());
+      matrix.setM21(rotX.getM21());
+      matrix.setM22(rotX.getM22());
+      matrix.setM23(trans.getZ());
+      matrix.setM30(0);
+      matrix.setM31(0);
+      matrix.setM32(0);
+      matrix.setM33(1);
    }
 
    private void createRandomTransformationMatrix(Matrix4f matrix, Random random)
@@ -2559,22 +2559,22 @@ public class RigidBodyTransformTest
       rotX.mul(rotY);
       rotX.mul(rotZ);
 
-      matrix.m00 = (float) rotX.m00;
-      matrix.m01 = (float) rotX.m01;
-      matrix.m02 = (float) rotX.m02;
-      matrix.m03 = (float) trans.x;
-      matrix.m10 = (float) rotX.m10;
-      matrix.m11 = (float) rotX.m11;
-      matrix.m12 = (float) rotX.m12;
-      matrix.m13 = (float) trans.y;
-      matrix.m20 = (float) rotX.m20;
-      matrix.m21 = (float) rotX.m21;
-      matrix.m22 = (float) rotX.m22;
-      matrix.m23 = (float) trans.z;
-      matrix.m30 = 0;
-      matrix.m31 = 0;
-      matrix.m32 = 0;
-      matrix.m33 = 1;
+      matrix.setM00((float) rotX.getM00());
+      matrix.setM01((float) rotX.getM01());
+      matrix.setM02((float) rotX.getM02());
+      matrix.setM03((float) trans.getX());
+      matrix.setM10((float) rotX.getM10());
+      matrix.setM11((float) rotX.getM11());
+      matrix.setM12((float) rotX.getM12());
+      matrix.setM13((float) trans.getY());
+      matrix.setM20((float) rotX.getM20());
+      matrix.setM21((float) rotX.getM21());
+      matrix.setM22((float) rotX.getM22());
+      matrix.setM23((float) trans.getZ());
+      matrix.setM30(0);
+      matrix.setM31(0);
+      matrix.setM32(0);
+      matrix.setM33(1);
    }
 
    private void createRandomRotationMatrixX(Random random, Matrix3d matrix)
@@ -2582,15 +2582,15 @@ public class RigidBodyTransformTest
       double theta = random.nextDouble();
       double cTheta = Math.cos(theta);
       double sTheta = Math.sin(theta);
-      matrix.m00 = 1;
-      matrix.m01 = 0;
-      matrix.m02 = 0;
-      matrix.m10 = 0;
-      matrix.m11 = cTheta;
-      matrix.m12 = -sTheta;
-      matrix.m20 = 0;
-      matrix.m21 = sTheta;
-      matrix.m22 = cTheta;
+      matrix.setM00(1);
+      matrix.setM01(0);
+      matrix.setM02(0);
+      matrix.setM10(0);
+      matrix.setM11(cTheta);
+      matrix.setM12(-sTheta);
+      matrix.setM20(0);
+      matrix.setM21(sTheta);
+      matrix.setM22(cTheta);
    }
 
    private void createRandomRotationMatrixX(Random random, Matrix3f matrix)
@@ -2598,15 +2598,15 @@ public class RigidBodyTransformTest
       double theta = random.nextDouble();
       double cTheta = Math.cos(theta);
       double sTheta = Math.sin(theta);
-      matrix.m00 = 1;
-      matrix.m01 = 0;
-      matrix.m02 = 0;
-      matrix.m10 = 0;
-      matrix.m11 = (float) cTheta;
-      matrix.m12 = (float) -sTheta;
-      matrix.m20 = 0;
-      matrix.m21 = (float) sTheta;
-      matrix.m22 = (float) cTheta;
+      matrix.setM00(1);
+      matrix.setM01(0);
+      matrix.setM02(0);
+      matrix.setM10(0);
+      matrix.setM11((float) cTheta);
+      matrix.setM12((float) -sTheta);
+      matrix.setM20(0);
+      matrix.setM21((float) sTheta);
+      matrix.setM22((float) cTheta);
    }
 
    private void createRandomRotationMatrixY(Random random, Matrix3f matrix)
@@ -2614,15 +2614,15 @@ public class RigidBodyTransformTest
       double theta = random.nextDouble();
       double cTheta = Math.cos(theta);
       double sTheta = Math.sin(theta);
-      matrix.m00 = (float) cTheta;
-      matrix.m01 = 0;
-      matrix.m02 = (float) sTheta;
-      matrix.m10 = 0;
-      matrix.m11 = 1;
-      matrix.m12 = 0;
-      matrix.m20 = (float) -sTheta;
-      matrix.m21 = 0;
-      matrix.m22 = (float) cTheta;
+      matrix.setM00((float) cTheta);
+      matrix.setM01(0);
+      matrix.setM02((float) sTheta);
+      matrix.setM10(0);
+      matrix.setM11(1);
+      matrix.setM12(0);
+      matrix.setM20((float) -sTheta);
+      matrix.setM21(0);
+      matrix.setM22((float) cTheta);
    }
 
    private void createRandomRotationMatrixY(Random random, Matrix3d matrix)
@@ -2630,15 +2630,15 @@ public class RigidBodyTransformTest
       double theta = random.nextDouble();
       double cTheta = Math.cos(theta);
       double sTheta = Math.sin(theta);
-      matrix.m00 = cTheta;
-      matrix.m01 = 0;
-      matrix.m02 = sTheta;
-      matrix.m10 = 0;
-      matrix.m11 = 1;
-      matrix.m12 = 0;
-      matrix.m20 = -sTheta;
-      matrix.m21 = 0;
-      matrix.m22 = cTheta;
+      matrix.setM00(cTheta);
+      matrix.setM01(0);
+      matrix.setM02(sTheta);
+      matrix.setM10(0);
+      matrix.setM11(1);
+      matrix.setM12(0);
+      matrix.setM20(-sTheta);
+      matrix.setM21(0);
+      matrix.setM22(cTheta);
    }
 
    private void createRandomRotationMatrixZ(Random random, Matrix3d matrix)
@@ -2646,15 +2646,15 @@ public class RigidBodyTransformTest
       double theta = random.nextDouble();
       double cTheta = Math.cos(theta);
       double sTheta = Math.sin(theta);
-      matrix.m00 = cTheta;
-      matrix.m01 = -sTheta;
-      matrix.m02 = 0;
-      matrix.m10 = sTheta;
-      matrix.m11 = cTheta;
-      matrix.m12 = 0;
-      matrix.m20 = 0;
-      matrix.m21 = 0;
-      matrix.m22 = 1;
+      matrix.setM00(cTheta);
+      matrix.setM01(-sTheta);
+      matrix.setM02(0);
+      matrix.setM10(sTheta);
+      matrix.setM11(cTheta);
+      matrix.setM12(0);
+      matrix.setM20(0);
+      matrix.setM21(0);
+      matrix.setM22(1);
    }
 
    private void createRandomRotationMatrixZ(Random random, Matrix3f matrix)
@@ -2662,31 +2662,31 @@ public class RigidBodyTransformTest
       double theta = random.nextDouble();
       double cTheta = Math.cos(theta);
       double sTheta = Math.sin(theta);
-      matrix.m00 = (float) cTheta;
-      matrix.m01 = (float) -sTheta;
-      matrix.m02 = 0;
-      matrix.m10 = (float) sTheta;
-      matrix.m11 = (float) cTheta;
-      matrix.m12 = 0;
-      matrix.m20 = 0;
-      matrix.m21 = 0;
-      matrix.m22 = 1;
+      matrix.setM00((float) cTheta);
+      matrix.setM01((float) -sTheta);
+      matrix.setM02(0);
+      matrix.setM10((float) sTheta);
+      matrix.setM11((float) cTheta);
+      matrix.setM12(0);
+      matrix.setM20(0);
+      matrix.setM21(0);
+      matrix.setM22(1);
    }
 
    private void createRandomTransform4Vector(Vector4d vector, Random random)
    {
-      vector.x = random.nextDouble();
-      vector.y = random.nextDouble();
-      vector.z = random.nextDouble();
-      vector.w = 1;
+      vector.setX(random.nextDouble());
+      vector.setY(random.nextDouble());
+      vector.setZ(random.nextDouble());
+      vector.setW(1);
    }
 
    private void createRandomTransform4Vector(Vector4f vector, Random random)
    {
-      vector.x = random.nextFloat();
-      vector.y = random.nextFloat();
-      vector.z = random.nextFloat();
-      vector.w = 1;
+      vector.setX(random.nextFloat());
+      vector.setY(random.nextFloat());
+      vector.setZ(random.nextFloat());
+      vector.setW(1);
    }
 
    private float[] putDoublesInFloatArray(double[] matrixAsDoubleArray)
@@ -2703,36 +2703,36 @@ public class RigidBodyTransformTest
    private void createFloatArrayFromMatrix4d(float[] floatArray,
          Matrix4f matrix)
    {
-      floatArray[0] = matrix.m00;
-      floatArray[1] = matrix.m01;
-      floatArray[2] = matrix.m02;
-      floatArray[3] = matrix.m03;
-      floatArray[4] = matrix.m10;
-      floatArray[5] = matrix.m11;
-      floatArray[6] = matrix.m12;
-      floatArray[7] = matrix.m13;
-      floatArray[8] = matrix.m20;
-      floatArray[9] = matrix.m21;
-      floatArray[10] = matrix.m22;
-      floatArray[11] = matrix.m23;
-      floatArray[12] = matrix.m30;
-      floatArray[13] = matrix.m31;
-      floatArray[14] = matrix.m32;
-      floatArray[15] = matrix.m33;
+      floatArray[0] = matrix.getM00();
+      floatArray[1] = matrix.getM01();
+      floatArray[2] = matrix.getM02();
+      floatArray[3] = matrix.getM03();
+      floatArray[4] = matrix.getM10();
+      floatArray[5] = matrix.getM11();
+      floatArray[6] = matrix.getM12();
+      floatArray[7] = matrix.getM13();
+      floatArray[8] = matrix.getM20();
+      floatArray[9] = matrix.getM21();
+      floatArray[10] = matrix.getM22();
+      floatArray[11] = matrix.getM23();
+      floatArray[12] = matrix.getM30();
+      floatArray[13] = matrix.getM31();
+      floatArray[14] = matrix.getM32();
+      floatArray[15] = matrix.getM33();
    }
 
    private void messWithRotationMatrixOrthogonality(Matrix4d matrix,
          Random random)
    {
-      matrix.m00 += random.nextDouble() * 1e-3;
-      matrix.m01 += random.nextDouble() * 1e-3;
-      matrix.m02 += random.nextDouble() * 1e-3;
-      matrix.m10 += random.nextDouble() * 1e-3;
-      matrix.m11 += random.nextDouble() * 1e-3;
-      matrix.m12 += random.nextDouble() * 1e-3;
-      matrix.m20 += random.nextDouble() * 1e-3;
-      matrix.m21 += random.nextDouble() * 1e-3;
-      matrix.m22 += random.nextDouble() * 1e-3;
+      matrix.setM00(matrix.getM00() + random.nextDouble() * 1e-3);
+      matrix.setM01(matrix.getM01() + random.nextDouble() * 1e-3);
+      matrix.setM02(matrix.getM02() + random.nextDouble() * 1e-3);
+      matrix.setM10(matrix.getM10() + random.nextDouble() * 1e-3);
+      matrix.setM11(matrix.getM11() + random.nextDouble() * 1e-3);
+      matrix.setM12(matrix.getM12() + random.nextDouble() * 1e-3);
+      matrix.setM20(matrix.getM20() + random.nextDouble() * 1e-3);
+      matrix.setM21(matrix.getM21() + random.nextDouble() * 1e-3);
+      matrix.setM22(matrix.getM22() + random.nextDouble() * 1e-3);
    }
 
 	private double getRandomAngleEpsilonToPiMinusEpsilon(Random random, double epsilon)
@@ -2762,22 +2762,22 @@ public class RigidBodyTransformTest
 
       try
       {
-         assertEquals(expected.m00, actual.m00, epsilon);
-         assertEquals(expected.m01, actual.m01, epsilon);
-         assertEquals(expected.m02, actual.m02, epsilon);
-         assertEquals(expected.m03, actual.m03, epsilon);
-         assertEquals(expected.m10, actual.m10, epsilon);
-         assertEquals(expected.m11, actual.m11, epsilon);
-         assertEquals(expected.m12, actual.m12, epsilon);
-         assertEquals(expected.m13, actual.m13, epsilon);
-         assertEquals(expected.m20, actual.m20, epsilon);
-         assertEquals(expected.m21, actual.m21, epsilon);
-         assertEquals(expected.m22, actual.m22, epsilon);
-         assertEquals(expected.m23, actual.m23, epsilon);
-         assertEquals(expected.m30, actual.m30, epsilon);
-         assertEquals(expected.m31, actual.m31, epsilon);
-         assertEquals(expected.m32, actual.m32, epsilon);
-         assertEquals(expected.m33, actual.m33, epsilon);
+         assertEquals(expected.getM00(), actual.getM00(), epsilon);
+         assertEquals(expected.getM01(), actual.getM01(), epsilon);
+         assertEquals(expected.getM02(), actual.getM02(), epsilon);
+         assertEquals(expected.getM03(), actual.getM03(), epsilon);
+         assertEquals(expected.getM10(), actual.getM10(), epsilon);
+         assertEquals(expected.getM11(), actual.getM11(), epsilon);
+         assertEquals(expected.getM12(), actual.getM12(), epsilon);
+         assertEquals(expected.getM13(), actual.getM13(), epsilon);
+         assertEquals(expected.getM20(), actual.getM20(), epsilon);
+         assertEquals(expected.getM21(), actual.getM21(), epsilon);
+         assertEquals(expected.getM22(), actual.getM22(), epsilon);
+         assertEquals(expected.getM23(), actual.getM23(), epsilon);
+         assertEquals(expected.getM30(), actual.getM30(), epsilon);
+         assertEquals(expected.getM31(), actual.getM31(), epsilon);
+         assertEquals(expected.getM32(), actual.getM32(), epsilon);
+         assertEquals(expected.getM33(), actual.getM33(), epsilon);
       }
       catch (AssertionError e)
       {

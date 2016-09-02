@@ -189,11 +189,11 @@ public class FollowBallBehavior extends BehaviorInterface
          tempPoint.set(fullPointCloud[i]);
          worldToCameraTransform.transform(tempPoint);
 
-         if (tempPoint.x > FILTERING_MIN_DISTANCE && tempPoint.x < FILTERING_MAX_DISTANCE)
+         if (tempPoint.getX() > FILTERING_MIN_DISTANCE && tempPoint.getX() < FILTERING_MAX_DISTANCE)
          {
             // rayAngle axes are in terms of the buffered image (y-down), temp pnt axes are in terms of camera frame (z-up)
-            double rayAngleX = Math.atan2(tempPoint.z, tempPoint.x);
-            double rayAngleY = Math.atan2(tempPoint.y, tempPoint.x);
+            double rayAngleX = Math.atan2(tempPoint.getZ(), tempPoint.getX());
+            double rayAngleY = Math.atan2(tempPoint.getY(), tempPoint.getX());
             if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
             {
                filteredPoints.add(fullPointCloud[i]);
@@ -212,7 +212,7 @@ public class FollowBallBehavior extends BehaviorInterface
       for (int i = 0; i < pointCloud.size(); i++)
       {
          Point3f tmpPoint = pointCloud.get(i);
-         pointsNearBy.add(new Point3D_F64(tmpPoint.x, tmpPoint.y, tmpPoint.z));
+         pointsNearBy.add(new Point3D_F64(tmpPoint.getX(), tmpPoint.getY(), tmpPoint.getZ()));
       }
 
       pointCloudSphereFinder.process(pointsNearBy, null);

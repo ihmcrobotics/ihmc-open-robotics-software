@@ -9,14 +9,14 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedGaitCycle;
-import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedSupportConfiguration;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.geometry.supportPolygon.YoQuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
+import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.geometry.supportPolygon.YoQuadrupedSupportPolygon;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedGaitCycle;
+import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedSupportConfiguration;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -50,7 +50,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLine;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
@@ -188,6 +187,8 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final YoFrameConvexPolygon2d currentShrunkenYoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("currentShrunkenYoFrameConvexPolygon2d", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoFrameConvexPolygon2d nextYoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("nextYoFrameConvexPolygon2d", ReferenceFrame.getWorldFrame(), 4, registry);
    private final VelocityConstrainedPositionTrajectoryGenerator icpTrajectory = new VelocityConstrainedPositionTrajectoryGenerator("icpTrajectory", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2d icpTrajectory2dInitialPosition = new YoFramePoint2d("icpTrajectory2dInitialPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2d icpTrajectory2dFinalPosition = new YoFramePoint2d("icpTrajectory2dFinalPosition", ReferenceFrame.getWorldFrame(), registry);
    private final QuadrantDependentList<BagOfBalls> swingTrajectoryBagsOfBalls = new QuadrantDependentList<>();
    
    // Experimental Trot Stuff
@@ -316,7 +317,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          yoGraphicsListRegistry.registerArtifact(getName() + "CenterOfPressureVis", new YoArtifactPosition("centerOfPressureVis", centerOfPressure.getYoX(), centerOfPressure.getYoY(), GraphicType.BALL_WITH_ROTATED_CROSS, YoAppearance.Lime().getAwtColor(), 0.01));
          yoGraphicsListRegistry.registerArtifact(getName() + "DesiredCenterOfPressureVis", new YoArtifactPosition("desiredCenterOfPressureVis", desiredCenterOfPressure.getYoX(), desiredCenterOfPressure.getYoY(), GraphicType.BALL_WITH_ROTATED_CROSS, YoAppearance.DarkSlateBlue().getAwtColor(), 0.01));
          yoGraphicsListRegistry.registerArtifact(getName() + "SnappedDesiredCenterOfPressureVis", new YoArtifactPosition("snappedDesiredCenterOfPressureVis", snappedDesiredCenterOfPressure.getYoX(), snappedDesiredCenterOfPressure.getYoY(), GraphicType.BALL_WITH_ROTATED_CROSS, YoAppearance.Red().getAwtColor(), 0.02));
-         yoGraphicsListRegistry.registerArtifact(getName() + "IcpTrajectory", new YoArtifactLine("icpTrajectory", icpTrajectory.getInitialPosition(), icpTrajectory.getFinalPosition(), Color.BLUE));
+         yoGraphicsListRegistry.registerArtifact(getName() + "IcpTrajectory", new YoArtifactLineSegment2d("icpTrajectory", icpTrajectory2dInitialPosition, icpTrajectory2dFinalPosition, Color.BLUE));
          yoGraphicsListRegistry.registerArtifact(getName() + "TrotWalkPolygons", new YoArtifactPolygon("targetYoArtifactPolygon", targetYoFrameConvexPolygon2d, Color.RED, false, 1));
          yoGraphicsListRegistry.registerArtifact(getName() + "TrotWalkPolygons", new YoArtifactPolygon("previousYoArtifactPolygon", previousYoFrameConvexPolygon2d, Color.GRAY, false, 3));
          yoGraphicsListRegistry.registerArtifact(getName() + "TrotWalkPolygons", new YoArtifactPolygon("currentYoArtifactPolygon", currentYoFrameConvexPolygon2d, Color.BLUE, false, 2));
@@ -727,6 +728,8 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       icpTrajectory.initialize();
       icpTrajectory.compute(currentGaitPhaseCompletion.getDoubleValue());
       icpTrajectory.getProjectedOntoXYPlane(desiredICP);
+      icpTrajectory2dInitialPosition.setByProjectionOntoXYPlane(icpTrajectory.getInitialPosition());
+      icpTrajectory2dFinalPosition.setByProjectionOntoXYPlane(icpTrajectory.getFinalPosition());
       
       targetSupportPolygon.getCentroid2d(desiredICP);
       desiredICP.add(desiredStancePoseOffset.getX(), desiredStancePoseOffset.getY());
@@ -779,7 +782,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       isInFrontOfLeftTrotLine.set(leftTrotLine.isPointInFrontOfLine(frontDirection, desiredCenterOfPressure.getFrameTuple2d()));
       isInFrontOfRightTrotLine.set(rightTrotLine.isPointInFrontOfLine(frontDirection, desiredCenterOfPressure.getFrameTuple2d()));
    
-      lineForFindingClosestLineSegment.setOrigin(desiredCenterOfPressure.getFrameTuple2d());
+      lineForFindingClosestLineSegment.setPoint(desiredCenterOfPressure.getFrameTuple2d());
    
       if (isInFrontOfLeftTrotLine.getBooleanValue() == isInFrontOfRightTrotLine.getBooleanValue())
       {

@@ -249,8 +249,8 @@ public class KinematicSolver implements InverseKinematicsCalculator
       transformEndEffectorToDesired.getTranslation(errorTranslationVector);
       transformEndEffectorToDesired.getRotation(errorQuat);
       errorAxisAngle.set(errorQuat);
-      errorAngularVector.set(errorAxisAngle.x, errorAxisAngle.y, errorAxisAngle.z);
-      errorAngularVector.scale(errorAxisAngle.angle);
+      errorAngularVector.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
+      errorAngularVector.scale(errorAxisAngle.getAngle());
       MatrixTools.setDenseMatrixFromTuple3d(spatialError, errorAngularVector, 0, 0);
       MatrixTools.setDenseMatrixFromTuple3d(spatialError, errorTranslationVector, 3, 0);
 

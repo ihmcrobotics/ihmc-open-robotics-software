@@ -27,20 +27,20 @@ public class AngleTools
 
    public static float getAngle(Quat4f q)
    {
-      return 2.0f * (float) Math.acos(q.w);
+      return 2.0f * (float) Math.acos(q.getW());
    }
 
    public static double angleMinusPiToPi(Vector2d startVector, Vector2d endVector)
    {
       double absoluteAngle = Math.acos(startVector.dot(endVector) / startVector.length() / endVector.length());
 
-      Vector3d start3d = new Vector3d(startVector.x, startVector.y, 0.0);
-      Vector3d end3d = new Vector3d(endVector.x, endVector.y, 0.0);
+      Vector3d start3d = new Vector3d(startVector.getX(), startVector.getY(), 0.0);
+      Vector3d end3d = new Vector3d(endVector.getX(), endVector.getY(), 0.0);
 
       Vector3d crossProduct = new Vector3d();
       crossProduct.cross(start3d, end3d);
 
-      if (crossProduct.z >= 0.0)
+      if (crossProduct.getZ() >= 0.0)
       {
          return absoluteAngle;
       }

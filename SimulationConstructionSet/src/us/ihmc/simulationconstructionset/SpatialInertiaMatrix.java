@@ -175,35 +175,35 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
 
    public void setInitArticulatedInertia(double mass, Matrix3d Inertia)
    {
-      A.m00 = 0.0;
-      A.m01 = 0.0;
-      A.m02 = 0.0;
-      B.m00 = mass;
-      B.m01 = 0.0;
-      B.m02 = 0.0;
-      A.m10 = 0.0;
-      A.m11 = 0.0;
-      A.m12 = 0.0;
-      B.m10 = 0.0;
-      B.m11 = mass;
-      B.m12 = 0.0;
-      A.m20 = 0.0;
-      A.m21 = 0.0;
-      A.m22 = 0.0;
-      B.m20 = 0.0;
-      B.m21 = 0.0;
-      B.m22 = mass;
+      A.setM00(0.0);
+      A.setM01(0.0);
+      A.setM02(0.0);
+      B.setM00(mass);
+      B.setM01(0.0);
+      B.setM02(0.0);
+      A.setM10(0.0);
+      A.setM11(0.0);
+      A.setM12(0.0);
+      B.setM10(0.0);
+      B.setM11(mass);
+      B.setM12(0.0);
+      A.setM20(0.0);
+      A.setM21(0.0);
+      A.setM22(0.0);
+      B.setM20(0.0);
+      B.setM21(0.0);
+      B.setM22(mass);
 
       C.set(Inertia);
-      D.m00 = 0.0;
-      D.m01 = 0.0;
-      D.m02 = 0.0;
-      D.m10 = 0.0;
-      D.m11 = 0.0;
-      D.m12 = 0.0;
-      D.m20 = 0.0;
-      D.m21 = 0.0;
-      D.m22 = 0.0;
+      D.setM00(0.0);
+      D.setM01(0.0);
+      D.setM02(0.0);
+      D.setM10(0.0);
+      D.setM11(0.0);
+      D.setM12(0.0);
+      D.setM20(0.0);
+      D.setM21(0.0);
+      D.setM22(0.0);
 
 
       /*
@@ -311,15 +311,15 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
 
    public void setInnerMul(Matrix3d M, Vector3d v1, Vector3d v2)
    {
-      M.m00 = v1.x * v2.x;
-      M.m01 = v1.x * v2.y;
-      M.m02 = v1.x * v2.z;
-      M.m10 = v1.y * v2.x;
-      M.m11 = v1.y * v2.y;
-      M.m12 = v1.y * v2.z;
-      M.m20 = v1.z * v2.x;
-      M.m21 = v1.z * v2.y;
-      M.m22 = v1.z * v2.z;
+      M.setM00(v1.getX() * v2.getX());
+      M.setM01(v1.getX() * v2.getY());
+      M.setM02(v1.getX() * v2.getZ());
+      M.setM10(v1.getY() * v2.getX());
+      M.setM11(v1.getY() * v2.getY());
+      M.setM12(v1.getY() * v2.getZ());
+      M.setM20(v1.getZ() * v2.getX());
+      M.setM21(v1.getZ() * v2.getY());
+      M.setM22(v1.getZ() * v2.getZ());
    }
 
 

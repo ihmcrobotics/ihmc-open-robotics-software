@@ -25,8 +25,8 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
-import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class LogVisualizer

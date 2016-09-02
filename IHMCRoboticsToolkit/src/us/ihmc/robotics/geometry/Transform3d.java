@@ -469,7 +469,7 @@ public class Transform3d extends RigidBodyTransform
    {
       computeScale();
 
-      double mag = Math.sqrt(axisAngle.x * axisAngle.x + axisAngle.y * axisAngle.y + axisAngle.z * axisAngle.z);
+      double mag = Math.sqrt(axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ());
 
       if (almostZero(mag))
       {
@@ -486,12 +486,12 @@ public class Transform3d extends RigidBodyTransform
       else
       {
          mag = 1.0 / mag;
-         double ax = axisAngle.x * mag;
-         double ay = axisAngle.y * mag;
-         double az = axisAngle.z * mag;
+         double ax = axisAngle.getX() * mag;
+         double ay = axisAngle.getY() * mag;
+         double az = axisAngle.getZ() * mag;
 
-         double sinTheta = Math.sin(axisAngle.angle);
-         double cosTheta = Math.cos(axisAngle.angle);
+         double sinTheta = Math.sin(axisAngle.getAngle());
+         double cosTheta = Math.cos(axisAngle.getAngle());
          double t = 1.0 - cosTheta;
 
          double xz = ax * az;
@@ -522,7 +522,7 @@ public class Transform3d extends RigidBodyTransform
    {
       computeScale();
 
-      double mag = Math.sqrt(axisAngle.x * axisAngle.x + axisAngle.y * axisAngle.y + axisAngle.z * axisAngle.z);
+      double mag = Math.sqrt(axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ());
 
       if (almostZero(mag))
       {
@@ -539,12 +539,12 @@ public class Transform3d extends RigidBodyTransform
       else
       {
          mag = 1.0 / mag;
-         double ax = axisAngle.x * mag;
-         double ay = axisAngle.y * mag;
-         double az = axisAngle.z * mag;
+         double ax = axisAngle.getX() * mag;
+         double ay = axisAngle.getY() * mag;
+         double az = axisAngle.getZ() * mag;
 
-         double sinTheta = Math.sin(axisAngle.angle);
-         double cosTheta = Math.cos(axisAngle.angle);
+         double sinTheta = Math.sin(axisAngle.getAngle());
+         double cosTheta = Math.cos(axisAngle.getAngle());
          double t = 1.0 - cosTheta;
 
          double xz = ax * az;
@@ -575,15 +575,15 @@ public class Transform3d extends RigidBodyTransform
    {
       computeScale();
 
-      double yy2 = 2.0 * quat.y * quat.y;
-      double zz2 = 2.0 * quat.z * quat.z;
-      double xx2 = 2.0 * quat.x * quat.x;
-      double xy2 = 2.0 * quat.x * quat.y;
-      double wz2 = 2.0 * quat.w * quat.z;
-      double xz2 = 2.0 * quat.x * quat.z;
-      double wy2 = 2.0 * quat.w * quat.y;
-      double yz2 = 2.0 * quat.y * quat.z;
-      double wx2 = 2.0 * quat.w * quat.x;
+      double yy2 = 2.0 * quat.getY() * quat.getY();
+      double zz2 = 2.0 * quat.getZ() * quat.getZ();
+      double xx2 = 2.0 * quat.getX() * quat.getX();
+      double xy2 = 2.0 * quat.getX() * quat.getY();
+      double wz2 = 2.0 * quat.getW() * quat.getZ();
+      double xz2 = 2.0 * quat.getX() * quat.getZ();
+      double wy2 = 2.0 * quat.getW() * quat.getY();
+      double yz2 = 2.0 * quat.getY() * quat.getZ();
+      double wx2 = 2.0 * quat.getW() * quat.getX();
 
       mat00 = (1.0 - yy2 - zz2) * scale1;
       mat01 = (xy2 - wz2) * scale2;
@@ -606,15 +606,15 @@ public class Transform3d extends RigidBodyTransform
    {
       computeScale();
 
-      double yy2 = 2.0 * quat.y * quat.y;
-      double zz2 = 2.0 * quat.z * quat.z;
-      double xx2 = 2.0 * quat.x * quat.x;
-      double xy2 = 2.0 * quat.x * quat.y;
-      double wz2 = 2.0 * quat.w * quat.z;
-      double xz2 = 2.0 * quat.x * quat.z;
-      double wy2 = 2.0 * quat.w * quat.y;
-      double yz2 = 2.0 * quat.y * quat.z;
-      double wx2 = 2.0 * quat.w * quat.x;
+      double yy2 = 2.0 * quat.getY() * quat.getY();
+      double zz2 = 2.0 * quat.getZ() * quat.getZ();
+      double xx2 = 2.0 * quat.getX() * quat.getX();
+      double xy2 = 2.0 * quat.getX() * quat.getY();
+      double wz2 = 2.0 * quat.getW() * quat.getZ();
+      double xz2 = 2.0 * quat.getX() * quat.getZ();
+      double wy2 = 2.0 * quat.getW() * quat.getY();
+      double yz2 = 2.0 * quat.getY() * quat.getZ();
+      double wx2 = 2.0 * quat.getW() * quat.getX();
 
       mat00 = (1.0 - yy2 - zz2) * scale1;
       mat01 = (xy2 - wz2) * scale2;
@@ -637,15 +637,15 @@ public class Transform3d extends RigidBodyTransform
    {
       computeScale();
 
-      mat00 = scale1 * matrix.m00;
-      mat01 = scale2 * matrix.m01;
-      mat02 = scale3 * matrix.m02;
-      mat10 = scale1 * matrix.m10;
-      mat11 = scale2 * matrix.m11;
-      mat12 = scale3 * matrix.m12;
-      mat20 = scale1 * matrix.m20;
-      mat21 = scale2 * matrix.m21;
-      mat22 = scale3 * matrix.m22;
+      mat00 = scale1 * matrix.getM00();
+      mat01 = scale2 * matrix.getM01();
+      mat02 = scale3 * matrix.getM02();
+      mat10 = scale1 * matrix.getM10();
+      mat11 = scale2 * matrix.getM11();
+      mat12 = scale3 * matrix.getM12();
+      mat20 = scale1 * matrix.getM20();
+      mat21 = scale2 * matrix.getM21();
+      mat22 = scale3 * matrix.getM22();
    }
 
    /**
@@ -658,15 +658,15 @@ public class Transform3d extends RigidBodyTransform
    {
       computeScale();
 
-      mat00 = scale1 * matrix.m00;
-      mat01 = scale2 * matrix.m01;
-      mat02 = scale3 * matrix.m02;
-      mat10 = scale1 * matrix.m10;
-      mat11 = scale2 * matrix.m11;
-      mat12 = scale3 * matrix.m12;
-      mat20 = scale1 * matrix.m20;
-      mat21 = scale2 * matrix.m21;
-      mat22 = scale3 * matrix.m22;
+      mat00 = scale1 * matrix.getM00();
+      mat01 = scale2 * matrix.getM01();
+      mat02 = scale3 * matrix.getM02();
+      mat10 = scale1 * matrix.getM10();
+      mat11 = scale2 * matrix.getM11();
+      mat12 = scale3 * matrix.getM12();
+      mat20 = scale1 * matrix.getM20();
+      mat21 = scale2 * matrix.getM21();
+      mat22 = scale3 * matrix.getM22();
    }
 
    /**
@@ -676,15 +676,15 @@ public class Transform3d extends RigidBodyTransform
     */
    public void setRotationScale(Matrix3f matrix)
    {
-      mat00 = matrix.m00;
-      mat01 = matrix.m01;
-      mat02 = matrix.m02;
-      mat10 = matrix.m10;
-      mat11 = matrix.m11;
-      mat12 = matrix.m12;
-      mat20 = matrix.m20;
-      mat21 = matrix.m21;
-      mat22 = matrix.m22;
+      mat00 = matrix.getM00();
+      mat01 = matrix.getM01();
+      mat02 = matrix.getM02();
+      mat10 = matrix.getM10();
+      mat11 = matrix.getM11();
+      mat12 = matrix.getM12();
+      mat20 = matrix.getM20();
+      mat21 = matrix.getM21();
+      mat22 = matrix.getM22();
    }
 
    /**
@@ -694,15 +694,15 @@ public class Transform3d extends RigidBodyTransform
     */
    public void setRotationScale(Matrix3d matrix)
    {
-      mat00 = matrix.m00;
-      mat01 = matrix.m01;
-      mat02 = matrix.m02;
-      mat10 = matrix.m10;
-      mat11 = matrix.m11;
-      mat12 = matrix.m12;
-      mat20 = matrix.m20;
-      mat21 = matrix.m21;
-      mat22 = matrix.m22;
+      mat00 = matrix.getM00();
+      mat01 = matrix.getM01();
+      mat02 = matrix.getM02();
+      mat10 = matrix.getM10();
+      mat11 = matrix.getM11();
+      mat12 = matrix.getM12();
+      mat20 = matrix.getM20();
+      mat21 = matrix.getM21();
+      mat22 = matrix.getM22();
    }
 
    /**
@@ -739,16 +739,16 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(Matrix3d matrix, Vector3d vector, double scale)
    {
-      mat00 = scale * matrix.m00;
-      mat01 = scale * matrix.m01;
-      mat02 = scale * matrix.m02;
-      mat10 = scale * matrix.m10;
-      mat11 = scale * matrix.m11;
-      mat12 = scale * matrix.m12;
-      mat20 = scale * matrix.m20;
-      mat21 = scale * matrix.m21;
-      mat22 = scale * matrix.m22;
-      setTranslation(vector.x,vector.y,vector.z);
+      mat00 = scale * matrix.getM00();
+      mat01 = scale * matrix.getM01();
+      mat02 = scale * matrix.getM02();
+      mat10 = scale * matrix.getM10();
+      mat11 = scale * matrix.getM11();
+      mat12 = scale * matrix.getM12();
+      mat20 = scale * matrix.getM20();
+      mat21 = scale * matrix.getM21();
+      mat22 = scale * matrix.getM22();
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -759,16 +759,16 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(Matrix3d matrix, Vector3d vector, Vector3d scales)
    {
-      mat00 = scales.x * matrix.m00;
-      mat01 = scales.y * matrix.m01;
-      mat02 = scales.z * matrix.m02;
-      mat10 = scales.x * matrix.m10;
-      mat11 = scales.y * matrix.m11;
-      mat12 = scales.z * matrix.m12;
-      mat20 = scales.x * matrix.m20;
-      mat21 = scales.y * matrix.m21;
-      mat22 = scales.z * matrix.m22;
-      setTranslation(vector.x,vector.y,vector.z);
+      mat00 = scales.getX() * matrix.getM00();
+      mat01 = scales.getY() * matrix.getM01();
+      mat02 = scales.getZ() * matrix.getM02();
+      mat10 = scales.getX() * matrix.getM10();
+      mat11 = scales.getY() * matrix.getM11();
+      mat12 = scales.getZ() * matrix.getM12();
+      mat20 = scales.getX() * matrix.getM20();
+      mat21 = scales.getY() * matrix.getM21();
+      mat22 = scales.getZ() * matrix.getM22();
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -779,16 +779,16 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(Matrix3d matrix, Vector3d vector, double scalex, double scaley, double scalez)
    {
-      mat00 = scalex * matrix.m00;
-      mat01 = scaley * matrix.m01;
-      mat02 = scalez * matrix.m02;
-      mat10 = scalex * matrix.m10;
-      mat11 = scaley * matrix.m11;
-      mat12 = scalez * matrix.m12;
-      mat20 = scalex * matrix.m20;
-      mat21 = scaley * matrix.m21;
-      mat22 = scalez * matrix.m22;
-      setTranslation(vector.x,vector.y,vector.z);
+      mat00 = scalex * matrix.getM00();
+      mat01 = scaley * matrix.getM01();
+      mat02 = scalez * matrix.getM02();
+      mat10 = scalex * matrix.getM10();
+      mat11 = scaley * matrix.getM11();
+      mat12 = scalez * matrix.getM12();
+      mat20 = scalex * matrix.getM20();
+      mat21 = scaley * matrix.getM21();
+      mat22 = scalez * matrix.getM22();
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -799,15 +799,15 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(Quat4d quat, Vector3d vector, double scale)
    {
-      double yy2 = 2.0 * quat.y * quat.y;
-      double zz2 = 2.0 * quat.z * quat.z;
-      double xx2 = 2.0 * quat.x * quat.x;
-      double xy2 = 2.0 * quat.x * quat.y;
-      double wz2 = 2.0 * quat.w * quat.z;
-      double xz2 = 2.0 * quat.x * quat.z;
-      double wy2 = 2.0 * quat.w * quat.y;
-      double yz2 = 2.0 * quat.y * quat.z;
-      double wx2 = 2.0 * quat.w * quat.x;
+      double yy2 = 2.0 * quat.getY() * quat.getY();
+      double zz2 = 2.0 * quat.getZ() * quat.getZ();
+      double xx2 = 2.0 * quat.getX() * quat.getX();
+      double xy2 = 2.0 * quat.getX() * quat.getY();
+      double wz2 = 2.0 * quat.getW() * quat.getZ();
+      double xz2 = 2.0 * quat.getX() * quat.getZ();
+      double wy2 = 2.0 * quat.getW() * quat.getY();
+      double yz2 = 2.0 * quat.getY() * quat.getZ();
+      double wx2 = 2.0 * quat.getW() * quat.getX();
 
       mat00 = (1.0 - yy2 - zz2) * scale;
       mat01 = (xy2 - wz2) * scale;
@@ -819,7 +819,7 @@ public class Transform3d extends RigidBodyTransform
       mat21 = (yz2 + wx2) * scale;
       mat22 = (1.0 - xx2 - yy2) * scale;
 
-      setTranslation(vector.x,vector.y,vector.z);
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -830,27 +830,27 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(Quat4d quat, Vector3d vector, Vector3d scales)
    {
-      double yy2 = 2.0 * quat.y * quat.y;
-      double zz2 = 2.0 * quat.z * quat.z;
-      double xx2 = 2.0 * quat.x * quat.x;
-      double xy2 = 2.0 * quat.x * quat.y;
-      double wz2 = 2.0 * quat.w * quat.z;
-      double xz2 = 2.0 * quat.x * quat.z;
-      double wy2 = 2.0 * quat.w * quat.y;
-      double yz2 = 2.0 * quat.y * quat.z;
-      double wx2 = 2.0 * quat.w * quat.x;
+      double yy2 = 2.0 * quat.getY() * quat.getY();
+      double zz2 = 2.0 * quat.getZ() * quat.getZ();
+      double xx2 = 2.0 * quat.getX() * quat.getX();
+      double xy2 = 2.0 * quat.getX() * quat.getY();
+      double wz2 = 2.0 * quat.getW() * quat.getZ();
+      double xz2 = 2.0 * quat.getX() * quat.getZ();
+      double wy2 = 2.0 * quat.getW() * quat.getY();
+      double yz2 = 2.0 * quat.getY() * quat.getZ();
+      double wx2 = 2.0 * quat.getW() * quat.getX();
 
-      mat00 = (1.0 - yy2 - zz2) * scales.x;
-      mat01 = (xy2 - wz2) * scales.y;
-      mat02 = (xz2 + wy2) * scales.z;
-      mat10 = (xy2 + wz2) * scales.x;
-      mat11 = (1.0 - xx2 - zz2) * scales.y;
-      mat12 = (yz2 - wx2) * scales.z;
-      mat20 = (xz2 - wy2) * scales.x;
-      mat21 = (yz2 + wx2) * scales.y;
-      mat22 = (1.0 - xx2 - yy2) * scales.z;
+      mat00 = (1.0 - yy2 - zz2) * scales.getX();
+      mat01 = (xy2 - wz2) * scales.getY();
+      mat02 = (xz2 + wy2) * scales.getZ();
+      mat10 = (xy2 + wz2) * scales.getX();
+      mat11 = (1.0 - xx2 - zz2) * scales.getY();
+      mat12 = (yz2 - wx2) * scales.getZ();
+      mat20 = (xz2 - wy2) * scales.getX();
+      mat21 = (yz2 + wx2) * scales.getY();
+      mat22 = (1.0 - xx2 - yy2) * scales.getZ();
 
-      setTranslation(vector.x,vector.y,vector.z);
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -861,15 +861,15 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(Quat4d quat, Vector3d vector, double scalex, double scaley, double scalez)
    {
-      double yy2 = 2.0 * quat.y * quat.y;
-      double zz2 = 2.0 * quat.z * quat.z;
-      double xx2 = 2.0 * quat.x * quat.x;
-      double xy2 = 2.0 * quat.x * quat.y;
-      double wz2 = 2.0 * quat.w * quat.z;
-      double xz2 = 2.0 * quat.x * quat.z;
-      double wy2 = 2.0 * quat.w * quat.y;
-      double yz2 = 2.0 * quat.y * quat.z;
-      double wx2 = 2.0 * quat.w * quat.x;
+      double yy2 = 2.0 * quat.getY() * quat.getY();
+      double zz2 = 2.0 * quat.getZ() * quat.getZ();
+      double xx2 = 2.0 * quat.getX() * quat.getX();
+      double xy2 = 2.0 * quat.getX() * quat.getY();
+      double wz2 = 2.0 * quat.getW() * quat.getZ();
+      double xz2 = 2.0 * quat.getX() * quat.getZ();
+      double wy2 = 2.0 * quat.getW() * quat.getY();
+      double yz2 = 2.0 * quat.getY() * quat.getZ();
+      double wx2 = 2.0 * quat.getW() * quat.getX();
 
       mat00 = (1.0 - yy2 - zz2) * scalex;
       mat01 = (xy2 - wz2) * scaley;
@@ -881,7 +881,7 @@ public class Transform3d extends RigidBodyTransform
       mat21 = (yz2 + wx2) * scaley;
       mat22 = (1.0 - xx2 - yy2) * scalez;
 
-      setTranslation(vector.x,vector.y,vector.z);
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -892,7 +892,7 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(AxisAngle4d axisAngle, Vector3d vector, double scale)
    {
-      double mag = Math.sqrt(axisAngle.x * axisAngle.x + axisAngle.y * axisAngle.y + axisAngle.z * axisAngle.z);
+      double mag = Math.sqrt(axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ());
 
       if (Math.abs(mag) < 1.0e-5)
       {
@@ -908,12 +908,12 @@ public class Transform3d extends RigidBodyTransform
       }
       else
       {
-         double ax = axisAngle.x / mag;
-         double ay = axisAngle.y / mag;
-         double az = axisAngle.z / mag;
+         double ax = axisAngle.getX() / mag;
+         double ay = axisAngle.getY() / mag;
+         double az = axisAngle.getZ() / mag;
 
-         double sTheta = Math.sin(axisAngle.angle);
-         double cTheta = Math.cos(axisAngle.angle);
+         double sTheta = Math.sin(axisAngle.getAngle());
+         double cTheta = Math.cos(axisAngle.getAngle());
          double t = 1.0 - cTheta;
 
          double xz = ax * az;
@@ -931,7 +931,7 @@ public class Transform3d extends RigidBodyTransform
          mat22 = scale * (t * az * az + cTheta);
       }
       
-      setTranslation(vector.x,vector.y,vector.z);
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -942,46 +942,46 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(AxisAngle4d axisAngle, Vector3d vector, Vector3d scales)
    {
-      double mag = Math.sqrt(axisAngle.x * axisAngle.x + axisAngle.y * axisAngle.y + axisAngle.z * axisAngle.z);
+      double mag = Math.sqrt(axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ());
 
       if (Math.abs(mag) < 1.0e-5)
       {
-         mat00 = scales.x;
+         mat00 = scales.getX();
          mat01 = 0.0;
          mat02 = 0.0;
          mat10 = 0.0;
-         mat11 = scales.y;
+         mat11 = scales.getY();
          mat12 = 0.0;
          mat20 = 0.0;
          mat21 = 0.0;
-         mat22 = scales.z;
+         mat22 = scales.getZ();
       }
       else
       {
-         double ax = axisAngle.x / mag;
-         double ay = axisAngle.y / mag;
-         double az = axisAngle.z / mag;
+         double ax = axisAngle.getX() / mag;
+         double ay = axisAngle.getY() / mag;
+         double az = axisAngle.getZ() / mag;
 
-         double sTheta = Math.sin(axisAngle.angle);
-         double cTheta = Math.cos(axisAngle.angle);
+         double sTheta = Math.sin(axisAngle.getAngle());
+         double cTheta = Math.cos(axisAngle.getAngle());
          double t = 1.0 - cTheta;
 
          double xz = ax * az;
          double xy = ax * ay;
          double yz = ay * az;
 
-         mat00 = scales.x * (t * ax * ax + cTheta);
-         mat01 = scales.y * (t * xy - sTheta * az);
-         mat02 = scales.z * (t * xz + sTheta * ay);
-         mat10 = scales.x * (t * xy + sTheta * az);
-         mat11 = scales.y * (t * ay * ay + cTheta);
-         mat12 = scales.z * (t * yz - sTheta * ax);
-         mat20 = scales.x * (t * xz - sTheta * ay);
-         mat21 = scales.y * (t * yz + sTheta * ax);
-         mat22 = scales.z * (t * az * az + cTheta);
+         mat00 = scales.getX() * (t * ax * ax + cTheta);
+         mat01 = scales.getY() * (t * xy - sTheta * az);
+         mat02 = scales.getZ() * (t * xz + sTheta * ay);
+         mat10 = scales.getX() * (t * xy + sTheta * az);
+         mat11 = scales.getY() * (t * ay * ay + cTheta);
+         mat12 = scales.getZ() * (t * yz - sTheta * ax);
+         mat20 = scales.getX() * (t * xz - sTheta * ay);
+         mat21 = scales.getY() * (t * yz + sTheta * ax);
+         mat22 = scales.getZ() * (t * az * az + cTheta);
       }
       
-      setTranslation(vector.x,vector.y,vector.z);
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -992,7 +992,7 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(AxisAngle4d axisAngle, Vector3d vector, double scalex, double scaley, double scalez)
    {
-      double mag = Math.sqrt(axisAngle.x * axisAngle.x + axisAngle.y * axisAngle.y + axisAngle.z * axisAngle.z);
+      double mag = Math.sqrt(axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ());
 
       if (Math.abs(mag) < 1.0e-5)
       {
@@ -1008,12 +1008,12 @@ public class Transform3d extends RigidBodyTransform
       }
       else
       {
-         double ax = axisAngle.x / mag;
-         double ay = axisAngle.y / mag;
-         double az = axisAngle.z / mag;
+         double ax = axisAngle.getX() / mag;
+         double ay = axisAngle.getY() / mag;
+         double az = axisAngle.getZ() / mag;
 
-         double sTheta = Math.sin(axisAngle.angle);
-         double cTheta = Math.cos(axisAngle.angle);
+         double sTheta = Math.sin(axisAngle.getAngle());
+         double cTheta = Math.cos(axisAngle.getAngle());
          double t = 1.0 - cTheta;
 
          double xz = ax * az;
@@ -1031,7 +1031,7 @@ public class Transform3d extends RigidBodyTransform
          mat22 = scalez * (t * az * az + cTheta);
       }
       
-      setTranslation(vector.x,vector.y,vector.z);
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -1042,7 +1042,7 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(AxisAngle4f axisAngle, Vector3f vector, double scale)
    {
-      double mag = Math.sqrt(axisAngle.x * axisAngle.x + axisAngle.y * axisAngle.y + axisAngle.z * axisAngle.z);
+      double mag = Math.sqrt(axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ());
 
       if (Math.abs(mag) < 1.0e-5)
       {
@@ -1058,12 +1058,12 @@ public class Transform3d extends RigidBodyTransform
       }
       else
       {
-         double ax = axisAngle.x / mag;
-         double ay = axisAngle.y / mag;
-         double az = axisAngle.z / mag;
+         double ax = axisAngle.getX() / mag;
+         double ay = axisAngle.getY() / mag;
+         double az = axisAngle.getZ() / mag;
 
-         double sTheta = Math.sin(axisAngle.angle);
-         double cTheta = Math.cos(axisAngle.angle);
+         double sTheta = Math.sin(axisAngle.getAngle());
+         double cTheta = Math.cos(axisAngle.getAngle());
          double t = 1.0 - cTheta;
 
          double xz = ax * az;
@@ -1081,7 +1081,7 @@ public class Transform3d extends RigidBodyTransform
          mat22 = scale * (t * az * az + cTheta);
       }
       
-      setTranslation(vector.x,vector.y,vector.z);
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -1092,46 +1092,46 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(AxisAngle4f axisAngle, Vector3f vector, Vector3f scales)
    {
-      double mag = Math.sqrt(axisAngle.x * axisAngle.x + axisAngle.y * axisAngle.y + axisAngle.z * axisAngle.z);
+      double mag = Math.sqrt(axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ());
 
       if (Math.abs(mag) < 1.0e-5)
       {
-         mat00 = scales.x;
+         mat00 = scales.getX();
          mat01 = 0.0;
          mat02 = 0.0;
          mat10 = 0.0;
-         mat11 = scales.y;
+         mat11 = scales.getY();
          mat12 = 0.0;
          mat20 = 0.0;
          mat21 = 0.0;
-         mat22 = scales.z;
+         mat22 = scales.getZ();
       }
       else
       {
-         double ax = axisAngle.x / mag;
-         double ay = axisAngle.y / mag;
-         double az = axisAngle.z / mag;
+         double ax = axisAngle.getX() / mag;
+         double ay = axisAngle.getY() / mag;
+         double az = axisAngle.getZ() / mag;
 
-         double sTheta = Math.sin(axisAngle.angle);
-         double cTheta = Math.cos(axisAngle.angle);
+         double sTheta = Math.sin(axisAngle.getAngle());
+         double cTheta = Math.cos(axisAngle.getAngle());
          double t = 1.0 - cTheta;
 
          double xz = ax * az;
          double xy = ax * ay;
          double yz = ay * az;
 
-         mat00 = scales.x * (t * ax * ax + cTheta);
-         mat01 = scales.y * (t * xy - sTheta * az);
-         mat02 = scales.z * (t * xz + sTheta * ay);
-         mat10 = scales.x * (t * xy + sTheta * az);
-         mat11 = scales.y * (t * ay * ay + cTheta);
-         mat12 = scales.z * (t * yz - sTheta * ax);
-         mat20 = scales.x * (t * xz - sTheta * ay);
-         mat21 = scales.y * (t * yz + sTheta * ax);
-         mat22 = scales.z * (t * az * az + cTheta);
+         mat00 = scales.getX() * (t * ax * ax + cTheta);
+         mat01 = scales.getY() * (t * xy - sTheta * az);
+         mat02 = scales.getZ() * (t * xz + sTheta * ay);
+         mat10 = scales.getX() * (t * xy + sTheta * az);
+         mat11 = scales.getY() * (t * ay * ay + cTheta);
+         mat12 = scales.getZ() * (t * yz - sTheta * ax);
+         mat20 = scales.getX() * (t * xz - sTheta * ay);
+         mat21 = scales.getY() * (t * yz + sTheta * ax);
+         mat22 = scales.getZ() * (t * az * az + cTheta);
       }
       
-      setTranslation(vector.x,vector.y,vector.z);
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -1142,7 +1142,7 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(AxisAngle4f axisAngle, Vector3f vector, double scalex, double scaley, double scalez)
    {
-      double mag = Math.sqrt(axisAngle.x * axisAngle.x + axisAngle.y * axisAngle.y + axisAngle.z * axisAngle.z);
+      double mag = Math.sqrt(axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ());
 
       if (Math.abs(mag) < 1.0e-5)
       {
@@ -1158,12 +1158,12 @@ public class Transform3d extends RigidBodyTransform
       }
       else
       {
-         double ax = axisAngle.x / mag;
-         double ay = axisAngle.y / mag;
-         double az = axisAngle.z / mag;
+         double ax = axisAngle.getX() / mag;
+         double ay = axisAngle.getY() / mag;
+         double az = axisAngle.getZ() / mag;
 
-         double sTheta = Math.sin(axisAngle.angle);
-         double cTheta = Math.cos(axisAngle.angle);
+         double sTheta = Math.sin(axisAngle.getAngle());
+         double cTheta = Math.cos(axisAngle.getAngle());
          double t = 1.0 - cTheta;
 
          double xz = ax * az;
@@ -1181,7 +1181,7 @@ public class Transform3d extends RigidBodyTransform
          mat22 = scalez * (t * az * az + cTheta);
       }
       
-      setTranslation(vector.x,vector.y,vector.z);
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -1192,15 +1192,15 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(Quat4f quat, Vector3f vector, double scale)
    {
-      double yy2 = 2.0 * quat.y * quat.y;
-      double zz2 = 2.0 * quat.z * quat.z;
-      double xx2 = 2.0 * quat.x * quat.x;
-      double xy2 = 2.0 * quat.x * quat.y;
-      double wz2 = 2.0 * quat.w * quat.z;
-      double xz2 = 2.0 * quat.x * quat.z;
-      double wy2 = 2.0 * quat.w * quat.y;
-      double yz2 = 2.0 * quat.y * quat.z;
-      double wx2 = 2.0 * quat.w * quat.x;
+      double yy2 = 2.0 * quat.getY() * quat.getY();
+      double zz2 = 2.0 * quat.getZ() * quat.getZ();
+      double xx2 = 2.0 * quat.getX() * quat.getX();
+      double xy2 = 2.0 * quat.getX() * quat.getY();
+      double wz2 = 2.0 * quat.getW() * quat.getZ();
+      double xz2 = 2.0 * quat.getX() * quat.getZ();
+      double wy2 = 2.0 * quat.getW() * quat.getY();
+      double yz2 = 2.0 * quat.getY() * quat.getZ();
+      double wx2 = 2.0 * quat.getW() * quat.getX();
 
       mat00 = (1.0 - yy2 - zz2) * scale;
       mat01 = (xy2 - wz2) * scale;
@@ -1212,7 +1212,7 @@ public class Transform3d extends RigidBodyTransform
       mat21 = (yz2 + wx2) * scale;
       mat22 = (1.0 - xx2 - yy2) * scale;
 
-      setTranslation(vector.x,vector.y,vector.z);
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -1223,27 +1223,27 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(Quat4f quat, Vector3f vector, Vector3f scales)
    {
-      double yy2 = 2.0 * quat.y * quat.y;
-      double zz2 = 2.0 * quat.z * quat.z;
-      double xx2 = 2.0 * quat.x * quat.x;
-      double xy2 = 2.0 * quat.x * quat.y;
-      double wz2 = 2.0 * quat.w * quat.z;
-      double xz2 = 2.0 * quat.x * quat.z;
-      double wy2 = 2.0 * quat.w * quat.y;
-      double yz2 = 2.0 * quat.y * quat.z;
-      double wx2 = 2.0 * quat.w * quat.x;
+      double yy2 = 2.0 * quat.getY() * quat.getY();
+      double zz2 = 2.0 * quat.getZ() * quat.getZ();
+      double xx2 = 2.0 * quat.getX() * quat.getX();
+      double xy2 = 2.0 * quat.getX() * quat.getY();
+      double wz2 = 2.0 * quat.getW() * quat.getZ();
+      double xz2 = 2.0 * quat.getX() * quat.getZ();
+      double wy2 = 2.0 * quat.getW() * quat.getY();
+      double yz2 = 2.0 * quat.getY() * quat.getZ();
+      double wx2 = 2.0 * quat.getW() * quat.getX();
 
-      mat00 = (1.0 - yy2 - zz2) * scales.x;
-      mat01 = (xy2 - wz2) * scales.y;
-      mat02 = (xz2 + wy2) * scales.z;
-      mat10 = (xy2 + wz2) * scales.x;
-      mat11 = (1.0 - xx2 - zz2) * scales.y;
-      mat12 = (yz2 - wx2) * scales.z;
-      mat20 = (xz2 - wy2) * scales.x;
-      mat21 = (yz2 + wx2) * scales.y;
-      mat22 = (1.0 - xx2 - yy2) * scales.z;
+      mat00 = (1.0 - yy2 - zz2) * scales.getX();
+      mat01 = (xy2 - wz2) * scales.getY();
+      mat02 = (xz2 + wy2) * scales.getZ();
+      mat10 = (xy2 + wz2) * scales.getX();
+      mat11 = (1.0 - xx2 - zz2) * scales.getY();
+      mat12 = (yz2 - wx2) * scales.getZ();
+      mat20 = (xz2 - wy2) * scales.getX();
+      mat21 = (yz2 + wx2) * scales.getY();
+      mat22 = (1.0 - xx2 - yy2) * scales.getZ();
 
-      setTranslation(vector.x,vector.y,vector.z);
+      setTranslation(vector.getX(),vector.getY(),vector.getZ());
    }
 
    /**
@@ -1254,15 +1254,15 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(Quat4f quat, Vector3f vector, double scalex, double scaley, double scalez)
    {
-      double yy2 = 2.0 * quat.y * quat.y;
-      double zz2 = 2.0 * quat.z * quat.z;
-      double xx2 = 2.0 * quat.x * quat.x;
-      double xy2 = 2.0 * quat.x * quat.y;
-      double wz2 = 2.0 * quat.w * quat.z;
-      double xz2 = 2.0 * quat.x * quat.z;
-      double wy2 = 2.0 * quat.w * quat.y;
-      double yz2 = 2.0 * quat.y * quat.z;
-      double wx2 = 2.0 * quat.w * quat.x;
+      double yy2 = 2.0 * quat.getY() * quat.getY();
+      double zz2 = 2.0 * quat.getZ() * quat.getZ();
+      double xx2 = 2.0 * quat.getX() * quat.getX();
+      double xy2 = 2.0 * quat.getX() * quat.getY();
+      double wz2 = 2.0 * quat.getW() * quat.getZ();
+      double xz2 = 2.0 * quat.getX() * quat.getZ();
+      double wy2 = 2.0 * quat.getW() * quat.getY();
+      double yz2 = 2.0 * quat.getY() * quat.getZ();
+      double wx2 = 2.0 * quat.getW() * quat.getX();
 
       mat00 = (1.0 - yy2 - zz2) * scalex;
       mat01 = (xy2 - wz2) * scaley;
@@ -1274,9 +1274,9 @@ public class Transform3d extends RigidBodyTransform
       mat21 = (yz2 + wx2) * scaley;
       mat22 = (1.0 - xx2 - yy2) * scalez;
 
-      mat03 = vector.x;
-      mat13 = vector.y;
-      mat23 = vector.z;
+      mat03 = vector.getX();
+      mat13 = vector.getY();
+      mat23 = vector.getZ();
    }
 
    /**
@@ -1287,19 +1287,19 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(Matrix3f matrix, Vector3f vector, double scale)
    {
-      mat00 = scale * matrix.m00;
-      mat01 = scale * matrix.m01;
-      mat02 = scale * matrix.m02;
-      mat10 = scale * matrix.m10;
-      mat11 = scale * matrix.m11;
-      mat12 = scale * matrix.m12;
-      mat20 = scale * matrix.m20;
-      mat21 = scale * matrix.m21;
-      mat22 = scale * matrix.m22;
+      mat00 = scale * matrix.getM00();
+      mat01 = scale * matrix.getM01();
+      mat02 = scale * matrix.getM02();
+      mat10 = scale * matrix.getM10();
+      mat11 = scale * matrix.getM11();
+      mat12 = scale * matrix.getM12();
+      mat20 = scale * matrix.getM20();
+      mat21 = scale * matrix.getM21();
+      mat22 = scale * matrix.getM22();
 
-      mat03 = vector.x;
-      mat13 = vector.y;
-      mat23 = vector.z;
+      mat03 = vector.getX();
+      mat13 = vector.getY();
+      mat23 = vector.getZ();
    }
 
    /**
@@ -1310,19 +1310,19 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(Matrix3f matrix, Vector3f vector, Vector3f scales)
    {
-      mat00 = scales.x * matrix.m00;
-      mat01 = scales.y * matrix.m01;
-      mat02 = scales.z * matrix.m02;
-      mat10 = scales.x * matrix.m10;
-      mat11 = scales.y * matrix.m11;
-      mat12 = scales.z * matrix.m12;
-      mat20 = scales.x * matrix.m20;
-      mat21 = scales.y * matrix.m21;
-      mat22 = scales.z * matrix.m22;
+      mat00 = scales.getX() * matrix.getM00();
+      mat01 = scales.getY() * matrix.getM01();
+      mat02 = scales.getZ() * matrix.getM02();
+      mat10 = scales.getX() * matrix.getM10();
+      mat11 = scales.getY() * matrix.getM11();
+      mat12 = scales.getZ() * matrix.getM12();
+      mat20 = scales.getX() * matrix.getM20();
+      mat21 = scales.getY() * matrix.getM21();
+      mat22 = scales.getZ() * matrix.getM22();
 
-      mat03 = vector.x;
-      mat13 = vector.y;
-      mat23 = vector.z;
+      mat03 = vector.getX();
+      mat13 = vector.getY();
+      mat23 = vector.getZ();
    }
 
    /**
@@ -1333,19 +1333,19 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void set(Matrix3f matrix, Vector3f vector, double scalex, double scaley, double scalez)
    {
-      mat00 = scalex * matrix.m00;
-      mat01 = scaley * matrix.m01;
-      mat02 = scalez * matrix.m02;
-      mat10 = scalex * matrix.m10;
-      mat11 = scaley * matrix.m11;
-      mat12 = scalez * matrix.m12;
-      mat20 = scalex * matrix.m20;
-      mat21 = scaley * matrix.m21;
-      mat22 = scalez * matrix.m22;
+      mat00 = scalex * matrix.getM00();
+      mat01 = scaley * matrix.getM01();
+      mat02 = scalez * matrix.getM02();
+      mat10 = scalex * matrix.getM10();
+      mat11 = scaley * matrix.getM11();
+      mat12 = scalez * matrix.getM12();
+      mat20 = scalex * matrix.getM20();
+      mat21 = scaley * matrix.getM21();
+      mat22 = scalez * matrix.getM22();
 
-      mat03 = vector.x;
-      mat13 = vector.y;
-      mat23 = vector.z;
+      mat03 = vector.getX();
+      mat13 = vector.getY();
+      mat23 = vector.getZ();
    }
 
    /**
@@ -1369,9 +1369,9 @@ public class Transform3d extends RigidBodyTransform
       mat20 = scale * matrix.get(2, 0);
       mat21 = scale * matrix.get(2, 1);
       mat22 = scale * matrix.get(2, 2);
-      mat03 = vector.x;
-      mat13 = vector.y;
-      mat23 = vector.z;
+      mat03 = vector.getX();
+      mat13 = vector.getY();
+      mat23 = vector.getZ();
    }
 
    /**
@@ -1386,18 +1386,18 @@ public class Transform3d extends RigidBodyTransform
          throw new RuntimeException("Incorrectly sized matrix. Matrix must be 4x4");
       }
 
-      mat00 = scales.x * matrix.get(0, 0);
-      mat01 = scales.y * matrix.get(0, 1);
-      mat02 = scales.z * matrix.get(0, 2);
-      mat10 = scales.x * matrix.get(1, 0);
-      mat11 = scales.y * matrix.get(1, 1);
-      mat12 = scales.z * matrix.get(1, 2);
-      mat20 = scales.x * matrix.get(2, 0);
-      mat21 = scales.y * matrix.get(2, 1);
-      mat22 = scales.z * matrix.get(2, 2);
-      mat03 = vector.x;
-      mat13 = vector.y;
-      mat23 = vector.z;
+      mat00 = scales.getX() * matrix.get(0, 0);
+      mat01 = scales.getY() * matrix.get(0, 1);
+      mat02 = scales.getZ() * matrix.get(0, 2);
+      mat10 = scales.getX() * matrix.get(1, 0);
+      mat11 = scales.getY() * matrix.get(1, 1);
+      mat12 = scales.getZ() * matrix.get(1, 2);
+      mat20 = scales.getX() * matrix.get(2, 0);
+      mat21 = scales.getY() * matrix.get(2, 1);
+      mat22 = scales.getZ() * matrix.get(2, 2);
+      mat03 = vector.getX();
+      mat13 = vector.getY();
+      mat23 = vector.getZ();
    }
 
    /**
@@ -1421,9 +1421,9 @@ public class Transform3d extends RigidBodyTransform
       mat20 = scalex * matrix.get(2, 0);
       mat21 = scaley * matrix.get(2, 1);
       mat22 = scalez * matrix.get(2, 2);
-      mat03 = vector.x;
-      mat13 = vector.y;
-      mat23 = vector.z;
+      mat03 = vector.getX();
+      mat13 = vector.getY();
+      mat23 = vector.getZ();
    }
 
    /**
@@ -1447,9 +1447,9 @@ public class Transform3d extends RigidBodyTransform
    {
       computeScale();
 
-      scaleToPack.x = scale1;
-      scaleToPack.y = scale2;
-      scaleToPack.z = scale3;
+      scaleToPack.setX(scale1);
+      scaleToPack.setY(scale2);
+      scaleToPack.setZ(scale3);
    }
 
    /**
@@ -1461,9 +1461,9 @@ public class Transform3d extends RigidBodyTransform
    {
       computeScale();
 
-      scaleToPack.x = (float) scale1;
-      scaleToPack.y = (float) scale2;
-      scaleToPack.z = (float) scale3;
+      scaleToPack.setX((float) scale1);
+      scaleToPack.setY((float) scale2);
+      scaleToPack.setZ((float) scale3);
    }
 
    /**
@@ -1506,12 +1506,12 @@ public class Transform3d extends RigidBodyTransform
 
    public void setScale(Vector3f scales)
    {
-      setScale(scales.x, scales.y, scales.z);
+      setScale(scales.getX(), scales.getY(), scales.getZ());
    }
 
    public void setScale(Vector3d scales)
    {
-      setScale(scales.x, scales.y, scales.z);
+      setScale(scales.getX(), scales.getY(), scales.getZ());
    }
 
    /**
@@ -1525,9 +1525,9 @@ public class Transform3d extends RigidBodyTransform
    public void getEulerXYZ(Vector3d vector)
    {
       computeRotationScale();
-      vector.x = Math.atan2(rot21, rot22);
-      vector.y = Math.atan2(-rot20, Math.sqrt(rot21 * rot21 + rot22 * rot22));
-      vector.z = Math.atan2(rot10, rot00);
+      vector.setX(Math.atan2(rot21, rot22));
+      vector.setY(Math.atan2(-rot20, Math.sqrt(rot21 * rot21 + rot22 * rot22)));
+      vector.setZ(Math.atan2(rot10, rot00));
    }
 
    /**
@@ -1540,15 +1540,15 @@ public class Transform3d extends RigidBodyTransform
    {
       computeRotationScale();
 
-      matrix.m00 = rot00;
-      matrix.m01 = rot01;
-      matrix.m02 = rot02;
-      matrix.m10 = rot10;
-      matrix.m11 = rot11;
-      matrix.m12 = rot12;
-      matrix.m20 = rot20;
-      matrix.m21 = rot21;
-      matrix.m22 = rot22;
+      matrix.setM00(rot00);
+      matrix.setM01(rot01);
+      matrix.setM02(rot02);
+      matrix.setM10(rot10);
+      matrix.setM11(rot11);
+      matrix.setM12(rot12);
+      matrix.setM20(rot20);
+      matrix.setM21(rot21);
+      matrix.setM22(rot22);
    }
 
    /**
@@ -1558,15 +1558,15 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void getRotationScale(Matrix3d matrix)
    {
-      matrix.m00 = mat00;
-      matrix.m01 = mat01;
-      matrix.m02 = mat02;
-      matrix.m10 = mat10;
-      matrix.m11 = mat11;
-      matrix.m12 = mat12;
-      matrix.m20 = mat20;
-      matrix.m21 = mat21;
-      matrix.m22 = mat22;
+      matrix.setM00(mat00);
+      matrix.setM01(mat01);
+      matrix.setM02(mat02);
+      matrix.setM10(mat10);
+      matrix.setM11(mat11);
+      matrix.setM12(mat12);
+      matrix.setM20(mat20);
+      matrix.setM21(mat21);
+      matrix.setM22(mat22);
    }
 
    /**
@@ -1579,15 +1579,15 @@ public class Transform3d extends RigidBodyTransform
    {
       computeRotationScale();
 
-      matrix.m00 = (float) rot00;
-      matrix.m01 = (float) rot01;
-      matrix.m02 = (float) rot02;
-      matrix.m10 = (float) rot10;
-      matrix.m11 = (float) rot11;
-      matrix.m12 = (float) rot12;
-      matrix.m20 = (float) rot20;
-      matrix.m21 = (float) rot21;
-      matrix.m22 = (float) rot22;
+      matrix.setM00((float) rot00);
+      matrix.setM01((float) rot01);
+      matrix.setM02((float) rot02);
+      matrix.setM10((float) rot10);
+      matrix.setM11((float) rot11);
+      matrix.setM12((float) rot12);
+      matrix.setM20((float) rot20);
+      matrix.setM21((float) rot21);
+      matrix.setM22((float) rot22);
    }
 
    /**
@@ -1597,15 +1597,15 @@ public class Transform3d extends RigidBodyTransform
     */
    public final void getRotationScale(Matrix3f matrix)
    {
-      matrix.m00 = (float) (mat00);
-      matrix.m01 = (float) (mat01);
-      matrix.m02 = (float) (mat02);
-      matrix.m10 = (float) (mat10);
-      matrix.m11 = (float) (mat11);
-      matrix.m12 = (float) (mat12);
-      matrix.m20 = (float) (mat20);
-      matrix.m21 = (float) (mat21);
-      matrix.m22 = (float) (mat22);
+      matrix.setM00((float) (mat00));
+      matrix.setM01((float) (mat01));
+      matrix.setM02((float) (mat02));
+      matrix.setM10((float) (mat10));
+      matrix.setM11((float) (mat11));
+      matrix.setM12((float) (mat12));
+      matrix.setM20((float) (mat20));
+      matrix.setM21((float) (mat21));
+      matrix.setM22((float) (mat22));
    }
 
    /**
@@ -1645,34 +1645,34 @@ public class Transform3d extends RigidBodyTransform
       if (trace > 0.0)
       {
          val = Math.sqrt(trace + 1.0) * 2.0;
-         quat.x = (rot21 - rot12) / val;
-         quat.y = (rot02 - rot20) / val;
-         quat.z = (rot10 - rot01) / val;
-         quat.w = 0.25 * val;
+         quat.setX((rot21 - rot12) / val);
+         quat.setY((rot02 - rot20) / val);
+         quat.setZ((rot10 - rot01) / val);
+         quat.setW(0.25 * val);
       }
       else if (rot11 > rot22)
       {
          val = Math.sqrt(1.0 + rot11 - rot00 - rot22) * 2.0;
-         quat.x = (rot01 + rot10) / val;
-         quat.y = 0.25 * val;
-         quat.z = (rot12 + rot21) / val;
-         quat.w = (rot02 - rot20) / val;
+         quat.setX((rot01 + rot10) / val);
+         quat.setY(0.25 * val);
+         quat.setZ((rot12 + rot21) / val);
+         quat.setW((rot02 - rot20) / val);
       }
       else if ((rot00 > rot11) && (rot00 > rot22))
       {
          val = Math.sqrt(1.0 + rot00 - rot11 - rot22) * 2.0;
-         quat.x = 0.25 * val;
-         quat.y = (rot01 + rot10) / val;
-         quat.z = (rot02 + rot20) / val;
-         quat.w = (rot21 - rot12) / val;
+         quat.setX(0.25 * val);
+         quat.setY((rot01 + rot10) / val);
+         quat.setZ((rot02 + rot20) / val);
+         quat.setW((rot21 - rot12) / val);
       }
       else
       {
          val = Math.sqrt(1.0 + rot22 - rot00 - rot11) * 2.0;
-         quat.x = (rot02 + rot20) / val;
-         quat.y = (rot12 + rot21) / val;
-         quat.z = 0.25 * val;
-         quat.w = (rot10 - rot01) / val;
+         quat.setX((rot02 + rot20) / val);
+         quat.setY((rot12 + rot21) / val);
+         quat.setZ(0.25 * val);
+         quat.setW((rot10 - rot01) / val);
       }
    }
 
@@ -1691,34 +1691,34 @@ public class Transform3d extends RigidBodyTransform
       if (trace > 0.0)
       {
          val = Math.sqrt(trace + 1.0) * 2.0;
-         quat.x = (float) ((rot21 - rot12) / val);
-         quat.y = (float) ((rot02 - rot20) / val);
-         quat.z = (float) ((rot10 - rot01) / val);
-         quat.w = (float) (0.25 * val);
+         quat.setX((float) ((rot21 - rot12) / val));
+         quat.setY((float) ((rot02 - rot20) / val));
+         quat.setZ((float) ((rot10 - rot01) / val));
+         quat.setW((float) (0.25 * val));
       }
       else if (rot11 > rot22)
       {
          val = Math.sqrt(1.0 + rot11 - rot00 - rot22) * 2.0;
-         quat.x = (float) ((rot01 + rot10) / val);
-         quat.y = (float) (0.25 * val);
-         quat.z = (float) ((rot12 + rot21) / val);
-         quat.w = (float) ((rot02 - rot20) / val);
+         quat.setX((float) ((rot01 + rot10) / val));
+         quat.setY((float) (0.25 * val));
+         quat.setZ((float) ((rot12 + rot21) / val));
+         quat.setW((float) ((rot02 - rot20) / val));
       }
       else if ((rot00 > rot11) && (rot00 > rot22))
       {
          val = Math.sqrt(1.0 + rot00 - rot11 - rot22) * 2.0;
-         quat.x = (float) (0.25 * val);
-         quat.y = (float) ((rot01 + rot10) / val);
-         quat.z = (float) ((rot02 + rot20) / val);
-         quat.w = (float) ((rot21 - rot12) / val);
+         quat.setX((float) (0.25 * val));
+         quat.setY((float) ((rot01 + rot10) / val));
+         quat.setZ((float) ((rot02 + rot20) / val));
+         quat.setW((float) ((rot21 - rot12) / val));
       }
       else
       {
          val = Math.sqrt(1.0 + rot22 - rot00 - rot11) * 2.0;
-         quat.x = (float) ((rot02 + rot20) / val);
-         quat.y = (float) ((rot12 + rot21) / val);
-         quat.z = (float) (0.25 * val);
-         quat.w = (float) ((rot10 - rot01) / val);
+         quat.setX((float) ((rot02 + rot20) / val));
+         quat.setY((float) ((rot12 + rot21) / val));
+         quat.setZ((float) (0.25 * val));
+         quat.setW((float) ((rot10 - rot01) / val));
       }
    }
 
@@ -1732,10 +1732,10 @@ public class Transform3d extends RigidBodyTransform
    {
       computeRotationScale();
 
-      axisAngle.x = rot21 - rot12;
-      axisAngle.y = rot02 - rot20;
-      axisAngle.z = rot10 - rot01;
-      double mag = axisAngle.x * axisAngle.x + axisAngle.y * axisAngle.y + axisAngle.z * axisAngle.z;
+      axisAngle.setX(rot21 - rot12);
+      axisAngle.setY(rot02 - rot20);
+      axisAngle.setZ(rot10 - rot01);
+      double mag = axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ();
 
       if (mag > 1.0e-12)
       {
@@ -1743,19 +1743,19 @@ public class Transform3d extends RigidBodyTransform
          double sin = 0.5 * mag;
          double cos = 0.5 * (rot00 + rot11 + rot22 - 1.0);
 
-         axisAngle.angle = Math.atan2(sin, cos);
+         axisAngle.setAngle(Math.atan2(sin, cos));
 
          double invMag = 1.0 / mag;
-         axisAngle.x = axisAngle.x * invMag;
-         axisAngle.y = axisAngle.y * invMag;
-         axisAngle.z = axisAngle.z * invMag;
+         axisAngle.setX(axisAngle.getX() * invMag);
+         axisAngle.setY(axisAngle.getY() * invMag);
+         axisAngle.setZ(axisAngle.getZ() * invMag);
       }
       else
       {
-         axisAngle.x = 0.0;
-         axisAngle.y = 1.0;
-         axisAngle.z = 0.0;
-         axisAngle.angle = 0.0;
+         axisAngle.setX(0.0);
+         axisAngle.setY(1.0);
+         axisAngle.setZ(0.0);
+         axisAngle.setAngle(0.0);
       }
    }
 
@@ -1769,10 +1769,10 @@ public class Transform3d extends RigidBodyTransform
    {
       computeRotationScale();
 
-      axisAngle.x = (float) (rot21 - rot12);
-      axisAngle.y = (float) (rot02 - rot20);
-      axisAngle.z = (float) (rot10 - rot01);
-      double mag = axisAngle.x * axisAngle.x + axisAngle.y * axisAngle.y + axisAngle.z * axisAngle.z;
+      axisAngle.setX((float) (rot21 - rot12));
+      axisAngle.setY((float) (rot02 - rot20));
+      axisAngle.setZ((float) (rot10 - rot01));
+      double mag = axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ();
 
       if (mag > 1.0e-12)
       {
@@ -1780,19 +1780,19 @@ public class Transform3d extends RigidBodyTransform
          double sin = 0.5 * mag;
          double cos = 0.5 * (rot00 + rot11 + rot22 - 1.0);
 
-         axisAngle.angle = (float) Math.atan2(sin, cos);
+         axisAngle.setAngle((float) Math.atan2(sin, cos));
 
          double invMag = 1.0 / mag;
-         axisAngle.x = (float) (axisAngle.x * invMag);
-         axisAngle.y = (float) (axisAngle.y * invMag);
-         axisAngle.z = (float) (axisAngle.z * invMag);
+         axisAngle.setX((float) (axisAngle.getX() * invMag));
+         axisAngle.setY((float) (axisAngle.getY() * invMag));
+         axisAngle.setZ((float) (axisAngle.getZ() * invMag));
       }
       else
       {
-         axisAngle.x = (float) 0.0;
-         axisAngle.y = (float) 1.0;
-         axisAngle.z = (float) 0.0;
-         axisAngle.angle = (float) 0.0;
+         axisAngle.setX((float) 0.0);
+         axisAngle.setY((float) 1.0);
+         axisAngle.setZ((float) 0.0);
+         axisAngle.setAngle((float) 0.0);
       }
    }
 

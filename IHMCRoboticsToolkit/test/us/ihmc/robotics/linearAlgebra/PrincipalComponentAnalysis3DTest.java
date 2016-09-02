@@ -67,9 +67,9 @@ public class PrincipalComponentAnalysis3DTest
             newPoint.add(offsetFromOrigin);
             listOfPoints.add(newPoint);
 
-            expectedMean.x += newPoint.x / numberOfPoints;
-            expectedMean.y += newPoint.y / numberOfPoints;
-            expectedMean.z += newPoint.z / numberOfPoints;
+            expectedMean.setX(expectedMean.getX() + newPoint.getX() / numberOfPoints);
+            expectedMean.setY(expectedMean.getY() + newPoint.getY() / numberOfPoints);
+            expectedMean.setZ(expectedMean.getZ() + newPoint.getZ() / numberOfPoints);
 
             pointCloud1D.add(nextGaussian);
             mean1D += nextGaussian / numberOfPoints;
@@ -139,13 +139,13 @@ public class PrincipalComponentAnalysis3DTest
             System.out.println("Estimated standard deviation: " + estimatedStandardDeviation);
          }
 
-         assertEquals(expectedStandardDeviationAlongPrincipalAxis, estimatedStandardDeviation.x, EPSILON_HIGH_PRECISION);
-         assertEquals(0.0, estimatedStandardDeviation.y, EPSILON_HIGH_PRECISION);
-         assertEquals(0.0, estimatedStandardDeviation.z, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedStandardDeviationAlongPrincipalAxis, estimatedStandardDeviation.getX(), EPSILON_HIGH_PRECISION);
+         assertEquals(0.0, estimatedStandardDeviation.getY(), EPSILON_HIGH_PRECISION);
+         assertEquals(0.0, estimatedStandardDeviation.getZ(), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedVarianceAlongPrincipalAxis, estimatedVariance.x, EPSILON_HIGH_PRECISION);
-         assertEquals(0.0, estimatedVariance.y, EPSILON_HIGH_PRECISION);
-         assertEquals(0.0, estimatedVariance.z, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVarianceAlongPrincipalAxis, estimatedVariance.getX(), EPSILON_HIGH_PRECISION);
+         assertEquals(0.0, estimatedVariance.getY(), EPSILON_HIGH_PRECISION);
+         assertEquals(0.0, estimatedVariance.getZ(), EPSILON_HIGH_PRECISION);
 
          assertEquals(expectedVarianceAlongPrincipalAxis, MathTools.square(estimatedScaledPrincipalVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
          assertEquals(0.0, MathTools.square(estimatedScaledSecondaryVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
@@ -207,21 +207,21 @@ public class PrincipalComponentAnalysis3DTest
             Point3d newPoint = new Point3d();
             newPoint.set(origin);
 
-            double nextGaussianForPrincipalAxis = pointScatteringAmplitude.x * (1.0 - 2.0 * random.nextDouble());
+            double nextGaussianForPrincipalAxis = pointScatteringAmplitude.getX() * (1.0 - 2.0 * random.nextDouble());
             offsetFromOrigin.set(expectedPrincipalAxis);
             offsetFromOrigin.scale(nextGaussianForPrincipalAxis);
             newPoint.add(offsetFromOrigin);
 
-            double nextGaussianForSecondaryAxis = pointScatteringAmplitude.y * (1.0 - 2.0 * random.nextDouble());
+            double nextGaussianForSecondaryAxis = pointScatteringAmplitude.getY() * (1.0 - 2.0 * random.nextDouble());
             offsetFromOrigin.set(expectedSecondaryAxis);
             offsetFromOrigin.scale(nextGaussianForSecondaryAxis);
             newPoint.add(offsetFromOrigin);
 
             listOfPoints.add(newPoint);
 
-            expectedMean.x += newPoint.x / numberOfPoints;
-            expectedMean.y += newPoint.y / numberOfPoints;
-            expectedMean.z += newPoint.z / numberOfPoints;
+            expectedMean.setX(expectedMean.getX() + newPoint.getX() / numberOfPoints);
+            expectedMean.setY(expectedMean.getY() + newPoint.getY() / numberOfPoints);
+            expectedMean.setZ(expectedMean.getZ() + newPoint.getZ() / numberOfPoints);
          }
 
          Point3d estimatedMean = new Point3d();
@@ -251,17 +251,17 @@ public class PrincipalComponentAnalysis3DTest
             double dotProductOnPrincipalAxis = vectorToPoint.dot(estimatedPrincipalAxis);
             double dotProductOnSecondaryAxis = vectorToPoint.dot(estimatedSecondaryAxis);
             pointCloudProjectedOnPrincipalAxes.add(new Point2d(dotProductOnPrincipalAxis, dotProductOnSecondaryAxis));
-            meanOnPrincipalAxes.x += dotProductOnPrincipalAxis / numberOfPoints;
-            meanOnPrincipalAxes.y += dotProductOnSecondaryAxis / numberOfPoints;
+            meanOnPrincipalAxes.setX(meanOnPrincipalAxes.getX() + dotProductOnPrincipalAxis / numberOfPoints);
+            meanOnPrincipalAxes.setY(meanOnPrincipalAxes.getY() + dotProductOnSecondaryAxis / numberOfPoints);
          }
 
          for (int i = 0; i < numberOfPoints; i++)
          {
-            expectedVariance.x += MathTools.square(pointCloudProjectedOnPrincipalAxes.get(i).x - meanOnPrincipalAxes.x) / numberOfPoints;
-            expectedVariance.y += MathTools.square(pointCloudProjectedOnPrincipalAxes.get(i).y - meanOnPrincipalAxes.y) / numberOfPoints;
+            expectedVariance.setX(expectedVariance.getX() + MathTools.square(pointCloudProjectedOnPrincipalAxes.get(i).getX() - meanOnPrincipalAxes.getX()) / numberOfPoints);
+            expectedVariance.setY(expectedVariance.getY() + MathTools.square(pointCloudProjectedOnPrincipalAxes.get(i).getY() - meanOnPrincipalAxes.getY()) / numberOfPoints);
          }
-         expectedStandardDeviation.x = Math.sqrt(expectedVariance.x);
-         expectedStandardDeviation.y = Math.sqrt(expectedVariance.y);
+         expectedStandardDeviation.setX(Math.sqrt(expectedVariance.getX()));
+         expectedStandardDeviation.setY(Math.sqrt(expectedVariance.getY()));
 
          if (estimatedPrincipalAxis.dot(expectedPrincipalAxis) < 0.0)
             expectedPrincipalAxis.negate();
@@ -316,16 +316,16 @@ public class PrincipalComponentAnalysis3DTest
          assertEquals(0.0, estimatedPrincipalAxis.dot(estimatedThirdAxis), EPSILON_HIGH_PRECISION);
          assertEquals(0.0, estimatedSecondaryAxis.dot(estimatedThirdAxis), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedStandardDeviation.x, estimatedStandardDeviation.x, EPSILON_HIGH_PRECISION);
-         assertEquals(expectedStandardDeviation.y, estimatedStandardDeviation.y, EPSILON_HIGH_PRECISION);
-         assertEquals(0.0, estimatedStandardDeviation.z, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedStandardDeviation.getX(), estimatedStandardDeviation.getX(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedStandardDeviation.getY(), estimatedStandardDeviation.getY(), EPSILON_HIGH_PRECISION);
+         assertEquals(0.0, estimatedStandardDeviation.getZ(), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedVariance.x, estimatedVariance.x, EPSILON_HIGH_PRECISION);
-         assertEquals(expectedVariance.y, estimatedVariance.y, EPSILON_HIGH_PRECISION);
-         assertEquals(0.0, estimatedVariance.z, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getX(), estimatedVariance.getX(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getY(), estimatedVariance.getY(), EPSILON_HIGH_PRECISION);
+         assertEquals(0.0, estimatedVariance.getZ(), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedVariance.x, MathTools.square(estimatedScaledPrincipalVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
-         assertEquals(expectedVariance.y, MathTools.square(estimatedScaledSecondaryVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getX(), MathTools.square(estimatedScaledPrincipalVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getY(), MathTools.square(estimatedScaledSecondaryVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
          assertEquals(0.0, MathTools.square(estimatedScaledThirdVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
 
          estimatedScaledPrincipalVector.normalize();
@@ -391,26 +391,26 @@ public class PrincipalComponentAnalysis3DTest
             Point3d newPoint = new Point3d();
             newPoint.set(origin);
 
-            double nextGaussianForPrincipalAxis = pointScatteringAmplitude.x * (1.0 - 2.0 * random.nextDouble());
+            double nextGaussianForPrincipalAxis = pointScatteringAmplitude.getX() * (1.0 - 2.0 * random.nextDouble());
             offsetFromOrigin.set(expectedPrincipalAxis);
             offsetFromOrigin.scale(nextGaussianForPrincipalAxis);
             newPoint.add(offsetFromOrigin);
 
-            double nextGaussianForSecondaryAxis = pointScatteringAmplitude.y * (1.0 - 2.0 * random.nextDouble());
+            double nextGaussianForSecondaryAxis = pointScatteringAmplitude.getY() * (1.0 - 2.0 * random.nextDouble());
             offsetFromOrigin.set(expectedSecondaryAxis);
             offsetFromOrigin.scale(nextGaussianForSecondaryAxis);
             newPoint.add(offsetFromOrigin);
 
-            double nextGaussianForThirdAxis = pointScatteringAmplitude.z * (1.0 - 2.0 * random.nextDouble());
+            double nextGaussianForThirdAxis = pointScatteringAmplitude.getZ() * (1.0 - 2.0 * random.nextDouble());
             offsetFromOrigin.set(expectedThirdAxis);
             offsetFromOrigin.scale(nextGaussianForThirdAxis);
             newPoint.add(offsetFromOrigin);
 
             listOfPoints.add(newPoint);
 
-            expectedMean.x += newPoint.x / numberOfPoints;
-            expectedMean.y += newPoint.y / numberOfPoints;
-            expectedMean.z += newPoint.z / numberOfPoints;
+            expectedMean.setX(expectedMean.getX() + newPoint.getX() / numberOfPoints);
+            expectedMean.setY(expectedMean.getY() + newPoint.getY() / numberOfPoints);
+            expectedMean.setZ(expectedMean.getZ() + newPoint.getZ() / numberOfPoints);
          }
 
          Point3d estimatedMean = new Point3d();
@@ -441,20 +441,20 @@ public class PrincipalComponentAnalysis3DTest
             double dotProductOnSecondaryAxis = vectorToPoint.dot(estimatedSecondaryAxis);
             double dotProductOnThirdAxis = vectorToPoint.dot(estimatedThirdAxis);
             pointCloudProjectedOnPrincipalAxes.add(new Point3d(dotProductOnPrincipalAxis, dotProductOnSecondaryAxis, dotProductOnThirdAxis));
-            meanOnPrincipalAxes.x += dotProductOnPrincipalAxis / numberOfPoints;
-            meanOnPrincipalAxes.y += dotProductOnSecondaryAxis / numberOfPoints;
-            meanOnPrincipalAxes.z += dotProductOnThirdAxis / numberOfPoints;
+            meanOnPrincipalAxes.setX(meanOnPrincipalAxes.getX() + dotProductOnPrincipalAxis / numberOfPoints);
+            meanOnPrincipalAxes.setY(meanOnPrincipalAxes.getY() + dotProductOnSecondaryAxis / numberOfPoints);
+            meanOnPrincipalAxes.setZ(meanOnPrincipalAxes.getZ() + dotProductOnThirdAxis / numberOfPoints);
          }
 
          for (int i = 0; i < numberOfPoints; i++)
          {
-            expectedVariance.x += MathTools.square(pointCloudProjectedOnPrincipalAxes.get(i).x - meanOnPrincipalAxes.x) / numberOfPoints;
-            expectedVariance.y += MathTools.square(pointCloudProjectedOnPrincipalAxes.get(i).y - meanOnPrincipalAxes.y) / numberOfPoints;
-            expectedVariance.z += MathTools.square(pointCloudProjectedOnPrincipalAxes.get(i).z - meanOnPrincipalAxes.z) / numberOfPoints;
+            expectedVariance.setX(expectedVariance.getX() + MathTools.square(pointCloudProjectedOnPrincipalAxes.get(i).getX() - meanOnPrincipalAxes.getX()) / numberOfPoints);
+            expectedVariance.setY(expectedVariance.getY() + MathTools.square(pointCloudProjectedOnPrincipalAxes.get(i).getY() - meanOnPrincipalAxes.getY()) / numberOfPoints);
+            expectedVariance.setZ(expectedVariance.getZ() + MathTools.square(pointCloudProjectedOnPrincipalAxes.get(i).getZ() - meanOnPrincipalAxes.getZ()) / numberOfPoints);
          }
-         expectedStandardDeviation.x = Math.sqrt(expectedVariance.x);
-         expectedStandardDeviation.y = Math.sqrt(expectedVariance.y);
-         expectedStandardDeviation.z = Math.sqrt(expectedVariance.z);
+         expectedStandardDeviation.setX(Math.sqrt(expectedVariance.getX()));
+         expectedStandardDeviation.setY(Math.sqrt(expectedVariance.getY()));
+         expectedStandardDeviation.setZ(Math.sqrt(expectedVariance.getZ()));
 
          if (estimatedPrincipalAxis.dot(expectedPrincipalAxis) < 0.0)
             expectedPrincipalAxis.negate();
@@ -509,17 +509,17 @@ public class PrincipalComponentAnalysis3DTest
          assertEquals(0.0, estimatedPrincipalAxis.dot(estimatedThirdAxis), EPSILON_HIGH_PRECISION);
          assertEquals(0.0, estimatedSecondaryAxis.dot(estimatedThirdAxis), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedStandardDeviation.x, estimatedStandardDeviation.x, EPSILON_HIGH_PRECISION);
-         assertEquals(expectedStandardDeviation.y, estimatedStandardDeviation.y, EPSILON_HIGH_PRECISION);
-         assertEquals(expectedStandardDeviation.z, estimatedStandardDeviation.z, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedStandardDeviation.getX(), estimatedStandardDeviation.getX(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedStandardDeviation.getY(), estimatedStandardDeviation.getY(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedStandardDeviation.getZ(), estimatedStandardDeviation.getZ(), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedVariance.x, estimatedVariance.x, EPSILON_HIGH_PRECISION);
-         assertEquals(expectedVariance.y, estimatedVariance.y, EPSILON_HIGH_PRECISION);
-         assertEquals(expectedVariance.z, estimatedVariance.z, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getX(), estimatedVariance.getX(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getY(), estimatedVariance.getY(), EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getZ(), estimatedVariance.getZ(), EPSILON_HIGH_PRECISION);
 
-         assertEquals(expectedVariance.x, MathTools.square(estimatedScaledPrincipalVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
-         assertEquals(expectedVariance.y, MathTools.square(estimatedScaledSecondaryVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
-         assertEquals(expectedVariance.z, MathTools.square(estimatedScaledThirdVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getX(), MathTools.square(estimatedScaledPrincipalVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getY(), MathTools.square(estimatedScaledSecondaryVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
+         assertEquals(expectedVariance.getZ(), MathTools.square(estimatedScaledThirdVector.length()) / numberOfPoints, EPSILON_HIGH_PRECISION);
 
          estimatedScaledPrincipalVector.normalize();
          assertTrue(expectedPrincipalAxis.epsilonEquals(estimatedScaledPrincipalVector, EPSILON_LOW_PRECISION));

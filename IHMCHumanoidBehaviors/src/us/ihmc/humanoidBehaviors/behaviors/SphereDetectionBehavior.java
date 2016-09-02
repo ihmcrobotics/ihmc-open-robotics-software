@@ -149,7 +149,7 @@ public class SphereDetectionBehavior extends BehaviorInterface
       ArrayList<Point3D_F64> pointsNearBy = new ArrayList<Point3D_F64>();
       for (Point3f tmpPoint : fullPoints)
       {
-         pointsNearBy.add(new Point3D_F64(tmpPoint.x, tmpPoint.y, tmpPoint.z));
+         pointsNearBy.add(new Point3D_F64(tmpPoint.getX(), tmpPoint.getY(), tmpPoint.getZ()));
       }
 
       //    filters =7; angleTolerance =0.9143273078940257; distanceThreashold = 0.08726045545980951; numNeighbors =41; maxDisance = 0.09815802524093345;
@@ -189,8 +189,8 @@ public class SphereDetectionBehavior extends BehaviorInterface
             Point3D_F64 center0 = sphereParams0.getCenter();
             Point3D_F64 center1 = sphereParams1.getCenter();
 
-            double distSq0 = (center0.x - chestPosition.x) * (center0.x - chestPosition.x) + (center0.y - chestPosition.y) * (center0.y - chestPosition.y);
-            double distSq1 = (center1.x - chestPosition.x) * (center1.x - chestPosition.x) + (center1.y - chestPosition.y) * (center1.y - chestPosition.y);
+            double distSq0 = (center0.x - chestPosition.getX()) * (center0.x - chestPosition.getX()) + (center0.y - chestPosition.getY()) * (center0.y - chestPosition.getY());
+            double distSq1 = (center1.x - chestPosition.getX()) * (center1.x - chestPosition.getX()) + (center1.y - chestPosition.getY()) * (center1.y - chestPosition.getY());
 
             return distSq0 < distSq1 ? 1 : -1;
          }

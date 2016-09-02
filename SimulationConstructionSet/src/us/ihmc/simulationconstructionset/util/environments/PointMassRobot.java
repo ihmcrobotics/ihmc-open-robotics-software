@@ -92,9 +92,9 @@ public class PointMassRobot extends Robot
 
    public void setPosition(Point3d point)
    {
-      xJoint.setQ(point.x);
-      yJoint.setQ(point.y);
-      zJoint.setQ(point.z);
+      xJoint.setQ(point.getX());
+      yJoint.setQ(point.getY());
+      zJoint.setQ(point.getZ());
 
    }
 
@@ -107,9 +107,9 @@ public class PointMassRobot extends Robot
 
    public void setVelocity(Vector3d velocity)
    {
-      xJoint.setQd(velocity.x);
-      yJoint.setQd(velocity.y);
-      zJoint.setQd(velocity.z);
+      xJoint.setQd(velocity.getX());
+      yJoint.setQd(velocity.getY());
+      zJoint.setQd(velocity.getZ());
 
    }
 

@@ -185,9 +185,9 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
       {
          double slope = xSlopePairs[indexOnLeft][1];
 
-         normal.x = -slope;
-         normal.y = 0.0;
-         normal.z = 1.0;
+         normal.setX(-slope);
+         normal.setY(0.0);
+         normal.setZ(1.0);
 
          normal.normalize();
       }

@@ -222,7 +222,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       int numberOfFootstepsBetweenStartAndTarget = 4;
       double walkDistance = numberOfFootstepsBetweenStartAndTarget * getRobotModel().getWalkingControllerParameters().getMaxStepLength();
       Vector2d walkDirection = new Vector2d(-0.5, -0.5);
-      double walkDirectionYaw = Math.atan2(walkDirection.y, walkDirection.x);
+      double walkDirectionYaw = Math.atan2(walkDirection.getY(), walkDirection.getX());
       FramePose2d targetMidFeetPose2d = copyOffsetAndYawCurrentMidfeetPose2d(walkDistance, walkDirection, walkDirectionYaw);
       WalkToLocationBehavior walkToLocationBehavior = createNewWalkToLocationBehavior();
       walkToLocationBehavior.initialize();
@@ -258,7 +258,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       int numberOfFootstepsBetweenStartAndTarget = 4;
       double walkDistance = numberOfFootstepsBetweenStartAndTarget * getRobotModel().getWalkingControllerParameters().getMaxStepLength();
       Vector2d walkDirection = new Vector2d(0.5, 0.5);
-      double walkDirectionYaw = Math.atan2(walkDirection.y, walkDirection.x);
+      double walkDirectionYaw = Math.atan2(walkDirection.getY(), walkDirection.getX());
       FramePose2d startMidFeetPose2d = getCurrentMidFeetPose2dCopy();
       FramePose2d targetMidFeetPose2d = copyOffsetAndYawCurrentMidfeetPose2d(walkDistance, walkDirection, walkDirectionYaw);
       FramePose2d startTargetMidPose2dMean = new FramePose2d();
@@ -483,7 +483,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       PrintTools.debug(this, "Setting New Behavior Inputs");
       walkDistance = 1.0;
       walkDirection.set(0, 1);
-      double desiredYawAngle = Math.atan2(walkDirection.y, walkDirection.x);
+      double desiredYawAngle = Math.atan2(walkDirection.getY(), walkDirection.getX());
       FramePose2d newDesiredMidFeetPose2d = copyOffsetAndYawCurrentMidfeetPose2d(walkDistance, walkDirection, desiredYawAngle);
       walkToLocationBehavior.setTarget(newDesiredMidFeetPose2d);
       walkToLocationBehavior.resume();

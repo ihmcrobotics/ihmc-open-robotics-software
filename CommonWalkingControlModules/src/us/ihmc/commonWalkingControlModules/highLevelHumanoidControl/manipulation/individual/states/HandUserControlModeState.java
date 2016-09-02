@@ -108,4 +108,10 @@ public class HandUserControlModeState extends HandControlState
    {
       return null;
    }
+
+   @Override
+   public boolean isDone()
+   {
+      return true;
+   }
 }

@@ -32,8 +32,8 @@ public class RosSupportPolygonPublisher extends RosTopicPublisher<SupportPolygon
       for (int i = 0; i < numberOfVertices; i++)
       {
          Point2dRosMessage point2d = messageFactory.newFromType(Point2dRosMessage._TYPE);
-         point2d.setX((float) points[i].x);
-         point2d.setY((float) points[i].y);
+         point2d.setX((float) points[i].getX());
+         point2d.setY((float) points[i].getY());
          vertices.add(point2d);
       }
       publish(message);
@@ -49,8 +49,8 @@ public class RosSupportPolygonPublisher extends RosTopicPublisher<SupportPolygon
       {
 
          Point2dRosMessage point2d = messageFactory.newFromType(Point2dRosMessage._TYPE);
-         point2d.setX(points[i].x);
-         point2d.setY(points[i].y);
+         point2d.setX(points[i].getX());
+         point2d.setY(points[i].getY());
          vertices.add(point2d);
 
       }

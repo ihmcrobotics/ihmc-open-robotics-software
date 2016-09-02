@@ -173,7 +173,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
 
       lineOfRotationInSoleFrame.setIncludingFrame(lineOfRotationInWorldFrame);
       lineOfRotationInSoleFrame.changeFrameAndProjectToXYPlane(soleFrame);
-      lineOfRotationInSoleFrame.setOrigin(centerOfPressure);
+      lineOfRotationInSoleFrame.setPoint(centerOfPressure);
 
       if (yoLineOfRotation != null)
       {

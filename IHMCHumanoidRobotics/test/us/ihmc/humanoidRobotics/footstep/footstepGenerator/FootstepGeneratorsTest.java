@@ -2184,8 +2184,8 @@ public class FootstepGeneratorsTest
       Point2d rightFootStartPoint = new Point2d(startX - leftXFactor, startY - leftYFactor);
       FramePose2d rightFootPose2d = new FramePose2d(WORLD_FRAME, rightFootStartPoint, startYaw - initialDeltaFeetYaw / 2);
 
-      FramePoint leftPosition = new FramePoint(WORLD_FRAME, leftFootStartPoint.x, leftFootStartPoint.y, 0);
-      FramePoint rightPosition = new FramePoint(WORLD_FRAME, rightFootStartPoint.x, rightFootStartPoint.y, 0);
+      FramePoint leftPosition = new FramePoint(WORLD_FRAME, leftFootStartPoint.getX(), leftFootStartPoint.getY(), 0);
+      FramePoint rightPosition = new FramePoint(WORLD_FRAME, rightFootStartPoint.getX(), rightFootStartPoint.getY(), 0);
       FrameOrientation leftOrientation = new FrameOrientation(WORLD_FRAME, leftFootPose2d.getYaw(), 0.0, 0.0);
       FrameOrientation rightOrientation = new FrameOrientation(WORLD_FRAME, rightFootPose2d.getYaw(), 0.0, 0.0);
 
@@ -2302,7 +2302,7 @@ public class FootstepGeneratorsTest
       }
       else
       {
-         double destinationVectorYaw = Math.atan2(destinationVector.y, destinationVector.x);
+         double destinationVectorYaw = Math.atan2(destinationVector.getY(), destinationVector.getX());
          endOrientation = new FrameOrientation2d(WORLD_FRAME, destinationVectorYaw + pathRelativeYaw);
       }
 

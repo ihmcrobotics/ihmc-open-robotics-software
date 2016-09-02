@@ -120,10 +120,10 @@ public class AcsellXSensState
     Qsi.set(qxtemp,qytemp,qztemp,qstemp);
     Qip.set(0,.707106781186548,0,-.707106781186548);
     Qsi.mul(Qip);
-    qs.set(Qsi.w);
-    qx.set(Qsi.x);
-    qy.set(Qsi.y);
-    qz.set(Qsi.z);
+    qs.set(Qsi.getW());
+    qx.set(Qsi.getX());
+    qy.set(Qsi.getY());
+    qz.set(Qsi.getZ());
     
     sample.set(buffer.getShort() & 0xFFFF);
     
@@ -163,10 +163,10 @@ public class AcsellXSensState
     Qip2.set(0,0,1,0);
     Qip.mul(Qip2);
     Qsi.mul(Qip);
-    qs.set(Qsi.w);
-    qx.set(Qsi.x);
-    qy.set(Qsi.y);
-    qz.set(Qsi.z);
+    qs.set(Qsi.getW());
+    qx.set(Qsi.getX());
+    qy.set(Qsi.getY());
+    qz.set(Qsi.getZ());
     
     sample.set(buffer.getShort() & 0xFFFF);
     

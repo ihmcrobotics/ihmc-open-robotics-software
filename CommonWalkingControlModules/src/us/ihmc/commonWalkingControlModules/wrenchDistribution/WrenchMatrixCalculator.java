@@ -28,11 +28,11 @@ import us.ihmc.robotics.screwTheory.Wrench;
 
 public class WrenchMatrixCalculator
 {
-   private static final int nContactableBodies = WholeBodyControlCoreToolbox.nContactableBodies;
-   private static final int maxNumberOfContactPoints = WholeBodyControlCoreToolbox.nContactPointsPerContactableBody;
-   private static final int numberOfBasisVectorsPerContactPoint = WholeBodyControlCoreToolbox.nBasisVectorsPerContactPoint;
-   private static final int rhoSize = WholeBodyControlCoreToolbox.rhoSize;
-   private static final int copTaskSize = 2 * nContactableBodies;
+   private final int nContactableBodies;
+   private final int maxNumberOfContactPoints;
+   private final int numberOfBasisVectorsPerContactPoint;
+   private final int rhoSize;
+   private final int copTaskSize;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -46,17 +46,17 @@ public class WrenchMatrixCalculator
    private final YoFrameVector2d copRateDefaultWeight = new YoFrameVector2d("copRateDefaultWeight", null, registry);
    private final YoFrameVector2d copRateHighWeight = new YoFrameVector2d("copRateHighWeight", null, registry);
 
-   private final DenseMatrix64F rhoJacobianMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
-   private final DenseMatrix64F copJacobianMatrix = new DenseMatrix64F(copTaskSize, rhoSize);
-   private final DenseMatrix64F rhoPreviousMatrix = new DenseMatrix64F(rhoSize, 1);
+   private final DenseMatrix64F rhoJacobianMatrix;
+   private final DenseMatrix64F copJacobianMatrix;
+   private final DenseMatrix64F rhoPreviousMatrix;
 
-   private final DenseMatrix64F desiredCoPMatrix = new DenseMatrix64F(copTaskSize, 1);
-   private final DenseMatrix64F previousCoPMatrix = new DenseMatrix64F(copTaskSize, 1);
+   private final DenseMatrix64F desiredCoPMatrix;
+   private final DenseMatrix64F previousCoPMatrix;
    
-   private final DenseMatrix64F rhoWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
-   private final DenseMatrix64F rhoRateWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
-   private final DenseMatrix64F desiredCoPWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);
-   private final DenseMatrix64F copRateWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);
+   private final DenseMatrix64F rhoWeightMatrix;
+   private final DenseMatrix64F rhoRateWeightMatrix;
+   private final DenseMatrix64F desiredCoPWeightMatrix;
+   private final DenseMatrix64F copRateWeightMatrix;
 
    private final ReferenceFrame centerOfMassFrame;
    private final Map<RigidBody, Wrench> wrenchesFromRho = new HashMap<>();
@@ -75,6 +75,26 @@ public class WrenchMatrixCalculator
    public WrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
    {
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
+      
+      
+      nContactableBodies = toolbox.getNumberOfContactableBodies();
+      maxNumberOfContactPoints = toolbox.getNumberOfContactPointsPerContactableBody();        
+      numberOfBasisVectorsPerContactPoint = toolbox.getNumberOfBasisVectorsPerContactPoint(); 
+      rhoSize = toolbox.getRhoSize();                                                  
+      copTaskSize = 2 * nContactableBodies; 
+      
+      rhoJacobianMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
+      copJacobianMatrix = new DenseMatrix64F(copTaskSize, rhoSize);            
+      rhoPreviousMatrix = new DenseMatrix64F(rhoSize, 1);                      
+                                                                               
+      desiredCoPMatrix = new DenseMatrix64F(copTaskSize, 1);                   
+      previousCoPMatrix = new DenseMatrix64F(copTaskSize, 1);                  
+                                                                               
+      rhoWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);                  
+      rhoRateWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);              
+      desiredCoPWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);   
+      copRateWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);      
+      
 
       if (contactablePlaneBodies.size() > nContactableBodies)
          throw new RuntimeException("Unexpected number of contactable plane bodies: " + contactablePlaneBodies.size());

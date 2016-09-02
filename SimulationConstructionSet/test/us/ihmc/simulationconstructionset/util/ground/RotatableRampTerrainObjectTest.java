@@ -171,9 +171,9 @@ public class RotatableRampTerrainObjectTest
    {
       for (int i = 0; i < pointsOnRamp.length; i++)
       {
-         String message = "Expected Height For point " + (pointsOnRamp[i].getX()+translation.x) + " " + 
-               (pointsOnRamp[i].getY()+translation.y) + " " + pointsOnRamp[i].getZ();
-         assertEquals(message, pointsOnRamp[i].getZ(), ramp.heightAt(pointsOnRamp[i].getX()+translation.x, pointsOnRamp[i].getY()+translation.y, pointsOnRamp[i].getZ()), epsilon);
+         String message = "Expected Height For point " + (pointsOnRamp[i].getX()+translation.getX()) + " " + 
+               (pointsOnRamp[i].getY()+translation.getY()) + " " + pointsOnRamp[i].getZ();
+         assertEquals(message, pointsOnRamp[i].getZ(), ramp.heightAt(pointsOnRamp[i].getX()+translation.getX(), pointsOnRamp[i].getY()+translation.getY(), pointsOnRamp[i].getZ()), epsilon);
       }
    }
 

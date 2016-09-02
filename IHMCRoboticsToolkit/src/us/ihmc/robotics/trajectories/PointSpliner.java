@@ -181,17 +181,17 @@ public class PointSpliner
 //       point3d.z = linearInterpolatorCurveGenerator[2].getPointGivenX(alpha).y;
 
          // check to make sure S is the same
-         if (listOfPoints[0][i].x != listOfPoints[1][i].x)
-            throw new RuntimeException(listOfPoints[0][i].x + " != " + listOfPoints[1][i].x);
+         if (listOfPoints[0][i].getX() != listOfPoints[1][i].getX())
+            throw new RuntimeException(listOfPoints[0][i].getX() + " != " + listOfPoints[1][i].getX());
 
-         if (listOfPoints[1][i].x != listOfPoints[2][i].x)
-            throw new RuntimeException(listOfPoints[1][i].x + " != " + listOfPoints[2][i].x);
+         if (listOfPoints[1][i].getX() != listOfPoints[2][i].getX())
+            throw new RuntimeException(listOfPoints[1][i].getX() + " != " + listOfPoints[2][i].getX());
 
          FramePoint framePoint = new FramePoint(referenceFrame);
 
-         framePoint.setX(listOfPoints[0][i].y);
-         framePoint.setY(listOfPoints[1][i].y);
-         framePoint.setZ(listOfPoints[2][i].y);
+         framePoint.setX(listOfPoints[0][i].getY());
+         framePoint.setY(listOfPoints[1][i].getY());
+         framePoint.setZ(listOfPoints[2][i].getY());
 
          ret.add(framePoint);
       }

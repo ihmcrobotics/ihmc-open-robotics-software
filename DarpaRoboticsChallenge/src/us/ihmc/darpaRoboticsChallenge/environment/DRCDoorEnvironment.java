@@ -46,7 +46,7 @@ public class DRCDoorEnvironment implements CommonAvatarEnvironmentInterface
 
       combinedTerrainObject.addBox(-10.0, -10.0, 10.0, 10.0, -0.05, 0.0, YoAppearance.DarkGray());
       combinedTerrainObject.addBox(2.0, -0.05, 3.0, 0.05, 2.0, YoAppearance.Beige());
-      combinedTerrainObject.addBox(3.0 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.x, -0.05, 4.0 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.x, 0.05, 2.0, YoAppearance.Beige());
+      combinedTerrainObject.addBox(3.0 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), -0.05, 4.0 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.05, 2.0, YoAppearance.Beige());
       
       return combinedTerrainObject;
    }

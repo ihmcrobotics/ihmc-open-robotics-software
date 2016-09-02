@@ -99,7 +99,7 @@ public class ExternalForcePoint extends KinematicPoint
                  getZVelocity() - externalForcePoint.getZVelocity());
       Rcoll_0.transform(u_coll);
 
-      if (u_coll.z > 0.0)    // -0.001) // Moving slowly together or moving apart...
+      if (u_coll.getZ() > 0.0)    // -0.001) // Moving slowly together or moving apart...
       {
          p_world.set(0.0, 0.0, 0.0);
          impulse.setToZero();
@@ -126,7 +126,7 @@ public class ExternalForcePoint extends KinematicPoint
 
       // Rotate into world coordinates:
       R0_coll.transform(p_world);
-      impulse.set(-p_world.x, -p_world.y, -p_world.z);
+      impulse.set(-p_world.getX(), -p_world.getY(), -p_world.getZ());
 
       externalForcePoint.impulse.set(p_world);
 
@@ -142,14 +142,14 @@ public class ExternalForcePoint extends KinematicPoint
       Rcoll_0.set(R0_coll);
       Rcoll_0.transpose();
 
-      u_coll.set(getXVelocity() - vel_world.x, getYVelocity() - vel_world.y, getZVelocity() - vel_world.z);
+      u_coll.set(getXVelocity() - vel_world.getX(), getYVelocity() - vel_world.getY(), getZVelocity() - vel_world.getZ());
       Rcoll_0.transform(u_coll);
 
       // System.out.println("normal_world: " + normal_world);
       // System.out.println("u_world: " + dx.val + ", " + dy.val + ", " + dz.val);
       // System.out.println("Rcoll_0" + Rcoll_0);
 
-      if (u_coll.z > 0.0)    // -0.001) // Moving slowly together or moving apart...
+      if (u_coll.getZ() > 0.0)    // -0.001) // Moving slowly together or moving apart...
       {
          p_world.set(0.0, 0.0, 0.0);
          impulse.setToZero();
@@ -185,10 +185,10 @@ public class ExternalForcePoint extends KinematicPoint
       Rcoll_0.set(R0_coll);
       Rcoll_0.transpose();
 
-      u_coll.set(getXVelocity() - vel_world.x, getYVelocity() - vel_world.y, getZVelocity() - vel_world.z);
+      u_coll.set(getXVelocity() - vel_world.getX(), getYVelocity() - vel_world.getY(), getZVelocity() - vel_world.getZ());
       Rcoll_0.transform(u_coll);
 
-      if (u_coll.z > 0.0)    // Moving slowly together or moving apart...
+      if (u_coll.getZ() > 0.0)    // Moving slowly together or moving apart...
       {
          p_world.set(0.0, 0.0, 0.0);
 
@@ -286,7 +286,7 @@ public class ExternalForcePoint extends KinematicPoint
 
       // if (Math.abs(yAxis.dot(zAxis)) > 0.99){yAxis = new Vector3d(1.0,0.0,0.0);}
 //    if (Math.abs(zAxis.y) > 0.99){yAxis = new Vector3d(1.0,0.0,0.0);}
-      if (Math.abs(zAxis.y) > 0.99)
+      if (Math.abs(zAxis.getY()) > 0.99)
       {
          yAxis.set(1.0, 0.0, 0.0);
       }
@@ -296,14 +296,14 @@ public class ExternalForcePoint extends KinematicPoint
 
       yAxis.cross(zAxis, xAxis);
 
-      rot.m00 = xAxis.x;
-      rot.m01 = yAxis.x;
-      rot.m02 = zAxis.x;
-      rot.m10 = xAxis.y;
-      rot.m11 = yAxis.y;
-      rot.m12 = zAxis.y;
-      rot.m20 = xAxis.z;
-      rot.m21 = yAxis.z;
-      rot.m22 = zAxis.z;
+      rot.setM00(xAxis.getX());
+      rot.setM01(yAxis.getX());
+      rot.setM02(zAxis.getX());
+      rot.setM10(xAxis.getY());
+      rot.setM11(yAxis.getY());
+      rot.setM12(zAxis.getY());
+      rot.setM20(xAxis.getZ());
+      rot.setM21(yAxis.getZ());
+      rot.setM22(zAxis.getZ());
    }
 }

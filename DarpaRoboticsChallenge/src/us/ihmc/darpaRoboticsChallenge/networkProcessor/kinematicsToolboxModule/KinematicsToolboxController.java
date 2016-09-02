@@ -486,9 +486,9 @@ public class KinematicsToolboxController
       }
 
       Vector3f translation = robotConfigurationData.getPelvisTranslation();
-      desiredRootJoint.setPosition(translation.x, translation.y, translation.z);
+      desiredRootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
       Quat4f orientation = robotConfigurationData.getPelvisOrientation();
-      desiredRootJoint.setRotation(orientation.x, orientation.y, orientation.z, orientation.w);
+      desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getW());
       desiredRootJoint.setVelocity(zeroVelocityMatrix, 0);
 
       updateTools();

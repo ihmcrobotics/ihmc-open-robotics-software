@@ -59,7 +59,7 @@ public class ConvexHullCalculator2d
       // Remove vertices on edges of upper and lower hull that have equal coordinates
       if (!upperHull.isEmpty() &&!lowerHull.isEmpty())
       {
-         if ((lowerHull.get(0).x == upperHull.get(upperHull.size() - 1).x) && (lowerHull.get(0).y == upperHull.get(upperHull.size() - 1).y))
+         if ((lowerHull.get(0).getX() == upperHull.get(upperHull.size() - 1).getX()) && (lowerHull.get(0).getY() == upperHull.get(upperHull.size() - 1).getY()))
          {
             lowerHull.remove(0);
          }
@@ -67,7 +67,7 @@ public class ConvexHullCalculator2d
 
       if (!upperHull.isEmpty() &&!lowerHull.isEmpty())
       {
-         if ((upperHull.get(0).x == lowerHull.get(lowerHull.size() - 1).x) && (upperHull.get(0).y == lowerHull.get(lowerHull.size() - 1).y))
+         if ((upperHull.get(0).getX() == lowerHull.get(lowerHull.size() - 1).getX()) && (upperHull.get(0).getY() == lowerHull.get(lowerHull.size() - 1).getY()))
          {
             lowerHull.remove(lowerHull.size() - 1);
          }
@@ -141,16 +141,16 @@ public class ConvexHullCalculator2d
       for(int i = 0; i <  pointList.size(); i++)
       {
          Point2d point = pointList.get(i);
-         point.x = -point.x;
-         point.y = -point.y;
+         point.setX(-point.getX());
+         point.setY(-point.getY());
       }
 
       getUpperHull(lowerHullToPack, pointList);
       for(int i = 0; i <  pointList.size(); i++)
       {
          Point2d point = pointList.get(i);
-         point.x = -point.x;
-         point.y = -point.y;
+         point.setX(-point.getX());
+         point.setY(-point.getY());
       }
    }
 
@@ -193,7 +193,7 @@ public class ConvexHullCalculator2d
          for(int i = 0; i <  pointList.size(); i++)
          {
             Point2d point = pointList.get(i);
-            if ((point.x > min.x) && (point.x < max.x))
+            if ((point.getX() > min.getX()) && (point.getX() < max.getX()))
             {
                T.add(point);
             }
@@ -225,7 +225,7 @@ public class ConvexHullCalculator2d
          Point2d point = pointList.get(i);
          if (min != null)
          {
-            if ((point.x < min.x) || ((point.x == min.x) && (point.y >= min.y)))
+            if ((point.getX() < min.getX()) || ((point.getX() == min.getX()) && (point.getY() >= min.getY())))
             {
                min = point;
             }
@@ -237,7 +237,7 @@ public class ConvexHullCalculator2d
 
          if (max != null)
          {
-            if ((point.x > max.x) || ((point.x == max.x) && (point.y >= max.y)))
+            if ((point.getX() > max.getX()) || ((point.getX() == max.getX()) && (point.getY() >= max.getY())))
             {
                max = point;
             }
@@ -272,7 +272,7 @@ public class ConvexHullCalculator2d
 //    pointListWithoutMax.remove(max);
 //    int randIndex = random.nextInt(pointListWithoutMax.size());
 //    double a = pointListWithoutMax.get(randIndex).x;
-      double a = (min.x + max.x) / 2.0;
+      double a = (min.getX() + max.getX()) / 2.0;
 
       // 2.2:
       Point2d[] bridge = bridge(0, pointList, a);
@@ -287,11 +287,11 @@ public class ConvexHullCalculator2d
       for(int i = 0; i <  pointList.size(); i++)
       {
          Point2d point = pointList.get(i);
-         if (point.x < bridge[0].x)
+         if (point.getX() < bridge[0].getX())
          {
             pointListLeft.add(point);
          }
-         else if (point.x > bridge[1].x)
+         else if (point.getX() > bridge[1].getX())
          {
             pointListRight.add(point);
          }
@@ -358,7 +358,7 @@ public class ConvexHullCalculator2d
       // 1:
       if (pointList.size() == 2)
       {
-         if (pointList.get(0).x < pointList.get(1).x)
+         if (pointList.get(0).getX() < pointList.get(1).getX())
          {
             bridge[0] = pointList.get(0);
             bridge[1] = pointList.get(1);
@@ -387,7 +387,7 @@ public class ConvexHullCalculator2d
       {
          Point2d[] pair = new Point2d[2];
 
-         if (pointList.get(2 * i).x <= pointList.get(2 * i + 1).x)
+         if (pointList.get(2 * i).getX() <= pointList.get(2 * i + 1).getX())
          {
             pair[0] = pointList.get(2 * i);
             pair[1] = pointList.get(2 * i + 1);
@@ -408,9 +408,9 @@ public class ConvexHullCalculator2d
          while (i < pairs.size())
          {
             Point2d[] pair = pairs.get(i);
-            if (pair[0].x == pair[1].x)
+            if (pair[0].getX() == pair[1].getX())
             {
-               if (pair[0].y > pair[1].y)
+               if (pair[0].getY() > pair[1].getY())
                {
                   candidates.add(pair[0]);
                }
@@ -423,7 +423,7 @@ public class ConvexHullCalculator2d
             }
             else
             {
-               double slope = (pair[0].y - pair[1].y) / (pair[0].x - pair[1].x);
+               double slope = (pair[0].getY() - pair[1].getY()) / (pair[0].getX() - pair[1].getX());
                slopes.add(slope);    // slopes is always 'synchronized' with pairs -> indices will match
                i++;
             }
@@ -473,7 +473,7 @@ public class ConvexHullCalculator2d
       for(int i = 0; i <  pointList.size(); i++)
       {
          Point2d point = pointList.get(i);
-         double criterionValue = point.y - K * point.x;
+         double criterionValue = point.getY() - K * point.getX();
          if (criterionValue > maxCriterionValue + epsilon)    // If the criterion value is significantly larger
          {
             max.clear();
@@ -494,7 +494,7 @@ public class ConvexHullCalculator2d
       Point2d pM = minMax[1];
 
       // 7:
-      if ((pK.x <= a) && (pM.x > a))
+      if ((pK.getX() <= a) && (pM.getX() > a))
       {
          bridge[0] = pK;
          bridge[1] = pM;
@@ -503,7 +503,7 @@ public class ConvexHullCalculator2d
       }
 
       // 8:
-      if (pM.x <= a)
+      if (pM.getX() <= a)
       {
          ArrayList<Point2d[]> largeUnionEqual = largeUnionEqualLocal.get();
          largeUnionEqual.addAll(large);
@@ -523,7 +523,7 @@ public class ConvexHullCalculator2d
       }
 
       // 9:
-      if (pK.x > a)
+      if (pK.getX() > a)
       {
          ArrayList<Point2d[]> smallUnionEqual = smallUnionEqualLocal.get();
          smallUnionEqual.addAll(small);
@@ -598,12 +598,12 @@ public class ConvexHullCalculator2d
 
       for (int i = 0; i < (n - 1); i++)
       {
-         if (sign(differences.get(i).x) != sign(differences.get(i + 1).x))
+         if (sign(differences.get(i).getX()) != sign(differences.get(i + 1).getX()))
          {
             signChangesX++;
          }
 
-         if (sign(differences.get(i).y) != sign(differences.get(i + 1).y))
+         if (sign(differences.get(i).getY()) != sign(differences.get(i + 1).getY()))
          {
             signChangesY++;
          }
@@ -619,7 +619,7 @@ public class ConvexHullCalculator2d
       for (int i = 0; i < n; i++)
       {
          int j = (i + 1) % n;
-         double cross = differences.get(i).x * differences.get(j).y - differences.get(j).x * differences.get(i).y;
+         double cross = differences.get(i).getX() * differences.get(j).getY() - differences.get(j).getX() * differences.get(i).getY();
          if (cross >= 0.0)
             return false;
       }

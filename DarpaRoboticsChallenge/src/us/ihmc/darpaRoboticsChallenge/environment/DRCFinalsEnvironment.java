@@ -170,7 +170,7 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
 
       combinedTerrainObject.addBox(-5.0, -30.0, 5.0, 5.0, -0.05, 0.0, YoAppearance.DarkGray());
       combinedTerrainObject.addBox(-1.2192, -0.025, 0, 0.025, WALL_HEIGHT, YoAppearance.Beige());
-      combinedTerrainObject.addBox(0.0 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.x, -0.025, 1.2192 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.x,
+      combinedTerrainObject.addBox(0.0 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), -0.025, 1.2192 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
             0.025, WALL_HEIGHT, YoAppearance.Beige());
       return combinedTerrainObject;
    }

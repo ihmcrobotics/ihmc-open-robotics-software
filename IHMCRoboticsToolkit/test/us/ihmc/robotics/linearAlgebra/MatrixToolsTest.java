@@ -138,9 +138,9 @@ public class MatrixToolsTest
 
       b.transform(p1);
 
-      assertEquals(p0.x, p1.x, 1e-8);
-      assertEquals(p0.y, p1.y, 1e-8);
-      assertEquals(p0.z, p1.z, 1e-8);
+      assertEquals(p0.x, p1.getX(), 1e-8);
+      assertEquals(p0.y, p1.getY(), 1e-8);
+      assertEquals(p0.z, p1.getZ(), 1e-8);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)

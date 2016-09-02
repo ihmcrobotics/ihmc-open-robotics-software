@@ -12,6 +12,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -106,6 +107,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
+      quadrupedTestFactory.setParameterSet(QuadrupedParameterSet.SIMULATION_IDEAL);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       

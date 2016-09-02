@@ -58,7 +58,7 @@ public class FootSpoof implements ContactablePlaneBody
 
       for (Point2d contactPointInSoleFrame : contactPoints2dInSoleFrame)
       {
-         FramePoint point = new FramePoint(soleFrame, contactPointInSoleFrame.x, contactPointInSoleFrame.y, 0.0);
+         FramePoint point = new FramePoint(soleFrame, contactPointInSoleFrame.getX(), contactPointInSoleFrame.getY(), 0.0);
          contactPoints.add(point);
          contactPoints2d.add(point.toFramePoint2d());
       }

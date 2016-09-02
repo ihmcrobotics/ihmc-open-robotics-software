@@ -59,12 +59,12 @@ public class ForceDistribution
    {
       for (int i = 0; i < 6; i++)
       {
-         aMatrix66.set(0, i, a_hat[i].x);
-         aMatrix66.set(1, i, a_hat[i].y);
-         aMatrix66.set(2, i, a_hat[i].z);
-         aMatrix66.set(3, i, b[i].x);
-         aMatrix66.set(4, i, b[i].y);
-         aMatrix66.set(5, i, b[i].z);
+         aMatrix66.set(0, i, a_hat[i].getX());
+         aMatrix66.set(1, i, a_hat[i].getY());
+         aMatrix66.set(2, i, a_hat[i].getZ());
+         aMatrix66.set(3, i, b[i].getX());
+         aMatrix66.set(4, i, b[i].getY());
+         aMatrix66.set(5, i, b[i].getZ());
 
          // System.out.println(i + ": a_hat: " + a_hat[i]);
          // System.out.println("b: " + b[i]);

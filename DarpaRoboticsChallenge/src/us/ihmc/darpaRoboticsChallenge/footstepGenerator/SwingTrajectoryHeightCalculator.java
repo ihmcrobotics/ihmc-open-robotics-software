@@ -33,8 +33,8 @@ public class SwingTrajectoryHeightCalculator
 
       public FootSwingInclusionFunction(Point2d start, Point2d end, double pathWidth)
       {
-         pathOrigin = new Point2d(start.x, start.y);
-         trajectoryDirection = new Vector2d(end.x - start.x, end.y - start.y);
+         pathOrigin = new Point2d(start.getX(), start.getY());
+         trajectoryDirection = new Vector2d(end.getX() - start.getX(), end.getY() - start.getY());
          pathLength = trajectoryDirection.length();
          trajectoryDirection.normalize();
          this.pathWidth = pathWidth;
@@ -43,13 +43,13 @@ public class SwingTrajectoryHeightCalculator
       @Override
       public boolean isIncluded(Point3d test)
       {
-         Vector2d vectorFromPath = new Vector2d(test.x, test.y);
+         Vector2d vectorFromPath = new Vector2d(test.getX(), test.getY());
          vectorFromPath.sub(pathOrigin);
          double distanceAlongPath = vectorFromPath.dot(trajectoryDirection);
          if ((distanceAlongPath < 0) || (distanceAlongPath > pathLength))
             return false;
 
-         double distanceFromPath = Math.abs(vectorFromPath.x * trajectoryDirection.y - vectorFromPath.y * trajectoryDirection.x);
+         double distanceFromPath = Math.abs(vectorFromPath.getX() * trajectoryDirection.getY() - vectorFromPath.getY() * trajectoryDirection.getX());
          if (distanceFromPath > pathWidth)
             return false;
 
@@ -101,16 +101,16 @@ public class SwingTrajectoryHeightCalculator
       double horizonalDistance = startToEnd2d.length();
 
       // search for points in area between the foot positions (range decreased by horizontal buffer size)
-      Point2d startPoint2d = new Point2d(startPoint.x, startPoint.y);
-      Point2d endPoint2d = new Point2d(endPoint.x, endPoint.y);
+      Point2d startPoint2d = new Point2d(startPoint.getX(), startPoint.getY());
+      Point2d endPoint2d = new Point2d(endPoint.getX(), endPoint.getY());
       FootSwingInclusionFunction inclusionFunction = new FootSwingInclusionFunction(startPoint2d, endPoint2d, calculatorParameters.getPathWidth());
 
       // get all points in the buffered region
-      double x = (startPoint2d.x + endPoint2d.x) / 2.0;
-      double y = (startPoint2d.y + endPoint2d.y) / 2.0;
+      double x = (startPoint2d.getX() + endPoint2d.getX()) / 2.0;
+      double y = (startPoint2d.getY() + endPoint2d.getY()) / 2.0;
       List<Point3d> pointsBetweenFeet = groundProfile.getAllPointsWithinArea(x, y, horizonalDistance / 2.0, horizonalDistance / 2.0, inclusionFunction);
-      double z0 = startPoint.z;
-      double maxZDiffFromStart = Math.max(0.0, endPoint.z - z0);
+      double z0 = startPoint.getZ();
+      double maxZDiffFromStart = Math.max(0.0, endPoint.getZ() - z0);
 
       Collections.sort(pointsBetweenFeet, new Comparator<Point3d>()
       {
@@ -131,7 +131,7 @@ public class SwingTrajectoryHeightCalculator
          int index = 0;
          for (Point3d point : pointsBetweenFeet)
          {
-            zHeightsFromStart[index] = point.z - z0;
+            zHeightsFromStart[index] = point.getZ() - z0;
             index++;
          }
 
@@ -174,7 +174,7 @@ public class SwingTrajectoryHeightCalculator
       Vector3d startToEnd3d = new Vector3d(endPoint);
       startToEnd3d.sub(startPoint);
 
-      Vector2d startToEnd2dDirection = new Vector2d(startToEnd3d.x, startToEnd3d.y);
+      Vector2d startToEnd2dDirection = new Vector2d(startToEnd3d.getX(), startToEnd3d.getY());
       double horizonalDistance = startToEnd2dDirection.length();
       startToEnd2dDirection.normalize();
 
@@ -195,35 +195,35 @@ public class SwingTrajectoryHeightCalculator
       }
 
       // search for points in area between the foot positions (range decreased by horizontal buffer size)
-      Point2d bufferedStartPoint = new Point2d(startPoint.x + calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.x,
-            startPoint.y + calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.y);
+      Point2d bufferedStartPoint = new Point2d(startPoint.getX() + calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.getX(),
+            startPoint.getY() + calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.getY());
 
-      Point2d bufferedEndPoint = new Point2d(endPoint.x - calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.x,
-            endPoint.y - calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.y);
+      Point2d bufferedEndPoint = new Point2d(endPoint.getX() - calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.getX(),
+            endPoint.getY() - calculatorParameters.getHorizontalBuffer() * startToEnd2dDirection.getY());
 
       FootSwingInclusionFunction inclusionFunction = new FootSwingInclusionFunction(bufferedStartPoint, bufferedEndPoint, calculatorParameters.getPathWidth());
 
       // get all points in the buffered region
-      double x = (bufferedStartPoint.x + bufferedEndPoint.x) / 2.0;
-      double y = (bufferedStartPoint.y + bufferedEndPoint.y) / 2.0;
+      double x = (bufferedStartPoint.getX() + bufferedEndPoint.getX()) / 2.0;
+      double y = (bufferedStartPoint.getY() + bufferedEndPoint.getY()) / 2.0;
       List<Point3d> innerPoints = groundProfile.getAllPointsWithinArea(x, y, horizonalDistance / 2.0, horizonalDistance / 2.0, inclusionFunction);
 
       // project all points onto the vertical plane along direction line from start to end.
       List<Point2d> projectedInnerPoints = new ArrayList<Point2d>();
-      Point2d startPoint2d = new Point2d(startPoint.x, startPoint.y);
+      Point2d startPoint2d = new Point2d(startPoint.getX(), startPoint.getY());
       Vector2d horizontalVectorToPoint = new Vector2d();
       for (Point3d point : innerPoints)
       {
-         horizontalVectorToPoint.set(point.x, point.y);
+         horizontalVectorToPoint.set(point.getX(), point.getY());
          horizontalVectorToPoint.sub(startPoint2d);
          double distanceAlongLine = horizontalVectorToPoint.dot(startToEnd2dDirection);
          if ((distanceAlongLine > 0) || (distanceAlongLine < horizonalDistance))
-            projectedInnerPoints.add(new Point2d(distanceAlongLine, point.z));
+            projectedInnerPoints.add(new Point2d(distanceAlongLine, point.getZ()));
       }
 
       // add dummyPoints below to allow bottom removal
-      Point2d dummyPointA = new Point2d(calculatorParameters.getHorizontalBuffer(), startPoint.z - 100);
-      Point2d dummyPointB = new Point2d(horizonalDistance - calculatorParameters.getHorizontalBuffer(), startPoint.z - 100);
+      Point2d dummyPointA = new Point2d(calculatorParameters.getHorizontalBuffer(), startPoint.getZ() - 100);
+      Point2d dummyPointB = new Point2d(horizonalDistance - calculatorParameters.getHorizontalBuffer(), startPoint.getZ() - 100);
       projectedInnerPoints.add(dummyPointA);
       projectedInnerPoints.add(dummyPointB);
 
@@ -249,22 +249,22 @@ public class SwingTrajectoryHeightCalculator
       List<Point2d> bufferedPoints = new ArrayList<>();
       for (Point2d point2d : newInnerPoints)
       {
-         bufferedPoints.add(new Point2d(point2d.x + calculatorParameters.getHorizontalBuffer(), point2d.y));
-         bufferedPoints.add(new Point2d(point2d.x - calculatorParameters.getHorizontalBuffer(), point2d.y));
-         bufferedPoints.add(new Point2d(point2d.x, point2d.y + calculatorParameters.getVerticalBuffer()));
+         bufferedPoints.add(new Point2d(point2d.getX() + calculatorParameters.getHorizontalBuffer(), point2d.getY()));
+         bufferedPoints.add(new Point2d(point2d.getX() - calculatorParameters.getHorizontalBuffer(), point2d.getY()));
+         bufferedPoints.add(new Point2d(point2d.getX(), point2d.getY() + calculatorParameters.getVerticalBuffer()));
       }
 
       // add start and end points to the list, points far below for the bottom of the hull
-      bufferedPoints.add(new Point2d(0, startPoint.z));
-      bufferedPoints.add(new Point2d(horizonalDistance, endPoint.z));
-      Point2d dummyPoint1 = new Point2d(0, startPoint.z - 100.0);
-      Point2d dummyPoint2 = new Point2d(horizonalDistance, endPoint.z - 100.0);
+      bufferedPoints.add(new Point2d(0, startPoint.getZ()));
+      bufferedPoints.add(new Point2d(horizonalDistance, endPoint.getZ()));
+      Point2d dummyPoint1 = new Point2d(0, startPoint.getZ() - 100.0);
+      Point2d dummyPoint2 = new Point2d(horizonalDistance, endPoint.getZ() - 100.0);
       bufferedPoints.add(dummyPoint1);
       bufferedPoints.add(dummyPoint2);
 
       // add extra points to ensure ground clearance
-      bufferedPoints.add(new Point2d(0 + calculatorParameters.getHorizontalBuffer(), startPoint.z + calculatorParameters.getVerticalBuffer()));
-      bufferedPoints.add(new Point2d(horizonalDistance - calculatorParameters.getHorizontalBuffer(), endPoint.z + calculatorParameters.getVerticalBuffer()));
+      bufferedPoints.add(new Point2d(0 + calculatorParameters.getHorizontalBuffer(), startPoint.getZ() + calculatorParameters.getVerticalBuffer()));
+      bufferedPoints.add(new Point2d(horizonalDistance - calculatorParameters.getHorizontalBuffer(), endPoint.getZ() + calculatorParameters.getVerticalBuffer()));
 
       convexPolygon2d.clear();
       convexPolygon2d.addVertices(bufferedPoints, bufferedPoints.size());
@@ -279,9 +279,9 @@ public class SwingTrajectoryHeightCalculator
 
          if (!currentPoint.epsilonEquals(dummyPoint1, 1e-13) && !currentPoint.epsilonEquals(dummyPoint2, 1e-13))
          {
-            currentX = startPoint.x + currentPoint.x * startToEnd2dDirection.x;
-            currentY = startPoint.y + currentPoint.x * startToEnd2dDirection.y;
-            trajectoryPoints.add(new FramePoint(startFramePoint.getReferenceFrame(), currentX, currentY, currentPoint.y));
+            currentX = startPoint.getX() + currentPoint.getX() * startToEnd2dDirection.getX();
+            currentY = startPoint.getY() + currentPoint.getX() * startToEnd2dDirection.getY();
+            trajectoryPoints.add(new FramePoint(startFramePoint.getReferenceFrame(), currentX, currentY, currentPoint.getY()));
          }
       }
 

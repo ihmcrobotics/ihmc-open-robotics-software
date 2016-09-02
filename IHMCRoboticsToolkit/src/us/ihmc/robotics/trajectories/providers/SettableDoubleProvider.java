@@ -23,4 +23,9 @@ public class SettableDoubleProvider implements DoubleProvider
    {
       return value;
    }
+
+   public void add(double amountToAdd)
+   {
+      value = value + amountToAdd;
+   }
 }

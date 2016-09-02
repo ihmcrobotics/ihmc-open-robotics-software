@@ -372,9 +372,9 @@ public class RobotDefinitionFixedFrame
 
       jointDef.setParentJoint(parentJoint);
 
-      if (joint.physics.getGroundContactPointGroup() != null)
+      if (joint.getGroundContactPointGroup() != null)
       {
-         for (GroundContactPoint groundContactPoint : (joint.physics.getGroundContactPointGroup().getGroundContactPoints()))
+         for (GroundContactPoint groundContactPoint : (joint.getGroundContactPointGroup().getGroundContactPoints()))
          {
             GroundContactDefinitionFixedFrame groundContactDefinitionFixedFrame = new GroundContactDefinitionFixedFrame();
             groundContactDefinitionFixedFrame.setName(groundContactPoint.getName());
@@ -384,9 +384,9 @@ public class RobotDefinitionFixedFrame
 
       }
 
-      if (joint.physics.getExternalForcePoints() != null)
+      if (joint.getExternalForcePoints() != null)
       {
-         for (ExternalForcePoint externalForcePoint : joint.physics.getExternalForcePoints())
+         for (ExternalForcePoint externalForcePoint : joint.getExternalForcePoints())
          {
             ExternalForcePointDefinitionFixedFrame externalForcePointDefinitionFixedFrame = new ExternalForcePointDefinitionFixedFrame();
             externalForcePointDefinitionFixedFrame.setName(externalForcePoint.getName());

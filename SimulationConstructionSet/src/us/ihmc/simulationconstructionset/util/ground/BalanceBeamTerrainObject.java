@@ -32,10 +32,10 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
       pBack.scale(-back);
 
       this.origin = new Point2d(origin);
-      double xMin = Math.min(pForward.x, pBack.x);
-      double xMax = Math.max(pForward.x, pBack.x);
-      double yMin = Math.min(pForward.y, pBack.y);
-      double yMax = Math.max(pForward.y, pBack.y);
+      double xMin = Math.min(pForward.getX(), pBack.getX());
+      double xMax = Math.max(pForward.getX(), pBack.getX());
+      double yMin = Math.min(pForward.getY(), pBack.getY());
+      double yMax = Math.max(pForward.getY(), pBack.getY());
       double zMin = Double.NEGATIVE_INFINITY;
       double zMax = zMin + heightAboveGround;
       
@@ -95,16 +95,16 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
 
    public void closestIntersectionTo(double x, double y, double z, Point3d intersection)
    {
-      intersection.x = x;    // Go Straight Up for now...
-      intersection.y = y;
-      intersection.z = heightAt(x, y, z);
+      intersection.setX(x);    // Go Straight Up for now...
+      intersection.setY(y);
+      intersection.setZ(heightAt(x, y, z));
    }
 
    public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
    {
-      intersection.x = x;    // Go Straight Up for now...
-      intersection.y = y;
-      intersection.z = heightAt(x, y, z);
+      intersection.setX(x);    // Go Straight Up for now...
+      intersection.setY(y);
+      intersection.setZ(heightAt(x, y, z));
 
       surfaceNormalAt(x, y, z, normal);
    }

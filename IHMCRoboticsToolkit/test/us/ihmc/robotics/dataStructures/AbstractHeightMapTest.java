@@ -309,7 +309,7 @@ public abstract class AbstractHeightMapTest
    
          public boolean isIncluded(Point3d test)
          {
-            return test.z<20;
+            return test.getZ()<20;
          }
          
       });

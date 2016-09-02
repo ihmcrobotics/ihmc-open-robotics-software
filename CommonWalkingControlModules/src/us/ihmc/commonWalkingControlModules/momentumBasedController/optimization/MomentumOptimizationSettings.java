@@ -5,8 +5,9 @@ import javax.vecmath.Vector3d;
 
 public class MomentumOptimizationSettings
 {
+ 
    private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.01);
-   private final Vector3d highLinearMomentumWeightForRecovery = new Vector3d(1.0, 1.0, 0.05);
+   private final Vector3d highLinearMomentumWeightForRecovery = new Vector3d(0.5, 0.5, 0.05);
    private final Vector3d angularMomentumWeight = new Vector3d(0.0, 0.0, 0.0);
 
    private Vector3d defaultAngularFootWeight = new Vector3d(0.5, 0.5, 0.5);
@@ -16,6 +17,10 @@ public class MomentumOptimizationSettings
 
    private Vector3d chestAngularWeight = new Vector3d(15.0, 10.0, 5.0);
    private Vector3d pelvisAngularWeight = new Vector3d(5.0, 5.0, 5.0);
+   
+   private int nBasisVectorsPerContactPoint = 4;
+   private int nContactPointsPerContactableBody = 4;
+   private int nContactableBodies = 2;
 
    private double jointAccelerationWeight = 0.005;
    private double jointJerkWeight = 0.1;
@@ -165,6 +170,22 @@ public class MomentumOptimizationSettings
    {
       copRateHighWeight.set(weight);
    }
+   
+
+   public void setNumberOfBasisVectorsPerContactPoint(int nBasisVectorsPerContactPoint)
+   {
+      this.nBasisVectorsPerContactPoint = nBasisVectorsPerContactPoint;
+   }
+
+   public void setNumberOfContactPointsPerContactableBody(int nContactPointsPerContactableBody)
+   {
+      this.nContactPointsPerContactableBody = nContactPointsPerContactableBody;
+   }
+
+   public void setNumberOfContactableBodies(int nContactableBodies)
+   {
+      this.nContactableBodies = nContactableBodies;
+   }
 
    public Vector3d getLinearMomentumWeight()
    {
@@ -289,5 +310,25 @@ public class MomentumOptimizationSettings
    public Vector3d getHandLinearTaskspaceWeight()
    {
       return handLinearTaskspaceWeight;
+   }
+
+   public int getNumberOfBasisVectorsPerContactPoint()
+   {
+      return nBasisVectorsPerContactPoint;
+   }
+
+   public int getNumberOfContactPointsPerContactableBody()
+   {
+      return nContactPointsPerContactableBody;
+   }
+
+   public int getNumberOfContactableBodies()
+   {
+      return nContactableBodies;
+   }
+
+   public int getRhoSize()
+   {
+      return  nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
    }
 }

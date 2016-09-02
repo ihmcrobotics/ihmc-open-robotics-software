@@ -55,15 +55,15 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
 
       if (jaxis == Axis.X)
       {
-         physics.u_i.x = 1.0;
+         physics.u_i.setX(1.0);
       }
       else if (jaxis == Axis.Y)
       {
-         physics.u_i.y = 1.0;
+         physics.u_i.setY(1.0);
       }
       else if (jaxis == Axis.Z)
       {
-         physics.u_i.z = 1.0;
+         physics.u_i.setZ(1.0);
       }
       else
       {

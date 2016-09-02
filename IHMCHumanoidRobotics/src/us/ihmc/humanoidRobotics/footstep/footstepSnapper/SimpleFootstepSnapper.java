@@ -110,8 +110,8 @@ public class SimpleFootstepSnapper implements FootstepSnapper
             throw new RuntimeException("Footstep Snapper does not have a mask");
          }
 
-         footstepMask.setPositionAndYaw(position.x, position.y, yaw);
-         pointList = heightMap.getAllPointsWithinArea(position.x, position.y, searchWidth, searchLength, footstepMask);
+         footstepMask.setPositionAndYaw(position.getX(), position.getY(), yaw);
+         pointList = heightMap.getAllPointsWithinArea(position.getX(), position.getY(), searchWidth, searchLength, footstepMask);
       }
 
       Plane3d fittedPlane = new Plane3d();
@@ -150,7 +150,7 @@ public class SimpleFootstepSnapper implements FootstepSnapper
          }
 
          footstepMask.setPositionAndYaw(position, footPose2d.getYaw());
-         pointList = heightMap.getAllPointsWithinArea(position.x, position.y, searchWidth, searchLength, footstepMask);
+         pointList = heightMap.getAllPointsWithinArea(position.getX(), position.getY(), searchWidth, searchLength, footstepMask);
       }
 
       Plane3d fittedPlane = new Plane3d();

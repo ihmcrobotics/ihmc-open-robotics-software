@@ -584,12 +584,12 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private void modifyHokuyoInertia(SDFLinkHolder linkHolder)
    {
-      linkHolder.getInertia().m00 = 0.000401606; // i_xx
-      linkHolder.getInertia().m01 = 4.9927e-08; // i_xy
-      linkHolder.getInertia().m02 = 1.0997e-05; // i_xz
-      linkHolder.getInertia().m11 = 0.00208115; // i_yy
-      linkHolder.getInertia().m12 = -9.8165e-09; // i_yz
-      linkHolder.getInertia().m22 = 0.00178402; // i_zz
+      linkHolder.getInertia().setM00(0.000401606); // i_xx
+      linkHolder.getInertia().setM01(4.9927e-08); // i_xy
+      linkHolder.getInertia().setM02(1.0997e-05); // i_xz
+      linkHolder.getInertia().setM11(0.00208115); // i_yy
+      linkHolder.getInertia().setM12(-9.8165e-09); // i_yz
+      linkHolder.getInertia().setM22(0.00178402); // i_zz
    }
 
    public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)

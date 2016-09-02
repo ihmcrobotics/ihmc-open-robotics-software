@@ -60,7 +60,7 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
 
    public double normSquared()
    {
-      return this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
+      return this.getX() * this.getX() + this.getY() * this.getY() + this.getZ() * this.getZ() + this.getW() * this.getW();
    }
 
    @Override

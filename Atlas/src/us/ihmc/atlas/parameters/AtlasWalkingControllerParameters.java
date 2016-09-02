@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParame
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -418,6 +419,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       ICPControlGains gains = new ICPControlGains("", registry);
 
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
       double kpParallel = 2.5;
       double kpOrthogonal = 1.5;
       double ki = 0.0;
@@ -428,6 +431,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
 
+      if (runningOnRealRobot) gains.setFeedbackPartMaxRate(1.0);
       return gains;
    }
 
@@ -568,8 +572,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 40.0; //80.0;
-      double kpZ = 40.0; //80.0;
+      double kpXY = 40.0;
+      double kpZ = 40.0;
       double zetaXY = realRobot ? 0.5 : 0.8;
       double zetaZ = realRobot ? 0.22 : 0.8;
       double maxAccel = realRobot ? 6.0 : 36.0;
@@ -627,7 +631,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double kpXY = 100.0;
       double kpZ = 0.0;
       double zetaXYZ = realRobot ? 0.2 : 1.0;
-      double kpXYOrientation = realRobot ? 100.0 : 100.0;
+      double kpXYOrientation = realRobot ? 100.0 : 175.0;
       double kpZOrientation = realRobot ? 100.0 : 200.0;
       double zetaOrientation = realRobot ? 0.2 : 1.0;
       // Reduce maxPositionAcceleration from 10 to 6 to prevent too high acceleration when hitting joint limits.
@@ -1006,7 +1010,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean useSupportState()
    {
-      return false;
+      return true;
    }
 
    /** {@inheritDoc} */
@@ -1018,8 +1022,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public String[] getJointsWithRestrictiveLimits()
+   public String[] getJointsWithRestrictiveLimits(JointLimitParameters jointLimitParametersToPack)
    {
+      jointLimitParametersToPack.setMaxAbsJointVelocity(9.0);
+      jointLimitParametersToPack.setJointLimitDistanceForMaxVelocity(30.0 * Math.PI/180.0);
+      jointLimitParametersToPack.setJointLimitFilterBreakFrequency(15.0);
+      jointLimitParametersToPack.setVelocityControlGain(30.0);
+
       String bkxName = jointMap.getSpineJointName(SpineJointName.SPINE_ROLL);
       String bkyName = jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
       String[] joints = {bkxName, bkyName};

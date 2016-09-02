@@ -34,7 +34,7 @@ public class DepthDataFilter extends DepthDataStore
 
       if (parameters.nearScan && isValidNearScan(point, sensorOrigin))
       {
-         send = nearScan.add(point.x, point.y, point.z) || send;
+         send = nearScan.add(point.getX(), point.getY(), point.getZ()) || send;
       }
 
       return send;
@@ -53,7 +53,7 @@ public class DepthDataFilter extends DepthDataStore
       {
          if (isPossibleGround(point, sensorOrigin))
          {
-            send = quadTree.addPoint(point.x, point.y, point.z) || send;
+            send = quadTree.addPoint(point.getX(), point.getY(), point.getZ()) || send;
          }
       }
 
@@ -69,9 +69,9 @@ public class DepthDataFilter extends DepthDataStore
    protected boolean isValidNearScan(Point3d point, Point3d lidarOrigin)
    {
       boolean valid = true;
-      valid &= point.z < lidarOrigin.z + parameters.nearScanZMaxAboveHead;
+      valid &= point.getZ() < lidarOrigin.getZ() + parameters.nearScanZMaxAboveHead;
 
-      Point3d center = new Point3d(lidarOrigin.x, lidarOrigin.y, point.z);
+      Point3d center = new Point3d(lidarOrigin.getX(), lidarOrigin.getY(), point.getZ());
       valid &= point.distance(center) < parameters.nearScanRadius;
 
 
@@ -91,7 +91,7 @@ public class DepthDataFilter extends DepthDataStore
    {
       final double footZ = 0;
 
-      return (point.z - footZ) < parameters.quadTreeZMax;
+      return (point.getZ() - footZ) < parameters.quadTreeZMax;
    }
 
    private boolean pointInRange(Point3d point, Point3d sensorOrigin)

@@ -48,8 +48,8 @@ public class CubicSplineCurveGenerator implements CurveGenerator
       for (int i = 0; i < points.length; i++)
       {
          arrayOfPoints[i] = new Point2d();
-         arrayOfPoints[i].y = points[i];
-         arrayOfPoints[i].x = (i + 1.0) / numberOfPoints;
+         arrayOfPoints[i].setY(points[i]);
+         arrayOfPoints[i].setX((i + 1.0) / numberOfPoints);
       }
 
       init(arrayOfPoints);
@@ -67,16 +67,16 @@ public class CubicSplineCurveGenerator implements CurveGenerator
       double xMaxTemp = Double.NEGATIVE_INFINITY;
       for (int i = 0; i < points.length; i++)
       {
-         this.xValues[i] = points[i].x;
-         this.yValues[i] = points[i].y;
+         this.xValues[i] = points[i].getX();
+         this.yValues[i] = points[i].getY();
 
-         xMinTemp = Math.min(xMinTemp, points[i].x);
-         xMaxTemp = Math.max(xMaxTemp, points[i].x);
+         xMinTemp = Math.min(xMinTemp, points[i].getX());
+         xMaxTemp = Math.max(xMaxTemp, points[i].getX());
 
          // make sure that x is in increasing order
          if (i > 0)
          {
-            if ((points[i].x - points[i - 1].x) <= 0.0)
+            if ((points[i].getX() - points[i - 1].getX()) <= 0.0)
                throw new RuntimeException("Points must be in increasing x order");
          }
       }

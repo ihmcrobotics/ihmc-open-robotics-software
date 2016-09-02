@@ -42,7 +42,7 @@ public class DRCGraspCylinderEnvironment implements CommonAvatarEnvironmentInter
       for (Point3d wheelLocation : wheelLocations)
       {
          String cylinderName = "Cylinder" + i;
-         createRotatedZUpCylinder(cylinderName, 0.2, 0.03, wheelLocation.x, wheelLocation.y, wheelLocation.z, yawAngles_degrees.get(wheelLocation),
+         createRotatedZUpCylinder(cylinderName, 0.2, 0.03, wheelLocation.getX(), wheelLocation.getY(), wheelLocation.getZ(), yawAngles_degrees.get(wheelLocation),
                pitchAngles_degrees.get(wheelLocation),  rollAngles_degrees.get(wheelLocation), forceVectorScale);
          i++;
       }

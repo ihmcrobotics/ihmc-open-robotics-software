@@ -420,10 +420,10 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 
    private String toStringFrameOrientationForVizualizer(FrameOrientation frameOrientation)
    {
-      double qx = frameOrientation.getQuaternionCopy().x;
-      double qy = frameOrientation.getQuaternionCopy().y;
-      double qz = frameOrientation.getQuaternionCopy().z;
-      double qs = frameOrientation.getQuaternionCopy().w;
+      double qx = frameOrientation.getQuaternionCopy().getX();
+      double qy = frameOrientation.getQuaternionCopy().getY();
+      double qz = frameOrientation.getQuaternionCopy().getZ();
+      double qs = frameOrientation.getQuaternionCopy().getW();
       return " = new FrameOrientation(worldFrame, " + qx + ", " + qy + ", " + qz + ", " + qs + ");";
    }
 

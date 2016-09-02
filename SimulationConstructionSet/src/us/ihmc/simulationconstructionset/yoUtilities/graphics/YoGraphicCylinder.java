@@ -61,9 +61,9 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
 
    public void getBasePosition(Point3d point3d)
    {
-      point3d.x = this.baseX.getDoubleValue();
-      point3d.y = this.baseY.getDoubleValue();
-      point3d.z = this.baseZ.getDoubleValue();
+      point3d.setX(this.baseX.getDoubleValue());
+      point3d.setY(this.baseY.getDoubleValue());
+      point3d.setZ(this.baseZ.getDoubleValue());
    }
 
    public void getBasePosition(FramePoint framePoint)
@@ -98,7 +98,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
       else
          z_rot.normalize();
 
-      if (Math.abs(z_rot.x) <= 0.99)
+      if (Math.abs(z_rot.getX()) <= 0.99)
          x_rot.set(1.0, 0.0, 0.0);
       else
          x_rot.set(0.0, 1.0, 0.0);

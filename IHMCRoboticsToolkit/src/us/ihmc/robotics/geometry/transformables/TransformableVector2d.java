@@ -43,18 +43,18 @@ public class TransformableVector2d extends Vector2d implements GeometryObject<Tr
 
    public void applyTransform(RigidBodyTransform transform, boolean requireTransformInPlane)
    {
-      temporaryTransformedVector.set(this.x, this.y, 0.0);
+      temporaryTransformedVector.set(this.getX(), this.getY(), 0.0);
       transform.transform(temporaryTransformedVector);
 
       if (requireTransformInPlane)
          checkIsTransformationInPlane(temporaryTransformedVector);
 
-      this.set(temporaryTransformedVector.x, temporaryTransformedVector.y);
+      this.set(temporaryTransformedVector.getX(), temporaryTransformedVector.getY());
    }
 
    private void checkIsTransformationInPlane(Vector3d transformedVector)
    {
-      if (Math.abs(transformedVector.z) > epsilon)
+      if (Math.abs(transformedVector.getZ()) > epsilon)
          throw new RuntimeException("Cannot transform FramePoint2d to a plane with a different surface normal");
    }
    

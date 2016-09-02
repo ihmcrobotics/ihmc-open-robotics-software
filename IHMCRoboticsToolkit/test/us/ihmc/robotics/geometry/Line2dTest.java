@@ -726,16 +726,16 @@ public class Line2dTest
          Point2d pointOnLine = new Point2d(firstPointOnLine);
          double distance = randomDouble(random, 10.0);
          double perpendicularDistance = randomDouble(random, 10.0);
-         pointOnLine.x = pointOnLine.x + distance * normalizedVector.x;
-         pointOnLine.y = pointOnLine.y + distance * normalizedVector.y;
+         pointOnLine.setX(pointOnLine.getX() + distance * normalizedVector.getX());
+         pointOnLine.setY(pointOnLine.getY() + distance * normalizedVector.getY());
          Point2d pointOffLine = new Point2d(pointOnLine);
-         pointOffLine.x = pointOffLine.x + perpendicularDistance * perpendicular.x;
-         pointOffLine.y = pointOffLine.y + perpendicularDistance * perpendicular.y;
+         pointOffLine.setX(pointOffLine.getX() + perpendicularDistance * perpendicular.getX());
+         pointOffLine.setY(pointOffLine.getY() + perpendicularDistance * perpendicular.getY());
 
          line2d.orthogonalProjection(pointOffLine);
 
-         assertEquals(pointOnLine.x, pointOffLine.x, delta);
-         assertEquals(pointOnLine.y, pointOffLine.y, delta);
+         assertEquals(pointOnLine.getX(), pointOffLine.getX(), delta);
+         assertEquals(pointOnLine.getY(), pointOffLine.getY(), delta);
       }
    }
 
@@ -756,16 +756,16 @@ public class Line2dTest
          Point2d pointOnLine = new Point2d(firstPointOnLine);
          double distance = randomDouble(random, 10.0);
          double perpendicularDistance = randomDouble(random, 10.0);
-         pointOnLine.x = pointOnLine.x + distance * normalizedVector.x;
-         pointOnLine.y = pointOnLine.y + distance * normalizedVector.y;
+         pointOnLine.setX(pointOnLine.getX() + distance * normalizedVector.getX());
+         pointOnLine.setY(pointOnLine.getY() + distance * normalizedVector.getY());
          Point2d pointOffLine = new Point2d(pointOnLine);
-         pointOffLine.x = pointOffLine.x + perpendicularDistance * perpendicular.x;
-         pointOffLine.y = pointOffLine.y + perpendicularDistance * perpendicular.y;
+         pointOffLine.setX(pointOffLine.getX() + perpendicularDistance * perpendicular.getX());
+         pointOffLine.setY(pointOffLine.getY() + perpendicularDistance * perpendicular.getY());
 
          Point2d orthogonalCopy = line2d.orthogonalProjectionCopy(pointOffLine);
 
-         assertEquals(pointOnLine.x, orthogonalCopy.x, delta);
-         assertEquals(pointOnLine.y, orthogonalCopy.y, delta);
+         assertEquals(pointOnLine.getX(), orthogonalCopy.getX(), delta);
+         assertEquals(pointOnLine.getY(), orthogonalCopy.getY(), delta);
          assertNotSame(pointOnLine, orthogonalCopy);
          assertNotSame(pointOffLine, orthogonalCopy);
       }
@@ -797,8 +797,8 @@ public class Line2dTest
          Vector2d direction = new Vector2d(randomDouble(random, 10.0), randomDouble(random, 10.0));
          Line2d lineThroughEndPoint = new Line2d(firstPoint, direction);
          Point2d intersection = lineThroughEndPoint.intersectionWith(lineSegment2d);
-         assertEquals(firstPoint.x, intersection.x, delta);
-         assertEquals(firstPoint.y, intersection.y, delta);
+         assertEquals(firstPoint.getX(), intersection.getX(), delta);
+         assertEquals(firstPoint.getY(), intersection.getY(), delta);
          lineThroughEndPoint.setPoint2d(secondPoint);
          intersection = lineThroughEndPoint.intersectionWith(lineSegment2d);
 
@@ -812,8 +812,8 @@ public class Line2dTest
 
          Line2d intersectingLine = new Line2d(midPoint, direction);
          intersection = intersectingLine.intersectionWith(lineSegment2d);
-         assertEquals(midPoint.x, intersection.x, delta);
-         assertEquals(midPoint.y, intersection.y, delta);
+         assertEquals(midPoint.getX(), intersection.getX(), delta);
+         assertEquals(midPoint.getY(), intersection.getY(), delta);
       }
    }
 
@@ -836,11 +836,11 @@ public class Line2dTest
          Point2d intersectionFirstWithSecond = firstLine.intersectionWith(secondLine);
          Point2d intersectionSecondWithFirst = secondLine.intersectionWith(firstLine);
 
-         assertEquals(secondPointOnFirstLine.x, intersectionFirstWithSecond.x, delta);
-         assertEquals(secondPointOnFirstLine.y, intersectionFirstWithSecond.y, delta);
+         assertEquals(secondPointOnFirstLine.getX(), intersectionFirstWithSecond.getX(), delta);
+         assertEquals(secondPointOnFirstLine.getY(), intersectionFirstWithSecond.getY(), delta);
 
-         assertEquals(secondPointOnFirstLine.x, intersectionSecondWithFirst.x, delta);
-         assertEquals(secondPointOnFirstLine.y, intersectionSecondWithFirst.y, delta);
+         assertEquals(secondPointOnFirstLine.getX(), intersectionSecondWithFirst.getX(), delta);
+         assertEquals(secondPointOnFirstLine.getY(), intersectionSecondWithFirst.getY(), delta);
 
          Line2d firstLineCopy = new Line2d(firstLine);
          Point2d intersectionWithParallel = firstLine.intersectionWith(firstLineCopy);
@@ -877,8 +877,8 @@ public class Line2dTest
 
          Line2d orthogonalLine = line2d.perpendicularLineThroughPoint(firstPointOnLine);
          Point2d orthogonalProjection = orthogonalLine.orthogonalProjectionCopy(distantPoint);
-         double xdiff = orthogonalProjection.x - firstPointOnLine.x;
-         double ydiff = orthogonalProjection.y - firstPointOnLine.y;
+         double xdiff = orthogonalProjection.getX() - firstPointOnLine.getX();
+         double ydiff = orthogonalProjection.getY() - firstPointOnLine.getY();
          double distance = Math.sqrt(xdiff * xdiff + ydiff * ydiff);
 
          assertEquals(distance, calculatedDistance, delta);
@@ -1048,9 +1048,9 @@ public class Line2dTest
          Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
          Point2d checkPoint = new Point2d(secondPointOnLine);
          double shift = (randomDouble(random) + maxRandomValue) / 2.0 + 1.0;    // Makes sure the shift is strictly positive.
-         checkPoint.x = checkPoint.x + shift;
+         checkPoint.setX(checkPoint.getX() + shift);
          assertTrue(line2d.isPointInFrontOfLine(checkPoint));
-         checkPoint.x = checkPoint.x - 2.0 * shift;
+         checkPoint.setX(checkPoint.getX() - 2.0 * shift);
          assertFalse(line2d.isPointInFrontOfLine(checkPoint));
 
          // TODO: is a test necessary where the point is exactly on the line? These kind of tests might fail due to floating point errors.
@@ -1091,9 +1091,9 @@ public class Line2dTest
          Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
          Point2d checkPoint = new Point2d(secondPointOnLine);
          double shift = (randomDouble(random) - maxRandomValue) / 2.0 - 1.0;    // Makes sure the shift is strictly negative.
-         checkPoint.x = checkPoint.x + shift;
+         checkPoint.setX(checkPoint.getX() + shift);
          assertTrue(line2d.isPointBehindLine(checkPoint));
-         checkPoint.x = checkPoint.x - 2.0 * shift;
+         checkPoint.setX(checkPoint.getX() - 2.0 * shift);
          assertFalse(line2d.isPointBehindLine(checkPoint));
 
          // TODO: is a test necessary where the point is exactly on the line? These kind of tests might fail due to floating point errors.
@@ -1134,7 +1134,7 @@ public class Line2dTest
          Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
          Point2d checkPoint = new Point2d(secondPointOnLine);
          double shift = randomDouble(random);
-         checkPoint.x = checkPoint.x + shift;
+         checkPoint.setX(checkPoint.getX() + shift);
          assertFalse(line2d.isPointBehindLine(checkPoint) == line2d.isPointInFrontOfLine(checkPoint));
       }
    }
@@ -1266,57 +1266,57 @@ public class Line2dTest
          assertFalse(line2d.containsNaN());
 
          Point2d point = line2d.getPoint();
-         point.x = Double.NaN;
+         point.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         point.y = Double.NaN;
+         point.setY(Double.NaN);
          assertTrue(line2d.containsNaN());
 
          Vector2d vector = line2d.getNormalizedVector();
          Vector2d vectorCopy = new Vector2d();
          line2d.getNormalizedVector(vectorCopy);
-         vector.x = Double.NaN;
+         vector.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = vectorCopy.x;
-         vector.y = Double.NaN;
+         vector.setX(vectorCopy.getX());
+         vector.setY(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = Double.NaN;
+         vector.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = vectorCopy.x;
-         point.y = Double.NaN;
+         vector.setX(vectorCopy.getX());
+         point.setY(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         point.x = Double.NaN;
+         point.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.y = vectorCopy.y;
-         vector.x = Double.NaN;
+         vector.setY(vectorCopy.getY());
+         vector.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         point.y = Double.NaN;
+         point.setY(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = vectorCopy.x;
-         point.x = Double.NaN;
+         vector.setX(vectorCopy.getX());
+         point.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = Double.NaN;
+         vector.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = vectorCopy.x;
-         vector.y = Double.NaN;
+         vector.setX(vectorCopy.getX());
+         vector.setY(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = Double.NaN;
+         vector.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         point.y = Double.NaN;
+         point.setY(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         point.x = Double.NaN;
+         point.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
       }
    }
@@ -1338,8 +1338,8 @@ public class Line2dTest
          Point2d checkPoint = randomPoint(random);
          parallelLine.setParallelLineThroughPoint(checkPoint);
 
-         assertEquals(line2d.getNormalizedVector().x, parallelLine.getNormalizedVector().x, delta);
-         assertEquals(line2d.getNormalizedVector().y, parallelLine.getNormalizedVector().y, delta);
+         assertEquals(line2d.getNormalizedVector().getX(), parallelLine.getNormalizedVector().getX(), delta);
+         assertEquals(line2d.getNormalizedVector().getY(), parallelLine.getNormalizedVector().getY(), delta);
 
          assertTrue(parallelLine.containsEpsilon(checkPoint, delta));
       }
@@ -1370,10 +1370,10 @@ public class Line2dTest
       line.getNormalizedVector(vector);
 
       line.applyTransform(transform);
-      assertEquals("pure translation failed", point.x + translation.x, line.point.x, delta);
-      assertEquals("pure translation failed", point.y + translation.y, line.point.y, delta);
-      assertEquals("pure translation failed", vector.x, line.normalizedVector.x, delta);
-      assertEquals("pure translation failed", vector.y, line.normalizedVector.y, delta);
+      assertEquals("pure translation failed", point.getX() + translation.getX(), line.point.getX(), delta);
+      assertEquals("pure translation failed", point.getY() + translation.getY(), line.point.getY(), delta);
+      assertEquals("pure translation failed", vector.getX(), line.normalizedVector.getX(), delta);
+      assertEquals("pure translation failed", vector.getY(), line.normalizedVector.getY(), delta);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
@@ -1427,14 +1427,14 @@ public class Line2dTest
 
       line.applyTransform(transform);
 
-      double alpha = eulerAngles.z;
+      double alpha = eulerAngles.getZ();
       double sina = Math.sin(alpha);
       double cosa = Math.cos(alpha);
 
-      assertEquals("pure rotation failed", point.x * cosa - point.y * sina, line.point.x, delta);
-      assertEquals("pure rotation failed", point.x * sina + point.y * cosa, line.point.y, delta);
-      assertEquals("pure rotation failed", vector.x * cosa - vector.y * sina, line.normalizedVector.x, delta);
-      assertEquals("pure rotation failed", vector.x * sina + vector.y * cosa, line.normalizedVector.y, delta);
+      assertEquals("pure rotation failed", point.getX() * cosa - point.getY() * sina, line.point.getX(), delta);
+      assertEquals("pure rotation failed", point.getX() * sina + point.getY() * cosa, line.point.getY(), delta);
+      assertEquals("pure rotation failed", vector.getX() * cosa - vector.getY() * sina, line.normalizedVector.getX(), delta);
+      assertEquals("pure rotation failed", vector.getX() * sina + vector.getY() * cosa, line.normalizedVector.getY(), delta);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -1505,14 +1505,14 @@ public class Line2dTest
 
       line.applyTransform(transform);
 
-      double alpha = eulerAngles.z;
+      double alpha = eulerAngles.getZ();
       double sina = Math.sin(alpha);
       double cosa = Math.cos(alpha);
 
-      assertEquals("pure rotation failed", point.x * cosa - point.y * sina + translation.x, line.point.x, delta);
-      assertEquals("pure rotation failed", point.x * sina + point.y * cosa + translation.y, line.point.y, delta);
-      assertEquals("pure rotation failed", vector.x * cosa - vector.y * sina, line.normalizedVector.x, delta);
-      assertEquals("pure rotation failed", vector.x * sina + vector.y * cosa, line.normalizedVector.y, delta);
+      assertEquals("pure rotation failed", point.getX() * cosa - point.getY() * sina + translation.getX(), line.point.getX(), delta);
+      assertEquals("pure rotation failed", point.getX() * sina + point.getY() * cosa + translation.getY(), line.point.getY(), delta);
+      assertEquals("pure rotation failed", vector.getX() * cosa - vector.getY() * sina, line.normalizedVector.getX(), delta);
+      assertEquals("pure rotation failed", vector.getX() * sina + vector.getY() * cosa, line.normalizedVector.getY(), delta);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -1544,10 +1544,10 @@ public class Line2dTest
       assertNotSame(transformedCopy, line);
       assertNotSame(transformedCopy.point, line.point);
       assertNotSame(transformedCopy.normalizedVector, line.normalizedVector);
-      assertEquals(line.point.x, transformedCopy.point.x, delta);
-      assertEquals(line.point.y, transformedCopy.point.y, delta);
-      assertEquals(line.normalizedVector.x, transformedCopy.normalizedVector.x, delta);
-      assertEquals(line.normalizedVector.y, transformedCopy.normalizedVector.y, delta);
+      assertEquals(line.point.getX(), transformedCopy.point.getX(), delta);
+      assertEquals(line.point.getY(), transformedCopy.point.getY(), delta);
+      assertEquals(line.normalizedVector.getX(), transformedCopy.normalizedVector.getX(), delta);
+      assertEquals(line.normalizedVector.getY(), transformedCopy.normalizedVector.getY(), delta);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)

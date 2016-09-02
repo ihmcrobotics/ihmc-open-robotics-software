@@ -13,37 +13,37 @@ public class BehaviorStateMachine <E extends Enum<E>> extends GenericStateMachin
 
    public void initialize()
    {
-      BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
+      BehaviorStateWrapper<E> currentState = getCurrentState();
       currentState.doTransitionIntoAction();
    }
 
    public void pause()
    {
-      BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
+      BehaviorStateWrapper<E> currentState = getCurrentState();
       currentState.pause();
    }
 
    public void resume()
    {
-      BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
+      BehaviorStateWrapper<E> currentState = getCurrentState();
       currentState.resume();
    }
 
    public void stop()
    {
-      BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
+      BehaviorStateWrapper<E> currentState = getCurrentState();
       currentState.stop();
    }
 
    public void doPostBehaviorCleanup()
    {
-      BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
+      BehaviorStateWrapper<E> currentState = getCurrentState();
       currentState.doPostBehaviorCleanup();
    }
 
    public void enableActions()
    {
-      BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
+      BehaviorStateWrapper<E> currentState = getCurrentState();
       currentState.enableActions();
    }
 }

@@ -57,9 +57,9 @@ public class KinematicsToolboxOutputConverter
          joint.setQ(q);
       }
       Vector3f translation = solution.getPelvisTranslation();
-      rootJoint.setPosition(translation.x, translation.y, translation.z);
+      rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
       Quat4f orientation = solution.getPelvisOrientation();
-      rootJoint.setRotation(orientation.x, orientation.y, orientation.z, orientation.w);
+      rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getW());
       fullRobotModelToUseForConversion.updateFrames();
    }
 

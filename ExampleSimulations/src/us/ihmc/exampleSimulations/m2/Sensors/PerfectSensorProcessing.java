@@ -431,9 +431,9 @@ public class PerfectSensorProcessing
          for (int i = 0; i < footPositions[0].length; i++)
          {
             footPositions[j][i] = new Point3d();
-            footPositions[j][i].x = groundContactFramePointsPositions[j][i * 3 + 0].getDoubleValue();
-            footPositions[j][i].y = groundContactFramePointsPositions[j][i * 3 + 1].getDoubleValue();
-            footPositions[j][i].z = groundContactFramePointsPositions[j][i * 3 + 2].getDoubleValue();
+            footPositions[j][i].setX(groundContactFramePointsPositions[j][i * 3 + 0].getDoubleValue());
+            footPositions[j][i].setY(groundContactFramePointsPositions[j][i * 3 + 1].getDoubleValue());
+            footPositions[j][i].setZ(groundContactFramePointsPositions[j][i * 3 + 2].getDoubleValue());
          }
       }
 
@@ -445,9 +445,9 @@ public class PerfectSensorProcessing
          for (int i = 0; i < footForces[0].length; i++)
          {
             footForces[j][i] = new Point3d();
-            footForces[j][i].x = groundContactFramePointsForces[j][i * 3 + 0].getDoubleValue();
-            footForces[j][i].y = groundContactFramePointsForces[j][i * 3 + 1].getDoubleValue();
-            footForces[j][i].z = groundContactFramePointsForces[j][i * 3 + 2].getDoubleValue();
+            footForces[j][i].setX(groundContactFramePointsForces[j][i * 3 + 0].getDoubleValue());
+            footForces[j][i].setY(groundContactFramePointsForces[j][i * 3 + 1].getDoubleValue());
+            footForces[j][i].setZ(groundContactFramePointsForces[j][i * 3 + 2].getDoubleValue());
          }
       }
 

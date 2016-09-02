@@ -814,18 +814,18 @@ public class QuadrupedSupportPolygonTest
       Point2d maxToPack = new Point2d();
       poly.getBounds(minToPack , maxToPack);
       
-      assertEquals("not correct", minToPack.x, 0.0, 1e-7);
-      assertEquals("not correct", minToPack.y, 0.0, 1e-7);
-      assertEquals("not correct", maxToPack.x, 1.0, 1e-7);
-      assertEquals("not correct", maxToPack.y, 1.0, 1e-7);
+      assertEquals("not correct", minToPack.getX(), 0.0, 1e-7);
+      assertEquals("not correct", minToPack.getY(), 0.0, 1e-7);
+      assertEquals("not correct", maxToPack.getX(), 1.0, 1e-7);
+      assertEquals("not correct", maxToPack.getY(), 1.0, 1e-7);
       
       poly = createPolygonWithoutLeg(RobotQuadrant.FRONT_LEFT);
       poly.getBounds(minToPack , maxToPack);
       
-      assertEquals("not correct", minToPack.x, 0.0, 1e-7);
-      assertEquals("not correct", minToPack.y, 0.0, 1e-7);
-      assertEquals("not correct", maxToPack.x, 1.0, 1e-7);
-      assertEquals("not correct", maxToPack.y, 1.0, 1e-7);
+      assertEquals("not correct", minToPack.getX(), 0.0, 1e-7);
+      assertEquals("not correct", minToPack.getY(), 0.0, 1e-7);
+      assertEquals("not correct", maxToPack.getX(), 1.0, 1e-7);
+      assertEquals("not correct", maxToPack.getY(), 1.0, 1e-7);
    }
    
    @DeployableTestMethod(estimatedDuration = 0.0)

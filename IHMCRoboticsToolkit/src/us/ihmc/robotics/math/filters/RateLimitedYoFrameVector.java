@@ -94,9 +94,9 @@ public class RateLimitedYoFrameVector extends YoFrameVector
 
    public void update(Vector3d vectorUnfiltered)
    {
-      x.update(vectorUnfiltered.x);
-      y.update(vectorUnfiltered.y);
-      z.update(vectorUnfiltered.z);
+      x.update(vectorUnfiltered.getX());
+      y.update(vectorUnfiltered.getY());
+      z.update(vectorUnfiltered.getZ());
    }
 
    public void update(FrameVector vectorUnfiltered)

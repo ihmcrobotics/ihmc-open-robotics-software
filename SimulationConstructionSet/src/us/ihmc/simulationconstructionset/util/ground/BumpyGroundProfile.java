@@ -69,9 +69,9 @@ public class BumpyGroundProfile extends GroundProfileFromHeightMap
       {
          if (normalToPack != null)
          {
-            normalToPack.x = 0.0;
-            normalToPack.y = 0.0;
-            normalToPack.z = 1.0;
+            normalToPack.setX(0.0);
+            normalToPack.setY(0.0);
+            normalToPack.setZ(1.0);
          }
          
          return 0.0;
@@ -87,9 +87,9 @@ public class BumpyGroundProfile extends GroundProfileFromHeightMap
                + xAmp2 * 2.0 * Math.PI * xFreq2 * Math.cos(2.0 * Math.PI * xFreq2 * x);
          double dzdy = yAmp1 * 2.0 * Math.PI * yFreq1 * Math.cos(2.0 * Math.PI * yFreq1 * y)
                + yAmp2 * 2.0 * Math.PI * yFreq2 * Math.cos(2.0 * Math.PI * yFreq2 * y);
-         normalToPack.x = -dzdx;
-         normalToPack.y = -dzdy;
-         normalToPack.z = 1.0;
+         normalToPack.setX(-dzdx);
+         normalToPack.setY(-dzdy);
+         normalToPack.setZ(1.0);
 
          normalToPack.normalize();
       }

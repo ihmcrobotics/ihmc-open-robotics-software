@@ -107,24 +107,24 @@ public class ReachabilityMapFileWriter
       currentCellIndex = 1;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
       currentRow.createCell(currentCellIndex++).setCellValue("Transform to parent frame:");
-      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.mat00);
-      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.mat01);
-      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.mat02);
-      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.mat03);
+      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM00());
+      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM01());
+      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM02());
+      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM03());
 
       currentCellIndex = 2;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
-      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.mat10);
-      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.mat11);
-      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.mat12);
-      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.mat13);
+      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM10());
+      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM11());
+      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM12());
+      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM13());
 
       currentCellIndex = 2;
       currentRow = descriptionSheet.createRow(currentRowIndex++);
-      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.mat20);
-      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.mat21);
-      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.mat22);
-      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.mat23);
+      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM20());
+      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM21());
+      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM22());
+      currentRow.createCell(currentCellIndex++).setCellValue(transformToParent.getM23());
 
       currentCellIndex = 1;
       currentRow = descriptionSheet.createRow(currentRowIndex++);

@@ -102,8 +102,8 @@ public class CollisionExampleTest1
       // Compute the K Matrix:
 
 
-      r1_twidle = new Matrix3d(0.0, -r1.z, r1.y, r1.z, 0.0, -r1.x, -r1.y, r1.x, 0.0);
-      r2_twidle = new Matrix3d(0.0, -r2.z, r2.y, r2.z, 0.0, -r2.x, -r2.y, r2.x, 0.0);
+      r1_twidle = new Matrix3d(0.0, -r1.getZ(), r1.getY(), r1.getZ(), 0.0, -r1.getX(), -r1.getY(), r1.getX(), 0.0);
+      r2_twidle = new Matrix3d(0.0, -r2.getZ(), r2.getY(), r2.getZ(), 0.0, -r2.getX(), -r2.getY(), r2.getX(), 0.0);
 
 
       Matrix3d I1_inv = new Matrix3d(I1);

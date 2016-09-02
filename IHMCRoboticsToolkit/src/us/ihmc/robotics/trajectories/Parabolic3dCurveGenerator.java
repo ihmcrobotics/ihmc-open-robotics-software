@@ -76,7 +76,7 @@ public class Parabolic3dCurveGenerator
 
    public static ArrayList<Point3d> generate3dParabola(Point3d startPoint, Point3d endPoint, double apexOfParabola, int numberOfPointsToGenerate)
    {
-      if (apexOfParabola <= Math.max(startPoint.z, endPoint.z))
+      if (apexOfParabola <= Math.max(startPoint.getZ(), endPoint.getZ()))
       {
          System.err.println("Apex should be higher than the maxmium z- value of Start/Target points");
       }
@@ -91,12 +91,12 @@ public class Parabolic3dCurveGenerator
       ArrayList<Point3d> pointsOnPath = new ArrayList<Point3d>(numberOfPointsToGenerate);
       double[] coefficientsOfParabola = new double[3];
 
-      double lengthOfParabola = Math.sqrt(MathTools.square(endPoint.x - startPoint.x) + MathTools.square(endPoint.y - startPoint.y));
+      double lengthOfParabola = Math.sqrt(MathTools.square(endPoint.getX() - startPoint.getX()) + MathTools.square(endPoint.getY() - startPoint.getY()));
       double delta = lengthOfParabola / (numberOfPointsToGenerate - 1);
 
-      double angle = Math.atan2((endPoint.y - startPoint.y), (endPoint.x - startPoint.x));
+      double angle = Math.atan2((endPoint.getY() - startPoint.getY()), (endPoint.getX() - startPoint.getX()));
 
-      coefficientsOfParabola = findCoefficientOfParabola(startPoint.z, endPoint.z, lengthOfParabola, apexOfParabola);
+      coefficientsOfParabola = findCoefficientOfParabola(startPoint.getZ(), endPoint.getZ(), lengthOfParabola, apexOfParabola);
 
       double cosineAngle = Math.cos(angle);
       double sinAngle = Math.sin(angle);
@@ -105,9 +105,9 @@ public class Parabolic3dCurveGenerator
       {
          double deltaTimesI = delta * (i);
 
-         pointToAdd.x = startPoint.x + deltaTimesI * cosineAngle;
-         pointToAdd.y = startPoint.y + deltaTimesI * sinAngle;
-         pointToAdd.z = coefficientsOfParabola[2] * deltaTimesI * deltaTimesI + coefficientsOfParabola[1] * deltaTimesI + coefficientsOfParabola[0];
+         pointToAdd.setX(startPoint.getX() + deltaTimesI * cosineAngle);
+         pointToAdd.setY(startPoint.getY() + deltaTimesI * sinAngle);
+         pointToAdd.setZ(coefficientsOfParabola[2] * deltaTimesI * deltaTimesI + coefficientsOfParabola[1] * deltaTimesI + coefficientsOfParabola[0]);
          pointsOnPath.add(new Point3d(pointToAdd));
       }
 

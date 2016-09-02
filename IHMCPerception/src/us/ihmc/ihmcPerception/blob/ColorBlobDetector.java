@@ -199,15 +199,15 @@ public class ColorBlobDetector
          if (count++ % 10 == 0)
          {
             String timeStr = String.valueOf(FormattingTools.roundToSignificantFigures(blobTimer.lapElapsed(), 2));
-            String xStr = String.valueOf(FormattingTools.roundToSignificantFigures(ballLocation.x, 2));
-            String yStr = String.valueOf(FormattingTools.roundToSignificantFigures(ballLocation.y, 2));
+            String xStr = String.valueOf(FormattingTools.roundToSignificantFigures(ballLocation.getX(), 2));
+            String yStr = String.valueOf(FormattingTools.roundToSignificantFigures(ballLocation.getY(), 2));
             System.out.println("imgx: " + bufferedImage.getWidth() + " imgy: " + bufferedImage.getHeight() + " hue: " + hue + " sat: " + sat + " val: " + val + " time: " + timeStr + " x: " + xStr + " y: " + yStr);
          }
          
          Graphics2D g2d = bufferedImage.createGraphics();
          g2d.setStroke(new BasicStroke(3));
          g2d.setColor(Color.BLUE);
-         g2d.drawOval((int) (ballLocation.x * bufferedImage.getWidth()), (int) ((1.0 - ballLocation.y) * bufferedImage.getHeight()), 5, 5);
+         g2d.drawOval((int) (ballLocation.getX() * bufferedImage.getWidth()), (int) ((1.0 - ballLocation.getY()) * bufferedImage.getHeight()), 5, 5);
          g2d.dispose();
          
          if (imagePanel == null)

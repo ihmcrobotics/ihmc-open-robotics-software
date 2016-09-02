@@ -118,7 +118,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
       RigidBodyTransform planeInv = new RigidBodyTransform(plane);
       planeInv.invert();
       planeInv.transform(point);
-      return new Point2d(point.x, point.y);
+      return new Point2d(point.getX(), point.getY());
    }
 
    public void setupContactPointsFromRobotModel(DRCRobotModel robot, boolean removeExistingContacts)

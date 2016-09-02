@@ -202,9 +202,9 @@ public class CollisionGroundContactModel implements GroundContactModel, MovingGr
             double penetration_squared;
             if (profile3D != null)
             {
-               penetration_squared = (gc.getX() - closestIntersection.x) * (gc.getX() - closestIntersection.x)
-                                     + (gc.getY() - closestIntersection.y) * (gc.getY() - closestIntersection.y)
-                                     + (gc.getZ() - closestIntersection.z) * (gc.getZ() - closestIntersection.z);
+               penetration_squared = (gc.getX() - closestIntersection.getX()) * (gc.getX() - closestIntersection.getX())
+                                     + (gc.getY() - closestIntersection.getY()) * (gc.getY() - closestIntersection.getY())
+                                     + (gc.getZ() - closestIntersection.getZ()) * (gc.getZ() - closestIntersection.getZ());
             }
             else
                penetration_squared = gc.getZ() * gc.getZ();
@@ -239,7 +239,7 @@ public class CollisionGroundContactModel implements GroundContactModel, MovingGr
           * gc.fz.set(p_world.z);
           */
 
-         if (p_world.z < 0.0)
+         if (p_world.getZ() < 0.0)
          {
             // System.out.println("Negative impulse!!!");
             // System.out.println("p_world = " + p_world);

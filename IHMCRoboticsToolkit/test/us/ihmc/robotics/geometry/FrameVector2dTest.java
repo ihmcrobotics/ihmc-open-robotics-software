@@ -322,7 +322,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
 
       Vector3d vectorToTransform = RandomTools.generateRandomVector(random, 0.0, 0.0, 0.0, 100.0, 100.0, 0.0);
-      FrameVector2d vectorToTest = new FrameVector2d(null, new Vector2d(vectorToTransform.x, vectorToTransform.y)); 
+      FrameVector2d vectorToTest = new FrameVector2d(null, new Vector2d(vectorToTransform.getX(), vectorToTransform.getY())); 
 
       try
       {
@@ -355,7 +355,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
 
       Vector3d vectorToTransform = RandomTools.generateRandomVector(random, 0.0, 0.0, 0.0, 100.0, 100.0, 0.0);
-      FrameVector2d vectorToTest = new FrameVector2d(null, new Vector2d(vectorToTransform.x, vectorToTransform.y)); 
+      FrameVector2d vectorToTest = new FrameVector2d(null, new Vector2d(vectorToTransform.getX(), vectorToTransform.getY())); 
 
       try
       {

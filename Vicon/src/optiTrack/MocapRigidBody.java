@@ -17,13 +17,13 @@ public class MocapRigidBody extends QuaternionPose
    public MocapRigidBody(int id, Vector3d position, Quat4d orientation, ArrayList<MocapMarker> listOfAssociatedMarkers, boolean isTracked)
    {
       this.id = id;
-      this.xPosition = (float) position.x;
-      this.yPosition = (float) position.y;
-      this.zPosition = (float) position.z;
-      this.qw = (float) orientation.w;
-      this.qx = (float) orientation.x;
-      this.qy = (float) orientation.y;
-      this.qz = (float) orientation.z;
+      this.xPosition = (float) position.getX();
+      this.yPosition = (float) position.getY();
+      this.zPosition = (float) position.getZ();
+      this.qw = (float) orientation.getW();
+      this.qx = (float) orientation.getX();
+      this.qy = (float) orientation.getY();
+      this.qz = (float) orientation.getZ();
 
       this.listOfAssociatedMarkers = listOfAssociatedMarkers;
       this.dataValid = isTracked;

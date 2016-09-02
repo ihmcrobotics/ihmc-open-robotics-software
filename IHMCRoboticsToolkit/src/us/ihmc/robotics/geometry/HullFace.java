@@ -71,7 +71,7 @@ public class HullFace
       planeNormal.scale(-1.0);
       area = planeNormal.length() / 2;
       planeNormal.normalize();
-      slopeAngle = Math.acos(planeNormal.z);
+      slopeAngle = Math.acos(planeNormal.getZ());
 
       for (int i = 0; i < numPoints; i++)
       {
@@ -168,11 +168,11 @@ public class HullFace
       {
          point.sub(averagePoint);
          rotationMatrix.transform(point);
-         if (Math.abs(point.z) > 1e-14)
+         if (Math.abs(point.getZ()) > 1e-14)
          {
             System.out.println("Error in HullFace class, failed to get polygon");
          }
-         polygonToPack.addVertex(point.x, point.y);
+         polygonToPack.addVertex(point.getX(), point.getY());
       }
       polygonToPack.update();
    }

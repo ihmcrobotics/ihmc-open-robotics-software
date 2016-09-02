@@ -11,7 +11,7 @@ import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -20,7 +20,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedDcmBasedStandController implements QuadrupedController
 {
-   private final QuadrupedControllerInputProviderInterface inputProvider;
+   private final QuadrupedPostureInputProviderInterface postureProvider;
    private final DoubleYoVariable robotTimestamp;
    private final double controlDT;
    private final double gravity;
@@ -76,10 +76,10 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    private final GroundPlaneEstimator groundPlaneEstimator;
 
    public QuadrupedDcmBasedStandController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-         QuadrupedControllerInputProviderInterface inputProvider)
+         QuadrupedPostureInputProviderInterface postureProvider)
 
    {
-      this.inputProvider = inputProvider;
+      this.postureProvider = postureProvider;
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
@@ -153,18 +153,18 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    {
       // update desired dcm position
       dcmPositionControllerSetpoints.getDcmPosition().changeFrame(supportFrame);
-      dcmPositionControllerSetpoints.getDcmPosition().set(inputProvider.getComVelocityInput());
+      dcmPositionControllerSetpoints.getDcmPosition().set(postureProvider.getComVelocityInput());
       dcmPositionControllerSetpoints.getDcmPosition().scale(1.0 / lipModel.getNaturalFrequency());
-      dcmPositionControllerSetpoints.getDcmPosition().add(inputProvider.getComPositionInput());
+      dcmPositionControllerSetpoints.getDcmPosition().add(postureProvider.getComPositionInput());
       dcmPositionControllerSetpoints.getDcmVelocity().setToZero(supportFrame);
       dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionControllerSetpoints, dcmPositionEstimate);
       taskSpaceControllerCommands.getComForce().changeFrame(supportFrame);
 
       // update desired com position and velocity
       comPositionControllerSetpoints.getComPosition().changeFrame(supportFrame);
-      comPositionControllerSetpoints.getComPosition().set(inputProvider.getComPositionInput());
+      comPositionControllerSetpoints.getComPosition().set(postureProvider.getComPositionInput());
       comPositionControllerSetpoints.getComVelocity().changeFrame(supportFrame);
-      comPositionControllerSetpoints.getComVelocity().set(inputProvider.getComVelocityInput());
+      comPositionControllerSetpoints.getComVelocity().set(postureProvider.getComVelocityInput());
       comPositionControllerSetpoints.getComForceFeedforward().changeFrame(supportFrame);
       comPositionControllerSetpoints.getComForceFeedforward().set(taskSpaceControllerCommands.getComForce());
       comPositionControllerSetpoints.getComForceFeedforward().setZ(comPositionGravityCompensationParameter.get() * mass * gravity);
@@ -172,13 +172,13 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
 
       // update desired body orientation and angular rate
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(supportFrame);
-      bodyOrientationControllerSetpoints.getBodyOrientation().set(inputProvider.getBodyOrientationInput());
+      bodyOrientationControllerSetpoints.getBodyOrientation().set(postureProvider.getBodyOrientationInput());
       bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(worldFrame);
       double bodyYaw = bodyOrientationControllerSetpoints.getBodyOrientation().getYaw();
       double bodyPitch = bodyOrientationControllerSetpoints.getBodyOrientation().getPitch() + groundPlaneEstimator.getPitch(bodyYaw);
       double bodyRoll = bodyOrientationControllerSetpoints.getBodyOrientation().getRoll();
       bodyOrientationControllerSetpoints.getBodyOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
-      bodyOrientationControllerSetpoints.getBodyAngularVelocity().set(inputProvider.getBodyAngularRateInput());
+      bodyOrientationControllerSetpoints.getBodyAngularVelocity().set(postureProvider.getBodyAngularRateInput());
       bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
 
       // update joint setpoints
@@ -188,7 +188,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    @Override
    public ControllerEvent process()
    {
-      lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
+      lipModel.setComHeight(postureProvider.getComPositionInput().getZ());
       updateGains();
       updateEstimates();
       updateSetpoints();
@@ -199,7 +199,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    public void onEntry()
    {
       // initialize estimates
-      lipModel.setComHeight(inputProvider.getComPositionInput().getZ());
+      lipModel.setComHeight(postureProvider.getComPositionInput().getZ());
       updateEstimates();
 
       // initialize feedback controllers

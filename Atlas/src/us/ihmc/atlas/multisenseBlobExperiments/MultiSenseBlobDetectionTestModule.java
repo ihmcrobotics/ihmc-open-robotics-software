@@ -95,7 +95,7 @@ public class MultiSenseBlobDetectionTestModule
 
                for (HoughCircleResult circle : circles)
                {
-                  Point openCVPoint = new Point(circle.getCenter().x, circle.getCenter().y);
+                  Point openCVPoint = new Point(circle.getCenter().getX(), circle.getCenter().getY());
                   Imgproc.circle(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR(), openCVPoint, (int) circle.getRadius(), circleColor, 1);
                }
 

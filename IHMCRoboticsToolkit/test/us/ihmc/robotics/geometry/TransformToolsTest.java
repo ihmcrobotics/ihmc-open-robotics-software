@@ -223,18 +223,18 @@ public class TransformToolsTest
       rotX.mul(rotY);
       rotX.mul(rotZ);
 
-      matrix.set(0, 0, rotX.m00);
-      matrix.set(0, 1, rotX.m01);
-      matrix.set(0, 2, rotX.m02);
-      matrix.set(0, 3, trans.x);
-      matrix.set(1, 0, rotX.m10);
-      matrix.set(1, 1, rotX.m11);
-      matrix.set(1, 2, rotX.m12);
-      matrix.set(1, 3, trans.y);
-      matrix.set(2, 0, rotX.m20);
-      matrix.set(2, 1, rotX.m21);
-      matrix.set(2, 2, rotX.m22);
-      matrix.set(2, 3, trans.z);
+      matrix.set(0, 0, rotX.getM00());
+      matrix.set(0, 1, rotX.getM01());
+      matrix.set(0, 2, rotX.getM02());
+      matrix.set(0, 3, trans.getX());
+      matrix.set(1, 0, rotX.getM10());
+      matrix.set(1, 1, rotX.getM11());
+      matrix.set(1, 2, rotX.getM12());
+      matrix.set(1, 3, trans.getY());
+      matrix.set(2, 0, rotX.getM20());
+      matrix.set(2, 1, rotX.getM21());
+      matrix.set(2, 2, rotX.getM22());
+      matrix.set(2, 3, trans.getZ());
       matrix.set(3, 0, 0);
       matrix.set(3, 1, 0);
       matrix.set(3, 2, 0);
@@ -246,15 +246,15 @@ public class TransformToolsTest
       double theta = random.nextDouble();
       double cTheta = Math.cos(theta);
       double sTheta = Math.sin(theta);
-      matrix.m00 = 1;
-      matrix.m01 = 0;
-      matrix.m02 = 0;
-      matrix.m10 = 0;
-      matrix.m11 = cTheta;
-      matrix.m12 = -sTheta;
-      matrix.m20 = 0;
-      matrix.m21 = sTheta;
-      matrix.m22 = cTheta;
+      matrix.setM00(1);
+      matrix.setM01(0);
+      matrix.setM02(0);
+      matrix.setM10(0);
+      matrix.setM11(cTheta);
+      matrix.setM12(-sTheta);
+      matrix.setM20(0);
+      matrix.setM21(sTheta);
+      matrix.setM22(cTheta);
    }
 
    private void createRandomRotationMatrixY(Random random, Matrix3d matrix)
@@ -262,15 +262,15 @@ public class TransformToolsTest
       double theta = random.nextDouble();
       double cTheta = Math.cos(theta);
       double sTheta = Math.sin(theta);
-      matrix.m00 = cTheta;
-      matrix.m01 = 0;
-      matrix.m02 = sTheta;
-      matrix.m10 = 0;
-      matrix.m11 = 1;
-      matrix.m12 = 0;
-      matrix.m20 = -sTheta;
-      matrix.m21 = 0;
-      matrix.m22 = cTheta;
+      matrix.setM00(cTheta);
+      matrix.setM01(0);
+      matrix.setM02(sTheta);
+      matrix.setM10(0);
+      matrix.setM11(1);
+      matrix.setM12(0);
+      matrix.setM20(-sTheta);
+      matrix.setM21(0);
+      matrix.setM22(cTheta);
    }
 
    private void createRandomRotationMatrixZ(Random random, Matrix3d matrix)
@@ -278,21 +278,21 @@ public class TransformToolsTest
       double theta = random.nextDouble();
       double cTheta = Math.cos(theta);
       double sTheta = Math.sin(theta);
-      matrix.m00 = cTheta;
-      matrix.m01 = -sTheta;
-      matrix.m02 = 0;
-      matrix.m10 = sTheta;
-      matrix.m11 = cTheta;
-      matrix.m12 = 0;
-      matrix.m20 = 0;
-      matrix.m21 = 0;
-      matrix.m22 = 1;
+      matrix.setM00(cTheta);
+      matrix.setM01(-sTheta);
+      matrix.setM02(0);
+      matrix.setM10(sTheta);
+      matrix.setM11(cTheta);
+      matrix.setM12(0);
+      matrix.setM20(0);
+      matrix.setM21(0);
+      matrix.setM22(1);
    }
 
    private void randomizeVector(Random random, Vector3d vector)
    {
-      vector.x = random.nextDouble();
-      vector.y = random.nextDouble();
-      vector.z = random.nextDouble();
+      vector.setX(random.nextDouble());
+      vector.setY(random.nextDouble());
+      vector.setZ(random.nextDouble());
    }
 }

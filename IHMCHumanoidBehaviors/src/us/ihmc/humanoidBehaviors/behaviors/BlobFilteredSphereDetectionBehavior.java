@@ -115,11 +115,11 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
                   candidateLidarPoint.set(fullPointCloud[i]);
                   worldToCameraTransform.transform(candidateLidarPoint);
 
-                  if (candidateLidarPoint.x > FILTERING_MIN_DISTANCE && candidateLidarPoint.x < FILTERING_MAX_DISTANCE)
+                  if (candidateLidarPoint.getX() > FILTERING_MIN_DISTANCE && candidateLidarPoint.getX() < FILTERING_MAX_DISTANCE)
                   {
                      // rayAngle axes are in terms of the buffered image (y-down), temp pnt axes are in terms of camera frame (z-up)
-                     double rayAngleX = Math.atan2(candidateLidarPoint.z, candidateLidarPoint.x);
-                     double rayAngleY = Math.atan2(candidateLidarPoint.y, candidateLidarPoint.x);
+                     double rayAngleX = Math.atan2(candidateLidarPoint.getZ(), candidateLidarPoint.getX());
+                     double rayAngleY = Math.atan2(candidateLidarPoint.getY(), candidateLidarPoint.getX());
                      if (Math.abs(rayAngleX - desiredRayAngleX) < FILTERING_ANGLE && Math.abs(rayAngleY - desiredRayAngleY) < FILTERING_ANGLE)
                      {
                         filteredPoints.add(fullPointCloud[i]);

@@ -138,9 +138,9 @@ public class SDFLinkHolderTest
       double Ixx=4.09812e-08,Ixy=0.0,Ixz=0.0,Iyy=5.31842e-08,Iyz=0.0,Izz=8.8101e-08;
       Matrix3d expectedInertia = new Matrix3d(Ixx,Ixy,Ixz,Ixy,Iyy,Iyz,Ixz,Iyz,Izz);
       //1e-10
-      assertArrayEquals(new double[] {Ixx, Ixy, Ixz, Iyy, Iyz, Izz}, new double[] {inertiaMatrix.m00, inertiaMatrix.m01, inertiaMatrix.m02, inertiaMatrix.m11, inertiaMatrix.m12, inertiaMatrix.m22}, 1e-10);
+      assertArrayEquals(new double[] {Ixx, Ixy, Ixz, Iyy, Iyz, Izz}, new double[] {inertiaMatrix.getM00(), inertiaMatrix.getM01(), inertiaMatrix.getM02(), inertiaMatrix.getM11(), inertiaMatrix.getM12(), inertiaMatrix.getM22()}, 1e-10);
       boolean inertiaEqual=inertiaMatrix.equals(expectedInertia);
-      String helpMessage = "Incorrect actual: Ixx=" + inertiaMatrix.m00 + ", Ixy=" + inertiaMatrix.m01 + ", Ixz=" + inertiaMatrix.m02 + ", Iyy=" + inertiaMatrix.m11 + ", Iyz=" + inertiaMatrix.m12 + ", Izz=" + inertiaMatrix.m22;
+      String helpMessage = "Incorrect actual: Ixx=" + inertiaMatrix.getM00() + ", Ixy=" + inertiaMatrix.getM01() + ", Ixz=" + inertiaMatrix.getM02() + ", Iyy=" + inertiaMatrix.getM11() + ", Iyz=" + inertiaMatrix.getM12() + ", Izz=" + inertiaMatrix.getM22();
       String helpMessagec = "Expected       : Ixx=" + Ixx + ", Ixy=" + Ixy + ", Ixz=" + Ixz + ", Iyy=" + Iyy + ", Iyz=" + Iyz + ", Izz=" + Izz;
       //if(!inertiaEqual)
 //      {
@@ -204,7 +204,7 @@ public class SDFLinkHolderTest
       Matrix3d expectedInertia = new Matrix3d(Ixx,Ixy,Ixz,Ixy,Iyy,Iyz,Ixz,Iyz,Izz);
       //1e-10
       boolean inertiaEqual=inertiaMatrix.equals(expectedInertia);
-      String helpMessage = "Incorrect actual: Ixx=" + inertiaMatrix.m00 + ", Ixy=" + inertiaMatrix.m01 + ", Ixz=" + inertiaMatrix.m02 + ", Iyy=" + inertiaMatrix.m11 + ", Iyz=" + inertiaMatrix.m12 + ", Izz=" + inertiaMatrix.m22;
+      String helpMessage = "Incorrect actual: Ixx=" + inertiaMatrix.getM00() + ", Ixy=" + inertiaMatrix.getM01() + ", Ixz=" + inertiaMatrix.getM02() + ", Iyy=" + inertiaMatrix.getM11() + ", Iyz=" + inertiaMatrix.getM12() + ", Izz=" + inertiaMatrix.getM22();
       String helpMessagec = "Expected       : Ixx=" + Ixx + ", Ixy=" + Ixy + ", Ixz=" + Ixz + ", Iyy=" + Iyy + ", Iyz=" + Iyz + ", Izz=" + Izz;
 //      if(!inertiaEqual)
 //      {
@@ -216,7 +216,7 @@ public class SDFLinkHolderTest
 //      System.out.println("Diffs: Ixx=" + inertiaMatrixDiff.m00 + ", Ixy=" + inertiaMatrixDiff.m01 + ", Ixz=" + inertiaMatrixDiff.m02 + ", Iyy=" + inertiaMatrixDiff.m11 + ", Iyz=" + inertiaMatrixDiff.m12 + ", Izz=" + inertiaMatrixDiff.m22);
 //      }
       //assertTrue("Inertia matrix should be changed to link frame. " + helpMessage, inertiaEqual);
-      assertArrayEquals(new double[] {Ixx, Ixy, Ixz, Iyy, Iyz, Izz}, new double[] {inertiaMatrix.m00, inertiaMatrix.m01, inertiaMatrix.m02, inertiaMatrix.m11, inertiaMatrix.m12, inertiaMatrix.m22}, 3e-9);
+      assertArrayEquals(new double[] {Ixx, Ixy, Ixz, Iyy, Iyz, Izz}, new double[] {inertiaMatrix.getM00(), inertiaMatrix.getM01(), inertiaMatrix.getM02(), inertiaMatrix.getM11(), inertiaMatrix.getM12(), inertiaMatrix.getM22()}, 3e-9);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -271,7 +271,7 @@ public class SDFLinkHolderTest
       
       //1e-10
       boolean inertiaEqual=inertiaMatrix.equals(expectedInertia);
-      String helpMessage = "Incorrect actual: Ixx=" + inertiaMatrix.m00 + ", Ixy=" + inertiaMatrix.m01 + ", Ixz=" + inertiaMatrix.m02 + ", Iyy=" + inertiaMatrix.m11 + ", Iyz=" + inertiaMatrix.m12 + ", Izz=" + inertiaMatrix.m22;
+      String helpMessage = "Incorrect actual: Ixx=" + inertiaMatrix.getM00() + ", Ixy=" + inertiaMatrix.getM01() + ", Ixz=" + inertiaMatrix.getM02() + ", Iyy=" + inertiaMatrix.getM11() + ", Iyz=" + inertiaMatrix.getM12() + ", Izz=" + inertiaMatrix.getM22();
       String helpMessagec = "Expected       : Ixx=" + Ixx + ", Ixy=" + Ixy + ", Ixz=" + Ixz + ", Iyy=" + Iyy + ", Iyz=" + Iyz + ", Izz=" + Izz;
 //      if(!inertiaEqual)
 //      {
@@ -283,7 +283,7 @@ public class SDFLinkHolderTest
 //         System.out.println("Diffs: Ixx=" + inertiaMatrixDiff.m00 + ", Ixy=" + inertiaMatrixDiff.m01 + ", Ixz=" + inertiaMatrixDiff.m02 + ", Iyy=" + inertiaMatrixDiff.m11 + ", Iyz=" + inertiaMatrixDiff.m12 + ", Izz=" + inertiaMatrixDiff.m22);
 //      }
       //assertTrue("Inertia matrix should be changed to link frame. " + helpMessage, inertiaEqual);
-      assertArrayEquals(new double[] {Ixx, Ixy, Ixz, Iyy, Iyz, Izz}, new double[] {inertiaMatrix.m00, inertiaMatrix.m01, inertiaMatrix.m02, inertiaMatrix.m11, inertiaMatrix.m12, inertiaMatrix.m22}, 2e-9);
+      assertArrayEquals(new double[] {Ixx, Ixy, Ixz, Iyy, Iyz, Izz}, new double[] {inertiaMatrix.getM00(), inertiaMatrix.getM01(), inertiaMatrix.getM02(), inertiaMatrix.getM11(), inertiaMatrix.getM12(), inertiaMatrix.getM22()}, 2e-9);
       
     }
    

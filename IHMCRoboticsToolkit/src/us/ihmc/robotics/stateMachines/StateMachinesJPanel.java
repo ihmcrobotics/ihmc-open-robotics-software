@@ -202,7 +202,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
 
       Color color = colorStateCell(stateMachine.states.get(indexOfStateinStateMachine(name)));
       GraphConstants.setBackground(stateCells[index].getAttributes(), color);
-      GraphConstants.setBounds(stateCells[index].getAttributes(), new Rectangle2D.Double(placement.x, placement.y, 0, 0));
+      GraphConstants.setBounds(stateCells[index].getAttributes(), new Rectangle2D.Double(placement.getX(), placement.getY(), 0, 0));
       stateCells[index].addPort();
 
       return stateCells[index];
@@ -277,7 +277,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
          if (defaultNextStateTransition != null)
          {
             // and that default state if the one we are checking, then the one we are checking is not empty.
-            if ((defaultNextStateTransition.nextStateEnum == checkstate.getStateEnum()))
+            if ((defaultNextStateTransition.getNextStateEnum() == checkstate.getStateEnum()))
             {
                isEmpty = false;
             }
@@ -288,7 +288,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
          {
             // and one of those state transitions are the state we are checking,
             // then the state we are checking is not empty
-            if (state.getStateTransitions().get(j).nextStateEnum == checkstate.getStateEnum())
+            if (state.getStateTransitions().get(j).getNextStateEnum() == checkstate.getStateEnum())
             {
                isEmpty = false;
             }
@@ -324,7 +324,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
       {
          for (int i = 0; i < parent.getStateTransitions().size(); i++)
          {
-            String state = parent.getStateTransitions().get(i).nextStateEnum.toString();
+            String state = parent.getStateTransitions().get(i).getNextStateEnum().toString();
 
             if (!doesCellAlreadyExist(state))
             {
@@ -341,7 +341,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
                   try
                   {
                      for (int j = indexOfStateinStateMachine(state) + 1;
-                             j < indexOfStateinStateMachine(parent.getStateTransitions().get(i + 1).nextStateEnum.toString()); j++)
+                             j < indexOfStateinStateMachine(parent.getStateTransitions().get(i + 1).getNextStateEnum().toString()); j++)
                      {
                         State<E> checkState = stateMachine.states.get(j);
 
@@ -383,7 +383,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
          {
             int source = indexOfStateInStateCells(state);
             int target =
-               indexOfStateInStateCells(stateMachine.states.get(indexOfStateinStateMachine(state.getStateTransitions().get(z).nextStateEnum.toString())));
+               indexOfStateInStateCells(stateMachine.states.get(indexOfStateinStateMachine(state.getStateTransitions().get(z).getNextStateEnum().toString())));
             createArrow(source, target);
          }
       }
@@ -400,7 +400,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
             int source = indexOfStateInStateCells(state);
             int target = indexOfStateInStateCells(
                              stateMachine.states.get(
-                                indexOfStateinStateMachine(defaultNextStateTransition.nextStateEnum.toString())));
+                                indexOfStateinStateMachine(defaultNextStateTransition.getNextStateEnum().toString())));
             createArrow(source, target);
          }
       }
@@ -500,14 +500,14 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
             g2.setColor(Color.BLACK);
 
          double angle = (2.0 * Math.PI * i) / (numberOfStates);
-         stateCenters[i].x = Rx * Math.cos(angle) + width / 2;
-         stateCenters[i].y = Ry * Math.sin(angle) + height / 2;
+         stateCenters[i].setX(Rx * Math.cos(angle) + width / 2);
+         stateCenters[i].setY(Ry * Math.sin(angle) + height / 2);
 
          // g2.drawOval(stateCentersX[i] - circleRadius, stateCentersY[i] - circleRadius, circleRadius*2, circleRadius*2);
-         g2.draw(new Ellipse2D.Double(stateCenters[i].x - circleRadius, stateCenters[i].y - circleRadius, circleRadius * 2, circleRadius * 2));
+         g2.draw(new Ellipse2D.Double(stateCenters[i].getX() - circleRadius, stateCenters[i].getY() - circleRadius, circleRadius * 2, circleRadius * 2));
          String stateString = state.getStateEnum().toString();
 
-         g2.drawString(state.getStateEnum().toString(), (int) stateCenters[i].x - 8 * stateString.length() / 2, (int) stateCenters[i].y);
+         g2.drawString(state.getStateEnum().toString(), (int) stateCenters[i].getX() - 8 * stateString.length() / 2, (int) stateCenters[i].getY());
       }
 
       g2.setColor(Color.BLACK);
@@ -521,11 +521,11 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
 
          for (StateTransition<E> stateTransition : stateTransitions)
          {
-            State<E> nextState = stateMachine.getState(stateTransition.nextStateEnum);
+            State<E> nextState = stateMachine.getState(stateTransition.getNextStateEnum());
 
             if (nextState == null)
             {
-               System.err.println("Error. StateMachine doesn't include state with enum " + stateTransition.nextStateEnum);
+               System.err.println("Error. StateMachine doesn't include state with enum " + stateTransition.getNextStateEnum());
 
                return;
             }
@@ -538,8 +538,8 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
                tempVector2d.normalize();
                tempVector2d.scale(circleRadius);
 
-               g2.draw(new Line2D.Double(stateCenters[i].x + tempVector2d.x, stateCenters[i].y + tempVector2d.y, stateCenters[nextIndex].x - tempVector2d.x,
-                                         stateCenters[nextIndex].y - tempVector2d.y));
+               g2.draw(new Line2D.Double(stateCenters[i].getX() + tempVector2d.getX(), stateCenters[i].getY() + tempVector2d.getY(), stateCenters[nextIndex].getX() - tempVector2d.getX(),
+                                         stateCenters[nextIndex].getY() - tempVector2d.getY()));
             }
             else
             {

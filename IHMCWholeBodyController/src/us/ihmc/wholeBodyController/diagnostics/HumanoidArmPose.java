@@ -81,9 +81,9 @@ public enum HumanoidArmPose
       case FLYING_PALMS_UP:
          return symmetricArmPose(0.3, halfPi - 1.2, -1.0, 0.4, robotSide);
       case FLEX_UP:
-         return symmetricArmPose(0.0, 0.0, 0.0, -2, robotSide);
+         return symmetricArmPose(0.0, 0.0, 0.0, 2.0, robotSide);
       case FLEX_DOWN:
-         return symmetricArmPose(0.0, 0.0, 0.0, -1.4, robotSide);
+         return symmetricArmPose(0.0, 0.0, 0.0, 1.4, robotSide);
       case FLYING_SUPPINATE_IN:
          return symmetricArmPose(0.3, halfPi - 1.2, 1.0, 0.4, robotSide);
       case FLYING_SUPPINATE_OUT:

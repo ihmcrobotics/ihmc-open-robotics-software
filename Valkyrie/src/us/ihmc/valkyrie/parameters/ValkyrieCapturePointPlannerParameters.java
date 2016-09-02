@@ -11,14 +11,14 @@ public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerPa
    public ValkyrieCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-      useTwoCMPsPerSupport = true;
+      useTwoCMPsPerSupport = false;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDoubleSupportInitialTransferDuration()
    {
-      return 1.0;
+      return runningOnRealRobot ? 2.0 : 1.0;
    }
 
    /** {@inheritDoc} */
@@ -32,21 +32,21 @@ public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerPa
    @Override
    public double getEntryCMPInsideOffset()
    {
-      return runningOnRealRobot ? 0.01 : 0.006;
+      return runningOnRealRobot ? 0.02 : 0.006;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getExitCMPInsideOffset()
    {
-      return 0.01;
+      return 0.025;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getEntryCMPForwardOffset()
    {
-      return runningOnRealRobot ? 0.0 : 0.0;
+      return runningOnRealRobot ? 0.01 : 0.0;
    }
 
    /** {@inheritDoc} */
@@ -74,14 +74,14 @@ public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerPa
    @Override
    public double getMinEntryCMPForwardOffset()
    {
-      return 0.0;
+      return 0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMaxExitCMPForwardOffset()
    {
-      return 0.08;
+      return 0.06;
    }
 
    /** {@inheritDoc} */
@@ -89,13 +89,6 @@ public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerPa
    public double getMinExitCMPForwardOffset()
    {
       return -0.04;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getCMPSafeDistanceAwayFromSupportEdges()
-   {
-      return 0.02;
    }
 
    /** {@inheritDoc} */
