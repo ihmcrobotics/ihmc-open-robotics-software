@@ -41,9 +41,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 /**
  * TODO Deprecate archaic methods
  * TODO Factor out artifacts.
- * TODO ALT rotation
  * TODO Fix color field in Artifact
- * TODO Clean up after rotation code
  */
 @SuppressWarnings("serial")
 public class Plotter
@@ -52,11 +50,13 @@ public class Plotter
    private static final boolean SHOW_SELECTION_BY_DEFAULT = false;
    private static final boolean SHOW_HISTORY_BY_DEFAULT = false;
    private static final boolean ENABLE_XY_ZOOM_BY_DEFAULT = false;
+   private static final boolean ENABLE_ROTATION_BY_DEFAULT = true;
    
    private boolean showLabels = SHOW_LABELS_BY_DEFAULT;
    private boolean showSelection = SHOW_SELECTION_BY_DEFAULT;
    private boolean showHistory = SHOW_HISTORY_BY_DEFAULT;
    private boolean xyZoomEnabled = ENABLE_XY_ZOOM_BY_DEFAULT;
+   private boolean rotationEnabled = ENABLE_ROTATION_BY_DEFAULT;
    
    private final JPanel panel;
    
@@ -85,7 +85,7 @@ public class Plotter
    private final PlotterPoint2d lowerRightCorner;
    private final PlotterPoint2d focusPoint;
    private final PlotterPoint2d origin;
-   private final PlotterPoint2d drawGuy;
+   private final PlotterPoint2d gridLinePencil;
    private final PlotterPoint2d selected;
    private final PlotterPoint2d selectionAreaStart;
    private final PlotterPoint2d selectionAreaEnd;
@@ -177,7 +177,7 @@ public class Plotter
       lowerRightCorner = new PlotterPoint2d(screenFrame);
       origin = new PlotterPoint2d(metersFrame);
       focusPoint = new PlotterPoint2d(screenFrame);
-      drawGuy = new PlotterPoint2d(screenFrame);
+      gridLinePencil = new PlotterPoint2d(screenFrame);
       selected = new PlotterPoint2d(screenFrame);
       selectionAreaStart = new PlotterPoint2d(screenFrame);
       selectionAreaEnd = new PlotterPoint2d(screenFrame);
@@ -286,35 +286,34 @@ public class Plotter
          
          for (double gridX = gridStart; gridX < gridEnd; gridX += gridSizePixels.getX())
          {
-            drawGuy.setIncludingFrame(pixelsFrame, gridX, 0.0);
+            gridLinePencil.setIncludingFrame(pixelsFrame, gridX, 0.0);
             
             int nthGridLineFromOrigin = (int) (Math.abs(gridX) / gridSizePixels.getX());
             applyColorForGridline(graphics2d, nthGridLineFromOrigin);
    
-            tempGridLine.set(drawGuy.getX(), drawGuy.getY(), 0.0, 1.0);
+            tempGridLine.set(gridLinePencil.getX(), gridLinePencil.getY(), 0.0, 1.0);
             graphics2d.drawLine(pixelsFrame, tempGridLine);
             
             if (showLabels)
             {
                graphics2d.setColor(PlotterColors.LABEL_COLOR);
-               drawGuy.changeFrame(metersFrame);
-               String labelString = FormattingTools.getFormattedToSignificantFigures(drawGuy.getX(), 2);
-               drawGuy.changeFrame(pixelsFrame);
+               gridLinePencil.changeFrame(metersFrame);
+               String labelString = FormattingTools.getFormattedToSignificantFigures(gridLinePencil.getX(), 2);
+               gridLinePencil.changeFrame(pixelsFrame);
                origin.changeFrame(pixelsFrame);
-               upperLeftCorner.changeFrame(pixelsFrame);
                if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getY() > upperLeftCorner.getY() - 14)
                {
-                  drawGuy.setY(upperLeftCorner.getY() - 14);
+                  gridLinePencil.setY(upperLeftCorner.getY() - 14);
                }
                else if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getY() < lowerRightCorner.getY())
                {
-                  drawGuy.setY(lowerRightCorner.getY() + 6);
+                  gridLinePencil.setY(lowerRightCorner.getY() + 6);
                }
                else
                {
-                  drawGuy.setY(origin.getY() + 1);
+                  gridLinePencil.setY(origin.getY() + 1);
                }
-               labelPosition.setIncludingFrame(drawGuy);
+               labelPosition.setIncludingFrame(gridLinePencil);
                labelPosition.add(1.0, 0.0);
                graphics2d.drawString(labelString, labelPosition);
             }
@@ -325,35 +324,34 @@ public class Plotter
          
          for (double gridY = gridStart; gridY < gridEnd; gridY += gridSizePixels.getY())
          {
-            drawGuy.setIncludingFrame(pixelsFrame, 0.0, gridY);
+            gridLinePencil.setIncludingFrame(pixelsFrame, 0.0, gridY);
             
             int nthGridLineFromOrigin = (int) (Math.abs(gridY) / gridSizePixels.getY());
             applyColorForGridline(graphics2d, nthGridLineFromOrigin);
    
-            tempGridLine.set(drawGuy.getX(), drawGuy.getY(), 1.0, 0.0);
+            tempGridLine.set(gridLinePencil.getX(), gridLinePencil.getY(), 1.0, 0.0);
             graphics2d.drawLine(pixelsFrame, tempGridLine);
             
             if (showLabels)
             {
                graphics2d.setColor(PlotterColors.LABEL_COLOR);
-               drawGuy.changeFrame(metersFrame);
-               String labelString = FormattingTools.getFormattedToSignificantFigures(drawGuy.getY(), 2);
-               drawGuy.changeFrame(pixelsFrame);
-               upperLeftCorner.changeFrame(pixelsFrame);
+               gridLinePencil.changeFrame(metersFrame);
+               String labelString = FormattingTools.getFormattedToSignificantFigures(gridLinePencil.getY(), 2);
+               gridLinePencil.changeFrame(pixelsFrame);
                origin.changeFrame(pixelsFrame);
                if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getX() > lowerRightCorner.getX() - 30)
                {
-                  drawGuy.setX(lowerRightCorner.getX() - 30);
+                  gridLinePencil.setX(lowerRightCorner.getX() - 30);
                }
                else if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getX() < upperLeftCorner.getX())
                {
-                  drawGuy.setX(upperLeftCorner.getX() + 6);
+                  gridLinePencil.setX(upperLeftCorner.getX() + 6);
                }
                else
                {
-                  drawGuy.setX(origin.getX() + 1);
+                  gridLinePencil.setX(origin.getX() + 1);
                }
-               labelPosition.setIncludingFrame(drawGuy);
+               labelPosition.setIncludingFrame(gridLinePencil);
                labelPosition.add(0.0, 1.0);
                graphics2d.drawString(labelString, labelPosition);
             }
@@ -592,7 +590,7 @@ public class Plotter
             
             rightMouseDragEnd.sub(rightMouseDragStart);
 
-            if (mouseEvent.isAltDown())
+            if (rotationEnabled && mouseEvent.isAltDown())
             {
                screenRotation += 0.01 * (double) rightMouseDragEnd.getX();
             }
@@ -687,6 +685,11 @@ public class Plotter
    public void setXYZoomEnabled(boolean xyZoomEnabled)
    {
       this.xyZoomEnabled = xyZoomEnabled;
+   }
+   
+   public void setRotationEnabled(boolean rotationEnabled)
+   {
+      this.rotationEnabled = rotationEnabled;
    }
 
    public void showInNewWindow()

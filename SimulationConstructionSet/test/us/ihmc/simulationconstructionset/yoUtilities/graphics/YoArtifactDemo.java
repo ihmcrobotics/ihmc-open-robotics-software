@@ -30,6 +30,7 @@ public class YoArtifactDemo
       
       plotter.setViewRange(10.0);
       plotter.setXYZoomEnabled(true);
+      plotter.setRotationEnabled(true);
 //      plotter.setViewRange(1.0);
       plotter.setShowLabels(true);
       
