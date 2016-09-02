@@ -34,7 +34,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class WalkToLocationBehavior extends BehaviorInterface
+public class WalkToLocationBehavior extends AbstractBehavior
 {
    public enum WalkingOrientation
    {

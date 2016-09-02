@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
@@ -50,7 +50,7 @@ import us.ihmc.robotics.stateMachines.StateTransitionAction;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class ScriptBehavior extends BehaviorInterface
+public class ScriptBehavior extends AbstractBehavior
 {
    private static final boolean DEBUG = false;
 
@@ -157,7 +157,7 @@ public class ScriptBehavior extends BehaviorInterface
    }
 
    private void wrapBehaviorAndSetupTransitions(BehaviorStateMachine<PrimitiveBehaviorType> stateMachine, PrimitiveBehaviorType scriptObjectType,
-         BehaviorInterface behavior)
+         AbstractBehavior behavior)
    {
       boolean initBehaviorOnStateTransitionIntoAction = false; // FIXME: this is a hack to prevent initialize() from being called *AFTER* input has been set
       final BehaviorStateWrapper<PrimitiveBehaviorType> behaviorState = new BehaviorStateWrapper<PrimitiveBehaviorType>(scriptObjectType, behavior,

@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveBehaviorTools;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.robotics.stateMachines.FinishableState;
@@ -8,15 +8,15 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class BehaviorStateWrapper <E extends Enum<E>> extends FinishableState<E>
 {
-   private final BehaviorInterface behavior;
+   private final AbstractBehavior behavior;
    private final Boolean initializeOnTransitionIntoAction;
 
-   public BehaviorStateWrapper(E stateEnum, BehaviorInterface behavior)
+   public BehaviorStateWrapper(E stateEnum, AbstractBehavior behavior)
    {
       this(stateEnum, behavior, true);
    }
 
-   public BehaviorStateWrapper(E stateEnum, BehaviorInterface behavior, boolean initializeOnTransitionIntoAction)
+   public BehaviorStateWrapper(E stateEnum, AbstractBehavior behavior, boolean initializeOnTransitionIntoAction)
    {
       super(stateEnum);
 
@@ -101,7 +101,7 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends FinishableState<E>
       behavior.doPostBehaviorCleanup();
    }
 
-   public BehaviorInterface getBehavior()
+   public AbstractBehavior getBehavior()
    {
       return behavior;
    }

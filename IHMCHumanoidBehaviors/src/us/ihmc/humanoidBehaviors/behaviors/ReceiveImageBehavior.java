@@ -18,7 +18,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 
-public class ReceiveImageBehavior extends BehaviorInterface implements VideoStreamer{
+public class ReceiveImageBehavior extends AbstractBehavior implements VideoStreamer{
 
 	private LongYoVariable counter = new LongYoVariable("counter", registry);
 	

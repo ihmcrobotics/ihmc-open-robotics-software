@@ -22,7 +22,7 @@ import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class LocalizeDrillBehavior extends BehaviorInterface implements VideoStreamer
+public class LocalizeDrillBehavior extends AbstractBehavior implements VideoStreamer
 {
 
    private LongYoVariable counter = new LongYoVariable("counter", registry);

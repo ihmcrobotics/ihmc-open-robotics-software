@@ -1,11 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
-public class SetLidarParametersBehavior extends BehaviorInterface
+public class SetLidarParametersBehavior extends AbstractBehavior
 {
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private DepthDataFilterParameters lidarParamPacket;

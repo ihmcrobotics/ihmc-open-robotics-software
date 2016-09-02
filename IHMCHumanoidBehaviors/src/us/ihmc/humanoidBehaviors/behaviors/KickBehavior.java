@@ -26,7 +26,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.taskExecutor.PipeLine;
 
-public class KickBehavior extends BehaviorInterface
+public class KickBehavior extends AbstractBehavior
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final DoubleYoVariable yoTime;
@@ -36,9 +36,9 @@ public class KickBehavior extends BehaviorInterface
 
    private FramePoint2d objectToKickPose;
 
-   private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
+   private final ArrayList<AbstractBehavior> behaviors = new ArrayList<AbstractBehavior>();
 
-   private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
    private final DoubleYoVariable trajectoryTime;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
@@ -151,7 +151,7 @@ public class KickBehavior extends BehaviorInterface
    {
       defaultInitialize();
 
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.initialize();
       }
@@ -162,7 +162,7 @@ public class KickBehavior extends BehaviorInterface
       hasInputBeenSet.set(false);
       defaultPostBehaviorCleanup();
 
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.doPostBehaviorCleanup();
       }
@@ -172,7 +172,7 @@ public class KickBehavior extends BehaviorInterface
    {
       defaultStop();
 
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.stop();
       }
@@ -182,7 +182,7 @@ public class KickBehavior extends BehaviorInterface
    {
       defaultPause();
 
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.pause();
       }
@@ -201,7 +201,7 @@ public class KickBehavior extends BehaviorInterface
    {
       defaultResume();
 
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.resume();
       }
@@ -209,7 +209,7 @@ public class KickBehavior extends BehaviorInterface
 
    @Override protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.consumeObjectFromNetworkProcessor(object);
       }
@@ -217,7 +217,7 @@ public class KickBehavior extends BehaviorInterface
 
    @Override protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.consumeObjectFromController(object);
       }

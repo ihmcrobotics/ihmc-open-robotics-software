@@ -12,7 +12,7 @@ import org.opencv.imgproc.Imgproc;
 import us.ihmc.communication.producers.JPEGCompressor;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.OpenCVTools;
@@ -40,7 +40,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
 
    private static final Scalar circleColor = new Scalar(160, 0, 0);
 
-   public ColoredCircularBlobDetectorBehaviorService(BehaviorInterface behaviorInterface)
+   public ColoredCircularBlobDetectorBehaviorService(AbstractBehavior behaviorInterface)
    {
       super(ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), behaviorInterface);
       
