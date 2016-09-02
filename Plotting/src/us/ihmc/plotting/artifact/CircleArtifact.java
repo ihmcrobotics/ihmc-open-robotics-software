@@ -10,10 +10,12 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 
 public class CircleArtifact extends Artifact
 {
    private static final BasicStroke STROKE = new BasicStroke(1.0f);
+   private static final double LEGEND_RADIUS = 20.0;
    
    private double x;
    private double y;
@@ -82,18 +84,19 @@ public class CircleArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
       graphics.setColor(color);
       graphics.setStroke(STROKE);
-      int diameter = 40;
+      tempPoint.set(origin);
+      tempRadii.set(LEGEND_RADIUS, LEGEND_RADIUS);
       if (fill)
       {
-         graphics.drawOvalFilled((centerX - (diameter / 2)), (centerY - (diameter / 2)), diameter, diameter);
+         graphics.drawOvalFilled(graphics.getScreenFrame(), tempPoint, tempRadii);
       }
       else
       {
-         graphics.drawOval((centerX - (diameter / 2)), (centerY - (diameter / 2)), diameter, diameter);
+         graphics.drawOval(graphics.getScreenFrame(), tempPoint, tempRadii);
       }
    }
 

@@ -8,6 +8,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
@@ -163,9 +164,9 @@ public class PolygonArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
-      graphics.drawString("Polygon", centerX, centerY);
+      graphics.drawString(graphics.getScreenFrame(), "Polygon", origin);
    }
 
    @Override
