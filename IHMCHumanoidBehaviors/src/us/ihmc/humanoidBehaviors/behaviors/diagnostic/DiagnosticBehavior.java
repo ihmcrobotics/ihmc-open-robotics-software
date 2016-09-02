@@ -14,7 +14,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
@@ -92,14 +92,14 @@ import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidArmPose;
 
-public class DiagnosticBehavior extends BehaviorInterface
+public class DiagnosticBehavior extends AbstractBehavior
 {
    private static final boolean FAST_MOTION = false;
    private static final boolean CAN_ARMS_REACH_FAR_BEHIND = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean DEBUG = false;
 
-   private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
    /** FIXME Should have a packet from the controller to let know when it is ready to execute commands. */
    private final ConcurrentListeningQueue<CapturabilityBasedStatus> inputListeningQueue = new ConcurrentListeningQueue<CapturabilityBasedStatus>();

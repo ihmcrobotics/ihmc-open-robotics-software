@@ -12,7 +12,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public class LocalizationBehavior extends BehaviorInterface {
+public class LocalizationBehavior extends AbstractBehavior {
 	
 	private final FullRobotModel fullRobotModel;
 	private ScriptBehavior scriptBehavior;

@@ -21,6 +21,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.plotting.artifact.ArtifactsChangedListener;
@@ -39,12 +40,8 @@ import us.ihmc.tools.io.printing.PrintTools;
 /**
  * TODO Deprecate archaic methods
  * TODO Factor out artifacts.
- * TODO Fix Artifact interface to use meters.
  * TODO ALT rotation
  * TODO Fix color field in Artifact
- * TODO Implement remote artifact in line2d
- * TODO Rid drawYo and move is
- * TODO Remove all deprecated Graphics2DAdapter methods (or pass in frame)
  */
 @SuppressWarnings("serial")
 public class Plotter
@@ -78,7 +75,8 @@ public class Plotter
    private final PixelsReferenceFrame screenFrame;
    private final MetersReferenceFrame metersFrame;
    
-   private double screenRotation = Math.PI;
+   private double screenRotation = 0.0;
+   private final Vector3d tempTranslation = new Vector3d();
    private final PlotterPoint2d screenPosition;
    private final PlotterPoint2d upperLeftCorner;
    private final PlotterPoint2d lowerRightCorner;
@@ -153,8 +151,14 @@ public class Plotter
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             screenPosition.changeFrame(pixelsFrame);
-            transformToParent.setRotationEulerAndZeroTranslation(0.0, Math.PI, screenRotation);
-            transformToParent.setTranslation(screenPosition.getX(), screenPosition.getY(), 0.0);
+            transformToParent.setIdentity();
+            tempTranslation.set(screenPosition.getX() + getPlotterWidthPixels() / 2.0, screenPosition.getY() - getPlotterHeightPixels() / 2.0, 0.0);
+            transformToParent.applyTranslation(tempTranslation);
+            transformToParent.applyRotationZ(screenRotation);
+            tempTranslation.set(-getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0, 0.0);
+            transformToParent.applyTranslation(tempTranslation);
+            transformToParent.applyRotationY(Math.PI);
+            transformToParent.applyRotationZ(Math.PI);
          }
       };
       metersFrame = new MetersReferenceFrame("metersFrame", ReferenceFrame.getWorldFrame(), spaceConverter)
@@ -178,7 +182,7 @@ public class Plotter
       imageSecondCorner = new PlotterPoint2d(screenFrame);
       labelPosition = new PlotterPoint2d(screenFrame);
       
-      screenPosition.set(-preferredSize.getWidth() / 2.0, preferredSize.getHeight() / 2.0);
+      screenPosition.set(-getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0);
       focusPoint.setIncludingFrame(metersFrame, 0.0, 0.0);
       
       updateFrames();
@@ -206,7 +210,7 @@ public class Plotter
       metersFrame.update();
       
       upperLeftCorner.setIncludingFrame(screenFrame, 0.0, 0.0);
-      lowerRightCorner.setIncludingFrame(screenFrame, visibleRectangle.getWidth(), visibleRectangle.getHeight());
+      lowerRightCorner.setIncludingFrame(screenFrame, getPlotterWidthPixels(), getPlotterHeightPixels());
       origin.setIncludingFrame(metersFrame, 0.0, 0.0);
    }
    
@@ -224,21 +228,24 @@ public class Plotter
       
       screenPosition.changeFrame(pixelsFrame);
       screenPosition.set(focusPoint);
-      if (isInitialized())
-      {
-         screenPosition.add(-visibleRectangle.getWidth() / 2.0, visibleRectangle.getHeight() / 2.0);
-      }
-      else
-      {
-         screenPosition.add(-preferredSize.getWidth() / 2.0, preferredSize.getHeight() / 2.0);
-      }
-      
+      screenPosition.add(-getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0);
+
       updateFrames();
    }
 
    private boolean isInitialized()
    {
       return visibleRectangle.getWidth() > 0.0;
+   }
+   
+   private double getPlotterWidthPixels()
+   {
+      return isInitialized() ? visibleRectangle.getWidth() : preferredSize.getWidth();
+   }
+   
+   private double getPlotterHeightPixels()
+   {
+      return isInitialized() ? visibleRectangle.getHeight() : preferredSize.getHeight();
    }
 
    private void paintComponent(final Plotter2DAdapter graphics2d)
@@ -282,7 +289,7 @@ public class Plotter
             applyColorForGridline(graphics2d, nthGridLineFromOrigin);
    
             drawGuy.changeFrame(screenFrame);
-            graphics2d.drawLineSegment(screenFrame, drawGuy.getX(), 0.0, drawGuy.getX(), visibleRectangle.getHeight());
+            graphics2d.drawLineSegment(screenFrame, drawGuy.getX(), 0.0, drawGuy.getX(), getPlotterHeightPixels());
             
             if (showLabels)
             {
@@ -325,7 +332,7 @@ public class Plotter
             applyColorForGridline(graphics2d, nthGridLineFromOrigin);
    
             drawGuy.changeFrame(screenFrame);
-            graphics2d.drawLineSegment(screenFrame, 0, drawGuy.getY(), visibleRectangle.getWidth(), drawGuy.getY());
+            graphics2d.drawLineSegment(screenFrame, 0, drawGuy.getY(), getPlotterWidthPixels(), drawGuy.getY());
             
             if (showLabels)
             {
@@ -360,8 +367,8 @@ public class Plotter
       // paint grid centerline
       origin.changeFrame(screenFrame);
       graphics2d.setColor(PlotterColors.GRID_AXIS);
-      graphics2d.drawLineSegment(screenFrame, origin.getX(), 0.0, origin.getX(), visibleRectangle.getHeight());
-      graphics2d.drawLineSegment(screenFrame, 0.0, origin.getY(), visibleRectangle.getWidth(), origin.getY());
+      graphics2d.drawLineSegment(screenFrame, origin.getX(), 0.0, origin.getX(), getPlotterHeightPixels());
+      graphics2d.drawLineSegment(screenFrame, 0.0, origin.getY(), getPlotterWidthPixels(), origin.getY());
       
       for (int artifactLevel = 0; artifactLevel < 5; artifactLevel++)
       {
@@ -571,7 +578,7 @@ public class Plotter
             }
             double scaledYChange = 1.0 + (deltaDragY * 0.005);
             
-            focusPoint.setIncludingFrame(screenFrame, visibleRectangle.getWidth() / 2.0, visibleRectangle.getHeight() / 2.0);
+            focusPoint.setIncludingFrame(screenFrame, getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0);
             
             setScale(metersToPixels.getX() * scaledXChange, metersToPixels.getY() * scaledYChange);
             
@@ -587,15 +594,15 @@ public class Plotter
             
             rightMouseDragEnd.sub(rightMouseDragStart);
 
-//            if (mouseEvent.isAltDown())
-//            {
-//               screenRotation += 0.01 * (double) mouseEvent.getX();
-//            }
-//            else
-//            {
+            if (mouseEvent.isAltDown())
+            {
+               screenRotation += 0.01 * (double) rightMouseDragEnd.getX();
+            }
+            else
+            {
                rightMouseDragEnd.negate();
                focusPoint.add(rightMouseDragEnd);
-//            }
+            }
             
             centerOnFocusPoint();
             panel.repaint();
@@ -658,27 +665,13 @@ public class Plotter
     */
    public void setViewRange(double viewRangeInX, double viewRangeInY)
    {
-      if (isInitialized())
-      {
-         setScale(visibleRectangle.getWidth() / viewRangeInX, visibleRectangle.getHeight() / viewRangeInY);
-      }
-      else
-      {
-         setScale(getPreferredSize().getWidth() / viewRangeInX, getPreferredSize().getHeight() / viewRangeInY);
-      }
+      setScale(getPlotterWidthPixels() / viewRangeInX, getPlotterHeightPixels() / viewRangeInY);
    }
    
    public void setViewRange(double minimumViewRange)
    {
       double smallestDimension;
-      if (isInitialized())
-      {
-         smallestDimension = Math.min(visibleRectangle.getWidth(), visibleRectangle.getHeight());
-      }
-      else
-      {
-         smallestDimension = Math.min(getPreferredSize().getWidth(), getPreferredSize().getHeight());
-      }
+      smallestDimension = Math.min(getPlotterWidthPixels(), getPlotterHeightPixels());
       double newPixelsPerMeter = smallestDimension / minimumViewRange;
       setScale(newPixelsPerMeter, newPixelsPerMeter);
    }
@@ -739,13 +732,13 @@ public class Plotter
 
    public double getViewRange()
    {
-      if (visibleRectangle.getWidth() <= visibleRectangle.getHeight())
+      if (getPlotterWidthPixels() <= getPlotterHeightPixels())
       {
-         return metersToPixels.getX() * visibleRectangle.getWidth();
+         return metersToPixels.getX() * getPlotterWidthPixels();
       }
       else
       {
-         return metersToPixels.getY() * visibleRectangle.getHeight();
+         return metersToPixels.getY() * getPlotterHeightPixels();
       }
    }
 

@@ -1,14 +1,14 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
-public class ClearLidarBehavior extends BehaviorInterface
+public class ClearLidarBehavior extends AbstractBehavior
 {
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private DepthDataClearCommand clearLidarPacket;

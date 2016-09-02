@@ -19,7 +19,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class TurnInPlaceBehavior extends BehaviorInterface
+public class TurnInPlaceBehavior extends AbstractBehavior
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final boolean DEBUG = false;

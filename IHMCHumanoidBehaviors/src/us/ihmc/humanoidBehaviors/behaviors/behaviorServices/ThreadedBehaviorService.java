@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class ThreadedBehaviorService extends BehaviorService implements Runnable
@@ -9,7 +9,7 @@ public abstract class ThreadedBehaviorService extends BehaviorService implements
    private boolean paused = false;
    private final String threadName;
    
-   public ThreadedBehaviorService(String threadName, BehaviorInterface behaviorInterface)
+   public ThreadedBehaviorService(String threadName, AbstractBehavior behaviorInterface)
    {
       super(behaviorInterface);
       

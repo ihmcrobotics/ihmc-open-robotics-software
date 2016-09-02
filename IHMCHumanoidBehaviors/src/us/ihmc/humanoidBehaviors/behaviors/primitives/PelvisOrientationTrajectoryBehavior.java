@@ -3,13 +3,13 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class PelvisOrientationTrajectoryBehavior extends BehaviorInterface
+public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
 {
    private PelvisOrientationTrajectoryMessage outgoingPelvisOrientationTrajectoryMessage;
 

@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -24,7 +24,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class FootstepListBehavior extends BehaviorInterface
+public class FootstepListBehavior extends AbstractBehavior
 {
    private static final boolean DEBUG = false;
 

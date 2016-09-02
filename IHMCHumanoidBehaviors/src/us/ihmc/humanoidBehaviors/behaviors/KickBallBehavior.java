@@ -22,7 +22,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
-public class KickBallBehavior extends BehaviorInterface
+public class KickBallBehavior extends AbstractBehavior
 {
    private static final boolean CREATE_COACTIVE_ELEMENT = true;
    private static final boolean USE_BLOB_FILTERING = true;
@@ -37,7 +37,7 @@ public class KickBallBehavior extends BehaviorInterface
    private final DoubleYoVariable yoTime;
    private final ReferenceFrame midZupFrame;
 
-   private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
+   private final ArrayList<AbstractBehavior> behaviors = new ArrayList<AbstractBehavior>();
 
    private final SphereDetectionBehavior sphereDetectionBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
@@ -46,7 +46,7 @@ public class KickBallBehavior extends BehaviorInterface
 
    private BehaviorStateMachine<KickState> stateMachine;
 
-   private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
    private final double initalWalkDistance = 1.0;
    private final double standingDistance = 0.4;
@@ -83,7 +83,7 @@ public class KickBallBehavior extends BehaviorInterface
       kickBehavior = new KickBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames);
       behaviors.add(kickBehavior);
 
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          registry.addChild(behavior.getYoVariableRegistry());
       }
@@ -235,7 +235,7 @@ public class KickBallBehavior extends BehaviorInterface
          coactiveElement.foundBall.set(false);
          coactiveElement.ballPositions.get(0).setToZero();
       }
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.doPostBehaviorCleanup();
       }
@@ -245,7 +245,7 @@ public class KickBallBehavior extends BehaviorInterface
    public void stop()
    {
       defaultStop();
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.stop();
       }
@@ -255,7 +255,7 @@ public class KickBallBehavior extends BehaviorInterface
    public void pause()
    {
       defaultPause();
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.pause();
       }
@@ -281,7 +281,7 @@ public class KickBallBehavior extends BehaviorInterface
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.consumeObjectFromNetworkProcessor(object);
       }
@@ -290,7 +290,7 @@ public class KickBallBehavior extends BehaviorInterface
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.consumeObjectFromController(object);
       }

@@ -24,6 +24,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.DoubleSupportICPEquationsTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.MomentumRecoveryControlModuleTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPPlanarProjectorTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPProjectorTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointToolsTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.CentroidalMomentumBenchmarkTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.PointFeedbackControllerTest.class,

@@ -33,7 +33,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
  * @author Alex Graber-Tilton
  *
  */
-public class WalkToGoalBehavior extends BehaviorInterface {
+public class WalkToGoalBehavior extends AbstractBehavior {
 
 	private final BooleanYoVariable DEBUG = new BooleanYoVariable("DEBUG", registry);
 	private final DoubleYoVariable yoTime;

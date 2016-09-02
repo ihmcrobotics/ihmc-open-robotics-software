@@ -98,7 +98,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       if (use2DProjection)
-         cmpProjector = new SmartCMPProjectorTwo(registry);
+         cmpProjector = new SmartCMPProjector(yoGraphicsListRegistry, registry);
       else
          cmpProjector = new SmartCMPPlanarProjector(registry);
 

@@ -30,7 +30,7 @@ import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 
-public class FollowBallBehavior extends BehaviorInterface
+public class FollowBallBehavior extends AbstractBehavior
 {
    private static final boolean DEBUG = true;
 
