@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
-public class WaitForUserValidationBehavior extends BehaviorInterface
+public class WaitForUserValidationBehavior extends AbstractBehavior
 {
 
    private BooleanYoVariable validClicked;

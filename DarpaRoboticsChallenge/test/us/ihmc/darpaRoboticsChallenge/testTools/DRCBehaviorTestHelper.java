@@ -19,7 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
@@ -205,7 +205,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       robotDataReceiver.updateRobotModel();
    }
 
-   public void dispatchBehavior(BehaviorInterface behaviorToTest) throws SimulationExceededMaximumTimeException
+   public void dispatchBehavior(AbstractBehavior behaviorToTest) throws SimulationExceededMaximumTimeException
    {
       HumanoidBehaviorType testBehaviorType = HumanoidBehaviorType.TEST;
       behaviorDispatcher.addBehavior(testBehaviorType, behaviorToTest);
@@ -220,7 +220,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       assertTrue(success);
    }
    
-   public void sendBehaviorToDispatcher(BehaviorInterface behaviorToTest) throws SimulationExceededMaximumTimeException
+   public void sendBehaviorToDispatcher(AbstractBehavior behaviorToTest) throws SimulationExceededMaximumTimeException
    {
       HumanoidBehaviorType testBehaviorType = HumanoidBehaviorType.TEST;
       behaviorDispatcher.addBehavior(testBehaviorType, behaviorToTest);
@@ -318,10 +318,10 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       super.destroySimulation();
    }
 
-   public boolean executeBehaviorsSimulateAndBlockAndCatchExceptions(final SideDependentList<BehaviorInterface> behaviors, double simulationRunTime)
+   public boolean executeBehaviorsSimulateAndBlockAndCatchExceptions(final SideDependentList<AbstractBehavior> behaviors, double simulationRunTime)
          throws SimulationExceededMaximumTimeException
    {
-      ArrayList<BehaviorInterface> behaviorArrayList = new ArrayList<BehaviorInterface>();
+      ArrayList<AbstractBehavior> behaviorArrayList = new ArrayList<AbstractBehavior>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -332,7 +332,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return ret;
    }
 
-   public boolean executeBehaviorsSimulateAndBlockAndCatchExceptions(final ArrayList<BehaviorInterface> behaviors, double simulationRunTime)
+   public boolean executeBehaviorsSimulateAndBlockAndCatchExceptions(final ArrayList<AbstractBehavior> behaviors, double simulationRunTime)
          throws SimulationExceededMaximumTimeException
    {
       BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behaviors);
@@ -343,7 +343,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return ret;
    }
 
-   public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final BehaviorInterface behavior, double pausePercent, double pauseDuration,
+   public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final AbstractBehavior behavior, double pausePercent, double pauseDuration,
          double stopPercent, FramePose poseAtTrajectoryEnd, ReferenceFrame frameToKeepTrackOf) throws SimulationExceededMaximumTimeException
    {
       StopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(robotDataReceiver, behavior, pausePercent, pauseDuration, stopPercent,
@@ -355,7 +355,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return stopThreadUpdatable;
    }
 
-   public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final BehaviorInterface behavior, double pauseTime, double pauseDuration, double stopTime,
+   public StopThreadUpdatable executeBehaviorPauseAndResumeOrStop(final AbstractBehavior behavior, double pauseTime, double pauseDuration, double stopTime,
          ReferenceFrame frameToKeepTrackOf) throws SimulationExceededMaximumTimeException
    {
       StopThreadUpdatable stopThreadUpdatable = new TimeBasedStopThreadUpdatable(robotDataReceiver, behavior, pauseTime, pauseDuration, stopTime,
@@ -367,7 +367,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return stopThreadUpdatable;
    }
 
-   public boolean executeBehaviorPauseAndResumeOrStop(BehaviorInterface behavior, StopThreadUpdatable stopThreadUpdatable)
+   public boolean executeBehaviorPauseAndResumeOrStop(AbstractBehavior behavior, StopThreadUpdatable stopThreadUpdatable)
          throws SimulationExceededMaximumTimeException
    {
       StoppableBehaviorRunner behaviorRunner = new StoppableBehaviorRunner(behavior, stopThreadUpdatable);
@@ -386,7 +386,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return success;
    }
 
-   public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(final BehaviorInterface behavior, double simulationRunTime)
+   public boolean executeBehaviorSimulateAndBlockAndCatchExceptions(final AbstractBehavior behavior, double simulationRunTime)
          throws SimulationExceededMaximumTimeException
    {
       BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behavior);
@@ -397,7 +397,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return ret;
    }
 
-   public boolean executeBehaviorUntilDone(final BehaviorInterface behavior) throws SimulationExceededMaximumTimeException
+   public boolean executeBehaviorUntilDone(final AbstractBehavior behavior) throws SimulationExceededMaximumTimeException
    {
       BehaviorRunner behaviorRunner = startNewBehaviorRunnerThread(behavior);
 
@@ -412,7 +412,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return success;
    }
    
-   public boolean executeBehaviorUntilDoneUsingBehaviorDispatcher(final BehaviorInterface behavior) throws SimulationExceededMaximumTimeException
+   public boolean executeBehaviorUntilDoneUsingBehaviorDispatcher(final AbstractBehavior behavior) throws SimulationExceededMaximumTimeException
    {
       behaviorDispatcher.start();
 
@@ -431,7 +431,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    
    
 
-   private BehaviorRunner startNewBehaviorRunnerThread(final ArrayList<BehaviorInterface> behaviors)
+   private BehaviorRunner startNewBehaviorRunnerThread(final ArrayList<AbstractBehavior> behaviors)
    {
       BehaviorRunner behaviorRunner = new BehaviorRunner(behaviors);
       Thread behaviorThread = new Thread(behaviorRunner);
@@ -440,7 +440,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return behaviorRunner;
    }
 
-   private BehaviorRunner startNewBehaviorRunnerThread(final BehaviorInterface behavior)
+   private BehaviorRunner startNewBehaviorRunnerThread(final AbstractBehavior behavior)
    {
       BehaviorRunner behaviorRunner = new BehaviorRunner(behavior);
       Thread behaviorThread = new Thread(behaviorRunner);
@@ -452,20 +452,20 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private class BehaviorRunner implements Runnable
    {
       protected boolean isRunning = true;
-      protected final ArrayList<BehaviorInterface> behaviors;
+      protected final ArrayList<AbstractBehavior> behaviors;
 
-      public BehaviorRunner(BehaviorInterface behavior)
+      public BehaviorRunner(AbstractBehavior behavior)
       {
-         this.behaviors = new ArrayList<BehaviorInterface>();
+         this.behaviors = new ArrayList<AbstractBehavior>();
          this.behaviors.add(behavior);
          behaviorCommunicationBridge.attachGlobalListener(behavior.getControllerGlobalPacketConsumer());
       }
 
-      public BehaviorRunner(ArrayList<BehaviorInterface> behaviors)
+      public BehaviorRunner(ArrayList<AbstractBehavior> behaviors)
       {
          this.behaviors = behaviors;
 
-         for (BehaviorInterface behavior : behaviors)
+         for (AbstractBehavior behavior : behaviors)
          {
             behaviorCommunicationBridge.attachGlobalListener(behavior.getControllerGlobalPacketConsumer());
          }
@@ -477,7 +477,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
          {
             robotDataReceiver.updateRobotModel();
 
-            for (BehaviorInterface behavior : behaviors)
+            for (AbstractBehavior behavior : behaviors)
             {
                behavior.doControl();
             }
@@ -502,7 +502,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       private BehaviorControlModeEnum currentControlMode = BehaviorControlModeEnum.RESUME;
 
-      public StoppableBehaviorRunner(BehaviorInterface behavior, StopThreadUpdatable stopThreadUpdatable)
+      public StoppableBehaviorRunner(AbstractBehavior behavior, StopThreadUpdatable stopThreadUpdatable)
       {
          super(behavior);
          this.stopThreadUpdatable = stopThreadUpdatable;
@@ -514,7 +514,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
          {
             robotDataReceiver.updateRobotModel();
 
-            for (BehaviorInterface behavior : behaviors)
+            for (AbstractBehavior behavior : behaviors)
             {
                behavior.doControl();
             }
@@ -535,7 +535,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
             }
             else if (requestedControlMode.equals(BehaviorControlModeEnum.PAUSE) && !currentControlMode.equals(BehaviorControlModeEnum.PAUSE))
             {
-               for (BehaviorInterface behavior : behaviors)
+               for (AbstractBehavior behavior : behaviors)
                {
                   behavior.pause();
                }
@@ -543,7 +543,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
             }
             else if (requestedControlMode.equals(BehaviorControlModeEnum.STOP) && !currentControlMode.equals(BehaviorControlModeEnum.STOP))
             {
-               for (BehaviorInterface behavior : behaviors)
+               for (AbstractBehavior behavior : behaviors)
                {
                   behavior.stop();
                }
@@ -551,7 +551,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
             }
             else if (requestedControlMode.equals(BehaviorControlModeEnum.RESUME) && !currentControlMode.equals(BehaviorControlModeEnum.RESUME))
             {
-               for (BehaviorInterface behavior : behaviors)
+               for (AbstractBehavior behavior : behaviors)
                {
                   behavior.resume();
                }

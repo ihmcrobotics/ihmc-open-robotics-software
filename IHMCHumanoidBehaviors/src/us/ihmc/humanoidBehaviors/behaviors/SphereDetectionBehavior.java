@@ -32,7 +32,7 @@ import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigMultiShapeRansa
 import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import us.ihmc.tools.io.printing.PrintTools;
 
-public class SphereDetectionBehavior extends BehaviorInterface
+public class SphereDetectionBehavior extends AbstractBehavior
 {
 
    private BooleanYoVariable ballFound = new BooleanYoVariable("ballFound", registry);

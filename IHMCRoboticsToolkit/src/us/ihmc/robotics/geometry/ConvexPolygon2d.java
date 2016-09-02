@@ -951,14 +951,14 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       checkIfUpToDate();
       if (hasAtLeastThreeVertices())
       {
-         if (x < boundingBox.getMinPoint().getX())
+         if (x < boundingBox.getMinPoint().getX() - epsilon)
             return false;
-         if (y < boundingBox.getMinPoint().getY())
+         if (y < boundingBox.getMinPoint().getY() - epsilon)
             return false;
 
-         if (x > boundingBox.getMaxPoint().getX())
+         if (x > boundingBox.getMaxPoint().getX() + epsilon)
             return false;
-         if (y > boundingBox.getMaxPoint().getY())
+         if (y > boundingBox.getMaxPoint().getY() + epsilon)
             return false;
 
          // Determine whether the point is on the right side of each edge:

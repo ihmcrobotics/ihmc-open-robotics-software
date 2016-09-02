@@ -128,7 +128,6 @@ public class YoArtifactPosition extends YoArtifact
             graphics.drawCross(tempPoint, radii);
             break;
          case BALL_WITH_CROSS :
-            System.out.println("drawing ball w cross: " + tempPoint + " radi: " + radii);
             graphics.drawCircleWithCross(tempPoint, radii);
             break;
          case ROTATED_CROSS :

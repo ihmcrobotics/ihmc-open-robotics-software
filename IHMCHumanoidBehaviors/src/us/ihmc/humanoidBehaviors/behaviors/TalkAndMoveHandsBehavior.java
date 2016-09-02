@@ -24,13 +24,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.taskExecutor.PipeLine;
 
-public class TalkAndMoveHandsBehavior extends BehaviorInterface implements VariableChangedListener
+public class TalkAndMoveHandsBehavior extends AbstractBehavior implements VariableChangedListener
 {
    private enum HandGestures {NONE, FIST_RAGE, HEIGHT_INDICATION, NUMBER_ONE, KNIFE_HAND, ME, NUMBERING_HAND_GESTURE};
    private final EnumYoVariable<HandGestures> currentHandGesture = new EnumYoVariable<TalkAndMoveHandsBehavior.HandGestures>("currentHandGesture", registry, HandGestures.class);
    private EnumYoVariable<RobotSide> selectedRobotSide = new EnumYoVariable<RobotSide>("selectedRobotSide", registry, RobotSide.class);
    private final DoubleYoVariable yoTime;
-   private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
    private final HandTrajectoryBehavior handTrajectoryBehavior;
    private final HandDesiredConfigurationBehavior handDesiredConfigurationBehavior;
 

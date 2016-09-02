@@ -46,13 +46,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
-public class PickUpBallBehavior extends BehaviorInterface
+public class PickUpBallBehavior extends AbstractBehavior
 {
    private static final boolean FILTER_KNOWN_COLORS_TO_SPEED_UP = false;
    
    private final PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 
-   private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
+   private final ArrayList<AbstractBehavior> behaviors = new ArrayList<AbstractBehavior>();
    private final EnableBehaviorOnlyLidarBehavior enableBehaviorOnlyLidarBehavior;
    private final SetLidarParametersBehavior setLidarParametersBehavior;
    private final ClearLidarBehavior clearLidarBehavior;
@@ -69,7 +69,7 @@ public class PickUpBallBehavior extends BehaviorInterface
    private final GoHomeBehavior armGoHomeRightBehavior;
    private final ArmTrajectoryBehavior armTrajectoryBehavior;
 
-   private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
+   private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final DoubleYoVariable yoTime;
@@ -140,7 +140,7 @@ public class PickUpBallBehavior extends BehaviorInterface
             coactiveElement.validAcknowledged);
       behaviors.add(waitForUserValidationBehavior);
       
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          registry.addChild(behavior.getYoVariableRegistry());
       }
@@ -658,7 +658,7 @@ public class PickUpBallBehavior extends BehaviorInterface
       coactiveElement.ballX.set(0);
       coactiveElement.ballY.set(0);
       coactiveElement.ballZ.set(0);
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.doPostBehaviorCleanup();
       }
@@ -668,7 +668,7 @@ public class PickUpBallBehavior extends BehaviorInterface
    public void stop()
    {
       defaultStop();
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.stop();
       }
@@ -678,7 +678,7 @@ public class PickUpBallBehavior extends BehaviorInterface
    public void pause()
    {
       defaultPause();
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.pause();
       }
@@ -704,7 +704,7 @@ public class PickUpBallBehavior extends BehaviorInterface
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.consumeObjectFromNetworkProcessor(object);
       }
@@ -713,7 +713,7 @@ public class PickUpBallBehavior extends BehaviorInterface
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      for (BehaviorInterface behavior : behaviors)
+      for (AbstractBehavior behavior : behaviors)
       {
          behavior.consumeObjectFromController(object);
       }

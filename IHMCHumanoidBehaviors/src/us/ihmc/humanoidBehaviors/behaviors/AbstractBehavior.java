@@ -23,7 +23,7 @@ import us.ihmc.tools.FormattingTools;
  * It helps in setting up the communications to receive and send packets to the other modules as the controller or the network processor.
  *
  */
-public abstract class BehaviorInterface implements RobotController
+public abstract class AbstractBehavior implements RobotController
 {
    public static enum BehaviorStatus
    {
@@ -49,12 +49,12 @@ public abstract class BehaviorInterface implements RobotController
    protected final BooleanYoVariable isStopped;
    protected final DoubleYoVariable percentCompleted;
 
-   public BehaviorInterface(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public AbstractBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
       this(null, outgoingCommunicationBridge);
    }
 
-   public BehaviorInterface(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public AbstractBehavior(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
       this.outgoingCommunicationBridge = outgoingCommunicationBridge;
       controllerObjectConsumer = new ControllerGlobalObjectConsumer(this);
@@ -63,7 +63,7 @@ public abstract class BehaviorInterface implements RobotController
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
       registry = new YoVariableRegistry(behaviorName);
       
-      yoBehaviorStatus = new EnumYoVariable<BehaviorInterface.BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
+      yoBehaviorStatus = new EnumYoVariable<AbstractBehavior.BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
       hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
       isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
       isStopped = new BooleanYoVariable("isStopped" + behaviorName, registry);
