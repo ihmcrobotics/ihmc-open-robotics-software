@@ -104,15 +104,15 @@ public class FrameMatrix3DTest
 
       matrixExpected = RandomTools.generateRandomMatrix3d(random, 10.0);
       frameMatrix3D = new FrameMatrix3D();
-      frameMatrix3D.setM00(matrixExpected.m00);
-      frameMatrix3D.setM01(matrixExpected.m01);
-      frameMatrix3D.setM02(matrixExpected.m02);
-      frameMatrix3D.setM10(matrixExpected.m10);
-      frameMatrix3D.setM11(matrixExpected.m11);
-      frameMatrix3D.setM12(matrixExpected.m12);
-      frameMatrix3D.setM20(matrixExpected.m20);
-      frameMatrix3D.setM21(matrixExpected.m21);
-      frameMatrix3D.setM22(matrixExpected.m22);
+      frameMatrix3D.setM00(matrixExpected.getM00());
+      frameMatrix3D.setM01(matrixExpected.getM01());
+      frameMatrix3D.setM02(matrixExpected.getM02());
+      frameMatrix3D.setM10(matrixExpected.getM10());
+      frameMatrix3D.setM11(matrixExpected.getM11());
+      frameMatrix3D.setM12(matrixExpected.getM12());
+      frameMatrix3D.setM20(matrixExpected.getM20());
+      frameMatrix3D.setM21(matrixExpected.getM21());
+      frameMatrix3D.setM22(matrixExpected.getM22());
       frameMatrix3D.getMatrix(matrixTested);
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
       
@@ -135,7 +135,7 @@ public class FrameMatrix3DTest
       {
          Vector3d rowElements = new Vector3d();
          matrixExpected.getRow(row, rowElements);
-         frameMatrix3D.setRow(row, rowElements.x, rowElements.y, rowElements.z);
+         frameMatrix3D.setRow(row, rowElements.getX(), rowElements.getY(), rowElements.getZ());
       }
       frameMatrix3D.getMatrix(matrixTested);
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
@@ -146,7 +146,7 @@ public class FrameMatrix3DTest
       {
          Vector3d columnElements = new Vector3d();
          matrixExpected.getColumn(column, columnElements);
-         frameMatrix3D.setColumn(column, columnElements.x, columnElements.y, columnElements.z);
+         frameMatrix3D.setColumn(column, columnElements.getX(), columnElements.getY(), columnElements.getZ());
       }
       frameMatrix3D.getMatrix(matrixTested);
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));

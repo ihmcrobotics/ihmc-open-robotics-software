@@ -123,7 +123,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       if (yoGraphicsListRegistry != null)
       {
          String graphicListName = getClass().getSimpleName();
-         YoGraphicPosition unprojectedDesiredCMPViz = new YoGraphicPosition("Unprojected Desired CMP", yoUnprojectedDesiredCMP, 0.008, Purple(), GraphicType.ROTATED_CROSS);
+         YoGraphicPosition unprojectedDesiredCMPViz = new YoGraphicPosition("Unprojected Desired CMP", yoUnprojectedDesiredCMP, 0.008, Purple(), GraphicType.BALL_WITH_ROTATED_CROSS);
          YoArtifactPosition artifact = unprojectedDesiredCMPViz.createArtifact();
          artifact.setVisible(false);
          yoGraphicsListRegistry.registerArtifact(graphicListName, artifact);

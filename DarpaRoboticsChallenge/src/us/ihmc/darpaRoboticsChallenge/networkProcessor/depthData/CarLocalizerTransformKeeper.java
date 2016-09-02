@@ -139,9 +139,9 @@ public class CarLocalizerTransformKeeper
    {
       tempPoint.set(x, y, z);
       inverseTransformFromSomeframeToWheel.transform(tempPoint);
-      x = tempPoint.x;
-      y = tempPoint.y;
-      z = tempPoint.z;
+      x = tempPoint.getX();
+      y = tempPoint.getY();
+      z = tempPoint.getZ();
 
       return isPointNearWheel(x, y, z, fudgeFactor);
    }
@@ -166,9 +166,9 @@ public class CarLocalizerTransformKeeper
       transformToDesiredPelvis.transform(tempPoint);
 
 //    inverseTransformFromNewPelvisToOldPelvis.transform(tempPoint);
-      x = tempPoint.x;
-      y = tempPoint.y;
-      z = tempPoint.z;
+      x = tempPoint.getX();
+      y = tempPoint.getY();
+      z = tempPoint.getZ();
 
       return isPointInCarFrameWithinTemplateBounds(x, y, z);
    }

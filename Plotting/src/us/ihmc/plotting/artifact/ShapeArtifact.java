@@ -4,17 +4,24 @@ import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
-import us.ihmc.plotting.Coordinate;
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+
 import us.ihmc.plotting.Graphics2DAdapter;
-import us.ihmc.plotting.Pose;
+import us.ihmc.plotting.Plotter2DAdapter;
 
 public class ShapeArtifact extends Artifact
 {
-   private Pose pose;
+   private static final double LEGEND_RADIUS = 20.0;
+   
+   private Point2d pose;
    private double height;
    private double width;
+   
+   private final Point2d tempCenter = new Point2d();
+   private final Vector2d tempRadii = new Vector2d();
 
-   public ShapeArtifact(String id, String type, double height, double width, Pose pose)
+   public ShapeArtifact(String id, String type, double height, double width, Point2d pose)
    {
       super(id);
       setType(type);
@@ -24,17 +31,12 @@ public class ShapeArtifact extends Artifact
       this.width = width;
    }
 
-   public void setPose(Pose pose)
+   public void setPose(Point2d pose)
    {
       this.pose = pose;
    }
 
-   public Coordinate getCoordinate()
-   {
-      return pose;
-   }
-
-   public Pose getPose()
+   public Point2d getPose()
    {
       return pose;
    }
@@ -43,7 +45,7 @@ public class ShapeArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
       if (pose == null)
       {
@@ -52,54 +54,49 @@ public class ShapeArtifact extends Artifact
          return;
       }
 
-      int x = Xcenter + ((int) Math.round(pose.getX() * scaleFactor));
-      int y = Ycenter - ((int) Math.round(pose.getY() * scaleFactor));
-
-      graphics2d.setColor(color);
-      int w = (int) (width * scaleFactor);
-      int h = (int) (height * scaleFactor);
+      graphics.setColor(color);
+      tempCenter.set(pose.getX(), pose.getY());
+      tempRadii.set(width / 2.0, height / 2.0);
+      
       if (getType().equals("fillcircle"))
       {
-         graphics2d.drawOvalFilled((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawOvalFilled(tempCenter, tempRadii);
       }
       else if (getType().equals("circle"))
       {
-         graphics2d.drawOval((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawOval(tempCenter, tempRadii);
       }
       else if (getType().equals("fillrectangle"))
       {
-         graphics2d.drawRectangleFilled((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawSquareFilled(tempCenter, tempRadii);
       }
       else if (getType().equals("rectangle"))
       {
-         graphics2d.drawRectangle((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawSquare(tempCenter, tempRadii);
       }
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
-      int x = Xcenter;
-      int y = Ycenter;
-
-      graphics2d.setColor(color);
-      int w = (int) (width * scaleFactor);
-      int h = (int) (height * scaleFactor);
+      graphics.setColor(color);
+      tempCenter.set(origin);
+      tempRadii.set(LEGEND_RADIUS, LEGEND_RADIUS);
       if (getType().equals("fillcircle"))
       {
-         graphics2d.drawOvalFilled((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawOvalFilled(graphics.getScreenFrame(), tempCenter, tempRadii);
       }
       else if (getType().equals("circle"))
       {
-         graphics2d.drawOval((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawOval(graphics.getScreenFrame(), tempCenter, tempRadii);
       }
       else if (getType().equals("fillrectangle"))
       {
-         graphics2d.drawRectangleFilled((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawSquareFilled(graphics.getScreenFrame(), tempCenter, tempRadii);
       }
       else if (getType().equals("rectangle"))
       {
-         graphics2d.drawRectangle((x - (w / 2)), (y - (h / 2)), w, h);
+         graphics.drawRectangle(graphics.getScreenFrame(), tempCenter, tempRadii);
       }
    }
 
@@ -119,7 +116,7 @@ public class ShapeArtifact extends Artifact
          StringTokenizer s = new StringTokenizer(line, " ");
          double x = Double.parseDouble(s.nextToken());
          double y = Double.parseDouble(s.nextToken());
-         Pose pose = new Pose(x, y, 0.0, Coordinate.METER);
+         Point2d pose = new Point2d(x, y);
          double width = Double.parseDouble(s.nextToken());
          double height = Double.parseDouble(s.nextToken());
          String type = s.nextToken();
@@ -143,7 +140,7 @@ public class ShapeArtifact extends Artifact
    }
 
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics)
    {
       throw new RuntimeException("Not implemented!");
    }

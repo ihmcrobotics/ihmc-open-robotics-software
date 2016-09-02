@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.Plane;
+
 public class JointDefinitionFixedFrame implements Comparable<JointDefinitionFixedFrame>
 {
    public enum JointType {PIN_JOINT, SLIDER_JOINT, FLOATING_JOINT, FLOATING_PLANAR_JOINT}
@@ -37,12 +39,12 @@ public class JointDefinitionFixedFrame implements Comparable<JointDefinitionFixe
    private ArrayList<JointDefinitionFixedFrame> childrenJoints = new ArrayList<JointDefinitionFixedFrame>();
 
    // only used for planar joints.
-   private int planarType = 3;
+   private Plane planarType = Plane.YZ;
 
    private ArrayList<GroundContactDefinitionFixedFrame> groundContactDefinitionsFixedFrame = new ArrayList<GroundContactDefinitionFixedFrame>();
    private ArrayList<ExternalForcePointDefinitionFixedFrame> externalForcePointDefinitionsFixedFrame = new ArrayList<ExternalForcePointDefinitionFixedFrame>();
 
-   public int getPlanarType()
+   public Plane getPlanarType()
    {
       return planarType;
    }
@@ -80,7 +82,7 @@ public class JointDefinitionFixedFrame implements Comparable<JointDefinitionFixe
    }
 
 
-   public void setPlanarType(int type)
+   public void setPlanarType(Plane type)
    {
       this.planarType = type;
    }

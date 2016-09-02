@@ -75,18 +75,18 @@ public class TransformTools
    {
       DenseMatrix64F ret = new DenseMatrix64F(4,4);
       
-      ret.set(0,0,(t2.mat00 - t1.mat00) / dt);
-      ret.set(0,1,(t2.mat01 - t1.mat01) / dt);
-      ret.set(0,2,(t2.mat02 - t1.mat02) / dt);
-      ret.set(0,3,(t2.mat03 - t1.mat03) / dt);
-      ret.set(1,0,(t2.mat10 - t1.mat10) / dt);
-      ret.set(1,1,(t2.mat11 - t1.mat11) / dt);
-      ret.set(1,2,(t2.mat12 - t1.mat12) / dt);
-      ret.set(1,3,(t2.mat13 - t1.mat13) / dt);
-      ret.set(2,0,(t2.mat20 - t1.mat20) / dt);
-      ret.set(2,1,(t2.mat21 - t1.mat21) / dt);
-      ret.set(2,2,(t2.mat22 - t1.mat22) / dt);
-      ret.set(2,3,(t2.mat23 - t1.mat23) / dt);
+      ret.set(0,0,(t2.getM00() - t1.getM00()) / dt);
+      ret.set(0,1,(t2.getM01() - t1.getM01()) / dt);
+      ret.set(0,2,(t2.getM02() - t1.getM02()) / dt);
+      ret.set(0,3,(t2.getM03() - t1.getM03()) / dt);
+      ret.set(1,0,(t2.getM10() - t1.getM10()) / dt);
+      ret.set(1,1,(t2.getM11() - t1.getM11()) / dt);
+      ret.set(1,2,(t2.getM12() - t1.getM12()) / dt);
+      ret.set(1,3,(t2.getM13() - t1.getM13()) / dt);
+      ret.set(2,0,(t2.getM20() - t1.getM20()) / dt);
+      ret.set(2,1,(t2.getM21() - t1.getM21()) / dt);
+      ret.set(2,2,(t2.getM22() - t1.getM22()) / dt);
+      ret.set(2,3,(t2.getM23() - t1.getM23()) / dt);
       ret.set(3,0,0);
       ret.set(3,1,0);
       ret.set(3,2,0);

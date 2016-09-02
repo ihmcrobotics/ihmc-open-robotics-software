@@ -130,14 +130,14 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       this.line.rotate(radians);
    }
    
-   public void setOrigin(FramePoint2d framePoint2d)
+   public void setPoint(FramePoint2d framePoint2d)
    {
       checkReferenceFrameMatch(framePoint2d);
       
       line.getPoint().set(framePoint2d.getPoint());
    }
    
-   public void setDirection(FrameVector2d frameVector2d)
+   public void setVector(FrameVector2d frameVector2d)
    {
       checkReferenceFrameMatch(frameVector2d);
       
@@ -147,7 +147,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    @Deprecated
    public void setFramePoint2d(FramePoint2d framePoint2d)
    {
-      setOrigin(framePoint2d);
+      setPoint(framePoint2d);
    }
 
    public void setByProjectionOntoXYPlane(FramePoint startPoint, FramePoint endPoint)
@@ -181,6 +181,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       this.line.set(endpoints[0].getPoint(), endpoints[1].getPoint());
    }
 
+   @Override
    public void setIncludingFrame(FrameLine2d otherFrameLine2d)
    {
       this.referenceFrame = otherFrameLine2d.referenceFrame;
@@ -201,18 +202,19 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       this.line.set(startPoint.getPoint(), vector.getVector());
    }
 
-   public void set(ReferenceFrame referenceFrame, double x0, double y0, double vx, double vy)
+   public void set(ReferenceFrame referenceFrame, double pointX, double pointY, double vectorX, double vectorY)
    {
       checkReferenceFrameMatch(referenceFrame);
-      this.line.set(x0, y0, vx, vy);
+      this.line.set(pointX, pointY, vectorX, vectorY);
    }
 
-   public void setIncludingFrame(ReferenceFrame referenceFrame, double x0, double y0, double vx, double vy)
+   public void setIncludingFrame(ReferenceFrame referenceFrame, double pointX, double pointY, double vectorX, double vectorY)
    {
       this.referenceFrame = referenceFrame;
-      this.line.set(x0, y0, vx, vy);
+      this.line.set(pointX, pointY, vectorX, vectorY);
    }
 
+   @Override
    public void set(FrameLine2d frameLine2d)
    {
       checkReferenceFrameMatch(frameLine2d);
@@ -325,7 +327,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    {
       checkReferenceFrameMatch(point);
       Point2d projected = line.orthogonalProjectionCopy(point.getPoint());
-      point.set(projected.x, projected.y);
+      point.set(projected.getX(), projected.getY());
    }
 
    @Override

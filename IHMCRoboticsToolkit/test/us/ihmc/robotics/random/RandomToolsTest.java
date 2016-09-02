@@ -70,9 +70,9 @@ public class RandomToolsTest
       {
          randomPoint3f = RandomTools.generateRandomPoint3f(random, min, max);
 
-         assertTrue((randomPoint3f.x >= -7.0f) && (randomPoint3f.x <= 5.0));
-         assertTrue((randomPoint3f.y >= -5.0f) && (randomPoint3f.y <= 4.0));
-         assertTrue((randomPoint3f.z >= -6.0f) && (randomPoint3f.z <= 8.0));
+         assertTrue((randomPoint3f.getX() >= -7.0f) && (randomPoint3f.getX() <= 5.0));
+         assertTrue((randomPoint3f.getY() >= -5.0f) && (randomPoint3f.getY() <= 4.0));
+         assertTrue((randomPoint3f.getZ() >= -6.0f) && (randomPoint3f.getZ() <= 8.0));
       }
    }
 
@@ -88,9 +88,9 @@ public class RandomToolsTest
 
       for (int i = 0; i < 1000; i++)
       {
-         assertTrue((randomPoint3fCloud[i].x >= -7.0f) && (randomPoint3fCloud[i].x <= 5.0));
-         assertTrue((randomPoint3fCloud[i].y >= -5.0f) && (randomPoint3fCloud[i].y <= 4.0));
-         assertTrue((randomPoint3fCloud[i].z >= -6.0f) && (randomPoint3fCloud[i].z <= 8.0));
+         assertTrue((randomPoint3fCloud[i].getX() >= -7.0f) && (randomPoint3fCloud[i].getX() <= 5.0));
+         assertTrue((randomPoint3fCloud[i].getY() >= -5.0f) && (randomPoint3fCloud[i].getY() <= 4.0));
+         assertTrue((randomPoint3fCloud[i].getZ() >= -6.0f) && (randomPoint3fCloud[i].getZ() <= 8.0));
       }
    }
 

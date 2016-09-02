@@ -686,21 +686,21 @@ public class MatrixTools
     */
    public static void setTildeTimesTilde(Matrix3d M, Tuple3d a, Tuple3d b)
    {
-      double axbx = a.x * b.x;
-      double ayby = a.y * b.y;
-      double azbz = a.z * b.z;
+      double axbx = a.getX() * b.getX();
+      double ayby = a.getY() * b.getY();
+      double azbz = a.getZ() * b.getZ();
 
-      M.m00 = -azbz - ayby;
-      M.m01 = a.y * b.x;
-      M.m02 = a.z * b.x;
+      M.setM00(-azbz - ayby);
+      M.setM01(a.getY() * b.getX());
+      M.setM02(a.getZ() * b.getX());
 
-      M.m10 = a.x * b.y;
-      M.m11 = -axbx - azbz;
-      M.m12 = a.z * b.y;
+      M.setM10(a.getX() * b.getY());
+      M.setM11(-axbx - azbz);
+      M.setM12(a.getZ() * b.getY());
 
-      M.m20 = a.x * b.z;
-      M.m21 = a.y * b.z;
-      M.m22 = -axbx - ayby;
+      M.setM20(a.getX() * b.getZ());
+      M.setM21(a.getY() * b.getZ());
+      M.setM22(-axbx - ayby);
    }
 
    public static void setDenseMatrixFromMatrix3d(int startRow, int startColumn, Matrix3d fromMatrix3d, DenseMatrix64F denseMatrix)
@@ -1054,13 +1054,13 @@ public class MatrixTools
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      double x = point.x;
-      double y = point.y;
-      double z = point.z;
+      double x = point.getX();
+      double y = point.getY();
+      double z = point.getZ();
 
-      point.x = matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z;
-      point.y = matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z;
-      point.z = matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z;
+      point.setX(matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z);
+      point.setY(matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z);
+      point.setZ(matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z);
    }
 
    /**
@@ -1074,13 +1074,13 @@ public class MatrixTools
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      double x = point.x;
-      double y = point.y;
-      double z = point.z;
+      double x = point.getX();
+      double y = point.getY();
+      double z = point.getZ();
 
-      point.x = (float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z);
-      point.y = (float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z);
-      point.z = (float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z);
+      point.setX((float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z));
+      point.setY((float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z));
+      point.setZ((float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z));
    }
 
    /**
@@ -1094,13 +1094,13 @@ public class MatrixTools
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      double x = vector.x;
-      double y = vector.y;
-      double z = vector.z;
+      double x = vector.getX();
+      double y = vector.getY();
+      double z = vector.getZ();
 
-      vector.x = matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z;
-      vector.y = matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z;
-      vector.z = matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z;
+      vector.setX(matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z);
+      vector.setY(matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z);
+      vector.setZ(matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z);
    }
 
    /**
@@ -1114,13 +1114,13 @@ public class MatrixTools
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      float x = vector.x;
-      float y = vector.y;
-      float z = vector.z;
+      float x = vector.getX();
+      float y = vector.getY();
+      float z = vector.getZ();
 
-      vector.x = (float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z);
-      vector.y = (float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z);
-      vector.z = (float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z);
+      vector.setX((float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z));
+      vector.setY((float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z));
+      vector.setZ((float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z));
    }
 
    /**
@@ -1134,15 +1134,15 @@ public class MatrixTools
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      double x = vector.x;
-      double y = vector.y;
-      double z = vector.z;
-      double w = vector.w;
+      double x = vector.getX();
+      double y = vector.getY();
+      double z = vector.getZ();
+      double w = vector.getW();
 
-      vector.x = matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z + matrix.get(0, 3) * w;
-      vector.y = matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z + matrix.get(1, 3) * w;
-      vector.z = matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z + matrix.get(2, 3) * w;
-      vector.w = matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * w;
+      vector.setX(matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z + matrix.get(0, 3) * w);
+      vector.setY(matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z + matrix.get(1, 3) * w);
+      vector.setZ(matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z + matrix.get(2, 3) * w);
+      vector.setW(matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * w);
    }
 
    /**
@@ -1156,15 +1156,15 @@ public class MatrixTools
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      float x = vector.x;
-      float y = vector.y;
-      float z = vector.z;
-      float w = vector.w;
+      float x = vector.getX();
+      float y = vector.getY();
+      float z = vector.getZ();
+      float w = vector.getW();
 
-      vector.x = (float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z + matrix.get(0, 3) * w);
-      vector.y = (float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z + matrix.get(1, 3) * w);
-      vector.z = (float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z + matrix.get(2, 3) * w);
-      vector.w = (float) (matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * w);
+      vector.setX((float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z + matrix.get(0, 3) * w));
+      vector.setY((float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z + matrix.get(1, 3) * w));
+      vector.setZ((float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z + matrix.get(2, 3) * w));
+      vector.setW((float) (matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * w));
    }
 
    public static void removeRow(DenseMatrix64F matrixToRemoveRowTo, int indexOfRowToRemove)

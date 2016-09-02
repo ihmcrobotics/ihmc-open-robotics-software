@@ -153,20 +153,20 @@ public class LineModDetector
          @Override
          public int compare(Vector3d o1, Vector3d o2)
          {
-            if (Double.compare(o1.x, o2.x) == 0)
+            if (Double.compare(o1.getX(), o2.getX()) == 0)
             {
-               if (Double.compare(o1.y, o2.y) == 0)
+               if (Double.compare(o1.getY(), o2.getY()) == 0)
                {
-                  return Double.compare(o1.z, o2.z);
+                  return Double.compare(o1.getZ(), o2.getZ());
                }
                else
                {
-                  return Double.compare(o1.y, o2.y);
+                  return Double.compare(o1.getY(), o2.getY());
                }
             }
             else
             {
-               return Double.compare(o1.x, o2.x);
+               return Double.compare(o1.getX(), o2.getX());
             }
 
          };
@@ -184,8 +184,8 @@ public class LineModDetector
 
       for (Vector3d viewpoint : viewPoints)
       {
-         float yaw = (float) Math.atan2(viewpoint.y, viewpoint.x);
-         float pitch = (float) Math.asin(viewpoint.z);
+         float yaw = (float) Math.atan2(viewpoint.getY(), viewpoint.getX());
+         float pitch = (float) Math.asin(viewpoint.getZ());
          if (pitch > FastMath.PI / 3)
             continue;
          for (float roll = -FastMath.PI / 24; roll <= FastMath.PI / 24; roll += FastMath.PI / 24)
@@ -305,11 +305,11 @@ public class LineModDetector
 //      System.out.println("ZAxis" + zAxis);
       Point2i c= bestDetection.getCenter();
       g2.setColor(Color.RED);
-      g2.drawLine(c.x, c.y, (int)(c.x+xAxis.x), (int)(c.y+xAxis.y));
+      g2.drawLine(c.x, c.y, (int)(c.x+xAxis.getX()), (int)(c.y+xAxis.getY()));
       g2.setColor(Color.GREEN);
-      g2.drawLine(c.x, c.y, (int)(c.x+yAxis.x), (int)(c.y+yAxis.y));
+      g2.drawLine(c.x, c.y, (int)(c.x+yAxis.getX()), (int)(c.y+yAxis.getY()));
       g2.setColor(Color.BLUE);
-      g2.drawLine(c.x, c.y, (int)(c.x+zAxis.x), (int)(c.y+zAxis.y));
+      g2.drawLine(c.x, c.y, (int)(c.x+zAxis.getX()), (int)(c.y+zAxis.getY()));
       g2.dispose();
    }
 

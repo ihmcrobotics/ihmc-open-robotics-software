@@ -51,18 +51,18 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
       double cosQ = Math.cos(owner.q.getDoubleValue()), sinQ = Math.sin(owner.q.getDoubleValue());
       @SuppressWarnings("unused") double
             one_cosQ = 1.0 - cosQ, one_sinQ = 1.0 - sinQ;
-      double ux_sinQ = u_i.x * sinQ, uy_sinQ = u_i.y * sinQ, uz_sinQ = u_i.z * sinQ;
-      double uxy_one_cosQ = u_i.x * u_i.y * one_cosQ, uxz_one_cosQ = u_i.x * u_i.z * one_cosQ, uyz_one_cosQ = u_i.y * u_i.z * one_cosQ;
+      double ux_sinQ = u_i.getX() * sinQ, uy_sinQ = u_i.getY() * sinQ, uz_sinQ = u_i.getZ() * sinQ;
+      double uxy_one_cosQ = u_i.getX() * u_i.getY() * one_cosQ, uxz_one_cosQ = u_i.getX() * u_i.getZ() * one_cosQ, uyz_one_cosQ = u_i.getY() * u_i.getZ() * one_cosQ;
 
-      Rh_i.m00 = cosQ + u_i.x * u_i.x * one_cosQ;
-      Rh_i.m01 = uxy_one_cosQ - uz_sinQ;
-      Rh_i.m02 = uxz_one_cosQ + uy_sinQ;
-      Rh_i.m10 = uxy_one_cosQ + uz_sinQ;
-      Rh_i.m11 = cosQ + u_i.y * u_i.y * one_cosQ;
-      Rh_i.m12 = uyz_one_cosQ - ux_sinQ;
-      Rh_i.m20 = uxz_one_cosQ - uy_sinQ;
-      Rh_i.m21 = uyz_one_cosQ + ux_sinQ;
-      Rh_i.m22 = cosQ + u_i.z * u_i.z * one_cosQ;
+      Rh_i.setM00(cosQ + u_i.getX() * u_i.getX() * one_cosQ);
+      Rh_i.setM01(uxy_one_cosQ - uz_sinQ);
+      Rh_i.setM02(uxz_one_cosQ + uy_sinQ);
+      Rh_i.setM10(uxy_one_cosQ + uz_sinQ);
+      Rh_i.setM11(cosQ + u_i.getY() * u_i.getY() * one_cosQ);
+      Rh_i.setM12(uyz_one_cosQ - ux_sinQ);
+      Rh_i.setM20(uxz_one_cosQ - uy_sinQ);
+      Rh_i.setM21(uyz_one_cosQ + ux_sinQ);
+      Rh_i.setM22(cosQ + u_i.getZ() * u_i.getZ() * one_cosQ);
 
       /*
        * if (this.axis == Axis.X) {Rh_i.setElement(1,1,cosQ);Rh_i.setElement(2,2,cosQ);Rh_i.setElement(1,2,-sinQ);Rh_i.setElement(2,1,sinQ);}
@@ -153,14 +153,14 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
       }
 
       // w_i <- w_i + q_i_dot u_i
-      w_i.x = w_i.x + owner.qd.getDoubleValue() * u_i.x;
-      w_i.y = w_i.y + owner.qd.getDoubleValue() * u_i.y;
-      w_i.z = w_i.z + owner.qd.getDoubleValue() * u_i.z;
+      w_i.setX(w_i.getX() + owner.qd.getDoubleValue() * u_i.getX());
+      w_i.setY(w_i.getY() + owner.qd.getDoubleValue() * u_i.getY());
+      w_i.setZ(w_i.getZ() + owner.qd.getDoubleValue() * u_i.getZ());
 
       // v_i <- v_i + q_i_dot (u_i X d_i)
-      v_i.x = v_i.x + owner.qd.getDoubleValue() * u_iXd_i.x;
-      v_i.y = v_i.y + owner.qd.getDoubleValue() * u_iXd_i.y;
-      v_i.z = v_i.z + owner.qd.getDoubleValue() * u_iXd_i.z;
+      v_i.setX(v_i.getX() + owner.qd.getDoubleValue() * u_iXd_i.getX());
+      v_i.setY(v_i.getY() + owner.qd.getDoubleValue() * u_iXd_i.getY());
+      v_i.setZ(v_i.getZ() + owner.qd.getDoubleValue() * u_iXd_i.getZ());
    }
 
    /**

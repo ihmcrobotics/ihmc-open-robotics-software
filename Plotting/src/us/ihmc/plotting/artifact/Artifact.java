@@ -2,20 +2,17 @@ package us.ihmc.plotting.artifact;
 
 import java.awt.Color;
 
-import javax.vecmath.Vector2d;
+import javax.vecmath.Point2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 
 public abstract class Artifact
 {
-   public static int X_Y = 0;
-   public static int X_Z = 1;
-   public static int Y_Z = 2;
-   
    protected final String id;
    protected String type;
    protected int level;
-   protected Color color = Color.blue;
+   protected Color color = Color.BLUE;
    protected boolean isVisible = true;
    private boolean showID = false;
    private boolean drawHistory = false;
@@ -27,21 +24,13 @@ public abstract class Artifact
       this.id = id;
    }
 
-   /**
-    * Must provide a draw method for plotter to render artifact
-    */
-   public abstract void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor);
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
-   {
-      draw(graphics2d, Xcenter, Ycenter, headingOffset, scaleFactor.getX());
-   }
-   public abstract void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor);
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, Vector2d scaleFactor)
-   {
-      draw(graphics2d, Xcenter, Ycenter, headingOffset, scaleFactor.getX());
-   }
+   public abstract void draw(Graphics2DAdapter graphics);
+   
+   public abstract void drawHistory(Graphics2DAdapter graphics);
+   
+   public abstract void drawLegend(Plotter2DAdapter graphics, Point2d origin);
+   
    public abstract void takeHistorySnapshot();
-   public abstract void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor);
 
    public void setType(String type)
    {
@@ -117,11 +106,7 @@ public abstract class Artifact
    {
       this.isVisible = isVisible;
    }
-
-   public String getName() {
-      return getID();
-   }
-
+   
    @Override
    public String toString()
    {

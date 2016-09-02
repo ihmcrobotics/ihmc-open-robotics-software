@@ -291,7 +291,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
 
       Point3d pointToTransform = RandomTools.generateRandomPoint(random, 100.0, 100.0, 0.0);
-      FramePoint2d pointToTest = new FramePoint2d(null, new Point2d(pointToTransform.x, pointToTransform.y));
+      FramePoint2d pointToTest = new FramePoint2d(null, new Point2d(pointToTransform.getX(), pointToTransform.getY()));
 
       transform.transform(pointToTransform);
       pointToTest.applyTransform(transform, requireTransformInPlane);
@@ -331,7 +331,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
 
       Point3d pointToTransform = RandomTools.generateRandomPoint(random, 100.0, 100.0, 0.0);
-      FramePoint2d pointToTest = new FramePoint2d(null, new Point2d(pointToTransform.x, pointToTransform.y));
+      FramePoint2d pointToTest = new FramePoint2d(null, new Point2d(pointToTransform.getX(), pointToTransform.getY()));
 
       try
       {

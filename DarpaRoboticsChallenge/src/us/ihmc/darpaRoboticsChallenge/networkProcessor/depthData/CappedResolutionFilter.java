@@ -38,9 +38,9 @@ public class CappedResolutionFilter
    private long hash(Point3d p, double res)
    {
       long hash = 0;
-      hash += (((int) (p.x / res) + offset) & mask) << 2 * bits;
-      hash += (((int) (p.y / res) + offset) & mask) << 1 * bits;
-      hash += (((int) (p.z / res) + offset) & mask) << 0 * bits;
+      hash += (((int) (p.getX() / res) + offset) & mask) << 2 * bits;
+      hash += (((int) (p.getY() / res) + offset) & mask) << 1 * bits;
+      hash += (((int) (p.getZ() / res) + offset) & mask) << 0 * bits;
       return hash;
    }
    

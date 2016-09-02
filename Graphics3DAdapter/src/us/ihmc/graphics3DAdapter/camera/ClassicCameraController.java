@@ -506,9 +506,9 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          double elapsedTransitionTime = System.currentTimeMillis() - lastTransitionTime;
          lastTransitionTime = System.currentTimeMillis();
 
-         if (Math.abs(camX - storedCameraPositions.get(storedPositionIndex).x) <= Math.abs(camXSpeed * elapsedTransitionTime))
+         if (Math.abs(camX - storedCameraPositions.get(storedPositionIndex).getX()) <= Math.abs(camXSpeed * elapsedTransitionTime))
          {
-            camX = storedCameraPositions.get(storedPositionIndex).x;
+            camX = storedCameraPositions.get(storedPositionIndex).getX();
             numberOfDimensionsThatHaveTransitioned++;
          }
          else
@@ -516,9 +516,9 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
             camX += camXSpeed * elapsedTransitionTime;
          }
 
-         if (Math.abs(camY - storedCameraPositions.get(storedPositionIndex).y) <= Math.abs(camYSpeed * elapsedTransitionTime))
+         if (Math.abs(camY - storedCameraPositions.get(storedPositionIndex).getY()) <= Math.abs(camYSpeed * elapsedTransitionTime))
          {
-            camY = storedCameraPositions.get(storedPositionIndex).y;
+            camY = storedCameraPositions.get(storedPositionIndex).getY();
             numberOfDimensionsThatHaveTransitioned++;
          }
          else
@@ -526,9 +526,9 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
             camY += camYSpeed * elapsedTransitionTime;
          }
 
-         if (Math.abs(camZ - storedCameraPositions.get(storedPositionIndex).z) <= Math.abs(camZSpeed * elapsedTransitionTime))
+         if (Math.abs(camZ - storedCameraPositions.get(storedPositionIndex).getZ()) <= Math.abs(camZSpeed * elapsedTransitionTime))
          {
-            camZ = storedCameraPositions.get(storedPositionIndex).z;
+            camZ = storedCameraPositions.get(storedPositionIndex).getZ();
             numberOfDimensionsThatHaveTransitioned++;
          }
          else
@@ -536,9 +536,9 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
             camZ += camZSpeed * elapsedTransitionTime;
          }
 
-         if (Math.abs(fixX - storedFixPositions.get(storedPositionIndex).x) <= Math.abs(fixXSpeed * elapsedTransitionTime))
+         if (Math.abs(fixX - storedFixPositions.get(storedPositionIndex).getX()) <= Math.abs(fixXSpeed * elapsedTransitionTime))
          {
-            fixX = storedFixPositions.get(storedPositionIndex).x;
+            fixX = storedFixPositions.get(storedPositionIndex).getX();
             numberOfDimensionsThatHaveTransitioned++;
          }
          else
@@ -546,9 +546,9 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
             fixX += fixXSpeed * elapsedTransitionTime;
          }
 
-         if (Math.abs(fixY - storedFixPositions.get(storedPositionIndex).y) <= Math.abs(fixYSpeed * elapsedTransitionTime))
+         if (Math.abs(fixY - storedFixPositions.get(storedPositionIndex).getY()) <= Math.abs(fixYSpeed * elapsedTransitionTime))
          {
-            fixY = storedFixPositions.get(storedPositionIndex).y;
+            fixY = storedFixPositions.get(storedPositionIndex).getY();
             numberOfDimensionsThatHaveTransitioned++;
          }
          else
@@ -556,9 +556,9 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
             fixY += fixYSpeed * elapsedTransitionTime;
          }
 
-         if (Math.abs(fixZ - storedFixPositions.get(storedPositionIndex).z) <= Math.abs(fixZSpeed * elapsedTransitionTime))
+         if (Math.abs(fixZ - storedFixPositions.get(storedPositionIndex).getZ()) <= Math.abs(fixZSpeed * elapsedTransitionTime))
          {
-            fixZ = storedFixPositions.get(storedPositionIndex).z;
+            fixZ = storedFixPositions.get(storedPositionIndex).getZ();
             numberOfDimensionsThatHaveTransitioned++;
          }
          else
@@ -621,13 +621,13 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
             {
                double elapsedTime = time - keyFrameTimes.get(i);
                double totalTime = keyFrameTimes.get(i + 1) - keyFrameTimes.get(i);
-               camX = keyFrameCamPos.get(i).x + (keyFrameCamPos.get(i + 1).x - keyFrameCamPos.get(i).x) * elapsedTime / totalTime;
-               camY = keyFrameCamPos.get(i).y + (keyFrameCamPos.get(i + 1).y - keyFrameCamPos.get(i).y) * elapsedTime / totalTime;
-               camZ = keyFrameCamPos.get(i).z + (keyFrameCamPos.get(i + 1).z - keyFrameCamPos.get(i).z) * elapsedTime / totalTime;
+               camX = keyFrameCamPos.get(i).getX() + (keyFrameCamPos.get(i + 1).getX() - keyFrameCamPos.get(i).getX()) * elapsedTime / totalTime;
+               camY = keyFrameCamPos.get(i).getY() + (keyFrameCamPos.get(i + 1).getY() - keyFrameCamPos.get(i).getY()) * elapsedTime / totalTime;
+               camZ = keyFrameCamPos.get(i).getZ() + (keyFrameCamPos.get(i + 1).getZ() - keyFrameCamPos.get(i).getZ()) * elapsedTime / totalTime;
 
-               fixX = keyFrameFixPos.get(i).x + (keyFrameFixPos.get(i + 1).x - keyFrameFixPos.get(i).x) * elapsedTime / totalTime;
-               fixY = keyFrameFixPos.get(i).y + (keyFrameFixPos.get(i + 1).y - keyFrameFixPos.get(i).y) * elapsedTime / totalTime;
-               fixZ = keyFrameFixPos.get(i).z + (keyFrameFixPos.get(i + 1).z - keyFrameFixPos.get(i).z) * elapsedTime / totalTime;
+               fixX = keyFrameFixPos.get(i).getX() + (keyFrameFixPos.get(i + 1).getX() - keyFrameFixPos.get(i).getX()) * elapsedTime / totalTime;
+               fixY = keyFrameFixPos.get(i).getY() + (keyFrameFixPos.get(i + 1).getY() - keyFrameFixPos.get(i).getY()) * elapsedTime / totalTime;
+               fixZ = keyFrameFixPos.get(i).getZ() + (keyFrameFixPos.get(i + 1).getZ() - keyFrameFixPos.get(i).getZ()) * elapsedTime / totalTime;
             }
 
             break;
@@ -640,13 +640,13 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       if ((index >= 0) && (index < keyFrameCamPos.size()))
       {
          storedPositionIndex = index;
-         camX = keyFrameCamPos.get(index).x;
-         camY = keyFrameCamPos.get(index).y;
-         camZ = keyFrameCamPos.get(index).z;
+         camX = keyFrameCamPos.get(index).getX();
+         camY = keyFrameCamPos.get(index).getY();
+         camZ = keyFrameCamPos.get(index).getZ();
 
-         fixX = keyFrameFixPos.get(index).x;
-         fixY = keyFrameFixPos.get(index).y;
-         fixZ = keyFrameFixPos.get(index).z;
+         fixX = keyFrameFixPos.get(index).getX();
+         fixY = keyFrameFixPos.get(index).getY();
+         fixZ = keyFrameFixPos.get(index).getZ();
       }
    }
 
@@ -762,8 +762,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       if (!isDolly || (!isDollyX && !isDollyY))
       {
-         camX = v3d.x + fixX;
-         camY = v3d.y + fixY;
+         camX = v3d.getX() + fixX;
+         camY = v3d.getY() + fixY;
       }
 
       delX0 = camX - fixX;
@@ -777,17 +777,17 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       t3d.setRotationAndZeroTranslation(rotAxisAngle4d);
       t3d.transform(v3d);
 
-      if ((v3d.x * delX0 > 0.0) && (v3d.y * delY0 > 0.0))
+      if ((v3d.getX() * delX0 > 0.0) && (v3d.getY() * delY0 > 0.0))
       {
          if (!isDolly || (!isDollyX && !isDollyY))
          {
-            camX = v3d.x + fixX;
-            camY = v3d.y + fixY;
+            camX = v3d.getX() + fixX;
+            camY = v3d.getY() + fixY;
          }
 
          if (!isDolly || !isDollyZ)
          {
-            camZ = v3d.z + fixZ;
+            camZ = v3d.getZ() + fixZ;
 
             /*
              * double factor = elevate_factor * Math.abs(offsetDistance);
@@ -819,8 +819,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       if (!isDolly || (!isDollyX && !isDollyY))
       {
-         camX = v3d.x + fixX;
-         camY = v3d.y + fixY;
+         camX = v3d.getX() + fixX;
+         camY = v3d.getY() + fixY;
       }
 
       delX0 = camX - fixX;
@@ -833,17 +833,17 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       t3d.setRotationAndZeroTranslation(rotAxisAngle4d);
       t3d.transform(v3d);
 
-      if ((v3d.x * delX0 > 0.0) && (v3d.y * delY0 > 0.0))
+      if ((v3d.getX() * delX0 > 0.0) && (v3d.getY() * delY0 > 0.0))
       {
          if (!isDolly || (!isDollyX && !isDollyY))
          {
-            camX = v3d.x + fixX;
-            camY = v3d.y + fixY;
+            camX = v3d.getX() + fixX;
+            camY = v3d.getY() + fixY;
          }
 
          if (!isDolly || !isDollyZ)
          {
-            camZ = v3d.z + fixZ;
+            camZ = v3d.getZ() + fixZ;
          }
       }
    }
@@ -861,8 +861,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       if (!isTracking || (!isTrackingX && !isTrackingY))
       {
-         fixX = camX - v3d.x;
-         fixY = camY - v3d.y;
+         fixX = camX - v3d.getX();
+         fixY = camY - v3d.getY();
       }
 
       delX0 = camX - fixX;
@@ -878,17 +878,17 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       t3d.setRotationAndZeroTranslation(rotAxisAngle4d);
       t3d.transform(v3d);
 
-      if ((v3d.x * delX0 > 0.0) && (v3d.y * delY0 > 0.0))
+      if ((v3d.getX() * delX0 > 0.0) && (v3d.getY() * delY0 > 0.0))
       {
          if (!isTracking || (!isTrackingX && !isTrackingY))
          {
-            fixX = camX - v3d.x;
-            fixY = camY - v3d.y;
+            fixX = camX - v3d.getX();
+            fixY = camY - v3d.getY();
          }
 
          if (!isTracking || !isTrackingZ)
          {
-            fixZ = camZ - v3d.z;
+            fixZ = camZ - v3d.getZ();
 
             /*
              * double factor = elevate_camera_factor * offsetDistance;
@@ -935,12 +935,12 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          // {
          if (!isDolly || (!isDollyX && !isDollyY))
          {
-            camX += offsetVec.x;
-            camY += offsetVec.y;
+            camX += offsetVec.getX();
+            camY += offsetVec.getY();
          }
 
          if (!isDolly || !isDollyZ)
-            camZ += offsetVec.z;
+            camZ += offsetVec.getZ();
 
          // }
 
@@ -950,9 +950,9 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          {
             v3d.normalize();
             v3d.scale(MIN_CAMERA_POSITION_TO_FIX_DISTANCE);
-            camX = v3d.x + fixX;
-            camY = v3d.y + fixY;
-            camZ = v3d.z + fixZ;
+            camX = v3d.getX() + fixX;
+            camY = v3d.getY() + fixY;
+            camZ = v3d.getZ() + fixZ;
          }
       }
 
@@ -1082,13 +1082,13 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    private void initTransition()
    {
-      camXSpeed = -(camX - storedCameraPositions.get(storedPositionIndex).x) / transitionTime;
-      camYSpeed = -(camY - storedCameraPositions.get(storedPositionIndex).y) / transitionTime;
-      camZSpeed = -(camZ - storedCameraPositions.get(storedPositionIndex).z) / transitionTime;
+      camXSpeed = -(camX - storedCameraPositions.get(storedPositionIndex).getX()) / transitionTime;
+      camYSpeed = -(camY - storedCameraPositions.get(storedPositionIndex).getY()) / transitionTime;
+      camZSpeed = -(camZ - storedCameraPositions.get(storedPositionIndex).getZ()) / transitionTime;
 
-      fixXSpeed = -(fixX - storedFixPositions.get(storedPositionIndex).x) / transitionTime;
-      fixYSpeed = -(fixY - storedFixPositions.get(storedPositionIndex).y) / transitionTime;
-      fixZSpeed = -(fixZ - storedFixPositions.get(storedPositionIndex).z) / transitionTime;
+      fixXSpeed = -(fixX - storedFixPositions.get(storedPositionIndex).getX()) / transitionTime;
+      fixYSpeed = -(fixY - storedFixPositions.get(storedPositionIndex).getY()) / transitionTime;
+      fixZSpeed = -(fixZ - storedFixPositions.get(storedPositionIndex).getZ()) / transitionTime;
 
       transitioning = true;
       lastTransitionTime = System.currentTimeMillis();
@@ -1433,11 +1433,11 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          if (modifierKeyHolder.isKeyPressed(Key.SHIFT))
          {
             if (!isTracking() || !isTrackingX())
-               setFixX(location.x);
+               setFixX(location.getX());
             if (!isTracking() || !isTrackingY())
-               setFixY(location.y);
+               setFixY(location.getY());
             if (!isTracking() || !isTrackingZ())
-               setFixZ(location.z);
+               setFixZ(location.getZ());
          }
       }
    }

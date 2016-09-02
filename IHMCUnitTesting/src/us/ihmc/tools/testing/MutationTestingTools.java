@@ -53,8 +53,8 @@ public class MutationTestingTools
          try
          {
             absolutePath = reportFile.getCanonicalPath();
-            
-            absolutePath = absolutePath.replace("\\", "/");         
+
+            absolutePath = absolutePath.replace("\\", "/");
             System.out.println("Opening " + "file://" + absolutePath);
 
             URI uri = new URI("file://" + absolutePath);
@@ -69,6 +69,11 @@ public class MutationTestingTools
             e.printStackTrace();
          }
       }
+   }
+
+   public static String createClassSelectorStringFromTargetString(String targetTests)
+   {
+      return targetTests.substring(0, targetTests.lastIndexOf('.')) + "*";
    }
 }
 

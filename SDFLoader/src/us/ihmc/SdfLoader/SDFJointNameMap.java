@@ -39,4 +39,8 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
 
    String[] getJointNamesBeforeFeet();
 
+   Enum<?>[] getRobotSegments();
+
+   Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector);
+
 }

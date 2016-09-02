@@ -92,7 +92,7 @@ public class FootstepSnapperTest
       while (dataReader.hasAnotherFootstepAndPoints())
       {
          listOfPoints = dataReader.getNextSetPointsAndFootstep(footstepData);
-         desiredPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), footstepData.getLocation().x, footstepData.getLocation().y,
+         desiredPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), footstepData.getLocation().getX(), footstepData.getLocation().getY(),
                                            RotationTools.computeYaw(footstepData.getOrientation()));
          Footstep footstep = footstepSnapper.generateFootstepUsingHeightMap(desiredPose, spoof.getRigidBody(), spoof.getSoleFrame(),
                                 footstepData.getRobotSide(), listOfPoints, 0.0);
@@ -575,9 +575,9 @@ public class FootstepSnapperTest
                      tokenizer.nextToken();
                   }
 
-                  position.x = Double.parseDouble(tokenizer.nextToken());
-                  position.y = Double.parseDouble(tokenizer.nextToken());
-                  position.z = Double.parseDouble(tokenizer.nextToken());
+                  position.setX(Double.parseDouble(tokenizer.nextToken()));
+                  position.setY(Double.parseDouble(tokenizer.nextToken()));
+                  position.setZ(Double.parseDouble(tokenizer.nextToken()));
                   footstepData.location = position;
                }
 
@@ -838,7 +838,7 @@ public class FootstepSnapperTest
             assertTrue((generatedSnappedFootstep.getPredictedContactPoints() == null) || (generatedSnappedFootstep.getPredictedContactPoints().size() > 2));
             boolean pointsBelowPlane = pointsBelowPlane(footstepSnapper.getPointList(), solePlane, tolerance);
             assertTrue("queryPoint = " + queryPoint + " yaw = " + soleYaw.getDoubleValue() + " planeNormal = " + planeNormal + ", pointsBelowPlane = "
-                       + pointsBelowPlane, (planeNormal.z >= 0.98) || pointsBelowPlane);
+                       + pointsBelowPlane, (planeNormal.getZ() >= 0.98) || pointsBelowPlane);
          }
 
          if (visualize)

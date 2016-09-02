@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import us.ihmc.tools.taskExecutor.ParallelTask;
 import us.ihmc.tools.taskExecutor.PipeLine;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class PipeLineTest
@@ -378,5 +379,12 @@ public class PipeLineTest
    private class ParallelTaskKey
    {
 
+   }
+
+   public static void main(String[] args)
+   {
+      String targetTests = PipeLineTest.class.getName();
+      String targetClassesInSamePackage = targetTests.substring(0, targetTests.lastIndexOf('.')) + "*";
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
    }
 }

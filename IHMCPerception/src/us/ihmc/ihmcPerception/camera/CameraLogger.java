@@ -64,7 +64,7 @@ public class CameraLogger
       Quaternion_F64 quad = RotationMatrixGenerator.matrixToQuaternion(R, null);
 //            rosTransformFromHeadBaseToCamera.get(T);
 
-      logPose.printf("%d %15f %15f %15f %15f %15f %15f %15f\n", timeStamp, quad.x, quad.y, quad.z, quad.w, T.x, T.y, T.z);
+      logPose.printf("%d %15f %15f %15f %15f %15f %15f %15f\n", timeStamp, quad.x, quad.y, quad.z, quad.w, T.getX(), T.getY(), T.getZ());
       logPose.flush();
 
       UtilImageIO.saveImage(image, String.format("%s/image%06d.png", outputDir.getAbsolutePath(), tick));

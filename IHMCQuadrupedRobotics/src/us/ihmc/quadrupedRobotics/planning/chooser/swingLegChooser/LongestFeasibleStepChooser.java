@@ -61,9 +61,9 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          
          // Update workspace center YoFramePoints
          FramePoint workspaceCenterPoint = footstepWorkspaceCenterFramePoints.get(robotQuadrant).getFrameTuple();
-         double hipHeight = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant)).mat23;
+         double hipHeight = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant)).getM23();
          
-         double x = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant)).mat03;
+         double x = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant)).getM03();
          System.out.println("X: " + x);
          
          workspaceCenterPoint.changeFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant));

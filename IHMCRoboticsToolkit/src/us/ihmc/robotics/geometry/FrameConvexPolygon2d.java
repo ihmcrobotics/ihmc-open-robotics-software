@@ -396,6 +396,23 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    /**
     * This method does:
     * 1- {@code clear()};
+    * 2- {@code addVertex(vertices.get(i)};
+    * 3- {@code update()}.
+    * @param vertices {@code FramePoint2d[]} the array of points that is used to creates the vertices.
+    */
+   public void setAndUpdate(FramePoint2d[] vertices)
+   {
+      clear();
+      for (int i = 0; i < vertices.length; i++)
+      {
+         addVertex(vertices[i]);
+      }
+      update();
+   }
+
+   /**
+    * This method does:
+    * 1- {@code clear()};
     * 2- {@code addVertices(otherPolygon)};
     * 3- {@code update()}.
     * <p/> TODO There is no need to call update() there, instead update everything from the other polygon to make it faster.<p/>
@@ -1145,6 +1162,27 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return ret;
    }
 
+   /**
+    * Computes the intersections of a ray with this polygon. Since the polygon is convex the maximum
+    * number of intersections is two. Returns the number of intersections found. If there are less
+    * then two intersections the FramePoints are set to NaN.
+    *
+    * @param ray                  ray to intersect this polygon with
+    * @param intersectionToPack1  modified - is set to the first intersection
+    *                             If the are no intersections this will be set to NaN.
+    * @param intersectionToPack2  modified - is set to the second intersection
+    *                             If there is only one intersection this will be set to NaN.
+    * @return                     The number of intersections 0, 1, or 2
+    */
+   public int intersectionWithRay(FrameLine2d ray, FramePoint2d intersectionToPack1, FramePoint2d intersectionToPack2)
+   {
+      checkReferenceFrameMatch(ray);
+      intersectionToPack1.setToZero(referenceFrame);
+      intersectionToPack2.setToZero(referenceFrame);
+      return convexPolygon.intersectionWithRay(ray.getLine2d(), intersectionToPack1.getPoint(), intersectionToPack2.getPoint());
+   }
+
+   @Deprecated // creates garbage - use intersectionWithRay method instead.
    public FramePoint2d[] intersectionWithRay(FrameLine2d ray)
    {
       checkReferenceFrameMatch(ray);

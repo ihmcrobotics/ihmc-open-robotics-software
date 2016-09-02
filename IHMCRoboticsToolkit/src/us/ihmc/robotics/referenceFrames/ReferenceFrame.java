@@ -730,7 +730,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       RotationTools.checkProperRotationMatrix(rotation);
       double epsilon = 1e-14;
 
-      return ((Math.abs(rotation.m02) <= epsilon) && (Math.abs(rotation.m12) <= epsilon) && (Math.abs(rotation.m22 - 1.0) <= epsilon));
+      return ((Math.abs(rotation.getM02()) <= epsilon) && (Math.abs(rotation.getM12()) <= epsilon) && (Math.abs(rotation.getM22() - 1.0) <= epsilon));
    }
 
    @Override

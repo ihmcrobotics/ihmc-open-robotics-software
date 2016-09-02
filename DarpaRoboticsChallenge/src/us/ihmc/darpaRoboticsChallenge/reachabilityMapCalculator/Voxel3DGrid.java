@@ -212,7 +212,7 @@ public class Voxel3DGrid extends AbstractReferenceFrameHolder
       pca.getStandardDeviation(standardDeviation);
       standardDeviation.scale(1.3); // Because the points are uniformly distributed
 
-      double coneBaseRadius = Math.sqrt(standardDeviation.x * standardDeviation.x + standardDeviation.y * standardDeviation.y);//radiusVector.length();
+      double coneBaseRadius = Math.sqrt(standardDeviation.getX() * standardDeviation.getX() + standardDeviation.getY() * standardDeviation.getY());//radiusVector.length();
       double coneHeight = mostOpenedRay.dot(thirdAxis);
 
       RigidBodyTransform coneTransform = new RigidBodyTransform();

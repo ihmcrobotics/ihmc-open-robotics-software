@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.controlModules.head;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.FinishableState;
 
-public abstract class HeadControlState extends State<HeadControlMode>
+public abstract class HeadControlState extends FinishableState<HeadControlMode>
 {
    public HeadControlState(HeadControlMode stateEnum)
    {
@@ -12,8 +12,14 @@ public abstract class HeadControlState extends State<HeadControlMode>
    }
 
    public abstract void setWeight(double weight);
-   
+
    public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();
 
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
+
+   @Override
+   public boolean isDone()
+   {
+      return true;
+   }
 }

@@ -70,9 +70,9 @@ public class AverageSampleYoFrameVector extends YoFrameVector
 
    public void update(Vector3d vectorSource)
    {
-      x.update(vectorSource.x);
-      y.update(vectorSource.y);
-      z.update(vectorSource.z);
+      x.update(vectorSource.getX());
+      y.update(vectorSource.getY());
+      z.update(vectorSource.getZ());
    }
 
    public void update(FrameVector vectorSource)

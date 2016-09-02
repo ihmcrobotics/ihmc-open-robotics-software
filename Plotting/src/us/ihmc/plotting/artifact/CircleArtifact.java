@@ -1,18 +1,29 @@
 package us.ihmc.plotting.artifact;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 
 public class CircleArtifact extends Artifact
 {
+   private static final BasicStroke STROKE = new BasicStroke(1.0f);
+   private static final double LEGEND_RADIUS = 20.0;
+   
    private double x;
    private double y;
    private double diameter;
    private boolean fill = true;
+   
+   private final Point2d tempPoint = new Point2d();
+   private final Vector2d tempRadii = new Vector2d();
 
    public CircleArtifact(String id, double x, double y, double diameter, boolean fill)
    {
@@ -55,38 +66,37 @@ public class CircleArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
-      int x = Xcenter + ((int)Math.round(this.x * scaleFactor));
-      int y = Ycenter - ((int)Math.round(this.y * scaleFactor));
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+      tempPoint.set(x, y);
+      tempRadii.set(diameter / 2.0, diameter / 2.0);
 
-      graphics2d.setColor(color);
-      int d = (int) ((this.diameter * scaleFactor));
       if (fill)
       {
-         graphics2d.drawOvalFilled((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics.drawOvalFilled(tempPoint, tempRadii);
       }
       else
       {
-         graphics2d.drawOval((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics.drawOval(tempPoint, tempRadii);
       }
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
-      int x = Xcenter;
-      int y = Ycenter;
-
-      graphics2d.setColor(color);
-      int d = (int) ((this.diameter * scaleFactor));
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+      tempPoint.set(origin);
+      tempRadii.set(LEGEND_RADIUS, LEGEND_RADIUS);
       if (fill)
       {
-         graphics2d.drawOvalFilled((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics.drawOvalFilled(graphics.getScreenFrame(), tempPoint, tempRadii);
       }
       else
       {
-         graphics2d.drawOval((x - (d / 2)), (y - (d / 2)), d, d);
+         graphics.drawOval(graphics.getScreenFrame(), tempPoint, tempRadii);
       }
    }
 
@@ -129,7 +139,7 @@ public class CircleArtifact extends Artifact
    }
    
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics)
    {
       throw new RuntimeException("Not implemented!");
    }

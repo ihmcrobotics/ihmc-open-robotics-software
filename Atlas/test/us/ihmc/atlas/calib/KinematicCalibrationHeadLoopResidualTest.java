@@ -318,7 +318,7 @@ public class KinematicCalibrationHeadLoopResidualTest
          Point2D_F64 observationPixel = new Point2D_F64();
 
          // convert to pixels
-         norm.set(p3.x / p3.z, p3.y / p3.z);
+         norm.set(p3.getX() / p3.getZ(), p3.getY() / p3.getZ());
          PerspectiveOps.convertNormToPixel(intrinsic, norm, observationPixel);
 
          observations.add(observationPixel);

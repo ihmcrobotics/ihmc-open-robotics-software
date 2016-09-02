@@ -115,7 +115,7 @@ public class DefaultCollisionHandler implements CollisionHandler
          }
 
          // TODO handle the case where the object is embedded inside the object and the normal is invalid
-         if (Double.isNaN(normal.x))
+         if (Double.isNaN(normal.getX()))
             throw new RuntimeException("Normal is invalid");
 
          negative_normal.set(normal);
@@ -125,8 +125,8 @@ public class DefaultCollisionHandler implements CollisionHandler
          ExternalForcePoint externalForcePointTwo = shape2.getLink().ef_collision;
 
          // +++JEP: For now. Make more efficient later. Don't need an ef_point really...
-         externalForcePointOne.setOffsetWorld(point1.x, point1.y, point1.z);    // Put the external force points in the right places.
-         externalForcePointTwo.setOffsetWorld(point2.x, point2.y, point2.z);
+         externalForcePointOne.setOffsetWorld(point1.getX(), point1.getY(), point1.getZ());    // Put the external force points in the right places.
+         externalForcePointTwo.setOffsetWorld(point2.getX(), point2.getY(), point2.getZ());
 
          // Update the robot and its velocity:
          Robot robot1 = shape1.getLink().getParentJoint().getRobot();

@@ -82,7 +82,7 @@ public class InverseDynamicsOptimizationControlModule
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      int rhoSize = WholeBodyControlCoreToolbox.rhoSize;
+      int rhoSize = toolbox.getRhoSize();
 
       double gravityZ = toolbox.getGravityZ();
 

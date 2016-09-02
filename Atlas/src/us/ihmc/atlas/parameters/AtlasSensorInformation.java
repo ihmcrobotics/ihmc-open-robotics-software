@@ -69,6 +69,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String fisheye_right_camera_info = "/right/camera/camera_info";
 
    public static final String head_imu_acceleration_topic = "/multisense/imu/accelerometer";
+   public static final String head_imu_data_topic = "/multisense/imu/imu_data";
 
    /**
     * Lidar Parameters
@@ -93,8 +94,6 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String bodyIMUSensor = "pelvis_imu_sensor_at_pelvis_frame";
    private static final String[] imuSensorsToUseInStateEstimator = { bodyIMUSensor };
    private static EnumMap<DRCRobotModel.RobotTarget, ReferenceFrame> headIMUFramesWhenLevel=new EnumMap<>(DRCRobotModel.RobotTarget.class);
-
-   private static final String headIMUSensor = "head_head_imu_sensor";
 
    /**
     * Stereo Parameters
@@ -218,12 +217,6 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public String getPrimaryBodyImu()
    {
       return bodyIMUSensor;
-   }
-
-   @Override
-   public String getHeadIMUName()
-   {
-      return headIMUSensor;
    }
 
    @Override

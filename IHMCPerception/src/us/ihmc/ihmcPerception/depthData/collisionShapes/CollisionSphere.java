@@ -22,6 +22,6 @@ public class CollisionSphere extends CollisionShape
    @Override
    public boolean contains(Point3d point)
    {
-      return (point.x * point.x + point.y * point.y + point.z * point.z) <= radiusSquared;
+      return (point.getX() * point.getX() + point.getY() * point.getY() + point.getZ() * point.getZ()) <= radiusSquared;
    }
 }

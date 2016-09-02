@@ -2,14 +2,9 @@ package us.ihmc.darpaRoboticsChallenge.sensors.multisense;
 
 import java.net.URI;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.IMUPacket;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.camera.CameraDataReceiver;
@@ -20,14 +15,12 @@ import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.ihmcPerception.depthData.PointCloudSource;
 import us.ihmc.ihmcPerception.depthData.RosPointCloudReceiver;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.subscriber.RosImuSubscriber;
 
 public class MultiSenseSensorManager
 {
@@ -63,7 +56,6 @@ public class MultiSenseSensorManager
       this.sensorURI = sensorURI;
       registerCameraReceivers();
       registerLidarReceivers(sdfFullRobotModelFactory);
-      registerIMUReciever();
       if(setROSParameters)
       {
          multiSenseParamaterSetter = new MultiSenseParamaterSetter(rosMainNode, sensorSuitePacketCommunicator);
@@ -119,27 +111,6 @@ public class MultiSenseSensorManager
       new RosCameraCompressedImageReceiver(cameraParamaters, rosMainNode, logger, cameraReceiver);
 
       cameraReceiver.start();
-   }
-
-   private void registerIMUReciever()
-   {
-      rosMainNode.attachSubscriber("/multisense/imu/imu_data", new RosImuSubscriber()
-      {
-         @Override
-         protected void onNewMessage(long timeStamp, int seqId, Quat4d orientation, Vector3d angularVelocity, Vector3d linearAcceleration)
-         {
-            long robotTimeStamp = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(timeStamp);
-
-            IMUPacket imuPacket = new IMUPacket();
-            imuPacket.linearAcceleration.set(linearAcceleration);
-            imuPacket.orientation.set(orientation);
-            imuPacket.angularVelocity.set(angularVelocity);
-            imuPacket.time = TimeTools.nanoSecondstoSeconds(robotTimeStamp);
-            imuPacket.setDestination(PacketDestination.CONTROLLER);
-
-            packetCommunicator.send(imuPacket);
-         }
-      });
    }
 
    public void registerCameraListener(DRCStereoListener drcStereoListener)

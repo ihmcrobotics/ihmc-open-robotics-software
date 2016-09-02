@@ -57,9 +57,9 @@ public class SpiralBasedAlgorithm
 
          double rSinTheta = sphereRadius * Math.sin(theta);
          pointsOnSphere[planeIndex] = new Point3d();
-         pointsOnSphere[planeIndex].x = rSinTheta * Math.cos(phi);
-         pointsOnSphere[planeIndex].y = rSinTheta * Math.sin(phi);
-         pointsOnSphere[planeIndex].z = sphereRadius * Math.cos(theta);
+         pointsOnSphere[planeIndex].setX(rSinTheta * Math.cos(phi));
+         pointsOnSphere[planeIndex].setY(rSinTheta * Math.sin(phi));
+         pointsOnSphere[planeIndex].setZ(sphereRadius * Math.cos(theta));
          pointsOnSphere[planeIndex].add(sphereOrigin);
 
          previousPhi = phi;

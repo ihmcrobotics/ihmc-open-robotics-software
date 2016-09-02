@@ -567,13 +567,13 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
       transformFromWorldToBody.transform(wBody);
 
       // Set the IMUs acceleration and rate gyroscope inputs.
-      x_accel.set(qddBody.x);
-      y_accel.set(qddBody.y);
-      z_accel.set(qddBody.z);
+      x_accel.set(qddBody.getX());
+      y_accel.set(qddBody.getY());
+      z_accel.set(qddBody.getZ());
 
-      x_gyro.set(wBody.x);
-      y_gyro.set(wBody.y);
-      z_gyro.set(wBody.z);
+      x_gyro.set(wBody.getX());
+      y_gyro.set(wBody.getY());
+      z_gyro.set(wBody.getZ());
    }
 
    public YoVariableRegistry getYoVariableRegistry()

@@ -115,7 +115,7 @@ public class SpringBallRobot extends Robot
       comOff.normalize();
       comOff.scale(SLIDER_LENGTH / 2.0);
 
-      ret.setComOffset(comOff.x, comOff.y, comOff.z);
+      ret.setComOffset(comOff.getX(), comOff.getY(), comOff.getZ());
 
       // ret.setMomentOfInertia(SLIDER_Ixx, SLIDER_Iyy, SLIDER_Izz);
 
@@ -136,7 +136,7 @@ public class SpringBallRobot extends Robot
       xAxis.normalize();
 
       yAxis.cross(zAxis, xAxis);
-      Matrix3d rotation = new Matrix3d(xAxis.x, yAxis.x, zAxis.x, xAxis.y, yAxis.y, zAxis.y, xAxis.z, yAxis.z, zAxis.z);
+      Matrix3d rotation = new Matrix3d(xAxis.getX(), yAxis.getX(), zAxis.getX(), xAxis.getY(), yAxis.getY(), zAxis.getY(), xAxis.getZ(), yAxis.getZ(), zAxis.getZ());
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
 

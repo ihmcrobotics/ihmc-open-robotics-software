@@ -60,9 +60,9 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
 
    public final void set(double x, double y, double z)
    {
-      tuple.x = x;
-      tuple.y = y;
-      tuple.z = z;
+      tuple.setX(x);
+      tuple.setY(y);
+      tuple.setZ(z);
    }
 
    public final void setIncludingFrame(ReferenceFrame referenceFrame, double x, double y, double z)
@@ -116,17 +116,17 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
 
    public final void setX(double x)
    {
-      tuple.x = x;
+      tuple.setX(x);
    }
 
    public final void setY(double y)
    {
-      tuple.y = y;
+      tuple.setY(y);
    }
 
    public final void setZ(double z)
    {
-      tuple.z = z;
+      tuple.setZ(z);
    }
 
    public final void set(Direction direction, double value)
@@ -168,24 +168,24 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
 
    public final void scale(double scaleXFactor, double scaleYFactor, double scaleZFactor)
    {
-      tuple.x *= scaleXFactor;
-      tuple.y *= scaleYFactor;
-      tuple.z *= scaleZFactor;
+      tuple.setX(tuple.getX() * scaleXFactor);
+      tuple.setY(tuple.getY() * scaleYFactor);
+      tuple.setZ(tuple.getZ() * scaleZFactor);
    }
 
    public final double getX()
    {
-      return tuple.x;
+      return tuple.getX();
    }
 
    public final double getY()
    {
-      return tuple.y;
+      return tuple.getY();
    }
 
    public final double getZ()
    {
-      return tuple.z;
+      return tuple.getZ();
    }
 
    /**
@@ -261,12 +261,12 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
    @Override
    public final boolean containsNaN()
    {
-      return Double.isNaN(tuple.x) || Double.isNaN(tuple.y) || Double.isNaN(tuple.z);
+      return Double.isNaN(tuple.getX()) || Double.isNaN(tuple.getY()) || Double.isNaN(tuple.getZ());
    }
    
    public final boolean containsInfinity()
    {
-      return Double.isInfinite(tuple.x) || Double.isInfinite(tuple.y) || Double.isInfinite(tuple.z);
+      return Double.isInfinite(tuple.getX()) || Double.isInfinite(tuple.getY()) || Double.isInfinite(tuple.getZ());
    }
 
    /**
@@ -302,9 +302,9 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     */
    public final void scaleAdd(double scaleFactor1, Tuple3d tuple1, double scaleFactor2, Tuple3d tuple2)
    {
-      tuple.x = scaleFactor1 * tuple1.x + scaleFactor2 * tuple2.x;
-      tuple.y = scaleFactor1 * tuple1.y + scaleFactor2 * tuple2.y;
-      tuple.z = scaleFactor1 * tuple1.z + scaleFactor2 * tuple2.z;
+      tuple.setX(scaleFactor1 * tuple1.getX() + scaleFactor2 * tuple2.getX());
+      tuple.setY(scaleFactor1 * tuple1.getY() + scaleFactor2 * tuple2.getY());
+      tuple.setZ(scaleFactor1 * tuple1.getZ() + scaleFactor2 * tuple2.getZ());
    }
 
    /**
@@ -397,9 +397,9 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     */
    public final void add(double x, double y, double z)
    {
-      tuple.x += x;
-      tuple.y += y;
-      tuple.z += z;
+      tuple.setX(tuple.getX() + x);
+      tuple.setY(tuple.getY() + y);
+      tuple.setZ(tuple.getZ() + z);
    }
 
    /**
@@ -443,9 +443,9 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     */
    public final void sub(double x, double y, double z)
    {
-      tuple.x -= x;
-      tuple.y -= y;
-      tuple.z -= z;
+      tuple.setX(tuple.getX() - x);
+      tuple.setY(tuple.getY() - y);
+      tuple.setZ(tuple.getZ() - z);
    }
 
    /**  
@@ -615,19 +615,19 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
       
       double diff;
 
-      diff = tuple.x - tuple1.x;
+      diff = tuple.getX() - tuple1.getX();
       if (Double.isNaN(diff))
          return false;
       if ((diff < 0 ? -diff : diff) > threshold)
          return false;
 
-      diff = tuple.y - tuple1.y;
+      diff = tuple.getY() - tuple1.getY();
       if (Double.isNaN(diff))
          return false;
       if ((diff < 0 ? -diff : diff) > threshold)
          return false;
 
-      diff = tuple.z;
+      diff = tuple.getZ();
       if (Double.isNaN(diff))
          return false;
       if ((diff < 0 ? -diff : diff) > threshold)
@@ -667,7 +667,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
 
    public final double[] toArray()
    {
-      return new double[] { tuple.x, tuple.y, tuple.z };
+      return new double[] { tuple.getX(), tuple.getY(), tuple.getZ() };
    }
 
    /**

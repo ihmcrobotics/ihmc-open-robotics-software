@@ -144,8 +144,8 @@ public class VisionPoseEstimator implements DRCStereoListener
                int counter = 0;
                for (Point3f tmpPoint : fullPoints)
                {
-                  if (!Double.isNaN(tmpPoint.z) & counter % pointDropFactor == 0 && tmpPoint.distance(head) < searchRadius)
-                     pointsNearBy.add(new Point3D_F64(tmpPoint.x, tmpPoint.y, tmpPoint.z));
+                  if (!Double.isNaN(tmpPoint.getZ()) & counter % pointDropFactor == 0 && tmpPoint.distance(head) < searchRadius)
+                     pointsNearBy.add(new Point3D_F64(tmpPoint.getX(), tmpPoint.getY(), tmpPoint.getZ()));
                   counter++;
                }
                PrintTools.debug(DEBUG, this, "Points around center " + pointsNearBy.size());

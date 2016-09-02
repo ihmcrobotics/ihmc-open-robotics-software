@@ -110,10 +110,10 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       String currentOrientationVarNamePrefix = subTrajectoryName + "CurrentOrientation";
 
       Quat4d desiredOrientation = new Quat4d();
-      desiredOrientation.x = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qx").getValueAsDouble();
-      desiredOrientation.y = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qy").getValueAsDouble();
-      desiredOrientation.z = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qz").getValueAsDouble();
-      desiredOrientation.w = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qs").getValueAsDouble();
+      desiredOrientation.setX(scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qx").getValueAsDouble());
+      desiredOrientation.setY(scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qy").getValueAsDouble());
+      desiredOrientation.setZ(scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qz").getValueAsDouble());
+      desiredOrientation.setW(scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qs").getValueAsDouble());
       return desiredOrientation;
    }
 
@@ -130,10 +130,10 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       assertEquals(2, findNumberOfWaypoints(scs));
 
       Quat4d controllerDesiredOrientation = findControllerDesiredOrientation(scs);
-      assertEquals(desiredOrientation.getX(), controllerDesiredOrientation.x, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getY(), controllerDesiredOrientation.y, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getZ(), controllerDesiredOrientation.z, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getW(), controllerDesiredOrientation.w, EPSILON_FOR_DESIREDS);
+      assertEquals(desiredOrientation.getX(), controllerDesiredOrientation.getX(), EPSILON_FOR_DESIREDS);
+      assertEquals(desiredOrientation.getY(), controllerDesiredOrientation.getY(), EPSILON_FOR_DESIREDS);
+      assertEquals(desiredOrientation.getZ(), controllerDesiredOrientation.getZ(), EPSILON_FOR_DESIREDS);
+      assertEquals(desiredOrientation.getW(), controllerDesiredOrientation.getW(), EPSILON_FOR_DESIREDS);
    }
 
    @Before

@@ -22,14 +22,15 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class WholeBodyControlCoreToolbox
 {
-   public static final int nBasisVectorsPerContactPoint = 4;
-   public static final int nContactPointsPerContactableBody = 4;
-   public static final int nContactableBodies = 2;
-   public static final int rhoSize = nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
+   private final int nBasisVectorsPerContactPoint;
+   private final int nContactPointsPerContactableBody;
+   private final int nContactableBodies;
+   private final int rhoSize;
 
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final TwistCalculator twistCalculator;
@@ -40,7 +41,7 @@ public class WholeBodyControlCoreToolbox
    private final RigidBody[] controlledBodies;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
-   private final CommonHumanoidReferenceFrames referenceFrames;
+   private final ReferenceFrames referenceFrames;
    private final double gravityZ;
    private final double totalRobotMass;
 
@@ -58,7 +59,7 @@ public class WholeBodyControlCoreToolbox
    private final JointIndexHandler jointIndexHandler;
 
    public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, RigidBody[] controlledBodies, InverseDynamicsJoint[] controlledJoints, MomentumOptimizationSettings momentumOptimizationSettings,
-         CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder,
+         ReferenceFrames referenceFrames, double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder,
          TwistCalculator twistCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry registry)
    {
@@ -72,6 +73,10 @@ public class WholeBodyControlCoreToolbox
       this.geometricJacobianHolder = geometricJacobianHolder;
       this.contactablePlaneBodies = contactablePlaneBodies;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
+      this.nBasisVectorsPerContactPoint = momentumOptimizationSettings.getNumberOfBasisVectorsPerContactPoint();    
+      this.nContactPointsPerContactableBody = momentumOptimizationSettings.getNumberOfContactPointsPerContactableBody();
+      this.nContactableBodies = momentumOptimizationSettings.getNumberOfContactableBodies();              
+      this.rhoSize = momentumOptimizationSettings.getRhoSize();
 
       if (contactablePlaneBodies != null)
       {
@@ -112,7 +117,8 @@ public class WholeBodyControlCoreToolbox
    public static WholeBodyControlCoreToolbox createForInverseKinematicsOnly(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
          CommonHumanoidReferenceFrames referenceFrames, double controlDT, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator)
    {
-      WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, null, controlledJoints, null, referenceFrames, controlDT, Double.NaN,
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, null, controlledJoints, momentumOptimizationSettings, referenceFrames, controlDT, Double.NaN,
             geometricJacobianHolder, twistCalculator, null, null, null);
       return ret;
    }
@@ -155,11 +161,6 @@ public class WholeBodyControlCoreToolbox
    public double getControlDT()
    {
       return controlDT;
-   }
-
-   public CommonHumanoidReferenceFrames getReferenceFrames()
-   {
-      return referenceFrames;
    }
 
    public ReferenceFrame getCenterOfMassFrame()
@@ -245,5 +246,30 @@ public class WholeBodyControlCoreToolbox
    public JointIndexHandler getJointIndexHandler()
    {
       return jointIndexHandler;
+   }
+
+   public int getNumberOfBasisVectorsPerContactPoint()
+   {
+      return nBasisVectorsPerContactPoint;
+   }
+
+   public int getNumberOfContactPointsPerContactableBody()
+   {
+      return nContactPointsPerContactableBody;
+   }
+
+   public int getNumberOfContactableBodies()
+   {
+      return nContactableBodies;
+   }
+
+   public int getRhoSize()
+   {
+      return rhoSize;
+   }
+
+   public ReferenceFrames getReferenceFrames()
+   {
+      return referenceFrames;
    }
 }

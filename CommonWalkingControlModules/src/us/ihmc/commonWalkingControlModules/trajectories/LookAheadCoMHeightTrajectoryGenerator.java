@@ -53,6 +53,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private static final boolean DEBUG = false;
 
+   private static final boolean PROCESS_GO_HOME_COMMANDS = false;
+
    private boolean VISUALIZE = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -295,8 +297,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
       endpointSlopes[0] = 0.0;
       endpointSlopes[1] = 0.0;
 
-      waypointSlopes[0] = (points[2].y - points[0].y) / (points[2].x - points[0].x);
-      waypointSlopes[1] = (points[3].y - points[1].y) / (points[3].x - points[1].x);
+      waypointSlopes[0] = (points[2].getY() - points[0].getY()) / (points[2].getX() - points[0].getX());
+      waypointSlopes[1] = (points[3].getY() - points[1].getY()) / (points[3].getX() - points[1].getX());
 
       spline.setPoints(points, endpointSlopes, waypointSlopes);
 
@@ -462,8 +464,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
       double[] endpointSlopes = new double[] {0.0, 0.0};
 
       double[] waypointSlopes = new double[2];
-      waypointSlopes[0] = (points[2].y - points[0].y) / (points[2].x - points[0].x);
-      waypointSlopes[1] = (points[3].y - points[1].y) / (points[3].x - points[1].x);
+      waypointSlopes[0] = (points[2].getY() - points[0].getY()) / (points[2].getX() - points[0].getX());
+      waypointSlopes[1] = (points[3].getY() - points[1].getY()) / (points[3].getX() - points[1].getX());
 
       spline.setPoints(points, endpointSlopes, waypointSlopes);
 
@@ -655,7 +657,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       double xSNext = Double.NaN;
       if (nextContactFramePosition != null)
       {
-         Line2d line2d = new Line2d(projectionSegment.getFirstEndPointCopy(), projectionSegment.getSecondEndPointCopy());
+         Line2d line2d = new Line2d(projectionSegment.getFirstEndpointCopy(), projectionSegment.getSecondEndpointCopy());
          Point2d nextPoint2d = new Point2d(nextContactFramePosition.getX(), nextContactFramePosition.getY());
          line2d.orthogonalProjectionCopy(nextPoint2d);
          xSNext = projectionSegment.percentageAlongLineSegment(nextPoint2d) * projectionSegment.length();
@@ -949,6 +951,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public void handleGoHomeCommand(GoHomeCommand command)
    {
+      if (!PROCESS_GO_HOME_COMMANDS)
+         return;
       if (!command.getRequest(BodyPart.PELVIS))
          return;
 
@@ -972,8 +976,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private void getPartialDerivativesWithRespectToS(LineSegment2d segment, double[] partialDerivativesToPack)
    {
-      double dsdx = (segment.getX1() - segment.getX0()) / segment.length();
-      double dsdy = (segment.getY1() - segment.getY0()) / segment.length();
+      double dsdx = (segment.getSecondEndpointX() - segment.getFirstEndpointX()) / segment.length();
+      double dsdy = (segment.getSecondEndpointY() - segment.getFirstEndpointY()) / segment.length();
 
       partialDerivativesToPack[0] = dsdx;
       partialDerivativesToPack[1] = dsdy;

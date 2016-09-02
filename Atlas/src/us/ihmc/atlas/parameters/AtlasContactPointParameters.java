@@ -246,9 +246,9 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
       Vector3d thumbJoint3ContactPoint = new Vector3d(0.0, plusOrMinusY * 0.025, plusOrMinusZ * -0.006);
 
       Vector3d fingersJoint1ContactPoint = new Vector3d(0.0, plusOrMinusY * 0.032, plusOrMinusZ * -0.011);
-      Vector3d fingersJoint2ContactPoint1 = new Vector3d(0.0, thumbJoint2ContactPoint1.y, -thumbJoint2ContactPoint1.z);
-      Vector3d fingersJoint2ContactPoint2 = new Vector3d(0.0, thumbJoint2ContactPoint2.y, -thumbJoint2ContactPoint2.z);
-      Vector3d fingersJoint3ContactPoint = new Vector3d(0.0, thumbJoint3ContactPoint.y, -thumbJoint3ContactPoint.z);
+      Vector3d fingersJoint2ContactPoint1 = new Vector3d(0.0, thumbJoint2ContactPoint1.getY(), -thumbJoint2ContactPoint1.getZ());
+      Vector3d fingersJoint2ContactPoint2 = new Vector3d(0.0, thumbJoint2ContactPoint2.getY(), -thumbJoint2ContactPoint2.getZ());
+      Vector3d fingersJoint3ContactPoint = new Vector3d(0.0, thumbJoint3ContactPoint.getY(), -thumbJoint3ContactPoint.getZ());
 
       addSimulationContactPoint(finger_1_joint_1, fingersJoint1ContactPoint);
       addSimulationContactPoint(finger_1_joint_2, fingersJoint2ContactPoint1);
@@ -276,21 +276,21 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
          palmHeight = robotSide.negateIfLeftSide(palmHeight);
 
       // Row of five contact points along center of palm
-      Vector3d palmContactPoint1 = new Vector3d(palmCenter.x - palmWidth / 2.0, palmCenter.y, palmCenter.z);
-      Vector3d palmContactPoint1b = new Vector3d(palmCenter.x - palmWidth / 4.0, palmCenter.y, palmCenter.z);
-      Vector3d palmContactPointCenter = new Vector3d(palmCenter.x, palmCenter.y, palmCenter.z);
-      Vector3d palmContactPoint2b = new Vector3d(palmCenter.x + palmWidth / 4.0, palmCenter.y, palmCenter.z);
-      Vector3d palmContactPoint3 = new Vector3d(palmCenter.x + palmWidth / 2.0, palmCenter.y, palmCenter.z);
+      Vector3d palmContactPoint1 = new Vector3d(palmCenter.getX() - palmWidth / 2.0, palmCenter.getY(), palmCenter.getZ());
+      Vector3d palmContactPoint1b = new Vector3d(palmCenter.getX() - palmWidth / 4.0, palmCenter.getY(), palmCenter.getZ());
+      Vector3d palmContactPointCenter = new Vector3d(palmCenter.getX(), palmCenter.getY(), palmCenter.getZ());
+      Vector3d palmContactPoint2b = new Vector3d(palmCenter.getX() + palmWidth / 4.0, palmCenter.getY(), palmCenter.getZ());
+      Vector3d palmContactPoint3 = new Vector3d(palmCenter.getX() + palmWidth / 2.0, palmCenter.getY(), palmCenter.getZ());
 
       // Pad that sits between the two outer fingers
-      Vector3d palmContactPoint4 = new Vector3d(palmCenter.x, palmCenter.y, palmCenter.z - palmHeight / 2.0);
-      Vector3d palmContactPoint4b = new Vector3d(palmCenter.x, palmCenter.y, palmCenter.z - palmHeight / 4.0);
+      Vector3d palmContactPoint4 = new Vector3d(palmCenter.getX(), palmCenter.getY(), palmCenter.getZ() - palmHeight / 2.0);
+      Vector3d palmContactPoint4b = new Vector3d(palmCenter.getX(), palmCenter.getY(), palmCenter.getZ() - palmHeight / 4.0);
 
       // Two pads that sandwich the center thumb
-      Vector3d palmContactPoint5 = new Vector3d(palmContactPoint3.x, palmCenter.y, palmCenter.z + palmHeight / 2.0);
-      Vector3d palmContactPoint5b = new Vector3d(palmContactPoint3.x, palmCenter.y, palmCenter.z + palmHeight / 4.0);
-      Vector3d palmContactPoint6 = new Vector3d(palmContactPoint1.x, palmCenter.y, palmContactPoint5.z);
-      Vector3d palmContactPoint6b = new Vector3d(palmContactPoint1.x, palmCenter.y, palmContactPoint5b.z);
+      Vector3d palmContactPoint5 = new Vector3d(palmContactPoint3.getX(), palmCenter.getY(), palmCenter.getZ() + palmHeight / 2.0);
+      Vector3d palmContactPoint5b = new Vector3d(palmContactPoint3.getX(), palmCenter.getY(), palmCenter.getZ() + palmHeight / 4.0);
+      Vector3d palmContactPoint6 = new Vector3d(palmContactPoint1.getX(), palmCenter.getY(), palmContactPoint5.getZ());
+      Vector3d palmContactPoint6b = new Vector3d(palmContactPoint1.getX(), palmCenter.getY(), palmContactPoint5b.getZ());
 
       addSimulationContactPoint(nameOfJointBeforeHand, palmContactPointCenter);
       addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint1);

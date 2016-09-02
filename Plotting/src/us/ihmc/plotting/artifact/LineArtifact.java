@@ -1,20 +1,24 @@
 package us.ihmc.plotting.artifact;
 
 import java.awt.BasicStroke;
-import java.awt.Stroke;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.robotics.geometry.LineSegment2d;
 
 public class LineArtifact extends Artifact
 {
+   private static final BasicStroke STROKE = new BasicStroke(1.0f);
+   
    private final Point2d point1 = new Point2d();
    private final Point2d point2 = new Point2d(0.01, 0.01);
-   private int lineThickness = 1;
 
+   private final LineSegment2d tempLineSegment = new LineSegment2d();
+   
    public LineArtifact(String id)
    {
       super(id);
@@ -53,38 +57,26 @@ public class LineArtifact extends Artifact
       point2.add(point1, vector);
    }
 
-   public void setLineThicknessInPixels(int pixels)
-   {
-      lineThickness = pixels;
-   }
-
    /**
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
-      if (isVisible)
-      {
-         int x1 = Xcenter + ((int) Math.round(point1.x * scaleFactor));
-         int y1 = Ycenter - ((int) Math.round(point1.y * scaleFactor));
-         int x2 = Xcenter + ((int) Math.round(point2.x * scaleFactor));
-         int y2 = Ycenter - ((int) Math.round(point2.y * scaleFactor));
-         graphics2d.setColor(color);
-         Stroke currentStroke = graphics2d.getStroke();
-         graphics2d.setStroke(new BasicStroke(lineThickness));
-         graphics2d.drawLine(x1, y1, x2, y2);
-         graphics2d.setStroke(currentStroke);
-      }
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+      
+      tempLineSegment.set(point1, point2);
+      graphics.drawLineSegment(tempLineSegment);
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
    }
 
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics)
    {
       throw new RuntimeException("Not implemented!");
    }

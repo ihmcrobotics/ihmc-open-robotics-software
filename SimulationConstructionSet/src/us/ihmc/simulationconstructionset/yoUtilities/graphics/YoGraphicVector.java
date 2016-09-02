@@ -104,9 +104,9 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic
 
    public void getBasePosition(Point3d point3d)
    {
-      point3d.x = this.baseX.getDoubleValue();
-      point3d.y = this.baseY.getDoubleValue();
-      point3d.z = this.baseZ.getDoubleValue();
+      point3d.setX(this.baseX.getDoubleValue());
+      point3d.setY(this.baseY.getDoubleValue());
+      point3d.setZ(this.baseZ.getDoubleValue());
    }
 
    public void getBasePosition(FramePoint framePoint)
@@ -118,9 +118,9 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic
 
    public void getVector(Vector3d vector3d)
    {
-      vector3d.x = x.getDoubleValue();
-      vector3d.y = y.getDoubleValue();
-      vector3d.z = z.getDoubleValue();
+      vector3d.setX(x.getDoubleValue());
+      vector3d.setY(y.getDoubleValue());
+      vector3d.setZ(z.getDoubleValue());
    }
 
    public void getVector(FrameVector frameVector)
@@ -149,7 +149,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic
       else
          z_rot.normalize();
 
-      if (Math.abs(z_rot.x) <= 0.99)
+      if (Math.abs(z_rot.getX()) <= 0.99)
          x_rot.set(1.0, 0.0, 0.0);
       else
          x_rot.set(0.0, 1.0, 0.0);
@@ -206,7 +206,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic
    public Artifact createArtifact()
    {
       Color3f color3f = appearance.getColor();
-      return new YoArtifactLineSegment2d(getName(), new YoFrameLineSegment2d(baseX, baseY, x, y, ReferenceFrame.getWorldFrame()), new Color(color3f.x, color3f.y, color3f.z));
+      return new YoArtifactLineSegment2d(getName(), new YoFrameLineSegment2d(baseX, baseY, x, y, ReferenceFrame.getWorldFrame()), new Color(color3f.getX(), color3f.getY(), color3f.getZ()));
    }
 
    @Override

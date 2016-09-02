@@ -27,15 +27,15 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class AtlasStateEstimatorParameters implements StateEstimatorParameters
+public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 {
    private final boolean runningOnRealRobot;
 
    private final double estimatorDT;
 
    private final double jointVelocitySlopTimeForBacklashCompensation;
-   private static final double backXBacklashSlopTime = 0.08;
-   private static final double backXAlphaFilterBreakFrequency = 10.0;
+   private static final double backXBacklashSlopTime = 0.03;
+   private static final double backXAlphaFilterBreakFrequency = 16.0;
 
    private final double defaultFilterBreakFrequency;
    private final double defaultFilterBreakFrequencyArm;
@@ -87,7 +87,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
       String[] armJointNames = createArmJointNames();
-      
+
       String[] backXName = new String[] {jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)};
       String[] armAndBackJoints = new String[armJointNames.length + backXName.length];
       System.arraycopy(armJointNames, 0, armAndBackJoints, 0, armJointNames.length);
@@ -95,7 +95,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       DoubleYoVariable backXFilter = sensorProcessing.createAlphaFilter("backXAlphaFilter", backXAlphaFilterBreakFrequency);
       DoubleYoVariable backXSlopTime = new DoubleYoVariable("backXSlopTime", registry);
       backXSlopTime.set(backXBacklashSlopTime);
-      
+
       DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", defaultFilterBreakFrequency);
       DoubleYoVariable wristForceAlphaFilter = sensorProcessing.createAlphaFilter("wristForceAlphaFilter", defaultFilterBreakFrequency);
       DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
@@ -287,12 +287,6 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
-   public boolean createFusedIMUSensor()
-   {
-      return false;
-   }
-
-   @Override
    public double getContactThresholdForce()
    {
       return 120.0;
@@ -359,6 +353,12 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    public boolean requestFootForceSensorCalibrationAtStart()
    {
       return false;
+   }
+
+   @Override
+   public boolean requestFrozenModeAtStart()
+   {
+      return runningOnRealRobot;
    }
 
    @Override

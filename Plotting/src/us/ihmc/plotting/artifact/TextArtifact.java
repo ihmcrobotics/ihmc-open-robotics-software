@@ -3,7 +3,10 @@ package us.ihmc.plotting.artifact;
 import java.awt.Font;
 import java.io.PrintWriter;
 
+import javax.vecmath.Point2d;
+
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 
 public class TextArtifact extends Artifact
 {
@@ -13,6 +16,8 @@ public class TextArtifact extends Artifact
    private Font font = Font.getFont(Font.SANS_SERIF);
    private int xPixelOffset = 0;
    private int yPixelOffset = 0;
+   
+   private final Point2d tempPoint = new Point2d();
 
    public TextArtifact(String id, String text, double x1, double y1)
    {
@@ -74,28 +79,23 @@ public class TextArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
-      int x1 = Xcenter + xPixelOffset +((int)Math.round(this.x1 * scaleFactor));
-      int y1 = Ycenter - yPixelOffset - ((int)Math.round(this.y1 * scaleFactor));
+      graphics.setColor(color);
+      graphics.setFont(font);
 
-
-      graphics2d.setColor(color);
-      graphics2d.setFont(font);
-
-      graphics2d.drawString(text, x1, y1);
+      tempPoint.set(x1, y1);
+      graphics.drawString(text, tempPoint);
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
-      int x1 = Xcenter + ((int)Math.round(this.x1 * scaleFactor));
-      int y1 = Ycenter - ((int)Math.round(this.y1 * scaleFactor));
+      graphics.setColor(color);
+      graphics.setFont(font);
 
-      graphics2d.setColor(color);
-      graphics2d.setFont(font);
-
-      graphics2d.drawString(text, x1, y1);
+      tempPoint.set(origin.getX() - 30.0, origin.getY() + 6.0);
+      graphics.drawString(graphics.getScreenFrame(), text, tempPoint);
    }
 
    public void save(PrintWriter printWriter)
@@ -112,7 +112,7 @@ public class TextArtifact extends Artifact
    }
    
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics)
    {
       throw new RuntimeException("Not implemented!");
    }

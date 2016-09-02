@@ -14,10 +14,10 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFoo
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
-import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
@@ -64,7 +64,6 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.HeadIMUSubscriber;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -144,19 +143,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       if (sensorReaderFactory.useStateEstimator())
       {
          drcStateEstimator = createStateEstimator(estimatorFullRobotModel, sensorInformation, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
-               contactPointParameters, forceSensorDataHolderForEstimator, 
-               centerOfMassDataHolderForEstimator, contactSensorHolder, 
+               contactPointParameters, forceSensorDataHolderForEstimator,
+               centerOfMassDataHolderForEstimator, contactSensorHolder,
                centerOfPressureDataHolderFromController,
                robotMotionStatusFromController, yoGraphicsListRegistry, estimatorRegistry);
-
-         String headIMUName = sensorInformation.getHeadIMUName();
-         IMUDefinition imuDefinition = null;
-         if (headIMUName != null)
-         {
-            for (IMUDefinition definition : imuDefinitions)
-               if (definition.getName().equals(headIMUName))
-                  imuDefinition = definition;
-         }
 
          if (globalDataProducer != null)
          {
@@ -167,15 +157,6 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
             drcStateEstimator.setOperatingModeSubscriber(stateEstimatorModeSubscriber);
             drcStateEstimator.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
-
-            if (imuDefinition != null)
-            {
-               HeadIMUSubscriber headIMUSubscriber = new HeadIMUSubscriber(imuDefinition, null, null);
-               dataProducer.attachListener(IMUPacket.class, headIMUSubscriber);
-               drcStateEstimator.setHeadIMUSubscriber(headIMUSubscriber);
-            }
-            else
-               System.err.println("Did not find IMU definition for: " + headIMUName);
          }
 
          estimatorController.addRobotController(drcStateEstimator);
@@ -327,7 +308,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    private DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullHumanoidRobotModel estimatorFullRobotModel, DRCRobotSensorInformation sensorInformation,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
-         RobotContactPointParameters contactPointParamaters, ForceSensorDataHolder estimatorForceSensorDataHolderToUpdate, 
+         RobotContactPointParameters contactPointParamaters, ForceSensorDataHolder estimatorForceSensorDataHolderToUpdate,
          CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
          ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
@@ -428,10 +409,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          drcStateEstimator.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
 
-   public void setHeadIMUSubscriber(HeadIMUSubscriber headIMUSubscriber)
+   public void requestStateEstimatorMode(StateEstimatorMode stateEstimatorMode)
    {
       if (drcStateEstimator != null)
-         drcStateEstimator.setHeadIMUSubscriber(headIMUSubscriber);
+         drcStateEstimator.requestStateEstimatorMode(stateEstimatorMode);
    }
 
    public List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()

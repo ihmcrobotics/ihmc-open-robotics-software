@@ -54,12 +54,12 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
 
    public FrameTuple<?, ?> createFrameTuple(ReferenceFrame referenceFrame, Tuple3d tuple)
    {
-      return createFrameTuple(referenceFrame, tuple.x, tuple.y, tuple.z, null);
+      return createFrameTuple(referenceFrame, tuple.getX(), tuple.getY(), tuple.getZ(), null);
    }
 
    public FrameTuple<?, ?> createFrameTuple(ReferenceFrame referenceFrame, Tuple3d tuple, String name)
    {
-      return createFrameTuple(referenceFrame, tuple.x, tuple.y, tuple.z, name);
+      return createFrameTuple(referenceFrame, tuple.getX(), tuple.getY(), tuple.getZ(), name);
    }
 
    public FrameTuple<?, ?> createFrameTuple(FrameTuple<?, ?> frameTuple)
@@ -216,7 +216,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
 
    private final void testGetters(FrameTuple<?, ?> frameTuple, Tuple3d tuple)
    {
-      testGetters(frameTuple, tuple.x, tuple.y, tuple.z);
+      testGetters(frameTuple, tuple.getX(), tuple.getY(), tuple.getZ());
       assertTrue(frameTuple.epsilonEquals(tuple, epsilon));
    }
 
@@ -525,14 +525,14 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       FrameTuple<?, ?> framePoint = createFrameTuple(theFrame, 1.0, 2.0, 3.0);
 
       Point3d actualReturn = framePoint.getPointCopy();
-      assertEquals(1.0, actualReturn.x, epsilon);
-      assertEquals(2.0, actualReturn.y, epsilon);
-      assertEquals(3.0, actualReturn.z, epsilon);
+      assertEquals(1.0, actualReturn.getX(), epsilon);
+      assertEquals(2.0, actualReturn.getY(), epsilon);
+      assertEquals(3.0, actualReturn.getZ(), epsilon);
 
       framePoint.add(createFrameTuple(theFrame, 1.0, 1.0, 1.0));
-      assertEquals(1.0, actualReturn.x, epsilon);
-      assertEquals(2.0, actualReturn.y, epsilon);
-      assertEquals(3.0, actualReturn.z, epsilon);
+      assertEquals(1.0, actualReturn.getX(), epsilon);
+      assertEquals(2.0, actualReturn.getY(), epsilon);
+      assertEquals(3.0, actualReturn.getZ(), epsilon);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)

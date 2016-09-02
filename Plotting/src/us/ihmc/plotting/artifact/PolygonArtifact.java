@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
@@ -14,6 +16,10 @@ public class PolygonArtifact extends Artifact
 {
    private ArrayList<Point2d> points = new ArrayList<Point2d>();
    private boolean FILL_POLYGON = false;
+   
+   private final ConvexPolygon2d tempPolygon = new ConvexPolygon2d();
+   private final Point2d tempPoint = new Point2d();
+   private final Vector2d tempRadii = new Vector2d();
 
    public PolygonArtifact(String id)
    {
@@ -128,53 +134,43 @@ public class PolygonArtifact extends Artifact
     * Must provide a draw method for plotter to render artifact
     */
    @Override
-   public void draw(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   public void draw(Graphics2DAdapter graphics)
    {
+      if (points.isEmpty())
+         return;
+      
       ArrayList<Point2d> pointsCopy = new ArrayList<>(points);
-      int nPoints = pointsCopy.size();
-      int[] xPoints = new int[nPoints];
-      int[] yPoints = new int[nPoints];
-
-      if (nPoints == 1)
+      
+      if (pointsCopy.size() == 1)
       {
-         int x = Xcenter + (int) Math.round(pointsCopy.get(0).x * scaleFactor);
-         int y = Ycenter - (int) Math.round(pointsCopy.get(0).y * scaleFactor);
-         graphics2d.drawOvalFilled(x, y, 4, 4);
+         tempPoint.set(pointsCopy.get(0).getX(), pointsCopy.get(0).getY());
+         tempRadii.set(4.0, 4.0);
+         graphics.drawOvalFilled(tempPoint, tempRadii);
       }
       else
       {
-         for (int i = 0; i < nPoints; i++)
-         {
-            if (pointsCopy.get(i) != null)
-            {
-               int x = Xcenter + (int) Math.round(pointsCopy.get(i).x * scaleFactor);
-               int y = Ycenter - (int) Math.round(pointsCopy.get(i).y * scaleFactor);
-               xPoints[i] = x;
-               yPoints[i] = y;
-            }
-         }
-
-         graphics2d.setColor(color);
+         graphics.setColor(color);
+         tempPolygon.setAndUpdate(pointsCopy, pointsCopy.size());
 
          if (FILL_POLYGON)
          {
-            graphics2d.drawPolygonFilled(xPoints, yPoints, nPoints);
+            graphics.drawPolygonFilled(tempPolygon);
          }
          else
          {
-            graphics2d.drawPolygon(xPoints, yPoints, nPoints);
+            graphics.drawPolygon(tempPolygon);
          }
       }
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics2d, int xCenter, int yCenter, double scaleFactor)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
-      graphics2d.drawString("Polygon", xCenter, yCenter);
+      graphics.drawString(graphics.getScreenFrame(), "Polygon", origin);
    }
 
    @Override
-   public void drawHistory(Graphics2DAdapter graphics2d, int Xcenter, int Ycenter, double scaleFactor)
+   public void drawHistory(Graphics2DAdapter graphics)
    {
       throw new RuntimeException("Not implemented!");
    }

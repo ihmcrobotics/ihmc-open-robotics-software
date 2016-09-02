@@ -90,11 +90,11 @@ public class ConvexPolygonToolsTest
       FrameLineSegment2d connectingEdge1 = frameConvexPolygon2dAndConnectingEdges.getConnectingEdge1();
       FrameLineSegment2d connectingEdge2 = frameConvexPolygon2dAndConnectingEdges.getConnectingEdge2();
 
-      assertTrue(polygon1.isPointInside(connectingEdge1.getFirstEndPointCopy()));
-      assertTrue(polygon2.isPointInside(connectingEdge1.getSecondEndPointCopy()));
+      assertTrue(polygon1.isPointInside(connectingEdge1.getFirstEndpointCopy()));
+      assertTrue(polygon2.isPointInside(connectingEdge1.getSecondEndpointCopy()));
 
-      assertTrue(polygon1.isPointInside(connectingEdge2.getSecondEndPointCopy()));
-      assertTrue(polygon2.isPointInside(connectingEdge2.getFirstEndPointCopy()));
+      assertTrue(polygon1.isPointInside(connectingEdge2.getSecondEndpointCopy()));
+      assertTrue(polygon2.isPointInside(connectingEdge2.getFirstEndpointCopy()));
 
       ArrayList<FramePoint2d> pointsThatShouldNotBeInOriginals = new ArrayList<FramePoint2d>();
 
@@ -116,14 +116,14 @@ public class ConvexPolygonToolsTest
       FramePoint2d point7 = new FramePoint2d();
       FramePoint2d point8 = new FramePoint2d();
 
-      point1.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), -epsilon);
-      point2.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), epsilon);
-      point3.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), 1.0 - epsilon);
-      point4.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), 1.0 + epsilon);
-      point5.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), -epsilon);
-      point6.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), epsilon);
-      point7.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), 1.0 - epsilon);
-      point8.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), 1.0 + epsilon);
+      point1.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), -epsilon);
+      point2.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), epsilon);
+      point3.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), 1.0 - epsilon);
+      point4.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), 1.0 + epsilon);
+      point5.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), -epsilon);
+      point6.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), epsilon);
+      point7.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), 1.0 - epsilon);
+      point8.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), 1.0 + epsilon);
 
       pointsThatShouldNotBeInOriginals.add(point1);
       pointsThatShouldNotBeInOriginals.add(point2);

@@ -236,9 +236,9 @@ public class PickUpBallBehavior extends BehaviorInterface
             coactiveElement.waitingForValidation.set(true);
             coactiveElement.validAcknowledged.set(false);
             coactiveElement.foundBall.set(false);
-            coactiveElement.ballX.set(initialSphereDetectionBehavior.getBallLocation().x);
-            coactiveElement.ballY.set(initialSphereDetectionBehavior.getBallLocation().y);
-            coactiveElement.ballZ.set(initialSphereDetectionBehavior.getBallLocation().z);
+            coactiveElement.ballX.set(initialSphereDetectionBehavior.getBallLocation().getX());
+            coactiveElement.ballY.set(initialSphereDetectionBehavior.getBallLocation().getY());
+            coactiveElement.ballZ.set(initialSphereDetectionBehavior.getBallLocation().getZ());
             coactiveElement.ballRadius.set(initialSphereDetectionBehavior.getSpehereRadius());
 
          }
@@ -369,9 +369,9 @@ public class PickUpBallBehavior extends BehaviorInterface
             coactiveElement.waitingForValidation.set(true);
             coactiveElement.validAcknowledged.set(false);
             coactiveElement.foundBall.set(false);
-            coactiveElement.ballX.set(initialSphereDetectionBehavior.getBallLocation().x);
-            coactiveElement.ballY.set(initialSphereDetectionBehavior.getBallLocation().y);
-            coactiveElement.ballZ.set(initialSphereDetectionBehavior.getBallLocation().z);
+            coactiveElement.ballX.set(initialSphereDetectionBehavior.getBallLocation().getX());
+            coactiveElement.ballY.set(initialSphereDetectionBehavior.getBallLocation().getY());
+            coactiveElement.ballZ.set(initialSphereDetectionBehavior.getBallLocation().getZ());
             coactiveElement.ballRadius.set(initialSphereDetectionBehavior.getSpehereRadius());
 
          }
@@ -386,9 +386,9 @@ public class PickUpBallBehavior extends BehaviorInterface
             TextToSpeechPacket p1 = new TextToSpeechPacket("I think i found the ball");
             sendPacketToNetworkProcessor(p1);
             coactiveElement.currentState.set(BehaviorState.REACHING_FOR_BALL);
-            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().x,
-                  initialSphereDetectionBehavior.getBallLocation().y,
-                  initialSphereDetectionBehavior.getBallLocation().z + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
+            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
+                  initialSphereDetectionBehavior.getBallLocation().getY(),
+                  initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
             wholeBodyBehavior.setTrajectoryTime(3);
             FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
@@ -408,9 +408,9 @@ public class PickUpBallBehavior extends BehaviorInterface
          @Override
          protected void setBehaviorInput()
          {
-            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().x,
-                  initialSphereDetectionBehavior.getBallLocation().y,
-                  initialSphereDetectionBehavior.getBallLocation().z + initialSphereDetectionBehavior.getSpehereRadius());
+            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
+                  initialSphereDetectionBehavior.getBallLocation().getY(),
+                  initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius());
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
             wholeBodyBehavior.setTrajectoryTime(3);
             FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
@@ -613,8 +613,8 @@ public class PickUpBallBehavior extends BehaviorInterface
    private FramePose2d getoffsetPoint()
    {
 
-      FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().x,
-            initialSphereDetectionBehavior.getBallLocation().y);
+      FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
+            initialSphereDetectionBehavior.getBallLocation().getY());
       FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
       robotPosition.changeFrame(worldFrame);
       FrameVector2d walkingDirection = new FrameVector2d(worldFrame);

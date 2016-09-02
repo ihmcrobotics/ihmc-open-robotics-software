@@ -887,8 +887,8 @@ public class ConvexPolygonTools
 
          Point2d vertexA = polygon.getVertex(idx1);
          Point2d vertexB = polygon.getVertex(idx2);
-         double xNew = (vertexA.x + vertexB.x) / 2.0;
-         double yNew = (vertexA.y + vertexB.y) / 2.0;
+         double xNew = (vertexA.getX() + vertexB.getX()) / 2.0;
+         double yNew = (vertexA.getY() + vertexB.getY()) / 2.0;
 
          polygon.removeVertex(idx1);
          polygon.removeVertex(idx2);
@@ -939,8 +939,8 @@ public class ConvexPolygonTools
 
          Point2d vertexA = polygon.getVertex(idx1);
          Point2d vertexB = polygon.getVertex(idx2);
-         double xNew = (vertexA.x + vertexB.x) / 2.0;
-         double yNew = (vertexA.y + vertexB.y) / 2.0;
+         double xNew = (vertexA.getX() + vertexB.getX()) / 2.0;
+         double yNew = (vertexA.getY() + vertexB.getY()) / 2.0;
 
          polygon.scale(1.0 - 10E-10);
          polygon.addVertex(xNew, yNew);

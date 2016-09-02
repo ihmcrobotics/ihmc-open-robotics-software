@@ -47,7 +47,7 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
 
       for (Point3d point3d : point3dList)
       {
-         if (Math.abs(point3d.z + xyCCoefficients[0] * point3d.x + xyCCoefficients[1] * point3d.y + xyCCoefficients[2]) > threshold)
+         if (Math.abs(point3d.getZ() + xyCCoefficients[0] * point3d.getX() + xyCCoefficients[1] * point3d.getY() + xyCCoefficients[2]) > threshold)
          {
             return false;
          }
@@ -94,15 +94,15 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
       {
          Point3d point3d = pointList.get(i);
          n++;
-         x += point3d.x;
-         y += point3d.y;
-         z += point3d.z;
-         xx += Math.pow(point3d.x, 2);
-         xy += point3d.x * point3d.y;
-         xz += point3d.x * point3d.z;
-         yy += Math.pow(point3d.y, 2);
-         yz += point3d.y * point3d.z;
-         zz += point3d.z * point3d.z;
+         x += point3d.getX();
+         y += point3d.getY();
+         z += point3d.getZ();
+         xx += Math.pow(point3d.getX(), 2);
+         xy += point3d.getX() * point3d.getY();
+         xz += point3d.getX() * point3d.getZ();
+         yy += Math.pow(point3d.getY(), 2);
+         yz += point3d.getY() * point3d.getZ();
+         zz += point3d.getZ() * point3d.getZ();
       }
 
       covarianceMatrix.set(0, 0, xx);

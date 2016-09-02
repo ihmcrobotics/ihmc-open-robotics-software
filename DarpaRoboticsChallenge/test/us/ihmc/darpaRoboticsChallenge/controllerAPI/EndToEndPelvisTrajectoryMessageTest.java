@@ -611,8 +611,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertNumberOfWaypoints(2, scs);
 
       Point2d desiredControllerXY = findControllerDesiredPositionXY(scs);
-      assertEquals(desiredPosition.getX(), desiredControllerXY.x, EPSILON_FOR_DESIREDS);
-      assertEquals(desiredPosition.getY(), desiredControllerXY.y, EPSILON_FOR_DESIREDS);
+      assertEquals(desiredPosition.getX(), desiredControllerXY.getX(), EPSILON_FOR_DESIREDS);
+      assertEquals(desiredPosition.getY(), desiredControllerXY.getY(), EPSILON_FOR_DESIREDS);
       
       Quat4d desiredControllerOrientation = findControllerDesiredOrientation(scs);
       JUnitTools.assertQuaternionsEqual(desiredOrientation, desiredControllerOrientation, EPSILON_FOR_DESIREDS);

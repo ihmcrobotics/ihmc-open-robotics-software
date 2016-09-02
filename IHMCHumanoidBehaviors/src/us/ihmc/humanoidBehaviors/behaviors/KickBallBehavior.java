@@ -199,8 +199,8 @@ public class KickBallBehavior extends BehaviorInterface
    private FramePose2d getoffsetPoint()
    {
 
-      FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), sphereDetectionBehavior.getBallLocation().x,
-            sphereDetectionBehavior.getBallLocation().y);
+      FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), sphereDetectionBehavior.getBallLocation().getX(),
+            sphereDetectionBehavior.getBallLocation().getY());
       FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
       robotPosition.changeFrame(worldFrame);
       FrameVector2d walkingDirection = new FrameVector2d(worldFrame);

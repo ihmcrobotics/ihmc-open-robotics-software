@@ -48,8 +48,8 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
 
    public final void set(double x, double y)
    {
-      tuple.x = x;
-      tuple.y = y;
+      tuple.setX(x);
+      tuple.setY(y);
    }
 
    public final void setIncludingFrame(ReferenceFrame referenceFrame, double x, double y)
@@ -105,12 +105,12 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
 
    public final void setX(double x)
    {
-      tuple.x = x;
+      tuple.setX(x);
    }
 
    public final void setY(double y)
    {
-      tuple.y = y;
+      tuple.setY(y);
    }
 
    public final void scale(double scaleFactor)
@@ -120,18 +120,18 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
 
    public final void scale(double scaleXFactor, double scaleYFactor)
    {
-      tuple.x *= scaleXFactor;
-      tuple.y *= scaleYFactor;
+      tuple.setX(tuple.getX() * scaleXFactor);
+      tuple.setY(tuple.getY() * scaleYFactor);
    }
 
    public final double getX()
    {
-      return tuple.x;
+      return tuple.getX();
    }
 
    public final double getY()
    {
-      return tuple.y;
+      return tuple.getY();
    }
 
    /**
@@ -165,7 +165,7 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
     */
    public final void get(Tuple3d tuple3dToPack)
    {
-      tuple3dToPack.set(tuple.x, tuple.y, 0.0);
+      tuple3dToPack.set(tuple.getX(), tuple.getY(), 0.0);
    }
 
    public final void setToZero()
@@ -198,7 +198,7 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
 
    public final boolean containsNaN()
    {
-      return Double.isNaN(tuple.x) || Double.isNaN(tuple.y);
+      return Double.isNaN(tuple.getX()) || Double.isNaN(tuple.getY());
    }
 
    /**
@@ -234,8 +234,8 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
     */
    public final void scaleAdd(double scaleFactor1, Tuple2d tuple1, double scaleFactor2, Tuple2d tuple2)
    {
-      tuple.x = scaleFactor1 * tuple1.x + scaleFactor2 * tuple2.x;
-      tuple.y = scaleFactor1 * tuple1.y + scaleFactor2 * tuple2.y;
+      tuple.setX(scaleFactor1 * tuple1.getX() + scaleFactor2 * tuple2.getX());
+      tuple.setY(scaleFactor1 * tuple1.getY() + scaleFactor2 * tuple2.getY());
    }
 
    /**
@@ -296,8 +296,8 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
 
    public final void add(double dx, double dy)
    {
-      tuple.x += dx;
-      tuple.y += dy;
+      tuple.setX(tuple.getX() + dx);
+      tuple.setY(tuple.getY() + dy);
    }
 
    /**  
@@ -355,8 +355,8 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
    
    public final void sub(double dx, double dy)
    {
-      tuple.x -= dx;
-      tuple.y -= dy;
+      tuple.setX(tuple.getX() - dx);
+      tuple.setY(tuple.getY() - dy);
    }
 
    /**  
@@ -476,7 +476,7 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
 
    public final double[] toArray()
    {
-      return new double[] { tuple.x, tuple.y };
+      return new double[] { tuple.getX(), tuple.getY() };
    }
 
    /**

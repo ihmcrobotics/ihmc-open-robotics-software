@@ -54,7 +54,7 @@ public class QuadrupedGeometryTools
     */
    public static void updateFootstepWorkspace(RobotQuadrant robotQuadrant, FrameEllipsoid3d ellipsoidToPack, CommonQuadrupedReferenceFrames referenceFrames)
    {
-      double hipPitchHeight = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(referenceFrames.getHipPitchFrame(robotQuadrant)).mat23;
+      double hipPitchHeight = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(referenceFrames.getHipPitchFrame(robotQuadrant)).getM23();
       double maxStepDistance = Math.sqrt(Math.pow(referenceFrames.getLegLength(robotQuadrant), 2) - Math.pow(hipPitchHeight, 2));
       
       ellipsoidToPack.checkReferenceFrameMatch(referenceFrames.getHipPitchFrame(robotQuadrant));

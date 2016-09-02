@@ -43,7 +43,7 @@ public class FourPointSpline1D
          this.intermediateSlopes[i] = intermediateSlopes[i];
       }
 
-      spline.setCubicUsingIntermediatePoints(points[0].x, points[1].x, points[2].x, points[3].x, points[0].y, points[1].y, points[2].y, points[3].y);
+      spline.setCubicUsingIntermediatePoints(points[0].getX(), points[1].getX(), points[2].getX(), points[3].getX(), points[0].getY(), points[1].getY(), points[2].getY(), points[3].getY());
 
       //    spline.setNonic(points[0].x, points[1].x, points[2].x, points[3].x, points[0].y, endpointSlopes[0],
       //    points[1].y, intermediateSlopes[0], points[2].y, intermediateSlopes[1], points[3].y, endpointSlopes[1]);

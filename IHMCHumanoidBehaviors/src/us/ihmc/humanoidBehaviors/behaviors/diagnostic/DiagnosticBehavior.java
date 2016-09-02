@@ -68,8 +68,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
-import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -1741,7 +1739,6 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitFootPose(true, robotSide, footPose);
 
       submitChestHomeCommand(true);
-      submitPelvisHomeCommand(true);
 
       // Put the foot back on the ground
       submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
@@ -1952,7 +1949,11 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void submitDesiredPelvisHeight(boolean parallelize, double offsetHeight)
    {
-      PelvisHeightTrajectoryTask comHeightTask = new PelvisHeightTrajectoryTask(offsetHeight, yoTime, pelvisHeightTrajectoryBehavior, trajectoryTime.getDoubleValue(),
+      SixDoFJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
+      FramePoint desiredPelvisPosition = new FramePoint(frameAfterRootJoint);
+      desiredPelvisPosition.setZ(offsetHeight);
+      desiredPelvisPosition.changeFrame(worldFrame);
+      PelvisHeightTrajectoryTask comHeightTask = new PelvisHeightTrajectoryTask(desiredPelvisPosition.getZ(), yoTime, pelvisHeightTrajectoryBehavior, trajectoryTime.getDoubleValue(),
             sleepTimeBetweenPoses.getDoubleValue());
       if (parallelize)
          pipeLine.submitTaskForPallelPipesStage(pelvisHeightTrajectoryBehavior, comHeightTask);
@@ -1980,7 +1981,8 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation(), yaw, pitch, roll);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredPelvisOrientation.getQuaternion());
+      Quat4d desiredQuaternion = new Quat4d(desiredPelvisOrientation.getQuaternion());
+      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredQuaternion);
       PelvisOrientationTrajectoryTask task = new PelvisOrientationTrajectoryTask(message, yoTime, pelvisOrientationTrajectoryBehavior, sleepTime);
 
       if (parallelize)
@@ -2001,8 +2003,9 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredPelvisPose.setPosition(dx, dy, dz);
       desiredPelvisPose.setYawPitchRoll(yaw, pitch, roll);
       desiredPelvisPose.changeFrame(worldFrame);
-      TransformablePoint3d position = desiredPelvisPose.getGeometryObject().getPoint();
-      TransformableQuat4d orientation = desiredPelvisPose.getGeometryObject().getOrientation();
+      Point3d position = new Point3d();
+      Quat4d orientation = new Quat4d();
+      desiredPelvisPose.getPose(position, orientation);
       PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(trajectoryTime.getDoubleValue(), position, orientation);
       PelvisTrajectoryTask task = new PelvisTrajectoryTask(message, yoTime, pelvisTrajectoryBehavior, sleepTimeBetweenPoses.getDoubleValue());
       if (parallelize)
@@ -2067,7 +2070,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          }
          ArmTrajectoryBehavior armTrajectoryBehavior = armTrajectoryBehaviors.get(robotSide);
          ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, trajectoryTime.getDoubleValue(), desiredJointAngles);
-         pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior, new ArmTrajectoryTask(message, armTrajectoryBehavior, trajectoryTime, sleepTimeBetweenPoses.getDoubleValue()));
+         pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior, new ArmTrajectoryTask(message, armTrajectoryBehavior, yoTime, sleepTimeBetweenPoses.getDoubleValue()));
       }
    }
 
@@ -2086,7 +2089,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private double[] computeArmJointAngles(RobotSide robotSide, FrameOrientation desiredUpperArmOrientation, double elbowAngle,
          FrameOrientation desiredHandOrientation, boolean mirrorOrientationForRightSide)
    {
-      double[] desiredUpperArmJointAngles = computeUpperArmJointAngles(robotSide, desiredUpperArmOrientation, mirrorOrientationForRightSide);
+      double[] desiredUpperArmJointAngles = computeUpperArmJointAngles(robotSide, desiredUpperArmOrientation, mirrorOrientationForRightSide, 0);
       if (desiredUpperArmJointAngles == null)
          return null;
 
@@ -2116,10 +2119,9 @@ public class DiagnosticBehavior extends BehaviorInterface
       return desiredJointAngles;
    }
 
-   private int counterForUpperArmIK = 0;
    private final Random random = new Random(541654L);
 
-   private double[] computeUpperArmJointAngles(RobotSide robotSide, FrameOrientation desiredUpperArmOrientation, boolean mirrorOrientationForRightSide)
+   private double[] computeUpperArmJointAngles(RobotSide robotSide, FrameOrientation desiredUpperArmOrientation, boolean mirrorOrientationForRightSide, int iteration)
    {
       if (desiredUpperArmOrientation == null)
          return new double[upperArmJointsClone.get(robotSide).length];
@@ -2127,9 +2129,13 @@ public class DiagnosticBehavior extends BehaviorInterface
       FrameOrientation temporaryDesiredUpperArmOrientation = new FrameOrientation();
       temporaryDesiredUpperArmOrientation.setIncludingFrame(desiredUpperArmOrientation);
 
-      if (counterForUpperArmIK >= 15)
+      if (iteration == 0)
       {
-         counterForUpperArmIK = 0;
+         for (OneDoFJoint joint : upperArmJointsClone.get(robotSide))
+            joint.setQ(0.0);
+      }
+      else if (iteration >= 15)
+      {
          System.err.println("Could not find desired joint angles for the upper arm joints");
          if (DEBUG)
          {
@@ -2158,16 +2164,20 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       if (!success)
       {
-         counterForUpperArmIK++;
-         ScrewTestTools.setRandomPositions(upperArmJointsClone.get(robotSide), random, 0.0, 1.0);
-         return computeUpperArmJointAngles(robotSide, temporaryDesiredUpperArmOrientation, false);
+         ScrewTestTools.setRandomPositionsWithinJointLimits(upperArmJointsClone.get(robotSide), random);
+         return computeUpperArmJointAngles(robotSide, temporaryDesiredUpperArmOrientation, false, iteration + 1);
       }
 
       double[] desiredUpperArmJointAngles = new double[upperArmJointsClone.get(robotSide).length];
 
       for (int i = 0; i < upperArmJointsClone.get(robotSide).length; i++)
       {
-         desiredUpperArmJointAngles[i] = upperArmJointsClone.get(robotSide)[i].getQ();
+         OneDoFJoint joint = upperArmJointsClone.get(robotSide)[i];
+         double qDesired = joint.getQ();
+         double qLow = joint.getJointLimitLower();
+         double qUp = joint.getJointLimitUpper();
+         double qRange = qUp - qLow;
+         desiredUpperArmJointAngles[i] = MathTools.clipToMinMax(qDesired, qLow + 0.01 * qRange, qUp - 0.01 * qRange);
       }
 
       return desiredUpperArmJointAngles;
@@ -2184,12 +2194,16 @@ public class DiagnosticBehavior extends BehaviorInterface
       temporaryDesiredHandOrientation.checkReferenceFrameMatch(lowerArmsFrames.get(robotSide));
       //      desiredHandOrientation.applyTransform(armZeroJointAngleConfigurationOffsets.get(robotSide));
 
+      for (OneDoFJoint joint : lowerArmJointsClone.get(robotSide))
+         joint.setQ(0.0);
+
       if (mirrorOrientationForRightSide)
       {
-         double[] yawPitchRoll = temporaryDesiredHandOrientation.getYawPitchRoll();
-         yawPitchRoll[0] = robotSide.negateIfRightSide(yawPitchRoll[0]);
-         yawPitchRoll[2] = robotSide.negateIfRightSide(yawPitchRoll[2]);
-         temporaryDesiredHandOrientation.setYawPitchRoll(yawPitchRoll);
+         double qx = -temporaryDesiredHandOrientation.getQx();
+         double qy = temporaryDesiredHandOrientation.getQy();
+         double qz = -temporaryDesiredHandOrientation.getQz();
+         double qs = temporaryDesiredHandOrientation.getQs();
+         temporaryDesiredHandOrientation.set(qx, qy, qz, qs);
       }
 
       RigidBodyTransform desiredTransformForLowerArm = new RigidBodyTransform();

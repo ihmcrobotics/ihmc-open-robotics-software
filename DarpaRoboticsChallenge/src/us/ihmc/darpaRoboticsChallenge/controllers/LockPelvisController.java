@@ -91,7 +91,7 @@ public class LockPelvisController implements RobotController
       for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
       {
          externalForcePoints.get(i).getYoPosition().get(initialPositions.get(i));
-         desiredHeight.add(initialPositions.get(i).z / initialPositions.size());
+         desiredHeight.add(initialPositions.get(i).getZ() / initialPositions.size());
          efp_positionViz.get(i).update();
       }
 

@@ -22,11 +22,12 @@ import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.SwingTargetGen
 import us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser.DefaultGaitSwingLegChooser;
 import us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser.NextSwingLegChooser;
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedSwingTrajectoryGenerator;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -78,7 +79,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactCircle;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactOval;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
@@ -267,7 +268,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final YoGraphicPosition circleCenterGraphic = new YoGraphicPosition("circleCenterGraphic", circleCenter, 0.005, YoAppearance.Green());
 
    private final DoubleYoVariable inscribedCircleRadius = new DoubleYoVariable("inscribedCircleRadius", registry);
-   private final YoArtifactCircle inscribedCircle = new YoArtifactCircle("inscribedCircle", circleCenter, inscribedCircleRadius, Color.BLACK);
+   private final YoArtifactOval inscribedCircle = new YoArtifactOval("inscribedCircle", circleCenter, inscribedCircleRadius, Color.BLACK);
    
    private final BooleanYoVariable useSubCircleForBodyShiftTarget = new BooleanYoVariable("useSubCircleForBodyShiftTarget", registry);
    private final DoubleYoVariable subCircleRadius = new DoubleYoVariable("subCircleRadius", registry);
@@ -299,7 +300,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    
    private final YoFramePoint desiredCoMTarget = new YoFramePoint("desiredCoMTarget", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition desiredCoMTargetViz = new YoGraphicPosition("desiredCoMTargetViz", desiredCoMTarget, 0.01, YoAppearance.Turquoise());
-   
+
    private final YoFramePoint desiredCoM = new YoFramePoint("desiredCoM", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition desiredCoMViz = new YoGraphicPosition("desiredCoMViz", desiredCoM, 0.01, YoAppearance.HotPink());
    
@@ -347,19 +348,20 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final DoubleYoVariable maximumCoMTrajectoryDuration = new DoubleYoVariable("maximumCoMTrajectoryDuration", registry);
    private final DoubleYoVariable minimumCoMTrajectoryDuration = new DoubleYoVariable("minimumCoMTrajectoryDuration", registry);
    
-   private final QuadrupedControllerInputProviderInterface inputProvider;
-   
+   private final QuadrupedPostureInputProviderInterface postureProvider;
+   private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
+
    private final TwistCalculator twistCalculator;
    private final Twist bodyTwist = new Twist();
 
-   public QuadrupedPositionBasedCrawlController(QuadrupedRuntimeEnvironment environment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedControllerInputProvider inputProvider, QuadrupedLegInverseKinematicsCalculator legIkCalculator)
+   public QuadrupedPositionBasedCrawlController(QuadrupedRuntimeEnvironment environment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedPostureInputProvider postureProvider, QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrupedLegInverseKinematicsCalculator legIkCalculator)
    {
-      this(environment.getControlDT(), modelFactory, physicalProperties, crawlControllerParameters, environment.getFullRobotModel(), inputProvider, environment.getFootSwitches(), legIkCalculator, environment.getGlobalDataProducer(), environment.getRobotTimestamp(),
+      this(environment.getControlDT(), modelFactory, physicalProperties, crawlControllerParameters, environment.getFullRobotModel(), postureProvider, planarVelocityProvider, environment.getFootSwitches(), legIkCalculator, environment.getGlobalDataProducer(), environment.getRobotTimestamp(),
             environment.getParentRegistry(), environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
    }
 
    public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, SDFFullQuadrupedRobotModel fullRobotModel,
-         QuadrupedControllerInputProviderInterface inputProvider, QuadrantDependentList<FootSwitchInterface> footSwitches, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
+         QuadrupedPostureInputProviderInterface postureProvider, QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrantDependentList<FootSwitchInterface> footSwitches, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
 
@@ -388,7 +390,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       
       runOpenLoop.set(true);
       
-      this.inputProvider = inputProvider;
+      this.postureProvider = postureProvider;
+      this.planarVelocityProvider = planarVelocityProvider;
       this.robotTimestamp = yoTime;
       this.dt = dt;
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
@@ -881,12 +884,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private void pollDataProviders()
    {
       
-      if(inputProvider != null)
+      if(postureProvider != null)
       {
-         inputProvider.getComVelocityInput();// support z up
+         postureProvider.getComVelocityInput();// support z up
          
          //body velocity
-         Vector3d planarVelocityInput = inputProvider.getPlanarVelocityInput();//Frame up to controller - feedForwardBodyFrame
+         Vector3d planarVelocityInput = planarVelocityProvider.get();//Frame up to controller - feedForwardBodyFrame
          desiredVelocity.setVector(planarVelocityInput);
          desiredVelocity.setY(0.0);
          desiredVelocity.setZ(0.0);
@@ -901,7 +904,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          }
          
          //body orientation
-         Quat4d bodyOrientationInput = inputProvider.getBodyOrientationInput();// support z up
+         Quat4d bodyOrientationInput = postureProvider.getBodyOrientationInput();// support z up
 //            double providedDesiredYawInPlace = desiredYawInPlaceProvider.getValue();
          double providedDesiredYawInPlace = RotationTools.computeYaw(bodyOrientationInput);
          providedDesiredYawInPlace = MathTools.clipToMinMax(providedDesiredYawInPlace, -MAX_YAW_IN_PLACE, MAX_YAW_IN_PLACE);
@@ -914,7 +917,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          desiredCoMOrientation.setRoll(RotationTools.computeRoll(bodyOrientationInput));
          
          //com height
-         Point3d comPositionInput = inputProvider.getComPositionInput();// support z up
+         Point3d comPositionInput = postureProvider.getComPositionInput();// support z up
          desiredCoMHeight.set(comPositionInput.getZ());
       }
    }

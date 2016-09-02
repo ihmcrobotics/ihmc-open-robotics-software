@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
-import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.FinishableState;
 
-public abstract class HandControlState extends State<HandControlMode>
+public abstract class HandControlState extends FinishableState<HandControlMode>
 {
    public HandControlState(HandControlMode stateEnum)
    {

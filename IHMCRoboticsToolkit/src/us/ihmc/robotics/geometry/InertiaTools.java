@@ -1,10 +1,12 @@
 package us.ihmc.robotics.geometry;
 
-import Jama.Matrix;
-import Jama.SingularValueDecomposition;
-
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
+
+import org.ejml.data.DenseMatrix64F;
+
+import Jama.Matrix;
+import Jama.SingularValueDecomposition;
 
 public class InertiaTools
 {
@@ -16,15 +18,15 @@ public class InertiaTools
     */
    public static Vector3d getInertiaEllipsoidRadii(Vector3d principalMomentsOfInertia, double mass)
    {
-      double Ixx = principalMomentsOfInertia.x;
-      double Iyy = principalMomentsOfInertia.y;
-      double Izz = principalMomentsOfInertia.z;
+      double Ixx = principalMomentsOfInertia.getX();
+      double Iyy = principalMomentsOfInertia.getY();
+      double Izz = principalMomentsOfInertia.getZ();
 
 //    http://en.wikipedia.org/wiki/Ellipsoid#Mass_properties
       Vector3d ret = new Vector3d();
-      ret.x = Math.sqrt(5.0 / 2.0 * (Iyy + Izz - Ixx) / mass);
-      ret.y = Math.sqrt(5.0 / 2.0 * (Izz + Ixx - Iyy) / mass);
-      ret.z = Math.sqrt(5.0 / 2.0 * (Ixx + Iyy - Izz) / mass);
+      ret.setX(Math.sqrt(5.0 / 2.0 * (Iyy + Izz - Ixx) / mass));
+      ret.setY(Math.sqrt(5.0 / 2.0 * (Izz + Ixx - Iyy) / mass));
+      ret.setZ(Math.sqrt(5.0 / 2.0 * (Ixx + Iyy - Izz) / mass));
 
       return ret;
    }
@@ -47,7 +49,7 @@ public class InertiaTools
 
       return result;
 
-//      
+//
 //    inertialFrameRotation.transpose();
 //    inertia.mul(inertialFrameRotation);
 //    inertialFrameRotation.transpose();
@@ -56,21 +58,39 @@ public class InertiaTools
    }
 
 
-   public static void computePrincipalMomentsOfInertia(Matrix3d Inertia, Matrix3d principalAxesRotationToPack, Vector3d principalMomentsOfInertiaToPack)
+   public static void computePrincipalMomentsOfInertia(DenseMatrix64F Inertia, Matrix3d principalAxesRotationToPack, Vector3d principalMomentsOfInertiaToPack)
    {
-      // Decompose Inertia Matrix:  I = U*sigma*V
-
-      double[][] moiArray = new double[][]
-      {
-         {Inertia.m00, Inertia.m01, Inertia.m02}, {Inertia.m10, Inertia.m11, Inertia.m12}, {Inertia.m20, Inertia.m21, Inertia.m22}
+      double[][] moiArray = new double[][]{
+         {Inertia.get(0, 0), Inertia.get(0, 1), Inertia.get(0, 2)},
+         {Inertia.get(1, 0), Inertia.get(1, 1), Inertia.get(1, 2)},
+         {Inertia.get(2, 0), Inertia.get(2, 1), Inertia.get(2, 2)}
       };
 
       Matrix inertiaForSVD = new Matrix(moiArray);
+      computePrincipalMomentsOfInertia(inertiaForSVD, principalAxesRotationToPack, principalMomentsOfInertiaToPack);
+   }
+
+   public static void computePrincipalMomentsOfInertia(Matrix3d Inertia, Matrix3d principalAxesRotationToPack, Vector3d principalMomentsOfInertiaToPack)
+   {
+      double[][] moiArray = new double[][]{
+         {Inertia.getM00(), Inertia.getM01(), Inertia.getM02()},
+         {Inertia.getM10(), Inertia.getM11(), Inertia.getM12()},
+         {Inertia.getM20(), Inertia.getM21(), Inertia.getM22()}
+      };
+
+      Matrix inertiaForSVD = new Matrix(moiArray);
+      computePrincipalMomentsOfInertia(inertiaForSVD, principalAxesRotationToPack, principalMomentsOfInertiaToPack);
+   }
+
+   public static void computePrincipalMomentsOfInertia(Matrix inertiaForSVD, Matrix3d principalAxesRotationToPack, Vector3d principalMomentsOfInertiaToPack)
+   {
+      // Decompose Inertia Matrix:  I = U*sigma*V
+
       SingularValueDecomposition inertiaSVD = new SingularValueDecomposition(inertiaForSVD);
 
       Matrix sigma = inertiaSVD.getS();
 
-//    Matrix U = inertiaSVD.getU();
+      //    Matrix U = inertiaSVD.getU();
       Matrix V = inertiaSVD.getV();
 
       // If determinant is -1.0, then multiply V by -1. Since I = U*sigma*U_Transpose, then I = (-U) * sigma * (-U_Transpose)

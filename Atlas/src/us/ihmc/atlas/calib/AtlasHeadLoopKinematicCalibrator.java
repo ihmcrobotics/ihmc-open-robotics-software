@@ -241,7 +241,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       activeArmEEtoCamera.changeFrame(cameraImageFrame);
       Point3d activeArmEEinImageFrame = activeArmEEtoCamera.getPoint();
 
-      Point2D_F64 norm = new Point2D_F64(activeArmEEinImageFrame.x / activeArmEEinImageFrame.z, activeArmEEinImageFrame.y / activeArmEEinImageFrame.z);
+      Point2D_F64 norm = new Point2D_F64(activeArmEEinImageFrame.getX() / activeArmEEinImageFrame.getZ(), activeArmEEinImageFrame.getY() / activeArmEEinImageFrame.getZ());
       Point2D_F64 pixel = new Point2D_F64();
 
       PerspectiveOps.convertNormToPixel(intrinsic, norm, pixel);
@@ -302,7 +302,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
          targetToCamera.transform(p3);
 
          // convert to pixels
-         norm.set(p3.x / p3.z, p3.y / p3.z);
+         norm.set(p3.getX() / p3.getZ(), p3.getY() / p3.getZ());
          PerspectiveOps.convertNormToPixel(intrinsic, norm, pixel);
 
          int x = (int) (pixel.x + 0.5);

@@ -37,7 +37,7 @@ public class CollisionBox extends CollisionShape
    @Override
    public boolean contains(Point3d point)
    {
-      return (point.x >= -xExtent && point.x <= xExtent) && (point.y >= -yExtent && point.y <= yExtent) && (point.z >= -zExtent && point.z <= zExtent);
+      return (point.getX() >= -xExtent && point.getX() <= xExtent) && (point.getY() >= -yExtent && point.getY() <= yExtent) && (point.getZ() >= -zExtent && point.getZ() <= zExtent);
    }
 
 }

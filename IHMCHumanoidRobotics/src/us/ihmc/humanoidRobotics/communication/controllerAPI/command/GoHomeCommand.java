@@ -69,6 +69,7 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
    @Override
    public void set(GoHomeMessage message)
    {
+      clear();
       trajectoryTime = message.getTrajectoryTime();
 
       BodyPart bodyPart = message.getBodyPart();
@@ -103,12 +104,13 @@ public class GoHomeCommand implements CompilableCommand<GoHomeCommand, GoHomeMes
          {
             for (RobotSide robotSide : RobotSide.values)
             {
-               sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).setValue(other.getRequest(robotSide, bodyPart));
+               if (other.getRequest(robotSide, bodyPart))
+                  sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).setTrue();
             }
          }
-         else
+         else if (other.getRequest(bodyPart))
          {
-            otherBodyPartRequestMap.get(bodyPart).setValue(other.getRequest(bodyPart));
+               otherBodyPartRequestMap.get(bodyPart).setTrue();
          }
       }
    }

@@ -96,6 +96,21 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
     */
    public <M extends Enum<M>> void trigger(Class<M> type, M event)
    {
+      List<FiniteStateMachineCallback<S, ? extends Enum<?>>> callbacksTypeM = callbacks.get(type);
+      if (callbacksTypeM != null)
+      {
+         for (int i = 0; i < callbacksTypeM.size(); i++)
+         {
+            FiniteStateMachineCallback<S, ?> callback = callbacksTypeM.get(i);
+
+            // Check if this callback should be called.
+            if (callback.getState() == getState() && event == callback.getEvent())
+            {
+               callback.call();
+            }
+         }
+      }
+
       List<FiniteStateMachineTransition<S, ? extends Enum<?>>> transitionsTypeM = transitions.get(type);
       if (transitionsTypeM != null)
       {
@@ -108,21 +123,6 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
             {
                transition(transition.getFrom(), transition.getTo());
                break;
-            }
-         }
-      }
-
-      List<FiniteStateMachineCallback<S, ? extends Enum<?>>> callbacksTypeM = callbacks.get(type);
-      if (callbacksTypeM != null)
-      {
-         for (int i = 0; i < callbacksTypeM.size(); i++)
-         {
-            FiniteStateMachineCallback<S, ?> callback = callbacksTypeM.get(i);
-
-            // Check if this callback should be called.
-            if (callback.getState() == getState() && event == callback.getEvent())
-            {
-               callback.call();
             }
          }
       }

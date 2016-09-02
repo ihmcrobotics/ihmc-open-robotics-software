@@ -32,7 +32,7 @@ public class CombinedTerrainObjectTest
       expectedIntersection.set(0.4, 0.5, 0.25);
       expectedNormal.set(0.0, 1.0, 0.0);
 
-      combinedTerrainObject.checkIfInside(pointToCheck.x, pointToCheck.y, pointToCheck.z, resultIntersection, resultNormal);
+      combinedTerrainObject.checkIfInside(pointToCheck.getX(), pointToCheck.getY(), pointToCheck.getZ(), resultIntersection, resultNormal);
       JUnitTools.assertTuple3dEquals(expectedIntersection, resultIntersection, 1e-4);
       JUnitTools.assertTuple3dEquals(expectedNormal, resultNormal, 1e-4);
    }

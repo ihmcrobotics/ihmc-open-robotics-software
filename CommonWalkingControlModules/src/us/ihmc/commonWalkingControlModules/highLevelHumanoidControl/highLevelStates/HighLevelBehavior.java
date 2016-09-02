@@ -4,9 +4,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.robotics.stateMachines.FinishableState;
 
-public abstract class HighLevelBehavior extends State<HighLevelState>
+public abstract class HighLevelBehavior extends FinishableState<HighLevelState>
 {
 
    public HighLevelBehavior(HighLevelState stateEnum)
@@ -28,4 +28,10 @@ public abstract class HighLevelBehavior extends State<HighLevelState>
    public abstract void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput);
 
    public abstract ControllerCoreCommand getControllerCoreCommand();
+
+   @Override
+   public boolean isDone()
+   {
+      return true;
+   }
 }

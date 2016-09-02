@@ -66,7 +66,7 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
 
       //remember to change getN()
 //    constantOffset.x=input[inputCounter++];
-      constantOffset.y = input[inputCounter++];
+      constantOffset.setY(input[inputCounter++]);
 //    constantOffset.z=input[inputCounter++];
 
       //compute error            
@@ -117,9 +117,9 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
                leftEE.getOrientation(mLeft);
                rightEE.getOrientation(mRight);
                Vector3d vDiff = CalibUtil.rotationDiff(mLeft, mRight);
-               output[outputCounter++] = scaleRadToCM * vDiff.x;
-               output[outputCounter++] = scaleRadToCM * vDiff.y;
-               output[outputCounter++] = scaleRadToCM * vDiff.z;
+               output[outputCounter++] = scaleRadToCM * vDiff.getX();
+               output[outputCounter++] = scaleRadToCM * vDiff.getY();
+               output[outputCounter++] = scaleRadToCM * vDiff.getZ();
             }
          }
       }

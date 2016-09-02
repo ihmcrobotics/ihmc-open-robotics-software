@@ -194,7 +194,7 @@ public class PathToFootstepGenerator
 
          // set to the prospective position
          double defaultHeight = stanceFoot.getLocation().getZ();
-         currentFootstep.getLocation().set(currentPosition.x, currentPosition.y, defaultHeight);
+         currentFootstep.getLocation().set(currentPosition.getX(), currentPosition.getY(), defaultHeight);
          RotationTools.computeQuaternionFromYawAndZNormal(footYaw, verticalUnitVector, currentFootstep.getOrientation());
 
          if (heightMap != null)
@@ -253,7 +253,7 @@ public class PathToFootstepGenerator
 
          // set to the prospective position
          double defaultHeight = stanceFoot.getLocation().getZ();
-         currentFootstep.getLocation().set(currentPosition.x, currentPosition.y, defaultHeight);
+         currentFootstep.getLocation().set(currentPosition.getX(), currentPosition.getY(), defaultHeight);
          RotationTools.computeQuaternionFromYawAndZNormal(footYaw, verticalUnitVector, currentFootstep.getOrientation());
 
          if (heightMap != null)
@@ -333,8 +333,8 @@ public class PathToFootstepGenerator
       double sign = (currentSide == RobotSide.LEFT) ? 1 : -1;
 
       // sign * horizontalDistance
-      position.x += -1.0 * Math.sin(yaw) * sign * horizontalDistance;
-      position.y += 1.0 * Math.cos(yaw) * sign * horizontalDistance;
+      position.setX(position.getX() + -1.0 * Math.sin(yaw) * sign * horizontalDistance);
+      position.setY(position.getY() + 1.0 * Math.cos(yaw) * sign * horizontalDistance);
 
       return position;
    }

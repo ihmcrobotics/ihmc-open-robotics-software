@@ -37,7 +37,7 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, TransformablePoint2
    /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */
    public FramePoint2d(FrameTuple2d<?, ?> frameTuple2d)
    {
-      this(frameTuple2d.referenceFrame, frameTuple2d.tuple.x, frameTuple2d.tuple.y, frameTuple2d.name);
+      this(frameTuple2d.referenceFrame, frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY(), frameTuple2d.name);
    }
 
    /** FramePoint2d <p/> A normal point2d associated with a specific reference frame. */

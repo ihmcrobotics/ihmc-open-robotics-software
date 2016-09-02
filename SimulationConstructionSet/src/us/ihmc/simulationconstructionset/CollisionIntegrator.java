@@ -166,7 +166,7 @@ public class CollisionIntegrator implements java.io.Serializable
 
       System.out.println("u0: " + u0_test);
 
-      System.out.println("final ux: " + final_output.x + ", uy: " + final_output.y + ", uz: " + final_output.z);    // + ", Wz: " + final_output[3]);
+      System.out.println("final ux: " + final_output.getX() + ", uy: " + final_output.getY() + ", uz: " + final_output.getZ());    // + ", Wz: " + final_output[3]);
       Vector3d delta_u = new Vector3d();
       delta_u.sub(final_output, u0_test);
       System.out.println("delta_u: " + delta_u);
@@ -211,18 +211,18 @@ public class CollisionIntegrator implements java.io.Serializable
          // Cheesy Solution for now.  Look at the diagonal entries and if any are zero, assume that they are the null space and add a little to the other columns:
          // System.out.println("Having trouble inverting K.  Using cheesy inverse.");
 
-         if (Math.abs(K_inv.m00) < 0.0001)
-            K_inv.m00 = 0.0001;
-         if (Math.abs(K_inv.m11) < 0.0001)
-            K_inv.m11 = 0.0001;
-         if (Math.abs(K_inv.m22) < 0.0001)
-            K_inv.m22 = 0.0001;
+         if (Math.abs(K_inv.getM00()) < 0.0001)
+            K_inv.setM00(0.0001);
+         if (Math.abs(K_inv.getM11()) < 0.0001)
+            K_inv.setM11(0.0001);
+         if (Math.abs(K_inv.getM22()) < 0.0001)
+            K_inv.setM22(0.0001);
 
          if (Math.abs(K_inv.determinant()) < 0.0001)
          {
-            K_inv.m00 += 0.0001;
-            K_inv.m11 += 0.0001;
-            K_inv.m22 += 0.0001;
+            K_inv.setM00(K_inv.getM00() + 0.0001);
+            K_inv.setM11(K_inv.getM11() + 0.0001);
+            K_inv.setM22(K_inv.getM22() + 0.0001);
          }
       }
 
@@ -300,13 +300,13 @@ public class CollisionIntegrator implements java.io.Serializable
 
    public void integrate(Vector3d u_fin)
    {
-      double ux = u0.x, uy = u0.y, uz = u0.z, Wz = 0.0;
+      double ux = u0.getX(), uy = u0.getY(), uz = u0.getZ(), Wz = 0.0;
 
       // Check to make sure that uz is initially increasing toward zero (Kz dot zeta(theta) > 0).  If not, then need to integrate with respect to pz first,
       // as in Mirtich p. 87.
 
-      double utot = Math.sqrt(u0.x * u0.x + u0.y * u0.y);
-      zeta.set(-mu * u0.x / utot, -mu * u0.y / utot, 1.0);
+      double utot = Math.sqrt(u0.getX() * u0.getX() + u0.getY() * u0.getY());
+      zeta.set(-mu * u0.getX() / utot, -mu * u0.getY() / utot, 1.0);
 
       // System.out.println("Kz.dot(zeta): " + Kz.dot(zeta));
 
@@ -319,7 +319,7 @@ public class CollisionIntegrator implements java.io.Serializable
 
          // if (nn>20)System.out.println("Before pz integration (ux, uy, uz, Wz) = (" + ux + ", " + uy + ", " + uz + ", " + Wz + ")");
 
-         double pz_step_size = (nn / 1000.0) * Math.abs(uz / K.m22);    // 0.005 *
+         double pz_step_size = (nn / 1000.0) * Math.abs(uz / K.getM22());    // 0.005 *
          if (pz_step_size > PZ_STEP_SIZE_MAX)
             pz_step_size = PZ_STEP_SIZE_MAX;
          if (pz_step_size < PZ_STEP_SIZE_MIN)
@@ -406,8 +406,8 @@ public class CollisionIntegrator implements java.io.Serializable
             // Stable Sticking during Compression.  Mirtich p. 74;
             // System.out.println("Stable Sticking during compression");
             // System.out.print(".");
-            u_fin.x = 0.0;
-            u_fin.y = 0.0;    // ux=uy=0.0 if stably stuck.
+            u_fin.setX(0.0);
+            u_fin.setY(0.0);    // ux=uy=0.0 if stably stuck.
 
             // System.out.println("Wz, uz: " + Wz + ", " + uz);
             if (uz < 0.0)    // Only do this if still compressing.  If extending, then just throw the energy away...
@@ -426,7 +426,7 @@ public class CollisionIntegrator implements java.io.Serializable
 
             // System.out.println("Wz, uz: " + Wz + ", " + uz);
 
-            u_fin.z = uz;
+            u_fin.setZ(uz);
 
             // output[3] = 0.0;
 
@@ -442,9 +442,9 @@ public class CollisionIntegrator implements java.io.Serializable
             }    // If extending, then just throw the energy away... +++JEP???
 
             double beta = solveBeta(K, mu);
-            zeta_B.x = -mu * Math.cos(beta);
-            zeta_B.y = -mu * Math.sin(beta);
-            zeta_B.z = 1.0;
+            zeta_B.setX(-mu * Math.cos(beta));
+            zeta_B.setY(-mu * Math.sin(beta));
+            zeta_B.setZ(1.0);
 
             // System.out.println("beta: " + beta);
 
@@ -457,9 +457,9 @@ public class CollisionIntegrator implements java.io.Serializable
             // System.out.println("At bottom: (ux, uy, uz, Wz) = (" + ux_bot + ", " + uy_bot + ", 0.0, " + Wz_bot + ")" );
 
             Restitution:
-            u_fin.z = Math.sqrt(0.0 * 0.0 + 2.0 * Kz.dot(zeta_B) * (0.0 - Wz_bot));
-            u_fin.x = ux_bot + Kx.dot(zeta_B) / Kz.dot(zeta_B) * (u_fin.z - 0.0);
-            u_fin.y = uy_bot + Ky.dot(zeta_B) / Kz.dot(zeta_B) * (u_fin.z - 0.0);
+            u_fin.setZ(Math.sqrt(0.0 * 0.0 + 2.0 * Kz.dot(zeta_B) * (0.0 - Wz_bot)));
+            u_fin.setX(ux_bot + Kx.dot(zeta_B) / Kz.dot(zeta_B) * (u_fin.getZ() - 0.0));
+            u_fin.setY(uy_bot + Ky.dot(zeta_B) / Kz.dot(zeta_B) * (u_fin.getZ() - 0.0));
 
             // System.out.println("u_fin: " + u_fin);
 
@@ -493,8 +493,8 @@ public class CollisionIntegrator implements java.io.Serializable
                // System.out.println("Stable Sticking during restitution");
                // System.out.print(".");
 
-               u_fin.x = 0.0;
-               u_fin.y = 0.0;    // ux=uy=0.0 if stably stuck.
+               u_fin.setX(0.0);
+               u_fin.setY(0.0);    // ux=uy=0.0 if stably stuck.
 
                if (Wz < 0.0)
                {
@@ -505,7 +505,7 @@ public class CollisionIntegrator implements java.io.Serializable
                   uz = 0.0;
                }
 
-               u_fin.z = uz;
+               u_fin.setZ(uz);
 
                // output[3] = 0.0;
 
@@ -516,14 +516,14 @@ public class CollisionIntegrator implements java.io.Serializable
                // Mirtich p.76
 
                double beta = solveBeta(K, mu);
-               zeta_B.x = -mu * Math.cos(beta);
-               zeta_B.y = -mu * Math.sin(beta);
-               zeta_B.z = 1.0;
+               zeta_B.setX(-mu * Math.cos(beta));
+               zeta_B.setY(-mu * Math.sin(beta));
+               zeta_B.setZ(1.0);
 
                // Restitution:
-               u_fin.z = Math.sqrt(uz * uz + 2.0 * Kz.dot(zeta_B) * (0.0 - Wz));
-               u_fin.x = ux + Kx.dot(zeta_B) / Kz.dot(zeta_B) * (u_fin.z - 0.0);
-               u_fin.y = uy + Ky.dot(zeta_B) / Kz.dot(zeta_B) * (u_fin.z - 0.0);
+               u_fin.setZ(Math.sqrt(uz * uz + 2.0 * Kz.dot(zeta_B) * (0.0 - Wz)));
+               u_fin.setX(ux + Kx.dot(zeta_B) / Kz.dot(zeta_B) * (u_fin.getZ() - 0.0));
+               u_fin.setY(uy + Ky.dot(zeta_B) / Kz.dot(zeta_B) * (u_fin.getZ() - 0.0));
 
             }
          }
@@ -531,18 +531,18 @@ public class CollisionIntegrator implements java.io.Serializable
          {
             // System.out.print(".");
             // System.out.println("Not Stuck after restitution");
-            u_fin.x = ux;
-            u_fin.y = uy;
-            u_fin.z = uz;
+            u_fin.setX(ux);
+            u_fin.setY(uy);
+            u_fin.setZ(uz);
 
             // System.out.println("u_final: " + u_fin);
          }
       }
 
       // Check to make sure that after collision, uz is positive:
-      if (u_fin.z < 0.0)
+      if (u_fin.getZ() < 0.0)
       {
-         u_fin.z = 0.0;
+         u_fin.setZ(0.0);
 
          // System.out.println("uz still negative after collision!!!!");
       }
@@ -556,7 +556,7 @@ public class CollisionIntegrator implements java.io.Serializable
    {
       // Mirtich p. 83;
       @SuppressWarnings("unused")
-      double a = K.m00, b = K.m11, c = K.m22, d = K.m12, e = K.m02, f = K.m01;
+      double a = K.getM00(), b = K.getM11(), c = K.getM22(), d = K.getM12(), e = K.getM02(), f = K.getM01();
 
       coeffs[0] = -f * mu + d;
       coeffs[1] = 2.0 * mu * (a - b) - 2.0 * e;

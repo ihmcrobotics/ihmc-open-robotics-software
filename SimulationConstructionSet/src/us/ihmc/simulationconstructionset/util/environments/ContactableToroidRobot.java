@@ -127,7 +127,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
    {
       if (yoGraphicsListRegistry == null) return;
       
-      GroundContactPointGroup groundContactPointGroup = pinJoint.physics.getGroundContactPointGroup(groupIdentifier);
+      GroundContactPointGroup groundContactPointGroup = pinJoint.getGroundContactPointGroup(groupIdentifier);
       System.out.println("GroundContactPointGroup" + groundContactPointGroup.getGroundContactPoints());
       ArrayList<GroundContactPoint> groundContactPoints = groundContactPointGroup.getGroundContactPoints();
       

@@ -182,9 +182,9 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       }
 
       Vector3f translation = robotConfigurationData.getPelvisTranslation();
-      rootJoint.setPosition(translation.x, translation.y, translation.z);
+      rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
       Quat4f orientation = robotConfigurationData.getPelvisOrientation();
-      rootJoint.setRotation(orientation.x, orientation.y, orientation.z, orientation.w);
+      rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getW());
       rootJoint.getPredecessor().updateFramesRecursively();
 
       if (forceSensorDataHolder != null)

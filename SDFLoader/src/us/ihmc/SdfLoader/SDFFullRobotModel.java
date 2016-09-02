@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -20,7 +21,6 @@ import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -60,14 +60,23 @@ public class SDFFullRobotModel implements FullRobotModel
    private final HashMap<String, InverseDynamicsJoint> lidarJoints = new HashMap<>();
    private final HashMap<String, ReferenceFrame> sensorFrames = new HashMap<String, ReferenceFrame>();
    private double totalMass = 0.0;
+   private final boolean alignReferenceFramesWithJoints;
 
+   private final Map<Enum<?>, RigidBody> endEffectors = new HashMap<>();
+   
    public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   {
+      this(rootLink, sdfJointNameMap, sensorLinksToTrack, false);
+   }
+   
+   public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack, boolean makeReferenceFramesAlignWithTheJoints)
    {
       super();
       this.rootLink = rootLink;
       this.sdfJointNameMap = sdfJointNameMap;
       this.sensorLinksToTrack = sensorLinksToTrack;
-
+      this.alignReferenceFramesWithJoints = makeReferenceFramesAlignWithTheJoints;
+      
       /*
        * Create root object
        */
@@ -98,6 +107,11 @@ public class SDFFullRobotModel implements FullRobotModel
       }
    }
 
+   public RigidBody getEndEffector(Enum<?> segmentEnum)
+   {
+      return endEffectors.get(segmentEnum);
+   }
+   
    public String getModelName()
    {
       return sdfJointNameMap.getModelName();
@@ -378,6 +392,7 @@ public class SDFFullRobotModel implements FullRobotModel
    
       Vector3d jointAxis = new Vector3d(joint.getAxisInModelFrame());
       Vector3d offset = new Vector3d(joint.getOffsetFromParentJoint());
+      RigidBodyTransform transformToParentJoint = joint.getTransformToParentJoint();
    
       RigidBodyTransform visualTransform = new RigidBodyTransform();
       visualTransform.setRotation(joint.getLinkRotation());
@@ -387,10 +402,25 @@ public class SDFFullRobotModel implements FullRobotModel
       switch(joint.getType())
       {
       case REVOLUTE:
-         inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, offset, jointAxis);
+         if(alignReferenceFramesWithJoints)
+         {
+            inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, transformToParentJoint, jointAxis);
+         }
+         else
+         {
+            inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, offset, jointAxis);
+         }
          break;
       case PRISMATIC:
-         inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, offset, jointAxis);
+         
+         if(alignReferenceFramesWithJoints)
+         {
+            inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, transformToParentJoint, jointAxis);
+         }
+         else
+         {
+            inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, offset, jointAxis);
+         }
          break;
       default:
          throw new RuntimeException("Joint type not implemented: " + joint.getType());
@@ -450,6 +480,13 @@ public class SDFFullRobotModel implements FullRobotModel
       if (rigidBody.getName().equals(sdfJointNameMap.getHeadName()))
       {
          head = rigidBody;
+      }
+      
+      Set<String> lastSimulatedJoints = sdfJointNameMap.getLastSimulatedJoints();
+      if(lastSimulatedJoints != null && lastSimulatedJoints.contains(inverseDynamicsJoint.getName()))
+      {
+         Enum<?> endEffectorRobotSegment = sdfJointNameMap.getEndEffectorsRobotSegment(inverseDynamicsJoint.getName());
+         endEffectors.put(endEffectorRobotSegment, rigidBody);
       }
    
       JointRole jointRole = sdfJointNameMap.getJointRole(joint.getName());

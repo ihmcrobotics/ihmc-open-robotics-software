@@ -50,10 +50,10 @@ public class BoundsPainter implements PostProcessor
 
       for (BoundingBox2d boundingBox : boundingBoxes)
       {
-         int x = new Double(boundingBox.getMinPoint().x).intValue();
-         int y = new Double(boundingBox.getMinPoint().y).intValue();
-         int width = new Double(boundingBox.getMaxPoint().x - boundingBox.getMinPoint().x).intValue();
-         int height = new Double(boundingBox.getMaxPoint().y - boundingBox.getMinPoint().y).intValue();
+         int x = new Double(boundingBox.getMinPoint().getX()).intValue();
+         int y = new Double(boundingBox.getMinPoint().getY()).intValue();
+         int width = new Double(boundingBox.getMaxPoint().getX() - boundingBox.getMinPoint().getX()).intValue();
+         int height = new Double(boundingBox.getMaxPoint().getY() - boundingBox.getMinPoint().getY()).intValue();
          graphics.drawRect(x, y, width, height);
          graphics.setColor(Color.cyan);
          graphics.fillOval(x, y, 5, 5);

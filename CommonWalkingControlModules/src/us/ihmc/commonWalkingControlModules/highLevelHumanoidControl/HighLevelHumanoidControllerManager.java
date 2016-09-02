@@ -24,6 +24,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.stateMachines.FinishableState;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
@@ -204,7 +205,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
       // Enable transition between every existing state of the state machine
       for (HighLevelState stateEnum : HighLevelState.values)
       {
-         State<HighLevelState> otherHighLevelState = stateMachine.getState(stateEnum);
+         FinishableState<HighLevelState> otherHighLevelState = stateMachine.getState(stateEnum);
          if (otherHighLevelState == null)
             continue;
 

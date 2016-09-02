@@ -16,16 +16,17 @@ import us.ihmc.quadrupedRobotics.params.BooleanParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.params.ParameterPacketListener;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderInterface;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedTimedStepInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsProvider;
+import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPreplannedStepStream;
+import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStream;
+import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStreamMultiplexer;
+import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
+import us.ihmc.quadrupedRobotics.providers.*;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -40,12 +41,18 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final BooleanParameter bypassDoNothingStateParameter = parameterFactory.createBoolean("bypassDoNothingState", true);
+   private final EnumYoVariable<QuadrupedForceControllerRequestedEvent> lastEvent = new EnumYoVariable<>("lastEvent", registry, QuadrupedForceControllerRequestedEvent.class);
 
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
-   private final QuadrupedControllerInputProviderInterface inputProvider;
+   private final QuadrupedPostureInputProviderInterface postureProvider;
+   private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
+   private final QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider;
    private final QuadrupedTimedStepInputProvider timedStepProvider;
-   private final QuadrupedXGaitSettingsProvider xGaitSettingsProvider;
    private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
+
+   private final QuadrupedPreplannedStepStream preplannedStepStream;
+   private final QuadrupedXGaitStepStream xGaitStepStream;
+   private final QuadrupedStepStreamMultiplexer<QuadrupedForceControllerState> stepStreamMultiplexer;
 
    private final FiniteStateMachine<QuadrupedForceControllerState, ControllerEvent> stateMachine;
    private final FiniteStateMachineYoVariableTrigger<QuadrupedForceControllerRequestedEvent> userEventTrigger;
@@ -56,11 +63,25 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
    public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties) throws IOException
    {
+      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry);
+      this.runtimeEnvironment = runtimeEnvironment;
+
       // Initialize input providers.
-      inputProvider = new QuadrupedControllerInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      postureProvider = new QuadrupedPostureInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      planarVelocityProvider = new QuadrupedPlanarVelocityInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      xGaitSettingsProvider = new QuadrupedXGaitSettingsInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       timedStepProvider = new QuadrupedTimedStepInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
-      xGaitSettingsProvider = new QuadrupedXGaitSettingsProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+
+      // Initialize input step streams.
+      xGaitStepStream = new QuadrupedXGaitStepStream(planarVelocityProvider, xGaitSettingsProvider, controllerToolbox.getReferenceFrames(),
+            runtimeEnvironment.getControlDT(), runtimeEnvironment.getRobotTimestamp(), registry);
+      preplannedStepStream = new QuadrupedPreplannedStepStream(timedStepProvider, controllerToolbox.getReferenceFrames(),
+            runtimeEnvironment.getRobotTimestamp());
+      stepStreamMultiplexer = new QuadrupedStepStreamMultiplexer<>();
+      stepStreamMultiplexer.addStepStream(QuadrupedForceControllerState.XGAIT, xGaitStepStream);
+      stepStreamMultiplexer.addStepStream(QuadrupedForceControllerState.STEP, preplannedStepStream);
+      stepStreamMultiplexer.selectStepStream(QuadrupedForceControllerState.STEP);
 
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
 
@@ -78,21 +99,18 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
          ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
       }
 
-      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry);
-      this.stateMachine = buildStateMachine(runtimeEnvironment, inputProvider);
+      this.stateMachine = buildStateMachine(runtimeEnvironment, postureProvider);
       this.userEventTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerRequestedEvent.class);
-      this.runtimeEnvironment = runtimeEnvironment;
-
    }
-   
+
    /**
     * Hack for realtime controllers to run all states a lot of times. This hopefully kicks in the JIT compiler and avoids expensive interpeted code paths
     */
    public void warmup(int iterations)
    {
-      for(int i = 0; i < iterations; i++)
+      for (int i = 0; i < iterations; i++)
       {
-         for(QuadrupedForceControllerState state : QuadrupedForceControllerState.values)
+         for (QuadrupedForceControllerState state : QuadrupedForceControllerState.values)
          {
             FiniteStateMachineState<ControllerEvent> stateImpl = stateMachine.getState(state);
             stateImpl.onEntry();
@@ -115,6 +133,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       QuadrupedForceControllerRequestedEvent reqEvent = requestedEvent.getAndSet(null);
       if (reqEvent != null)
       {
+         lastEvent.set(reqEvent);
          stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, reqEvent);
       }
       stateMachine.process();
@@ -178,7 +197,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    }
 
    private FiniteStateMachine<QuadrupedForceControllerState, ControllerEvent> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
-         QuadrupedControllerInputProviderInterface inputProvider)
+         QuadrupedPostureInputProviderInterface inputProvider)
    {
       // Initialize controllers.
       final QuadrupedController jointInitializationController = new QuadrupedForceBasedJointInitializationController(runtimeEnvironment);
@@ -187,9 +206,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       final QuadrupedController freezeController = new QuadrupedForceBasedFreezeController(runtimeEnvironment, controllerToolbox);
       final QuadrupedController standController = new QuadrupedDcmBasedStandController(runtimeEnvironment, controllerToolbox, inputProvider);
       final QuadrupedDcmBasedStepController stepController = new QuadrupedDcmBasedStepController(runtimeEnvironment, controllerToolbox, inputProvider,
-            timedStepProvider);
-      final QuadrupedDcmBasedXGaitController xGaitController = new QuadrupedDcmBasedXGaitController(runtimeEnvironment, controllerToolbox, inputProvider,
-            xGaitSettingsProvider);
+            stepStreamMultiplexer);
       final QuadrupedController fallController = new QuadrupedForceBasedFallController(runtimeEnvironment, controllerToolbox);
       final QuadrupedController soleWaypointController = new QuadrupedForceBasedSoleWaypointController(runtimeEnvironment, controllerToolbox,
             soleWaypointInputProvider);
@@ -204,7 +221,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       builder.addState(QuadrupedForceControllerState.FREEZE, freezeController);
       builder.addState(QuadrupedForceControllerState.STAND, standController);
       builder.addState(QuadrupedForceControllerState.STEP, stepController);
-      builder.addState(QuadrupedForceControllerState.XGAIT, xGaitController);
+      builder.addState(QuadrupedForceControllerState.XGAIT, stepController);
       builder.addState(QuadrupedForceControllerState.FALL, fallController);
       builder.addState(QuadrupedForceControllerState.SOLE_WAYPOINT, soleWaypointController);
 
@@ -290,17 +307,41 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             QuadrupedForceControllerState.STAND, QuadrupedForceControllerState.STAND_PREP);
 
       // Callbacks functions.
-      Runnable xGaitHaltCallback = new Runnable()
+      Runnable standToXGaitCallback = new Runnable()
       {
          @Override
          public void run()
          {
-            xGaitController.halt();
+            stepStreamMultiplexer.selectStepStream(QuadrupedForceControllerState.XGAIT);
+         }
+      };
+      builder.addCallback(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT,
+            QuadrupedForceControllerState.STAND, standToXGaitCallback);
+
+      Runnable xGaitToStandCallback = new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            stepController.halt();
          }
       };
       builder.addCallback(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND,
-            QuadrupedForceControllerState.XGAIT, xGaitHaltCallback);
-      Runnable stepHaltCallback = new Runnable()
+            QuadrupedForceControllerState.XGAIT, xGaitToStandCallback);
+
+      Runnable standToStepCallback = new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            stepStreamMultiplexer.selectStepStream(QuadrupedForceControllerState.STEP);
+         }
+      };
+      builder
+            .addCallback(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STEP, QuadrupedForceControllerState.STAND,
+                  standToStepCallback);
+
+      Runnable stepToStandCallback = new Runnable()
       {
          @Override
          public void run()
@@ -310,7 +351,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       };
       builder
             .addCallback(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND, QuadrupedForceControllerState.STEP,
-                  stepHaltCallback);
+                  stepToStandCallback);
 
       return builder.build(QuadrupedForceControllerState.JOINT_INITIALIZATION);
    }

@@ -93,9 +93,9 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
 
       // v_i <- v_i + q_i_dot u_i
 
-      v_i.x = v_i.x + owner.qd.getDoubleValue() * u_i.x;
-      v_i.y = v_i.y + owner.qd.getDoubleValue() * u_i.y;
-      v_i.z = v_i.z + owner.qd.getDoubleValue() * u_i.z;
+      v_i.setX(v_i.getX() + owner.qd.getDoubleValue() * u_i.getX());
+      v_i.setY(v_i.getY() + owner.qd.getDoubleValue() * u_i.getY());
+      v_i.setZ(v_i.getZ() + owner.qd.getDoubleValue() * u_i.getZ());
 
    }
 
