@@ -65,6 +65,7 @@ public class Plotter
    private final PlotterMouseAdapter mouseAdapter;
    private final PlotterComponentAdapter componentAdapter;
    
+   private final Plotter2DAdapter plotter2dAdapter;
    private final Graphics2DAdapter graphics2dAdapter;
    
    private final Vector2d metersToPixels = new Vector2d(50.0, 50.0);
@@ -88,6 +89,9 @@ public class Plotter
    private final PlotterPoint2d selected;
    private final PlotterPoint2d selectionAreaStart;
    private final PlotterPoint2d selectionAreaEnd;
+   private final PlotterPoint2d imageFirstCorner;
+   private final PlotterPoint2d imageSecondCorner;
+   private final PlotterPoint2d labelPosition;
    
    // Artifact stuff
    private final ArrayList<ArtifactsChangedListener> artifactsChangedListeners = new ArrayList<ArtifactsChangedListener>();
@@ -100,10 +104,10 @@ public class Plotter
          @Override
          protected void paintComponent(Graphics graphics)
          {
-            graphics2dAdapter.setGraphics2d((Graphics2D) graphics);
+            plotter2dAdapter.setGraphics2d((Graphics2D) graphics);
             updateFrames();
             super.paintComponent(graphics);
-            Plotter.this.paintComponent(graphics2dAdapter);
+            Plotter.this.paintComponent(plotter2dAdapter);
          }
          
          @Override
@@ -171,13 +175,17 @@ public class Plotter
       selected = new PlotterPoint2d(screenFrame);
       selectionAreaStart = new PlotterPoint2d(screenFrame);
       selectionAreaEnd = new PlotterPoint2d(screenFrame);
+      imageFirstCorner = new PlotterPoint2d(screenFrame);
+      imageSecondCorner = new PlotterPoint2d(screenFrame);
+      labelPosition = new PlotterPoint2d(screenFrame);
       
       screenPosition.set(-preferredSize.getWidth() / 2.0, preferredSize.getHeight() / 2.0);
       focusPoint.setIncludingFrame(metersFrame, 0.0, 0.0);
       
       updateFrames();
       
-      graphics2dAdapter = new Graphics2DAdapter(metersFrame, screenFrame);
+      plotter2dAdapter = new Plotter2DAdapter(metersFrame, screenFrame, pixelsFrame);
+      graphics2dAdapter = new Graphics2DAdapter(plotter2dAdapter);
       
       panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
       panel.setBackground(PlotterColors.BACKGROUND);
@@ -234,7 +242,7 @@ public class Plotter
       return visibleRectangle.getWidth() > 0.0;
    }
 
-   private void paintComponent(final Graphics2DAdapter graphics2d)
+   private void paintComponent(final Plotter2DAdapter graphics2d)
    {
       origin.changeFrame(screenFrame);
       forAllArtifacts(86, new ArtifactIterator()
@@ -244,18 +252,16 @@ public class Plotter
          {
             if (artifact.isVisible())
             {
-               artifact.draw(graphics2d);
+               artifact.draw(graphics2dAdapter);
             }
          }
       });
       
       if (backgroundImage != null)
       {
-         graphics2dAdapter.drawImage(backgroundImage, (int) Math.round(upperLeftCorner.getX()),
-                                               (int) Math.round(upperLeftCorner.getY()),
-                                               (int) Math.round(lowerRightCorner.getX()),
-                                               (int) Math.round(lowerRightCorner.getY()),
-                                               0, 0, backgroundImage.getWidth(), backgroundImage.getHeight(), panel);
+         imageFirstCorner.setToZero();
+         imageSecondCorner.set(backgroundImage.getWidth(), backgroundImage.getHeight());
+         graphics2d.drawImage(backgroundImage, upperLeftCorner, lowerRightCorner, imageFirstCorner, imageSecondCorner, panel);
       }
       else
       {
@@ -277,7 +283,7 @@ public class Plotter
             applyColorForGridline(graphics2d, nthGridLineFromOrigin);
    
             drawGuy.changeFrame(screenFrame);
-            graphics2d.drawLineSegment((int) Math.round(drawGuy.getX()), 0, (int) Math.round(drawGuy.getX()), (int) visibleRectangle.getHeight());
+            graphics2d.drawLineSegment(screenFrame, drawGuy.getX(), 0.0, drawGuy.getX(), visibleRectangle.getHeight());
             
             if (showLabels)
             {
@@ -301,7 +307,9 @@ public class Plotter
                }
                origin.changeFrame(metersFrame);
                drawGuy.changeFrame(screenFrame);
-               graphics2d.drawString(labelString, (int) Math.round(drawGuy.getX()) + 1, (int) Math.round(drawGuy.getY()));
+               labelPosition.setIncludingFrame(drawGuy);
+               labelPosition.add(1.0, 0.0);
+               graphics2d.drawString(labelString, labelPosition);
                graphics2d.setColor(tempColor);
             }
          }
@@ -318,7 +326,7 @@ public class Plotter
             applyColorForGridline(graphics2d, nthGridLineFromOrigin);
    
             drawGuy.changeFrame(screenFrame);
-            graphics2d.drawLineSegment(0, (int) Math.round(drawGuy.getY()), (int) visibleRectangle.getWidth(), (int) Math.round(drawGuy.getY()));
+            graphics2d.drawLineSegment(screenFrame, 0, drawGuy.getY(), visibleRectangle.getWidth(), drawGuy.getY());
             
             if (showLabels)
             {
@@ -342,16 +350,19 @@ public class Plotter
                }
                origin.changeFrame(metersFrame);
                drawGuy.changeFrame(screenFrame);
-               graphics2d.drawString(labelString, (int) Math.round(drawGuy.getX()), (int) Math.round(drawGuy.getY()) - 1);
+               labelPosition.setIncludingFrame(drawGuy);
+               labelPosition.add(0.0, -1.0);
+               graphics2d.drawString(labelString, labelPosition);
                graphics2d.setColor(tempColor);
             }
          }
       }
       
       // paint grid centerline
+      origin.changeFrame(screenFrame);
       graphics2d.setColor(PlotterColors.GRID_AXIS);
-      graphics2d.drawLineSegment((int) Math.round(origin.getX()), 0, (int) Math.round(origin.getX()), (int) visibleRectangle.getHeight());
-      graphics2d.drawLineSegment(0, (int) Math.round(origin.getY()), (int) visibleRectangle.getWidth(), (int) Math.round(origin.getY()));
+      graphics2d.drawLineSegment(screenFrame, origin.getX(), 0.0, origin.getX(), visibleRectangle.getHeight());
+      graphics2d.drawLineSegment(screenFrame, 0.0, origin.getY(), visibleRectangle.getWidth(), origin.getY());
       
       for (int artifactLevel = 0; artifactLevel < 5; artifactLevel++)
       {
@@ -362,7 +373,7 @@ public class Plotter
             {
                if (showHistory && artifact.getDrawHistory() && artifact.isVisible())
                {
-                  artifact.drawHistory(graphics2d);
+                  artifact.drawHistory(graphics2dAdapter);
                }
             }
          });
@@ -377,7 +388,7 @@ public class Plotter
             {
                if (artifact.isVisible())
                {
-                  artifact.draw(graphics2d);
+                  artifact.draw(graphics2dAdapter);
                }
             }
          });
@@ -389,14 +400,14 @@ public class Plotter
          selected.changeFrame(screenFrame);
          graphics2d.setColor(PlotterColors.SELECTION);
          double crossSize = 8.0;
-         graphics2d.drawLineSegment((int) Math.round(selected.getX() - crossSize),
-                             (int) Math.round(selected.getY() - crossSize),
-                             (int) Math.round(selected.getX() + crossSize),
-                             (int) Math.round(selected.getY() + crossSize));
-         graphics2d.drawLineSegment((int) Math.round(selected.getX() - crossSize),
-                             (int) Math.round(selected.getY() + crossSize),
-                             (int) Math.round(selected.getX() + crossSize),
-                             (int) Math.round(selected.getY() - crossSize));
+         graphics2d.drawLineSegment(screenFrame, selected.getX() - crossSize,
+                                                 selected.getY() - crossSize,
+                                                 selected.getX() + crossSize,
+                                                 selected.getY() + crossSize);
+         graphics2d.drawLineSegment(screenFrame, selected.getX() - crossSize,
+                                                 selected.getY() + crossSize,
+                                                 selected.getX() + crossSize,
+                                                 selected.getY() - crossSize);
       }
 
       // paint selected area
@@ -426,10 +437,7 @@ public class Plotter
             Ymin = selectionAreaStart.getY();
          }
 
-         graphics2d.drawRectangle((int) Math.round(Xmin),
-                             (int) Math.round(Ymin),
-                             (int) Math.round(Xmax - Xmin),
-                             (int) Math.round(Ymax - Ymin));
+         graphics2d.drawRectangle(screenFrame, Xmin, Ymin, Xmax - Xmin, Ymax - Ymin);
       }
    }
 
@@ -459,7 +467,7 @@ public class Plotter
       return gridSizePixels;
    }
 
-   private void applyColorForGridline(final Graphics2DAdapter graphics2d, int nthGridLineFromOrigin)
+   private void applyColorForGridline(final Plotter2DAdapter graphics2d, int nthGridLineFromOrigin)
    {
       if (nthGridLineFromOrigin % 10 == 0)
       {
@@ -761,10 +769,15 @@ public class Plotter
    {
       return graphics2dAdapter;
    }
+   
+   public Plotter2DAdapter getPlotter2DAdapter()
+   {
+      return plotter2dAdapter;
+   }
 
    public PlotterLegendPanel createPlotterLegendPanel()
    {
-      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel(graphics2dAdapter);
+      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel(plotter2dAdapter);
       addArtifactsChangedListener(plotterLegendPanel);
       return plotterLegendPanel;
    }
@@ -772,7 +785,7 @@ public class Plotter
    public JPanel createAndAttachPlotterLegendPanel()
    {
       JPanel flashyNewJayPanel = new JPanel();
-      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel(graphics2dAdapter);
+      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel(plotter2dAdapter);
       plotterLegendPanel.setPreferredSize(new Dimension(500, 500));
       addArtifactsChangedListener(plotterLegendPanel);
       flashyNewJayPanel.setLayout(new BorderLayout());

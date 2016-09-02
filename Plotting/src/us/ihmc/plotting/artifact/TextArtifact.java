@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import javax.vecmath.Point2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 
 public class TextArtifact extends Artifact
 {
@@ -84,16 +85,17 @@ public class TextArtifact extends Artifact
       graphics.setFont(font);
 
       tempPoint.set(x1, y1);
-      graphics.drawString(tempPoint, text);
+      graphics.drawString(text, tempPoint);
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
       graphics.setColor(color);
       graphics.setFont(font);
 
-      graphics.drawString(text, centerX - 30, centerY + 6);
+      tempPoint.set(origin.getX() - 30.0, origin.getY() + 6.0);
+      graphics.drawString(graphics.getScreenFrame(), text, tempPoint);
    }
 
    public void save(PrintWriter printWriter)
