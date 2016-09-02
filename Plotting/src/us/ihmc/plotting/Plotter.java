@@ -44,7 +44,6 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO Fix color field in Artifact
  * TODO Implement remote artifact in line2d
  * TODO Rid drawYo and move is
- * TODO Rename draw square to drawRectangle
  * TODO Remove all deprecated Graphics2DAdapter methods (or pass in frame)
  */
 @SuppressWarnings("serial")
