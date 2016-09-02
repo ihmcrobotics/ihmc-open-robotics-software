@@ -6,6 +6,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -47,10 +48,12 @@ public class YoArtifactOval extends YoArtifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
       graphics.setColor(color);
-      graphics.drawOval(centerX, centerY, LEGEND_DIAMETER, LEGEND_DIAMETER);
+      tempCenter.set(origin);
+      tempRadii.set(LEGEND_DIAMETER / 2.0, LEGEND_DIAMETER / 2.0);
+      graphics.drawOval(graphics.getScreenFrame(), tempCenter, tempRadii);
    }
 
    @Override

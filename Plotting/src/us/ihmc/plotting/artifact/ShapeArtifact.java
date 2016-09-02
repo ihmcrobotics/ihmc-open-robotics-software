@@ -8,9 +8,12 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 
 public class ShapeArtifact extends Artifact
 {
+   private static final double LEGEND_RADIUS = 20.0;
+   
    private Point2d pose;
    private double height;
    private double width;
@@ -74,26 +77,26 @@ public class ShapeArtifact extends Artifact
    }
 
    @Override
-   public void drawLegend(Graphics2DAdapter graphics, int centerX, int centerY)
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
       graphics.setColor(color);
-      int w = 40;
-      int h = 40;
+      tempCenter.set(origin);
+      tempRadii.set(LEGEND_RADIUS, LEGEND_RADIUS);
       if (getType().equals("fillcircle"))
       {
-         graphics.drawOvalFilled((centerX - (w / 2)), (centerY - (h / 2)), w, h);
+         graphics.drawOvalFilled(graphics.getScreenFrame(), tempCenter, tempRadii);
       }
       else if (getType().equals("circle"))
       {
-         graphics.drawOval((centerX - (w / 2)), (centerY - (h / 2)), w, h);
+         graphics.drawOval(graphics.getScreenFrame(), tempCenter, tempRadii);
       }
       else if (getType().equals("fillrectangle"))
       {
-         graphics.drawRectangleFilled((centerX - (w / 2)), (centerY - (h / 2)), w, h);
+         graphics.drawSquareFilled(graphics.getScreenFrame(), tempCenter, tempRadii);
       }
       else if (getType().equals("rectangle"))
       {
-         graphics.drawRectangle((centerX - (w / 2)), (centerY - (h / 2)), w, h);
+         graphics.drawRectangle(graphics.getScreenFrame(), tempCenter, tempRadii);
       }
    }
 
