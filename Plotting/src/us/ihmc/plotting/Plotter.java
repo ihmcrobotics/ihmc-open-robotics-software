@@ -42,6 +42,7 @@ import us.ihmc.tools.io.printing.PrintTools;
  * TODO Deprecate archaic methods
  * TODO Factor out artifacts.
  * TODO Fix color field in Artifact
+ * TODO Fix zoom in for vector
  */
 @SuppressWarnings("serial")
 public class Plotter
