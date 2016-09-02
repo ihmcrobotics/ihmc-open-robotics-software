@@ -151,7 +151,7 @@ public class HarmonographRobot extends Robot
 //      KinematicPoint deskCornerThree = new KinematicPoint("kp_deskThree", new Vector3d(-DESK_LENGTH/2.0, -DESK_WIDTH/2.0, DESK_HEIGHT), this);
 //      KinematicPoint deskCornerFour = new KinematicPoint("kp_deskFour", new Vector3d(DESK_LENGTH/2.0, -DESK_WIDTH/2.0, DESK_HEIGHT), this);
       
-      deskPendulumYJoint.physics.addKinematicPoint(deskCenterExternalForcePoint);
+      deskPendulumYJoint.addKinematicPoint(deskCenterExternalForcePoint);
 //      deskPendulumYJoint.addKinematicPoint(deskCornerOne);
 //      deskPendulumYJoint.addKinematicPoint(deskCornerTwo);
 //      deskPendulumYJoint.addKinematicPoint(deskCornerThree);

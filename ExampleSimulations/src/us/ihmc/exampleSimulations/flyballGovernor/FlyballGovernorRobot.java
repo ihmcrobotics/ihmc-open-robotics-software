@@ -58,7 +58,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
       upperPivot1.addJoint(lowerPivot1);
 
       constraint1A = new ExternalForcePoint("constraint1A", new Vector3d(0.0, 0.0, -L3), this);
-      lowerPivot1.physics.addExternalForcePoint(constraint1A);
+      lowerPivot1.addExternalForcePoint(constraint1A);
 
       // The other flyball
 
@@ -77,7 +77,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
       upperPivot2.addJoint(lowerPivot2);
 
       constraint2A = new ExternalForcePoint("constraint2A", new Vector3d(0.0, 0.0, -L3), this);
-      lowerPivot2.physics.addExternalForcePoint(constraint2A);
+      lowerPivot2.addExternalForcePoint(constraint2A);
 
 
       // The sliding Cylinder:

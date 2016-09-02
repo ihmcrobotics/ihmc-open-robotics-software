@@ -1,6 +1,7 @@
 package us.ihmc.SdfLoader;
 
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,15 +51,15 @@ public class RobotDescriptionFromSDFLoader
    private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
    private static final boolean DEBUG = false;
 
-   private final SDFParameters sdfParameters;
+//   private final SDFParameters sdfParameters;
    private List<String> resourceDirectories;
 
    private RobotDescription robotDescription;
    private GeneralizedSDFRobotModel generalizedSDFRobotModel;
 
-   public RobotDescriptionFromSDFLoader(SDFParameters sdfParameters)
+   public RobotDescriptionFromSDFLoader() //SDFParameters sdfParameters)
    {
-      this.sdfParameters = sdfParameters;
+//      this.sdfParameters = sdfParameters;
    }
 
    public RobotDescription getRobotDescription()
@@ -66,9 +67,9 @@ public class RobotDescriptionFromSDFLoader
       return robotDescription;
    }
 
-   public void loadRobotDescriptionFromSDF(SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
-   {
-      loadSDFFile();
+   public void loadRobotDescriptionFromSDF(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
+   {   
+      loadSDFFile(modelName, inputStream, resourceDirectories, mutator);
 
       String name = generalizedSDFRobotModel.getName();
       robotDescription = new RobotDescription(name);
@@ -309,13 +310,19 @@ public class RobotDescriptionFromSDFLoader
       return jointName.contains("f0") || jointName.contains("f1") || jointName.contains("f2") || jointName.contains("f3") || jointName.contains("palm") || jointName.contains("finger");
    }
 
-   private void loadSDFFile()
+//   private void loadSDFFile()
+//   {
+//      resourceDirectories = Arrays.asList(sdfParameters.getResourceDirectories());
+//      loadSDFFile(sdfParameters.getSdfAsInputStream(), resourceDirectories, null);
+//   }
+   
+   private void loadSDFFile(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator)
    {
       try
       {
-         JaxbSDFLoader loader = new JaxbSDFLoader(sdfParameters.getSdfAsInputStream(), sdfParameters.getResourceDirectories(), null);
-         generalizedSDFRobotModel = loader.getGeneralizedSDFRobotModel(sdfParameters.getSdfModelName());
-         resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
+         JaxbSDFLoader loader = new JaxbSDFLoader(inputStream, resourceDirectories, mutator);
+         generalizedSDFRobotModel = loader.getGeneralizedSDFRobotModel(modelName);
+//         resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
       }
       catch (FileNotFoundException | JAXBException e)
       {

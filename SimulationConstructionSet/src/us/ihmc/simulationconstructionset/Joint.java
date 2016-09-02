@@ -746,6 +746,11 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
       sensors.add(simulatedSensor);
    }
 
+   public void recursiveGetAllGroundContactPoints(ArrayList<GroundContactPoint> groundContactPoints)
+   {
+      physics.recursiveGetAllGroundContactPoints(groundContactPoints);
+   }
+   
    /**
     * Sets ret to the transform between world space and this joint space.
     *
@@ -893,5 +898,25 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    public void getJointAxis(Vector3d axisToPack)
    {
       physics.getJointAxis(axisToPack);
+   }
+
+   public void removeExternalForcePoint(ExternalForcePoint externalForcePoint)
+   {
+      physics.removeExternalForcePoint(externalForcePoint);
+   }
+
+   public GroundContactPointGroup getGroundContactPointGroup()
+   {
+      return physics.getGroundContactPointGroup();
+   }
+   
+   public GroundContactPointGroup getGroundContactPointGroup(int groupIdentifier)
+   {
+      return physics.getGroundContactPointGroup(groupIdentifier);
+   }
+
+   public ArrayList<ExternalForcePoint> getExternalForcePoints()
+   {
+      return physics.getExternalForcePoints();
    }
 }

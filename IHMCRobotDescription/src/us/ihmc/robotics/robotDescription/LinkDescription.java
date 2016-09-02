@@ -88,7 +88,7 @@ public class LinkDescription
       {
          for (int j=0; j<3; j++)
          {
-            this.momentOfInertia.set(i, j, momentOfInertia.getElement(0, 0));
+            this.momentOfInertia.set(i, j, momentOfInertia.getElement(i, j));
          }
       }
    }
