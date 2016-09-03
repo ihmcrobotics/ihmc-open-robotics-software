@@ -3,8 +3,8 @@ package us.ihmc.quadrupedRobotics.planning.stepStream;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedTimedStepInputProvider;
-import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
-import us.ihmc.quadrupedRobotics.util.PreallocatedQueueSorter;
+import us.ihmc.quadrupedRobotics.util.PreallocatedDeque;
+import us.ihmc.quadrupedRobotics.util.PreallocatedDequeSorter;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 
@@ -18,7 +18,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    private final QuadrupedTimedStepInputProvider timedStepInputProvider;
    private final QuadrupedReferenceFrames referenceFrames;
    private final DoubleYoVariable timestamp;
-   private final PreallocatedQueue<QuadrupedTimedStep> stepQueue;
+   private final PreallocatedDeque<QuadrupedTimedStep> stepDeque;
    private final FrameOrientation bodyOrientation;
 
    public QuadrupedPreplannedStepStream(QuadrupedTimedStepInputProvider timedStepInputProvider, QuadrupedReferenceFrames referenceFrames, DoubleYoVariable timestamp)
@@ -26,7 +26,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
       this.timedStepInputProvider = timedStepInputProvider;
       this.referenceFrames = referenceFrames;
       this.timestamp = timestamp;
-      this.stepQueue = new PreallocatedQueue<>(QuadrupedTimedStep.class, MAXIMUM_STEP_QUEUE_SIZE);
+      this.stepDeque = new PreallocatedDeque<>(QuadrupedTimedStep.class, MAXIMUM_STEP_QUEUE_SIZE);
       this.bodyOrientation = new FrameOrientation();
    }
 
@@ -44,20 +44,20 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    {
       double currentTime = timestamp.getDoubleValue();
       ArrayList<QuadrupedTimedStep> steps = timedStepInputProvider.get();
-      stepQueue.clear();
+      stepDeque.clear();
       for (int i = 0; i < steps.size(); i++)
       {
          double timeShift = steps.get(i).isAbsolute() ? 0.0 : currentTime;
          double touchdownTime = steps.get(i).getTimeInterval().getEndTime();
          if (touchdownTime + timeShift >= currentTime)
          {
-            stepQueue.enqueue();
-            stepQueue.getTail().set(steps.get(i));
-            stepQueue.getTail().getTimeInterval().shiftInterval(timeShift);
-            stepQueue.getTail().setAbsolute(true);
+            stepDeque.pushBack();
+            stepDeque.back().set(steps.get(i));
+            stepDeque.back().getTimeInterval().shiftInterval(timeShift);
+            stepDeque.back().setAbsolute(true);
          }
       }
-      PreallocatedQueueSorter.sort(stepQueue, compareByEndTime);
+      PreallocatedDequeSorter.sort(stepDeque, compareByEndTime);
 
       bodyOrientation.setToZero(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
    }
@@ -67,9 +67,9 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    {
       // dequeue completed steps
       double currentTime = timestamp.getDoubleValue();
-      while ((stepQueue.size() > 0) && (currentTime > stepQueue.getHead().getTimeInterval().getEndTime()))
+      while ((stepDeque.size() > 0) && (currentTime > stepDeque.front().getTimeInterval().getEndTime()))
       {
-         stepQueue.dequeue();
+         stepDeque.popFront();
       }
 
       bodyOrientation.setToZero(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
@@ -88,8 +88,8 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    }
 
    @Override
-   public PreallocatedQueue<QuadrupedTimedStep> getSteps()
+   public PreallocatedDeque<QuadrupedTimedStep> getSteps()
    {
-      return stepQueue;
+      return stepDeque;
    }
 }

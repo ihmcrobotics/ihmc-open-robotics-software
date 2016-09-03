@@ -8,7 +8,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionEstimator;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.planning.*;
-import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
+import us.ihmc.quadrupedRobotics.util.PreallocatedDeque;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -77,7 +77,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    }
 
    @Override
-   public void compute(FrameVector stepAdjustmentVector, FramePoint cmpPositionSetpoint, PreallocatedQueue<QuadrupedTimedStep> queuedSteps,
+   public void compute(FrameVector stepAdjustmentVector, FramePoint cmpPositionSetpoint, PreallocatedDeque<QuadrupedTimedStep> queuedSteps,
          QuadrantDependentList<FramePoint> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint currentComPosition,
          FrameVector currentComVelocity, double currentTime, QuadrupedMpcOptimizationWithLaneChangeSettings settings)
    {
@@ -122,7 +122,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       }
 
       // Compute nominal piecewise center of pressure plan.
-      contactStateSequence.compute(numberOfPreviewSteps, queuedSteps, currentSolePosition, currentContactState, currentTime);
+      contactStateSequence.compute(queuedSteps, currentSolePosition, currentContactState, currentTime);
       piecewiseConstantPressureSequence.compute(contactStateSequence);
       numberOfIntervals = piecewiseConstantPressureSequence.getNumberOfIntervals();
 
