@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.planning;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.quadrupedRobotics.util.ArraySorter;
-import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
+import us.ihmc.quadrupedRobotics.util.PreallocatedDeque;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -129,50 +129,13 @@ public class QuadrupedContactStateSequence
    }
 
    /**
-    * compute piecewise center of pressure plan given a preallocated queue of upcoming steps
-    * @param numberOfSteps number of upcoming steps (input)
-    * @param stepQueue queue of preview steps (input)
-    * @param initialSolePosition initial sole positions (input)
-    * @param initialContactState initial sole contact state (input)
-    * @param initialTime initial time (input)
-    */
-   public void compute(int numberOfSteps, PreallocatedQueue<QuadrupedTimedStep> stepQueue, QuadrantDependentList<FramePoint> initialSolePosition,
-         QuadrantDependentList<ContactState> initialContactState, double initialTime)
-   {
-      for (int i = 0; i < numberOfSteps; i++)
-      {
-         stepArray[i] = stepQueue.get(i);
-      }
-      compute(numberOfSteps, stepArray, initialSolePosition, initialContactState, initialTime);
-   }
-
-   /**
-    * compute piecewise center of pressure plan given a list of upcoming steps
-    * @param numberOfSteps number of upcoming steps (input)
-    * @param stepList list of upcoming steps (input)
-    * @param initialSolePosition initial sole positions (input)
-    * @param initialContactState initial sole contact state (input)
-    * @param initialTime initial time (input)
-    */
-   public void compute(int numberOfSteps, List<QuadrupedTimedStep> stepList, QuadrantDependentList<FramePoint> initialSolePosition,
-         QuadrantDependentList<ContactState> initialContactState, double initialTime)
-   {
-      for (int i = 0; i < numberOfSteps; i++)
-      {
-         stepArray[i] = stepList.get(i);
-      }
-      compute(numberOfSteps, stepArray, initialSolePosition, initialContactState, initialTime);
-   }
-
-   /**
     * compute piecewise center of pressure plan given an array of upcoming steps
-    * @param numberOfSteps number of upcoming steps (input)
-    * @param stepArray array of upcoming steps (input)
+    * @param steps list of upcoming steps (input)
     * @param initialSolePosition initial sole positions (input)
     * @param initialContactState initial sole contact state (input)
     * @param initialTime initial time (input)
     */
-   public void compute(int numberOfSteps, QuadrupedTimedStep[] stepArray, QuadrantDependentList<FramePoint> initialSolePosition,
+   public void compute(List<QuadrupedTimedStep> steps, QuadrantDependentList<FramePoint> initialSolePosition,
          QuadrantDependentList<ContactState> initialContactState, double initialTime)
    {
       // initialize contact state and sole positions
@@ -190,9 +153,9 @@ public class QuadrupedContactStateSequence
       }
 
       int numberOfStepTransitions = 0;
-      for (int i = 0; i < numberOfSteps; i++)
+      for (int i = 0; i < steps.size(); i++)
       {
-         QuadrupedTimedStep step = stepArray[i];
+         QuadrupedTimedStep step = steps.get(i);
 
          if (step.getTimeInterval().getStartTime() >= initialTime)
          {

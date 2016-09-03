@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.util.PreallocatedQueue;
+import us.ihmc.quadrupedRobotics.util.PreallocatedDeque;
 import us.ihmc.robotics.geometry.FrameOrientation;
 
 public interface QuadrupedStepStream
@@ -25,7 +25,7 @@ public interface QuadrupedStepStream
     * Get the queue of ongoing and upcoming steps.
     * @return timed step queue
     */
-   PreallocatedQueue<QuadrupedTimedStep> getSteps();
+   PreallocatedDeque<QuadrupedTimedStep> getSteps();
 
    /**
     * Get the nominal body orientation at the current time step.
