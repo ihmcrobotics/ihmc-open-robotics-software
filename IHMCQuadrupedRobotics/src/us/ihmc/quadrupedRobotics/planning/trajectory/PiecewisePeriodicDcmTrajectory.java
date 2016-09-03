@@ -8,6 +8,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PiecewisePeriodicDcmTrajectory
 {
@@ -21,8 +22,8 @@ public class PiecewisePeriodicDcmTrajectory
    private final FramePoint[] vrpPositionAtSoS;
    private final FramePoint dcmPosition;
    private final FrameVector dcmVelocity;
-   private final ArrayList<MutableDouble> temporaryDouble;
-   private final ArrayList<FramePoint> temporaryFramePoint;
+   private final List<MutableDouble> temporaryDouble;
+   private final List<FramePoint> temporaryFramePoint;
    private final DenseMatrix64F A = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F x = new DenseMatrix64F(3, 1);
 
@@ -62,7 +63,7 @@ public class PiecewisePeriodicDcmTrajectory
     * @param cmpPositionAtEoS centroidal moment pivot position at the end of the final step
     * @param relativeYawAtEoS relative yaw angle at end of the final step
     */
-   public void initializeTrajectory(int numSteps, ArrayList<MutableDouble> timeAtSoS, ArrayList<FramePoint> cmpPositionAtSoS, double timeAtEoS, FramePoint cmpPositionAtEoS,
+   public void initializeTrajectory(int numSteps, List<MutableDouble> timeAtSoS, List<FramePoint> cmpPositionAtSoS, double timeAtEoS, FramePoint cmpPositionAtEoS,
          double relativeYawAtEoS)
    {
       double naturalFrequency = Math.sqrt(gravity / comHeight);
@@ -190,10 +191,10 @@ public class PiecewisePeriodicDcmTrajectory
       double gravity = 9.81;
       PiecewisePeriodicDcmTrajectory dcmTrajectory = new PiecewisePeriodicDcmTrajectory(10, gravity, comHeight);
 
-      ArrayList<MutableDouble> timeAtSoS = new ArrayList<>(2);
+      List<MutableDouble> timeAtSoS = new ArrayList<>(2);
       timeAtSoS.add(0, new MutableDouble(0.0));
       timeAtSoS.add(1, new MutableDouble(0.4));
-      ArrayList<FramePoint> cmpPositionAtSoS = new ArrayList<>(2);
+      List<FramePoint> cmpPositionAtSoS = new ArrayList<>(2);
       cmpPositionAtSoS.add(0, new FramePoint(ReferenceFrame.getWorldFrame()));
       cmpPositionAtSoS.add(1, new FramePoint(ReferenceFrame.getWorldFrame()));
       cmpPositionAtSoS.get(0).set(0.0, 0.0, 0.0);
