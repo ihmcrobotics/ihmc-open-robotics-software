@@ -6,6 +6,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PiecewiseReverseDcmTrajectory
 {
@@ -19,8 +20,8 @@ public class PiecewiseReverseDcmTrajectory
    private final FramePoint[] vrpPositionAtSoS;
    private final FramePoint dcmPosition;
    private final FrameVector dcmVelocity;
-   private final ArrayList<MutableDouble> temporaryDouble;
-   private final ArrayList<FramePoint> temporaryFramePoint;
+   private final List<MutableDouble> temporaryDouble;
+   private final List<FramePoint> temporaryFramePoint;
 
    public PiecewiseReverseDcmTrajectory(int maxSteps, double gravity, double comHeight)
    {
@@ -58,7 +59,7 @@ public class PiecewiseReverseDcmTrajectory
     * @param timeAtEoS time at the end of the final step
     * @param dcmPositionAtEoS divergent component of motion position at the end of the final step
     */
-   public void initializeTrajectory(int numSteps, ArrayList<MutableDouble> timeAtSoS, ArrayList<FramePoint> cmpPositionAtSoS, double timeAtEoS, FramePoint dcmPositionAtEoS)
+   public void initializeTrajectory(int numSteps, List<MutableDouble> timeAtSoS, List<FramePoint> cmpPositionAtSoS, double timeAtEoS, FramePoint dcmPositionAtEoS)
    {
       double naturalFrequency = Math.sqrt(gravity / comHeight);
 
@@ -148,10 +149,10 @@ public class PiecewiseReverseDcmTrajectory
       double gravity = 9.81;
       PiecewiseReverseDcmTrajectory dcmTrajectory = new PiecewiseReverseDcmTrajectory(10, gravity, comHeight);
 
-      ArrayList<MutableDouble> timeAtSoS = new ArrayList(2);
+      List<MutableDouble> timeAtSoS = new ArrayList(2);
       timeAtSoS.add(0, new MutableDouble(0.0));
       timeAtSoS.add(1, new MutableDouble(0.4));
-      ArrayList<FramePoint> cmpPositionAtSoS = new ArrayList<>(2);
+      List<FramePoint> cmpPositionAtSoS = new ArrayList<>(2);
       cmpPositionAtSoS.add(0, new FramePoint());
       cmpPositionAtSoS.add(1, new FramePoint());
       cmpPositionAtSoS.get(0).set(0.0, 0.0, 0.0);
