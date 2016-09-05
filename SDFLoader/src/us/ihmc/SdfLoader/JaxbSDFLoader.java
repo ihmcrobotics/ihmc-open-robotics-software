@@ -157,7 +157,14 @@ public class JaxbSDFLoader
          String modelName = sdfJointNameMap.getModelName();
          checkModelName(modelName);
 
-         return new SDFFullHumanoidRobotModel(generalizedSDFRobotModels.get(modelName).getRootLinks().get(0), sdfJointNameMap, sensorFramesToTrack);
+         boolean useCollisionMeshes = false;
+         boolean enableTorqueVelocityLimits = true;
+         boolean enableJointDamping = true;
+
+         RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+         RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModels.get(modelName), sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+
+         return new SDFFullHumanoidRobotModel(description, sdfJointNameMap, sensorFramesToTrack);
       }
       else
       {

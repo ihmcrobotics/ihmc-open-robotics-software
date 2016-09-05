@@ -66,9 +66,16 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
    public SDFFullQuadrupedRobotModel createFullRobotModel()
    {
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
-      SDFLinkHolder rootLink = generalizedSDFRobotModel.getRootLinks().get(0);
       String[] sensorLinksToTrack = new String[] {};
-      SDFFullQuadrupedRobotModel sdfFullRobotMdoel = new SDFFullQuadrupedRobotModel(rootLink, jointMap, sensorLinksToTrack);
+
+      boolean useCollisionMeshes = false;
+      boolean enableTorqueVelocityLimits = true;
+      boolean enableJointDamping = true;
+
+      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+      RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+
+      SDFFullQuadrupedRobotModel sdfFullRobotMdoel = new SDFFullQuadrupedRobotModel(description, jointMap, sensorLinksToTrack);
 
       return sdfFullRobotMdoel;
    }

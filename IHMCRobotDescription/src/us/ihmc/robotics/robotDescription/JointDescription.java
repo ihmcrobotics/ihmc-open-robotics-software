@@ -24,6 +24,8 @@ public class JointDescription
    private final ArrayList<LidarSensorDescription> lidarSensors = new ArrayList<>();
    private final ArrayList<ForceSensorDescription> forceSensors = new ArrayList<>();
 
+   private boolean isDynamic = true;
+
    public JointDescription(String name, Vector3d offsetFromParentJoint)
    {
       this.name = name;
@@ -153,5 +155,15 @@ public class JointDescription
    public ArrayList<ForceSensorDescription> getForceSensors()
    {
       return forceSensors;
+   }
+
+   public void setIsDynamic(boolean isDynamic)
+   {
+      this.isDynamic = isDynamic;
+   }
+
+   public boolean isDynamic()
+   {
+      return isDynamic;
    }
 }
