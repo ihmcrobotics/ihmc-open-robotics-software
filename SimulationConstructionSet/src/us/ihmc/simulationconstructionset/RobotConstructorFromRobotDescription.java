@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import javax.vecmath.Vector3d;
 
@@ -24,12 +25,12 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 
-public class RobotConstructorFromRobotDescription
+public class RobotConstructorFromRobotDescription extends Robot implements OneDegreeOfFreedomJointHolder
 {
-   private Robot robot;
-
    private HashMap<String, Joint> jointNameMap = new HashMap<>();
    private HashMap<JointDescription, Joint> jointDescriptionMap = new HashMap<>();
+
+   private final LinkedHashMap<String, OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new LinkedHashMap<String, OneDegreeOfFreedomJoint>();
 
    private HashMap<String, CameraMount> cameraNameMap = new HashMap<>();
    private HashMap<CameraSensorDescription, CameraMount> cameraDescriptionMap = new HashMap<>();
@@ -43,14 +44,12 @@ public class RobotConstructorFromRobotDescription
    private HashMap<String, JointWrenchSensor> wrenchSensorNameMap = new HashMap<>();
    private HashMap<JointWrenchSensorDescription, JointWrenchSensor> wrenchSensorDescriptionMap = new HashMap<>();
 
+   private final LinkedHashMap<Joint, ArrayList<GroundContactPoint>> jointToGroundContactPointsMap = new LinkedHashMap<Joint, ArrayList<GroundContactPoint>>();
+
    public RobotConstructorFromRobotDescription(RobotDescription description)
    {
+      super(description.getName());
       constructRobotFromDescription(description);
-   }
-
-   public Robot getRobot()
-   {
-      return robot;
    }
 
    public Joint getJoint(String jointName)
@@ -61,6 +60,17 @@ public class RobotConstructorFromRobotDescription
    public Joint getJoint(JointDescription jointDescription)
    {
       return jointDescriptionMap.get(jointDescription);
+   }
+
+   @Override
+   public OneDegreeOfFreedomJoint getOneDegreeOfFreedomJoint(String name)
+   {
+      return oneDegreeOfFreedomJoints.get(name);
+   }
+
+   public OneDegreeOfFreedomJoint[] getOneDegreeOfFreedomJoints()
+   {
+      return oneDegreeOfFreedomJoints.values().toArray(new OneDegreeOfFreedomJoint[oneDegreeOfFreedomJoints.size()]);
    }
 
    public CameraMount getCameraMount(String cameraName)
@@ -95,14 +105,14 @@ public class RobotConstructorFromRobotDescription
 
    private void constructRobotFromDescription(RobotDescription description)
    {
-      robot = new Robot(description.getName());
+      //      robot = new Robot(description.getName());
 
       ArrayList<JointDescription> rootJointDescriptions = description.getRootJoints();
 
       for (JointDescription rootJointDescription : rootJointDescriptions)
       {
          Joint rootJoint = constructJointRecursively(rootJointDescription);
-         robot.addRootJoint(rootJoint);
+         this.addRootJoint(rootJoint);
       }
    }
 
@@ -129,6 +139,12 @@ public class RobotConstructorFromRobotDescription
 
       jointNameMap.put(joint.getName(), joint);
       jointDescriptionMap.put(jointDescription, joint);
+
+      if (joint instanceof OneDegreeOfFreedomJoint)
+      {
+         oneDegreeOfFreedomJoints.put(joint.getName(), (OneDegreeOfFreedomJoint) joint);
+      }
+
       return joint;
    }
 
@@ -155,7 +171,7 @@ public class RobotConstructorFromRobotDescription
       ArrayList<CameraSensorDescription> cameraSensorDescriptions = jointDescription.getCameraSensors();
       for (CameraSensorDescription cameraSensorDescription : cameraSensorDescriptions)
       {
-         CameraMount cameraMount = new CameraMount(cameraSensorDescription.getName(), cameraSensorDescription.getTransformToJoint(), robot);
+         CameraMount cameraMount = new CameraMount(cameraSensorDescription.getName(), cameraSensorDescription.getTransformToJoint(), this);
          cameraMount.setImageWidth(cameraSensorDescription.getImageWidth());
          cameraMount.setImageHeight(cameraSensorDescription.getImageHeight());
 
@@ -171,7 +187,7 @@ public class RobotConstructorFromRobotDescription
       ArrayList<IMUSensorDescription> imuSensorDescriptions = jointDescription.getIMUSensors();
       for (IMUSensorDescription imuSensorDescription : imuSensorDescriptions)
       {
-         IMUMount imuMount = new IMUMount(imuSensorDescription.getName(), imuSensorDescription.getTransformToJoint(), robot);
+         IMUMount imuMount = new IMUMount(imuSensorDescription.getName(), imuSensorDescription.getTransformToJoint(), this);
          joint.addIMUMount(imuMount);
 
          imuNameMap.put(imuMount.getName(), imuMount);
@@ -184,7 +200,7 @@ public class RobotConstructorFromRobotDescription
       ArrayList<JointWrenchSensorDescription> jointWrenchSensorDescriptions = jointDescription.getWrenchSensors();
       for (JointWrenchSensorDescription jointWrenchSensorDescription : jointWrenchSensorDescriptions)
       {
-         JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(jointWrenchSensorDescription.getName(), jointWrenchSensorDescription.getOffsetFromJoint(), robot);
+         JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(jointWrenchSensorDescription.getName(), jointWrenchSensorDescription.getOffsetFromJoint(), this);
          joint.addJointWrenchSensor(jointWrenchSensor);
 
          wrenchSensorNameMap.put(jointWrenchSensor.getName(), jointWrenchSensor);
@@ -198,8 +214,14 @@ public class RobotConstructorFromRobotDescription
 
       for (GroundContactPointDescription groundContactPointDescription : groundContactPointDescriptions)
       {
-         GroundContactPoint groundContactPoint = new GroundContactPoint(groundContactPointDescription.getName(), groundContactPointDescription.getOffsetFromJoint(), robot);
+         GroundContactPoint groundContactPoint = new GroundContactPoint(groundContactPointDescription.getName(), groundContactPointDescription.getOffsetFromJoint(), this);
          joint.addGroundContactPoint(groundContactPoint);
+
+         if (!jointToGroundContactPointsMap.containsKey(joint))
+         {
+            jointToGroundContactPointsMap.put(joint, new ArrayList<GroundContactPoint>());
+         }
+         jointToGroundContactPointsMap.get(joint).add(groundContactPoint);
       }
    }
 
@@ -209,7 +231,7 @@ public class RobotConstructorFromRobotDescription
 
       for (ExternalForcePointDescription ExternalForcePointDescription : ExternalForcePointDescriptions)
       {
-         ExternalForcePoint ExternalForcePoint = new ExternalForcePoint(ExternalForcePointDescription.getName(), ExternalForcePointDescription.getOffsetFromJoint(), robot);
+         ExternalForcePoint ExternalForcePoint = new ExternalForcePoint(ExternalForcePointDescription.getName(), ExternalForcePointDescription.getOffsetFromJoint(), this);
          joint.addExternalForcePoint(ExternalForcePoint);
       }
    }
@@ -220,7 +242,7 @@ public class RobotConstructorFromRobotDescription
 
       for (KinematicPointDescription KinematicPointDescription : KinematicPointDescriptions)
       {
-         KinematicPoint KinematicPoint = new KinematicPoint(KinematicPointDescription.getName(), KinematicPointDescription.getOffsetFromJoint(), robot);
+         KinematicPoint KinematicPoint = new KinematicPoint(KinematicPointDescription.getName(), KinematicPointDescription.getOffsetFromJoint(), this);
          joint.addKinematicPoint(KinematicPoint);
       }
    }
@@ -236,14 +258,14 @@ public class RobotConstructorFromRobotDescription
          Vector3d offset = new Vector3d();
          floatingJointDescription.getOffsetFromParentJoint(offset);
 
-         joint = new FloatingJoint(jointDescription.getName(), offset, robot);
+         joint = new FloatingJoint(jointDescription.getName(), offset, this);
       }
 
       else if (jointDescription instanceof FloatingPlanarJointDescription)
       {
          FloatingPlanarJointDescription floatingPlanarJointDescription = (FloatingPlanarJointDescription) jointDescription;
 
-         joint = new FloatingPlanarJoint(jointDescription.getName(), robot, floatingPlanarJointDescription.getPlane());
+         joint = new FloatingPlanarJoint(jointDescription.getName(), this, floatingPlanarJointDescription.getPlane());
       }
 
       else if (jointDescription instanceof PinJointDescription)
@@ -252,7 +274,7 @@ public class RobotConstructorFromRobotDescription
          Vector3d offset = new Vector3d();
          pinJointDescription.getOffsetFromParentJoint(offset);
 
-         joint = new PinJoint(jointDescription.getName(), offset, robot, pinJointDescription.getJointAxis());
+         joint = new PinJoint(jointDescription.getName(), offset, this, pinJointDescription.getJointAxis());
 
          PinJoint pinJoint = (PinJoint) joint;
 
@@ -274,7 +296,7 @@ public class RobotConstructorFromRobotDescription
          Vector3d offset = new Vector3d();
          sliderJointDescription.getOffsetFromParentJoint(offset);
 
-         joint = new SliderJoint(jointDescription.getName(), offset, robot, sliderJointDescription.getJointAxis());
+         joint = new SliderJoint(jointDescription.getName(), offset, this, sliderJointDescription.getJointAxis());
 
          SliderJoint sliderJoint = (SliderJoint) joint;
 

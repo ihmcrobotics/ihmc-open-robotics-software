@@ -41,7 +41,7 @@ public class SDFHumanoidRobot extends SDFRobot
       {
          for(RobotSide robotSide : RobotSide.values)
          {
-            ArrayList<GroundContactPoint> contactPointsForJoint = jointToGroundContactPointsMap.get(joint);
+            ArrayList<GroundContactPoint> contactPointsForJoint = getGroundContactPointsOnJoint(joint);
 
             if(contactPointsForJoint != null)
             {

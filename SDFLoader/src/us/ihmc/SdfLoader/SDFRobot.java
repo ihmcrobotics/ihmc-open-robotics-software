@@ -14,7 +14,6 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
@@ -33,7 +32,6 @@ import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.CameraMount;
 import us.ihmc.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -59,17 +57,16 @@ import us.ihmc.tools.FormattingTools;
 
 public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 {
-
-   protected static final boolean SHOW_CONTACT_POINTS = true;
+   private static final boolean SHOW_CONTACT_POINTS = true;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
    private static final boolean SHOW_INERTIA_ELLIPSOIDS = false;
    private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
    private static final boolean DEBUG = false;
-   protected final List<String> resourceDirectories;
-   protected final LinkedHashMap<String, OneDegreeOfFreedomJoint> oneDoFJoints = new LinkedHashMap<String, OneDegreeOfFreedomJoint>();
-   protected final FloatingJoint rootJoint;
+   private final List<String> resourceDirectories;
+   private final LinkedHashMap<String, OneDegreeOfFreedomJoint> oneDoFJoints = new LinkedHashMap<String, OneDegreeOfFreedomJoint>();
+   private final FloatingJoint rootJoint;
    private final LinkedHashMap<String, SDFCamera> cameras = new LinkedHashMap<String, SDFCamera>();
-   protected final LinkedHashMap<Joint, ArrayList<GroundContactPoint>> jointToGroundContactPointsMap = new LinkedHashMap<Joint, ArrayList<GroundContactPoint>>();
+   private final LinkedHashMap<Joint, ArrayList<GroundContactPoint>> jointToGroundContactPointsMap = new LinkedHashMap<Joint, ArrayList<GroundContactPoint>>();
 
    public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
                    boolean enableTorqueVelocityLimits, boolean enableDamping)
@@ -223,6 +220,11 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       Point3d centerOfMass = new Point3d();
       double totalMass = computeCenterOfMass(centerOfMass);
       printIfDebug("SDFRobot: Total robot mass: " + FormattingTools.getFormattedDecimal3D(totalMass) + " (kg)");
+   }
+
+   public ArrayList<GroundContactPoint> getGroundContactPointsOnJoint(Joint joint)
+   {
+      return jointToGroundContactPointsMap.get(joint);
    }
 
    public Quat4d getRootJointToWorldRotationQuaternion()
@@ -816,30 +818,6 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    public FloatingJoint getPelvisJoint()
    {
       return getRootJoint();
-   }
-
-   public void copyWholeBodyStateFromFullRobotModel(FullRobotModel modelToCopyFrom, boolean copyRootJointToo)
-   {
-      OneDoFJoint[] oneDoFJoints = modelToCopyFrom.getOneDoFJoints();
-      for (OneDoFJoint otherJoint: oneDoFJoints)
-      {
-         OneDegreeOfFreedomJoint thisJoint = this.getOneDegreeOfFreedomJoint( otherJoint.getName() );
-         if( thisJoint != null)
-         {
-            thisJoint.setQ( otherJoint.getQ() );
-            thisJoint.setQd( otherJoint.getQd() );
-            thisJoint.setQdd( otherJoint.getQdd() );
-         }
-      }
-
-      if( copyRootJointToo )
-      {
-         Vector3d position = new Vector3d();
-         Quat4d rotation = new Quat4d();
-         modelToCopyFrom.getRootJoint().getFrameAfterJoint().getTransformToWorldFrame().get(rotation, position);
-         this.setPositionInWorld( position );
-         this.setOrientation(rotation);
-      }
    }
 
    protected void printIfDebug(String string)
