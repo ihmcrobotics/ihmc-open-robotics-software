@@ -162,6 +162,8 @@ public class RobotDescriptionFromSDFLoader
             if (SHOW_CONTACT_POINTS)
             {
                Graphics3DObject graphics = jointDescription.getLink().getLinkGraphics();
+               if (graphics == null) graphics = new Graphics3DObject();
+
                graphics.identity();
                graphics.translate(jointContactPoint.getRight());
                double radius = 0.01;
