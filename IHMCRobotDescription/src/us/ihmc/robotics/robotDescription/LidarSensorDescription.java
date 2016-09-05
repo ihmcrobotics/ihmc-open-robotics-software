@@ -3,17 +3,23 @@ package us.ihmc.robotics.robotDescription;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 
-public class LidarSensorDescription
+public class LidarSensorDescription extends SensorDescription
 {
-   private String name;
-   private RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
    private LidarScanParameters lidarScanParameters;
 
-   public LidarSensorDescription(RigidBodyTransform linkToSensorInZUp, LidarScanParameters polarDefinition, String name)
+   public LidarSensorDescription(String name, RigidBodyTransform transformToJoint, LidarScanParameters lidarScanParameters)
    {
-      this.name = name;
+      super(name, transformToJoint);
+      this.setLidarScanParameters(lidarScanParameters);
+   }
 
-      this.linkToSensorInZUp.set(linkToSensorInZUp);
+   public LidarScanParameters getLidarScanParameters()
+   {
+      return lidarScanParameters;
+   }
+
+   public void setLidarScanParameters(LidarScanParameters lidarScanParameters)
+   {
       this.lidarScanParameters = lidarScanParameters;
    }
 
