@@ -34,7 +34,20 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.CameraMount;
+import us.ihmc.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.IMUMount;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.JointWrenchSensor;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJointHolder;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SliderJoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.FeatherStoneJointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
@@ -57,23 +70,19 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    protected final FloatingJoint rootJoint;
    private final LinkedHashMap<String, SDFCamera> cameras = new LinkedHashMap<String, SDFCamera>();
    protected final LinkedHashMap<Joint, ArrayList<GroundContactPoint>> jointToGroundContactPointsMap = new LinkedHashMap<Joint, ArrayList<GroundContactPoint>>();
-   private boolean doDynamics = true;
 
-   private final SDFDescriptionMutator descriptionMutator;
-
-   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
+   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
                    boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
-      this(generalizedSDFRobotModel.getName(), generalizedSDFRobotModel, descriptionMutator,sdfJointNameMap,useCollisionMeshes,enableTorqueVelocityLimits,enableDamping);
+      this(generalizedSDFRobotModel.getName(), generalizedSDFRobotModel,sdfJointNameMap,useCollisionMeshes,enableTorqueVelocityLimits,enableDamping);
    }
 
-   public SDFRobot(String name, GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
+   public SDFRobot(String name, GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
          boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       super(name);
-      this.descriptionMutator = descriptionMutator;
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
-      
+
       ArrayList<SDFLinkHolder> rootLinks = generalizedSDFRobotModel.getRootLinks();
 
       if (rootLinks.size() > 1)
@@ -104,7 +113,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       for (SDFJointHolder child : rootLink.getChildren())
       {
          // System.out.println("Joint name: " + child.getName());
-         
+
          Set<String> lastSimulatedJoints;
 
          if (sdfJointNameMap != null)
@@ -132,7 +141,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                count = counters.get(jointName);
 
             Vector3d gcOffset = jointContactPoint.getRight();
-            
+
             GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, null,
                   this.getRobotsYoVariableRegistry());
             groundContactPoint.setOffsetJoint(gcOffset);
@@ -156,7 +165,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
             counters.put(jointName, count);
 
 //            PrintTools.info("Joint Contact Point: " + jointContactPoint);
-            
+
             if (SHOW_CONTACT_POINTS)
             {
                Graphics3DObject graphics = joint.getLink().getLinkGraphics();
@@ -164,7 +173,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                graphics.translate(jointContactPoint.getRight());
                double radius = 0.01;
                graphics.addSphere(radius, YoAppearance.Orange());
-               
+
 //               double bigRadius = 0.05;
 //               if (jointContactPoint.first().equals("r_arm_wrx"))
 //               {
@@ -182,18 +191,18 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 //               }
             }
 
-            if (!jointToGroundContactPointsMap.containsKey(joint)) 
+            if (!jointToGroundContactPointsMap.containsKey(joint))
             {
                jointToGroundContactPointsMap.put(joint, new ArrayList<GroundContactPoint>());
             }
             jointToGroundContactPointsMap.get(joint).add(groundContactPoint);
-//            
-//            
+//
+//
 //            for (RobotSide robotSide : RobotSide.values)
 //            {
-//               
-//               
-//               
+//
+//
+//
 //               if (jointName.equals(sdfJointNameMap.getJointBeforeFootName(robotSide)))
 //               {
 //                  footGroundContactPoints.get(robotSide).add(groundContactPoint);
@@ -271,9 +280,9 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    {
       if(jointNameMap != null)
       {
-         addForceSensor(joint, jointNameMap);         
+         addForceSensor(joint, jointNameMap);
       }
-   
+
       for (SDFJointHolder child : joint.getChildLinkHolder().getChildren())
       {
          addForceSensorsIncludingDescendants(child, jointNameMap);
@@ -290,15 +299,15 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
             String jointName = joint.getName();
             String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(jointName);
             OneDegreeOfFreedomJoint scsJoint = getOneDegreeOfFreedomJoint(sanitizedJointName);
-   
+
             for (SDFForceSensor forceSensor : joint.getForceSensors())
             {
                ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
                //TODO: Not sure if you want all of the ground contact points from here down, or just the ones attached to this joint.
                scsJoint.recursiveGetAllGroundContactPoints(groundContactPoints);
-   
+
                WrenchCalculatorInterface wrenchCalculator;
-               
+
                boolean jointIsParentOfFoot = false;
                for(int i = 0; i < jointNamesBeforeFeet.length; i++)
                {
@@ -307,7 +316,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                      jointIsParentOfFoot = true;
                   }
                }
-   
+
                if ( jointIsParentOfFoot )
                {
    //               System.out.println("SDFRobot: Adding old-school force sensor to: " + joint.getName());
@@ -317,16 +326,16 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                else
                {
    //               System.out.println("SDFRobot: Adding force sensor to: " + joint.getName());
-                  
+
                   Vector3d offsetToPack = new Vector3d();
                   forceSensor.getTransform().getTranslation(offsetToPack);
                   JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(jointName, offsetToPack, this);
                   scsJoint.addJointWrenchSensor(jointWrenchSensor);
-                  
+
                   wrenchCalculator = new FeatherStoneJointBasedWrenchCalculator(forceSensor.getName(), scsJoint);
                }
                scsJoint.addForceSensor(wrenchCalculator);
-   
+
             }
          }
       }
@@ -335,14 +344,14 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    {
          Vector3d jointAxis = new Vector3d(joint.getAxisInModelFrame());
          Vector3d offset = new Vector3d(joint.getOffsetFromParentJoint());
-   
+
          RigidBodyTransform visualTransform = new RigidBodyTransform();
          visualTransform.setRotation(joint.getLinkRotation());
-   
+
          String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(joint.getName());
-   
+
          Joint scsJoint;
-   
+
          if (asNullJoint)
          {
             DummyOneDegreeOfFreedomJoint dummyJoint = new DummyOneDegreeOfFreedomJoint(sanitizedJointName, offset, this, jointAxis);
@@ -372,14 +381,14 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                      {
                         pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), 0.1 * joint.getContactKd());
                      }
-                     
+
                      if (!Double.isNaN(joint.getVelocityLimit()))
                         pinJoint.setVelocityLimits(joint.getVelocityLimit(), 0.0);
                      //System.out.println("SDFRobot: joint.getVelocityLimit()=" + joint.getVelocityLimit());
-                     
+
                   }
                }
-   
+
                if (enableDamping)
                {
                   pinJoint.setDamping(joint.getDamping());
@@ -390,7 +399,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                   pinJoint.setDampingParameterOnly(joint.getDamping());
                   pinJoint.setStictionParameterOnly(joint.getFriction());
                }
-   
+
                if (enableTorqueVelocityLimits)
                {
                   if (!isJointInNeedOfReducedGains(joint))
@@ -399,7 +408,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                      {
                         pinJoint.setTorqueLimits(joint.getEffortLimit());
                      }
-   
+
                      if (!Double.isNaN(joint.getVelocityLimit()))
                      {
                         if (!isJointInNeedOfReducedGains(joint))
@@ -409,12 +418,12 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                      }
                   }
                }
-   
+
                oneDoFJoints.put(joint.getName(), pinJoint);
                scsJoint = pinJoint;
-   
+
                break;
-   
+
             case PRISMATIC:
                SliderJoint sliderJoint = new SliderJoint(sanitizedJointName, offset, this, jointAxis);
                if (joint.hasLimits())
@@ -428,7 +437,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                      sliderJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 0.0001 * joint.getContactKp(), joint.getContactKd());
                   }
                }
-   
+
                if (enableDamping)
                {
                   sliderJoint.setDamping(joint.getDamping());
@@ -437,33 +446,33 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                {
                   sliderJoint.setDampingParameterOnly(joint.getDamping());
                }
-   
+
                oneDoFJoints.put(joint.getName(), sliderJoint);
-   
+
                scsJoint = sliderJoint;
-   
+
                break;
-   
+
             default:
                throw new RuntimeException("Joint type not implemented: " + joint.getType());
             }
          }
-   
+
          scsJoint.setLink(createLink(joint.getChildLinkHolder(), visualTransform, useCollisionMeshes));
          scsParentJoint.addJoint(scsJoint);
-   
+
          addSensors(scsJoint, joint.getChildLinkHolder());
-   
+
          if (!asNullJoint && lastSimulatedJoints.contains(joint.getName()))
          {
             asNullJoint = true;
          }
-   
+
          for (SDFJointHolder child : joint.getChildLinkHolder().getChildren())
          {
             addJointsRecursively(child, scsJoint, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping, lastSimulatedJoints, asNullJoint);
          }
-   
+
       }
 
    ///TODO:
@@ -515,7 +524,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    {
       // TODO: handle left and right sides of multicamera
       final List<Camera> cameras = sensor.getCamera();
-   
+
       if (cameras != null)
       {
          for (Camera camera : cameras)
@@ -529,14 +538,14 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
             linkToCamera.multiply(linkRotation, linkToSensor);
             linkToCamera.multiply(sensorToCamera);
             showCordinateSystem(scsJoint, linkToCamera);
-   
+
             double fieldOfView = Double.parseDouble(camera.getHorizontalFov());
             double clipNear = Double.parseDouble(camera.getClip().getNear());
             double clipFar = Double.parseDouble(camera.getClip().getFar());
             String cameraName = sensor.getName() + "_" + camera.getName();
             CameraMount mount = new CameraMount(cameraName, linkToCamera, fieldOfView, clipNear, clipFar, this);
             scsJoint.addCameraMount(mount);
-   
+
             SDFCamera sdfCamera = new SDFCamera(Integer.parseInt(camera.getImage().getWidth()), Integer.parseInt(camera.getImage().getHeight()));
             this.cameras.put(cameraName, sdfCamera);
          }
@@ -551,7 +560,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    {
       // TODO: handle left and right sides of multicamera
       final IMU imu = sensor.getImu();
-   
+
       if (imu != null)
       {
          // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
@@ -559,10 +568,10 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
          linkRotation.setTranslation(0.0, 0.0, 0.0);
          RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
          linkToSensorInZUp.multiply(linkRotation, SDFConversionsHelper.poseToTransform(sensor.getPose()));
-   
+
          showCordinateSystem(scsJoint, linkToSensorInZUp);
          IMUMount imuMount = new IMUMount(child.getName() + "_" + sensor.getName(), linkToSensorInZUp, this);
-   
+
          IMUNoise noise = imu.getNoise();
          if (noise != null)
          {
@@ -570,25 +579,25 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
             {
                NoiseParameters accelerationNoise = noise.getAccel();
                NoiseParameters angularVelocityNoise = noise.getRate();
-   
+
                imuMount.setAccelerationNoiseParameters(Double.parseDouble(accelerationNoise.getMean()), Double.parseDouble(accelerationNoise.getStddev()));
                imuMount.setAccelerationBiasParameters(Double.parseDouble(accelerationNoise.getBias_mean()),
                      Double.parseDouble(accelerationNoise.getBias_stddev()));
-   
+
                imuMount.setAngularVelocityNoiseParameters(Double.parseDouble(angularVelocityNoise.getMean()),
                      Double.parseDouble(angularVelocityNoise.getStddev()));
                imuMount.setAngularVelocityBiasParameters(Double.parseDouble(angularVelocityNoise.getBias_mean()),
                      Double.parseDouble(angularVelocityNoise.getBias_stddev()));
-   
+
             }
             else
             {
                throw new RuntimeException("Unknown IMU noise model: " + noise.getType());
             }
          }
-   
+
          scsJoint.addIMUMount(imuMount);
-   
+
       }
       else
       {
@@ -615,18 +624,18 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
          double sdfMinSweepAngle = Double.parseDouble(sdfHorizontalScan.getMinAngle());
          double sdfMaxHeightAngle = sdfVerticalScan == null ? 0.0 : Double.parseDouble(sdfVerticalScan.getMaxAngle());
          double sdfMinHeightAngle = sdfVerticalScan == null ? 0.0 : Double.parseDouble(sdfVerticalScan.getMinAngle());
-   
+
          // double sdfAngularResolution = Double.parseDouble(sdfHorizontalScan.getSillyAndProbablyNotUsefulResolution());
          int sdfSamples = (Integer.parseInt(sdfHorizontalScan.getSamples()) / 3) * 3;
          int sdfScanHeight = sdfVerticalScan == null ? 1 : Integer.parseInt(sdfVerticalScan.getSamples());
          double sdfRangeResolution = Double.parseDouble(sdfRay.getRange().getResolution());
-   
+
          boolean sdfAlwaysOn = true;
-   
+
          double sdfGaussianStdDev = 0.0;
          double sdfGaussianMean = 0.0;
          int sdfUpdateRate = (int) (1000.0 / Double.parseDouble(sensor.getUpdateRate()));
-   
+
          Noise sdfNoise = sdfRay.getNoise();
          if (sdfNoise != null)
          {
@@ -640,34 +649,34 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                System.err.println("Unknown noise model: " + sdfNoise.getType());
             }
          }
-   
+
          //         System.err.println("[SDFRobot]: FIXME: Setting LIDAR angle to 0.5 pi due to current GPULidar limitations");
          //         sdfMinAngle = -Math.PI/4;
          //         sdfMaxAngle = Math.PI/4;
-   
+
          LidarScanParameters polarDefinition = new LidarScanParameters(sdfSamples, sdfScanHeight, (float) sdfMinSweepAngle, (float) sdfMaxSweepAngle, (float) sdfMinHeightAngle, (float) sdfMaxHeightAngle, 0.0f, (float) sdfMinRange,
                (float) sdfMaxRange, 0.0f, 0l);
-   
+
          // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
          RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
          linkRotation.setTranslation(0.0, 0.0, 0.0);
          RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
          linkToSensorInZUp.multiply(linkRotation, SDFConversionsHelper.poseToTransform(sensor.getPose()));
          showCordinateSystem(scsJoint, linkToSensorInZUp);
-   
+
          SimulatedLIDARSensorNoiseParameters noiseParameters = new SimulatedLIDARSensorNoiseParameters();
          noiseParameters.setGaussianNoiseStandardDeviation(sdfGaussianStdDev);
          noiseParameters.setGaussianNoiseMean(sdfGaussianMean);
-   
+
          SimulatedLIDARSensorLimitationParameters limitationParameters = new SimulatedLIDARSensorLimitationParameters();
          limitationParameters.setMaxRange(sdfMaxRange);
          limitationParameters.setMinRange(sdfMinRange);
          limitationParameters.setQuantization(sdfRangeResolution);
-   
+
          SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
          updateParameters.setAlwaysOn(sdfAlwaysOn);
          updateParameters.setUpdatePeriodInMillis(sdfUpdateRate);
-   
+
          LidarMount lidarMount = new LidarMount(linkToSensorInZUp, polarDefinition, sensor.getName());
          scsJoint.addSensor(lidarMount);
          scsJoint.addLidarMount(lidarMount);
@@ -687,11 +696,11 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
          SDFGraphics3DObject linkGraphics = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, rotationTransform);
          scsLink.setLinkGraphics(linkGraphics);
       }
-   
+
       double mass = link.getMass();
       Matrix3d inertia = InertiaTools.rotate(rotationTransform, link.getInertia());
       Vector3d CoMOffset = new Vector3d(link.getCoMOffset());
-   
+
       if (link.getJoint() != null)
       {
          if (isJointInNeedOfReducedGains(link.getJoint()))
@@ -699,13 +708,13 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
             inertia.mul(100.0);
          }
       }
-   
+
       rotationTransform.transform(CoMOffset);
-   
+
       scsLink.setComOffset(CoMOffset);
       scsLink.setMass(mass);
       scsLink.setMomentOfInertia(inertia);
-   
+
       if (SHOW_COM_REFERENCE_FRAMES)
       {
          scsLink.addCoordinateSystemToCOM(0.1);
@@ -714,23 +723,23 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       {
          scsLink.addEllipsoidFromMassProperties(YoAppearance.Orange());
       }
-   
+
       return scsLink;
-   
+
    }
 
    public FrameVector getRootJointVelocity()
    {
       FrameVector ret = new FrameVector(ReferenceFrame.getWorldFrame());
       rootJoint.getVelocity(ret.getVector());
-   
+
       return ret;
    }
 
    public FrameVector getPelvisAngularVelocityInPelvisFrame(ReferenceFrame pelvisFrame)
    {
       Vector3d angularVelocity = rootJoint.getAngularVelocityInBody();
-   
+
       return new FrameVector(pelvisFrame, angularVelocity);
    }
 
@@ -740,7 +749,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       {
          return rootJoint.getLink().getLinkGraphics();
       }
-   
+
       return oneDoFJoints.get(name).getLink().getLinkGraphics();
    }
 
@@ -753,7 +762,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    {
       Vector3d position = new Vector3d();
       getPositionInWorld(position);
-   
+
       return position;
    }
 
@@ -787,20 +796,20 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       for (Joint joint : joints)
       {
          String nextJointName = joint.getName();
-   
+
          // System.out.println(nextJointName);
          if (nextJointName.equals(jointName))
          {
             return joint;
          }
-   
+
          ArrayList<Joint> children = joint.getChildrenJoints();
-   
+
          Joint foundJoint = getJointRecursively(children, jointName);
          if (foundJoint != null)
             return foundJoint;
       }
-   
+
       return null;
    }
 
@@ -822,7 +831,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
             thisJoint.setQdd( otherJoint.getQdd() );
          }
       }
-   
+
       if( copyRootJointToo )
       {
          Vector3d position = new Vector3d();
@@ -836,20 +845,6 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    protected void printIfDebug(String string)
    {
       if (DEBUG) System.out.println(string);
-   }
-
-   public void setDoDynamics(boolean doDynamics)
-   {
-      this.doDynamics = doDynamics;
-   }
-
-   @Override
-   public void doDynamicsAndIntegrate(double DT) throws UnreasonableAccelerationException
-   {
-      if(doDynamics)
-      {
-         super.doDynamicsAndIntegrate(DT);
-      }
    }
 
 }
