@@ -23,7 +23,7 @@ import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFJointHolder;
 import us.ihmc.SdfLoader.SDFLinkHolder;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
@@ -306,7 +306,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public ScsCollisionConfigure getPhysicsConfigure(SDFRobot robotModel)
+   public ScsCollisionConfigure getPhysicsConfigure(FloatingRootJointRobot robotModel)
    {
       return null;
    }
@@ -319,7 +319,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    //For Sim Only
    @Override
-   public void setJointDamping(SDFRobot simulatedRobot)
+   public void setJointDamping(FloatingRootJointRobot simulatedRobot)
    {
       System.err.println("Joint Damping not setup for Valkyrie. ValkyrieRobotModel setJointDamping!");
    }
@@ -434,7 +434,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, HumanoidGlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, HumanoidGlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
 	   return null;
       //return new ValkyrieFingerController(this, simulatedRobot, threadDataSynchronizer, globalDataProducer, null);

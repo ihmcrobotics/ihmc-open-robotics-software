@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -63,7 +63,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public abstract InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel fullRobotModel, SDFRobot sdfRobot);
+   public abstract InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel fullRobotModel, FloatingRootJointRobot sdfRobot);
    
    // 150313: This test currently fails, seemingly due to some sort of problem in the MomentumBasedController or InverseDynamicsCalculator. Trying to fix it...
 	@DeployableTestMethod(estimatedDuration = 38.0)

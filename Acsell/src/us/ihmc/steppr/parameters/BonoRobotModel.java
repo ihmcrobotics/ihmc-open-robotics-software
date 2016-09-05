@@ -12,7 +12,7 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.acsell.initialSetup.BonoInitialSetup;
@@ -185,7 +185,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public void setJointDamping(SDFRobot simulatedRobot)
+   public void setJointDamping(FloatingRootJointRobot simulatedRobot)
    {
       System.err.println("Joint Damping not setup for Bono. BonoRobotModel setJointDamping!");
    }
@@ -209,7 +209,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public ScsCollisionConfigure getPhysicsConfigure(SDFRobot robotModel)
+   public ScsCollisionConfigure getPhysicsConfigure(FloatingRootJointRobot robotModel)
    {
       return null;
    }
@@ -297,7 +297,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
+   public MultiThreadedRobotControlElement createSimulatedHandController(FloatingRootJointRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
          HumanoidGlobalDataProducer globalDataProducers, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       return null;

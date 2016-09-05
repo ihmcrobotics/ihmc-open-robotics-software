@@ -5,7 +5,7 @@ import java.io.IOException;
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -53,7 +53,7 @@ public class LLAQuadrupedSimulationFactory
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new LLAQuadrupedPositionBasedCrawlControllerParameters();
       
       SDFFullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
-      SDFRobot sdfRobot = modelFactory.createSdfRobot();
+      FloatingRootJointRobot sdfRobot = modelFactory.createSdfRobot();
       
       SensorTimestampHolder timestampProvider = new LLAQuadrupedTimestampProvider(sdfRobot);
       

@@ -11,7 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -173,7 +173,7 @@ public class DRCSimulationFactory
        }
    }
 
-   private Robot[] setupEnvironmentAndListSimulatedRobots(SDFRobot simulatedRobot, CommonAvatarEnvironmentInterface environment)
+   private Robot[] setupEnvironmentAndListSimulatedRobots(FloatingRootJointRobot simulatedRobot, CommonAvatarEnvironmentInterface environment)
    {
       List<Robot> allSimulatedRobotList = new ArrayList<Robot>();
       allSimulatedRobotList.add(simulatedRobot);

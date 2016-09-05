@@ -7,7 +7,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.DelayedDoubleYoVariable;
@@ -28,7 +28,7 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
    private final ArrayList<RawOutputWriter> rawOutputWriters = new ArrayList<RawOutputWriter>();
 
-   public DRCSimulationOutputWriter(SDFRobot robot)
+   public DRCSimulationOutputWriter(FloatingRootJointRobot robot)
    {
       super(robot);
    }

@@ -20,7 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -91,7 +91,7 @@ public class AtlasSDFVerificationTest
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCRobotModel selectedModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, DRCRobotModel.RobotTarget.SCS, false);
-      SDFRobot sdfRobot = selectedModel.createSdfRobot(true);
+      FloatingRootJointRobot sdfRobot = selectedModel.createSdfRobot(true);
 
       pinRobotInAir(sdfRobot);
 
@@ -116,7 +116,7 @@ public class AtlasSDFVerificationTest
 //    fail();
    }
 
-   private void pinRobotInAir(SDFRobot sdfRobot)
+   private void pinRobotInAir(FloatingRootJointRobot sdfRobot)
    {
       sdfRobot.setPositionInWorld(new Vector3d(sdfRobot.getPositionInWorld().getX(), sdfRobot.getPositionInWorld().getY(), sdfRobot.getPositionInWorld().getZ() + 0.5));
       ExternalForcePoint fp = new ExternalForcePoint("gravityCompensation", sdfRobot.getRobotsYoVariableRegistry());

@@ -14,7 +14,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -189,7 +189,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       }
    }
 
-   public void setRobotTorquesToMatchFullRobotModelButCheckAgainstOtherRobot(SDFRobot otherRobot, double epsilon)
+   public void setRobotTorquesToMatchFullRobotModelButCheckAgainstOtherRobot(FloatingRootJointRobot otherRobot, double epsilon)
    {
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
@@ -222,7 +222,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       }
    }
 
-   public void setRobotTorquesToMatchOtherRobot(SDFRobot otherRobot)
+   public void setRobotTorquesToMatchOtherRobot(FloatingRootJointRobot otherRobot)
    {
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
@@ -375,7 +375,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       }
    }
 
-   public void setRobotStateToMatchOtherRobot(SDFRobot otherRobot)
+   public void setRobotStateToMatchOtherRobot(FloatingRootJointRobot otherRobot)
    {
       otherRobot.update();
 
@@ -681,7 +681,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       setRobotsExternalForcesToMatchFullRobotModel(inverseDynamicsCalculator);
    }
 
-   public void setRobotsExternalForcesToMatchOtherRobot(SDFRobot otherRobot)
+   public void setRobotsExternalForcesToMatchOtherRobot(FloatingRootJointRobot otherRobot)
    {
       ArrayList<GroundContactPoint> otherGroundContactPoints = otherRobot.getAllGroundContactPoints();
       ArrayList<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();

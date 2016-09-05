@@ -13,12 +13,12 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.tools.FormattingTools;
 
-public class SDFRobot extends RobotFromDescription
+public class FloatingRootJointRobot extends RobotFromDescription
 {
    private static final boolean DEBUG = false;
    private final FloatingJoint rootJoint;
 
-   public SDFRobot(RobotDescription robotDescription)
+   public FloatingRootJointRobot(RobotDescription robotDescription)
    {
       super(robotDescription);
 

@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.simulation;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCPelvisLowGainsTest;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -52,7 +52,7 @@ public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
    }
 
    @Override
-   public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel controllersFullRobotModel, SDFRobot robot)
+   public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel controllersFullRobotModel, FloatingRootJointRobot robot)
    {
       return null;
    }

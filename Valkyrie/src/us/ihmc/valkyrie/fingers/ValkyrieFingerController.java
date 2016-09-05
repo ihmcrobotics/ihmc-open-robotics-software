@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.fingers;
 import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
@@ -60,7 +60,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
     * @param globalDataProducer
     * @param yoVariableRegistry 
     */
-   public ValkyrieFingerController(DRCRobotModel robotModel, SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, 
+   public ValkyrieFingerController(DRCRobotModel robotModel, FloatingRootJointRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, 
          HumanoidGlobalDataProducer globalDataProducer, YoVariableRegistry controllerRegistry, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this.isRunningOnRealRobot = robotModel.getStateEstimatorParameters().isRunningOnRealRobot();

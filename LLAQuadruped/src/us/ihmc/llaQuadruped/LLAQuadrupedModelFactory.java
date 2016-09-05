@@ -50,7 +50,7 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
    }
 
    @Override
-   public SDFRobot createSdfRobot()
+   public FloatingRootJointRobot createSdfRobot()
    {
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = true;
@@ -59,7 +59,7 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
       RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
-      return new SDFRobot(description);
+      return new FloatingRootJointRobot(description);
    }
 
    @Override
