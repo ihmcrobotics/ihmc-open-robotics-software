@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.communication.net.NetClassList;
@@ -82,7 +82,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<SDFFullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<QuadrupedPhysicalProperties> physicalProperties = new RequiredFactoryField<>("physicalProperties");
    private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
-   private final RequiredFactoryField<SDFRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
+   private final RequiredFactoryField<FloatingRootJointRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
    private final RequiredFactoryField<Double> controlDT = new RequiredFactoryField<>("controlDT");
    private final RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
    private final RequiredFactoryField<Integer> recordFrequency = new RequiredFactoryField<>("recordFrequency");
@@ -532,7 +532,7 @@ public class QuadrupedSimulationFactory
       this.timestampProvider.set(timestampProvider);
    }
 
-   public void setSDFRobot(SDFRobot sdfRobot)
+   public void setSDFRobot(FloatingRootJointRobot sdfRobot)
    {
       this.sdfRobot.set(sdfRobot);
    }

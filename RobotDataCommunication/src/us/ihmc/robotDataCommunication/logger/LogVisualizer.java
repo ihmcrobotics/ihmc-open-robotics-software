@@ -16,7 +16,7 @@ import javax.swing.JTextField;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
@@ -232,7 +232,7 @@ public class LogVisualizer
       return scs;
    }
 
-   public SDFRobot getSDFRobot()
+   public FloatingRootJointRobot getSDFRobot()
    {
       return robot;
    }

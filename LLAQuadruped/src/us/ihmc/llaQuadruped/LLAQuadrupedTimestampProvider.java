@@ -1,14 +1,14 @@
 package us.ihmc.llaQuadruped;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 
 public class LLAQuadrupedTimestampProvider implements SensorTimestampHolder
 {
-   private final SDFRobot sdfRobot;
+   private final FloatingRootJointRobot sdfRobot;
 
-   public LLAQuadrupedTimestampProvider(SDFRobot sdfRobot)
+   public LLAQuadrupedTimestampProvider(FloatingRootJointRobot sdfRobot)
    {
       this.sdfRobot = sdfRobot;
    }

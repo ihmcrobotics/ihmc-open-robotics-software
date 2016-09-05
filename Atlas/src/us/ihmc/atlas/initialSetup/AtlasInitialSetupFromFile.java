@@ -8,7 +8,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
@@ -96,7 +96,7 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFHumano
       robotInitialized = true;
    }
 
-   private void setRobotAngle(String jointName, Properties properties, SDFRobot robot)
+   private void setRobotAngle(String jointName, Properties properties, FloatingRootJointRobot robot)
    {
       if (jointName == null)
          return;

@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -48,7 +48,7 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFHu
       robot.setPositionInWorld(offset);
    }
 
-   protected void setArmJointPositions(SDFRobot robot)
+   protected void setArmJointPositions(FloatingRootJointRobot robot)
    {
       // Avoid singularities at startup
 
@@ -59,7 +59,7 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFHu
 //      robot.getOneDoFJoint(jointNames[r_arm_elx]).setQ(-1.57);
    }
 
-   protected void setLegJointPositions(SDFRobot robot)
+   protected void setLegJointPositions(FloatingRootJointRobot robot)
    {
 //      try{
 //         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpy]).setQ(-0.4);

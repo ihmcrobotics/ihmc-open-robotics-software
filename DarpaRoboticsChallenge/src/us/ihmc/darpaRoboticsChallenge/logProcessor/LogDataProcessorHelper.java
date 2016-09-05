@@ -10,7 +10,7 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createZName;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
@@ -70,7 +70,7 @@ public class LogDataProcessorHelper
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final DoubleYoVariable yoTime;
 
-   public LogDataProcessorHelper(DRCRobotModel model, SimulationConstructionSet scs, SDFRobot sdfRobot)
+   public LogDataProcessorHelper(DRCRobotModel model, SimulationConstructionSet scs, FloatingRootJointRobot sdfRobot)
    {
       this.scs = scs;
       fullRobotModel = model.createFullRobotModel();

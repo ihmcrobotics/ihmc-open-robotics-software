@@ -20,7 +20,7 @@ import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotDataCommunication.VisualizerRobot;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.tools.ClassLoaderTools;
@@ -53,7 +53,7 @@ public class SDFModelLoader implements LogModelLoader
    }
 
    @Override
-   public SDFRobot createRobot()
+   public FloatingRootJointRobot createRobot()
    {
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = true;

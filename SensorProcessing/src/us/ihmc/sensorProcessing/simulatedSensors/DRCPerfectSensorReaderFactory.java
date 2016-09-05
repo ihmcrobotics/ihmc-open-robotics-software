@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -20,13 +20,13 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 
 public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
 {
-   private final SDFRobot robot;
+   private final FloatingRootJointRobot robot;
 
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private final DRCPerfectSensorReader perfectSensorReader;
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
-   public DRCPerfectSensorReaderFactory(SDFRobot robot, ForceSensorDataHolder forceSensorDataHolderToUpdate, double estimateDT)
+   public DRCPerfectSensorReaderFactory(FloatingRootJointRobot robot, ForceSensorDataHolder forceSensorDataHolderToUpdate, double estimateDT)
    {
       this.robot = robot;
       perfectSensorReader = new DRCPerfectSensorReader(estimateDT);

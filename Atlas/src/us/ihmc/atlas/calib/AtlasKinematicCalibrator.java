@@ -9,7 +9,7 @@ import org.ddogleg.optimization.functions.FunctionNtoM;
 
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class AtlasKinematicCalibrator
 {
-   private final SDFRobot robot;
+   private final FloatingRootJointRobot robot;
    protected final SDFFullHumanoidRobotModel fullRobotModel;
 
    protected final OneDoFJoint[] joints;

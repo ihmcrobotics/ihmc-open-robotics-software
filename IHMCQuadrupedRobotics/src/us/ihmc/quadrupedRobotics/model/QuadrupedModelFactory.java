@@ -5,12 +5,12 @@ import java.util.Collection;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModelFactory;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 
 public abstract class QuadrupedModelFactory implements SDFFullQuadrupedRobotModelFactory
 {
-   public abstract SDFRobot createSdfRobot();
+   public abstract FloatingRootJointRobot createSdfRobot();
    
    @Override
    public abstract SDFFullQuadrupedRobotModel createFullRobotModel();

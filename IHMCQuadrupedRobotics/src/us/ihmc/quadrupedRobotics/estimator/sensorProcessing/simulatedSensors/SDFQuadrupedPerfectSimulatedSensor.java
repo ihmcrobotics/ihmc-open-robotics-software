@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors;
 import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -27,7 +27,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    
    private final BooleanYoVariable enableDrives;
    
-   public SDFQuadrupedPerfectSimulatedSensor(SDFRobot sdfRobot, SDFFullQuadrupedRobotModel sdfFullRobotModel, CommonQuadrupedReferenceFrames referenceFrames)
+   public SDFQuadrupedPerfectSimulatedSensor(FloatingRootJointRobot sdfRobot, SDFFullQuadrupedRobotModel sdfFullRobotModel, CommonQuadrupedReferenceFrames referenceFrames)
    {
       super(sdfRobot, sdfFullRobotModel, referenceFrames);
       

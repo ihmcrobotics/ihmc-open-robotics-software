@@ -6,7 +6,7 @@ import com.martiansoftware.jsap.JSAPException;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -55,7 +55,7 @@ public class AtlasPushRecoveryTrack
       DRCFlatGroundWalkingTrack track = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
             cheatWithGroundHeightAtForFootstep, model);
 
-      SDFRobot robot = track.getDrcSimulation().getRobot();
+      FloatingRootJointRobot robot = track.getDrcSimulation().getRobot();
       SDFFullHumanoidRobotModel fullRobotModel = model.createFullRobotModel();
       PushRobotController pushRobotController = new PushRobotController(robot, fullRobotModel);
 

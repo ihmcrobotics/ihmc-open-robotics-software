@@ -9,7 +9,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 
-public class SDFHumanoidRobot extends SDFRobot
+public class SDFHumanoidRobot extends FloatingRootJointRobot
 {
    private final SideDependentList<String> jointsBeforeFeet = new SideDependentList<String>();
 

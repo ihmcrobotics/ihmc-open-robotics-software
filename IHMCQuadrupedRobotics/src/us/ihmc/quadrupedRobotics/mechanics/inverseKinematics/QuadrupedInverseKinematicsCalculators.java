@@ -6,7 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
@@ -95,7 +95,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
       quadrantHolders.get(robotQuadrant).setDesiredLegAnglesInFullRobotModel(jointAnglesToPack);
    }
 
-   public void updateSimulationBasedOnFullRobotModel(SDFRobot sdfRobot)
+   public void updateSimulationBasedOnFullRobotModel(FloatingRootJointRobot sdfRobot)
    {
       for (OneDoFJoint joint : oneDoFJoints)
       {

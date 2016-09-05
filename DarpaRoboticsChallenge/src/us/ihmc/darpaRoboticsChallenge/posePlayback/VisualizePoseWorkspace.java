@@ -7,7 +7,7 @@ import javax.swing.JFileChooser;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -112,7 +112,7 @@ public class VisualizePoseWorkspace
    {
       private final SimulationConstructionSet scs;
 
-      public LoadSequenceListener(FullRobotModel fullRobotModel, SDFRobot sdfRobot, SimulationConstructionSet scs)
+      public LoadSequenceListener(FullRobotModel fullRobotModel, FloatingRootJointRobot sdfRobot, SimulationConstructionSet scs)
       {
          this.scs = scs;
       }
