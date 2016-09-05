@@ -23,7 +23,7 @@ import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.RobotConstructorFromRobotDescription;
+import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
@@ -55,7 +55,7 @@ public class SDFRobotTest
 
       RobotDescription robotDescription = robotDescriptionFromSDFLoader.getRobotDescription();
 
-      RobotConstructorFromRobotDescription robot = new RobotConstructorFromRobotDescription(robotDescription);
+      RobotFromDescription robot = new RobotFromDescription(robotDescription);
 
       checkRobotsMatch(sdfHumanoidRobot, robot);
    }

@@ -25,7 +25,7 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 
-public class RobotConstructorFromRobotDescription extends Robot implements OneDegreeOfFreedomJointHolder
+public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJointHolder
 {
    private HashMap<String, Joint> jointNameMap = new HashMap<>();
    private HashMap<JointDescription, Joint> jointDescriptionMap = new HashMap<>();
@@ -46,7 +46,7 @@ public class RobotConstructorFromRobotDescription extends Robot implements OneDe
 
    private final LinkedHashMap<Joint, ArrayList<GroundContactPoint>> jointToGroundContactPointsMap = new LinkedHashMap<Joint, ArrayList<GroundContactPoint>>();
 
-   public RobotConstructorFromRobotDescription(RobotDescription description)
+   public RobotFromDescription(RobotDescription description)
    {
       super(description.getName());
       constructRobotFromDescription(description);
