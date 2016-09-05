@@ -2067,8 +2067,8 @@ public class ConvexPolygon2dTest
          assertTrue(polygonWithOnePoint.getVertex(0).equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getClosestEdgeCopy(arbitraryPoint0) == null);
          assertTrue(polygonWithOnePoint.getClosestEdgeVertexIndicesInClockwiseOrderedList(arbitraryPoint0) == null);
-         assertTrue(calculator.getClosestVertexCopy(arbitraryLine, polygonWithOnePoint).equals(pointThatDefinesThePolygon));
-         assertTrue(calculator.getClosestVertexCopy(arbitraryPoint0, polygonWithOnePoint).equals(pointThatDefinesThePolygon));
+         assertTrue(ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryLine, polygonWithOnePoint).equals(pointThatDefinesThePolygon));
+         assertTrue(ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithOnePoint).equals(pointThatDefinesThePolygon));
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
          assertTrue(polygonWithOnePoint.getVertexCCW(0).equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getIntersectingEdges(arbitraryLine) == null);
@@ -2242,13 +2242,13 @@ public class ConvexPolygon2dTest
          assertTrue(expectedProjection.epsilonEquals(actualProjection, epsilon));
 
          // getClosestVertexCopy
-         Point2d closestVertexToLine = calculator.getClosestVertexCopy(arbitraryLine, polygonWithTwoPoints);
+         Point2d closestVertexToLine = ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryLine, polygonWithTwoPoints);
          if (arbitraryLine.distance(pointThatDefinesThePolygon0) < arbitraryLine.distance(pointThatDefinesThePolygon1))
             assertEquals(closestVertexToLine, pointThatDefinesThePolygon0);
          else
             assertEquals(closestVertexToLine, pointThatDefinesThePolygon1);
 
-         Point2d closestVertexToPoint = calculator.getClosestVertexCopy(arbitraryPoint0, polygonWithTwoPoints);
+         Point2d closestVertexToPoint = ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithTwoPoints);
          if (arbitraryPoint0.distance(pointThatDefinesThePolygon0) < arbitraryPoint0.distance(pointThatDefinesThePolygon1))
             assertEquals(closestVertexToPoint, pointThatDefinesThePolygon0);
          else

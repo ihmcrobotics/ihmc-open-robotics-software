@@ -56,8 +56,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    private final LineSegment2d tempSegment2 = new LineSegment2d();
    private final LineSegment2d tempSegment3 = new LineSegment2d();
 
-   private final ConvexPolygon2dCalculator calculator = new ConvexPolygon2dCalculator();
-
    /**
     * Creates an empty convex polygon.
     */
@@ -1759,7 +1757,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       {
          // TODO: this duplicates the computation in intersectionWith(ray) - same below
          if (tempSegment1.intersectionWith(ray) == null)
-            calculator.getClosestVertex(ray, this, intersectionToPack1);
+            ConvexPolygon2dCalculator.getClosestVertex(ray, this, intersectionToPack1);
          else
             intersectionToPack1.set(tempSegment1.intersectionWith(ray));
 
@@ -1770,12 +1768,12 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       else if (intersectingEdges == 2)
       {
          if (tempSegment1.intersectionWith(ray) == null)
-            calculator.getClosestVertex(ray, this, intersectionToPack1);
+            ConvexPolygon2dCalculator.getClosestVertex(ray, this, intersectionToPack1);
          else
             intersectionToPack1.set(tempSegment1.intersectionWith(ray));
 
          if (tempSegment2.intersectionWith(ray) == null)
-            calculator.getClosestVertex(ray, this, intersectionToPack2);
+            ConvexPolygon2dCalculator.getClosestVertex(ray, this, intersectionToPack2);
          else
             intersectionToPack2.set(tempSegment2.intersectionWith(ray));
 
