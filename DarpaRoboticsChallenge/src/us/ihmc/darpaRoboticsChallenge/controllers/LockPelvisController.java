@@ -56,7 +56,7 @@ public class LockPelvisController implements RobotController
          System.err.println("No chest or spine found. Stack trace:");
          e.printStackTrace();
 
-         jointToAddExternalForcePoints = robot.getPelvisJoint();
+         jointToAddExternalForcePoints = robot.getRootJoint();
       }
 
       holdPelvisKp.set(5000.0);

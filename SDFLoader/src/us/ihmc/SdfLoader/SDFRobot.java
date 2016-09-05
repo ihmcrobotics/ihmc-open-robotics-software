@@ -1,7 +1,5 @@
 package us.ihmc.SdfLoader;
 
-import java.util.ArrayList;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
@@ -12,7 +10,6 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.tools.FormattingTools;
 
@@ -29,7 +26,8 @@ public class SDFRobot extends RobotFromDescription
 
       Point3d centerOfMass = new Point3d();
       double totalMass = computeCenterOfMass(centerOfMass);
-      if (DEBUG) System.out.println("SDFRobot: Total robot mass: " + FormattingTools.getFormattedDecimal3D(totalMass) + " (kg)");
+      if (DEBUG)
+         System.out.println("SDFRobot: Total robot mass: " + FormattingTools.getFormattedDecimal3D(totalMass) + " (kg)");
    }
 
    public Quat4d getRootJointToWorldRotationQuaternion()
@@ -72,7 +70,6 @@ public class SDFRobot extends RobotFromDescription
       return rootJoint;
    }
 
-
    public FrameVector getRootJointVelocity()
    {
       FrameVector ret = new FrameVector(ReferenceFrame.getWorldFrame());
@@ -81,11 +78,10 @@ public class SDFRobot extends RobotFromDescription
       return ret;
    }
 
-   public FrameVector getPelvisAngularVelocityInPelvisFrame(ReferenceFrame pelvisFrame)
+   public FrameVector getRootJointAngularVelocityInRootJointFrame(ReferenceFrame rootJointFrame)
    {
       Vector3d angularVelocity = rootJoint.getAngularVelocityInBody();
-
-      return new FrameVector(pelvisFrame, angularVelocity);
+      return new FrameVector(rootJointFrame, angularVelocity);
    }
 
    public Vector3d getPositionInWorld()
@@ -115,37 +111,5 @@ public class SDFRobot extends RobotFromDescription
    {
       rootJoint.getAngularVelocityInBody(vectorToPack);
    }
-
-   public Joint getJoint(String jointName)
-   {
-      return getJointRecursively(this.getRootJoints(), jointName);
-   }
-
-   private Joint getJointRecursively(ArrayList<Joint> joints, String jointName)
-   {
-      for (Joint joint : joints)
-      {
-         String nextJointName = joint.getName();
-
-         if (nextJointName.equals(jointName))
-         {
-            return joint;
-         }
-
-         ArrayList<Joint> children = joint.getChildrenJoints();
-
-         Joint foundJoint = getJointRecursively(children, jointName);
-         if (foundJoint != null)
-            return foundJoint;
-      }
-
-      return null;
-   }
-
-   public FloatingJoint getPelvisJoint()
-   {
-      return getRootJoint();
-   }
-
 
 }
