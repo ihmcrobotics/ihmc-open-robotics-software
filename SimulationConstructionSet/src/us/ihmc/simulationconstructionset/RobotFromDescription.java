@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
+import us.ihmc.robotics.robotDescription.DummyOneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.FloatingPlanarJointDescription;
@@ -359,6 +360,15 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
             sliderJoint.setLimitStops(qMin, qMax, kLimit, bLimit);
          }
       }
+      else if (jointDescription instanceof DummyOneDoFJointDescription)
+      {
+         DummyOneDoFJointDescription dummyOneDoFJointDescription = (DummyOneDoFJointDescription) jointDescription;
+         Vector3d offset = new Vector3d();
+         dummyOneDoFJointDescription.getOffsetFromParentJoint(offset);
+
+         joint = new DummyOneDegreeOfFreedomJoint(jointDescription.getName(), offset, this, dummyOneDoFJointDescription.getJointAxis());
+      }
+
       else
       {
          throw new RuntimeException("Don't support that joint type yet. Please implement it! Type = " + jointDescription.getClass());
