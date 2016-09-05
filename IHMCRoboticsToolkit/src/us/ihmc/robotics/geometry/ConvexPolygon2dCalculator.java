@@ -41,7 +41,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Packs the closest vertex in the polygon to the given line.
     */
-   public boolean getClosestVertex(Line2d line, ConvexPolygon2d polygon, Point2d pointToPack)
+   public static boolean getClosestVertex(Line2d line, ConvexPolygon2d polygon, Point2d pointToPack)
    {
       double minDistance = Double.POSITIVE_INFINITY;
       pointToPack.set(Double.NaN, Double.NaN);
@@ -63,7 +63,7 @@ public class ConvexPolygon2dCalculator
    /**
     * Packs the closest vertex to the polygon to the given point
     */
-   public boolean getClosestVertex(Point2d point, ConvexPolygon2d polygon, Point2d pointToPack)
+   public static boolean getClosestVertex(Point2d point, ConvexPolygon2d polygon, Point2d pointToPack)
    {
       double minDistance = Double.POSITIVE_INFINITY;
       pointToPack.set(Double.NaN, Double.NaN);
@@ -84,7 +84,7 @@ public class ConvexPolygon2dCalculator
 
 
    // --- Methods that generate garbage ---
-   public Point2d getClosestVertexCopy(Line2d line, ConvexPolygon2d polygon)
+   public static Point2d getClosestVertexCopy(Line2d line, ConvexPolygon2d polygon)
    {
       Point2d ret = new Point2d();
       if (getClosestVertex(line, polygon, ret))
@@ -92,7 +92,7 @@ public class ConvexPolygon2dCalculator
       return null;
    }
 
-   public Point2d getClosestVertexCopy(Point2d point, ConvexPolygon2d polygon)
+   public static Point2d getClosestVertexCopy(Point2d point, ConvexPolygon2d polygon)
    {
       Point2d ret = new Point2d();
       if (getClosestVertex(point, polygon, ret))
