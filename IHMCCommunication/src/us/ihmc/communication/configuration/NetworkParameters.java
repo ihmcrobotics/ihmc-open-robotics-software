@@ -103,18 +103,19 @@ public class NetworkParameters
          }
          if (key != NetworkParameterKeys.rosURI)
          {
-            PrintTools.error("Could not find " + key.toString() + "! Please check you ini for a " + key.toString()
+            throw new RuntimeException("Could not find " + key.toString() + "! Please check you ini for a " + key.toString()
                   + " and check that the key and value are seperated by a colon. You can use the NetworkParametersCreator to create this file for you. (if using Env. Variables it would be named: "
                   + envVarString + ") . Exiting.\n" + helpText);
          }
          else
          {
-            PrintTools.error(
+            throw new RuntimeException(
                   "Could not establish the ROS Master URI. Check your environment variables for ROS_MASTER_URI or set the IHMC Network key " + key.toString()
                         + " in your ini file. Exiting.\n" + helpText);
          }
 
-         System.exit(-1);
+
+//         System.exit(-1);
       }
       return value;
    }
