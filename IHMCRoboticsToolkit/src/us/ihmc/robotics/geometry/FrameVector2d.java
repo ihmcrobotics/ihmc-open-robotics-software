@@ -20,6 +20,8 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, TransformableVect
 {
    private static final long serialVersionUID = -610124454205790361L;
 
+   private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
+   
    /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
    public FrameVector2d(ReferenceFrame referenceFrame, double x, double y, String name)
    {
@@ -170,4 +172,13 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, TransformableVect
       scale(maxLength / length);
    }
 
+   public void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame)
+   {
+      if (desiredFrame == referenceFrame)
+         return;
+
+      referenceFrame.getTransformToDesiredFrame(temporaryTransformToDesiredFrame, desiredFrame);
+      getGeometryObject().applyTransform(temporaryTransformToDesiredFrame, false);
+      this.referenceFrame = desiredFrame;
+   }
 }
