@@ -37,7 +37,7 @@ public class SpringFlamingoSimulation
 // private static int controllerToUse = FAST_WALKING_CONTROLLER;
    private static int controllerToUse = BALLISTIC_WALKING_CONTROLLER;
 
-   public static double DT = 0.00001;
+   public static double DT = 0.0001;
    public static int TICKS_PER_RECORD = 100;
    public static int TICKS_PER_CONTROL = 10;
 
