@@ -19,6 +19,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.sensors.ContactSensorType;
 
 public class JaxbSDFLoader
@@ -31,7 +32,7 @@ public class JaxbSDFLoader
    {
       this(new FileInputStream(file), resourceDirectories);
    }
-   
+
    public JaxbSDFLoader(InputStream inputStream, List<String> resourceDirectories) throws JAXBException, FileNotFoundException
    {
       this(inputStream, resourceDirectories, null);
@@ -41,7 +42,7 @@ public class JaxbSDFLoader
    {
       this(new FileInputStream(file), Arrays.asList(resourceDirectory), mutator);
    }
-   
+
    public JaxbSDFLoader(InputStream inputStream, String[] resourceDirectories, SDFDescriptionMutator mutator) throws JAXBException, FileNotFoundException
    {
       this(inputStream, Arrays.asList(resourceDirectories), mutator);
@@ -124,13 +125,14 @@ public class JaxbSDFLoader
    }
 
    public SDFHumanoidRobot createRobot(String modelName, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits,
-           boolean enableDamping)
+           boolean enableJointDamping)
    {
       checkModelName(modelName);
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = generalizedSDFRobotModels.get(modelName);
-
-      return new SDFHumanoidRobot(generalizedSDFRobotModel, generalizedSDFRobotModel.getSDFDescriptionMutator(), sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+      RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      return new SDFHumanoidRobot(description, sdfJointNameMap);
    }
 
    public void addForceSensor(SDFJointNameMap jointMap, String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)

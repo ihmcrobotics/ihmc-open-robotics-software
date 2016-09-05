@@ -150,7 +150,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       AbstractThreadedRobotController robotController = createController(robotModel, controllerCommunicatorServer, globalDataProducer, outputWriter, sdfRobot);
       sdfRobot.setController(robotController);
 
-      OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDoFJoints();
+      OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDegreeOfFreedomJoints();
 
       robotController.doControl();
       controllerCommunicatorServer.send(new HighLevelStateMessage(HighLevelState.WALKING));
@@ -248,7 +248,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       AbstractThreadedRobotController robotController = createController(robotModel, packetCommunicatorServer, globalDataProducer, outputWriter, sdfRobot);
       sdfRobot.setController(robotController);
 
-      OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDoFJoints();
+      OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDegreeOfFreedomJoints();
 
       robotController.doControl();
       packetCommunicatorClient.send(new HighLevelStateMessage(HighLevelState.WALKING));

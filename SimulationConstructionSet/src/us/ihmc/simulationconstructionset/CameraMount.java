@@ -12,7 +12,6 @@ import us.ihmc.robotics.geometry.TransformTools;
 
 public class CameraMount implements CameraMountInterface
 {
-
    private final String name;
 
    private final RigidBodyTransform offsetTransform;
@@ -231,7 +230,7 @@ public class CameraMount implements CameraMountInterface
 
    public void setImageWidth(int imageWidth)
    {
-      this.imageHeight = imageWidth;
+      this.imageWidth = imageWidth;
    }
 
    public void setImageHeight(int imageHeight)

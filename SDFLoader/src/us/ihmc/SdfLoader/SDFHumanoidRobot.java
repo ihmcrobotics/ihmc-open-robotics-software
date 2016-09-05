@@ -3,6 +3,7 @@ package us.ihmc.SdfLoader;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -10,22 +11,14 @@ import us.ihmc.simulationconstructionset.Joint;
 
 public class SDFHumanoidRobot extends SDFRobot
 {
-
    private final SideDependentList<String> jointsBeforeFeet = new SideDependentList<String>();
 
    private final SideDependentList<ArrayList<GroundContactPoint>> footGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
-
    private final SideDependentList<ArrayList<GroundContactPoint>> handGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
 
-   public SDFHumanoidRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   public SDFHumanoidRobot(RobotDescription robotDescription, SDFHumanoidJointNameMap sdfJointNameMap)
    {
-      this(generalizedSDFRobotModel, descriptionMutator, sdfJointNameMap, useCollisionMeshes, true, true);
-   }
-
-   public SDFHumanoidRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFDescriptionMutator descriptionMutator, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
-         boolean enableTorqueVelocityLimits, boolean enableDamping)
-   {
-      super(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+      super(robotDescription);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -37,7 +30,7 @@ public class SDFHumanoidRobot extends SDFRobot
          }
       }
 
-      for(Joint joint : getOneDoFJoints())
+      for(Joint joint : getOneDegreeOfFreedomJoints())
       {
          for(RobotSide robotSide : RobotSide.values)
          {

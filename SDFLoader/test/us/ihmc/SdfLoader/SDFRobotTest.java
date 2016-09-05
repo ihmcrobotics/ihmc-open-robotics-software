@@ -44,17 +44,18 @@ public class SDFRobotTest
 
       SDFHumanoidJointNameMap sdfJointNameMap = null;
       boolean useCollisionMeshes = true;
-      SDFHumanoidRobot sdfHumanoidRobot = new SDFHumanoidRobot(generalizedSDFRobotModel, mutator, sdfJointNameMap, useCollisionMeshes);
+      boolean enableTorqueVelocityLimits = true;
+      boolean enableJointDamping = true;
 
+      RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
+      RobotDescription description = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      SDFHumanoidRobot sdfHumanoidRobot = new SDFHumanoidRobot(description, sdfJointNameMap);
 
       inputStream = getClass().getClassLoader().getResourceAsStream("sdfRobotTest.sdf");
       RobotDescriptionFromSDFLoader robotDescriptionFromSDFLoader = new RobotDescriptionFromSDFLoader();
-      boolean enableTorqueVelocityLimits = true;
-      boolean enableDamping = true;
-      robotDescriptionFromSDFLoader.loadRobotDescriptionFromSDF(modelName, inputStream, resourceDirectories, mutator, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+      robotDescriptionFromSDFLoader.loadRobotDescriptionFromSDF(modelName, inputStream, resourceDirectories, mutator, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
       RobotDescription robotDescription = robotDescriptionFromSDFLoader.getRobotDescription();
-
       RobotFromDescription robot = new RobotFromDescription(robotDescription);
 
       checkRobotsMatch(sdfHumanoidRobot, robot);
