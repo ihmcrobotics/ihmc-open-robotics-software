@@ -343,7 +343,7 @@ public class DRCSimulationFactory
 
       simulatedRobot.computeCenterOfMass(initialCoMPosition);
 
-      Joint estimationJoint = simulatedRobot.getPelvisJoint();
+      Joint estimationJoint = simulatedRobot.getRootJoint();
 
       RigidBodyTransform estimationLinkTransform3D = estimationJoint.getJointTransform3D();
       Quat4d initialEstimationLinkOrientation = new Quat4d();

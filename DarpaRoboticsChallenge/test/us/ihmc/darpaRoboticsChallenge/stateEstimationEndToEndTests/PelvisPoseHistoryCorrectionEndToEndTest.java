@@ -77,7 +77,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    //TODO get that from the StateEstimatorParameters
    private static final boolean USE_ROTATION_CORRECTION = false;
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private BlockingSimulationRunner blockingSimulationRunner;
    private DRCFlatGroundWalkingTrack flatGroundWalkingTrack;
@@ -114,7 +114,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
          blockingSimulationRunner.destroySimulation();
          blockingSimulationRunner = null;
       }
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -146,7 +146,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    private DoubleYoVariable previousRotationClippedAlphaValue;
    private final double previousTranslationAlphaValue = Double.POSITIVE_INFINITY;
    private final double previousRotationAlphaValue = Double.POSITIVE_INFINITY;
-   
+
    private DoubleYoVariable pelvisX;
    private DoubleYoVariable pelvisY;
    private DoubleYoVariable pelvisZ;
@@ -178,21 +178,21 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    private DoubleYoVariable localizationBackInTimeFrame_yaw;
    private DoubleYoVariable localizationBackInTimeFrame_pitch;
    private DoubleYoVariable localizationBackInTimeFrame_roll;
-   
+
    private DoubleYoVariable totalTranslationErrorFrame_x;
    private DoubleYoVariable totalTranslationErrorFrame_y;
    private DoubleYoVariable totalTranslationErrorFrame_z;
    private DoubleYoVariable totalTranslationErrorFrame_yaw;
    private DoubleYoVariable totalTranslationErrorFrame_pitch;
    private DoubleYoVariable totalTranslationErrorFrame_roll;
-   
+
    private DoubleYoVariable totalRotationErrorFrame_x;
    private DoubleYoVariable totalRotationErrorFrame_y;
    private DoubleYoVariable totalRotationErrorFrame_z;
    private DoubleYoVariable totalRotationErrorFrame_yaw;
    private DoubleYoVariable totalRotationErrorFrame_pitch;
    private DoubleYoVariable totalRotationErrorFrame_roll;
-   
+
    private DoubleYoVariable interpolatedTranslationCorrectionFrame_x;
    private DoubleYoVariable interpolatedTranslationCorrectionFrame_y;
    private DoubleYoVariable interpolatedTranslationCorrectionFrame_z;
@@ -205,7 +205,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    private DoubleYoVariable interpolationTranslationStartFrame_yaw;
    private DoubleYoVariable interpolationTranslationStartFrame_pitch;
    private DoubleYoVariable interpolationTranslationStartFrame_roll;
-   
+
    private DoubleYoVariable interpolatedRotationCorrectionFrame_x;
    private DoubleYoVariable interpolatedRotationCorrectionFrame_y;
    private DoubleYoVariable interpolatedRotationCorrectionFrame_z;
@@ -218,7 +218,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    private DoubleYoVariable interpolationRotationStartFrame_yaw;
    private DoubleYoVariable interpolationRotationStartFrame_pitch;
    private DoubleYoVariable interpolationRotationStartFrame_roll;
-   
+
    private DoubleYoVariable manualTranslationOffsetX;
    private DoubleYoVariable manualTranslationOffsetY;
    private BooleanYoVariable manuallyTriggerLocalizationUpdate;
@@ -279,21 +279,21 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       localizationBackInTimeFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_yaw");
       localizationBackInTimeFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_pitch");
       localizationBackInTimeFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "localizationBackInTimeFrame_roll");
-      
+
       totalTranslationErrorFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "totalTranslationErrorFrame_x");
       totalTranslationErrorFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "totalTranslationErrorFrame_y");
       totalTranslationErrorFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "totalTranslationErrorFrame_z");
       totalTranslationErrorFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "totalTranslationErrorFrame_yaw");
       totalTranslationErrorFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "totalTranslationErrorFrame_pitch");
       totalTranslationErrorFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "totalTranslationErrorFrame_roll");
-      
+
       totalRotationErrorFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "totalRotationErrorFrame_x");
       totalRotationErrorFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "totalRotationErrorFrame_y");
       totalRotationErrorFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "totalRotationErrorFrame_z");
       totalRotationErrorFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "totalRotationErrorFrame_yaw");
       totalRotationErrorFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "totalRotationErrorFrame_pitch");
       totalRotationErrorFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "totalRotationErrorFrame_roll");
-      
+
       interpolatedTranslationCorrectionFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_x");
       interpolatedTranslationCorrectionFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_y");
       interpolatedTranslationCorrectionFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedTranslationCorrectionFrame_z");
@@ -306,7 +306,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       interpolationTranslationStartFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_yaw");
       interpolationTranslationStartFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_pitch");
       interpolationTranslationStartFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationStartFrame_roll");
-      
+
       interpolatedRotationCorrectionFrame_x = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_x");
       interpolatedRotationCorrectionFrame_y = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_y");
       interpolatedRotationCorrectionFrame_z = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolatedRotationCorrectionFrame_z");
@@ -319,7 +319,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       interpolationRotationStartFrame_yaw = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_yaw");
       interpolationRotationStartFrame_pitch = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_pitch");
       interpolationRotationStartFrame_roll = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationRotationStartFrame_roll");
-      
+
       manualTranslationOffsetX = (DoubleYoVariable) registry.getVariable(nameSpace, "manualTranslationOffset_X");
       manualTranslationOffsetY = (DoubleYoVariable) registry.getVariable(nameSpace, "manualTranslationOffset_Y");
       manuallyTriggerLocalizationUpdate = (BooleanYoVariable) registry.getVariable(nameSpace, "manuallyTriggerLocalizationUpdate");
@@ -348,7 +348,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
       sendPelvisCorrectionPackets = false;
-      
+
       assertTrue(success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -399,7 +399,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
 	/**
 	 * Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.
-	 * 
+	 *
 	 * @throws SimulationExceededMaximumTimeException
 	 */
 	@DeployableTestMethod(estimatedDuration = 7.7)
@@ -429,7 +429,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
 	/**
 	 * Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.
-	 * 
+	 *
 	 * @throws SimulationExceededMaximumTimeException
 	 */
 	@DeployableTestMethod(estimatedDuration = 9.4)
@@ -458,10 +458,10 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	
+
 	/**
 	 * Work in progress. Fix these tests in order to make Atlas more robust to Localization drift
-	 * 
+	 *
 	 * @throws SimulationExceededMaximumTimeException
 	 */
 	@DeployableTestMethod(estimatedDuration = 8.1)
@@ -520,7 +520,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    /**
     * Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.
-    * 
+    *
     * @throws SimulationExceededMaximumTimeException
     * @throws ControllerFailureException
     */
@@ -559,8 +559,8 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       {
          success = false;
       }
-   
-      
+
+
       assertTrue(success);
       sendPelvisCorrectionPackets = false;
 
@@ -589,7 +589,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
    public void createSCS()
    {
       Robot robot = new PointMassRobot();
-      
+
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(true);
       simulationConstructionSet = new SimulationConstructionSet(robot, parameters);
@@ -623,7 +623,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
          return testTranslationInterpolationToRandomTargets(robot, registry, numTargets);
    }
 
-   
+
    //TODO retune the test because of the change of rotation handling (which now has its own alphaFilter) in the PelvisPoseHistoryCorrection
    private boolean testTranslationAndRotationInterpolationToRandomTargets(final Robot robot, YoVariableRegistry registry, int numTargets)
          throws SimulationExceededMaximumTimeException
@@ -665,7 +665,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
          {
             success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT() * 100);
          }
-         
+
          double xError = Math.abs(pelvisX.getDoubleValue() - targetTranslation.getX());
          double yError = Math.abs(pelvisY.getDoubleValue() - targetTranslation.getY());
          double zError = Math.abs(pelvisZ.getDoubleValue() - targetTranslation.getZ());
@@ -696,66 +696,66 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       System.out.println(" max fudge factor: " + largestError);
       return success;
    }
-   
+
    private boolean testTranslationInterpolationToRandomTargets(final Robot robot, YoVariableRegistry registry, int numTargets)
          throws SimulationExceededMaximumTimeException
    {
       YoFramePose target = new YoFramePose("target_", ReferenceFrame.getWorldFrame(), registry);
       RigidBodyTransform[] targets = createRandomCorrectionTargets(numTargets);
       boolean success = true;
-      
+
       Vector3d targetTranslation = new Vector3d();
       Quat4d targetQuat = new Quat4d();
       double[] yawPitchRoll = new double[3];
       double translationFudgeFactor = 0.015;
       double rotationFudgeFactor = 0.035;
       double largestError = Double.NEGATIVE_INFINITY;
-      
+
       for (int i = 0; i < targets.length; i++)
       {
          success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT() * 10);
          targets[i].getTranslation(targetTranslation);
          targets[i].getRotation(targetQuat);
-         
+
          RotationTools.convertQuaternionToYawPitchRoll(targetQuat, yawPitchRoll);
          target.setYawPitchRoll(yawPitchRoll);
          target.setXYZ(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
-         
+
          long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
-         
+
          success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT() * 3);
          externalPelvisPosePublisher.setNewestPose(posePacket);
-         
+
          double yawErrorBeforeCorrection = Math.abs(pelvisYaw.getDoubleValue() - yawPitchRoll[0]);
          double pitchErrorBeforeCorrection = Math.abs(pelvisPitch.getDoubleValue() - yawPitchRoll[1]);
          double rollErrorBeforeCorrection = Math.abs(pelvisRoll.getDoubleValue() - yawPitchRoll[2]);
-         
+
          while (translationClippedAlphaValue.getDoubleValue() > 0.2)
          {
             success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT());
          }
-         
+
          while (translationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
             success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT() * 100);
          }
-         
+
          double xError = Math.abs(pelvisX.getDoubleValue() - targetTranslation.getX());
          double yError = Math.abs(pelvisY.getDoubleValue() - targetTranslation.getY());
          double zError = Math.abs(pelvisZ.getDoubleValue() - targetTranslation.getZ());
          double yawErrorAfterCorrection = Math.abs(pelvisYaw.getDoubleValue() - yawPitchRoll[0]);
          double pitchErrorAfterCorrection = Math.abs(pelvisPitch.getDoubleValue() - yawPitchRoll[1]);
          double rollErrorAfterCorrection = Math.abs(pelvisRoll.getDoubleValue() - yawPitchRoll[2]);
-         
+
          if (xError > largestError)
             largestError = xError;
          if (yError > largestError)
             largestError = yError;
          if (zError > largestError)
             largestError = zError;
-         
+
          success &= xError <= translationFudgeFactor;
          success &= yError <= translationFudgeFactor;
          success &= zError <= translationFudgeFactor;
@@ -773,7 +773,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       Runnable pelvisCorrectorSource = new Runnable()
       {
 
-         FloatingJoint pelvis = robot.getPelvisJoint();
+         FloatingJoint pelvis = robot.getRootJoint();
          RigidBodyTransform pelvisTransform = new RigidBodyTransform();
 
          @Override
@@ -825,7 +825,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       DoubleYoVariable pelvisTranslationCorrectorAlphaFilterBF = (DoubleYoVariable) registry.getVariable("PelvisPoseHistoryCorrection",
             "interpolationTranslationAlphaFilterBreakFrequency");
       pelvisTranslationCorrectorAlphaFilterBF.set(breakFrequencyTranslation);
-      
+
       DoubleYoVariable pelvisRotationCorrectorAlphaFilterBF = (DoubleYoVariable) registry.getVariable("PelvisPoseHistoryCorrection",
             "interpolationRotationAlphaFilterBreakFrequency");
       pelvisRotationCorrectorAlphaFilterBF.set(breakFrequencyRotation);
@@ -845,7 +845,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       BooleanYoVariable useExternalPelvisCorrector = (BooleanYoVariable) registry.getVariable("DRCKinematicsBasedStateEstimator", "useExternalPelvisCorrector");
       useExternalPelvisCorrector.set(activate);
    }
-   
+
    private void setupSim(DRCObstacleCourseStartingLocation startingLocation, boolean useScript) throws SimulationExceededMaximumTimeException
    {
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "PelvisCorrectionTest",
@@ -942,9 +942,9 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       {
          //doNothing
       }
-      
+
       @Override
-      public void sendPelvisPoseErrorPacket(PelvisPoseErrorPacket pelvisPoseErrorPacket) 
+      public void sendPelvisPoseErrorPacket(PelvisPoseErrorPacket pelvisPoseErrorPacket)
       {
         //doNothing
       }
@@ -953,7 +953,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       public void sendLocalizationResetRequest(LocalizationPacket localizationPacket)
       {
          // TODO Auto-generated method stub
-         
+
       }
    }
 
