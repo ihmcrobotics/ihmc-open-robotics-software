@@ -53,7 +53,7 @@ public class SmartCMPProjectorTest
    private static boolean showPlotterOnDirectionChange = false;
    private static boolean showPlotterOnFail = false;
 
-   private static final double epsilon = 1.0e-8;
+   private static final double epsilon = 1.0e-4;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final Random random = new Random(727434726273L);
