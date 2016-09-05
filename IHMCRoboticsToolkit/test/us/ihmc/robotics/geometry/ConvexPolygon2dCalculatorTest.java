@@ -1,6 +1,8 @@
 package us.ihmc.robotics.geometry;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Point2d;
 
@@ -86,9 +88,100 @@ public class ConvexPolygon2dCalculatorTest
       assertDistanceCorrect(-Math.sqrt(5.0 * 5.0 + 0.15 * 0.15), distance6);
    }
 
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetClosestVertexPoint1()
+   {
+      Point2d vertex1 = new Point2d(0.0, 0.0);
+      Point2d vertex2 = new Point2d(10.0, 0.0);
+      Point2d vertex3 = new Point2d(0.0, 10.0);
+
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(vertex1);
+      polygon.addVertex(vertex2);
+      polygon.addVertex(vertex3);
+      polygon.update();
+
+      Point2d point1 = new Point2d(-1.0, -1.0);
+      assertPointsEqual(vertex1, calculator.getClosestVertexCopy(point1, polygon));
+
+      Point2d point2 = new Point2d(1.0, 1.0);
+      assertPointsEqual(vertex1, calculator.getClosestVertexCopy(point2, polygon));
+
+      Point2d point3 = new Point2d(10.0, 0.0);
+      assertPointsEqual(vertex2, calculator.getClosestVertexCopy(point3, polygon));
+
+      Point2d point4 = new Point2d(9.8, 0.0);
+      assertPointsEqual(vertex2, calculator.getClosestVertexCopy(point4, polygon));
+
+      Point2d point5 = new Point2d(10.0, 11.0);
+      assertPointsEqual(vertex3, calculator.getClosestVertexCopy(point5, polygon));
+
+      Point2d point6 = new Point2d(-3.0, 8.0);
+      assertPointsEqual(vertex3, calculator.getClosestVertexCopy(point6, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetClosestVertexPoint2()
+   {
+      // make sure the method fails as expected with an empty polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      Point2d closestVertex = new Point2d();
+
+      assertFalse(calculator.getClosestVertex(new Point2d(), polygon, closestVertex));
+      assertTrue(Double.isNaN(closestVertex.x) && Double.isNaN(closestVertex.y));
+      assertTrue(calculator.getClosestVertexCopy(new Point2d(), polygon) == null);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetClosestVertexLine1()
+   {
+      Point2d vertex1 = new Point2d(0.0, 0.0);
+      Point2d vertex2 = new Point2d(10.0, 0.0);
+      Point2d vertex3 = new Point2d(0.0, 10.0);
+
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(vertex1);
+      polygon.addVertex(vertex2);
+      polygon.addVertex(vertex3);
+      polygon.update();
+
+      Line2d line1 = new Line2d(new Point2d(-1.0, 1.0), new Point2d(1.0, -1.0));
+      assertPointsEqual(vertex1, calculator.getClosestVertexCopy(line1, polygon));
+
+      Line2d line2 = new Line2d(new Point2d(9.0, 0.0), new Point2d(0.0, 1.0));
+      assertPointsEqual(vertex2, calculator.getClosestVertexCopy(line2, polygon));
+
+      Line2d line3 = new Line2d(new Point2d(11.0, 0.0), new Point2d(0.0, 12.0));
+      assertPointsEqual(vertex2, calculator.getClosestVertexCopy(line3, polygon));
+
+      Line2d line4 = new Line2d(new Point2d(12.0, 0.0), new Point2d(0.0, 11.0));
+      assertPointsEqual(vertex3, calculator.getClosestVertexCopy(line4, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetClosestVertexLine2()
+   {
+      // make sure the method fails as expected with an empty polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      Point2d closestVertex = new Point2d();
+
+      assertFalse(calculator.getClosestVertex(new Line2d(), polygon, closestVertex));
+      assertTrue(Double.isNaN(closestVertex.x) && Double.isNaN(closestVertex.y));
+      assertTrue(calculator.getClosestVertexCopy(new Line2d(), polygon) == null);
+   }
+
    private static void assertDistanceCorrect(double expected, double actual)
    {
-      assertEquals("Distance to point did not equal expected", expected, actual, epsilon);
+      assertEquals("Distance did not equal expected.", expected, actual, epsilon);
+   }
+
+   private static void assertPointsEqual(Point2d expected, Point2d actual)
+   {
+      assertTrue("Point did not match expected.", expected.epsilonEquals(actual, epsilon));
    }
 
    public static void main(String[] args)
