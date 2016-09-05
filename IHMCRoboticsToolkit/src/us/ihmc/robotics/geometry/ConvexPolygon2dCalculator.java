@@ -73,7 +73,7 @@ public class ConvexPolygon2dCalculator
          Point2d vertex = polygon.getVertex(i);
          double distance = vertex.distance(point);
          if (distance < minDistance)
-        {
+         {
             pointToPack.set(vertex);
             minDistance = distance;
          }
