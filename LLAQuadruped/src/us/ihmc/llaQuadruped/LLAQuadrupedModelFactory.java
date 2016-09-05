@@ -41,7 +41,7 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
          throw new RuntimeException("Unrecoverable error.");
       }
    }
-   
+
    @Override
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
    {
@@ -56,7 +56,7 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
       boolean enableJointDamping = true;
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
-      SDFRobot sdfRobot = new SDFRobot(generalizedSDFRobotModel, null, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      SDFRobot sdfRobot = new SDFRobot(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
       return sdfRobot;
    }
 
@@ -76,7 +76,7 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
    {
       return jointMap.getQuadrupedJointNames();
    }
-   
+
    @Override
    public String getSDFNameForJointName(QuadrupedJointName quadrupedJointName)
    {
