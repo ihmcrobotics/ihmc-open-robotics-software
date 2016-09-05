@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 import javax.vecmath.Vector3d;
@@ -12,6 +11,7 @@ import us.ihmc.robotics.robotDescription.CameraSensorDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.FloatingPlanarJointDescription;
+import us.ihmc.robotics.robotDescription.ForceSensorDescription;
 import us.ihmc.robotics.robotDescription.GroundContactPointDescription;
 import us.ihmc.robotics.robotDescription.IMUSensorDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
@@ -23,26 +23,29 @@ import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.simulationconstructionset.simulatedSensors.FeatherStoneJointBasedWrenchCalculator;
+import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJointHolder
 {
-   private HashMap<String, Joint> jointNameMap = new HashMap<>();
-   private HashMap<JointDescription, Joint> jointDescriptionMap = new HashMap<>();
+   private LinkedHashMap<String, Joint> jointNameMap = new LinkedHashMap<>();
+   private LinkedHashMap<JointDescription, Joint> jointDescriptionMap = new LinkedHashMap<>();
 
    private final LinkedHashMap<String, OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new LinkedHashMap<String, OneDegreeOfFreedomJoint>();
 
-   private HashMap<String, CameraMount> cameraNameMap = new HashMap<>();
-   private HashMap<CameraSensorDescription, CameraMount> cameraDescriptionMap = new HashMap<>();
+   private LinkedHashMap<String, CameraMount> cameraNameMap = new LinkedHashMap<>();
+   private LinkedHashMap<CameraSensorDescription, CameraMount> cameraDescriptionMap = new LinkedHashMap<>();
 
-   private HashMap<String, LidarMount> lidarNameMap = new HashMap<>();
-   private HashMap<LidarSensorDescription, LidarMount> lidarDescriptionMap = new HashMap<>();
+   private LinkedHashMap<String, LidarMount> lidarNameMap = new LinkedHashMap<>();
+   private LinkedHashMap<LidarSensorDescription, LidarMount> lidarDescriptionMap = new LinkedHashMap<>();
 
-   private HashMap<String, IMUMount> imuNameMap = new HashMap<>();
-   private HashMap<IMUSensorDescription, IMUMount> imuDescriptionMap = new HashMap<>();
+   private LinkedHashMap<String, IMUMount> imuNameMap = new LinkedHashMap<>();
+   private LinkedHashMap<IMUSensorDescription, IMUMount> imuDescriptionMap = new LinkedHashMap<>();
 
-   private HashMap<String, JointWrenchSensor> wrenchSensorNameMap = new HashMap<>();
-   private HashMap<JointWrenchSensorDescription, JointWrenchSensor> wrenchSensorDescriptionMap = new HashMap<>();
+   private LinkedHashMap<String, JointWrenchSensor> wrenchSensorNameMap = new LinkedHashMap<>();
+   private LinkedHashMap<JointWrenchSensorDescription, JointWrenchSensor> wrenchSensorDescriptionMap = new LinkedHashMap<>();
 
    private final LinkedHashMap<Joint, ArrayList<GroundContactPoint>> jointToGroundContactPointsMap = new LinkedHashMap<Joint, ArrayList<GroundContactPoint>>();
 
@@ -103,10 +106,13 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       return wrenchSensorDescriptionMap.get(jointWrenchSensorDescription);
    }
 
+   public ArrayList<GroundContactPoint> getGroundContactPointsOnJoint(Joint joint)
+   {
+      return jointToGroundContactPointsMap.get(joint);
+   }
+
    private void constructRobotFromDescription(RobotDescription description)
    {
-      //      robot = new Robot(description.getName());
-
       ArrayList<JointDescription> rootJointDescriptions = description.getRootJoints();
 
       for (JointDescription rootJointDescription : rootJointDescriptions)
@@ -128,6 +134,8 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       addCameraMounts(jointDescription, joint);
       addIMUMounts(jointDescription, joint);
       addJointWrenchSensors(jointDescription, joint);
+
+      addForceSensors(jointDescription, joint);
 
       // Iterate over the children
       ArrayList<JointDescription> childrenJoints = jointDescription.getChildrenJoints();
@@ -160,6 +168,10 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
          LidarMount lidarMount = new LidarMount(transform3d, lidarScanParameters, sensorName);
          joint.addLidarMount(lidarMount);
+
+         //TODO: Should we really call addSensor here?
+         // Instead, perhaps, there should be a better way to get the sensors from a robot...
+         joint.addSensor(lidarMount);
 
          lidarNameMap.put(lidarMount.getName(), lidarMount);
          lidarDescriptionMap.put(lidarSensorDescription, lidarMount);
@@ -205,6 +217,41 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
          wrenchSensorNameMap.put(jointWrenchSensor.getName(), jointWrenchSensor);
          wrenchSensorDescriptionMap.put(jointWrenchSensorDescription, jointWrenchSensor);
+      }
+   }
+
+   private void addForceSensors(JointDescription jointDescription, Joint joint)
+   {
+      ArrayList<ForceSensorDescription> forceSensorDescriptions = jointDescription.getForceSensors();
+
+      for (ForceSensorDescription forceSensorDescription : forceSensorDescriptions)
+      {
+         OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = (OneDegreeOfFreedomJoint) joint;
+         WrenchCalculatorInterface wrenchCalculator;
+
+         if (forceSensorDescription.useGroundContactPoints())
+         {
+//               System.out.println("SDFRobot: Adding old-school force sensor to: " + joint.getName());
+            ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();
+            //TODO: Not sure if you want all of the ground contact points from here down, or just the ones attached to this joint.
+            joint.recursiveGetAllGroundContactPoints(groundContactPoints);
+
+            wrenchCalculator = new GroundContactPointBasedWrenchCalculator(
+                  forceSensorDescription.getName(), groundContactPoints, oneDegreeOfFreedomJoint, forceSensorDescription.getTransformToJoint());
+         }
+         else
+         {
+//               System.out.println("SDFRobot: Adding force sensor to: " + joint.getName());
+
+            Vector3d offsetToPack = new Vector3d();
+            forceSensorDescription.getTransformToJoint().getTranslation(offsetToPack);
+            JointWrenchSensor jointWrenchSensor = new JointWrenchSensor(forceSensorDescription.getName(), offsetToPack, this);
+            joint.addJointWrenchSensor(jointWrenchSensor);
+
+            wrenchCalculator = new FeatherStoneJointBasedWrenchCalculator(forceSensorDescription.getName(), oneDegreeOfFreedomJoint);
+         }
+
+         joint.addForceSensor(wrenchCalculator);
       }
    }
 

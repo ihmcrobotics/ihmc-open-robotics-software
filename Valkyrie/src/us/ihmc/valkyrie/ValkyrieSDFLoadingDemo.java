@@ -32,25 +32,25 @@ public class ValkyrieSDFLoadingDemo
    public ValkyrieSDFLoadingDemo()
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
-      
+
       SDFRobot valkyrieRobot = robotModel.createSdfRobot(false);
       valkyrieRobot.setPositionInWorld(new Vector3d());
-      
+
       if (SHOW_ELLIPSOIDS)
       {
          addIntertialEllipsoidsToVisualizer(valkyrieRobot);
       }
-      
+
       if (SHOW_COORDINATES_AT_JOINT_ORIGIN)
          addJointAxis(valkyrieRobot);
 
       SDFFullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
-      
+
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       CommonInertiaEllipsoidsVisualizer inertiaVis = new CommonInertiaEllipsoidsVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry);
       inertiaVis.update();
-      
-      
+
+
       scs = new SimulationConstructionSet(valkyrieRobot);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setGroundVisible(false);
@@ -92,8 +92,8 @@ public class ValkyrieSDFLoadingDemo
    public void addJointAxis(SDFRobot valkyrieRobot)
    {
 
-      ArrayList<OneDegreeOfFreedomJoint> joints = new ArrayList<>(Arrays.asList(valkyrieRobot.getOneDoFJoints()));
-      
+      ArrayList<OneDegreeOfFreedomJoint> joints = new ArrayList<>(Arrays.asList(valkyrieRobot.getOneDegreeOfFreedomJoints()));
+
       for (OneDegreeOfFreedomJoint joint : joints)
       {
          Graphics3DObject linkGraphics = new Graphics3DObject();

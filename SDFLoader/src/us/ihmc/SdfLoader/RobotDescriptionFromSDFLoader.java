@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -11,6 +12,8 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import javax.xml.bind.JAXBException;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
@@ -30,18 +33,27 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
 import us.ihmc.robotics.robotDescription.DummyOneDoFJointDescription;
+import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
+import us.ihmc.robotics.robotDescription.ForceSensorDescription;
+import us.ihmc.robotics.robotDescription.GroundContactPointDescription;
 import us.ihmc.robotics.robotDescription.IMUSensorDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
+import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.JointWrenchSensor;
+import us.ihmc.simulationconstructionset.simulatedSensors.FeatherStoneJointBasedWrenchCalculator;
+import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
 public class RobotDescriptionFromSDFLoader
 {
@@ -55,6 +67,7 @@ public class RobotDescriptionFromSDFLoader
    private List<String> resourceDirectories;
 
    private RobotDescription robotDescription;
+   private LinkedHashMap<String, JointDescription> jointDescriptions = new LinkedHashMap<>();
    private GeneralizedSDFRobotModel generalizedSDFRobotModel;
 
    public RobotDescriptionFromSDFLoader() //SDFParameters sdfParameters)
@@ -67,9 +80,16 @@ public class RobotDescriptionFromSDFLoader
       return robotDescription;
    }
 
-   public void loadRobotDescriptionFromSDF(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
+   public RobotDescription loadRobotDescriptionFromSDF(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
-      loadSDFFile(modelName, inputStream, resourceDirectories, mutator);
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = loadSDFFile(modelName, inputStream, resourceDirectories, mutator);
+      return loadRobotDescriptionFromSDF(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+   }
+
+   public RobotDescription loadRobotDescriptionFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
+   {
+      this.generalizedSDFRobotModel = generalizedSDFRobotModel;
+      this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
 
       String name = generalizedSDFRobotModel.getName();
       robotDescription = new RobotDescription(name);
@@ -93,6 +113,7 @@ public class RobotDescriptionFromSDFLoader
       addSensors(rootJointDescription, rootLink);
 
       robotDescription.addRootJoint(rootJointDescription);
+      jointDescriptions.put(rootJointDescription.getName(), rootJointDescription);
 
       if (sdfJointNameMap != null)
       {
@@ -116,6 +137,53 @@ public class RobotDescriptionFromSDFLoader
          addJointsRecursively(child, rootJointDescription, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping, lastSimulatedJoints, false);
       }
 
+      // Ground Contact Points:
+
+      LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
+      if (sdfJointNameMap != null)
+      {
+         for (ImmutablePair<String, Vector3d> jointContactPoint : sdfJointNameMap.getJointNameGroundContactPointMap())
+         {
+            String jointName = jointContactPoint.getLeft();
+
+            int count;
+            if (counters.get(jointName) == null)
+               count = 0;
+            else
+               count = counters.get(jointName);
+
+            Vector3d gcOffset = jointContactPoint.getRight();
+
+            GroundContactPointDescription groundContactPoint = new GroundContactPointDescription("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset);
+            ExternalForcePointDescription externalForcePoint = new ExternalForcePointDescription("ef_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset);
+
+            JointDescription jointDescription = jointDescriptions.get(jointName);
+
+            jointDescription.addGroundContactPoint(groundContactPoint);
+            jointDescription.addExternalForcePoint(externalForcePoint);
+
+            counters.put(jointName, count);
+
+//            PrintTools.info("Joint Contact Point: " + jointContactPoint);
+
+            if (SHOW_CONTACT_POINTS)
+            {
+               Graphics3DObject graphics = jointDescription.getLink().getLinkGraphics();
+               graphics.identity();
+               graphics.translate(jointContactPoint.getRight());
+               double radius = 0.01;
+               graphics.addSphere(radius, YoAppearance.Orange());
+
+            }
+         }
+      }
+
+      for (SDFJointHolder child : rootLink.getChildren())
+      {
+         addForceSensorsIncludingDescendants(child, sdfJointNameMap);
+      }
+
+      return robotDescription;
    }
 
    private LinkDescription createLinkDescription(SDFLinkHolder link, RigidBodyTransform rotationTransform, boolean useCollisionMeshes)
@@ -288,6 +356,7 @@ public class RobotDescriptionFromSDFLoader
       scsJoint.setLink(createLinkDescription(joint.getChildLinkHolder(), visualTransform, useCollisionMeshes));
       scsParentJoint.addJoint(scsJoint);
 
+      jointDescriptions.put(scsJoint.getName(), scsJoint);
       addSensors(scsJoint, joint.getChildLinkHolder());
 
       if (!asNullJoint && lastSimulatedJoints.contains(joint.getName()))
@@ -316,8 +385,9 @@ public class RobotDescriptionFromSDFLoader
 //      loadSDFFile(sdfParameters.getSdfAsInputStream(), resourceDirectories, null);
 //   }
 
-   private void loadSDFFile(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator)
+   private static GeneralizedSDFRobotModel loadSDFFile(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator)
    {
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = null;
       try
       {
          JaxbSDFLoader loader = new JaxbSDFLoader(inputStream, resourceDirectories, mutator);
@@ -328,6 +398,8 @@ public class RobotDescriptionFromSDFLoader
       {
          throw new RuntimeException("Cannot load model", e);
       }
+
+      return generalizedSDFRobotModel;
    }
 
    private void showCordinateSystem(JointDescription scsJoint, RigidBodyTransform offsetFromLink)
@@ -529,6 +601,44 @@ public class RobotDescriptionFromSDFLoader
          LidarSensorDescription lidarMount = new LidarSensorDescription(sensor.getName(), linkToSensorInZUp, polarDefinition);
          //         scsJoint.addLidarSensor(lidarMount);
          scsJoint.addLidarSensor(lidarMount);
+      }
+   }
+
+   private void addForceSensorsIncludingDescendants(SDFJointHolder joint, SDFJointNameMap jointNameMap)
+   {
+      addForceSensor(joint, jointNameMap);
+
+      for (SDFJointHolder child : joint.getChildLinkHolder().getChildren())
+      {
+         addForceSensorsIncludingDescendants(child, jointNameMap);
+      }
+   }
+
+   private void addForceSensor(SDFJointHolder joint, SDFJointNameMap jointNameMap)
+   {
+      if (joint.getForceSensors().size() > 0)
+      {
+         String[] jointNamesBeforeFeet = jointNameMap.getJointNamesBeforeFeet();
+
+         String jointName = joint.getName();
+         String sanitizedJointName = SDFConversionsHelper.sanitizeJointName(jointName);
+         JointDescription scsJoint = jointDescriptions.get(sanitizedJointName);
+
+         boolean jointIsParentOfFoot = false;
+         for(int i = 0; i < jointNamesBeforeFeet.length; i++)
+         {
+            if(jointName.equals(jointNamesBeforeFeet[i]))
+            {
+               jointIsParentOfFoot = true;
+            }
+         }
+
+         for (SDFForceSensor forceSensor : joint.getForceSensors())
+         {
+            ForceSensorDescription forceSensorDescription = new ForceSensorDescription(forceSensor.getName(), forceSensor.getTransform());
+            forceSensorDescription.setUseGroundContactPoints(jointIsParentOfFoot);
+            scsJoint.addForceSensor(forceSensorDescription);
+         }
       }
    }
 }

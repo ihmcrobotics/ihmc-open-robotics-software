@@ -9,6 +9,7 @@ import javax.xml.bind.JAXBException;
 import us.ihmc.SdfLoader.*;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
@@ -56,8 +57,9 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
       boolean enableJointDamping = true;
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
-      SDFRobot sdfRobot = new SDFRobot(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
-      return sdfRobot;
+      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+      RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      return new SDFRobot(description);
    }
 
    @Override
