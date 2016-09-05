@@ -56,6 +56,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    private final LineSegment2d tempSegment2 = new LineSegment2d();
    private final LineSegment2d tempSegment3 = new LineSegment2d();
 
+   private final ConvexPolygon2dCalculator calculator = new ConvexPolygon2dCalculator();
+
    /**
     * Creates an empty convex polygon.
     */
@@ -678,133 +680,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       update();
    }
 
-   public double[] distanceToEachVertex(Point2d point)
-   {
-      checkIfUpToDate();
-      double[] ret = new double[numberOfVertices];
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         ret[i] = point.distance(getVertex(i));
-      }
-
-      return ret;
-   }
-
-   /**
-    * Returns distance from the point to the boundary of this polygon.
-    * Positive number if inside. Negative number if outside.
-    * If inside, the distance is the exact distance to an edge.
-    * If outside, the negative distance is an underestimate.
-    * It is actually the furthest distance from a projected edge that
-    * it is outside of.
-    * @param point
-    * @return distance from point to this polygon.
-    */
-   public double getDistanceInside(Point2d point)
-   {
-      checkIfUpToDate();
-
-      if (numberOfVertices == 1)
-      {
-         return -point.distance(getVertex(0));
-      }
-
-      if (numberOfVertices == 2)
-      {
-         Point2d pointOne = getVertex(0);
-         Point2d pointTwo = getVertex(1);
-
-         return -Math.abs(computeDistanceToSideOfSegment(point, pointOne, pointTwo));
-      }
-
-      double closestDistance = Double.POSITIVE_INFINITY;
-
-      for (int index = 0; index < numberOfVertices; index++)
-      {
-         Point2d pointOne = getVertex(index);
-         int nextIndex = index+1;
-         if (nextIndex == numberOfVertices)
-            nextIndex = 0;
-
-         Point2d pointTwo = getVertex(nextIndex);
-
-         double distance = computeDistanceToSideOfSegment(point, pointOne, pointTwo);
-         if (distance < closestDistance)
-         {
-            closestDistance = distance;
-         }
-      }
-
-      return closestDistance;
-   }
-
-   private double computeDistanceToSideOfSegment(Point2d point, Point2d pointOne, Point2d pointTwo)
-   {
-      double x0 = point.getX();
-      double y0 = point.getY();
-
-      double x1 = pointOne.getX();
-      double y1 = pointOne.getY();
-
-      double x2 = pointTwo.getX();
-      double y2 = pointTwo.getY();
-
-      double numerator = (y2 - y1) * x0 - (x2 - x1) * y0 + x2*y1 - y2*x1;
-      double denominator = Math.sqrt((y2-y1) * (y2-y1) + (x2-x1) * (x2-x1));
-
-      return numerator/denominator;
-   }
-
-   public Point2d getClosestVertexCopy(Point2d point)
-   {
-      checkIfUpToDate();
-      // throw new RuntimeException("Not yet implemented");
-      // O(n) for now, maybe there's a faster way?
-
-      double minDistance = Double.POSITIVE_INFINITY;
-      Point2d ret = null;
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         Point2d vertex = getVertex(i);
-         double distance = vertex.distance(point);
-         if (distance < minDistance)
-         {
-            ret = vertex;
-            minDistance = distance;
-         }
-      }
-
-      return ret;
-   }
-
-   public Point2d getClosestVertexCopy(Line2d line)
-   {
-      Point2d point = new Point2d();
-      getClosestVertex(line, point);
-      return point;
-   }
-
-   public boolean getClosestVertex(Line2d line, Point2d pointToPack)
-   {
-      checkIfUpToDate();
-      // O(n) for now, maybe there's a faster way?
-
-      double minDistanceSquared = Double.POSITIVE_INFINITY;
-      pointToPack.set(Double.NaN, Double.NaN);
-
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         Point2d vertex = getVertex(i);
-         double distanceSquared = line.distanceSquared(vertex);
-         if (distanceSquared < minDistanceSquared)
-         {
-            pointToPack.set(vertex);
-            minDistanceSquared = distanceSquared;
-         }
-      }
-
-      return !Double.isInfinite(minDistanceSquared);
-   }
+   // here ---------------------
 
    public Point2d getClosestVertexWithRayCopy(Line2d ray, boolean throwAwayVerticesOutsideRay)
    {
@@ -1883,7 +1759,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       {
          // TODO: this duplicates the computation in intersectionWith(ray) - same below
          if (tempSegment1.intersectionWith(ray) == null)
-            getClosestVertex(ray, intersectionToPack1);
+            calculator.getClosestVertex(ray, this, intersectionToPack1);
          else
             intersectionToPack1.set(tempSegment1.intersectionWith(ray));
 
@@ -1894,12 +1770,12 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       else if (intersectingEdges == 2)
       {
          if (tempSegment1.intersectionWith(ray) == null)
-            getClosestVertex(ray, intersectionToPack1);
+            calculator.getClosestVertex(ray, this, intersectionToPack1);
          else
             intersectionToPack1.set(tempSegment1.intersectionWith(ray));
 
          if (tempSegment2.intersectionWith(ray) == null)
-            getClosestVertex(ray, intersectionToPack2);
+            calculator.getClosestVertex(ray, this, intersectionToPack2);
          else
             intersectionToPack2.set(tempSegment2.intersectionWith(ray));
 
