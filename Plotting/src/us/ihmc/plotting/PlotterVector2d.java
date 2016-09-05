@@ -56,10 +56,10 @@ public class PlotterVector2d extends FrameVector2d
    {
       if (getReferenceFrame() instanceof MetersReferenceFrame)
       {
-         changeFrame(ReferenceFrame.getWorldFrame());
+         changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
          scale(pixelsReferenceFrame.getConversionToPixels().getX(), pixelsReferenceFrame.getConversionToPixels().getY());
       }
       
-      super.changeFrame(pixelsReferenceFrame);
+      super.changeFrameAndProjectToXYPlane(pixelsReferenceFrame);
    }
 }
