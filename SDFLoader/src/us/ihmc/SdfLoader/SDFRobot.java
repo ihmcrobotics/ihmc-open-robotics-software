@@ -18,23 +18,8 @@ import us.ihmc.tools.FormattingTools;
 
 public class SDFRobot extends RobotFromDescription
 {
-//   private static final boolean SHOW_CONTACT_POINTS = true;
-//   private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
-//   private static final boolean SHOW_INERTIA_ELLIPSOIDS = false;
-//   private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
    private static final boolean DEBUG = false;
-//   private final List<String> resourceDirectories;
-//   private final LinkedHashMap<String, OneDegreeOfFreedomJoint> oneDoFJoints = new LinkedHashMap<String, OneDegreeOfFreedomJoint>();
    private final FloatingJoint rootJoint;
-//   private final LinkedHashMap<String, SDFCamera> cameras = new LinkedHashMap<String, SDFCamera>();
-//   private final LinkedHashMap<Joint, ArrayList<GroundContactPoint>> jointToGroundContactPointsMap = new LinkedHashMap<Joint, ArrayList<GroundContactPoint>>();
-//
-//   public SDFRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes,
-//                   boolean enableTorqueVelocityLimits, boolean enableDamping)
-//   {
-//      this(generalizedSDFRobotModel.getName(), generalizedSDFRobotModel,sdfJointNameMap,useCollisionMeshes,enableTorqueVelocityLimits,enableDamping);
-//   }
-
 
    public SDFRobot(RobotDescription robotDescription)
    {
