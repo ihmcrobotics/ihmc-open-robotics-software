@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
@@ -14,11 +16,13 @@ import us.ihmc.robotics.robotDescription.IMUSensorDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.JointWrenchSensorDescription;
 import us.ihmc.robotics.robotDescription.KinematicPointDescription;
+import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 
 public class RobotConstructorFromRobotDescription
 {
@@ -29,6 +33,9 @@ public class RobotConstructorFromRobotDescription
 
    private HashMap<String, CameraMount> cameraNameMap = new HashMap<>();
    private HashMap<CameraSensorDescription, CameraMount> cameraDescriptionMap = new HashMap<>();
+
+   private HashMap<String, LidarMount> lidarNameMap = new HashMap<>();
+   private HashMap<LidarSensorDescription, LidarMount> lidarDescriptionMap = new HashMap<>();
 
    private HashMap<String, IMUMount> imuNameMap = new HashMap<>();
    private HashMap<IMUSensorDescription, IMUMount> imuDescriptionMap = new HashMap<>();
@@ -107,6 +114,7 @@ public class RobotConstructorFromRobotDescription
       addExternalForcePoints(jointDescription, joint);
       addKinematicPoints(jointDescription, joint);
 
+      addLidarMounts(jointDescription, joint);
       addCameraMounts(jointDescription, joint);
       addIMUMounts(jointDescription, joint);
       addJointWrenchSensors(jointDescription, joint);
@@ -124,12 +132,33 @@ public class RobotConstructorFromRobotDescription
       return joint;
    }
 
+   private void addLidarMounts(JointDescription jointDescription, Joint joint)
+   {
+      ArrayList<LidarSensorDescription> lidarSensorDescriptions = jointDescription.getLidarSensors();
+
+      for (LidarSensorDescription lidarSensorDescription : lidarSensorDescriptions)
+      {
+         String sensorName = lidarSensorDescription.getName();
+         RigidBodyTransform transform3d = lidarSensorDescription.getTransformToJoint();
+         LidarScanParameters lidarScanParameters = lidarSensorDescription.getLidarScanParameters();
+
+         LidarMount lidarMount = new LidarMount(transform3d, lidarScanParameters, sensorName);
+         joint.addLidarMount(lidarMount);
+
+         lidarNameMap.put(lidarMount.getName(), lidarMount);
+         lidarDescriptionMap.put(lidarSensorDescription, lidarMount);
+      }
+   }
+
    private void addCameraMounts(JointDescription jointDescription, Joint joint)
    {
       ArrayList<CameraSensorDescription> cameraSensorDescriptions = jointDescription.getCameraSensors();
       for (CameraSensorDescription cameraSensorDescription : cameraSensorDescriptions)
       {
          CameraMount cameraMount = new CameraMount(cameraSensorDescription.getName(), cameraSensorDescription.getTransformToJoint(), robot);
+         cameraMount.setImageWidth(cameraSensorDescription.getImageWidth());
+         cameraMount.setImageHeight(cameraSensorDescription.getImageHeight());
+
          joint.addCameraMount(cameraMount);
 
          cameraNameMap.put(cameraMount.getName(), cameraMount);
@@ -206,10 +235,10 @@ public class RobotConstructorFromRobotDescription
 
          Vector3d offset = new Vector3d();
          floatingJointDescription.getOffsetFromParentJoint(offset);
-         
+
          joint = new FloatingJoint(jointDescription.getName(), offset, robot);
       }
-      
+
       else if (jointDescription instanceof FloatingPlanarJointDescription)
       {
          FloatingPlanarJointDescription floatingPlanarJointDescription = (FloatingPlanarJointDescription) jointDescription;

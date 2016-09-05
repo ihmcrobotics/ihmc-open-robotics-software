@@ -68,7 +68,7 @@ public class RobotDescriptionFromSDFLoader
    }
 
    public void loadRobotDescriptionFromSDF(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
-   {   
+   {
       loadSDFFile(modelName, inputStream, resourceDirectories, mutator);
 
       String name = generalizedSDFRobotModel.getName();
@@ -315,7 +315,7 @@ public class RobotDescriptionFromSDFLoader
 //      resourceDirectories = Arrays.asList(sdfParameters.getResourceDirectories());
 //      loadSDFFile(sdfParameters.getSdfAsInputStream(), resourceDirectories, null);
 //   }
-   
+
    private void loadSDFFile(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator)
    {
       try
@@ -390,9 +390,16 @@ public class RobotDescriptionFromSDFLoader
             double clipFar = Double.parseDouble(camera.getClip().getFar());
             String cameraName = sensor.getName() + "_" + camera.getName();
             CameraSensorDescription mount = new CameraSensorDescription(cameraName, linkToCamera, fieldOfView, clipNear, clipFar);
+
+            int imageHeight = Integer.parseInt(camera.getImage().getHeight());
+            int imageWidth = Integer.parseInt(camera.getImage().getWidth());
+
+            mount.setImageHeight(imageHeight);
+            mount.setImageWidth(imageWidth);
+
             scsJoint.addCameraSensor(mount);
 
-            SDFCamera sdfCamera = new SDFCamera(Integer.parseInt(camera.getImage().getWidth()), Integer.parseInt(camera.getImage().getHeight()));
+//            SDFCamera sdfCamera = new SDFCamera(Integer.parseInt(camera.getImage().getWidth()), Integer.parseInt(camera.getImage().getHeight()));
             //            this.cameras.put(cameraName, sdfCamera);
          }
       }
@@ -519,7 +526,7 @@ public class RobotDescriptionFromSDFLoader
          updateParameters.setAlwaysOn(sdfAlwaysOn);
          updateParameters.setUpdatePeriodInMillis(sdfUpdateRate);
 
-         LidarSensorDescription lidarMount = new LidarSensorDescription(linkToSensorInZUp, polarDefinition, sensor.getName());
+         LidarSensorDescription lidarMount = new LidarSensorDescription(sensor.getName(), linkToSensorInZUp, polarDefinition);
          //         scsJoint.addLidarSensor(lidarMount);
          scsJoint.addLidarSensor(lidarMount);
       }
