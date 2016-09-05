@@ -158,7 +158,7 @@ public class Plotter
             transformToParent.setIdentity();
             tempTranslation.set(screenPosition.getX() + getPlotterWidthPixels() / 2.0, screenPosition.getY() - getPlotterHeightPixels() / 2.0, 0.0);
             transformToParent.applyTranslation(tempTranslation);
-            transformToParent.applyRotationZ(-screenRotation);
+            transformToParent.applyRotationZ(screenRotation);
             tempTranslation.set(-getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0, 0.0);
             transformToParent.applyTranslation(tempTranslation);
             transformToParent.applyRotationY(Math.PI);
@@ -641,6 +641,13 @@ public class Plotter
    {
       focusPoint.changeFrame(metersFrame);
       focusPoint.setX(focusPointX);
+      
+      centerOnFocusPoint();
+   }
+
+   public void setFocusOrientationYaw(double focusOrientationYaw)
+   {
+      screenRotation = focusOrientationYaw - Math.PI / 2.0;
       
       centerOnFocusPoint();
    }
