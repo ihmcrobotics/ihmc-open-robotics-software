@@ -93,8 +93,28 @@ public class OneDoFJointDescription extends JointDescription
 
    public void setTorqueLimits(double torqueLimit)
    {
-      this.maxTorqueLimit = Math.abs(torqueLimit);
-      this.minTorqueLimit = -Math.abs(torqueLimit);
+      this.setMaxTorqueLimit(Math.abs(torqueLimit));
+      this.setMinTorqueLimit(-Math.abs(torqueLimit));
+   }
+
+   public double getMaxTorqueLimit()
+   {
+      return maxTorqueLimit;
+   }
+
+   public void setMaxTorqueLimit(double maxTorqueLimit)
+   {
+      this.maxTorqueLimit = maxTorqueLimit;
+   }
+
+   public double getMinTorqueLimit()
+   {
+      return minTorqueLimit;
+   }
+
+   public void setMinTorqueLimit(double minTorqueLimit)
+   {
+      this.minTorqueLimit = minTorqueLimit;
    }
 
 }
