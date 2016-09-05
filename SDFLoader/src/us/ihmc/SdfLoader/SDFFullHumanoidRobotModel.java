@@ -1,6 +1,9 @@
 package us.ihmc.SdfLoader;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -15,6 +18,9 @@ import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotDescription.JointDescription;
+import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -25,49 +31,49 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
 {
    private SideDependentList<EnumMap<ArmJointName, OneDoFJoint>> armJointLists;
    private SideDependentList<EnumMap<LegJointName, OneDoFJoint>> legJointLists;
-    
+
    private  SideDependentList< ArrayList<OneDoFJoint>> armJointIDsList;
    private  SideDependentList< ArrayList<OneDoFJoint>> legJointIDsList;
 
    private RigidBody[] endEffectors = new RigidBody[4];
    private SideDependentList<RigidBody> feet;
    private SideDependentList<RigidBody> hands;
-   
+
    private boolean initialized = false;
-   
+
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> attachmentPlateFrames = new SideDependentList<>();
    ArrayList<OneDoFJoint> oneDoFJointsExcludingHands = new ArrayList<>();
 
    private SDFHumanoidJointNameMap humanoidJointNameMap;
-   
+
    // copy constructor
    public SDFFullHumanoidRobotModel(SDFFullHumanoidRobotModel modelToCopy)
    {
-      this( modelToCopy.rootLink, modelToCopy.humanoidJointNameMap, modelToCopy.sensorLinksToTrack );
+      this( modelToCopy.description, modelToCopy.humanoidJointNameMap, modelToCopy.sensorLinksToTrack );
    }
 
-   public SDFFullHumanoidRobotModel(SDFLinkHolder rootLink, SDFHumanoidJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public SDFFullHumanoidRobotModel(RobotDescription description, SDFHumanoidJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
-      super(rootLink, sdfJointNameMap, sensorLinksToTrack);
-      
+      super(description, sdfJointNameMap, sensorLinksToTrack);
+
       humanoidJointNameMap = sdfJointNameMap;
-      
+
       for(RobotSide robotSide : RobotSide.values)
       {
          RigidBodyTransform soleToAnkleTransform = sdfJointNameMap.getSoleToAnkleFrameTransform(robotSide);
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "Sole", 
-             getEndEffectorFrame(robotSide, LimbName.LEG), 
+         ReferenceFrame soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "Sole",
+             getEndEffectorFrame(robotSide, LimbName.LEG),
              soleToAnkleTransform);
-         soleFrames.put(robotSide, soleFrame); 
+         soleFrames.put(robotSide, soleFrame);
 
          RigidBodyTransform handAttachmentPlaeToWristTransform = sdfJointNameMap.getHandControlFrameToWristTransform(robotSide);
 
          if (handAttachmentPlaeToWristTransform != null)
          {
             ReferenceFrame attachmentPlateFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(sidePrefix + "HandControlFrame",
-                  getEndEffectorFrame(robotSide, LimbName.ARM), 
+                  getEndEffectorFrame(robotSide, LimbName.ARM),
                   handAttachmentPlaeToWristTransform);
             attachmentPlateFrames.put(robotSide, attachmentPlateFrame);
          }
@@ -88,7 +94,7 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
       getAllJointsExcludingHands(oneDoFJointsExcludingHands);
    }
 
-   public void setJointAngles(RobotSide side, LimbName limb, double[] q) 
+   public void setJointAngles(RobotSide side, LimbName limb, double[] q)
    {
 	   int i = 0;
 		if( limb == LimbName.ARM){
@@ -106,8 +112,8 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
 			}
 		}
 	}
-   
-   public void getJointAngles(RobotSide side, LimbName limb, double[] q) 
+
+   public void getJointAngles(RobotSide side, LimbName limb, double[] q)
    {
       int i = 0;
       if( limb == LimbName.ARM){
@@ -141,10 +147,10 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
       {
          return;
       }
-      
+
       ArrayList<OneDoFJoint> sourceJoints = joints.get(sourceSide);
       ArrayList<OneDoFJoint> destJoints = joints.get(sourceSide.getOppositeSide());
-      
+
       for(int i = 0; i < sourceJoints.size(); i++)
       {
          destJoints.get(i).setQ(sourceJoints.get(i).getQ());
@@ -251,21 +257,21 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
 
    public void copyAllJointsButKeepOneFootFixed( OneDoFJoint[] jointsToCopyFrom, RobotSide sideOfSole )
    {
-      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();     
+      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();
       int numJoints = getOneDoFJoints().length;
 
       for (int i=0; i<numJoints; i++)  {
-         newJointAngles.put( jointsToCopyFrom[i].getName() ,  jointsToCopyFrom[i].getQ() ); 
+         newJointAngles.put( jointsToCopyFrom[i].getName() ,  jointsToCopyFrom[i].getQ() );
       }
       updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
    }
-   
+
    public void copyAllJointsButKeepOneFootFixed( ArrayList<OneDoFJoint> jointsToCopyFrom, RobotSide sideOfSole )
    {
-      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();     
+      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();
 
       for (int i=0; i<jointsToCopyFrom.size(); i++)  {
-         newJointAngles.put( jointsToCopyFrom.get(i).getName() ,  jointsToCopyFrom.get(i).getQ() ); 
+         newJointAngles.put( jointsToCopyFrom.get(i).getName() ,  jointsToCopyFrom.get(i).getQ() );
       }
       updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
    }
@@ -274,12 +280,12 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
    {
       updateJointsStateButKeepOneFootFixed( jointsAngles,null, sideOfSole);
    }
-   
+
    public void updateJointsStateButKeepOneFootFixed( Map<String, Double> jointsAngles, Map<String, Double> jointsVelocities, RobotSide sideOfSole )
-   {   
+   {
       // next line of code must be executed BEFORE modifying the model
       RigidBodyTransform worldToFoot  = getSoleFrame(sideOfSole).getTransformToWorldFrame();
-      
+
       if( jointsAngles != null)
       {
          for ( Map.Entry<String, Double> entry: jointsAngles.entrySet() )
@@ -287,7 +293,7 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
              getOneDoFJointByName( entry.getKey() ).setQ( entry.getValue() );
          }
       }
-      
+
       if( jointsVelocities != null)
       {
          for ( Map.Entry<String, Double> entry: jointsVelocities.entrySet() )
@@ -295,34 +301,34 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
              getOneDoFJointByName( entry.getKey() ).setQd( entry.getValue() );
          }
       }
-      
+
       this.updateFrames();
-      
+
       ReferenceFrame footFrame   = getSoleFrame(sideOfSole);
       ReferenceFrame pelvisFrame = getRootJoint().getFrameAfterJoint();
-      
+
       RigidBodyTransform footToPelvis = pelvisFrame.getTransformToDesiredFrame( footFrame );
 
       RigidBodyTransform worldToPelvis = new RigidBodyTransform();
       worldToPelvis.multiply( worldToFoot, footToPelvis );
 
       getRootJoint().setPositionAndRotation(worldToPelvis);
-      
+
       this.updateFrames();
    }
-   
+
    @Override
-   protected void mapRigidBody(SDFJointHolder joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
+   protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
    {
       initializeLists();
-      
-      SDFLinkHolder childLink = joint.getChildLinkHolder();
-      
+
+      LinkDescription childLink = joint.getLink();
+
       if (rigidBody.getName().equals(sdfJointNameMap.getChestName()))
       {
          chest = rigidBody;
       }
-   
+
       if (rigidBody.getName().equals(sdfJointNameMap.getHeadName()))
       {
          head = rigidBody;
@@ -343,7 +349,7 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
             break;
          }
       }
-   
+
       JointRole jointRole = sdfJointNameMap.getJointRole(joint.getName());
       if(jointRole != null)
       {
@@ -378,10 +384,10 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
       {
          armJointLists = SideDependentList.createListOfEnumMaps(ArmJointName.class);
          legJointLists = SideDependentList.createListOfEnumMaps(LegJointName.class);
-         
+
          armJointIDsList =  SideDependentList.createListOfArrayLists();
          legJointIDsList =  SideDependentList.createListOfArrayLists();
-         
+
          feet = new SideDependentList<RigidBody>();
          hands = new SideDependentList<RigidBody>();
          initialized = true;
@@ -409,5 +415,5 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
    {
       return armJointIDsList.get(side);
    }
-   
+
 }

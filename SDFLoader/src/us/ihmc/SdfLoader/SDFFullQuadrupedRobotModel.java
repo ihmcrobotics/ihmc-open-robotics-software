@@ -7,10 +7,13 @@ import java.util.Map;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.robotics.kinematics.JointLimit;
+import us.ihmc.robotics.robotDescription.JointDescription;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -24,17 +27,17 @@ public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements Ful
 
    private QuadrantDependentList<RigidBody> feet;
 
-   public SDFFullQuadrupedRobotModel(SDFLinkHolder rootLink, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack,
+   public SDFFullQuadrupedRobotModel(RobotDescription description, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack,
          Map<QuadrupedJointName, JointLimit> jointLimits)
    {
-      this(rootLink, sdfJointNameMap, sensorLinksToTrack);
+      this(description, sdfJointNameMap, sensorLinksToTrack);
 
       this.jointLimits.putAll(jointLimits);
    }
 
-   public SDFFullQuadrupedRobotModel(SDFLinkHolder rootLink, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public SDFFullQuadrupedRobotModel(RobotDescription description, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
-      super(rootLink, sdfJointNameMap, sensorLinksToTrack);
+      super(description, sdfJointNameMap, sensorLinksToTrack);
 
       for (OneDoFJoint oneDoFJoint : getOneDoFJoints())
       {
@@ -60,7 +63,7 @@ public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements Ful
    }
 
    @Override
-   protected void mapRigidBody(SDFJointHolder joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
+   protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
    {
       if(feet == null)
       {

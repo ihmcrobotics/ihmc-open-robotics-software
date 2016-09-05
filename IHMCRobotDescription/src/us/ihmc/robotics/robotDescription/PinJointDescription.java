@@ -17,5 +17,4 @@ public class PinJointDescription extends OneDoFJointDescription
       super(name, offset, jointAxis);
    }
 
-
 }
