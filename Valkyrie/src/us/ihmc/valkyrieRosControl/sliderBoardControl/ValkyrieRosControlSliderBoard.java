@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.MathTools;
@@ -59,7 +59,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
    private static final boolean RESET_FUNCTIONS_ON_JOINT_CHANGE = false;
 
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
-   private final SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+   private final FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
    private final ArrayList<ValkyrieSliderBoardJointHolder> jointHolders = new ArrayList<>();
 

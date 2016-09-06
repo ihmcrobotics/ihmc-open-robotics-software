@@ -4,7 +4,7 @@ import javax.vecmath.Vector3d;
 
 import com.martiansoftware.jsap.JSAPException;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
@@ -48,7 +48,7 @@ public class ValkyriePushRecoveryTrack
             cheatWithGroundHeightAtForFootstep, model);
 
       FloatingRootJointRobot robot = track.getDrcSimulation().getRobot();
-      SDFFullHumanoidRobotModel fullRobotModel = model.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = model.createFullRobotModel();
       PushRobotController pushRobotController = new PushRobotController(robot, fullRobotModel);
 
       pushRobotController.addPushButtonToSCS(track.getSimulationConstructionSet());

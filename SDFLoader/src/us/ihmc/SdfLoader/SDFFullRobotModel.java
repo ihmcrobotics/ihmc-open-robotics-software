@@ -332,6 +332,7 @@ public class SDFFullRobotModel implements FullRobotModel
       return lidarBaseFrames.get(name);
    }
 
+   @Override
    public RigidBodyTransform getLidarBaseToSensorTransform(String name)
    {
       return lidarBaseToSensorTransform.get(name);

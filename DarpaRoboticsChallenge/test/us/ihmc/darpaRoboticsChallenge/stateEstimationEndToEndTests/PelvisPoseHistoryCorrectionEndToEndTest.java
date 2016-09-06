@@ -15,7 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
@@ -853,7 +853,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       if (useScript)
       {
          String scriptName = simpleFlatGroundScriptName;
-         SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+         FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
          drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
          InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
          drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));

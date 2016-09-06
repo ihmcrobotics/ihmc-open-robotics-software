@@ -3,7 +3,7 @@ package us.ihmc.atlas.posePlayback;
 import java.io.Reader;
 import java.io.StringReader;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -20,7 +20,7 @@ public class AtlasPoseInterpolatorPlaybacker
    
    public AtlasPoseInterpolatorPlaybacker()
    {
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
       
       StringBuffer stringBuffer = new StringBuffer();

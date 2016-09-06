@@ -3,7 +3,7 @@ package us.ihmc.wholeBodyController.concurrent;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
@@ -22,7 +22,7 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchronizerInterface
 {
-   private final SDFFullHumanoidRobotModel estimatorFullRobotModel;
+   private final FullHumanoidRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder estimatorForceSensorDataHolder;
    private final CenterOfMassDataHolder estimatorCenterOfMassDataHolder;
    private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
@@ -31,7 +31,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    private final ContactSensorHolder estimatorContactSensorHolder;
    private final DesiredJointDataHolder estimatorDesiredJointDataHolder;
 
-   private final SDFFullHumanoidRobotModel controllerFullRobotModel;
+   private final FullHumanoidRobotModel controllerFullRobotModel;
    private final ForceSensorDataHolder controllerForceSensorDataHolder;
    private final CenterOfMassDataHolder controllerCenterOfMassDataHolder;
    private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
@@ -107,7 +107,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    }
 
    @Override
-   public SDFFullHumanoidRobotModel getEstimatorFullRobotModel()
+   public FullHumanoidRobotModel getEstimatorFullRobotModel()
    {
       return estimatorFullRobotModel;
    }
@@ -125,7 +125,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    }
 
    @Override
-   public SDFFullHumanoidRobotModel getControllerFullRobotModel()
+   public FullHumanoidRobotModel getControllerFullRobotModel()
    {
       return controllerFullRobotModel;
    }

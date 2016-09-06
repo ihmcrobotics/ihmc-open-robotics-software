@@ -7,6 +7,7 @@ import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -86,6 +87,7 @@ public interface FullHumanoidRobotModel extends FullRobotModel
     */
    public abstract ReferenceFrame getSoleFrame(RobotSide robotSide);
 
+   public abstract SideDependentList<ReferenceFrame> getSoleFrames();
 
    public abstract void setJointAngles(RobotSide side, LimbName limb, double[] q);
 

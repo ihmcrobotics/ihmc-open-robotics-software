@@ -6,6 +6,7 @@ import java.util.Map;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -68,6 +69,8 @@ public interface FullRobotModel
    public abstract InverseDynamicsJoint getLidarJoint(String lidarName);
 
    public abstract ReferenceFrame getLidarBaseFrame(String name);
+
+   public abstract RigidBodyTransform getLidarBaseToSensorTransform(String name);
 
    public abstract ReferenceFrame getCameraFrame(String name);
 

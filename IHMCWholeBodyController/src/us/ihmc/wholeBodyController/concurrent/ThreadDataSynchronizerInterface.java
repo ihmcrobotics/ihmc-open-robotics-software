@@ -1,6 +1,6 @@
 package us.ihmc.wholeBodyController.concurrent;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
@@ -18,13 +18,13 @@ public interface ThreadDataSynchronizerInterface
 
    public abstract void publishEstimatorState(long timestamp, long estimatorTick, long estimatorClockStartTime);
 
-   public abstract SDFFullHumanoidRobotModel getEstimatorFullRobotModel();
+   public abstract FullHumanoidRobotModel getEstimatorFullRobotModel();
 
    public abstract ForceSensorDataHolder getEstimatorForceSensorDataHolder();
 
    public abstract CenterOfMassDataHolder getEstimatorCenterOfMassDataHolder();
 
-   public abstract SDFFullHumanoidRobotModel getControllerFullRobotModel();
+   public abstract FullHumanoidRobotModel getControllerFullRobotModel();
 
    public abstract ForceSensorDataHolderReadOnly getControllerForceSensorDataHolder();
    

@@ -243,6 +243,7 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
       return soleFrames.get(robotSide);
    }
 
+   @Override
    public SideDependentList<ReferenceFrame> getSoleFrames()
    {
       return soleFrames;

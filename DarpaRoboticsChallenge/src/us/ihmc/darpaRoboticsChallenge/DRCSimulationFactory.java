@@ -9,7 +9,7 @@ import javax.vecmath.Quat4d;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
@@ -429,7 +429,7 @@ public class DRCSimulationFactory
       return threadDataSynchronizer;
    }
 
-   public SDFFullHumanoidRobotModel getControllerFullRobotModel()
+   public FullHumanoidRobotModel getControllerFullRobotModel()
    {
       return threadDataSynchronizer.getControllerFullRobotModel();
    }

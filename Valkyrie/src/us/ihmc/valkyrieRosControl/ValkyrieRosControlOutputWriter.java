@@ -1,6 +1,6 @@
 package us.ihmc.valkyrieRosControl;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -33,7 +33,7 @@ public class ValkyrieRosControlOutputWriter implements DRCOutputWriter, Controll
    }
 
    @Override
-   public void setFullRobotModel(SDFFullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       // TODO Auto-generated method stub
       

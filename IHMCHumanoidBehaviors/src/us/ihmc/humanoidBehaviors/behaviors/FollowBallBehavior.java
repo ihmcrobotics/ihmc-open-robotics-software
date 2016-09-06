@@ -10,7 +10,7 @@ import javax.vecmath.Point3f;
 
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -39,7 +39,7 @@ public class FollowBallBehavior extends AbstractBehavior
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue;
    private FootstepStatus latestFootstepStatus;
 
-   private final SDFFullHumanoidRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    private final double swingTime = 0.6;
    private final double tranferTime = 0.5;
@@ -72,7 +72,7 @@ public class FollowBallBehavior extends AbstractBehavior
 
    private final PointCloudShapeFinder pointCloudSphereFinder;
 
-   public FollowBallBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, SDFFullHumanoidRobotModel fullRobotModel)
+   public FollowBallBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel)
    {
       super(behaviorCommunicationBridge);
 
