@@ -15,6 +15,7 @@ import com.jme3.math.Vector3f;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.SdfLoader.SDFContactSensor;
 import us.ihmc.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.SdfLoader.SDFForceSensor;
@@ -49,6 +50,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -101,12 +103,13 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    private final JaxbSDFLoader loader;
+   private final RobotDescription robotDescription;
 
    private boolean enableJointDamping = true;
 
    public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless)
    {
-	   this(target,headless, "DEFAULT");
+      this(target,headless, "DEFAULT");
    }
 
    public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model)
@@ -119,24 +122,24 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       if(model.equalsIgnoreCase("DEFAULT"))
       {
-    	  System.out.println("Loading robot model from: '"+getSdfFile()+"'");
-    	  sdf=getSdfFileAsStream();
+         System.out.println("Loading robot model from: '"+getSdfFile()+"'");
+         sdf=getSdfFileAsStream();
       }
       else
       {
-    	  System.out.println("Loading robot model from: '"+model+"'");
-    	  sdf=getClass().getClassLoader().getResourceAsStream(model);
-    	  if(sdf==null)
-    	  {
-    		  try
-    		  {
-    			  sdf=new FileInputStream(model);
-    		  }
-    		  catch (FileNotFoundException e)
-    		  {
-    			  System.err.println("failed to load sdf file - file not found");
-    		  }
-    	  }
+         System.out.println("Loading robot model from: '"+model+"'");
+         sdf=getClass().getClassLoader().getResourceAsStream(model);
+         if(sdf==null)
+         {
+            try
+            {
+               sdf=new FileInputStream(model);
+            }
+            catch (FileNotFoundException e)
+            {
+               System.err.println("failed to load sdf file - file not found");
+            }
+         }
 
       }
 
@@ -180,7 +183,27 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
+      robotDescription = createRobotDescription();
    }
+
+   private RobotDescription createRobotDescription()
+   {
+      boolean useCollisionMeshes = false;
+      boolean enableTorqueVelocityLimits = true;
+      boolean enableJointDamping = true;
+
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
+      RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      return robotDescription;
+   }
+
+   @Override
+   public RobotDescription getRobotDescription()
+   {
+      return robotDescription;
+   }
+
 
    @Override
    public CapturePointPlannerParameters getCapturePointPlannerParameters()
@@ -403,7 +426,6 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return 0.004;
    }
 
-   @Override
    public GeneralizedSDFRobotModel getGeneralizedRobotModel()
    {
       return loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());

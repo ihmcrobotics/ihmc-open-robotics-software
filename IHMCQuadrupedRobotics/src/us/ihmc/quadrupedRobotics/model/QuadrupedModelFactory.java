@@ -15,9 +15,6 @@ public abstract class QuadrupedModelFactory implements SDFFullQuadrupedRobotMode
    @Override
    public abstract FullQuadrupedRobotModel createFullRobotModel();
 
-   @Override
-   public abstract GeneralizedSDFRobotModel getGeneralizedRobotModel();
-
    public abstract Collection<QuadrupedJointName> getQuadrupedJointNames();
 
    public abstract String getSDFNameForJointName(QuadrupedJointName quadrupedJointName);

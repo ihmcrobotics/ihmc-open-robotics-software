@@ -359,13 +359,15 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       parser = new YoVariableHandshakeParser("logged", true);
       parser.parseFrom(handshakeData);
 
-      boolean useCollisionMeshes = false;
-      boolean enableTorqueVelocityLimits = true;
-      boolean enableJointDamping = true;
+//      boolean useCollisionMeshes = false;
+//      boolean enableTorqueVelocityLimits = true;
+//      boolean enableJointDamping = true;
+//
+//      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
+//      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+//      RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
-      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      RobotDescription robotDescription = robotModel.getRobotDescription();
 
       robot = new YoVariableLogPlaybackRobot(selectedFile, robotDescription, parser.getJointStates(),
             parser.getYoVariablesList(), logProperties, scs);

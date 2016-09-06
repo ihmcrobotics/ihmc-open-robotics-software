@@ -7,6 +7,4 @@ public interface SDFFullQuadrupedRobotModelFactory extends SDFFullRobotModelFact
    @Override
    public FullQuadrupedRobotModel createFullRobotModel();
 
-   @Override
-   public GeneralizedSDFRobotModel getGeneralizedRobotModel();
 }

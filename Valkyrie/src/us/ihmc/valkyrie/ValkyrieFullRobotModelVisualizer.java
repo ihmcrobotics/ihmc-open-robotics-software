@@ -7,10 +7,10 @@ import java.awt.Container;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
@@ -29,7 +29,7 @@ public class ValkyrieFullRobotModelVisualizer
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
 
 
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
+      RobotDescription robotDescription = robotModel.getRobotDescription();
 //      jaxbSDFLoader.createRobot(jointMap, false);
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
@@ -54,7 +54,7 @@ public class ValkyrieFullRobotModelVisualizer
 
 //      ((OneDoFJoint)fullRobotModel.getChest().getParentJoint()).setQ(1.0);
 
-      GraphicsRobot robotGraphics = new GraphicsRobot(generalizedSDFRobotModel.getName(), fullRobotModel.getElevator(), generalizedSDFRobotModel, false);
+      GraphicsRobot robotGraphics = new GraphicsRobot(robotDescription.getName(), fullRobotModel.getElevator(), robotDescription, false);
       robotGraphics.update();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();

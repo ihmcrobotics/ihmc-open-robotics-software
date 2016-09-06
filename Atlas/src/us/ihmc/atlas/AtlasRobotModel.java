@@ -7,17 +7,18 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.math.Transform;
 
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.SdfLoader.SDFContactSensor;
 import us.ihmc.SdfLoader.SDFConversionsHelper;
 import us.ihmc.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.SdfLoader.SDFForceSensor;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFJointHolder;
 import us.ihmc.SdfLoader.SDFLinkHolder;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
@@ -65,6 +66,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeTools;
@@ -112,6 +114,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private boolean enableJointDamping = true;
 
+   private final RobotDescription robotDescription;
+
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
    {
       selectedVersion = atlasVersion;
@@ -145,6 +149,26 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       defaultArmConfigurations = new AtlasDefaultArmConfigurations();
       heightCalculatorParameters = new AtlasHeightCalculatorParameters();
       snappingParameters = new AtlasFootstepSnappingParameters();
+
+      robotDescription = createRobotDescription();
+   }
+
+   private RobotDescription createRobotDescription()
+   {
+      boolean useCollisionMeshes = false;
+      boolean enableTorqueVelocityLimits = true;
+      boolean enableJointDamping = true;
+
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
+      RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      return robotDescription;
+   }
+
+   @Override
+   public RobotDescription getRobotDescription()
+   {
+      return robotDescription;
    }
 
    @Override
@@ -337,8 +361,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return CONTROL_DT;
    }
 
-   @Override
-   public GeneralizedSDFRobotModel getGeneralizedRobotModel()
+   private GeneralizedSDFRobotModel getGeneralizedRobotModel()
    {
       return loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
    }
