@@ -93,12 +93,12 @@ public class MultiSenseSensorManager
 //      new RosPointCloudReceiver(lidarParamaters.getSensorNameInSdf(), lidarParamaters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.NEARSCAN);
 //      new RosPointCloudReceiver(lidarParamaters.getSensorNameInSdf(), lidarParamaters.getGroundCloudTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.QUADTREE);
 
-      FullRobotModel sdfFullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
+      FullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
 
-      new RosPointCloudReceiver(lidarParamaters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), sdfFullRobotModel.getLidarBaseFrame(lidarParamaters.getSensorNameInSdf()),
+      new RosPointCloudReceiver(lidarParamaters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), fullRobotModel.getLidarBaseFrame(lidarParamaters.getSensorNameInSdf()),
             pointCloudDataReceiver, PointCloudSource.NEARSCAN);
 
-      new RosPointCloudReceiver(lidarParamaters.getGroundCloudTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), sdfFullRobotModel.getLidarBaseFrame(lidarParamaters.getSensorNameInSdf()),
+      new RosPointCloudReceiver(lidarParamaters.getGroundCloudTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), fullRobotModel.getLidarBaseFrame(lidarParamaters.getSensorNameInSdf()),
             pointCloudDataReceiver, PointCloudSource.QUADTREE);
    }
 

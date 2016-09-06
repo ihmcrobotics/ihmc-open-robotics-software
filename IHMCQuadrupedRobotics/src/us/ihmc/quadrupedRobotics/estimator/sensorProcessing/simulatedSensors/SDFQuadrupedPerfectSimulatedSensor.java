@@ -27,11 +27,11 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    
    private final BooleanYoVariable enableDrives;
    
-   public SDFQuadrupedPerfectSimulatedSensor(FloatingRootJointRobot sdfRobot, SDFFullQuadrupedRobotModel sdfFullRobotModel, CommonQuadrupedReferenceFrames referenceFrames)
+   public SDFQuadrupedPerfectSimulatedSensor(FloatingRootJointRobot sdfRobot, SDFFullQuadrupedRobotModel fullRobotModel, CommonQuadrupedReferenceFrames referenceFrames)
    {
-      super(sdfRobot, sdfFullRobotModel, referenceFrames);
+      super(sdfRobot, fullRobotModel, referenceFrames);
       
-      sensorOneDoFJoints = sdfFullRobotModel.getOneDoFJoints();
+      sensorOneDoFJoints = fullRobotModel.getOneDoFJoints();
       
       //FootSwitches
       ArrayList<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
@@ -39,7 +39,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
          String prefix = quadrant.getCamelCaseNameForStartOfExpression();
-         OneDoFJoint jointBeforeFoot = sdfFullRobotModel.getOneDoFJointBeforeFoot(quadrant);
+         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(quadrant);
 
          for(GroundContactPoint groundContactPoint : groundContactPoints)
          {
