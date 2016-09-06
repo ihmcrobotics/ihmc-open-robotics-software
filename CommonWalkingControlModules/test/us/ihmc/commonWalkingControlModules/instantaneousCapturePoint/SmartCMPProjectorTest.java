@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Beige;
@@ -628,10 +627,14 @@ public class SmartCMPProjectorTest
          success = projectedCMP.epsilonEquals(expectedProjection, epsilon);
       else if (expectedArea != null)
          success = expectedArea.isPointInside(projectedCMP, epsilon);
-      boolean wasProjected = !projectedCMP.epsilonEquals(desiredCMP, epsilon);
+
+      boolean correctInfo = true;
+      boolean cmpMoved = !projectedCMP.epsilonEquals(desiredCMP, epsilon);
+      if (!projector.getWasCMPProjected() && cmpMoved)
+         correctInfo = false;
 
       // show overhead results if required
-      if ((!success && showPlotterOnFail) || (!directionPreserved && showPlotterOnDirectionChange) || showPlotter)
+      if ((!success && showPlotterOnFail) || (!correctInfo && showPlotterOnFail) || (!directionPreserved && showPlotterOnDirectionChange) || showPlotter)
       {
          YoFramePoint2d yoCapturePoint = new YoFramePoint2d("CapturePoint", worldFrame, registry);
          YoArtifactPosition capturePointViz = new YoArtifactPosition("Capture Point", yoCapturePoint, GraphicType.BALL_WITH_ROTATED_CROSS, Blue().getAwtColor(),
@@ -704,7 +707,7 @@ public class SmartCMPProjectorTest
       if (expectedArea != null && expectedProjection != null)
          assertTrue("Expected conditions were not compatibe.", expectedArea.isPointInside(expectedProjection, epsilon));
       assertFalse("This test does not have a fail condition.", expectedArea == null && expectedProjection == null);
-      assertEquals("CMP was changed but projector claimed it wasn't projected.", wasProjected, projector.getWasCMPProjected());
+      assertTrue("CMP was changed but projector claimed it wasn't projected.", correctInfo);
       assertTrue("Projection of CMP did not equal expected.", success);
    }
 
