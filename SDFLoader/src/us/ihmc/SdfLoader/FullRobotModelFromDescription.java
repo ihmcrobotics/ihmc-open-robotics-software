@@ -40,7 +40,7 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.tools.containers.ContainerTools;
 
-public class SDFFullRobotModel implements FullRobotModel
+public class FullRobotModelFromDescription implements FullRobotModel
 {
    protected final RobotDescription description;
 
@@ -70,16 +70,15 @@ public class SDFFullRobotModel implements FullRobotModel
 
    private final Map<Enum<?>, RigidBody> endEffectors = new HashMap<>();
 
-   public SDFFullRobotModel(RobotDescription description, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public FullRobotModelFromDescription(RobotDescription description, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       this(description, sdfJointNameMap, sensorLinksToTrack, false);
    }
 
-   public SDFFullRobotModel(RobotDescription description, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack, boolean makeReferenceFramesAlignWithTheJoints)
+   public FullRobotModelFromDescription(RobotDescription description, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack, boolean makeReferenceFramesAlignWithTheJoints)
    {
       super();
       this.description = description;
-//      this.rootLink = rootLink;
 
       if (description.getRootJoints().size() != 1)
       {

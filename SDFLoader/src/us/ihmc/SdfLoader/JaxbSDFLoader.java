@@ -165,7 +165,7 @@ public class JaxbSDFLoader
          RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
          RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModels.get(modelName), sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
-         return new SDFFullHumanoidRobotModel(description, sdfJointNameMap, sensorFramesToTrack);
+         return new FullHumanoidRobotModelFromDescription(description, sdfJointNameMap, sensorFramesToTrack);
       }
       else
       {
