@@ -53,6 +53,8 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
    {
       super(description.getName());
       constructRobotFromDescription(description);
+
+//      System.out.println(this);
    }
 
    public Joint getJoint(String jointName)
@@ -338,6 +340,9 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
                pinJoint.setLimitStops(qMin, qMax, kLimit, bLimit);
             }
+
+            pinJoint.setDamping(pinJointDescription.getDamping());
+            pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
          }
          else
          {

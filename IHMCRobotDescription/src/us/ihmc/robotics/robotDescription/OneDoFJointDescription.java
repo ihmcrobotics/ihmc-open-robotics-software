@@ -62,6 +62,26 @@ public class OneDoFJointDescription extends JointDescription
       this.damping = damping;
    }
 
+   public double getDamping()
+   {
+      return damping;
+   }
+
+   public double getStiction()
+   {
+      return stiction;
+   }
+
+   public double getVelocityLimit()
+   {
+      return velocityLimit;
+   }
+
+   public double getVelocityDamping()
+   {
+      return velocityDamping;
+   }
+
    public void setStiction(double stiction)
    {
       this.stiction = stiction;
