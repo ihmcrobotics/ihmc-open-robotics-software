@@ -846,6 +846,12 @@ public class VirtualModelControllerTestHelper
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
       }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
    }
 
    public static class RobotArm implements FullRobotModel
@@ -1138,6 +1144,12 @@ public class VirtualModelControllerTestHelper
       @Override
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
+      }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
       }
    }
 
@@ -1473,6 +1485,12 @@ public class VirtualModelControllerTestHelper
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
       }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
    }
 
    public static class PlanarForkedRobotArm implements FullRobotModel
@@ -1796,6 +1814,12 @@ public class VirtualModelControllerTestHelper
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
       }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
    }
 
    public static class RobotLegs extends Robot implements FullRobotModel
@@ -2002,14 +2026,18 @@ public class VirtualModelControllerTestHelper
       @Override
       public OneDoFJoint[] getControllableOneDoFJoints()
       {
-         
-         
          return null;
       }
 
       @Override
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
+      }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
       }
    }
 
