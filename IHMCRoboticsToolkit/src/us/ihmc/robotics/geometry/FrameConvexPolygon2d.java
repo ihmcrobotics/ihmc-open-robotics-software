@@ -790,7 +790,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
     */
    public double getSignedDistance(FramePoint2d point)
    {
-      return calculator.getSignedDistance(point.tuple, this.convexPolygon);
+      return ConvexPolygon2dCalculator.getSignedDistance(point.tuple, this.convexPolygon);
    }
 
    public BoundingBox2d getBoundingBoxCopy()
@@ -822,31 +822,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    public boolean isPointInside(FramePoint2d framePoint, double epsilon)
    {
       framePoint.checkReferenceFrameMatch(referenceFrame);
-
-      return convexPolygon.isPointInside(framePoint.tuple, epsilon);
-   }
-
-   /**
-    * areAllPointsInside
-    * Determines whether all the points in framePoints are inside the convex
-    * polygon.
-    *
-    * @param framePoints FramePoint2d[]
-    * @return boolean
-    */
-   public boolean areAllPointsInside(FramePoint2d[] framePoints)
-   {
-      ReferenceFrame referenceFrame = framePoints[0].getReferenceFrame();
-
-      // Check and strip reference frames
-      Point2d[] points = new Point2d[framePoints.length];
-      for (int i = 0; i < framePoints.length; i++)
-      {
-         framePoints[i].checkReferenceFrameMatch(referenceFrame);
-         points[i] = framePoints[i].getPointCopy();
-      }
-
-      return convexPolygon.areAllPointsInside(points);
+      return ConvexPolygon2dCalculator.isPointInside(framePoint.tuple, epsilon, this.convexPolygon);
    }
 
    public FrameLine2d[] getLinesOfSight(FramePoint2d observerFramePoint)

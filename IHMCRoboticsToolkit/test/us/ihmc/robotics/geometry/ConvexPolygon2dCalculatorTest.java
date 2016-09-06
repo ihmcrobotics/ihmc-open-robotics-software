@@ -17,7 +17,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 public class ConvexPolygon2dCalculatorTest
 {
    private static final double epsilon = 1.0e-10;
-   private final ConvexPolygon2dCalculator calculator = new ConvexPolygon2dCalculator();
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testConstruction()
+   {
+      new ConvexPolygon2dCalculator();
+   }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -29,7 +35,7 @@ public class ConvexPolygon2dCalculatorTest
       polygon.update();
 
       Point2d point = new Point2d(2.5, 1.0);
-      double distance = calculator.getSignedDistance(point, polygon);
+      double distance = ConvexPolygon2dCalculator.getSignedDistance(point, polygon);
       assertDistanceCorrect(-Math.sqrt(2.5*2.5 + 1.0*1.0), distance);
    }
 
@@ -44,11 +50,11 @@ public class ConvexPolygon2dCalculatorTest
       polygon.update();
 
       Point2d point1 = new Point2d(2.5, 1.0);
-      double distance1 = calculator.getSignedDistance(point1, polygon);
+      double distance1 = ConvexPolygon2dCalculator.getSignedDistance(point1, polygon);
       assertDistanceCorrect(-Math.sqrt(1.5*1.5 + 1.0*1.0), distance1);
 
       Point2d point2 = new Point2d(0.5, 1.0);
-      double distance2 = calculator.getSignedDistance(point2, polygon);
+      double distance2 = ConvexPolygon2dCalculator.getSignedDistance(point2, polygon);
       assertDistanceCorrect(-1.0, distance2);
    }
 
@@ -64,27 +70,27 @@ public class ConvexPolygon2dCalculatorTest
       polygon.update();
 
       Point2d point1 = new Point2d(10.0, 10.0);
-      double distance1 = calculator.getSignedDistance(point1, polygon);
+      double distance1 = ConvexPolygon2dCalculator.getSignedDistance(point1, polygon);
       assertDistanceCorrect(-5.0 * Math.sqrt(2.0), distance1);
 
       Point2d point2 = new Point2d(1.2, 1.1);
-      double distance2 = calculator.getSignedDistance(point2, polygon);
+      double distance2 = ConvexPolygon2dCalculator.getSignedDistance(point2, polygon);
       assertDistanceCorrect(1.1, distance2);
 
       Point2d point3 = new Point2d(0.05, 9.8);
-      double distance3 = calculator.getSignedDistance(point3, polygon);
+      double distance3 = ConvexPolygon2dCalculator.getSignedDistance(point3, polygon);
       assertDistanceCorrect(0.05, distance3);
 
       Point2d point4 = new Point2d(9.8, 0.15);
-      double distance4 = calculator.getSignedDistance(point4, polygon);
+      double distance4 = ConvexPolygon2dCalculator.getSignedDistance(point4, polygon);
       assertDistanceCorrect(0.5 * Math.sqrt(0.05 * 0.05 * 2.0), distance4);
 
       Point2d point5 = new Point2d(5.0, -0.15);
-      double distance5 = calculator.getSignedDistance(point5, polygon);
+      double distance5 = ConvexPolygon2dCalculator.getSignedDistance(point5, polygon);
       assertDistanceCorrect(-0.15, distance5);
 
       Point2d point6 = new Point2d(15.0, -0.15);
-      double distance6 = calculator.getSignedDistance(point6, polygon);
+      double distance6 = ConvexPolygon2dCalculator.getSignedDistance(point6, polygon);
       assertDistanceCorrect(-Math.sqrt(5.0 * 5.0 + 0.15 * 0.15), distance6);
    }
 
@@ -172,6 +178,147 @@ public class ConvexPolygon2dCalculatorTest
       assertFalse(ConvexPolygon2dCalculator.getClosestVertex(new Line2d(), polygon, closestVertex));
       assertTrue(Double.isNaN(closestVertex.x) && Double.isNaN(closestVertex.y));
       assertTrue(ConvexPolygon2dCalculator.getClosestVertexCopy(new Line2d(), polygon) == null);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsPointInside1()
+   {
+      // single point polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.update();
+
+      Point2d point1 = new Point2d(1.0, 1.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point1, epsilon, polygon));
+
+      Point2d point2 = new Point2d(0.8, 0.9);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point2, polygon));
+
+      Point2d point3 = new Point2d(0.8, 1.1);
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point3, 0.3, polygon));
+
+      Point2d point4 = new Point2d(1.0, 0.9);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point4, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsPointInside2()
+   {
+      // line polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.addVertex(new Point2d(1.0, 0.0));
+      polygon.update();
+
+      Point2d point1 = new Point2d(0.1, 0.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point1, epsilon, polygon));
+
+      Point2d point2 = new Point2d(0.1, 0.1);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point2, epsilon, polygon));
+
+      Point2d point3 = new Point2d(1.5, 0.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point3, epsilon, polygon));
+
+      Point2d point4 = new Point2d(1.0, 0.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point4.x, point4.y, polygon));
+
+      Point2d point5 = new Point2d(1.0, epsilon * 0.1);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point5.x, point5.y, polygon));
+
+      Point2d point6 = new Point2d(1.0, epsilon * 0.1);
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point6, epsilon, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsPointInside3()
+   {
+      // triangle polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.addVertex(new Point2d(5.0, 0.0));
+      polygon.addVertex(new Point2d(3.0, 5.0));
+      polygon.update();
+
+      Point2d point1 = new Point2d(0.3, 0.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point1, epsilon, polygon));
+
+      Point2d point2 = new Point2d(0.0, 0.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point2, epsilon, polygon));
+
+      Point2d point3 = new Point2d(2.0, 2.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point3, polygon));
+
+      Point2d point4 = new Point2d(1.0, 0.3);
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point4, epsilon, polygon));
+
+      Point2d point5 = new Point2d(-1.0, 4.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point5.x, point5.y, epsilon, polygon));
+
+      Point2d point6 = new Point2d(6.0, 7.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point6, epsilon, polygon));
+
+      Point2d point7 = new Point2d(10.0, 0.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point7, epsilon, polygon));
+
+      Point2d point8 = new Point2d(0.1, 0.2);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point8, polygon));
+
+      Point2d point9 = new Point2d(3.5, 4.9);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point9.x, point9.y, epsilon, polygon));
+
+      Point2d point10 = new Point2d(3.5, -1.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point10, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsPointInside4()
+   {
+      // empty polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+
+      Point2d point1 = new Point2d(10.0, 0.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point1, epsilon, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsPolygonInside1()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.addVertex(new Point2d(2.0, 1.0));
+      polygon.addVertex(new Point2d(1.0, 2.0));
+      polygon.update();
+
+      ConvexPolygon2d polygonToTest1 = new ConvexPolygon2d();
+      polygonToTest1.addVertex(new Point2d(0.1, 0.1));
+      polygonToTest1.addVertex(new Point2d(0.2, 0.2));
+      polygonToTest1.update();
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest1, polygon));
+
+      ConvexPolygon2d polygonToTest2 = new ConvexPolygon2d(polygon);
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest2, polygon));
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest2, epsilon, polygon));
+      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest2, -epsilon, polygon));
+
+      ConvexPolygon2d polygonToTest3 = new ConvexPolygon2d();
+      polygonToTest3.addVertex(new Point2d(0.3, 0.9));
+      polygonToTest3.addVertex(new Point2d(0.1, 0.1));
+      polygonToTest3.addVertex(new Point2d(1.0, 1.2));
+      polygonToTest3.update();
+      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest3, polygon));
+
+      ConvexPolygon2d polygonToTest4 = new ConvexPolygon2d();
+      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest4, polygon));
+
+      ConvexPolygon2d polygonToTest5 = new ConvexPolygon2d();
+      polygonToTest5.addVertex(new Point2d(-0.1, 0.1));
+      polygonToTest5.update();
+      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest5, polygon));
    }
 
    private static void assertDistanceCorrect(double expected, double actual)

@@ -679,7 +679,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    }
 
    // here ---------------------
-
+   // nuke this
    public Point2d getClosestVertexWithRayCopy(Line2d ray, boolean throwAwayVerticesOutsideRay)
    {
       checkIfUpToDate();
@@ -716,6 +716,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          return new Point2d(ret);
    }
 
+   // nuke this
    public boolean getClosestVertexWithRay(Point2d closestVertexToPack, Line2d ray, boolean throwAwayVerticesOutsideRay)
    {
       checkIfUpToDate();
@@ -750,6 +751,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return success;
    }
 
+   // nuke this
    public double distanceToClosestVertex(Point2d point)
    {
       checkIfUpToDate();
@@ -768,27 +770,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return minDistance;
    }
 
-   public boolean isPointInside(Point2d point)
-   {
-      checkIfUpToDate();
-      return isPointInside(point, 0.0);
-   }
-
-   /**
-    * isPointInside
-    * Determines whether a point is inside the convex polygon (point in polygon test).
-    * Uses the orientation method (Nordbeck, Rystedt, 1967)
-    * Test is only valid for convex polygons, and only if the vertices are ordered clockwise.
-    *
-    * @param point Point2d the point to be tested
-    * @return boolean true if the point is inside the polygon
-    */
-   public boolean isPointInside(Point2d point, double epsilon)
-   {
-      checkIfUpToDate();
-      return isPointInside(point.getX(), point.getY(), epsilon);
-   }
-
+   // nuke this
    public ConvexPolygon2d translateCopy(Tuple2d translation)
    {
       checkIfUpToDate();
@@ -802,120 +784,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       }
 
       return new ConvexPolygon2d(points);
-   }
-
-   public boolean isPointInside(double x, double y)
-   {
-      checkIfUpToDate();
-      return isPointInside(x, y, 0.0);
-   }
-
-   /**
-    * isPointInside
-    * Determines whether a point is inside the convex polygon (point in polygon test).
-    * Uses the orientation method (Nordbeck, Rystedt, 1967)
-    * Test is only valid for convex polygons, and only if the vertices are ordered clockwise.
-    *
-    * @param x
-    * @param y
-    * @return boolean true if the point is inside the polygon
-    */
-   public boolean isPointInside(double x, double y, double epsilon)
-   {
-      checkIfUpToDate();
-      if (hasAtLeastThreeVertices())
-      {
-         if (x < boundingBox.getMinPoint().getX() - epsilon)
-            return false;
-         if (y < boundingBox.getMinPoint().getY() - epsilon)
-            return false;
-
-         if (x > boundingBox.getMaxPoint().getX() + epsilon)
-            return false;
-         if (y > boundingBox.getMaxPoint().getY() + epsilon)
-            return false;
-
-         // Determine whether the point is on the right side of each edge:
-         for (int i = 0; i < numberOfVertices; i++)
-         {
-            double x0 = getVertex(i).getX();
-            double y0 = getVertex(i).getY();
-
-            double x1 = getNextVertex(i).getX();
-            double y1 = getNextVertex(i).getY();
-
-            if ((y - y0) * (x1 - x0) - (x - x0) * (y1 - y0) > epsilon)
-            {
-               return false;
-            }
-         }
-
-         return true;
-      }
-      else if (hasAtLeastTwoVertices())
-      {
-         Point2d point0 = getVertex(0);
-         Point2d point1 = getVertex(1);
-         if (LineSegment2d.areEndpointsTheSame(point0, point1))
-         {
-            return (point0.getX() == x) && (point0.getY() == y);
-         }
-         else
-         {
-            LineSegment2d lineSegment = new LineSegment2d(point0.getX(), point0.getY(), point1.getX(), point1.getY());
-            return lineSegment.isPointOnLineSegment(new Point2d(x, y));
-         }
-      }
-      else if (hasAtLeastOneVertex())
-      {
-         Point2d point = getVertex(0);
-
-         return (point.getX() == x) && (point.getY() == y);
-      }
-
-      return false;
-   }
-
-   /**
-    * areAllPointsInside
-    * Determines whether all the points in points are inside the convex
-    * polygon.
-    *
-    * @param points Point2d[]
-    * @return boolean
-    */
-   public boolean areAllPointsInside(Point2d[] points)
-   {
-      checkIfUpToDate();
-      for (Point2d point : points)
-      {
-         if (!isPointInside(point))
-         {
-            return false;
-         }
-      }
-
-      return true;
-   }
-
-   /**
-    * checks to see if the passed polygon is inside of this one.
-    *
-    * @param polygon2
-    * @return true if polygon2 is inside of this polygon
-    */
-   public boolean isPolygonInside(ConvexPolygon2d polygon2)
-   {
-      checkIfUpToDate();
-      for (int i = 0; i < polygon2.getNumberOfVertices(); i++)
-      {
-         if (!isPointInside(polygon2.getVertex(i)))
-         {
-            return false;
-         }
-      }
-
-      return true;
    }
 
    public Line2d[] getLinesOfSight(Point2d observerPoint)
@@ -1619,16 +1487,16 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       boolean onePointIsInside;
 
       // First make sure that the ray goes from an outside point...
-      if (isPointInside(endPoints[0]))
+      if (ConvexPolygon2dCalculator.isPointInside(endPoints[0], this))
       {
-         if (isPointInside(endPoints[1]))
+         if (ConvexPolygon2dCalculator.isPointInside(endPoints[1], this))
             return null; // Both Points are inside!
 
          outsidePoint = endPoints[1];
          otherPoint = endPoints[0];
          onePointIsInside = true;
       }
-      else if (isPointInside(endPoints[1]))
+      else if (ConvexPolygon2dCalculator.isPointInside(endPoints[1], this))
       {
          outsidePoint = endPoints[0];
          otherPoint = endPoints[1];
@@ -2330,7 +2198,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       checkIfUpToDate();
       for (int i = 0; i < numberOfVertices; i++)
       {
-         if (!polygonQ.isPointInside(getVertex(i), epsilon))
+         if (!ConvexPolygon2dCalculator.isPointInside(getVertex(i), epsilon, polygonQ))
             return false;
       }
 
@@ -2602,6 +2470,26 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       }
 
       return false;
+   }
+
+   public boolean isPointInside(double x, double y)
+   {
+      return ConvexPolygon2dCalculator.isPointInside(x, y, this);
+   }
+
+   public boolean isPointInside(double x, double y, double epsilon)
+   {
+      return ConvexPolygon2dCalculator.isPointInside(x, y, epsilon, this);
+   }
+
+   public boolean isPointInside(Point2d point)
+   {
+      return ConvexPolygon2dCalculator.isPointInside(point, this);
+   }
+
+   public boolean isPointInside(Point2d point, double epsilon)
+   {
+      return ConvexPolygon2dCalculator.isPointInside(point, epsilon, this);
    }
 
 }
