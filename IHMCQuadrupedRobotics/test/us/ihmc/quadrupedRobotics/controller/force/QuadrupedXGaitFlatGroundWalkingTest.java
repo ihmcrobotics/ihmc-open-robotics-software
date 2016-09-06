@@ -92,7 +92,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(-1.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 5.0));
+      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 6.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -2.0));
       conductor.simulate();
       
