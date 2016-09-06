@@ -285,6 +285,7 @@ public class SDFFullRobotModel implements FullRobotModel
       return Collections.unmodifiableMap(oneDoFJoints);
    }
 
+   @Override
    public OneDoFJoint getOneDoFJointByName(String name)
    {
       return oneDoFJoints.get(name);

@@ -96,6 +96,14 @@ public interface FullRobotModel
    public abstract void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack);
 
    /**
+    * Gets the one DoF joint with the given name.
+    *
+    * @param name Name of the OneDoFJoint to return.
+    * @return
+    */
+   public abstract OneDoFJoint getOneDoFJointByName(String name);
+
+   /**
     *  Gets all one DoF joints, excluding joints that do not exist in the controller.
     *
     *  @param oneDoFJointsToPack {@code ArrayList<OneDoFJoint>} that will be packed will the controllable one DoF joints.
