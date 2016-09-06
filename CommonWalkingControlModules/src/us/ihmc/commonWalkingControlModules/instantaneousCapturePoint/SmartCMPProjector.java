@@ -214,7 +214,7 @@ public class SmartCMPProjector extends CMPProjector
             if (newAngle < angle)
             {
                angle = newAngle;
-               projectedCMP.set(vertex);
+               projectedCMP.setIncludingFrame(vertex);
             }
          }
          // only do this if it actually helps (pushed the ICP in the right direction)
