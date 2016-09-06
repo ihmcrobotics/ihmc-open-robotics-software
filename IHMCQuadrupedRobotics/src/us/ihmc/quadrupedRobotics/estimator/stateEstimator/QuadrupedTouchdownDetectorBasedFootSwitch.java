@@ -50,17 +50,19 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    @Override
    public boolean hasFootHitGround()
    {
-      boolean touchdown = true;
-      for (int i = 0; i < touchdownDetectors.size(); i++)
+      if(!touchdownDetectorsUpdated)
       {
-         TouchdownDetector touchdownDetector = touchdownDetectors.get(i);
-         if(!touchdownDetectorsUpdated)
+         boolean touchdown = true;
+         for (int i = 0; i < touchdownDetectors.size(); i++)
+         {
+            TouchdownDetector touchdownDetector = touchdownDetectors.get(i);
             touchdownDetector.update();
-         touchdown &= touchdownDetector.hasTouchedDown();
-      }
-      touchdownDetectorsUpdated = true;
+            touchdown &= touchdownDetector.hasTouchedDown();
+         }
+         touchdownDetected.set(touchdown);
 
-      touchdownDetected.set(touchdown);
+         touchdownDetectorsUpdated = true;
+      }
 
       if(trustTouchdownDetectors.getBooleanValue())
          return touchdownDetected.getBooleanValue();
