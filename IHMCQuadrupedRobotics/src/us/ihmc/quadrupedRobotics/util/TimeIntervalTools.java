@@ -45,7 +45,7 @@ public class TimeIntervalTools
       ListSorter.sort((List<TimeIntervalProvider>)timeIntervalProviders, compareTimeIntervalProvidersByEndTime.reversed());
    }
 
-   static public void removeAllStartingBeforeTime(List<? extends TimeIntervalProvider> timeIntervalProviders, double time)
+   static public void removeStartTimesBefore(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
       for (int i = 0; i < timeIntervalProviders.size(); i++)
       {
@@ -57,7 +57,7 @@ public class TimeIntervalTools
       }
    }
 
-   static public void removeAllStartingAfterTime(List<? extends TimeIntervalProvider> timeIntervalProviders, double time)
+   static public void removeStartTimesAfter(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
       for (int i = timeIntervalProviders.size() - 1; i >= 0; i--)
       {
@@ -68,7 +68,7 @@ public class TimeIntervalTools
       }
    }
 
-   static public void removeAllEndingBeforeTime(List<? extends TimeIntervalProvider> timeIntervalProviders, double time)
+   static public void removeEndTimesBefore(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
       for (int i = 0; i < timeIntervalProviders.size(); i++)
       {
@@ -80,7 +80,7 @@ public class TimeIntervalTools
       }
    }
 
-   static public void removeAllEndingAfterTime(List<? extends TimeIntervalProvider> timeIntervalProviders, double time)
+   static public void removeEndTimesAfter(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
       for (int i = timeIntervalProviders.size() - 1; i >= 0; i--)
       {

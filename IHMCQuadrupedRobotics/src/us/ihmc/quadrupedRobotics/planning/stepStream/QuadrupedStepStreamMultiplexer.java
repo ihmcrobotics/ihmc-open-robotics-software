@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.util.PreallocatedDeque;
+import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.robotics.geometry.FrameOrientation;
 
 import java.util.HashMap;
@@ -64,7 +64,7 @@ public class QuadrupedStepStreamMultiplexer<E extends Enum<E>> implements Quadru
    }
 
    @Override
-   public PreallocatedDeque<QuadrupedTimedStep> getSteps()
+   public PreallocatedList<QuadrupedTimedStep> getSteps()
    {
       if (selectedStepStream != null)
       {

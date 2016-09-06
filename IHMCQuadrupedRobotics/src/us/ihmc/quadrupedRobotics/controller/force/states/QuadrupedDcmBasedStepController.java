@@ -16,7 +16,7 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajecto
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.quadrupedRobotics.util.PreallocatedDeque;
+import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -108,7 +108,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final YoFrameVector stepAdjustmentForPlanning;
    private final YoFrameVector accumulatedStepAdjustmentForPlanning;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
-   private final PreallocatedDeque<QuadrupedTimedStep> stepPlan;
+   private final PreallocatedList<QuadrupedTimedStep> stepPlan;
    private final FrameOrientation bodyOrientationReference;
    private final OrientationFrame bodyOrientationReferenceFrame;
 
@@ -161,9 +161,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       {
          groundPlanePositions.set(robotQuadrant, new FramePoint());
       }
-      timedContactSequence = new QuadrupedTimedContactSequence(timedStepController.getStepDequeCapacity());
-      piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedStepController.getStepDequeCapacity());
-      dcmTrajectory = new PiecewiseReverseDcmTrajectory(timedStepController.getStepDequeCapacity(), gravity, postureProvider.getComPositionInput().getZ());
+      timedContactSequence = new QuadrupedTimedContactSequence(timedStepController.getStepSequenceCapacity());
+      piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedStepController.getStepSequenceCapacity());
+      dcmTrajectory = new PiecewiseReverseDcmTrajectory(timedStepController.getStepSequenceCapacity(), gravity, postureProvider.getComPositionInput().getZ());
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
       dcmPositionWaypoint = new FramePoint();
       stepAdjustmentForControl = new YoFrameVector("stepAdjustmentForControl", worldFrame, registry);
@@ -171,7 +171,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       accumulatedStepAdjustmentForPlanning = new YoFrameVector("accumulatedStepAdjustmentForPlanning", worldFrame, registry);
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
-      stepPlan = new PreallocatedDeque<>(QuadrupedTimedStep.class, MAXIMUM_STEP_QUEUE_SIZE);
+      stepPlan = new PreallocatedList<>(QuadrupedTimedStep.class, MAXIMUM_STEP_QUEUE_SIZE);
       bodyOrientationReference = new FrameOrientation();
       bodyOrientationReferenceFrame = new OrientationFrame(bodyOrientationReference);
 
@@ -315,9 +315,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       {
          if (!haltFlag.getBooleanValue() || stepStream.getSteps().get(i).getTimeInterval().getEndTime() < haltTime.getDoubleValue())
          {
-            stepPlan.pushBack();
-            stepPlan.back().set(stepStream.getSteps().get(i));
-            stepPlan.back().getGoalPosition().add(accumulatedStepAdjustmentForPlanning.getFrameTuple().getVector());
+            stepPlan.add(i);
+            stepPlan.get(i).set(stepStream.getSteps().get(i));
+            stepPlan.get(i).getGoalPosition().add(accumulatedStepAdjustmentForPlanning.getFrameTuple().getVector());
          }
       }
    }
@@ -364,7 +364,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
             }
             else if (timedStepController.addStep(stepPlan.get(i)))
             {
-               QuadrupedTimedStep adjustedStep = timedStepController.getStepDeque().back();
+               QuadrupedTimedStep adjustedStep = timedStepController.getStepSequence().get(timedStepController.getStepSequenceSize() - 1);
                adjustedStep.getGoalPosition().add(stepAdjustmentForPlanning.getFrameTuple().getVector());
                groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
             }
@@ -438,7 +438,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       // compute relative step adjustment
       computeRelativeStepAdjustment();
 
-      if (timedStepController.getStepDequeSize() > 0)
+      if (timedStepController.getStepSequenceSize() > 0)
       {
          // compute dcm trajectory
          computeDcmTrajectory();
@@ -454,7 +454,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    @Override
    public ControllerEvent process()
    {
-      if (timedStepController.getStepDequeSize() == 0)
+      if (timedStepController.getStepSequenceSize() == 0)
       {
          return ControllerEvent.DONE;
       }
