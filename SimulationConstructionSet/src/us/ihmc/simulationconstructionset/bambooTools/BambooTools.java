@@ -407,19 +407,13 @@ public class BambooTools
    private static GUIMessageFrame guiMessageFrame;
    private static int junitTestCasesIndex;
 
-   public static void logMessagesToFile(String filename)
-   {
-      if (guiMessageFrame == null)
-         return;
-
-      File file = new File(filename);
-      logMessagesToFile(file);
-   }
-
    public static void logMessagesToFile(File file)
    {
       if (guiMessageFrame == null)
+      {
+         PrintTools.error("GUI message frame null. Returning");
          return;
+      }
 
       guiMessageFrame.save(file);
    }
