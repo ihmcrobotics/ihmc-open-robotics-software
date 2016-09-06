@@ -7,7 +7,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
@@ -115,7 +115,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       safeToShiftMode.set(SafeStartingShiftMode.TROTLINE_MIDPOINT);
    }
 
-   private final SDFFullQuadrupedRobotModel feedForwardFullRobotModel;
+   private final FullQuadrupedRobotModel feedForwardFullRobotModel;
    private final QuadrupedReferenceFrames feedForwardReferenceFrames;
 
    private final StateMachine<CrawlGateWalkingState> walkingStateMachine;
@@ -360,7 +360,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             environment.getParentRegistry(), environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
    }
 
-   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, SDFFullQuadrupedRobotModel fullRobotModel,
+   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, FullQuadrupedRobotModel fullRobotModel,
          QuadrupedPostureInputProviderInterface postureProvider, QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrantDependentList<FootSwitchInterface> footSwitches, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {

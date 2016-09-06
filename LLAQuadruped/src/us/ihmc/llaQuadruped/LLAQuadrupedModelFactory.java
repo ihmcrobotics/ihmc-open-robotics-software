@@ -6,7 +6,12 @@ import java.util.Collection;
 
 import javax.xml.bind.JAXBException;
 
-import us.ihmc.SdfLoader.*;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -63,7 +68,7 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
    }
 
    @Override
-   public SDFFullQuadrupedRobotModel createFullRobotModel()
+   public FullQuadrupedRobotModel createFullRobotModel()
    {
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       String[] sensorLinksToTrack = new String[] {};
@@ -75,7 +80,7 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
       RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
-      SDFFullQuadrupedRobotModel sdfFullRobotMdoel = new SDFFullQuadrupedRobotModel(description, jointMap, sensorLinksToTrack);
+      FullQuadrupedRobotModel sdfFullRobotMdoel = new SDFFullQuadrupedRobotModel(description, jointMap, sensorLinksToTrack);
 
       return sdfFullRobotMdoel;
    }

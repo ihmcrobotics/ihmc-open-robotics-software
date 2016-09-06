@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -14,7 +13,11 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -159,7 +162,7 @@ public class QuadrupedTaskSpaceEstimator
 
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceEstimator");
 
-   public QuadrupedTaskSpaceEstimator(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
+   public QuadrupedTaskSpaceEstimator(FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry graphicsListRegistry)
    {
       this.referenceFrames = referenceFrames;

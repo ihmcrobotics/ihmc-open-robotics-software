@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
@@ -50,7 +50,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
 
-   private SDFFullQuadrupedRobotModel fullRobotModel;
+   private FullQuadrupedRobotModel fullRobotModel;
 
    public QuadrupedForceBasedFreezeController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {

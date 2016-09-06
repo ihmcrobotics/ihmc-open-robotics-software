@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
@@ -49,7 +49,7 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
 
-   private SDFFullQuadrupedRobotModel fullRobotModel;
+   private FullQuadrupedRobotModel fullRobotModel;
 
    public QuadrupedForceBasedSoleWaypointController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedSoleWaypointInputProvider inputProvider)

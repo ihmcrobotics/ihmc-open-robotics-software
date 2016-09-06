@@ -84,32 +84,55 @@ public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements Ful
       }
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getFoot(us.ihmc.robotics.robotSide.RobotQuadrant)
+    */
    @Override
    public RigidBody getFoot(RobotQuadrant robotQuadrant)
    {
       return feet.get(robotQuadrant);
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getLegOneDoFJoints(us.ihmc.robotics.robotSide.RobotQuadrant)
+    */
+   @Override
    public List<OneDoFJoint> getLegOneDoFJoints(RobotQuadrant quadrant)
    {
       return legOneDoFJoints.get(quadrant);
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getOneDoFJointBeforeFoot(us.ihmc.robotics.robotSide.RobotQuadrant)
+    */
+   @Override
    public OneDoFJoint getOneDoFJointBeforeFoot(RobotQuadrant quadrant)
    {
       return (OneDoFJoint) getFoot(quadrant).getParentJoint();
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getOneDoFJointByName(us.ihmc.SdfLoader.partNames.QuadrupedJointName)
+    */
+   @Override
    public OneDoFJoint getOneDoFJointByName(QuadrupedJointName name)
    {
       return jointNameOneDoFJointBiMap.get(name);
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getNameForOneDoFJoint(us.ihmc.robotics.screwTheory.OneDoFJoint)
+    */
+   @Override
    public QuadrupedJointName getNameForOneDoFJoint(OneDoFJoint oneDoFJoint)
    {
       return jointNameOneDoFJointBiMap.inverse().get(oneDoFJoint);
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getJointLimit(us.ihmc.SdfLoader.partNames.QuadrupedJointName)
+    */
+   @Override
    public JointLimit getJointLimit(QuadrupedJointName jointName)
    {
       return jointLimits.get(jointName);

@@ -477,6 +477,7 @@ public class SDFFullRobotModel implements FullRobotModel
       }
    }
 
+   @Override
    public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
    {
       oneDoFJointsToPack.clear();

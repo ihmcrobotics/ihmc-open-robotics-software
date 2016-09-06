@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
@@ -32,7 +32,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
    private YoGraphicReferenceFrame bodyGraphicReferenceFrame, rootJointGraphicReferenceFrame;
 
    public QuadrupedInverseKinematicsCalculators(QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties,
-         SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
+         FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
 
@@ -119,7 +119,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
       private final QuadrupedReferenceFrames referenceFrames;
 
       public QuadrantHolder(RobotQuadrant robotQuadrant, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties,
-            QuadrupedReferenceFrames referenceFrames, SDFFullQuadrupedRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+            QuadrupedReferenceFrames referenceFrames, FullQuadrupedRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
       {
          this.referenceFrames = referenceFrames;
 

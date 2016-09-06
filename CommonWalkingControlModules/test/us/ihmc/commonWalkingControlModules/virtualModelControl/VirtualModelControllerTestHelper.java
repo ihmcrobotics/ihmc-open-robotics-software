@@ -888,6 +888,11 @@ public class VirtualModelControllerTestHelper
       {
          return null;
       }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
    }
 
    public static class RobotArm implements FullRobotModel
@@ -1222,6 +1227,11 @@ public class VirtualModelControllerTestHelper
       public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
       {
          return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
       }
    }
 
@@ -1599,6 +1609,11 @@ public class VirtualModelControllerTestHelper
       {
          return null;
       }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
    }
 
    public static class PlanarForkedRobotArm implements FullRobotModel
@@ -1964,6 +1979,11 @@ public class VirtualModelControllerTestHelper
       {
          return null;
       }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
    }
 
    public static class RobotLegs extends Robot implements FullRobotModel
@@ -2218,6 +2238,11 @@ public class VirtualModelControllerTestHelper
       public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
       {
          return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
       }
    }
 
