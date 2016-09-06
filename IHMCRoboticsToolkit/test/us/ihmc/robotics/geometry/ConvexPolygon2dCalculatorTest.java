@@ -229,6 +229,9 @@ public class ConvexPolygon2dCalculatorTest
 
       Point2d point6 = new Point2d(1.0, epsilon * 0.1);
       assertTrue(ConvexPolygon2dCalculator.isPointInside(point6, epsilon, polygon));
+
+      Point2d point7 = new Point2d(1.5, 0.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point7, 0.5, polygon));
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
