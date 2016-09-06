@@ -76,7 +76,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines whether a point is inside the convex polygon (orientation method Nordbeck, Rystedt, 1967).
+    * Determines if the pointToTest is inside the convex polygon (orientation method Nordbeck, Rystedt, 1967).
     */
    public static boolean isPointInside(double pointX, double pointY, double epsilon, ConvexPolygon2d polygon)
    {
@@ -122,7 +122,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines whether a point is inside the convex polygon (orientation method Nordbeck, Rystedt, 1967).
+    * Determines if the pointToTest is inside the convex polygon (orientation method Nordbeck, Rystedt, 1967).
     */
    public static boolean isPointInside(double pointX, double pointY, ConvexPolygon2d polygon)
    {
@@ -130,7 +130,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines whether a point is inside the convex polygon (orientation method Nordbeck, Rystedt, 1967).
+    * Determines if the pointToTest is inside the convex polygon (orientation method Nordbeck, Rystedt, 1967).
     */
    public static boolean isPointInside(Point2d pointToTest, ConvexPolygon2d polygon)
    {
@@ -138,7 +138,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines whether a point is inside the convex polygon (orientation method Nordbeck, Rystedt, 1967).
+    * Determines if the pointToTest is inside the convex polygon (orientation method Nordbeck, Rystedt, 1967).
     */
    public static boolean isPointInside(Point2d pointToTest, double epsilon, ConvexPolygon2d polygon)
    {
@@ -146,7 +146,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines whether a polygon is inside the convex polygon.
+    * Determines if the polygonToTest is inside the convex polygon.
     */
    public static boolean isPolygonInside(ConvexPolygon2d polygonToTest, double epsilon, ConvexPolygon2d polygon)
    {
