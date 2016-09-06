@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeTools;
@@ -14,13 +14,13 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStat
 
 public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
 {
-   private final SDFFullRobotModel sdfFullRobotModel;
+   private final FullRobotModel sdfFullRobotModel;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final JointStateUpdater jointStateUpdater;
 
 
 
-   public JointsOnlyStateEstimator(SDFFullRobotModel sdfFullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly, JointStateUpdater jointStateUpdater)
+   public JointsOnlyStateEstimator(FullRobotModel sdfFullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly, JointStateUpdater jointStateUpdater)
    {
       this.sdfFullRobotModel = sdfFullRobotModel;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
@@ -35,7 +35,7 @@ public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
 
    public void enable()
    {
-      
+
    }
 
    public void doControl()
@@ -81,7 +81,7 @@ public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
    @Override
    public void initializeEstimatorToActual(Tuple3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
    {
-      
+
    }
 
 }

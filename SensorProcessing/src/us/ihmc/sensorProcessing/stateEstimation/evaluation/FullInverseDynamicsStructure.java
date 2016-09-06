@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
@@ -26,7 +26,7 @@ public class FullInverseDynamicsStructure
 
       this.estimationLink = estimationLink;
    }
-   
+
    public SixDoFJoint getRootJoint()
    {
       return rootJoint;
@@ -63,7 +63,7 @@ public class FullInverseDynamicsStructure
       spatialAccelerationCalculator.compute();
    }
 
-   public static FullInverseDynamicsStructure createInverseDynamicStructure(SDFFullRobotModel sdfFullRobotModel)
+   public static FullInverseDynamicsStructure createInverseDynamicStructure(FullRobotModel sdfFullRobotModel)
    {
       RigidBody elevator = sdfFullRobotModel.getElevator();
       SixDoFJoint rootInverseDynamicsJoint = sdfFullRobotModel.getRootJoint();

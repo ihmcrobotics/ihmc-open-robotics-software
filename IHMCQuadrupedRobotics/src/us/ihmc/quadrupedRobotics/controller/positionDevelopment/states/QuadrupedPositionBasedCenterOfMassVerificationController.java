@@ -1,22 +1,21 @@
 package us.ihmc.quadrupedRobotics.controller.positionDevelopment.states;
 
 import java.awt.Color;
-
 import java.util.HashMap;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
-import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
-import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
-import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
+import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
+import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
+import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -65,7 +64,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private DoubleYoVariable footZHeightOnTouchdown = new DoubleYoVariable("footZHeightOnTouchdown", registry);
    private DoubleYoVariable timeToSTayInMoveFeetAfterTouchDown = new DoubleYoVariable("timeToSTayInMoveFeetAfterTouchDown", registry);
    private final SideDependentList<ReferenceFrame> sideDependentMidTrotLineZUpFrames = new SideDependentList<ReferenceFrame>();
-   
+
 
    public enum COM_ESTIMATE_STATES
    {
@@ -75,7 +74,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private final StateMachine<COM_ESTIMATE_STATES> stateMachine;
    private final FilterDesiredsToMatchCrawlControllerState filterDesiredsToMatchCrawlControllerOnTransitionIn;
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
-   private final SDFFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final OneDoFJoint[] oneDoFJoints;
 
@@ -163,12 +162,12 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          YoFrameVector footPositionInLegAttachementFrame = new YoFrameVector(prefix + "FootPositionInLegFrame", legAttachmentFrame, registry);
          desiredFeetPositionsInLegAttachmentFrame.set(robotQuadrant, footPositionInLegAttachementFrame);
       }
-      
+
       for (RobotSide robotSide : RobotSide.values)
       {
          RobotQuadrant hindSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.HIND, robotSide);
          RobotQuadrant frontSoleQuadrantOppositeSide = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide.getOppositeSide());
-         
+
          MidFrameZUpFrame midTrotLineZUpFrame = new MidFrameZUpFrame("hind" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Front" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "MidTrotLineZUpFrame", worldFrame, referenceFrames.getFootFrame(hindSoleQuadrant), referenceFrames.getFootFrame(frontSoleQuadrantOppositeSide));
          sideDependentMidTrotLineZUpFrames.put(robotSide, midTrotLineZUpFrame);
       }
@@ -186,8 +185,8 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       stateMachine.addState(filterDesiredsToMatchCrawlControllerOnTransitionIn);
 
       //setup transitions
-      //start with ALPHA_FILTERING_DESIREDS, once finished goto ESTIMATE_COM, 
-      //once in ESTIMATE_COM, trotPairToRaise can trigger pick up and put down, 
+      //start with ALPHA_FILTERING_DESIREDS, once finished goto ESTIMATE_COM,
+      //once in ESTIMATE_COM, trotPairToRaise can trigger pick up and put down,
       //both pick up and put down transition back to ESTIMATE_COM when done
       FilterToCoMShiftTransition filterDesiredsToCoMShiftTransitionCondition = new FilterToCoMShiftTransition(filterDesiredsToMatchCrawlControllerOnTransitionIn);
       StateTransition<COM_ESTIMATE_STATES> filterDesiredsToCoMShiftTransition = new StateTransition<COM_ESTIMATE_STATES>(COM_ESTIMATE_STATES.MOVE_COM_AROUND, filterDesiredsToCoMShiftTransitionCondition);
@@ -331,7 +330,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
    private final Vector3d desiredFootPositionForInverseKinematics = new Vector3d();
 
-   private void useInverseKinematicsToGetJointPositionsAndStoreInFullRobotModel(SDFFullRobotModel fullRobotModel)
+   private void useInverseKinematicsToGetJointPositionsAndStoreInFullRobotModel(FullRobotModel fullRobotModel)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -420,10 +419,10 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          this.trotLineFrame = trotLineFrame;
          this.initialCenterOfMassReferenceFrame = initialCenterOfMassReferenceFrame;
          initialCenterOfMass = new FramePoint(initialCenterOfMassReferenceFrame);
-         
+
          alpha = new DoubleYoVariable(name + "desiredCenterOfMassIncrementAlpha", registry);
          alpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.5, dt));
-         
+
          desiredCenterOfMassLargeIncrementX = new DoubleYoVariable(name + "DesiredCenterOfMassLargeIncrementX", registry);
          desiredCenterOfMassSmallIncrementX = new DoubleYoVariable(name + "DesiredCenterOfMassSmallIncrementX", registry);
          desiredCenterOfMassLargeIncrementY = new DoubleYoVariable(name + "DesiredCenterOfMassLargeIncrementY", registry);
@@ -434,7 +433,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          filteredDesiredCenterOfMassLargeIncrementY = new AlphaFilteredYoVariable(name + "FilteredDesiredCenterOfMassLargeIncrementY", registry, alpha, desiredCenterOfMassLargeIncrementY);
          filteredDesiredCenterOfMassSmallIncrementY = new AlphaFilteredYoVariable(name + "FilteredDesiredCenterOfMassSmallIncrementY", registry, alpha, desiredCenterOfMassSmallIncrementY);
       }
-      
+
       public void update()
       {
          filteredDesiredCenterOfMassLargeIncrementX.update();
@@ -454,20 +453,20 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 //         framePointToPack.changeFrame(trotLineFrame);
          framePointToPack.add(x, y, 0.0);
       }
-      
+
       public void setPosition(FramePoint newPosition, boolean reset)
       {
          newPosition.changeFrame(trotLineFrame);
-         
+
          double x = newPosition.getX();
          double y = newPosition.getY();
-         
+
          desiredCenterOfMassLargeIncrementX.set(x);
          desiredCenterOfMassSmallIncrementX.set(0.0);
-         
+
          desiredCenterOfMassLargeIncrementY.set(y);
          desiredCenterOfMassSmallIncrementY.set(0.0);
-         
+
          if (reset)
          {
             filteredDesiredCenterOfMassLargeIncrementX.reset();
@@ -508,7 +507,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          intialCenterOfMass.changeFrame(worldFrame);
          desiredCenterOfMassPosition.getFrameTuple(intialCenterOfMass);
          intialCenterOfMassReferenceFrame.updateTranslation(intialCenterOfMass);
-         
+
          totalMass = fullRobotModel.getTotalMass();
          bodyMass = fullRobotModel.getPelvis().getInertia().getMass();
 
@@ -535,7 +534,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
             return worldFrame;
          }
       }
-      
+
       public ReferenceFrame getMidTrotLineZUpFrame(RobotQuadrant quadrantAssocaitedWithTrotLine)
       {
          if(quadrantAssocaitedWithTrotLine.isQuadrantInHind())
@@ -552,12 +551,12 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          {
             sideDependentMidTrotLineZUpFrames.get(robotSide).update();
          }
-         
+
          TrotPair currentTrotPair = frameToIncrementOver.getEnumValue();
-         
+
          CenterOfMassIncrementVariableHolder incrementHolder = incrementHolders.get(currentTrotPair);
          centerOfTrotLinesFramePoint.setToZero(referenceFrames.getCenterOfFourFeetFrame());
-         
+
          if(shiftCoMOverCenterOfFeet.getBooleanValue())
          {
             centerOfTrotLinesFramePoint.changeFrame(worldFrame);
@@ -565,18 +564,18 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
             incrementHolder.setPosition(centerOfTrotLinesFramePoint, false);
          }
          incrementHolder.update();
-         
+
          incrementHolder.getPosition(shiftedCenterOfMass);
          shiftedCenterOfMass.changeFrame(worldFrame);
          desiredCenterOfMassPosition.set(shiftedCenterOfMass);
-         
+
          centerOfTrotLinesFramePoint.changeFrame(rootFrame);
          rootJointToCenterOfTrotLines.set(centerOfTrotLinesFramePoint);
-         
-         
+
+
          estimatedBodyCenterOfMassPosition.set(centerOfTrotLinesFramePoint);
          estimatedBodyCenterOfMassPosition.scale(totalMass / bodyMass);
-         
+
          for(TrotPair trotPairToUpdate : TrotPair.values)
          {
             if(trotPairToUpdate != currentTrotPair)
@@ -683,7 +682,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private class FilterDesiredsToMatchCrawlControllerState extends State<COM_ESTIMATE_STATES>
    {
       private final AlphaFilteredYoVariable filterStandPrepDesiredsToWalkingDesireds;
-      private final SDFFullRobotModel initialDesiredsUponEnteringFullRobotModel;
+      private final FullRobotModel initialDesiredsUponEnteringFullRobotModel;
 
       public FilterDesiredsToMatchCrawlControllerState(QuadrupedModelFactory modelFactory)
       {

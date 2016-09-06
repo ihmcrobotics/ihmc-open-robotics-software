@@ -2,7 +2,7 @@ package us.ihmc.wanderer.hardware.controllers;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -45,14 +45,14 @@ public class WandererStandPrep implements WandererController
    private final DoubleYoVariable crouch = new DoubleYoVariable("crouch", registry);
 
    private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableStandPrepOutput", registry);
-   
+
    private double springCalibration_t0;
    private final BooleanYoVariable springCalibration_wasEnabled = new BooleanYoVariable("springCalibrationEnabled",registry);
    private final BooleanYoVariable springCalibration_isEnabled = new BooleanYoVariable("startSpringCalibration", registry);
    private final DoubleYoVariable springTime = new DoubleYoVariable("springTime",registry);
 
    @Override
-   public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
+   public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
       for (WandererJoint joint : WandererJoint.values)
       {
@@ -94,14 +94,14 @@ public class WandererStandPrep implements WandererController
       switch (standPrepState.getEnumValue())
       {
       case WAIT:
-         
+
          for (int i = 0; i < WandererJoint.values.length; i++)
          {
             WandererJoint joint = WandererJoint.values[i];
             OneDoFJoint oneDoFJoint = joints.get(joint);
             oneDoFJoint.setTau(0.0);
          }
-         
+
          if (startStandprep.getBooleanValue())
          {
             standPrepState.set(StandPrepState.INITIALIZE);
@@ -177,12 +177,12 @@ public class WandererStandPrep implements WandererController
       }
 
    }
-   
+
    private double springCalibrationScript(double time)
-   {      
+   {
       if(WandererStandPrepSetpoints.HIP_X.getReflectRight()!=1.0)
          return 0.0;
-      
+
       if (springCalibration_isEnabled.getBooleanValue())
       {
          if(!springCalibration_wasEnabled.getBooleanValue())
@@ -202,18 +202,18 @@ public class WandererStandPrep implements WandererController
                return 0.0;
             }
          }
-         
+
       }
       else
       {
          springCalibration_wasEnabled.set(false);
-         return 0.0; 
+         return 0.0;
       }
-         
 
-         
+
+
    }
-   
+
    public StandPrepState getStandPrepState()
    {
 	   return standPrepState.getEnumValue();

@@ -1,16 +1,26 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Set;
+
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.ros.*;
+import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.ros.IHMCPacketToMsgPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosRobotConfigurationDataPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.ihmcPerception.IHMCETHRosLocalizationUpdateSubscriber;
@@ -23,10 +33,6 @@ import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Set;
-
 public class RosModule
 {
    private static final boolean DEBUG = false;
@@ -36,23 +42,23 @@ public class RosModule
 
 //   private final KryoLocalPacketCommunicator rosModulePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
 //         PacketDestination.ROS_MODULE.ordinal(), "RosModule");
-   
+
    private final PacketCommunicator rosModulePacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_MODULE,
          new IHMCCommunicationKryoNetClassList());
-   
+
    private final RosMainNode rosMainNode;
    private final DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final DRCRobotSensorInformation sensorInformation;
-   
+
    public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator)
    {
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NODE_NAME, true);
       String rosTopicPrefix = "/ihmc_ros/" + robotModel.getSimpleRobotName().toLowerCase();
-      
+
       ppsTimestampOffsetProvider = robotModel.getPPSTimestampOffsetProvider();
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
       rosModulePacketCommunicator.attachListener(RobotConfigurationData.class, ppsTimestampOffsetProvider);
-      
+
       sensorInformation = robotModel.getSensorInformation();
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, null);
@@ -60,11 +66,11 @@ public class RosModule
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, rosModulePacketCommunicator,
             rosMainNode, ppsTimestampOffsetProvider, sensorInformation, jointMap, rosTopicPrefix, tfPublisher);
-      
+
       if(simulatedSensorCommunicator != null)
       {
          publishSimulatedCameraAndLidar(robotModel.createFullRobotModel(), sensorInformation, simulatedSensorCommunicator);
-         
+
          DRCRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
          if (lidarParameters.length > 0)
          {
@@ -72,7 +78,7 @@ public class RosModule
             robotConfigurationPublisher.setAdditionalJointStatePublishing(primaryLidar.getLidarSpindleJointTopic(), primaryLidar.getLidarSpindleJointName());
          }
       }
-      
+
       if(sensorInformation.setupROSLocationService())
       {
          setupRosLocalization();
@@ -83,7 +89,7 @@ public class RosModule
 
       if (CREATE_ROS_ECHO_PUBLISHER)
          setupROSEchoPublisher(rosMainNode, rosTopicPrefix);
-      
+
       try
       {
          rosModulePacketCommunicator.connect();
@@ -92,14 +98,14 @@ public class RosModule
       {
          throw new RuntimeException(e);
       }
-      
+
       System.out.flush();
       rosMainNode.execute();
       if (DEBUG)
          PrintTools.debug("Finished creating ROS Module.");
    }
 
-   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, ObjectCommunicator localObjectCommunicator)
+   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, ObjectCommunicator localObjectCommunicator)
    {
       if (sensorInformation.getCameraParameters().length > 0)
       {
@@ -139,7 +145,7 @@ public class RosModule
    @SuppressWarnings("unchecked")
    private void setupROSEchoPublisher(RosMainNode rosMainNode, String namespace)
    {
-      
+
       PacketCommunicator uiPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
       try
       {
