@@ -89,6 +89,16 @@ public class ConvexPolygon2dCalculator
          return true;
       }
 
+      if (polygon.hasExactlyTwoVertices())
+      {
+         Point2d lineStart = polygon.getVertex(0);
+         Point2d lineEnd = polygon.getVertex(1);
+         double distance = GeometryTools.distanceFromPointToLineSegment(pointX, pointY, lineStart, lineEnd);
+         if (distance > epsilon)
+            return false;
+         return true;
+      }
+
       if (polygon.hasAtLeastTwoVertices())
       {
          // Not required to check bounding box this is just to speed up things:
