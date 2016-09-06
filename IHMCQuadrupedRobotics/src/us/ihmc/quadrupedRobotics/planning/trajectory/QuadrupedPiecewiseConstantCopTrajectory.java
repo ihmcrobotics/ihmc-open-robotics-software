@@ -1,7 +1,9 @@
-package us.ihmc.quadrupedRobotics.planning;
+package us.ihmc.quadrupedRobotics.planning.trajectory;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
+import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -9,7 +11,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.ArrayList;
 
-public class QuadrupedPiecewiseConstantPressureSequence
+public class QuadrupedPiecewiseConstantCopTrajectory
 {
    // internal
    private final QuadrantDependentList<ContactState> initialContactState;
@@ -23,7 +25,7 @@ public class QuadrupedPiecewiseConstantPressureSequence
    private final ArrayList<MutableDouble> normalizedPressureContributedByInitialContacts;
    private final ArrayList<MutableDouble> normalizedPressureContributedByQueuedSteps;
 
-   public QuadrupedPiecewiseConstantPressureSequence(int maxSteps)
+   public QuadrupedPiecewiseConstantCopTrajectory(int maxSteps)
    {
       int maxIntervals = 2 * maxSteps + 2;
 
@@ -115,21 +117,26 @@ public class QuadrupedPiecewiseConstantPressureSequence
 
    /**
     * compute piecewise constant center of pressure plan given the upcoming contact states
-    * @param contactStatePlan contact state plan
+    * @param timedContactSequence upcoming contact states (input)
     */
-   public void compute(QuadrupedContactStateSequence contactStatePlan)
+   public void compute(QuadrupedTimedContactSequence timedContactSequence)
    {
+      if (timedContactSequence.size() < 1)
+      {
+         throw new RuntimeException("Input contact sequence must have at least one time interval.");
+      }
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         initialContactState.set(robotQuadrant, contactStatePlan.getContactStateAtStartOfInterval(0).get(robotQuadrant));
+         initialContactState.set(robotQuadrant, timedContactSequence.get(0).getContactState().get(robotQuadrant));
          isInitialContactState.get(robotQuadrant).setTrue();
       }
 
-      for (int interval = 0; interval < contactStatePlan.getNumberOfIntervals(); interval++)
+      numberOfIntervals = timedContactSequence.size();
+      for (int interval = 0; interval < numberOfIntervals; interval++)
       {
-         numberOfIntervals = contactStatePlan.getNumberOfIntervals();
-         QuadrantDependentList<FramePoint> solePosition = contactStatePlan.getSolePositionAtStartOfInterval().get(interval);
-         QuadrantDependentList<ContactState> contactState = contactStatePlan.getContactStateAtStartOfInterval().get(interval);
+         QuadrantDependentList<FramePoint> solePosition = timedContactSequence.get(interval).getSolePosition();
+         QuadrantDependentList<ContactState> contactState = timedContactSequence.get(interval).getContactState();
 
          computeNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState);
          computeCenterOfPressure(centerOfPressureAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
@@ -150,7 +157,7 @@ public class QuadrupedPiecewiseConstantPressureSequence
                normalizedPressureContributedByQueuedSteps.add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant));
             }
          }
-         timeAtStartOfInterval.get(interval).setValue(contactStatePlan.getTimeAtStartOfInterval().get(interval));
+         timeAtStartOfInterval.get(interval).setValue(timedContactSequence.get(interval).getTimeInterval().getStartTime());
       }
    }
 

@@ -1,19 +1,17 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.quadrupedRobotics.util.ArraySorter;
-import us.ihmc.quadrupedRobotics.util.PreallocatedDeque;
+import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import javax.vecmath.Point3d;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class QuadrupedContactStateSequence
+public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTimedContactPhase>
 {
    private enum QuadrupedStepTransitionType
    {
@@ -45,99 +43,47 @@ public class QuadrupedContactStateSequence
    };
 
    // internal states
-   private final QuadrupedTimedStep[] stepArray;
    private final QuadrupedStepTransition[] stepTransition;
    private final QuadrupedTimedStep[] transitionStep;
-   private final QuadrantDependentList<FramePoint> solePosition;
    private final QuadrantDependentList<ContactState> contactState;
-   private final QuadrantDependentList<MutableDouble> contactPressure;
+   private final QuadrantDependentList<FramePoint> solePosition;
 
-   // contact state plan
-   private int numberOfIntervals;
-   private final ArrayList<MutableDouble> timeAtStartOfInterval;
-   private final ArrayList<QuadrantDependentList<ContactState>> contactStateAtStartOfInterval;
-   private final ArrayList<QuadrantDependentList<FramePoint>> solePositionAtStartOfInterval;
-
-   public QuadrupedContactStateSequence(int maximumNumberOfSteps)
+   public QuadrupedTimedContactSequence(int maximumNumberOfSteps)
    {
-      int maximumNumberOfIntervals = 2 * maximumNumberOfSteps + 2;
+      super(QuadrupedTimedContactPhase.class, 2 * maximumNumberOfSteps + 2);
 
-      // internal
-      stepArray = new QuadrupedTimedStep[maximumNumberOfIntervals];
-      stepTransition = new QuadrupedStepTransition[maximumNumberOfIntervals];
-      transitionStep = new QuadrupedTimedStep[maximumNumberOfIntervals];
-      for (int i = 0; i < maximumNumberOfIntervals; i++)
+      stepTransition = new QuadrupedStepTransition[capacity()];
+      transitionStep = new QuadrupedTimedStep[capacity()];
+      for (int i = 0; i < capacity(); i++)
       {
          stepTransition[i] = new QuadrupedStepTransition();
       }
-      solePosition = new QuadrantDependentList<>();
       contactState = new QuadrantDependentList<>();
-      contactPressure = new QuadrantDependentList<>();
+      solePosition = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         solePosition.set(robotQuadrant, new FramePoint(ReferenceFrame.getWorldFrame()));
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
-         contactPressure.set(robotQuadrant, new MutableDouble(0.0));
-      }
-
-      // external
-      numberOfIntervals = 0;
-      timeAtStartOfInterval = new ArrayList<>(maximumNumberOfIntervals);
-      solePositionAtStartOfInterval = new ArrayList<>(maximumNumberOfIntervals);
-      contactStateAtStartOfInterval = new ArrayList<>(maximumNumberOfIntervals);
-      for (int i = 0; i < maximumNumberOfIntervals; i++)
-      {
-         timeAtStartOfInterval.add(i, new MutableDouble(0.0));
-         contactStateAtStartOfInterval.add(i, new QuadrantDependentList<ContactState>());
-         solePositionAtStartOfInterval.add(i, new QuadrantDependentList<>(new FramePoint(), new FramePoint(), new FramePoint(), new FramePoint()));
+         solePosition.set(robotQuadrant, new FramePoint());
       }
    }
 
-   public int getNumberOfIntervals()
+   public void initialize()
    {
-      return numberOfIntervals;
-   }
-
-   public double getTimeAtStartOfInterval(int interval)
-   {
-      return timeAtStartOfInterval.get(interval).getValue();
-   }
-
-   public QuadrantDependentList<ContactState> getContactStateAtStartOfInterval(int interval)
-   {
-      return contactStateAtStartOfInterval.get(interval);
-   }
-
-   public QuadrantDependentList<FramePoint> getSolePositionAtStartOfInterval(int interval)
-   {
-      return solePositionAtStartOfInterval.get(interval);
-   }
-
-   public ArrayList<MutableDouble> getTimeAtStartOfInterval()
-   {
-      return timeAtStartOfInterval;
-   }
-
-   public ArrayList<QuadrantDependentList<ContactState>> getContactStateAtStartOfInterval()
-   {
-      return contactStateAtStartOfInterval;
-   }
-
-   public ArrayList<QuadrantDependentList<FramePoint>> getSolePositionAtStartOfInterval()
-   {
-      return solePositionAtStartOfInterval;
    }
 
    /**
     * compute piecewise center of pressure plan given an array of upcoming steps
-    * @param steps list of upcoming steps (input)
+    * @param stepSequence list of upcoming steps (input)
     * @param initialSolePosition initial sole positions (input)
     * @param initialContactState initial sole contact state (input)
     * @param initialTime initial time (input)
     */
-   public void compute(List<QuadrupedTimedStep> steps, QuadrantDependentList<FramePoint> initialSolePosition,
+   public void compute(List<QuadrupedTimedStep> stepSequence, QuadrantDependentList<FramePoint> initialSolePosition,
          QuadrantDependentList<ContactState> initialContactState, double initialTime)
    {
+      QuadrupedTimedContactPhase contactPhase;
+      super.clear();
+
       // initialize contact state and sole positions
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -153,9 +99,9 @@ public class QuadrupedContactStateSequence
       }
 
       int numberOfStepTransitions = 0;
-      for (int i = 0; i < steps.size(); i++)
+      for (int i = 0; i < stepSequence.size(); i++)
       {
-         QuadrupedTimedStep step = steps.get(i);
+         QuadrupedTimedStep step = stepSequence.get(i);
 
          if (step.getTimeInterval().getStartTime() >= initialTime)
          {
@@ -182,13 +128,11 @@ public class QuadrupedContactStateSequence
       ArraySorter.sort(stepTransition, compareByTime);
 
       // compute transition time and center of pressure for each time interval
-      numberOfIntervals = 1;
-      timeAtStartOfInterval.get(0).setValue(initialTime);
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         contactStateAtStartOfInterval.get(0).set(robotQuadrant, contactState.get(robotQuadrant));
-         solePositionAtStartOfInterval.get(0).get(robotQuadrant).setIncludingFrame(solePosition.get(robotQuadrant));
-      }
+      super.add();
+      contactPhase = super.get(super.size() - 1);
+      contactPhase.setContactState(contactState);
+      contactPhase.setSolePosition(solePosition);
+      contactPhase.getTimeInterval().setStartTime(initialTime);
       for (int i = 0; i < numberOfStepTransitions; i++)
       {
          switch (stepTransition[i].type)
@@ -204,14 +148,14 @@ public class QuadrupedContactStateSequence
          }
          if ((i + 1 == numberOfStepTransitions) || (stepTransition[i].time != stepTransition[i + 1].time))
          {
-            timeAtStartOfInterval.get(numberOfIntervals).setValue(stepTransition[i].time);
-            for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-            {
-               contactStateAtStartOfInterval.get(numberOfIntervals).set(robotQuadrant, contactState.get(robotQuadrant));
-               solePositionAtStartOfInterval.get(numberOfIntervals).get(robotQuadrant).setIncludingFrame(solePosition.get(robotQuadrant));
-            }
-            numberOfIntervals++;
+            contactPhase.getTimeInterval().setEndTime(stepTransition[i].time);
+            super.add();
+            contactPhase = super.get(super.size() - 1);
+            contactPhase.setSolePosition(solePosition);
+            contactPhase.setContactState(contactState);
+            contactPhase.getTimeInterval().setStartTime(stepTransition[i].time);
          }
       }
+      contactPhase.getTimeInterval().setEndTime(contactPhase.getTimeInterval().getStartTime() + 1.0);
    }
 }
