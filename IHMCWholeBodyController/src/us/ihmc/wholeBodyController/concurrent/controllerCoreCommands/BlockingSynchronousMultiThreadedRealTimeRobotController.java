@@ -11,14 +11,14 @@ import java.util.ArrayList;
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class BlockingMultiThreadedRealTimeRobotController
+public class BlockingSynchronousMultiThreadedRealTimeRobotController
 {
    private final MultiThreadedRobotControlElement sensorReader;
    private final ArrayList<ImmutableTriple<MultiThreadedRobotControlElement, PriorityParameters, Processor>> robotControllers = new ArrayList<>();
    //   private final MonotonicTime triggerTime = new MonotonicTime();
    //   private final MonotonicTime monotonicTime = new MonotonicTime();
 
-   public BlockingMultiThreadedRealTimeRobotController(MultiThreadedRobotControlElement sensorReader)
+   public BlockingSynchronousMultiThreadedRealTimeRobotController(MultiThreadedRobotControlElement sensorReader)
    {
       this.sensorReader = sensorReader;
    }
