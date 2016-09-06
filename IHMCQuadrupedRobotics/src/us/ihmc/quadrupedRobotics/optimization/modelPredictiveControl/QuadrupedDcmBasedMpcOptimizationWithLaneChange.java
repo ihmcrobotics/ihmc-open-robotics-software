@@ -9,7 +9,7 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMo
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
-import us.ihmc.quadrupedRobotics.util.PreallocatedDeque;
+import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -78,7 +78,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    }
 
    @Override
-   public void compute(FrameVector stepAdjustmentVector, FramePoint cmpPositionSetpoint, PreallocatedDeque<QuadrupedTimedStep> queuedSteps,
+   public void compute(FrameVector stepAdjustmentVector, FramePoint cmpPositionSetpoint, PreallocatedList<QuadrupedTimedStep> queuedSteps,
          QuadrantDependentList<FramePoint> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint currentComPosition,
          FrameVector currentComVelocity, double currentTime, QuadrupedMpcOptimizationWithLaneChangeSettings settings)
    {

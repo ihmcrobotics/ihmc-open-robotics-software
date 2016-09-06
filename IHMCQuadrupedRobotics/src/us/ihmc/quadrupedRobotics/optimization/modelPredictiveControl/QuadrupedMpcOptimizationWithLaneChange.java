@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.optimization.modelPredictiveControl;
 
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.util.PreallocatedDeque;
+import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -20,7 +20,7 @@ public interface QuadrupedMpcOptimizationWithLaneChange
     * @param currentComVelocity current center of mass velocity
     * @param currentTime current time in seconds
     */
-   void compute(FrameVector stepAdjustmentVector, FramePoint cmpPositionSetpoint, PreallocatedDeque<QuadrupedTimedStep> queuedSteps,
+   void compute(FrameVector stepAdjustmentVector, FramePoint cmpPositionSetpoint, PreallocatedList<QuadrupedTimedStep> queuedSteps,
          QuadrantDependentList<FramePoint> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint currentComPosition,
          FrameVector currentComVelocity, double currentTime, QuadrupedMpcOptimizationWithLaneChangeSettings settings);
 }
