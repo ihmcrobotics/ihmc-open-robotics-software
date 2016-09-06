@@ -19,7 +19,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements FullQuadrupedRobotModel
+public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDescription implements FullQuadrupedRobotModel
 {
    private final BiMap<QuadrupedJointName, OneDoFJoint> jointNameOneDoFJointBiMap = HashBiMap.create();
    private final QuadrantDependentList<List<OneDoFJoint>> legOneDoFJoints = new QuadrantDependentList<>();
@@ -27,7 +27,7 @@ public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements Ful
 
    private QuadrantDependentList<RigidBody> feet;
 
-   public SDFFullQuadrupedRobotModel(RobotDescription description, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack,
+   public FullQuadrupedRobotModelFromDescription(RobotDescription description, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack,
          Map<QuadrupedJointName, JointLimit> jointLimits)
    {
       this(description, sdfJointNameMap, sensorLinksToTrack);
@@ -35,7 +35,7 @@ public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements Ful
       this.jointLimits.putAll(jointLimits);
    }
 
-   public SDFFullQuadrupedRobotModel(RobotDescription description, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public FullQuadrupedRobotModelFromDescription(RobotDescription description, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       super(description, sdfJointNameMap, sensorLinksToTrack);
 

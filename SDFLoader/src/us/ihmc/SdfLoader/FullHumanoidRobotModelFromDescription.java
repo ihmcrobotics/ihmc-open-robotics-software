@@ -25,7 +25,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
-public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements FullHumanoidRobotModel
+public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDescription implements FullHumanoidRobotModel
 {
    private SideDependentList<EnumMap<ArmJointName, OneDoFJoint>> armJointLists;
    private SideDependentList<EnumMap<LegJointName, OneDoFJoint>> legJointLists;
@@ -46,12 +46,12 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
    private SDFHumanoidJointNameMap humanoidJointNameMap;
 
    // copy constructor
-   public SDFFullHumanoidRobotModel(SDFFullHumanoidRobotModel modelToCopy)
+   public FullHumanoidRobotModelFromDescription(FullHumanoidRobotModelFromDescription modelToCopy)
    {
       this(modelToCopy.description, modelToCopy.humanoidJointNameMap, modelToCopy.sensorLinksToTrack);
    }
 
-   public SDFFullHumanoidRobotModel(RobotDescription description, SDFHumanoidJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public FullHumanoidRobotModelFromDescription(RobotDescription description, SDFHumanoidJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       super(description, sdfJointNameMap, sensorLinksToTrack);
 

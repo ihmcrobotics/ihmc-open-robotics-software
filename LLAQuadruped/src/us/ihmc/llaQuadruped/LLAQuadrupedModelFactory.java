@@ -10,7 +10,7 @@ import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.FullQuadrupedRobotModelFromDescription;
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
@@ -80,7 +80,7 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
       RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
-      FullQuadrupedRobotModel sdfFullRobotMdoel = new SDFFullQuadrupedRobotModel(description, jointMap, sensorLinksToTrack);
+      FullQuadrupedRobotModel sdfFullRobotMdoel = new FullQuadrupedRobotModelFromDescription(description, jointMap, sensorLinksToTrack);
 
       return sdfFullRobotMdoel;
    }
