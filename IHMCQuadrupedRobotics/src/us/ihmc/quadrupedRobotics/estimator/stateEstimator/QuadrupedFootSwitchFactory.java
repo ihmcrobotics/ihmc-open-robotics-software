@@ -41,7 +41,7 @@ public class QuadrupedFootSwitchFactory
       {
          QuadrupedTouchdownDetectorBasedFootSwitch touchdownDetectorBasedFootSwitch;
          touchdownDetectorBasedFootSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant, footContactableBodies.get().get(robotQuadrant),
-                                                                                          fullRobotModel.get(), totalRobotWeight, registry);
+                                                                                          totalRobotWeight, registry);
 
          JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector;
          jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.get().getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), registry);
