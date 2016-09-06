@@ -117,4 +117,3 @@ public class PilotInterfacePacket extends StatusPacket<PilotInterfacePacket>
       return packetString;
    }
 }
-
