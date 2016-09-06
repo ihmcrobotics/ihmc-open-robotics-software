@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 
 import com.github.quickhull3d.Point3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -60,9 +60,9 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    private final DRCSCSInitialSetup scsInitialSetup;
 
    private DRCGuiInitialSetup guiInitialSetup;
-   private DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup;
+   private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
 
-   private SDFHumanoidRobot sdfRobot;
+   private HumanoidFloatingRootJointRobot sdfRobot;
    private MomentumBasedControllerFactory controllerFactory;
    private DRCSimulationFactory drcSimulationFactory;
    private SimulationConstructionSet simulationConstructionSet;
@@ -231,7 +231,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
     * @param robotInitialSetup
     */
    @Override
-   public void setRobotInitialSetup(DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup)
+   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       this.robotInitialSetup = robotInitialSetup;
    }
@@ -427,7 +427,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
          DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
          DRCRobotJointMap jointMap = robotModel.getJointMap();
          TimestampProvider timeStampProvider = drcSimulationFactory.getTimeStampProvider();
-         SDFHumanoidRobot robot = drcSimulationFactory.getRobot();
+         HumanoidFloatingRootJointRobot robot = drcSimulationFactory.getRobot();
          Graphics3DAdapter graphics3dAdapter = simulationConstructionSet.getGraphics3dAdapter();
 
          printIfDebug("Streaming SCS Video");
@@ -490,7 +490,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    }
 
    @Override
-   public SDFHumanoidRobot getSDFRobot()
+   public HumanoidFloatingRootJointRobot getSDFRobot()
    {
       return sdfRobot;
    }

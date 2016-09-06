@@ -14,7 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -85,7 +85,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private HumanoidRobotDataReceiver robotDataReceiver;
-   private SDFHumanoidRobot robot;
+   private HumanoidFloatingRootJointRobot robot;
    private FullHumanoidRobotModel fullRobotModel;
 
    @Before
@@ -399,7 +399,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       return footstep;
    }
 
-   private FramePose2d getRobotFootPose2d(SDFHumanoidRobot robot, RobotSide robotSide)
+   private FramePose2d getRobotFootPose2d(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
    {
       List<GroundContactPoint> gcPoints = robot.getFootGroundContactPoints(robotSide);
       Joint ankleJoint = gcPoints.get(0).getParentJoint();

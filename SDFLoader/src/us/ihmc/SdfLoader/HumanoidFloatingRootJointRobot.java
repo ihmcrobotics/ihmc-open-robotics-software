@@ -9,14 +9,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 
-public class SDFHumanoidRobot extends FloatingRootJointRobot
+public class HumanoidFloatingRootJointRobot extends FloatingRootJointRobot
 {
    private final SideDependentList<String> jointsBeforeFeet = new SideDependentList<String>();
 
    private final SideDependentList<ArrayList<GroundContactPoint>> footGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
    private final SideDependentList<ArrayList<GroundContactPoint>> handGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
 
-   public SDFHumanoidRobot(RobotDescription robotDescription, SDFHumanoidJointNameMap sdfJointNameMap)
+   public HumanoidFloatingRootJointRobot(RobotDescription robotDescription, SDFHumanoidJointNameMap sdfJointNameMap)
    {
       super(robotDescription);
 

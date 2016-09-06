@@ -6,8 +6,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.math.Transform;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.footstepGenerator.HeightCalculatorParameters;
@@ -55,7 +55,7 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
 
    public abstract DRCRobotSensorInformation getSensorInformation();
 
-   public abstract DRCRobotInitialSetup<SDFHumanoidRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
+   public abstract DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
    public abstract ScsCollisionConfigure getPhysicsConfigure(FloatingRootJointRobot robotModel);
 
@@ -74,7 +74,7 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
-   
+
    public abstract double getStandPrepAngle(String jointName);
 
    public abstract DRCROSPPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
@@ -87,9 +87,9 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
            ThreadDataSynchronizerInterface threadDataSynchronizer, HumanoidGlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry);
 
    public abstract DRCHandType getDRCHandType();
-   
+
    public abstract LinkedHashMap<NeckJointName,ImmutablePair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits();
-   
+
    public abstract SideDependentList<LinkedHashMap<String,ImmutablePair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits();
 
    public abstract LogSettings getLogSettings();
@@ -99,7 +99,7 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
    public abstract HeightCalculatorParameters getHeightCalculatorParameters();
 
    public abstract String getSimpleRobotName();
-   
+
    public abstract CollisionBoxProvider getCollisionBoxProvider();
 
    public abstract FootstepSnappingParameters getSnappingParameters();

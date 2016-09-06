@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.github.quickhull3d.Point3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -59,7 +59,7 @@ import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfigura
 public class AutomatedDiagnosticSimulationFactory implements RobotController
 {
    private final DRCRobotModel robotModel;
-   private DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup;
+   private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
    private InputStream gainStream;
    private InputStream setpointStream;
    private final YoVariableRegistry simulationRegistry = new YoVariableRegistry("AutomatedDiagnosticSimulation");
@@ -74,7 +74,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private final Point3d scsCameraFix = new Point3d(0.0, 0.0, 1.35);
 
    private AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration;
-   private SDFHumanoidRobot simulatedRobot;
+   private HumanoidFloatingRootJointRobot simulatedRobot;
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private DRCKinematicsBasedStateEstimator stateEstimator;
 
@@ -198,7 +198,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       this.diagnosticParameters = diagnosticParameters;
    }
 
-   public void setRobotInitialSetup(DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup)
+   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       this.robotInitialSetup = robotInitialSetup;
    }

@@ -13,7 +13,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -58,7 +58,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    private final YoFrameVector leftFootComputedWrenchForce = new YoFrameVector("wrench_computed_leftFootForce", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector rightFootComputedWrenchForce = new YoFrameVector("wrench_computed_rightFootForce", ReferenceFrame.getWorldFrame(), registry);
 
-   private final SDFHumanoidRobot robot;
+   private final HumanoidFloatingRootJointRobot robot;
    private final FullHumanoidRobotModel fullRobotModel;
    private final SimulationConstructionSet scs;
    private final TwistCalculator twistCalculator;
@@ -75,7 +75,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    private final SideDependentList<ExternalForcePoint> feetExternalForcePoints;
 
-   public DRCInverseDynamicsCalculatorTestHelper(FullHumanoidRobotModel fullRobotModel, SDFHumanoidRobot robot, boolean visualize, double gravityZ)
+   public DRCInverseDynamicsCalculatorTestHelper(FullHumanoidRobotModel fullRobotModel, HumanoidFloatingRootJointRobot robot, boolean visualize, double gravityZ)
    {
       this.fullRobotModel = fullRobotModel;
       this.robot = robot;

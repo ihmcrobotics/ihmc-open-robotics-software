@@ -7,7 +7,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -26,7 +26,7 @@ class ActualCMPComputer extends SimpleRobotController
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private final SDFHumanoidRobot simulatedRobot;
+   private final HumanoidFloatingRootJointRobot simulatedRobot;
    private final double simulateDT;
    private final double gravity;
 
@@ -43,7 +43,7 @@ class ActualCMPComputer extends SimpleRobotController
 
    private final YoFrameVector2d yoCmp = new YoFrameVector2d("actualCMP", worldFrame, registry);
 
-   public ActualCMPComputer(boolean createViz, SimulationConstructionSet scs, SDFHumanoidRobot simulatedRobot)
+   public ActualCMPComputer(boolean createViz, SimulationConstructionSet scs, HumanoidFloatingRootJointRobot simulatedRobot)
    {
       this.simulatedRobot = simulatedRobot;
       simulateDT = scs.getDT();

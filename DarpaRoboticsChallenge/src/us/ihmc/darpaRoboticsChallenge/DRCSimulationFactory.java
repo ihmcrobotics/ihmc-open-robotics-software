@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
@@ -79,14 +79,14 @@ public class DRCSimulationFactory
    private static final double headIMUMeasurmentRate = 400.0;
 
    private final SimulationConstructionSet scs;
-   private final SDFHumanoidRobot simulatedRobot;
+   private final HumanoidFloatingRootJointRobot simulatedRobot;
    private final MomentumBasedControllerFactory controllerFactory;
 
    private DRCEstimatorThread drcEstimatorThread;
    private DRCControllerThread drcControllerThread;
    private AbstractThreadedRobotController multiThreadedRobotController;
 
-   private final DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup;
+   private final DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
 
    private final SimulatedDRCRobotTimeProvider simulatedDRCRobotTimeProvider;
 
@@ -99,7 +99,7 @@ public class DRCSimulationFactory
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
    public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, CommonAvatarEnvironmentInterface environment,
-         DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+         DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
          HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
@@ -193,8 +193,8 @@ public class DRCSimulationFactory
    }
 
    private void createRobotController(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, HumanoidGlobalDataProducer globalDataProducer,
-         SDFHumanoidRobot simulatedRobot, SimulationConstructionSet scs, DRCSCSInitialSetup scsInitialSetup,
-         DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup)
+         HumanoidFloatingRootJointRobot simulatedRobot, SimulationConstructionSet scs, DRCSCSInitialSetup scsInitialSetup,
+         DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
 
@@ -330,8 +330,8 @@ public class DRCSimulationFactory
       simulatedRobot.setController(simulatedDRCRobotTimeProvider);
    }
 
-   private static void initializeEstimatorToActual(DRCEstimatorThread drcStateEstimator, DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup,
-         SDFHumanoidRobot simulatedRobot, DRCRobotJointMap jointMap)
+   private static void initializeEstimatorToActual(DRCEstimatorThread drcStateEstimator, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup,
+         HumanoidFloatingRootJointRobot simulatedRobot, DRCRobotJointMap jointMap)
    {
       // The following is to get the initial CoM position from the robot.
       // It is cheating for now, and we need to move to where the
@@ -409,7 +409,7 @@ public class DRCSimulationFactory
       closeableAndDisposableRegistry = null;
    }
 
-   public SDFHumanoidRobot getRobot()
+   public HumanoidFloatingRootJointRobot getRobot()
    {
       return simulatedRobot;
    }

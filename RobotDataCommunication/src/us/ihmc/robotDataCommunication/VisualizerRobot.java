@@ -1,12 +1,12 @@
 package us.ihmc.robotDataCommunication;
 
 import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
-public class VisualizerRobot extends SDFHumanoidRobot
+public class VisualizerRobot extends HumanoidFloatingRootJointRobot
 {
    private final YoVariableRegistry reducedRegistry;
 

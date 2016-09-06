@@ -7,7 +7,7 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PosePlaybackSCSBridge;
@@ -47,7 +47,7 @@ public class AtlasPosePlaybackSCSBridge
          return;
       }
 
-      SDFHumanoidRobot sdfRobot = model.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = model.createSdfRobot(false);
       FullHumanoidRobotModel fullRobotModel = model.createFullRobotModel();
       FullHumanoidRobotModel fullRobotModelForSlider = model.createFullRobotModel();
 

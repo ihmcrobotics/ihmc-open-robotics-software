@@ -49,7 +49,7 @@ public class SDFRobotTest
 
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
       RobotDescription description = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
-      SDFHumanoidRobot sdfHumanoidRobot = new SDFHumanoidRobot(description, sdfJointNameMap);
+      HumanoidFloatingRootJointRobot sdfHumanoidRobot = new HumanoidFloatingRootJointRobot(description, sdfJointNameMap);
 
       inputStream = getClass().getClassLoader().getResourceAsStream("sdfRobotTest.sdf");
       RobotDescriptionFromSDFLoader robotDescriptionFromSDFLoader = new RobotDescriptionFromSDFLoader();

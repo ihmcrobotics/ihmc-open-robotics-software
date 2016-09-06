@@ -10,7 +10,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
+import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -79,7 +79,7 @@ public class KinematicsToolboxModule
    private final ControllerNetworkSubscriber controllerNetworkSubscriber;
    private final KinematicsToolboxController kinematicsToolBoxController;
 
-   public KinematicsToolboxModule(SDFFullHumanoidRobotModelFactory fullRobotModelFactory, LogModelProvider modelProvider,
+   public KinematicsToolboxModule(FullHumanoidRobotModelFactory fullRobotModelFactory, LogModelProvider modelProvider,
          boolean startYoVariableServer) throws IOException
    {
       commandInputManager = new CommandInputManager(createListOfSupportedCommands());
