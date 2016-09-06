@@ -770,22 +770,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return minDistance;
    }
 
-   // nuke this
-   public ConvexPolygon2d translateCopy(Tuple2d translation)
-   {
-      checkIfUpToDate();
-      ArrayList<Point2d> points = new ArrayList<Point2d>(numberOfVertices);
-
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         Point2d newPoint = new Point2d(getVertex(i));
-         newPoint.add(translation);
-         points.add(newPoint);
-      }
-
-      return new ConvexPolygon2d(points);
-   }
-
    public Line2d[] getLinesOfSight(Point2d observerPoint)
    {
       checkIfUpToDate();
@@ -2472,6 +2456,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return false;
    }
 
+   // --- remove these eventually ---
    public boolean isPointInside(double x, double y)
    {
       return ConvexPolygon2dCalculator.isPointInside(x, y, this);
@@ -2492,4 +2477,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return ConvexPolygon2dCalculator.isPointInside(point, epsilon, this);
    }
 
+   public ConvexPolygon2d translateCopy(Tuple2d translation)
+   {
+      return ConvexPolygon2dCalculator.translatePolygonCopy(translation, this);
+   }
 }

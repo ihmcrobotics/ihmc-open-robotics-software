@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
 
 import org.junit.Test;
 
@@ -200,6 +201,14 @@ public class ConvexPolygon2dCalculatorTest
 
       Point2d point4 = new Point2d(1.0, 0.9);
       assertFalse(ConvexPolygon2dCalculator.isPointInside(point4, polygon));
+
+      Point2d point5 = new Point2d(2.0, 1.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point5, polygon));
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point5, 1.0, polygon));
+
+      Point2d point6 = new Point2d(1.0, 2.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point6, polygon));
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point6, 1.0, polygon));
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -322,6 +331,40 @@ public class ConvexPolygon2dCalculatorTest
       polygonToTest5.addVertex(new Point2d(-0.1, 0.1));
       polygonToTest5.update();
       assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest5, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testTranslatePolygon1()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.addVertex(new Point2d(10.0, 0.0));
+      polygon.addVertex(new Point2d(0.0, 10.0));
+      polygon.update();
+
+      Vector2d translation1 = new Vector2d(0.0, 0.0);
+      ConvexPolygon2d polygon1 = ConvexPolygon2dCalculator.translatePolygonCopy(translation1, polygon);
+      assertTrue(polygon1.epsilonEquals(polygon, epsilon));
+
+      Vector2d translation2 = new Vector2d(1.0, 0.5);
+      ConvexPolygon2d polygon2 = ConvexPolygon2dCalculator.translatePolygonCopy(translation2, polygon);
+      assertTrue(polygon2.getVertex(2).epsilonEquals(new Point2d(1.0, 0.5), epsilon));
+      assertTrue(polygon2.getVertex(1).epsilonEquals(new Point2d(11.0, 0.5), epsilon));
+      assertTrue(polygon2.getVertex(0).epsilonEquals(new Point2d(1.0, 10.5), epsilon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testTranslatePolygon2()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.update();
+
+      Vector2d translation1 = new Vector2d(-0.1, 0.0);
+      ConvexPolygon2dCalculator.translatePolygon(translation1, polygon);
+      assertTrue(polygon.getVertex(0).epsilonEquals(translation1, epsilon));
    }
 
    private static void assertDistanceCorrect(double expected, double actual)
