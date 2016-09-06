@@ -66,7 +66,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
 
    public double getTimeAtStartOfInterval(int interval)
    {
-      return timeAtStartOfInterval.get(interval).getValue();
+      return timeAtStartOfInterval.get(interval).doubleValue();
    }
 
    public FramePoint getCenterOfPressureAtStartOfInterval(int interval)
@@ -81,12 +81,12 @@ public class QuadrupedPiecewiseConstantCopTrajectory
 
    public double getNormalizedPressureContributedByInitialContacts(int interval)
    {
-      return normalizedPressureContributedByInitialContacts.get(interval).getValue();
+      return normalizedPressureContributedByInitialContacts.get(interval).doubleValue();
    }
 
    public double getNormalizedPressureContributedByQueuedSteps(int interval)
    {
-      return normalizedPressureContributedByQueuedSteps.get(interval).getValue();
+      return normalizedPressureContributedByQueuedSteps.get(interval).doubleValue();
    }
 
 
