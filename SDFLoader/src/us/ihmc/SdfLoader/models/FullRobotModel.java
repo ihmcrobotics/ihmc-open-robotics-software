@@ -96,6 +96,8 @@ public interface FullRobotModel
 
    public abstract Map<String, OneDoFJoint> getOneDoFJointsAsMap();
 
+   public abstract void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack);
+
    /** Returns all one DoF joints, excluding joints that do not exist in the controller. */
    public abstract OneDoFJoint[] getControllableOneDoFJoints();
 

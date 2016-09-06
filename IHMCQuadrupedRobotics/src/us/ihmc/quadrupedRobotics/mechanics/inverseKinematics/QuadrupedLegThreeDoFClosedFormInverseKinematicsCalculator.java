@@ -2,11 +2,11 @@ package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -29,9 +29,9 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
    private final Vector3d footPositionInFrameBeforeHipPitch = new Vector3d();
 
    private boolean bendKneesIn = false;
-   
+
    /**
-    * 
+    *
     * @param offsetFromHipRollToHipPitch
     * @param referenceFrames
     * @param robotQuadrant
@@ -42,24 +42,24 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       ReferenceFrame hipPitchFrame = referenceFrames.getHipPitchFrame(robotQuadrant);
       ReferenceFrame kneePitchFrame = referenceFrames.getKneeFrame(robotQuadrant);
       ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
-      
+
       FramePoint hipPitch = new FramePoint(hipPitchFrame);
       FramePoint kneePitch = new FramePoint(kneePitchFrame);
       FramePoint foot = new FramePoint(footFrame);
-      
+
       kneePitch.changeFrame(hipPitchFrame);
-      
+
       double hipToKneeTheta = Math.atan2(kneePitch.getX(), -kneePitch.getZ());
       hipThetaOffset = hipToKneeTheta;
 
 //    System.out.println("hipThetaOffset = " + hipThetaOffset);
-    
+
       thighLength = kneePitch.distance(hipPitch);
-      
+
       kneePitch.changeFrame(kneePitchFrame);
       foot.changeFrame(kneePitchFrame);
       shinLength = foot.distance(kneePitch);
-      
+
       if(foot.getX() != 0)
       {
          double kneeToFootTheta = Math.atan(foot.getZ() / foot.getX());
@@ -69,17 +69,17 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       {
          kneeThetaOffset = 0.0;
       }
-      
+
 //      System.out.println("kneeThetaOffset = " + kneeThetaOffset);
 
    }
-   
+
    public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromLegAttachmentFrame(RobotQuadrant robotQuadrant, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties)
    {
       //make these here to ensure we get a zero pose
-      SDFFullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
+      FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      
+
       ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
       ReferenceFrame frameBeforeHipPitch = referenceFrames.getHipPitchFrame(robotQuadrant).getParent();
 
@@ -88,13 +88,13 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
 
       return new QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(offsetFromHipRollToHipPitch.getVectorCopy(), referenceFrames, robotQuadrant);
    }
-   
+
    public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromHipRollFrame(RobotQuadrant robotQuadrant, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties)
    {
       //make these here to ensure we get a zero pose
-      SDFFullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
+      FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      
+
       ReferenceFrame frameAfterHipRoll = referenceFrames.getFrameBeforeLegJoint(robotQuadrant, LegJointName.HIP_ROLL);
       ReferenceFrame frameBeforeHipPitch = referenceFrames.getHipPitchFrame(robotQuadrant).getParent();
 
@@ -103,12 +103,12 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
 
       return new QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(offsetFromHipRollToHipPitch.getVectorCopy(), referenceFrames, robotQuadrant);
    }
-   
+
    public void setBendKneesIn(boolean bendKneesIn)
    {
       this.bendKneesIn = bendKneesIn;
    }
-   
+
    public boolean computeJointAnglesGivenFootInFrameBeforeHipRoll(Vector3d footPositionInFrameBeforeHipRoll, double[] jointAnglesToPack)
    {
       // hipRollAngle will be guaranteed to be between +-PI since using atan2 here.
@@ -167,7 +167,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
 
       return valid;
    }
-   
+
    public double getKneeAngleAtMaxLength()
    {
 	   return  -hipThetaOffset - kneeThetaOffset;
