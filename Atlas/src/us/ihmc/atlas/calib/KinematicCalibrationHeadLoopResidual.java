@@ -18,7 +18,7 @@ import boofcv.alg.geo.PerspectiveOps;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -76,7 +76,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       this.calJointNames = getOrderedArmJointsNames(fullRobotModel, isLeft);
    }
 
-   public static List<String> getOrderedArmJointsNames(SDFFullRobotModel fullRobotModel, boolean isLeft)
+   public static List<String> getOrderedArmJointsNames(FullRobotModel fullRobotModel, boolean isLeft)
    {
       final OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
 

@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -38,7 +38,7 @@ public class LockPelvisController implements RobotController
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<YoGraphicPosition> efp_positionViz = new ArrayList<>();
 
-   public LockPelvisController(FloatingRootJointRobot robot, SimulationConstructionSet scs, SDFFullRobotModel sdfFullRobotModel, double desiredHeight)
+   public LockPelvisController(FloatingRootJointRobot robot, SimulationConstructionSet scs, FullRobotModel sdfFullRobotModel, double desiredHeight)
    {
       this.robot = robot;
       robotMass = robot.computeCenterOfMass(new Point3d());

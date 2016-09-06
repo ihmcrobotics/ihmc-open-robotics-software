@@ -75,7 +75,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
 //      DRCRobotJointMap jointMap = robotModel.getJointMap();
 //      JaxbSDFLoader sdfLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
 //      
-//      SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
+//      FullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
 //      SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
 //      
 //      PosePlaybackRobotPoseSequence sequence = PosePlaybackExampleSequence.createExampleSequenceFourPoses(fullRobotModel);

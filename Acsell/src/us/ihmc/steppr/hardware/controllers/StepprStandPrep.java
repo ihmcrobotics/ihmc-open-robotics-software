@@ -2,7 +2,7 @@ package us.ihmc.steppr.hardware.controllers;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -47,7 +47,7 @@ public class StepprStandPrep implements StepprController
    private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableStandPrepOutput", registry);
 
    @Override
-   public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
+   public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
       for (StepprJoint joint : StepprJoint.values)
       {
@@ -89,14 +89,14 @@ public class StepprStandPrep implements StepprController
       switch (standPrepState.getEnumValue())
       {
       case WAIT:
-         
+
          for (int i = 0; i < StepprJoint.values.length; i++)
          {
             StepprJoint joint = StepprJoint.values[i];
             OneDoFJoint oneDoFJoint = joints.get(joint);
             oneDoFJoint.setTau(0.0);
          }
-         
+
          if (startStandprep.getBooleanValue())
          {
             standPrepState.set(StandPrepState.INITIALIZE);
@@ -170,7 +170,7 @@ public class StepprStandPrep implements StepprController
       }
 
    }
-   
+
    public StandPrepState getStandPrepState()
    {
 	   return standPrepState.getEnumValue();

@@ -1,6 +1,7 @@
 package us.ihmc.SdfLoader.models;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
@@ -66,6 +67,10 @@ public interface FullRobotModel
     */
    public abstract InverseDynamicsJoint getLidarJoint(String lidarName);
 
+   public abstract ReferenceFrame getLidarBaseFrame(String name);
+
+   public abstract ReferenceFrame getCameraFrame(String name);
+
    /**
     * Returns the {@link RigidBody} describing the pelvis of this robot.
     * In the current framework (on the day: 11/18/2014), the pelvis is the the first successor of the root joint.
@@ -84,8 +89,12 @@ public interface FullRobotModel
     */
    public abstract RigidBody getHead();
 
+   public abstract ReferenceFrame getHeadBaseFrame();
+
    /** Returns all the one DoF joints that this robot has. */
    public abstract OneDoFJoint[] getOneDoFJoints();
+
+   public abstract Map<String, OneDoFJoint> getOneDoFJointsAsMap();
 
    /** Returns all one DoF joints, excluding joints that do not exist in the controller. */
    public abstract OneDoFJoint[] getControllableOneDoFJoints();
@@ -129,4 +138,6 @@ public interface FullRobotModel
     */
    public abstract ContactSensorDefinition[] getContactSensorDefinitions();
 
+
+   public abstract double getTotalMass();
 }

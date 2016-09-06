@@ -2,7 +2,7 @@ package us.ihmc.wanderer.hardware.controllers;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -13,17 +13,17 @@ public class WandererPDJointController implements WandererController
 {
    WandererRobotModel robotModel = new WandererRobotModel(true, true);
    protected final YoVariableRegistry registry = new YoVariableRegistry("WandererPDJointController");
-   
+
    protected final ArrayList<OneDoFJoint> joints = new ArrayList<>();
    protected final ArrayList<PDController> controllers = new ArrayList<>();
    protected final ArrayList<DoubleYoVariable> desiredPositions = new ArrayList<>();
    protected final ArrayList<DoubleYoVariable> desiredVelocities = new ArrayList<>();
    protected final ArrayList<DoubleYoVariable> tauFFs = new ArrayList<>();
    protected final ArrayList<DoubleYoVariable> damping = new ArrayList<>();
-   
+
 
    @Override
-   public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
+   public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
       for(OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
@@ -42,7 +42,7 @@ public class WandererPDJointController implements WandererController
    {
       for(int i = 0; i < controllers.size(); i++)
       {
-         OneDoFJoint joint = joints.get(i); 
+         OneDoFJoint joint = joints.get(i);
          desiredPositions.get(i).set(joint.getQ());;
          desiredVelocities.get(i).set(0);
       }
@@ -55,12 +55,12 @@ public class WandererPDJointController implements WandererController
       {
          OneDoFJoint joint = joints.get(i);
          PDController controller = controllers.get(i);
-         double tauFF = tauFFs.get(i).getDoubleValue(); 
+         double tauFF = tauFFs.get(i).getDoubleValue();
          double q_d = desiredPositions.get(i).getDoubleValue();
          double qd_d = desiredVelocities.get(i).getDoubleValue();
-         
+
          double tau = controller.compute(joint.getQ(), q_d, joint.getQd(), qd_d) + tauFF;
-         
+
          joint.setTau(tau);
          joint.setKd(damping.get(i).getDoubleValue());
       }
@@ -72,7 +72,7 @@ public class WandererPDJointController implements WandererController
       return registry;
    }
 
-   
+
    public static void main(String[] args)
    {
       WandererSingleThreadedController.startController(new WandererPDJointController());

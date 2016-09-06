@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 import java.util.HashMap;
 import java.util.Map;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -28,7 +28,7 @@ public class QuadrupedStateEstimatorFactory
 {
    private final RequiredFactoryField<QuadrupedSensorInformation> sensorInformation = new RequiredFactoryField<>("sensorInformation");
    private final RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
-   private final RequiredFactoryField<SDFFullRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
+   private final RequiredFactoryField<FullRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<SensorOutputMapReadOnly> sensorOutputMapReadOnly = new RequiredFactoryField<>("sensorOutputMapReadOnly");
    private final RequiredFactoryField<QuadrantDependentList<ContactablePlaneBody>> footContactableBodies = new RequiredFactoryField<>("footContactableBodies");
    private final RequiredFactoryField<QuadrantDependentList<FootSwitchInterface>> footSwitches = new RequiredFactoryField<>("footSwitches");
@@ -36,11 +36,11 @@ public class QuadrupedStateEstimatorFactory
    private final RequiredFactoryField<Double> estimatorDT = new RequiredFactoryField<>("estimatorDT");
    private final RequiredFactoryField<YoVariableRegistry> yoVariableRegistry = new RequiredFactoryField<>("yoVariableRegistry");
    private final RequiredFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistry = new RequiredFactoryField<>("yoGraphicsListRegistry");
-   
+
    public DRCKinematicsBasedStateEstimator createStateEstimator()
    {
       FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
-      
+
       RigidBody elevator = fullRobotModel.get().getElevator();
       SixDoFJoint rootInverseDynamicsJoint = fullRobotModel.get().getRootJoint();
       RigidBody estimationLink = fullRobotModel.get().getPelvis();
@@ -65,64 +65,64 @@ public class QuadrupedStateEstimatorFactory
 
       String[] imuSensorsToUseInStateEstimator = sensorInformation.get().getImuNames();
       double gravityMagnitude = Math.abs(gravity.get());
-      
+
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters.get(),
                                                                                              sensorOutputMapReadOnly.get(), forceSensorDataHolderToUpdate,
                                                                                              estimatorCenterOfMassDataHolderToUpdate,
                                                                                              imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
                                                                                              centerOfPressureDataHolder , robotMotionStatusFromController, feetMap,
                                                                                              yoGraphicsListRegistry.get());
-      
+
       yoVariableRegistry.get().addChild(stateEstimator.getYoVariableRegistry());
-      
+
       return stateEstimator;
    }
-   
+
    public void setSensorInformation(QuadrupedSensorInformation sensorInformation)
    {
       this.sensorInformation.set(sensorInformation);
    }
-   
+
    public void setStateEstimatorParameters(StateEstimatorParameters stateEstimatorParameters)
    {
       this.stateEstimatorParameters.set(stateEstimatorParameters);
    }
-   
-   public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
+
+   public void setFullRobotModel(FullRobotModel fullRobotModel)
    {
       this.fullRobotModel.set(fullRobotModel);
    }
-   
+
    public void setSensorOutputMapReadOnly(SensorOutputMapReadOnly sensorOutputMapReadOnly)
    {
       this.sensorOutputMapReadOnly.set(sensorOutputMapReadOnly);
    }
-   
+
    public void setFootContactableBodies(QuadrantDependentList<ContactablePlaneBody> footContactableBodies)
    {
       this.footContactableBodies.set(footContactableBodies);
    }
-   
+
    public void setFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches)
    {
       this.footSwitches.set(footSwitches);
    }
-   
+
    public void setGravity(double gravity)
    {
       this.gravity.set(gravity);
    }
-   
+
    public void setEstimatorDT(double estimatorDT)
    {
       this.estimatorDT.set(estimatorDT);
    }
-   
+
    public void setYoVariableRegistry(YoVariableRegistry yoVariableRegistry)
    {
       this.yoVariableRegistry.set(yoVariableRegistry);
    }
-   
+
    public void setYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.yoGraphicsListRegistry.set(yoGraphicsListRegistry);

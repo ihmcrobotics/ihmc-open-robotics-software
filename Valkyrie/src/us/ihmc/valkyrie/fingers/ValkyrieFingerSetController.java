@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.fingers;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -27,11 +27,11 @@ public class ValkyrieFingerSetController implements RobotController
    {
       OPEN, CLOSED
    }
-   
+
    public static final boolean DEBUG = false;
-   
+
    private final boolean runningOnRealRobot;
-   
+
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry controllerRegistry;
    private final YoVariableRegistry registry;
@@ -42,19 +42,19 @@ public class ValkyrieFingerSetController implements RobotController
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable startTrajectoryTime, currentTrajectoryTime, endTrajectoryTime, trajectoryTime;
    private final BooleanYoVariable hasTrajectoryTimeChanged, isStopped;
-   
+
    private final LinkedHashMap<ValkyrieRealRobotFingerJoint, DoubleYoVariable> initialDesiredAngles = new LinkedHashMap<>();
    private final LinkedHashMap<ValkyrieRealRobotFingerJoint, DoubleYoVariable> finalDesiredAngles = new LinkedHashMap<>();
    private final LinkedHashMap<ValkyrieRealRobotFingerJoint, DoubleYoVariable> desiredAngles = new LinkedHashMap<>();
 
    private final EnumMap<ValkyrieRealRobotFingerJoint, DoubleYoVariable> realRobotControlVariables = new EnumMap<>(ValkyrieRealRobotFingerJoint.class);
    private final EnumMap<ValkyrieSimulatedFingerJoint, RevoluteJoint> revoluteJointMap = new EnumMap<>(ValkyrieSimulatedFingerJoint.class);
-   
+
    private final EnumYoVariable<HandConfiguration> handConfiguration;
    private final EnumYoVariable<HandConfiguration> handDesiredConfiguration;
    private StateMachine<GraspState> stateMachine;
-         
-   public ValkyrieFingerSetController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, SDFFullRobotModel fullRobotModel, boolean runningOnRealRobot, YoVariableRegistry parentRegistry,  YoVariableRegistry controllerRegistry)
+
+   public ValkyrieFingerSetController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, FullRobotModel fullRobotModel, boolean runningOnRealRobot, YoVariableRegistry parentRegistry,  YoVariableRegistry controllerRegistry)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       this.controllerRegistry = controllerRegistry;
@@ -63,9 +63,9 @@ public class ValkyrieFingerSetController implements RobotController
       this.robotSide = robotSide;
       this.yoTime = yoTime;
       this.runningOnRealRobot = runningOnRealRobot;
-      
+
       mapJointsAndVariables(fullRobotModel);
-      
+
       startTrajectoryTime = new DoubleYoVariable(sidePrefix + "StartTrajectoryTime", registry);
       currentTrajectoryTime = new DoubleYoVariable(sidePrefix + "CurrentTrajectoryTime", registry);
       endTrajectoryTime = new DoubleYoVariable(sidePrefix + "EndTrajectoryTime", registry);
@@ -88,31 +88,31 @@ public class ValkyrieFingerSetController implements RobotController
       handConfiguration.set(HandConfiguration.OPEN);
       handDesiredConfiguration = new EnumYoVariable<>(sidePrefix + "ValkyrieHandDesiredConfiguration", registry, HandConfiguration.class);
       handDesiredConfiguration.set(HandConfiguration.OPEN);
-      
+
       stateMachine = new StateMachine<>(sidePrefix + "ValkyrieGraspStateMachine", "FingerTrajectoryTime", GraspState.class, yoTime, registry);
       setupStateMachine();
    }
 
-   private void mapJointsAndVariables(SDFFullRobotModel fullRobotModel)
+   private void mapJointsAndVariables(FullRobotModel fullRobotModel)
    {
       for (ValkyrieRealRobotFingerJoint jointEnum : ValkyrieRealRobotFingerJoint.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          DoubleYoVariable initialDesiredAngle = new DoubleYoVariable("q_d_initial_" + sidePrefix + jointEnum, registry);
          initialDesiredAngles.put(jointEnum, initialDesiredAngle);
-         
+
          DoubleYoVariable finalDesiredAngle = new DoubleYoVariable("q_d_final_" + sidePrefix + jointEnum, registry);
          finalDesiredAngles.put(jointEnum, finalDesiredAngle);
 
          DoubleYoVariable desiredAngle = new DoubleYoVariable("q_d_" + sidePrefix + jointEnum, registry);
          desiredAngles.put(jointEnum, desiredAngle);
       }
-      
+
       for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
       {
          revoluteJointMap.put(simulatedFingerJoint, simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel));
       }
-      
+
       if (runningOnRealRobot)
       {
          for (ValkyrieRealRobotFingerJoint realRobotFingerJointEnum : ValkyrieRealRobotFingerJoint.values)
@@ -126,11 +126,11 @@ public class ValkyrieFingerSetController implements RobotController
    {
       State<GraspState> stateOpenGrip = new OpenGrip();
       State<GraspState> stateClosedGrip = new ClosedGrip();
-      
+
       stateMachine.addState(stateOpenGrip);
       stateMachine.addState(stateClosedGrip);
       stateMachine.setCurrentState(GraspState.OPEN);
-      
+
       StateTransitionCondition openGripCondition = new StateTransitionCondition()
       {
          @Override
@@ -139,7 +139,7 @@ public class ValkyrieFingerSetController implements RobotController
             return handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN);
          }
       };
-      
+
       StateTransitionCondition closedGripCondition = new StateTransitionCondition()
       {
          @Override
@@ -148,10 +148,10 @@ public class ValkyrieFingerSetController implements RobotController
             return handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE);
          }
       };
-      
+
       // OPEN
       stateOpenGrip.addStateTransition(new StateTransition<GraspState>(GraspState.CLOSED, closedGripCondition));
-      
+
       // CLOSED
       stateClosedGrip.addStateTransition(new StateTransition<GraspState>(GraspState.OPEN, openGripCondition));
    }
@@ -181,7 +181,7 @@ public class ValkyrieFingerSetController implements RobotController
       {
       }
    }
-   
+
    private class ClosedGrip extends State<GraspState>
    {
       public ClosedGrip()
@@ -207,7 +207,7 @@ public class ValkyrieFingerSetController implements RobotController
       {
       }
    }
-   
+
    @Override
    public void doControl()
    {
@@ -220,12 +220,12 @@ public class ValkyrieFingerSetController implements RobotController
    {
       handDesiredConfiguration.set(HandConfiguration.OPEN);
    }
-   
+
    public void close()
    {
       handDesiredConfiguration.set(HandConfiguration.CLOSE);
    }
-   
+
    public void stop()
    {
       if (!isStopped.getBooleanValue())
@@ -237,13 +237,13 @@ public class ValkyrieFingerSetController implements RobotController
    public void reset()
    {
       isStopped.set(false);
-      
+
       for (ValkyrieRealRobotFingerJoint controllableJoint : ValkyrieRealRobotFingerJoint.values)
       {
          finalDesiredAngles.get(controllableJoint).set(0.0);
       }
    }
-   
+
    private void computeAllFinalDesiredAngles(double percent, EnumMap<ValkyrieRealRobotFingerJoint, Double> desiredDefinition)
    {
       for (ValkyrieRealRobotFingerJoint controllableJoint : ValkyrieRealRobotFingerJoint.values)
@@ -251,10 +251,10 @@ public class ValkyrieFingerSetController implements RobotController
          double qDesired = percent * desiredDefinition.get(controllableJoint);
          finalDesiredAngles.get(controllableJoint).set(qDesired);
       }
-      
+
       initializeTrajectory();
    }
-   
+
    /**
     * Only place where the actual values should be modified.
     */
@@ -267,7 +267,7 @@ public class ValkyrieFingerSetController implements RobotController
             realRobotControlVariables.get(controllableJoint).set(desiredAngles.get(controllableJoint).getDoubleValue());
          }
       }
-      
+
       for (ValkyrieRealRobotFingerJoint controllableJoint : ValkyrieRealRobotFingerJoint.values)
       {
          double desiredValue = desiredAngles.get(controllableJoint).getDoubleValue();
@@ -275,7 +275,7 @@ public class ValkyrieFingerSetController implements RobotController
 //         double alpha = MathTools.clipToMinMax(yoPolynomial.getPosition(), 0.0, 1.0);
 //         if (alpha > 0.0 && alpha < 1.0)
 //            PrintTools.debug(DEBUG, this, controllableJoint.name() + "Desired q : " + desiredValue);
-         
+
          switch (controllableJoint)
          {
          case ThumbRoll:
@@ -329,7 +329,7 @@ public class ValkyrieFingerSetController implements RobotController
          currentTrajectoryTime.set(yoTime.getDoubleValue() - startTrajectoryTime.getDoubleValue());
          currentTrajectoryTime.set(MathTools.clipToMinMax(currentTrajectoryTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue()));
       }
-      
+
       yoPolynomial.compute(currentTrajectoryTime.getDoubleValue());
       double alpha = MathTools.clipToMinMax(yoPolynomial.getPosition(), 0.0, 1.0);
 
@@ -341,7 +341,7 @@ public class ValkyrieFingerSetController implements RobotController
          desiredAngles.get(controllableJoint).set(q_d);
       }
    }
-   
+
    @Override
    public YoVariableRegistry getYoVariableRegistry()
    {

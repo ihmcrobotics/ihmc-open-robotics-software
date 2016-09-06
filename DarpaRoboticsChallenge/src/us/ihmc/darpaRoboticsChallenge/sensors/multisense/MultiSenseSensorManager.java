@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.sensors.multisense;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
@@ -93,7 +93,7 @@ public class MultiSenseSensorManager
 //      new RosPointCloudReceiver(lidarParamaters.getSensorNameInSdf(), lidarParamaters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.NEARSCAN);
 //      new RosPointCloudReceiver(lidarParamaters.getSensorNameInSdf(), lidarParamaters.getGroundCloudTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.QUADTREE);
 
-      SDFFullRobotModel sdfFullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
+      FullRobotModel sdfFullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
 
       new RosPointCloudReceiver(lidarParamaters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), sdfFullRobotModel.getLidarBaseFrame(lidarParamaters.getSensorNameInSdf()),
             pointCloudDataReceiver, PointCloudSource.NEARSCAN);

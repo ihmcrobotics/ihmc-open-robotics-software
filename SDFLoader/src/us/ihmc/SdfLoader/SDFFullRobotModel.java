@@ -281,6 +281,7 @@ public class SDFFullRobotModel implements FullRobotModel
       getOneDoFJoints(oneDoFJointsToPack);
    }
 
+   @Override
    public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
    {
       return Collections.unmodifiableMap(oneDoFJoints);
@@ -315,25 +316,28 @@ public class SDFFullRobotModel implements FullRobotModel
       return this.contactSensorDefinitions.toArray(new ContactSensorDefinition[this.contactSensorDefinitions.size()]);
    }
 
+   @Override
    public ReferenceFrame getCameraFrame(String name)
    {
       return cameraFrames.get(name);
    }
 
+   @Override
    public ReferenceFrame getLidarBaseFrame(String name)
    {
-   //      for(String st : lidarBaseFrames.keySet())
-   //      {
-   //         System.out.println(st);
-   //      }
-         return lidarBaseFrames.get(name);
-      }
+      //      for(String st : lidarBaseFrames.keySet())
+      //      {
+      //         System.out.println(st);
+      //      }
+      return lidarBaseFrames.get(name);
+   }
 
    public RigidBodyTransform getLidarBaseToSensorTransform(String name)
    {
       return lidarBaseToSensorTransform.get(name);
    }
 
+   @Override
    public ReferenceFrame getHeadBaseFrame()
    {
       return head.getParentJoint().getFrameAfterJoint();
@@ -491,6 +495,7 @@ public class SDFFullRobotModel implements FullRobotModel
       Collections.reverse(oneDoFJointsToPack);
    }
 
+   @Override
    public double getTotalMass()
    {
       return totalMass;
