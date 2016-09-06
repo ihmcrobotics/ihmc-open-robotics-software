@@ -50,6 +50,8 @@ public interface FullRobotModel
     */
    public abstract OneDoFJoint getSpineJoint(SpineJointName spineJointName);
 
+   public abstract RigidBody getEndEffector(Enum<?> segmentEnum);
+
    /**
     * Return the {@link OneDoFJoint} describing the the corresponding leg joint.
     * @param robotSide Refers to which leg the joint belongs to (assuming there is only one left and one right leg).
