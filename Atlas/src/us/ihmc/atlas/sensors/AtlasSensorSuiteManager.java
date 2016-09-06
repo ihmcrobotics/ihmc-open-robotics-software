@@ -34,7 +34,8 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
-
+   private static final boolean USE_CV_IN_SIMULATION = false;
+   
    private final PacketCommunicator sensorSuitePacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
          new IHMCCommunicationKryoNetClassList());
 
@@ -85,10 +86,12 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       //      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation);
 
-      VisionPoseEstimator visionPoseEstimator = new VisionPoseEstimator(sensorSuitePacketCommunicator, pointCloudDataReceiver, modelFactory,
-            robotConfigurationDataBuffer, false);
-
-      cameraDataReceiver.registerCameraListener(visionPoseEstimator);
+      if (USE_CV_IN_SIMULATION)
+      {
+         VisionPoseEstimator visionPoseEstimator = new VisionPoseEstimator(sensorSuitePacketCommunicator, pointCloudDataReceiver, modelFactory,
+                                                                           robotConfigurationDataBuffer, false);
+         cameraDataReceiver.registerCameraListener(visionPoseEstimator);
+      }
    }
 
    @Override
