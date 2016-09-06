@@ -72,7 +72,7 @@ public class PiecewiseReverseDcmTrajectory
       // compute dcm position at start of each step assuming a piecewise constant vrp trajectory
       for (int i = 0; i < numSteps; i++)
       {
-         this.timeAtSoS[i] = timeAtSoS.get(i).getValue();
+         this.timeAtSoS[i] = timeAtSoS.get(i).doubleValue();
          this.vrpPositionAtSoS[i].setIncludingFrame(cmpPositionAtSoS.get(i));
          this.vrpPositionAtSoS[i].changeFrame(ReferenceFrame.getWorldFrame());
          this.vrpPositionAtSoS[i].add(0, 0, comHeight);
