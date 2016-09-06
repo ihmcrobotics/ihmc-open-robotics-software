@@ -1154,7 +1154,7 @@ public class ConvexPolygon2dTest
             translation.sub(referencePointForP);
             ConvexPolygon2d translatedPolygon = randomPPolygon.translateCopy(translation);
 
-            boolean completelyInside = translatedPolygon.isCompletelyInside(polygonQ);
+            boolean completelyInside = ConvexPolygon2dCalculator.isPolygonInside(translatedPolygon, polygonQ);
 
             if (insideShrunkenPolygon && !completelyInside)
             {

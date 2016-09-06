@@ -2172,23 +2172,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return false;
    }
 
-   public boolean isCompletelyInside(ConvexPolygon2d polygonQ)
-   {
-      return isCompletelyInside(polygonQ, 0.0);
-   }
-
-   public boolean isCompletelyInside(ConvexPolygon2d polygonQ, double epsilon)
-   {
-      checkIfUpToDate();
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         if (!ConvexPolygon2dCalculator.isPointInside(getVertex(i), epsilon, polygonQ))
-            return false;
-      }
-
-      return true;
-   }
-
    @Override
    public boolean epsilonEquals(ConvexPolygon2d convexPolygon, double threshold)
    {

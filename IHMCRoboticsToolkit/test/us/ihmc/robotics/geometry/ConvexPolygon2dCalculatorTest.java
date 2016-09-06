@@ -325,7 +325,7 @@ public class ConvexPolygon2dCalculatorTest
       assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest3, polygon));
 
       ConvexPolygon2d polygonToTest4 = new ConvexPolygon2d();
-      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest4, polygon));
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest4, polygon));
 
       ConvexPolygon2d polygonToTest5 = new ConvexPolygon2d();
       polygonToTest5.addVertex(new Point2d(-0.1, 0.1));

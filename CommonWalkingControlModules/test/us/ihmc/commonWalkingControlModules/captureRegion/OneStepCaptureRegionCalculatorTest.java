@@ -20,6 +20,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
@@ -115,7 +116,7 @@ public class OneStepCaptureRegionCalculatorTest
 
       shrinker.shrinkConstantDistanceInto(expectedPolygonInside, movePointsFactor, shrunkenPolygon);
 
-      assertTrue(shrunkenPolygon.getConvexPolygon2d().isCompletelyInside(captureRegion.getConvexPolygon2d()));
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(shrunkenPolygon.getConvexPolygon2d(), captureRegion.getConvexPolygon2d()));
 
       ArrayList<FramePoint2d> expectedPointsOutside = new ArrayList<FramePoint2d>();
       movePointsFactor = 1.03;

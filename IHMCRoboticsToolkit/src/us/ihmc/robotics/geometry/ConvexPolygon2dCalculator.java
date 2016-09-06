@@ -150,9 +150,6 @@ public class ConvexPolygon2dCalculator
     */
    public static boolean isPolygonInside(ConvexPolygon2d polygonToTest, double epsilon, ConvexPolygon2d polygon)
    {
-      if (!polygonToTest.hasAtLeastOneVertex())
-         return false;
-
       for (int i = 0; i < polygonToTest.getNumberOfVertices(); i++)
       {
          if (!isPointInside(polygonToTest.getVertex(i), epsilon, polygon))
