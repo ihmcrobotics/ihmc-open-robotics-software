@@ -2,8 +2,6 @@ package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -43,7 +41,7 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> attachmentPlateFrames = new SideDependentList<>();
-   ArrayList<OneDoFJoint> oneDoFJointsExcludingHands = new ArrayList<>();
+   private final ArrayList<OneDoFJoint> oneDoFJointsExcludingHands = new ArrayList<>();
 
    private SDFHumanoidJointNameMap humanoidJointNameMap;
 
@@ -255,67 +253,67 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
       return attachmentPlateFrames.get(robotSide);
    }
 
-   public void copyAllJointsButKeepOneFootFixed( OneDoFJoint[] jointsToCopyFrom, RobotSide sideOfSole )
-   {
-      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();
-      int numJoints = getOneDoFJoints().length;
-
-      for (int i=0; i<numJoints; i++)  {
-         newJointAngles.put( jointsToCopyFrom[i].getName() ,  jointsToCopyFrom[i].getQ() );
-      }
-      updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
-   }
-
-   public void copyAllJointsButKeepOneFootFixed( ArrayList<OneDoFJoint> jointsToCopyFrom, RobotSide sideOfSole )
-   {
-      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();
-
-      for (int i=0; i<jointsToCopyFrom.size(); i++)  {
-         newJointAngles.put( jointsToCopyFrom.get(i).getName() ,  jointsToCopyFrom.get(i).getQ() );
-      }
-      updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
-   }
-
-   public void updateJointsAngleButKeepOneFootFixed( Map<String, Double> jointsAngles, RobotSide sideOfSole )
-   {
-      updateJointsStateButKeepOneFootFixed( jointsAngles,null, sideOfSole);
-   }
-
-   public void updateJointsStateButKeepOneFootFixed( Map<String, Double> jointsAngles, Map<String, Double> jointsVelocities, RobotSide sideOfSole )
-   {
-      // next line of code must be executed BEFORE modifying the model
-      RigidBodyTransform worldToFoot  = getSoleFrame(sideOfSole).getTransformToWorldFrame();
-
-      if( jointsAngles != null)
-      {
-         for ( Map.Entry<String, Double> entry: jointsAngles.entrySet() )
-         {
-             getOneDoFJointByName( entry.getKey() ).setQ( entry.getValue() );
-         }
-      }
-
-      if( jointsVelocities != null)
-      {
-         for ( Map.Entry<String, Double> entry: jointsVelocities.entrySet() )
-         {
-             getOneDoFJointByName( entry.getKey() ).setQd( entry.getValue() );
-         }
-      }
-
-      this.updateFrames();
-
-      ReferenceFrame footFrame   = getSoleFrame(sideOfSole);
-      ReferenceFrame pelvisFrame = getRootJoint().getFrameAfterJoint();
-
-      RigidBodyTransform footToPelvis = pelvisFrame.getTransformToDesiredFrame( footFrame );
-
-      RigidBodyTransform worldToPelvis = new RigidBodyTransform();
-      worldToPelvis.multiply( worldToFoot, footToPelvis );
-
-      getRootJoint().setPositionAndRotation(worldToPelvis);
-
-      this.updateFrames();
-   }
+//   private void copyAllJointsButKeepOneFootFixed( OneDoFJoint[] jointsToCopyFrom, RobotSide sideOfSole )
+//   {
+//      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();
+//      int numJoints = getOneDoFJoints().length;
+//
+//      for (int i=0; i<numJoints; i++)  {
+//         newJointAngles.put( jointsToCopyFrom[i].getName() ,  jointsToCopyFrom[i].getQ() );
+//      }
+//      updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
+//   }
+//
+//   private void copyAllJointsButKeepOneFootFixed( ArrayList<OneDoFJoint> jointsToCopyFrom, RobotSide sideOfSole )
+//   {
+//      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();
+//
+//      for (int i=0; i<jointsToCopyFrom.size(); i++)  {
+//         newJointAngles.put( jointsToCopyFrom.get(i).getName() ,  jointsToCopyFrom.get(i).getQ() );
+//      }
+//      updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
+//   }
+//
+//   private void updateJointsAngleButKeepOneFootFixed( Map<String, Double> jointsAngles, RobotSide sideOfSole )
+//   {
+//      updateJointsStateButKeepOneFootFixed( jointsAngles,null, sideOfSole);
+//   }
+//
+//   private void updateJointsStateButKeepOneFootFixed( Map<String, Double> jointsAngles, Map<String, Double> jointsVelocities, RobotSide sideOfSole )
+//   {
+//      // next line of code must be executed BEFORE modifying the model
+//      RigidBodyTransform worldToFoot  = getSoleFrame(sideOfSole).getTransformToWorldFrame();
+//
+//      if( jointsAngles != null)
+//      {
+//         for ( Map.Entry<String, Double> entry: jointsAngles.entrySet() )
+//         {
+//             getOneDoFJointByName( entry.getKey() ).setQ( entry.getValue() );
+//         }
+//      }
+//
+//      if( jointsVelocities != null)
+//      {
+//         for ( Map.Entry<String, Double> entry: jointsVelocities.entrySet() )
+//         {
+//             getOneDoFJointByName( entry.getKey() ).setQd( entry.getValue() );
+//         }
+//      }
+//
+//      this.updateFrames();
+//
+//      ReferenceFrame footFrame   = getSoleFrame(sideOfSole);
+//      ReferenceFrame pelvisFrame = getRootJoint().getFrameAfterJoint();
+//
+//      RigidBodyTransform footToPelvis = pelvisFrame.getTransformToDesiredFrame( footFrame );
+//
+//      RigidBodyTransform worldToPelvis = new RigidBodyTransform();
+//      worldToPelvis.multiply( worldToFoot, footToPelvis );
+//
+//      getRootJoint().setPositionAndRotation(worldToPelvis);
+//
+//      this.updateFrames();
+//   }
 
    @Override
    protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
@@ -411,9 +409,9 @@ public class SDFFullHumanoidRobotModel extends SDFFullRobotModel implements Full
       }
    }
 
-   public ArrayList<OneDoFJoint> getArmJointIDs(RobotSide side)
-   {
-      return armJointIDsList.get(side);
-   }
+//   public ArrayList<OneDoFJoint> getArmJointIDs(RobotSide side)
+//   {
+//      return armJointIDsList.get(side);
+//   }
 
 }
