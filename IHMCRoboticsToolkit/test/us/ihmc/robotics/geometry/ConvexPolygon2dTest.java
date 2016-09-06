@@ -30,8 +30,6 @@ public class ConvexPolygon2dTest
    private static final boolean WAIT_FOR_BUTTON_PUSH = false;
    private final double epsilon = 1e-10;
 
-   private final ConvexPolygon2dCalculator calculator = new ConvexPolygon2dCalculator();
-
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructors()
@@ -224,7 +222,7 @@ public class ConvexPolygon2dTest
       {
          int x = random.nextInt(10);
          int y = random.nextInt(10);
-         assertTrue(doubles.isPointInside(x, y));
+         assertTrue(ConvexPolygon2dCalculator.isPointInside(x, y, doubles));
       }
    }
 
@@ -456,7 +454,7 @@ public class ConvexPolygon2dTest
 
       ConvexPolygon2d polygon = new ConvexPolygon2d(polygonPoints);
 
-      boolean isInside = polygon.isPointInside(testPoint);
+      boolean isInside = ConvexPolygon2dCalculator.isPointInside(testPoint, polygon);
       System.out.println("isInside = " + isInside);
 
       assertTrue(isInside);
@@ -1145,7 +1143,7 @@ public class ConvexPolygon2dTest
 
             ConvexPolygon2d shrunkenPolygon = shrunkenPolygons[j];
 
-            boolean insideShrunkenPolygon = ((shrunkenPolygon != null) && shrunkenPolygon.isPointInside(testPoint.getPointCopy()));
+            boolean insideShrunkenPolygon = ((shrunkenPolygon != null) && ConvexPolygon2dCalculator.isPointInside(testPoint.getPointCopy(), shrunkenPolygon));
             if (insideShrunkenPolygon)
                insideAnyShrunkenPolygon = true;
 
@@ -1289,7 +1287,7 @@ public class ConvexPolygon2dTest
                   assertNotNull(intersectionPolygon);
                }
 
-               boolean insideIntersection = ((intersectionPolygon != null) && (intersectionPolygon.isPointInside(testPoint.getPointCopy())));
+               boolean insideIntersection = ((intersectionPolygon != null) && (ConvexPolygon2dCalculator.isPointInside(testPoint.getPointCopy(), intersectionPolygon)));
                if (insideIntersection)
                {
                   insideAnyIntersection = true;
@@ -1691,12 +1689,12 @@ public class ConvexPolygon2dTest
          LineSegment2d lineSegment = new LineSegment2d(startPoint, endPoint);
          Point2d testPoint = lineSegment.midpoint();
 
-         assertTrue(polygon.isPointInside(testPoint, 1e-15));
+         assertTrue(ConvexPolygon2dCalculator.isPointInside(testPoint, 1e-15, polygon));
 
          normalVector.scale(1e-9);
          testPoint.add(normalVector);
 
-         assertFalse(polygon.isPointInside(testPoint, 1e-15));
+         assertFalse(ConvexPolygon2dCalculator.isPointInside(testPoint, 1e-15, polygon));
       }
    }
 
@@ -1792,11 +1790,11 @@ public class ConvexPolygon2dTest
       ConvexPolygon2d polygon = createSomeValidPolygon();
       Point2d point = new Point2d(1.314592, 6.0221415); // Useless Riddle: first number is easy, second one multiplied by 1e23 is called?
 
-      assertFalse(polygon.isPointInside(point));
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point, polygon));
 
       LineSegment2d closestEdge = polygon.getClosestEdgeCopy(point);
 
-      Point2d closestVertex = calculator.getClosestVertexCopy(point, polygon);
+      Point2d closestVertex = ConvexPolygon2dCalculator.getClosestVertexCopy(point, polygon);
 
       int otherEdgeVertexIndex = 0;
       boolean isClosestVertexPartOfClosestEdge = false;
@@ -2022,7 +2020,7 @@ public class ConvexPolygon2dTest
             Point2d projectedPoint = convexPolygon.orthogonalProjectionCopy(testPoint);
 
             assertTrue("Projected point was not inside the polygon for point\n" + projectedPoint + "\nand convex polygon \n" + convexPolygon,
-                  convexPolygon.isPointInside(projectedPoint));
+                  ConvexPolygon2dCalculator.isPointInside(projectedPoint, convexPolygon));
          }
       }
    }
@@ -2055,7 +2053,7 @@ public class ConvexPolygon2dTest
          Line2d arbitraryLine = new Line2d(arbitraryPoint0, arbitraryPoint1);
          LineSegment2d arbitraryLineSegment = new LineSegment2d(arbitraryPoint0, arbitraryPoint1);
 
-         assertFalse(polygonWithOnePoint.areAllPointsInside(new Point2d[] {arbitraryPoint0}));
+//         assertFalse(polygonWithOnePoint.areAllPointsInside(new Point2d[] {arbitraryPoint0}));
          assertEquals(pointThatDefinesThePolygon.distance(arbitraryPoint0), polygonWithOnePoint.distanceToClosestVertex(arbitraryPoint0), epsilon);
          assertTrue(polygonWithOnePoint.getAllVisibleVerticesFromOutsideLeftToRightCopy(arbitraryPoint0).get(0).equals(pointThatDefinesThePolygon));
          assertEquals(0.0, polygonWithOnePoint.getArea(), epsilon);
@@ -2084,8 +2082,8 @@ public class ConvexPolygon2dTest
          assertTrue(polygonWithOnePoint.getVertex(0).equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.intersectionWith(sparePolygon) == null);
          assertTrue(polygonWithOnePoint.intersectionWith(arbitraryLine) == null);
-         assertFalse(polygonWithOnePoint.isPointInside(arbitraryPoint0));
-         assertFalse(polygonWithOnePoint.isPolygonInside(sparePolygon));
+         assertFalse(ConvexPolygon2dCalculator.isPointInside(arbitraryPoint0, polygonWithOnePoint));
+         assertFalse(ConvexPolygon2dCalculator.isPolygonInside(sparePolygon, polygonWithOnePoint));
          assertTrue(polygonWithOnePoint.getMaxXMaxYPointCopy().equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getMaxXMinYPointCopy().equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getMinXMaxYPointCopy().equals(pointThatDefinesThePolygon));
@@ -2175,7 +2173,7 @@ public class ConvexPolygon2dTest
          LineSegment2d arbitraryLineSegment = new LineSegment2d(arbitraryPoint0, arbitraryPoint1);
 
          // one line tests
-         assertFalse(polygonWithTwoPoints.areAllPointsInside(new Point2d[] { arbitraryPoint0 }));
+//         assertFalse(polygonWithTwoPoints.areAllPointsInside(new Point2d[] { arbitraryPoint0 }));
          assertEquals(Math.min(pointThatDefinesThePolygon0.distance(arbitraryPoint0), pointThatDefinesThePolygon1.distance(arbitraryPoint0)),
                polygonWithTwoPoints.distanceToClosestVertex(arbitraryPoint0), epsilon);
          assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1,
@@ -2199,8 +2197,8 @@ public class ConvexPolygon2dTest
          assertEquals(2, polygonWithTwoPoints.getNumberOfVertices());
          assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1, polygonWithTwoPoints.getVertex(0),
                polygonWithTwoPoints.getVertex(1));
-         assertFalse(polygonWithTwoPoints.isPointInside(arbitraryPoint0));
-         assertFalse(polygonWithTwoPoints.isPolygonInside(sparePolygon));
+         assertFalse(ConvexPolygon2dCalculator.isPointInside(arbitraryPoint0, polygonWithTwoPoints));
+         assertFalse(ConvexPolygon2dCalculator.isPolygonInside(sparePolygon, polygonWithTwoPoints));
          assertEquals(2, polygonWithTwoPoints.getNumberOfVertices());
          assertTrue(polygonWithTwoPoints.getCentroid().getX() == 0.5 * (pointThatDefinesThePolygon0.getX() + pointThatDefinesThePolygon1.getX()));
          assertTrue(polygonWithTwoPoints.getCentroid().getY() == 0.5 * (pointThatDefinesThePolygon0.getY() + pointThatDefinesThePolygon1.getY()));
