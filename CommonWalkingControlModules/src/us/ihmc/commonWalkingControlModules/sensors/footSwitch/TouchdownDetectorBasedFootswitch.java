@@ -14,8 +14,6 @@ public abstract class TouchdownDetectorBasedFootswitch implements FootSwitchInte
 
    protected final BooleanYoVariable controllerThinksHasTouchedDown;
 
-   protected boolean touchdownDetectorsUpdated = false;
-
    public TouchdownDetectorBasedFootswitch(String name, YoVariableRegistry parentRegistry)
    {
       this.registry = parentRegistry;
