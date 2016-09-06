@@ -43,7 +43,7 @@ public class Step7Simulation
       sim.setCameraTracking(true, true, true, false);
       sim.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       
-      VisualizerUtils.createOverheadPlotter(sim, true, "Center of Mass", yoGraphicsListRegistry);
+      VisualizerUtils.createOverheadPlotter(sim, true, "centerOfMass", yoGraphicsListRegistry);
       
       sim.startOnAThread();
 

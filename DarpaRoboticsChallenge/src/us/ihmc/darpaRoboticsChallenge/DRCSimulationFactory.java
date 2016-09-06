@@ -143,7 +143,7 @@ public class DRCSimulationFactory
 
       if (guiInitialSetup.isGuiShown())
       {
-         VisualizerUtils.createOverheadPlotter(scs, guiInitialSetup.isShowOverheadView(), drcControllerThread.getDynamicGraphicObjectsListRegistry(),
+         VisualizerUtils.createOverheadPlotter(scs, guiInitialSetup.isShowOverheadView(), "centerOfMass", drcControllerThread.getDynamicGraphicObjectsListRegistry(),
                drcEstimatorThread.getDynamicGraphicObjectsListRegistry(), cmpViz.getYoGraphicsListRegistry());
          guiInitialSetup.initializeGUI(scs, simulatedRobot, drcRobotModel);
       }
