@@ -39,49 +39,49 @@ public class PreallocatedListTest
       // front of list
       doubleList.remove(0);
       assertEquals(doubleList.size(), 9);
-      assertEquals(doubleList.get(0).getValue(), 1.0, epsilon);
-      assertEquals(doubleList.get(1).getValue(), 2.0, epsilon);
+      assertEquals(doubleList.get(0).doubleValue(), 1.0, epsilon);
+      assertEquals(doubleList.get(1).doubleValue(), 2.0, epsilon);
       doubleList.add(0);
       doubleList.get(0).setValue(0);
       assertEquals(doubleList.size(), 10);
-      assertEquals(doubleList.get(0).getValue(), 0.0, epsilon);
-      assertEquals(doubleList.get(1).getValue(), 1.0, epsilon);
+      assertEquals(doubleList.get(0).doubleValue(), 0.0, epsilon);
+      assertEquals(doubleList.get(1).doubleValue(), 1.0, epsilon);
 
       // first half
       doubleList.remove(3);
       assertEquals(doubleList.size(), 9);
-      assertEquals(doubleList.get(2).getValue(), 2.0, epsilon);
-      assertEquals(doubleList.get(3).getValue(), 4.0, epsilon);
-      assertEquals(doubleList.get(4).getValue(), 5.0, epsilon);
+      assertEquals(doubleList.get(2).doubleValue(), 2.0, epsilon);
+      assertEquals(doubleList.get(3).doubleValue(), 4.0, epsilon);
+      assertEquals(doubleList.get(4).doubleValue(), 5.0, epsilon);
       doubleList.add(3);
       doubleList.get(3).setValue(3);
       assertEquals(doubleList.size(), 10);
-      assertEquals(doubleList.get(2).getValue(), 2.0, epsilon);
-      assertEquals(doubleList.get(3).getValue(), 3.0, epsilon);
-      assertEquals(doubleList.get(4).getValue(), 4.0, epsilon);
+      assertEquals(doubleList.get(2).doubleValue(), 2.0, epsilon);
+      assertEquals(doubleList.get(3).doubleValue(), 3.0, epsilon);
+      assertEquals(doubleList.get(4).doubleValue(), 4.0, epsilon);
 
       // second half
       doubleList.remove(7);
       assertEquals(doubleList.size(), 9);
-      assertEquals(doubleList.get(6).getValue(), 6.0, epsilon);
-      assertEquals(doubleList.get(7).getValue(), 8.0, epsilon);
-      assertEquals(doubleList.get(8).getValue(), 9.0, epsilon);
+      assertEquals(doubleList.get(6).doubleValue(), 6.0, epsilon);
+      assertEquals(doubleList.get(7).doubleValue(), 8.0, epsilon);
+      assertEquals(doubleList.get(8).doubleValue(), 9.0, epsilon);
       doubleList.add(7);
       doubleList.get(7).setValue(7);
       assertEquals(doubleList.size(), 10);
-      assertEquals(doubleList.get(6).getValue(), 6.0, epsilon);
-      assertEquals(doubleList.get(7).getValue(), 7.0, epsilon);
-      assertEquals(doubleList.get(8).getValue(), 8.0, epsilon);
+      assertEquals(doubleList.get(6).doubleValue(), 6.0, epsilon);
+      assertEquals(doubleList.get(7).doubleValue(), 7.0, epsilon);
+      assertEquals(doubleList.get(8).doubleValue(), 8.0, epsilon);
 
       // end of list
       doubleList.remove(9);
       assertEquals(doubleList.size(), 9);
-      assertEquals(doubleList.get(7).getValue(), 7.0, epsilon);
-      assertEquals(doubleList.get(8).getValue(), 8.0, epsilon);
+      assertEquals(doubleList.get(7).doubleValue(), 7.0, epsilon);
+      assertEquals(doubleList.get(8).doubleValue(), 8.0, epsilon);
       doubleList.add(9);
       doubleList.get(9).setValue(9);
       assertEquals(doubleList.size(), 10);
-      assertEquals(doubleList.get(8).getValue(), 8.0, epsilon);
-      assertEquals(doubleList.get(9).getValue(), 9.0, epsilon);
+      assertEquals(doubleList.get(8).doubleValue(), 8.0, epsilon);
+      assertEquals(doubleList.get(9).doubleValue(), 9.0, epsilon);
    }
 }
