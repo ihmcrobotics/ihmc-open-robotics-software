@@ -55,6 +55,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -171,29 +172,30 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       l_swingSpeedup.set(false);
       r_swingSpeedup.set(false);
 
-      DoubleYoVariable damping_l_akx = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_akx");
-      DoubleYoVariable damping_l_aky = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_aky");
-      DoubleYoVariable damping_r_akx = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_r_leg_akx");
-      DoubleYoVariable damping_r_aky = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_r_leg_aky");
-      damping_l_akx.set(1.0);
-      damping_l_aky.set(1.0);
-      damping_r_akx.set(1.0);
-      damping_r_aky.set(1.0);
+      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      double ankleDamping = 1.0;
+      SDFHumanoidRobot simulatedRobot = drcSimulationTestHelper.getDRCSimulationFactory().getRobot();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String firstAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getName();
+         String secondAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getName();
+         simulatedRobot.getOneDegreeOfFreedomJoint(firstAnkleName).setDamping(ankleDamping);
+         simulatedRobot.getOneDegreeOfFreedomJoint(secondAnkleName).setDamping(ankleDamping);
+      }
 
       setupCameraForWalkingUpToRamp();
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       setUpMomentum();
 
-      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
-      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
-
       // take one step forward onto a line contact
+      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
+      SideDependentList<String> footJointNames = getFootJointNames(fullRobotModel);
       double stepLength = 0.6;
       FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(RobotSide.LEFT), stepLength/2.0, 0.0, 0.0);
       ArrayList<Point2d> contacts = generateContactPointsForRotatedLineOfContact(0.0);
-      success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, RobotSide.LEFT, contacts, stepLocation, jointNames, true);
+      success = success && takeAStepOntoNewFootGroundContactPoints(robot, fullRobotModel, RobotSide.LEFT, contacts, stepLocation, footJointNames, true);
 
       FootstepDataListMessage message = new FootstepDataListMessage();
       stepLocation.setIncludingFrame(fullRobotModel.getSoleFrame(RobotSide.RIGHT), stepLength, 0.0, 0.0);
@@ -237,14 +239,17 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       l_swingSpeedup.set(false);
       r_swingSpeedup.set(false);
 
-      DoubleYoVariable damping_l_akx = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_akx");
-      DoubleYoVariable damping_l_aky = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_aky");
-      DoubleYoVariable damping_r_akx = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_r_leg_akx");
-      DoubleYoVariable damping_r_aky = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_damp_r_leg_aky");
-      damping_l_akx.set(1.0);
-      damping_l_aky.set(1.0);
-      damping_r_akx.set(1.0);
-      damping_r_aky.set(1.0);
+      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      double ankleDamping = 1.0;
+      SDFHumanoidRobot simulatedRobot = drcSimulationTestHelper.getDRCSimulationFactory().getRobot();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String firstAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getName();
+         String secondAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getName();
+         simulatedRobot.getOneDegreeOfFreedomJoint(firstAnkleName).setDamping(ankleDamping);
+         simulatedRobot.getOneDegreeOfFreedomJoint(secondAnkleName).setDamping(ankleDamping);
+      }
 
       Point3d cameraFix = new Point3d(0.0, 0.0, 1.0);
       Point3d cameraPosition = new Point3d(-10.0, 0.0, 5.0);
@@ -254,7 +259,6 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       setUpMomentum();
 
-      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
       SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
 
@@ -392,7 +396,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.9)
+   @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 230000)
    /**
     * This test stands one one leg and then gets pushed sideways. The true ground contact is slightly narrower than what the controller thinks.
@@ -518,7 +522,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 45.9)
+   @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 230000)
    /**
     * In this test, the robot walks forward. On each step a part of the foot is cut away. The controller knows about the foothold. No exploration is done
@@ -601,7 +605,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 45.9)
+   @DeployableTestMethod(estimatedDuration = 45.9, targets = {TestPlanTarget.InDevelopment})
    @Test(timeout = 230000)
    /**
     * In this test, the robot walks forward. On each step a half of the foot is cut out.
@@ -833,6 +837,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
          double testTransferTime, double chickenPercentage)
    {
       SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      SDFHumanoidRobot simulatedRobot = drcSimulationTestHelper.getDRCSimulationFactory().getRobot();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -842,17 +847,30 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
          // Set joint velocity limits on the ankle joints so that they don't flip out when doing partial footsteps. On real robots with joint velocity limits, this should
          // happen naturally.
-         String firstAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getName();
-         String secondAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getName();
+         double qd_max = 12.0;
+         double b_vel_limit = 500.0;
 
-         DoubleYoVariable qdMax = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("qd_max_" + firstAnkleName);
-         qdMax.set(12.0);
-         DoubleYoVariable bVelLimit = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_vel_limit_" + firstAnkleName);
-         bVelLimit.set(500.0);
-         qdMax = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("qd_max_" + secondAnkleName);
-         qdMax.set(12.0);
-         bVelLimit = (DoubleYoVariable) drcSimulationTestHelper.getYoVariable("b_vel_limit_" + secondAnkleName);
-         bVelLimit.set(500.0);
+         String firstAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getName();
+         if (simulatedRobot.getOneDegreeOfFreedomJoint(firstAnkleName) instanceof PinJoint)
+         {
+            PinJoint ankleJoint = (PinJoint) simulatedRobot.getOneDegreeOfFreedomJoint(firstAnkleName);
+            ankleJoint.setVelocityLimits(qd_max , b_vel_limit);
+         }
+         else
+         {
+            throw new RuntimeException("Can not set velocity limits on ankle joint " + firstAnkleName + " - it is not a PinJoint.");
+         }
+
+         String secondAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getName();
+         if (simulatedRobot.getOneDegreeOfFreedomJoint(secondAnkleName) instanceof PinJoint)
+         {
+            PinJoint ankleJoint = (PinJoint) simulatedRobot.getOneDegreeOfFreedomJoint(secondAnkleName);
+            ankleJoint.setVelocityLimits(qd_max , b_vel_limit);
+         }
+         else
+         {
+            throw new RuntimeException("Can not set velocity limits on ankle joint " + secondAnkleName + " - it is not a PinJoint.");
+         }
       }
 
       BooleanYoVariable doFootExplorationInTransferToStanding = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
