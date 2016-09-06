@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -217,7 +217,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       GroundProfile3D groundProfile = new FlatGroundProfile();
       DRCRobotModel robotModel = getRobotModel();
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setRunMultiThreaded(false);
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,

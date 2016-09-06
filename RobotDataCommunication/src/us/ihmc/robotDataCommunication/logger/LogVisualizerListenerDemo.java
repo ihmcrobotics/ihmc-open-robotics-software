@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -28,7 +28,7 @@ public class LogVisualizerListenerDemo implements YoVariableLogPlaybackListener
    private DoubleYoVariable desiredCoMHeight;
 
    @Override
-   public void setRobot(SDFHumanoidRobot robot)
+   public void setRobot(HumanoidFloatingRootJointRobot robot)
    {
       joints = robot.getOneDegreeOfFreedomJoints();
       origin = robot.getRootJoint();

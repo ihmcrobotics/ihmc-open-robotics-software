@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -73,10 +73,10 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
       private final DRCInverseDynamicsCalculatorTestHelper atlasInverseDynamicsCalculatorTestHelper;
       private final FullRobotModel controllersFullRobotModel;
       private final SimulationConstructionSet scs;
-      private final SDFHumanoidRobot robot, simulatedRobot;
+      private final HumanoidFloatingRootJointRobot robot, simulatedRobot;
       private boolean firstTick = true;
 
-      public FancyInverseDynamicsCalculatorListener(FullHumanoidRobotModel controllersFullRobotModel, SDFHumanoidRobot simulatedRobot)
+      public FancyInverseDynamicsCalculatorListener(FullHumanoidRobotModel controllersFullRobotModel, HumanoidFloatingRootJointRobot simulatedRobot)
       {
          this.controllersFullRobotModel = controllersFullRobotModel;
          this.simulatedRobot = simulatedRobot;

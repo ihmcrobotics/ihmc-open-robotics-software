@@ -3,7 +3,7 @@ package us.ihmc.steppr.simulation;
 import java.io.IOException;
 
 import net.java.games.input.Component;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -38,7 +38,7 @@ public class BonoFlatGroundWalkingTrack
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
       double initialYaw = 0.3;
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
       boolean useVelocityAndHeadingScript = !USE_JOYSTICK_CONTROLLER;
       boolean cheatWithGroundHeightAtForFootstep = false;
 

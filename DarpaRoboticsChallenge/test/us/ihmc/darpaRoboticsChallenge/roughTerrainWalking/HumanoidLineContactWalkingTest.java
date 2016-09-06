@@ -17,7 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExploreFootPolygonState.ExplorationMethod;
@@ -605,7 +605,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       private void setNewContacts()
       {
          String footJointName = drcSimulationTestHelper.getControllerFullRobotModel().getFoot(robotSide).getParentJoint().getName();
-         SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
+         HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
 
          int pointIndex = 0;
          ArrayList<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();

@@ -6,7 +6,7 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -34,7 +34,7 @@ public class VisualizePoseWorkspace
       this.controlDT = robotModel.getControllerDT();
       
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
 
       interpolator = new PlaybackPoseInterpolator(registry);
 
@@ -64,11 +64,11 @@ public class VisualizePoseWorkspace
 
    private class CaptureSnapshotListener implements VariableChangedListener
    {
-      private final SDFHumanoidRobot sdfRobot;
+      private final HumanoidFloatingRootJointRobot sdfRobot;
       private final SimulationConstructionSet scs;
       private PlaybackPose previousPose;
 
-      public CaptureSnapshotListener(SDFHumanoidRobot sdfRobot, SimulationConstructionSet scs)
+      public CaptureSnapshotListener(HumanoidFloatingRootJointRobot sdfRobot, SimulationConstructionSet scs)
       {
          this.sdfRobot = sdfRobot;
          this.scs = scs;

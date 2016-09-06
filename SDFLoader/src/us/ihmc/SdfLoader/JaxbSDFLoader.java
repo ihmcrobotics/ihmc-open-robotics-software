@@ -110,7 +110,7 @@ public class JaxbSDFLoader
       return generalizedSDFRobotModels.get(name);
    }
 
-   public SDFHumanoidRobot createRobot(SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   public HumanoidFloatingRootJointRobot createRobot(SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
       return createRobot(sdfJointNameMap.getModelName(), sdfJointNameMap, useCollisionMeshes);
    }
@@ -120,12 +120,12 @@ public class JaxbSDFLoader
       return createRobot(modelName, null, useCollisionMeshes);
    }
 
-   private SDFHumanoidRobot createRobot(String modelName, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   private HumanoidFloatingRootJointRobot createRobot(String modelName, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
       return createRobot(modelName, sdfJointNameMap, useCollisionMeshes, true, true);
    }
 
-   public SDFHumanoidRobot createRobot(String modelName, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits,
+   public HumanoidFloatingRootJointRobot createRobot(String modelName, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits,
            boolean enableJointDamping)
    {
       checkModelName(modelName);
@@ -133,7 +133,7 @@ public class JaxbSDFLoader
       GeneralizedSDFRobotModel generalizedSDFRobotModel = generalizedSDFRobotModels.get(modelName);
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
       RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
-      return new SDFHumanoidRobot(description, sdfJointNameMap);
+      return new HumanoidFloatingRootJointRobot(description, sdfJointNameMap);
    }
 
    public void addForceSensor(SDFJointNameMap jointMap, String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)

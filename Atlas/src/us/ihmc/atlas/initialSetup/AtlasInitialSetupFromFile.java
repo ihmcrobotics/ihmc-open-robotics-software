@@ -7,7 +7,7 @@ import java.util.Properties;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
@@ -18,7 +18,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFHumanoidRobot>
+public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    private String initialConditionsFileName;
 
@@ -33,7 +33,7 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFHumano
    }
 
    @Override
-   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       if (robotInitialized)
          return;

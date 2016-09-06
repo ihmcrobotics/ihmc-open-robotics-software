@@ -9,7 +9,7 @@ import java.util.Properties;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
@@ -30,7 +30,7 @@ public class AtlasDrivingInitialSetupTest
    public void testLoadFile()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(version, DRCRobotModel.RobotTarget.SCS, false);
-      SDFHumanoidRobot robot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot robot = robotModel.createSdfRobot(false);
       DRCRobotJointMap jointMap = new AtlasJointMap(version);
       
       AtlasInitialSetupFromFile initialSetup = new AtlasInitialSetupFromFile("initialDrivingSetup");

@@ -18,7 +18,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point3D_F64;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
+import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.sensors.DetectedObjectId;
@@ -47,10 +47,10 @@ public class VisionPoseEstimator implements DRCStereoListener
 
    PacketCommunicator communicator;
    LinkedBlockingQueue<ImmutablePair<CameraData, RigidBodyTransform>> imagesToProcess = new LinkedBlockingQueue<>(2);
-   SDFFullHumanoidRobotModelFactory modelFactory;
+   FullHumanoidRobotModelFactory modelFactory;
    PointCloudDataReceiver pointCloudDataReceiver;
 
-   public VisionPoseEstimator(PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver, SDFFullHumanoidRobotModelFactory modelFactory,
+   public VisionPoseEstimator(PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver, FullHumanoidRobotModelFactory modelFactory,
          RobotConfigurationDataBuffer robotConfigurationDataBuffer, boolean runningOnRealRobot)
    {
       if (runningOnRealRobot)

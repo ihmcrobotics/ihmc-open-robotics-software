@@ -15,7 +15,7 @@ import us.ihmc.SdfLoader.SDFContactSensor;
 import us.ihmc.SdfLoader.SDFConversionsHelper;
 import us.ihmc.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.SdfLoader.SDFForceSensor;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.SDFJointHolder;
 import us.ihmc.SdfLoader.SDFLinkHolder;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
@@ -225,7 +225,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCRobotInitialSetup<SDFHumanoidRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
+   public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return new AtlasSimInitialSetup(groundHeight, initialYaw);
    }
@@ -333,7 +333,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes)
+   public HumanoidFloatingRootJointRobot createSdfRobot(boolean createCollisionMeshes)
    {
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;

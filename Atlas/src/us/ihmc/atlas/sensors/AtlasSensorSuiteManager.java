@@ -3,7 +3,7 @@ package us.ihmc.atlas.sensors;
 import java.io.IOException;
 import java.net.URI;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
+import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -43,10 +43,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final DRCRobotSensorInformation sensorInformation;
    private final PointCloudDataReceiver pointCloudDataReceiver;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
-   private final SDFFullHumanoidRobotModelFactory modelFactory;
+   private final FullHumanoidRobotModelFactory modelFactory;
    private SideDependentList<BlackFlyParameterSetter> blackFlyParameterSetters = null;
 
-   public AtlasSensorSuiteManager(SDFFullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
+   public AtlasSensorSuiteManager(FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
          DRCROSPPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
          AtlasPhysicalProperties physicalProperties, DRCRobotModel.RobotTarget targetDeployment)
    {

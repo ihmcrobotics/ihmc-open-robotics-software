@@ -8,7 +8,7 @@ import javax.swing.JButton;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.diagnostics.HumanoidDiagnosticsWhenHangingSimulation;
@@ -41,7 +41,7 @@ public class StepprDiagnosticsWhenHangingSimulation
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
       double initialYaw = 0.3;
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
 
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
       humanoidJointPoseList.createPoseSettersJustLegs();
@@ -182,9 +182,9 @@ public class StepprDiagnosticsWhenHangingSimulation
       }
       
       @Override
-      public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes)
+      public HumanoidFloatingRootJointRobot createSdfRobot(boolean createCollisionMeshes)
       {
-         SDFHumanoidRobot robot = super.createSdfRobot(createCollisionMeshes);
+         HumanoidFloatingRootJointRobot robot = super.createSdfRobot(createCollisionMeshes);
          
          Joint joint = robot.getJoint("back_ubz");
          if (joint == null) throw new RuntimeException();

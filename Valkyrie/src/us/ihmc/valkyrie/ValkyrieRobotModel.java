@@ -21,7 +21,7 @@ import us.ihmc.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.SdfLoader.SDFForceSensor;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.SDFJointHolder;
 import us.ihmc.SdfLoader.SDFLinkHolder;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
@@ -317,7 +317,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCRobotInitialSetup<SDFHumanoidRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
+   public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return new ValkyrieInitialSetup(groundHeight, initialYaw);
    }
@@ -384,14 +384,14 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes)
+   public HumanoidFloatingRootJointRobot createSdfRobot(boolean createCollisionMeshes)
    {
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
       SDFHumanoidJointNameMap jointMap = getJointMap();
       boolean enableJointDamping = getEnableJointDamping();
 
-      SDFHumanoidRobot sdfRobot =  loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      HumanoidFloatingRootJointRobot sdfRobot =  loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
       if (PRINT_MODEL)
       {

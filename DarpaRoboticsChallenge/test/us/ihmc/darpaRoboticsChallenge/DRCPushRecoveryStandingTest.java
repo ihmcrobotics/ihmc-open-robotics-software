@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
@@ -312,7 +312,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       scsInitialSetup.setDrawGroundProfile(true);
       scsInitialSetup.setRunMultiThreaded(runMultiThreaded);
       
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
 
       drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,
             robotModel);

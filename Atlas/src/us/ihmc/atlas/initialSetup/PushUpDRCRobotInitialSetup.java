@@ -2,13 +2,13 @@ package us.ihmc.atlas.initialSetup;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class PushUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRobot>
+public class PushUpDRCRobotInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
-   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       double elbowBend = Math.PI / 2.0;
       double handRotation = Math.PI / 2.0;

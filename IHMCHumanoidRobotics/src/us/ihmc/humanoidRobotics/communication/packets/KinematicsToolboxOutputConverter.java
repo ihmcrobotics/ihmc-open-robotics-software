@@ -5,7 +5,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
+import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.SdfLoader.partNames.LimbName;
@@ -37,7 +37,7 @@ public class KinematicsToolboxOutputConverter
    private final OneDoFJoint[] oneDoFJoints;
    private final int jointsHashCode;
 
-   public KinematicsToolboxOutputConverter(SDFFullHumanoidRobotModelFactory fullRobotModelFactory)
+   public KinematicsToolboxOutputConverter(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
       this.fullRobotModelToUseForConversion = fullRobotModelFactory.createFullRobotModel();
       rootJoint = fullRobotModelToUseForConversion.getRootJoint();

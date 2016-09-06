@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -121,7 +121,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       drcSimulationTestHelper.send(new PelvisHeightTrajectoryMessage(0.5, pelvisPosition.getZ() + 0.05));
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOntoSlopes(simulationConstructionSet);
-      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
+      HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1201L);
       slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.02, 0.03, 0.0}, new double[] {0.025, 0.035, 0.005});
       slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[] {0.02, 0.01, 0.0}, new double[] {0.2, 0.05, 0.01});
@@ -185,7 +185,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       drcSimulationTestHelper.loadScriptFile(scriptInputStream, fullRobotModel.getSoleFrame(RobotSide.LEFT));
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverHurdles(simulationConstructionSet);
-      SDFHumanoidRobot robot = drcSimulationTestHelper.getRobot();
+      HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1201L);
       slipRandomOnEachStepPerturber.setTranslationRangeToSlipNextStep(new double[] {0.03, 0.03, 0.0}, new double[] {0.04, 0.06, 0.005});
       slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[] {0.0, 0.0, 0.0}, new double[] {0.2, 0.05, 0.02});
