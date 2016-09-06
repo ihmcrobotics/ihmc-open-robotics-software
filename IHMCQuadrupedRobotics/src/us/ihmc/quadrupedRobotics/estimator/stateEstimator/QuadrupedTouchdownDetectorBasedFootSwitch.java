@@ -21,6 +21,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    private final YoFramePoint2d yoResolvedCoP;
    private final BooleanYoVariable touchdownDetected;
    private final BooleanYoVariable trustTouchdownDetectors;
+   private boolean touchdownDetectorsUpdated = false;
 
    public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, FullRobotModel fullRobotModel, double totalRobotWeight,
          YoVariableRegistry parentRegistry)
@@ -103,6 +104,11 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    public void trustFootSwitch(boolean trustFootSwitch)
    {
       this.trustTouchdownDetectors.set(trustFootSwitch);
+   }
+
+   @Override
+   public void reset()
+   {
       touchdownDetectorsUpdated = false;
    }
 }
