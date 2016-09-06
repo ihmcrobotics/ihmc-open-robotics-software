@@ -133,9 +133,9 @@ public class SDFFullRobotModel implements FullRobotModel
       return sdfJointNameMap.getModelName();
    }
 
-   protected void addSensorDefinitions(InverseDynamicsJoint joint, JointDescription child)
+   protected void addSensorDefinitions(InverseDynamicsJoint joint, JointDescription jointDescription)
    {
-      ArrayList<IMUSensorDescription> imuSensors = child.getIMUSensors();
+      ArrayList<IMUSensorDescription> imuSensors = jointDescription.getIMUSensors();
 
       // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
 //      RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
@@ -145,17 +145,17 @@ public class SDFFullRobotModel implements FullRobotModel
 
       for (IMUSensorDescription imuSensor : imuSensors)
       {
-         IMUDefinition imuDefinition = new IMUDefinition(child.getName() + "_" + imuSensor.getName(), joint.getSuccessor(), imuSensor.getTransformToJoint());
+         IMUDefinition imuDefinition = new IMUDefinition(imuSensor.getName(), joint.getSuccessor(), imuSensor.getTransformToJoint());
          imuDefinitions.add(imuDefinition);
       }
 
-      for (CameraSensorDescription cameraSensor : child.getCameraSensors())
+      for (CameraSensorDescription cameraSensor : jointDescription.getCameraSensors())
       {
          ReferenceFrame cameraFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(cameraSensor.getName(), joint.getFrameAfterJoint(), cameraSensor.getTransformToJoint());
          cameraFrames.put(cameraFrame.getName(), cameraFrame);
       }
 
-      for (LidarSensorDescription lidarSensor : child.getLidarSensors())
+      for (LidarSensorDescription lidarSensor : jointDescription.getLidarSensors())
       {
          ReferenceFrame lidarFrame = joint.getFrameAfterJoint();
          lidarBaseFrames.put(lidarSensor.getName(), lidarFrame);
