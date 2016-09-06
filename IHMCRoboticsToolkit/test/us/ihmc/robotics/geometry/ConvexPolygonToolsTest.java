@@ -261,7 +261,7 @@ public class ConvexPolygonToolsTest
          // check if the number of vertices is correct
          Assert.assertEquals(desiredNumberOfVertices, polygon.getNumberOfVertices());
          // check if the new polygon is contained in the old one
-         Assert.assertTrue(polygon.getConvexPolygon2d().isCompletelyInside(originalPolygon.getConvexPolygon2d(), 10E-10));
+         Assert.assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygon.getConvexPolygon2d(), 10E-10, originalPolygon.getConvexPolygon2d()));
       }
 
 //      System.out.println("Tested " + increase + " point increases");
