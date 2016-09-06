@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -216,14 +216,14 @@ public class DRCSimulationTestHelper
       controllerFactory.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
-   public SDFFullHumanoidRobotModel getControllerFullRobotModel()
+   public FullHumanoidRobotModel getControllerFullRobotModel()
    {
       return drcSimulationFactory.getControllerFullRobotModel();
    }
 
-   public SDFFullHumanoidRobotModel getSDFFullRobotModel()
+   public FullHumanoidRobotModel getSDFFullRobotModel()
    {
-      return (SDFFullHumanoidRobotModel) fullRobotModel;
+      return (FullHumanoidRobotModel) fullRobotModel;
    }
 
    /**

@@ -893,6 +893,12 @@ public class VirtualModelControllerTestHelper
       public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
       }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
+      }
    }
 
    public static class RobotArm implements FullRobotModel
@@ -1232,6 +1238,12 @@ public class VirtualModelControllerTestHelper
       @Override
       public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
       }
    }
 
@@ -1614,6 +1626,12 @@ public class VirtualModelControllerTestHelper
       public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
       }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
+      }
    }
 
    public static class PlanarForkedRobotArm implements FullRobotModel
@@ -1984,6 +2002,12 @@ public class VirtualModelControllerTestHelper
       public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
       }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
+      }
    }
 
    public static class RobotLegs extends Robot implements FullRobotModel
@@ -2243,6 +2267,12 @@ public class VirtualModelControllerTestHelper
       @Override
       public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
       }
    }
 

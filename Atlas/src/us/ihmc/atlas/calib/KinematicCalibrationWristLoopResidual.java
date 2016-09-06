@@ -12,7 +12,7 @@ import javax.vecmath.Vector3d;
 
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -21,7 +21,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
 {
    //robot model and data
-   private final SDFFullHumanoidRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final ArrayList<Map<String, Double>> qdata;
    private final ArrayList<String> calJointNames;
 
@@ -30,7 +30,7 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
    Vector3d constantOffset = new Vector3d();
 
 
-   public KinematicCalibrationWristLoopResidual(SDFFullHumanoidRobotModel fullRobotModel, final ArrayList<String> calJointNames, ArrayList<Map<String, Double>> qdata)
+   public KinematicCalibrationWristLoopResidual(FullHumanoidRobotModel fullRobotModel, final ArrayList<String> calJointNames, ArrayList<Map<String, Double>> qdata)
    {
       this.fullRobotModel = fullRobotModel;
       this.calJointNames = calJointNames;

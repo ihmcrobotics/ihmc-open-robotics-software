@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import javax.swing.JFileChooser;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
@@ -19,7 +19,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class VisualizePoseWorkspace
 {
-   private final SDFFullHumanoidRobotModel fullRobotModelForSlider;
+   private final FullHumanoidRobotModel fullRobotModelForSlider;
    
    private PlaybackPoseSequence posePlaybackRobotPoseSequence;
 

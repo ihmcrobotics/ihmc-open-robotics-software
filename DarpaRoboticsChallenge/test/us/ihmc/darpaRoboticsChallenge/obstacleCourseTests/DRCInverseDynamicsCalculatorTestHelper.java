@@ -12,7 +12,7 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -59,7 +59,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    private final YoFrameVector rightFootComputedWrenchForce = new YoFrameVector("wrench_computed_rightFootForce", ReferenceFrame.getWorldFrame(), registry);
 
    private final SDFHumanoidRobot robot;
-   private final SDFFullHumanoidRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final SimulationConstructionSet scs;
    private final TwistCalculator twistCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
@@ -75,7 +75,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    private final SideDependentList<ExternalForcePoint> feetExternalForcePoints;
 
-   public DRCInverseDynamicsCalculatorTestHelper(SDFFullHumanoidRobotModel fullRobotModel, SDFHumanoidRobot robot, boolean visualize, double gravityZ)
+   public DRCInverseDynamicsCalculatorTestHelper(FullHumanoidRobotModel fullRobotModel, SDFHumanoidRobot robot, boolean visualize, double gravityZ)
    {
       this.fullRobotModel = fullRobotModel;
       this.robot = robot;
@@ -875,7 +875,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       return simulationTestingParameters;
    }
 
-   public SDFFullHumanoidRobotModel getFullRobotModel()
+   public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }

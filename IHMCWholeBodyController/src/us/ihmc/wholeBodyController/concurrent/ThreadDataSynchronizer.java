@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -21,7 +21,7 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
 {
-   private final SDFFullHumanoidRobotModel estimatorFullRobotModel;
+   private final FullHumanoidRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder estimatorForceSensorDataHolder;
    private final CenterOfMassDataHolder estimatorCenterOfMassDataHolder;
    private final ContactSensorHolder estimatorContactSensorHolder;
@@ -29,7 +29,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
    private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
    private final RobotMotionStatusHolder estimatorRobotMotionStatusHolder;
 
-   private final SDFFullHumanoidRobotModel controllerFullRobotModel;
+   private final FullHumanoidRobotModel controllerFullRobotModel;
    private final ForceSensorDataHolder controllerForceSensorDataHolder;
    private final CenterOfMassDataHolder controllerCenterOfMassDataHolder;
    private final ContactSensorHolder controllerContactSensorHolder;
@@ -117,7 +117,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
    }
 
    @Override
-   public SDFFullHumanoidRobotModel getEstimatorFullRobotModel()
+   public FullHumanoidRobotModel getEstimatorFullRobotModel()
    {
       return estimatorFullRobotModel;
    }
@@ -135,7 +135,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
    }
 
    @Override
-   public SDFFullHumanoidRobotModel getControllerFullRobotModel()
+   public FullHumanoidRobotModel getControllerFullRobotModel()
    {
       return controllerFullRobotModel;
    }

@@ -16,7 +16,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
 import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.SdfLoader.partNames.LegJointName;
@@ -68,7 +68,7 @@ public class KinematicsToolboxController
    private static final double updateDT = 1.0e-3;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final SDFFullHumanoidRobotModel desiredFullRobotModel;
+   private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
    private final GeometricJacobianHolder geometricJacobianHolder;
@@ -541,7 +541,7 @@ public class KinematicsToolboxController
       };
    }
 
-   public SDFFullHumanoidRobotModel getDesiredFullRobotModel()
+   public FullHumanoidRobotModel getDesiredFullRobotModel()
    {
       return desiredFullRobotModel;
    }

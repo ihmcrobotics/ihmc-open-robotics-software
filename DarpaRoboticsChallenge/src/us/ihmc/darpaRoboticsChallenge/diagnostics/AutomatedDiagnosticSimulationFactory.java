@@ -7,8 +7,8 @@ import java.util.Map;
 
 import com.github.quickhull3d.Point3d;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
@@ -102,13 +102,13 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
          robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       robotInitialSetup.initializeRobot(simulatedRobot, robotModel.getJointMap());
 
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       DoubleYoVariable yoTime = simulatedRobot.getYoTime();
       double dt = robotModel.getEstimatorDT();
 
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
-      
+
       if (diagnosticParameters == null)
          diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, false);
 
@@ -132,7 +132,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       return automatedDiagnosticConfiguration;
    }
 
-   private SensorOutputMapReadOnly createStateEstimator(SDFFullHumanoidRobotModel fullRobotModel, StateEstimatorParameters stateEstimatorParameters,
+   private SensorOutputMapReadOnly createStateEstimator(FullHumanoidRobotModel fullRobotModel, StateEstimatorParameters stateEstimatorParameters,
          DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration)
    {
       SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
@@ -144,7 +144,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       ForceSensorDataHolder forceSensorDataHolderToUpdate = new ForceSensorDataHolder(Arrays.asList(forceSensorDefinitions));
       CenterOfMassDataHolder centerOfMassDataHolderToUpdate = new CenterOfMassDataHolder();
-      
+
       SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot,
             sensorProcessingConfiguration);
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, rawJointSensorDataHolderMap,
@@ -171,7 +171,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
          ContactablePlaneBody contactablePlaneBody = bipedFeet.get(robotSide);
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          bipedFeetMap.put(rigidBody, contactablePlaneBody);
-         
+
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
          ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolderToUpdate.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
@@ -183,7 +183,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
                footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide), null, contactThresholdForce, simulationRegistry);
          footSwitchMap.put(rigidBody, wrenchBasedFootSwitchForEstimator);
       }
-      
+
       stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters, sensorOutputMapReadOnly,
             forceSensorDataHolderToUpdate, centerOfMassDataHolderToUpdate,
             imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitchMap, null, new RobotMotionStatusHolder(),

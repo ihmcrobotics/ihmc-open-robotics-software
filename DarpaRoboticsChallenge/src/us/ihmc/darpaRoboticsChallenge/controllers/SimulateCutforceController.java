@@ -4,7 +4,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -56,7 +56,7 @@ public class SimulateCutforceController implements RobotController
    private final FramePose wristJointPose, handControlFramePose;
    private final YoFramePose yoWristJointPose, yoHandControlFramePose;
 
-   public SimulateCutforceController(FloatingRootJointRobot robot, SDFFullHumanoidRobotModel fullRobotModel, RobotSide robotSide, SimulationConstructionSet scs)
+   public SimulateCutforceController(FloatingRootJointRobot robot, FullHumanoidRobotModel fullRobotModel, RobotSide robotSide, SimulationConstructionSet scs)
    {
       this.sdfRobot = robot;
       this.fullRobotModel = fullRobotModel;
