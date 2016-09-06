@@ -123,15 +123,16 @@ public class SDFFullRobotModel implements FullRobotModel
       }
    }
 
+   @Override
    public RigidBody getEndEffector(Enum<?> segmentEnum)
    {
       return endEffectors.get(segmentEnum);
    }
 
-   public String getModelName()
-   {
-      return sdfJointNameMap.getModelName();
-   }
+//   public String getModelName()
+//   {
+//      return sdfJointNameMap.getModelName();
+//   }
 
    protected void addSensorDefinitions(InverseDynamicsJoint joint, JointDescription jointDescription)
    {

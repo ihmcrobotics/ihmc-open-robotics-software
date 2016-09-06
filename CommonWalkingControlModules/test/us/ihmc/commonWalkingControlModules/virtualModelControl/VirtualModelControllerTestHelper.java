@@ -852,6 +852,12 @@ public class VirtualModelControllerTestHelper
       {
          return null;
       }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
    }
 
    public static class RobotArm implements FullRobotModel
@@ -1148,6 +1154,12 @@ public class VirtualModelControllerTestHelper
 
       @Override
       public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
       {
          return null;
       }
@@ -1491,6 +1503,12 @@ public class VirtualModelControllerTestHelper
       {
          return null;
       }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
    }
 
    public static class PlanarForkedRobotArm implements FullRobotModel
@@ -1820,6 +1838,12 @@ public class VirtualModelControllerTestHelper
       {
          return null;
       }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
    }
 
    public static class RobotLegs extends Robot implements FullRobotModel
@@ -2036,6 +2060,12 @@ public class VirtualModelControllerTestHelper
 
       @Override
       public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
       {
          return null;
       }
