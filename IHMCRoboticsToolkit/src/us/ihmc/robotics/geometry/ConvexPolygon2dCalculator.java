@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Tuple2d;
 
 /**
  * This calculator class contains methods for computations with a ConvexPolygon2d such as
@@ -101,17 +102,6 @@ public class ConvexPolygon2dCalculator
 
       if (polygon.hasAtLeastTwoVertices())
       {
-         // Not required to check bounding box this is just to speed up things:
-         BoundingBox2d boundingBox = polygon.getBoundingBox();
-         if (pointX < boundingBox.getMinPoint().getX() - epsilon)
-            return false;
-         if (pointY < boundingBox.getMinPoint().getY() - epsilon)
-            return false;
-         if (pointX > boundingBox.getMaxPoint().getX() + epsilon)
-            return false;
-         if (pointY > boundingBox.getMaxPoint().getY() + epsilon)
-            return false;
-
          // Determine whether the point is on the right side of each edge:
          for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          {
@@ -180,6 +170,18 @@ public class ConvexPolygon2dCalculator
       return isPolygonInside(polygonToTest, 0.0, polygon);
    }
 
+   /**
+    * Translates the given polygon.
+    */
+   public static void translatePolygon(Tuple2d translation, ConvexPolygon2d polygon)
+   {
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         Point2d vertex = polygon.getVertex(i);
+         vertex.add(translation);
+      }
+   }
+
    // --- Methods that generate garbage ---
    public static Point2d getClosestVertexCopy(Line2d line, ConvexPolygon2d polygon)
    {
@@ -195,6 +197,13 @@ public class ConvexPolygon2dCalculator
       if (getClosestVertex(point, polygon, ret))
          return ret;
       return null;
+   }
+
+   public static ConvexPolygon2d translatePolygonCopy(Tuple2d translation, ConvexPolygon2d polygon)
+   {
+      ConvexPolygon2d ret = new ConvexPolygon2d(polygon);
+      translatePolygon(translation, ret);
+      return ret;
    }
 
 }
