@@ -288,7 +288,7 @@ public class RobotDescriptionFromSDFLoader
             {
                if (!Double.isNaN(joint.getEffortLimit()))
                {
-                  pinJoint.setTorqueLimits(joint.getEffortLimit());
+                  pinJoint.setEffortLimit(joint.getEffortLimit());
                }
 
                if (!Double.isNaN(joint.getVelocityLimit()))

@@ -34,7 +34,7 @@ public class RobotDescription implements GraphicsObjectsHolder
       return rootJoints;
    }
 
-   private JointDescription getJointDescription(String name)
+   public JointDescription getJointDescription(String name)
    {
       for (JointDescription rootJoint : rootJoints)
       {
