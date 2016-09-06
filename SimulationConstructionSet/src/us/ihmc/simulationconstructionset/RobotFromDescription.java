@@ -343,6 +343,7 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
             pinJoint.setDamping(pinJointDescription.getDamping());
             pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
+            pinJoint.setStiction(pinJointDescription.getStiction());
          }
          else
          {
