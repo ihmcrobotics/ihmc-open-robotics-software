@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorBasedFootswitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -14,23 +13,18 @@ import us.ihmc.robotics.screwTheory.Wrench;
 
 public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetectorBasedFootswitch
 {
-   private final RobotQuadrant robotQuadrant;
    private final ContactablePlaneBody foot;
-   private final FullRobotModel fullRobotModel;
    private final double totalRobotWeight;
    private final YoFramePoint2d yoResolvedCoP;
    private final BooleanYoVariable touchdownDetected;
    private final BooleanYoVariable trustTouchdownDetectors;
    private boolean touchdownDetectorsUpdated = false;
 
-   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, FullRobotModel fullRobotModel, double totalRobotWeight,
-         YoVariableRegistry parentRegistry)
+   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, double totalRobotWeight, YoVariableRegistry parentRegistry)
    {
       super(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch", parentRegistry);
 
-      this.robotQuadrant = robotQuadrant;
       this.foot = foot;
-      this.fullRobotModel = fullRobotModel;
       this.totalRobotWeight = totalRobotWeight;
       yoResolvedCoP = new YoFramePoint2d(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
       touchdownDetected = new BooleanYoVariable(robotQuadrant.getCamelCaseName() + "TouchdownDetected", registry);
