@@ -26,8 +26,10 @@ import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 
@@ -81,7 +83,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       stepStreamMultiplexer = new QuadrupedStepStreamMultiplexer<>();
       stepStreamMultiplexer.addStepStream(QuadrupedForceControllerState.XGAIT, xGaitStepStream);
       stepStreamMultiplexer.addStepStream(QuadrupedForceControllerState.STEP, preplannedStepStream);
-      stepStreamMultiplexer.selectStepStream(QuadrupedForceControllerState.STEP);
+      stepStreamMultiplexer.selectStepStream(QuadrupedForceControllerState.XGAIT);
 
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
 
@@ -108,16 +110,28 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
     */
    public void warmup(int iterations)
    {
-      for (int i = 0; i < iterations; i++)
+      DoubleYoVariable robotTimestamp = runtimeEnvironment.getRobotTimestamp();
+      double robotTimeBeforeWarmUp = robotTimestamp.getDoubleValue();
+      for (QuadrupedForceControllerState state : QuadrupedForceControllerState.values)
       {
-         for (QuadrupedForceControllerState state : QuadrupedForceControllerState.values)
+         FiniteStateMachineState<ControllerEvent> stateImpl = stateMachine.getState(state);
+
+         stateImpl.onEntry();
+         for (int i = 0; i < iterations; i++)
          {
-            FiniteStateMachineState<ControllerEvent> stateImpl = stateMachine.getState(state);
-            stateImpl.onEntry();
+            robotTimestamp.add(TimeTools.milliSecondsToSeconds(1));
             stateImpl.process();
+         }
+         stateImpl.onExit();
+         
+         for (int i = 0; i < iterations; i++)
+         {
+            robotTimestamp.add(TimeTools.milliSecondsToSeconds(1));
+            stateImpl.onEntry();
             stateImpl.onExit();
          }
       }
+      robotTimestamp.set(robotTimeBeforeWarmUp);
    }
 
    @Override
