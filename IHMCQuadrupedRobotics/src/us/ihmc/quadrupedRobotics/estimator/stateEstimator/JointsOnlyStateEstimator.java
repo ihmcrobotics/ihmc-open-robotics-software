@@ -14,15 +14,15 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStat
 
 public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
 {
-   private final FullRobotModel sdfFullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final JointStateUpdater jointStateUpdater;
 
 
 
-   public JointsOnlyStateEstimator(FullRobotModel sdfFullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly, JointStateUpdater jointStateUpdater)
+   public JointsOnlyStateEstimator(FullRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly, JointStateUpdater jointStateUpdater)
    {
-      this.sdfFullRobotModel = sdfFullRobotModel;
+      this.fullRobotModel = fullRobotModel;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
       this.jointStateUpdater = jointStateUpdater;
    }
@@ -30,7 +30,7 @@ public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
    public void initialize()
    {
       jointStateUpdater.initialize();
-      sdfFullRobotModel.updateFrames();
+      fullRobotModel.updateFrames();
    }
 
    public void enable()
@@ -41,7 +41,7 @@ public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
    public void doControl()
    {
       jointStateUpdater.updateJointState();
-      sdfFullRobotModel.updateFrames();
+      fullRobotModel.updateFrames();
    }
 
    public boolean isFootInContact(RobotQuadrant quadrant)

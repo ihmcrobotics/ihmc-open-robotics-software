@@ -44,10 +44,10 @@ public class ValkyrieSDFLoadingDemo
       if (SHOW_COORDINATES_AT_JOINT_ORIGIN)
          addJointAxis(valkyrieRobot);
 
-      FullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
+      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      CommonInertiaEllipsoidsVisualizer inertiaVis = new CommonInertiaEllipsoidsVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry);
+      CommonInertiaEllipsoidsVisualizer inertiaVis = new CommonInertiaEllipsoidsVisualizer(fullRobotModel.getElevator(), yoGraphicsListRegistry);
       inertiaVis.update();
 
 

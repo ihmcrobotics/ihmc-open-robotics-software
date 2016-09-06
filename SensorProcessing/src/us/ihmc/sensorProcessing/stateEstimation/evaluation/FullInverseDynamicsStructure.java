@@ -63,11 +63,11 @@ public class FullInverseDynamicsStructure
       spatialAccelerationCalculator.compute();
    }
 
-   public static FullInverseDynamicsStructure createInverseDynamicStructure(FullRobotModel sdfFullRobotModel)
+   public static FullInverseDynamicsStructure createInverseDynamicStructure(FullRobotModel fullRobotModel)
    {
-      RigidBody elevator = sdfFullRobotModel.getElevator();
-      SixDoFJoint rootInverseDynamicsJoint = sdfFullRobotModel.getRootJoint();
-      RigidBody estimationLink = sdfFullRobotModel.getPelvis();
+      RigidBody elevator = fullRobotModel.getElevator();
+      SixDoFJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
+      RigidBody estimationLink = fullRobotModel.getPelvis();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
 

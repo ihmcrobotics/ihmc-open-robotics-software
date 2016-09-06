@@ -38,7 +38,7 @@ public class LockPelvisController implements RobotController
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<YoGraphicPosition> efp_positionViz = new ArrayList<>();
 
-   public LockPelvisController(FloatingRootJointRobot robot, SimulationConstructionSet scs, FullRobotModel sdfFullRobotModel, double desiredHeight)
+   public LockPelvisController(FloatingRootJointRobot robot, SimulationConstructionSet scs, FullRobotModel fullRobotModel, double desiredHeight)
    {
       this.robot = robot;
       robotMass = robot.computeCenterOfMass(new Point3d());
@@ -48,8 +48,8 @@ public class LockPelvisController implements RobotController
       Joint jointToAddExternalForcePoints;
       try
       {
-         //            String lastSpineJointName = sdfFullRobotModel.getChest().getParentJoint().getName();
-         jointToAddExternalForcePoints = robot.getJoint(sdfFullRobotModel.getPelvis().getParentJoint().getName());
+         //            String lastSpineJointName = fullRobotModel.getChest().getParentJoint().getName();
+         jointToAddExternalForcePoints = robot.getJoint(fullRobotModel.getPelvis().getParentJoint().getName());
       }
       catch (NullPointerException e)
       {

@@ -40,7 +40,7 @@ public class SimulateCutforceController implements RobotController
    private final DoubleYoVariable efpForce;
 
    private final FloatingRootJointRobot sdfRobot;
-   private final FullRobotModel sdfFullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private final RobotSide robotSide;
 
    private final Joint wristJoint;
@@ -56,15 +56,15 @@ public class SimulateCutforceController implements RobotController
    private final FramePose wristJointPose, handControlFramePose;
    private final YoFramePose yoWristJointPose, yoHandControlFramePose;
 
-   public SimulateCutforceController(FloatingRootJointRobot robot, SDFFullHumanoidRobotModel sdfFullRobotModel, RobotSide robotSide, SimulationConstructionSet scs)
+   public SimulateCutforceController(FloatingRootJointRobot robot, SDFFullHumanoidRobotModel fullRobotModel, RobotSide robotSide, SimulationConstructionSet scs)
    {
       this.sdfRobot = robot;
-      this.sdfFullRobotModel = sdfFullRobotModel;
+      this.fullRobotModel = fullRobotModel;
       this.robotSide = robotSide;
 
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      wristJoint = robot.getJoint(sdfFullRobotModel.getHand(this.robotSide).getParentJoint().getName());
+      wristJoint = robot.getJoint(fullRobotModel.getHand(this.robotSide).getParentJoint().getName());
       transform = new RigidBodyTransform();
       wristToHandControlFrame = new Vector3d();
       tangentVector = new Vector3d();

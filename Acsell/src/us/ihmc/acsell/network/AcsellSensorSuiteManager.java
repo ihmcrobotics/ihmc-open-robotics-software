@@ -15,7 +15,7 @@ public class AcsellSensorSuiteManager implements DRCSensorSuiteManager
    private final PacketCommunicator sensorSuitePacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
          new IHMCCommunicationKryoNetClassList());
 
-   public AcsellSensorSuiteManager(FullRobotModel sdfFullRobotModel, boolean useSimulatedSensors)
+   public AcsellSensorSuiteManager(FullRobotModel fullRobotModel, boolean useSimulatedSensors)
    {
    }
 
