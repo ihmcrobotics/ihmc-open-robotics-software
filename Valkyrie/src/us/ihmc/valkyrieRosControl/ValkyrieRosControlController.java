@@ -1,10 +1,5 @@
 package us.ihmc.valkyrieRosControl;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import us.ihmc.affinity.Affinity;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -30,11 +25,7 @@ import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
-import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
-import us.ihmc.rosControl.wholeRobot.IMUHandle;
-import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
-import us.ihmc.rosControl.wholeRobot.JointStateHandle;
+import us.ihmc.rosControl.wholeRobot.*;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
@@ -46,9 +37,16 @@ import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.wholeBodyController.concurrent.BlockingSynchronousMultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
+import us.ihmc.wholeBodyController.concurrent.MultiThreadedRobotControlElementCoordinator;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorControllerFactory;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {   
@@ -105,7 +103,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
    private static final boolean DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET = true;
 
-   private MultiThreadedRealTimeRobotController robotController;
+   private MultiThreadedRobotControlElementCoordinator robotController;
 
    private final SettableTimestampProvider timestampProvider = new SettableTimestampProvider();
 
@@ -301,14 +299,26 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       yoVariableServer.start();
 
-      robotController = new MultiThreadedRealTimeRobotController(estimatorThread);
-      if (valkyrieAffinity.setAffinity())
+      if(true) // TODO Not Gazebo
       {
-         robotController.addController(controllerThread, ValkyriePriorityParameters.CONTROLLER_PRIORITY, valkyrieAffinity.getControlThreadProcessor());
+         MultiThreadedRealTimeRobotController coordinator = new MultiThreadedRealTimeRobotController(estimatorThread);
+         if (valkyrieAffinity.setAffinity())
+         {
+            coordinator.addController(controllerThread, ValkyriePriorityParameters.CONTROLLER_PRIORITY, valkyrieAffinity.getControlThreadProcessor());
+         }
+         else
+         {
+            coordinator.addController(controllerThread, ValkyriePriorityParameters.CONTROLLER_PRIORITY, null);
+         }
+
+         robotController = coordinator;
       }
-      else
+      else // TODO Gazebo
       {
-         robotController.addController(controllerThread, ValkyriePriorityParameters.CONTROLLER_PRIORITY, null);
+         BlockingSynchronousMultiThreadedRealTimeRobotController coordinator = new BlockingSynchronousMultiThreadedRealTimeRobotController(estimatorThread, null); // TODO Timestamp Provider
+         coordinator.addController(controllerThread, (int) (robotModel.getControllerDT() / robotModel.getEstimatorDT()));
+
+         robotController = coordinator;
       }
 
       robotController.start();
