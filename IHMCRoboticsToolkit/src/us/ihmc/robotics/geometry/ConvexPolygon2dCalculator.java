@@ -34,7 +34,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Packs the closest vertex in the polygon to the given line.
+    * Packs the closest vertex of the polygon to the given line.
     */
    public static boolean getClosestVertex(Line2d line, ConvexPolygon2d polygon, Point2d pointToPack)
    {
@@ -56,7 +56,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Packs the closest vertex to the polygon to the given point
+    * Packs the closest vertex of the polygon to the given point
     */
    public static boolean getClosestVertex(Point2d point, ConvexPolygon2d polygon, Point2d pointToPack)
    {
@@ -78,7 +78,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines if the pointToTest is inside the convex polygon (orientation method Nordbeck, Rystedt, 1967).
+    * Determines if the pointToTest is inside the convex polygon.
     */
    public static boolean isPointInside(double pointX, double pointY, double epsilon, ConvexPolygon2d polygon)
    {
@@ -126,7 +126,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines if the pointToTest is inside the convex polygon (orientation method Nordbeck, Rystedt, 1967).
+    * Determines if the pointToTest is inside the convex polygon.
     */
    public static boolean isPointInside(double pointX, double pointY, ConvexPolygon2d polygon)
    {
@@ -134,7 +134,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines if the pointToTest is inside the convex polygon (orientation method Nordbeck, Rystedt, 1967).
+    * Determines if the pointToTest is inside the convex polygon.
     */
    public static boolean isPointInside(Point2d pointToTest, ConvexPolygon2d polygon)
    {
@@ -142,7 +142,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines if the pointToTest is inside the convex polygon (orientation method Nordbeck, Rystedt, 1967).
+    * Determines if the pointToTest is inside the convex polygon.
     */
    public static boolean isPointInside(Point2d pointToTest, double epsilon, ConvexPolygon2d polygon)
    {
@@ -164,7 +164,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines whether a polygon is inside the convex polygon.
+    * Determines if the polygonToTest is inside the convex polygon.
     */
    public static boolean isPolygonInside(ConvexPolygon2d polygonToTest, ConvexPolygon2d polygon)
    {
@@ -185,25 +185,22 @@ public class ConvexPolygon2dCalculator
 
    /**
     * Determines whether an observer can see the outside of the given edge. The edge index corresponds to
-    * the vertex at the start of the edge when moving clockwise around the polygon.
+    * the vertex at the start of the edge when moving clockwise around the polygon. Will return false if the
+    * observer is on the edge.
     */
    public static boolean canObserverSeeEdge(int edgeIndex, double observerX, double observerY, ConvexPolygon2d polygon)
    {
-      if (polygon.hasAtLeastTwoVertices())
-      {
-         Point2d vertexOne = polygon.getVertex(edgeIndex);
-         Point2d vertexTwo = polygon.getNextVertex(edgeIndex);
-         double edgeVectorX = vertexTwo.x - vertexOne.x;
-         double edgeVectorY = vertexTwo.y - vertexOne.y;
-         return Line2d.isPointOnSideOfLine(observerX, observerY, edgeVectorX, edgeVectorY, vertexOne.x, vertexOne.y, RobotSide.LEFT);
-      }
-
-      return false;
+      Point2d vertexOne = polygon.getVertex(edgeIndex);
+      Point2d vertexTwo = polygon.getNextVertex(edgeIndex);
+      double edgeVectorX = vertexTwo.x - vertexOne.x;
+      double edgeVectorY = vertexTwo.y - vertexOne.y;
+      return Line2d.isPointOnSideOfLine(observerX, observerY, edgeVectorX, edgeVectorY, vertexOne.x, vertexOne.y, RobotSide.LEFT);
    }
 
    /**
     * Determines whether an observer can see the outside of the given edge. The edge index corresponds to
-    * the vertex at the start of the edge when moving clockwise around the polygon.
+    * the vertex at the start of the edge when moving clockwise around the polygon. Will return false if the
+    * observer is on the edge.
     */
    public static boolean canObserverSeeEdge(int edgeIndex, Point2d observer, ConvexPolygon2d polygon)
    {

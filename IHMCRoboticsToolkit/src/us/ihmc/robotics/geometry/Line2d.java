@@ -538,6 +538,9 @@ public class Line2d implements Geometry2d<Line2d>
       return isPointOnSideOfLine(x, y, normalizedVector.getX(), normalizedVector.getY(), point.getX(), point.getY(), side);
    }
 
+   /**
+    * Checks whether a point is on the specified side of a line. If the direction of the line is zero this will return false.
+    */
    public static boolean isPointOnSideOfLine(double pointX, double pointY, double directionX, double directionY, double pointOnLineX, double pointOnLineY,
          RobotSide side)
    {
