@@ -124,7 +124,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
 
       // Compute nominal piecewise center of pressure plan.
       timedContactSequence.compute(queuedSteps, currentSolePosition, currentContactState, currentTime);
-      piecewiseConstantCopTrajectory.compute(timedContactSequence);
+      piecewiseConstantCopTrajectory.initializeTrajectory(timedContactSequence);
       numberOfIntervals = piecewiseConstantCopTrajectory.getNumberOfIntervals();
 
       // Solve constrained quadratic program.
@@ -232,8 +232,8 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
 
          for (int i = 0; i < numberOfIntervals; i++)
          {
-            piecewiseConstantCopTrajectory.getCenterOfPressureAtStartOfInterval(i).changeFrame(ReferenceFrame.getWorldFrame());
-            x0.set(i * 2 + rowOffset, 0, piecewiseConstantCopTrajectory.getCenterOfPressureAtStartOfInterval(i).get(direction));
+            piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).changeFrame(ReferenceFrame.getWorldFrame());
+            x0.set(i * 2 + rowOffset, 0, piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).get(direction));
             B.set(i * 2 + rowOffset, numberOfContacts + rowOffset, piecewiseConstantCopTrajectory.getNormalizedPressureContributedByQueuedSteps(i));
          }
          x0.set(rowOffset, 0, 0);
