@@ -21,14 +21,14 @@ public class SortByResultTypeComparatorTest
       Random random = new Random(1976L);
       SortByResultTypeComparator comparator = new SortByResultTypeComparator();
 
-      CombinedFuzzySearchResult aardvark = new CombinedFuzzySearchResult("Aardvark", CombinedFuzzySearchResultType.EXACT_SUBSTRING, null);
-      CombinedFuzzySearchResult burgundy = new CombinedFuzzySearchResult("Burgundy", CombinedFuzzySearchResultType.REGEX, null);
-      CombinedFuzzySearchResult sebastopol = new CombinedFuzzySearchResult("Sebastopol", CombinedFuzzySearchResultType.FUZZY, null);
+      CombinedFuzzySearchResult aardvark = new CombinedFuzzySearchResult("Aardvark", CombinedFuzzySearchResultType.EXACT_SUBSTRING);
+      CombinedFuzzySearchResult burgundy = new CombinedFuzzySearchResult("Burgundy", CombinedFuzzySearchResultType.REGEX);
+      CombinedFuzzySearchResult sebastopol = new CombinedFuzzySearchResult("Sebastopol", CombinedFuzzySearchResultType.FUZZY);
 
       for (int i = 0; i < 10000; i++)
       {
          CombinedFuzzySearchResultType randomResultType = generateRandomResultType(random);
-         CombinedFuzzySearchResult victorious = new CombinedFuzzySearchResult("Victorious", randomResultType, null);
+         CombinedFuzzySearchResult victorious = new CombinedFuzzySearchResult("Victorious", randomResultType);
 
          int exactSubstringCompare = comparator.compare(aardvark, victorious);
          int regexCompare = comparator.compare(burgundy, victorious);
