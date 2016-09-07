@@ -298,6 +298,26 @@ public class ConvexPolygon2dCalculatorTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testIsPointInside5()
+   {
+      // foot polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(-0.0682, -0.084));
+      polygon.addVertex(new Point2d(0.1418, -0.0834));
+      polygon.addVertex(new Point2d(0.1421, -0.1934));
+      polygon.addVertex(new Point2d(-0.0679, -0.194));
+      polygon.update();
+
+      Point2d point1 = new Point2d(0.0342, -0.0006);
+      System.out.println(ConvexPolygon2dCalculator.getSignedDistance(point1, polygon));
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point1, 0.02, polygon));
+
+      Point2d point2 = new Point2d(0.0351, -0.0983);
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point2, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testIsPolygonInside1()
    {
       ConvexPolygon2d polygon = new ConvexPolygon2d();
