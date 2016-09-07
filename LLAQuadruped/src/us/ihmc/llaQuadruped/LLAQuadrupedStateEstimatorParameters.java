@@ -56,12 +56,6 @@ public class LLAQuadrupedStateEstimatorParameters extends StateEstimatorParamete
    }
 
    @Override
-   public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
-   {
-      return 0;
-   }
-
-   @Override
    public double getCoPFilterFreqInHertz()
    {
       return 0;
@@ -117,12 +111,6 @@ public class LLAQuadrupedStateEstimatorParameters extends StateEstimatorParamete
 
    @Override
    public double getPelvisLinearVelocityFusingFrequency()
-   {
-      return 0;
-   }
-
-   @Override
-   public double getPelvisVelocityBacklashSlopTime()
    {
       return 0;
    }

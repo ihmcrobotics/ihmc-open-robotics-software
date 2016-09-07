@@ -83,6 +83,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedPhysicalProperties> physicalProperties = new RequiredFactoryField<>("physicalProperties");
    private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
    private final RequiredFactoryField<FloatingRootJointRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
+   private final RequiredFactoryField<Double> simulationDT = new RequiredFactoryField<>("simulationDT");
    private final RequiredFactoryField<Double> controlDT = new RequiredFactoryField<>("controlDT");
    private final RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
    private final RequiredFactoryField<Integer> recordFrequency = new RequiredFactoryField<>("recordFrequency");
@@ -368,7 +369,8 @@ public class QuadrupedSimulationFactory
 
    private void setupSDFRobot()
    {
-      sdfRobot.get().setController(simulationController);
+      int simulationTicksPerControllerTick = (int) Math.round(controlDT.get() / simulationDT.get());
+      sdfRobot.get().setController(simulationController, simulationTicksPerControllerTick);
       sdfRobot.get().setPositionInWorld(initialPositionParameters.get().getInitialBodyPosition());
       for (QuadrupedJointName quadrupedJointName : modelFactory.get().getQuadrupedJointNames())
       {
@@ -427,7 +429,7 @@ public class QuadrupedSimulationFactory
          scs.setGroundVisible(false);
       }
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      scs.setDT(controlDT.get(), recordFrequency.get());
+      scs.setDT(simulationDT.get(), recordFrequency.get());
       if (scs.getSimulationConstructionSetParameters().getCreateGUI())
       {
          scs.setCameraTrackingVars("q_x", "q_y", "q_z");
@@ -446,6 +448,11 @@ public class QuadrupedSimulationFactory
    }
 
    // OPTIONS
+
+   public void setSimulationDT(double simulationDT)
+   {
+      this.simulationDT.set(simulationDT);
+   }
 
    public void setControlDT(double controlDT)
    {

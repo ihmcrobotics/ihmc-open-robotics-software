@@ -23,6 +23,7 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
+import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -114,6 +115,10 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      Vector3d midFeetZup = findVector3d(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUp", scs);
+
+      desiredPosition.setX(desiredPosition.getX() - midFeetZup.getX());
+      desiredPosition.setY(desiredPosition.getY() - midFeetZup.getY());
 
       assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
    }
@@ -191,6 +196,15 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       walkingDesiredOrientation.conjugate();
       fromWorldToDesiredPelvisOrientation.setRotation(walkingDesiredOrientation);
 
+      RigidBodyTransform fromWorldToMidFeetZUpTransform = new RigidBodyTransform();
+      Vector3d midFeetZup = findVector3d(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUp", scs);
+      double midFeetZupYaw = scs.getVariable(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUpYaw").getValueAsDouble();
+      double midFeetZupPitch = scs.getVariable(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUpPitch").getValueAsDouble();
+      double midFeetZupRoll = scs.getVariable(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUpRoll").getValueAsDouble();
+      fromWorldToMidFeetZUpTransform.setRotationEulerAndZeroTranslation(midFeetZupRoll, midFeetZupPitch, midFeetZupYaw);
+      fromWorldToMidFeetZUpTransform.setTranslation(midFeetZup);
+      fromWorldToMidFeetZUpTransform.invert();
+
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
       assertTrue(success);
 
@@ -201,6 +215,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          SE3TrajectoryPointMessage fromMessage = pelvisTrajectoryMessage.getTrajectoryPoint(trajectoryPointIndex);
          SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
          expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
+         expectedTrajectoryPoint.applyTransform(fromWorldToMidFeetZUpTransform);
          SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(trajectoryPointIndex + 1, scs);
 
 
@@ -210,6 +225,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          assertEquals(expectedTrajectoryPoint.getPositionY(), controllerTrajectoryPoint.getPositionY(), EPSILON_FOR_DESIREDS);
          JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getLinearVelocityCopy(), controllerTrajectoryPoint.getLinearVelocityCopy(), EPSILON_FOR_DESIREDS);
 
+         expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
          expectedTrajectoryPoint.applyTransform(fromWorldToDesiredPelvisOrientation);
 
          JUnitTools.assertQuaternionsEqual(expectedTrajectoryPoint.getOrientationCopy(), controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
@@ -222,6 +238,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       SE3TrajectoryPointMessage fromMessage = pelvisTrajectoryMessage.getLastTrajectoryPoint();
       SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
       expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
+      expectedTrajectoryPoint.applyTransform(fromWorldToMidFeetZUpTransform);
       SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(scs);
 
       // Not check the height on purpose as it is non-trivial.
@@ -229,6 +246,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertEquals(expectedTrajectoryPoint.getPositionY(), controllerTrajectoryPoint.getPositionY(), EPSILON_FOR_DESIREDS);
       JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getLinearVelocityCopy(), controllerTrajectoryPoint.getLinearVelocityCopy(), EPSILON_FOR_DESIREDS);
 
+      expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
       expectedTrajectoryPoint.applyTransform(fromWorldToDesiredPelvisOrientation);
 
       JUnitTools.assertQuaternionsEqual(expectedTrajectoryPoint.getOrientationCopy(), controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
@@ -308,6 +326,15 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       walkingDesiredOrientation.conjugate();
       fromWorldToDesiredPelvisOrientation.setRotation(walkingDesiredOrientation);
 
+      RigidBodyTransform fromWorldToMidFeetZUpTransform = new RigidBodyTransform();
+      Vector3d midFeetZup = findVector3d(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUp", scs);
+      double midFeetZupYaw = scs.getVariable(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUpYaw").getValueAsDouble();
+      double midFeetZupPitch = scs.getVariable(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUpPitch").getValueAsDouble();
+      double midFeetZupRoll = scs.getVariable(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUpRoll").getValueAsDouble();
+      fromWorldToMidFeetZUpTransform.setRotationEulerAndZeroTranslation(midFeetZupRoll, midFeetZupPitch, midFeetZupYaw);
+      fromWorldToMidFeetZUpTransform.setTranslation(midFeetZup);
+      fromWorldToMidFeetZUpTransform.invert();
+
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timePerWaypoint + 2.0 * getRobotModel().getControllerDT());
       assertTrue(success);
 
@@ -326,6 +353,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
             SE3TrajectoryPointMessage fromMessage = pelvisTrajectoryMessage.getTrajectoryPoint(expectedTrajectoryPointIndex);
             SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
             expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
+            expectedTrajectoryPoint.applyTransform(fromWorldToMidFeetZUpTransform);
             SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(trajectoryPointIndex + 1, scs);
 
             double time = expectedTrajectoryPoint.getTime();
@@ -336,6 +364,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
             assertEquals(expectedTrajectoryPoint.getPositionY(), controllerTrajectoryPoint.getPositionY(), EPSILON_FOR_DESIREDS);
             JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getLinearVelocityCopy(), controllerTrajectoryPoint.getLinearVelocityCopy(), EPSILON_FOR_DESIREDS);
 
+            expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
             expectedTrajectoryPoint.applyTransform(fromWorldToDesiredPelvisOrientation);
 
             JUnitTools.assertQuaternionsEqual(expectedTrajectoryPoint.getOrientationCopy(), controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
@@ -361,6 +390,14 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
             walkingDesiredOrientation = findQuat4d(PelvisOrientationManager.class.getSimpleName(), "desiredPelvis", scs);
             walkingDesiredOrientation.conjugate();
             fromWorldToDesiredPelvisOrientation.setRotation(walkingDesiredOrientation);
+
+            midFeetZup = findVector3d(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUp", scs);
+            midFeetZupYaw = scs.getVariable(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUpYaw").getValueAsDouble();
+            midFeetZupPitch = scs.getVariable(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUpPitch").getValueAsDouble();
+            midFeetZupRoll = scs.getVariable(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUpRoll").getValueAsDouble();
+            fromWorldToMidFeetZUpTransform.setRotationEulerAndZeroTranslation(midFeetZupRoll, midFeetZupPitch, midFeetZupYaw);
+            fromWorldToMidFeetZUpTransform.setTranslation(midFeetZup);
+            fromWorldToMidFeetZUpTransform.invert();
          }
       }
 
@@ -371,6 +408,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       SE3TrajectoryPointMessage fromMessage = pelvisTrajectoryMessage.getLastTrajectoryPoint();
       SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
       expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
+      expectedTrajectoryPoint.applyTransform(fromWorldToMidFeetZUpTransform);
       SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(scs);
 
       // Not checking the height on purpose as it is non-trivial.
@@ -378,6 +416,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertEquals(expectedTrajectoryPoint.getPositionY(), controllerTrajectoryPoint.getPositionY(), EPSILON_FOR_DESIREDS);
       JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getLinearVelocityCopy(), controllerTrajectoryPoint.getLinearVelocityCopy(), EPSILON_FOR_DESIREDS);
 
+      expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
       expectedTrajectoryPoint.applyTransform(fromWorldToDesiredPelvisOrientation);
 
       // These asserts are causing trouble
