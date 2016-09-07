@@ -24,10 +24,10 @@ public class SortFuzzyMatchesDescendingByFuzzyDistanceComparatorTest
          int secondRandomDistance = random.nextInt(300) + 1;
 
          CombinedFuzzySearchResult aardvark = new CombinedFuzzySearchResult("Aardvark", CombinedFuzzySearchResult.CombinedFuzzySearchResultType.FUZZY,
-               firstRandomDistance, null);
+               firstRandomDistance);
 
          CombinedFuzzySearchResult sebastopol = new CombinedFuzzySearchResult("Sebastopol", CombinedFuzzySearchResult.CombinedFuzzySearchResultType.FUZZY,
-               secondRandomDistance, null);
+               secondRandomDistance);
 
          SortFuzzyMatchesDescendingByFuzzyDistanceComparator comparator = new SortFuzzyMatchesDescendingByFuzzyDistanceComparator();
 
