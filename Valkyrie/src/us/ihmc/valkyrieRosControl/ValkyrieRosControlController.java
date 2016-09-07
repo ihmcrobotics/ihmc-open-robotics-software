@@ -37,7 +37,7 @@ import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.concurrent.BlockingSynchronousMultiThreadedRealTimeRobotController;
+import us.ihmc.wholeBodyController.concurrent.SynchronousMultiThreadedRobotController;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRobotControlElementCoordinator;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
@@ -315,7 +315,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
       else // TODO Gazebo
       {
-         BlockingSynchronousMultiThreadedRealTimeRobotController coordinator = new BlockingSynchronousMultiThreadedRealTimeRobotController(estimatorThread, timestampProvider);
+         SynchronousMultiThreadedRobotController coordinator = new SynchronousMultiThreadedRobotController(estimatorThread, timestampProvider);
          coordinator.addController(controllerThread, (int) (robotModel.getControllerDT() / robotModel.getEstimatorDT()));
 
          robotController = coordinator;
