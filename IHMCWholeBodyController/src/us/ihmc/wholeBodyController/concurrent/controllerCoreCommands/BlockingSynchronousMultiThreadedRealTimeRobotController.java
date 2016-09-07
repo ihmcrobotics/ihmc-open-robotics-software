@@ -64,7 +64,7 @@ public class BlockingSynchronousMultiThreadedRealTimeRobotController
       private final int ticksPerExecution;
       private int ticks;
 
-      public ReentrantLockedControlElementRunner(MultiThreadedRobotControlElement controller, TimestampProvider timestampProvider, int ticksPerExecution)
+      private ReentrantLockedControlElementRunner(MultiThreadedRobotControlElement controller, TimestampProvider timestampProvider, int ticksPerExecution)
       {
          this.controller = controller;
          this.timestampProvider = timestampProvider;
@@ -97,7 +97,7 @@ public class BlockingSynchronousMultiThreadedRealTimeRobotController
          }
       }
 
-      public void tick()
+      private void tick()
       {
          reentrantLock.lock();
          try
@@ -114,7 +114,7 @@ public class BlockingSynchronousMultiThreadedRealTimeRobotController
          }
       }
 
-      public MultiThreadedRobotControlElement getController()
+      private MultiThreadedRobotControlElement getController()
       {
          return controller;
       }
