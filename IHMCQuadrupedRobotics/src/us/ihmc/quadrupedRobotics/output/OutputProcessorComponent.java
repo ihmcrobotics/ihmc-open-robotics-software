@@ -6,5 +6,7 @@ public interface OutputProcessorComponent
 {
    void setFullRobotModel(FullRobotModel fullRobotModel);
 
+   void initialize();
+
    void update();
 }

@@ -145,7 +145,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    @Override
    public void initialize()
    {
-
+      outputProcessor.initialize();
    }
 
    @Override
