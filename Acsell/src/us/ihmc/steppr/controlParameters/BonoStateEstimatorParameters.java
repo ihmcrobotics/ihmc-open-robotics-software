@@ -107,12 +107,6 @@ public class BonoStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
-   {
-      return 16.0; //50.0;
-   }
-
-   @Override
    public double getCoPFilterFreqInHertz()
    {
       // TODO Try to crank up that one, might be a bit sluggish with 4Hz. If the change is not evident, leave it to 4Hz then.
@@ -171,12 +165,6 @@ public class BonoStateEstimatorParameters extends StateEstimatorParameters
    public double getPelvisLinearVelocityFusingFrequency()
    {
       return 0.4261; // alpha = 0.992 with dt = 0.003
-   }
-
-   @Override
-   public double getPelvisVelocityBacklashSlopTime()
-   {
-      return jointVelocitySlopTimeForBacklashCompensation;
    }
 
    @Override
