@@ -106,6 +106,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
+   private final OptionalFactoryField<FootSwitchType> footSwitchType = new OptionalFactoryField<>("footSwitchType");
 
    // TO CONSTRUCT
    private YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -188,8 +189,12 @@ public class QuadrupedSimulationFactory
       footSwitchFactory.setFootContactableBodies(contactableFeet);
       footSwitchFactory.setFullRobotModel(fullRobotModel.get());
       footSwitchFactory.setGravity(gravity.get());
+      footSwitchFactory.setSimulatedRobot(sdfRobot.get());
       footSwitchFactory.setYoVariableRegistry(sdfRobot.get().getRobotsYoVariableRegistry());
-      footSwitchFactory.setFootSwitchType(FootSwitchType.TouchdownBased);
+      if (footSwitchType.hasBeenSet())
+         footSwitchFactory.setFootSwitchType(footSwitchType.get());
+      else
+         footSwitchFactory.setFootSwitchType(FootSwitchType.TouchdownBased);
       footSwitches = footSwitchFactory.createFootSwitches();
    }
 
@@ -570,5 +575,10 @@ public class QuadrupedSimulationFactory
    public void setUsePushRobotController(boolean usePushRobotController)
    {
       this.usePushRobotController.set(usePushRobotController);
+   }
+
+   public void setFootSwitchType(FootSwitchType footSwitchType)
+   {
+      this.footSwitchType.set(footSwitchType);
    }
 }
