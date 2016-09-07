@@ -86,7 +86,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       stepStreamMultiplexer.selectStepStream(QuadrupedForceControllerState.XGAIT);
 
       // Initialize output processor
-      StateChangeSmootherComponent stateChangeSmootherComponent = new StateChangeSmootherComponent(runtimeEnvironment.getRobotTimestamp(), registry);
+      StateChangeSmootherComponent stateChangeSmootherComponent = new StateChangeSmootherComponent(runtimeEnvironment.getControlDT(),
+            runtimeEnvironment.getRobotTimestamp(), registry);
       FiniteStateMachineStateChangedListener stateChangedListener = stateChangeSmootherComponent.createFiniteStateMachineStateChangedListener();
       controllerToolbox.getTimedStepController().attachStateChangedListener(stateChangedListener);
       OutputProcessorBuilder outputProcessorBuilder = new OutputProcessorBuilder(runtimeEnvironment.getFullRobotModel());
