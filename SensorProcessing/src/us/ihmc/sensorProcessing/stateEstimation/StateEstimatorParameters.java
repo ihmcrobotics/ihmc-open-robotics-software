@@ -95,4 +95,9 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    public abstract boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact();
    
    public abstract boolean useGroundReactionForcesToComputeCenterOfMassVelocity();
+
+   public boolean correctTrustedFeetPositions()
+   {
+      return false;
+   }
 }
