@@ -244,6 +244,7 @@ public class QuadrupedTimedStepController
          stepStateMachine.get(robotQuadrant).reset();
          contactForceLimits.setPressureUpperLimit(robotQuadrant, contactPressureUpperLimitParameter.get());
          contactForceLimits.setPressureLowerLimit(robotQuadrant, contactPressureLowerLimitParameter.get());
+         contactState.set(robotQuadrant, ContactState.IN_CONTACT);
       }
    }
 
