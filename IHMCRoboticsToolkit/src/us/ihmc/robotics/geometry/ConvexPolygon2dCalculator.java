@@ -107,13 +107,15 @@ public class ConvexPolygon2dCalculator
          // Determine whether the point is on the right side of each edge:
          for (int i = 0; i < polygon.getNumberOfVertices(); i++)
          {
-            double x0 = polygon.getVertex(i).getX();
-            double y0 = polygon.getVertex(i).getY();
+            Point2d edgeStart = polygon.getVertex(i);
+            Point2d edgeEnd = polygon.getNextVertex(i);
+            double distanceToEdgeLine = GeometryTools.distanceFromPointToLine(pointX, pointY, edgeStart.x, edgeStart.y, edgeEnd.x, edgeEnd.y);
 
-            double x1 = polygon.getNextVertex(i).getX();
-            double y1 = polygon.getNextVertex(i).getY();
+            boolean pointOutside = canObserverSeeEdge(i, pointX, pointY, polygon);
+            if (!pointOutside)
+               distanceToEdgeLine = -distanceToEdgeLine;
 
-            if ((pointY - y0) * (x1 - x0) - (pointX - x0) * (y1 - y0) > epsilon)
+            if (distanceToEdgeLine > epsilon)
                return false;
          }
 
@@ -185,7 +187,7 @@ public class ConvexPolygon2dCalculator
     * Determines whether an observer can see the outside of the given edge. The edge index corresponds to
     * the vertex at the start of the edge when moving clockwise around the polygon.
     */
-   public static boolean canObserverSeeEdge(int edgeIndex, Point2d observer, ConvexPolygon2d polygon)
+   public static boolean canObserverSeeEdge(int edgeIndex, double observerX, double observerY, ConvexPolygon2d polygon)
    {
       if (polygon.hasAtLeastTwoVertices())
       {
@@ -193,10 +195,19 @@ public class ConvexPolygon2dCalculator
          Point2d vertexTwo = polygon.getNextVertex(edgeIndex);
          double edgeVectorX = vertexTwo.x - vertexOne.x;
          double edgeVectorY = vertexTwo.y - vertexOne.y;
-         return Line2d.isPointOnSideOfLine(observer.x, observer.y, edgeVectorX, edgeVectorY, vertexOne.x, vertexOne.y, RobotSide.LEFT);
+         return Line2d.isPointOnSideOfLine(observerX, observerY, edgeVectorX, edgeVectorY, vertexOne.x, vertexOne.y, RobotSide.LEFT);
       }
 
       return false;
+   }
+
+   /**
+    * Determines whether an observer can see the outside of the given edge. The edge index corresponds to
+    * the vertex at the start of the edge when moving clockwise around the polygon.
+    */
+   public static boolean canObserverSeeEdge(int edgeIndex, Point2d observer, ConvexPolygon2d polygon)
+   {
+      return canObserverSeeEdge(edgeIndex, observer.x, observer.y, polygon);
    }
 
    /**
