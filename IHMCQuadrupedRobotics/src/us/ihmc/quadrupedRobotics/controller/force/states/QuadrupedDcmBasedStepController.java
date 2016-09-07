@@ -315,9 +315,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       {
          if (!haltFlag.getBooleanValue() || stepStream.getSteps().get(i).getTimeInterval().getEndTime() < haltTime.getDoubleValue())
          {
-            stepPlan.add(i);
-            stepPlan.get(i).set(stepStream.getSteps().get(i));
-            stepPlan.get(i).getGoalPosition().add(accumulatedStepAdjustmentForPlanning.getFrameTuple().getVector());
+            stepPlan.add();
+            stepPlan.get(stepPlan.size() - 1).set(stepStream.getSteps().get(i));
+            stepPlan.get(stepPlan.size() - 1).getGoalPosition().add(accumulatedStepAdjustmentForPlanning.getFrameTuple().getVector());
          }
       }
    }
