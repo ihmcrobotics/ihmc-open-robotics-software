@@ -19,7 +19,8 @@ public class DataExporter implements ActionListener
    private final DataExporterReadmeWriter readmeWriter = new DataExporterReadmeWriter();
    private final DataExporterGraphCreator graphCreator;
    private final DataExporterExcelWorkbookCreator excelWorkbookCreator;
-   private final File simulationRootDirectory;
+
+   private final Class<?> rootClassForDirectory;
 
    public DataExporter(SimulationConstructionSet scs, Robot robot)
    {
@@ -40,11 +41,13 @@ public class DataExporter implements ActionListener
       this.graphCreator = new DataExporterGraphCreator(robot, scs.getDataBuffer());
       this.excelWorkbookCreator = new DataExporterExcelWorkbookCreator(robot, scs.getDataBuffer());
 
-      simulationRootDirectory = DataExporterDirectoryFinder.findSimulationRootLocation(rootClassForDirectory);
+      this.rootClassForDirectory = rootClassForDirectory;
    }
 
    public void actionPerformed(ActionEvent e)
    {
+      File simulationRootDirectory = DataExporterDirectoryFinder.findSimulationRootLocation(rootClassForDirectory);
+
       // Stop the sim and disable the GUI:
       scs.stop();
       scs.disableGUIComponents();
