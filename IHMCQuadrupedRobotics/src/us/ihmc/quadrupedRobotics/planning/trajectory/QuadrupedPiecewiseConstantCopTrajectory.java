@@ -7,20 +7,21 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedPiecewiseConstantCopTrajectory
 {
-   // internal
    private final QuadrantDependentList<ContactState> initialContactState;
    private final QuadrantDependentList<MutableBoolean> isInitialContactState;
+   private boolean initialized;
 
-   // external
+   private final FramePoint copPositionAtCurrentTime;
    private int numberOfIntervals;
    private final ArrayList<MutableDouble> timeAtStartOfInterval;
-   private final ArrayList<FramePoint> centerOfPressureAtStartOfInterval;
+   private final ArrayList<FramePoint> copPositionAtStartOfInterval;
    private final ArrayList<QuadrantDependentList<MutableDouble>> normalizedPressureAtStartOfInterval;
    private final ArrayList<MutableDouble> normalizedPressureContributedByInitialContacts;
    private final ArrayList<MutableDouble> normalizedPressureContributedByQueuedSteps;
@@ -28,8 +29,6 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    public QuadrupedPiecewiseConstantCopTrajectory(int maxSteps)
    {
       int maxIntervals = 2 * maxSteps + 2;
-
-      // internal
       initialContactState = new QuadrantDependentList<>();
       isInitialContactState = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -37,18 +36,19 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          initialContactState.set(robotQuadrant, ContactState.IN_CONTACT);
          isInitialContactState.set(robotQuadrant, new MutableBoolean(true));
       }
+      initialized = false;
 
-      // external
+      copPositionAtCurrentTime = new FramePoint();
       numberOfIntervals = 0;
       timeAtStartOfInterval = new ArrayList<>(maxIntervals);
-      centerOfPressureAtStartOfInterval = new ArrayList<>(maxIntervals);
+      copPositionAtStartOfInterval = new ArrayList<>(maxIntervals);
       normalizedPressureContributedByInitialContacts = new ArrayList<>(maxIntervals);
       normalizedPressureContributedByQueuedSteps = new ArrayList<>(maxIntervals);
       normalizedPressureAtStartOfInterval = new ArrayList<>(maxIntervals);
       for (int i = 0; i < maxIntervals; i++)
       {
          timeAtStartOfInterval.add(i, new MutableDouble(0.0));
-         centerOfPressureAtStartOfInterval.add(i, new FramePoint());
+         copPositionAtStartOfInterval.add(i, new FramePoint());
          normalizedPressureContributedByInitialContacts.add(i, new MutableDouble(0.0));
          normalizedPressureContributedByQueuedSteps.add(i, new MutableDouble(0.0));
          normalizedPressureAtStartOfInterval.add(i, new QuadrantDependentList<MutableDouble>());
@@ -57,6 +57,84 @@ public class QuadrupedPiecewiseConstantCopTrajectory
             normalizedPressureAtStartOfInterval.get(i).set(robotQuadrant, new MutableDouble(0.0));
          }
       }
+   }
+
+   /**
+    * compute piecewise constant center of pressure plan given the upcoming contact states
+    * @param timedContactSequence upcoming contact states (input)
+    */
+   public void initializeTrajectory(QuadrupedTimedContactSequence timedContactSequence)
+   {
+      if (timedContactSequence.size() < 1)
+      {
+         throw new RuntimeException("Input contact sequence must have at least one time interval.");
+      }
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         initialContactState.set(robotQuadrant, timedContactSequence.get(0).getContactState().get(robotQuadrant));
+         isInitialContactState.get(robotQuadrant).setTrue();
+      }
+
+      numberOfIntervals = timedContactSequence.size();
+      for (int interval = 0; interval < numberOfIntervals; interval++)
+      {
+         QuadrantDependentList<FramePoint> solePosition = timedContactSequence.get(interval).getSolePosition();
+         QuadrantDependentList<ContactState> contactState = timedContactSequence.get(interval).getContactState();
+
+         computeNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState);
+         computeCenterOfPressure(copPositionAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
+         normalizedPressureContributedByQueuedSteps.get(interval).setValue(0.0);
+         normalizedPressureContributedByInitialContacts.get(interval).setValue(0.0);
+         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         {
+            if (contactState.get(robotQuadrant) != initialContactState.get(robotQuadrant))
+            {
+               isInitialContactState.get(robotQuadrant).setFalse();
+            }
+            if (isInitialContactState.get(robotQuadrant).booleanValue())
+            {
+               normalizedPressureContributedByInitialContacts.get(interval)
+                     .add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant).doubleValue());
+            }
+            else
+            {
+               normalizedPressureContributedByQueuedSteps.get(interval).add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant).doubleValue());
+            }
+         }
+         timeAtStartOfInterval.get(interval).setValue(timedContactSequence.get(interval).getTimeInterval().getStartTime());
+      }
+
+      initialized = true;
+      computeTrajectory(timeAtStartOfInterval.get(0).doubleValue());
+   }
+
+   public void computeTrajectory(double currentTime)
+   {
+      if (!initialized)
+      {
+         throw new RuntimeException("trajectory must be initialized before calling computeTrajectory");
+      }
+
+      for (int interval = numberOfIntervals - 1; interval >= 0; interval++)
+      {
+         if (currentTime >= timeAtStartOfInterval.get(interval).doubleValue())
+         {
+            copPositionAtCurrentTime.setIncludingFrame(copPositionAtStartOfInterval.get(interval));
+            return;
+         }
+      }
+      copPositionAtCurrentTime.setIncludingFrame(copPositionAtStartOfInterval.get(0));
+   }
+
+   public void getPosition(FramePoint copPosition)
+   {
+      copPosition.setIncludingFrame(copPositionAtCurrentTime);
+   }
+
+   public void getVelocity(FrameVector copVelocity)
+   {
+      copVelocity.setToZero();
    }
 
    public int getNumberOfIntervals()
@@ -69,9 +147,9 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       return timeAtStartOfInterval.get(interval).doubleValue();
    }
 
-   public FramePoint getCenterOfPressureAtStartOfInterval(int interval)
+   public FramePoint getCopPositionAtStartOfInterval(int interval)
    {
-      return centerOfPressureAtStartOfInterval.get(interval);
+      return copPositionAtStartOfInterval.get(interval);
    }
 
    public QuadrantDependentList<MutableDouble> getNormalizedPressureAtStartOfInterval(int interval)
@@ -94,9 +172,9 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       return timeAtStartOfInterval;
    }
 
-   public ArrayList<FramePoint> getCenterOfPressureAtStartOfInterval()
+   public ArrayList<FramePoint> getCopPositionAtStartOfInterval()
    {
-      return centerOfPressureAtStartOfInterval;
+      return copPositionAtStartOfInterval;
    }
 
    public ArrayList<QuadrantDependentList<MutableDouble>> getNormalizedPressureAtStartOfInterval()
@@ -114,52 +192,6 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       return normalizedPressureContributedByQueuedSteps;
    }
 
-   /**
-    * compute piecewise constant center of pressure plan given the upcoming contact states
-    * @param timedContactSequence upcoming contact states (input)
-    */
-   public void compute(QuadrupedTimedContactSequence timedContactSequence)
-   {
-      if (timedContactSequence.size() < 1)
-      {
-         throw new RuntimeException("Input contact sequence must have at least one time interval.");
-      }
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         initialContactState.set(robotQuadrant, timedContactSequence.get(0).getContactState().get(robotQuadrant));
-         isInitialContactState.get(robotQuadrant).setTrue();
-      }
-
-      numberOfIntervals = timedContactSequence.size();
-      for (int interval = 0; interval < numberOfIntervals; interval++)
-      {
-         QuadrantDependentList<FramePoint> solePosition = timedContactSequence.get(interval).getSolePosition();
-         QuadrantDependentList<ContactState> contactState = timedContactSequence.get(interval).getContactState();
-
-         computeNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState);
-         computeCenterOfPressure(centerOfPressureAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
-         normalizedPressureContributedByQueuedSteps.get(interval).setValue(0.0);
-         normalizedPressureContributedByInitialContacts.get(interval).setValue(0.0);
-         for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         {
-            if (contactState.get(robotQuadrant) != initialContactState.get(robotQuadrant))
-            {
-               isInitialContactState.get(robotQuadrant).setFalse();
-            }
-            if (isInitialContactState.get(robotQuadrant).booleanValue())
-            {
-               normalizedPressureContributedByInitialContacts.get(interval)
-                     .add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant).doubleValue());
-            }
-            else
-            {
-               normalizedPressureContributedByQueuedSteps.get(interval).add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant).doubleValue());
-            }
-         }
-         timeAtStartOfInterval.get(interval).setValue(timedContactSequence.get(interval).getTimeInterval().getStartTime());
-      }
-   }
 
    private void computeNormalizedContactPressure(QuadrantDependentList<MutableDouble> contactPressure, QuadrantDependentList<ContactState> contactState)
    {

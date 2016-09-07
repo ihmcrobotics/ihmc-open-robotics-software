@@ -278,16 +278,16 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       QuadrantDependentList<FramePoint> currentSolePosition = taskSpaceEstimates.getSolePosition();
       QuadrantDependentList<ContactState> currentContactState = taskSpaceControllerSettings.getContactState();
       timedContactSequence.compute(stepPlan, currentSolePosition, currentContactState, currentTime);
-      piecewiseConstanceCopTrajectory.compute(timedContactSequence);
+      piecewiseConstanceCopTrajectory.initializeTrajectory(timedContactSequence);
 
       // compute dcm trajectory with final boundary constraint
       int numberOfIntervals = piecewiseConstanceCopTrajectory.getNumberOfIntervals();
-      dcmPositionWaypoint.setIncludingFrame(piecewiseConstanceCopTrajectory.getCenterOfPressureAtStartOfInterval(numberOfIntervals - 1));
+      dcmPositionWaypoint.setIncludingFrame(piecewiseConstanceCopTrajectory.getCopPositionAtStartOfInterval(numberOfIntervals - 1));
       dcmPositionWaypoint.changeFrame(ReferenceFrame.getWorldFrame());
       dcmPositionWaypoint.add(0, 0, lipModel.getComHeight());
       dcmTrajectory.setComHeight(lipModel.getComHeight());
       dcmTrajectory.initializeTrajectory(numberOfIntervals, piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(),
-            piecewiseConstanceCopTrajectory.getCenterOfPressureAtStartOfInterval(),
+            piecewiseConstanceCopTrajectory.getCopPositionAtStartOfInterval(),
             piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(numberOfIntervals - 1), dcmPositionWaypoint);
    }
 
