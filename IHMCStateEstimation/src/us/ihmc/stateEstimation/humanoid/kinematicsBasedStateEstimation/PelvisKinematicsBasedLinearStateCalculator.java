@@ -60,7 +60,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final Map<RigidBody, ReferenceFrame> copFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
 
    private final YoFramePoint rootJointPosition = new YoFramePoint("estimatedRootJointPositionWithKinematics", worldFrame, registry);
-   private final YoFrameVector rootJointLinearVelocity = new YoFrameVector("estimatedRootJointVelocityWithKinematics", worldFrame, registry);
 
    private final Map<RigidBody, YoFrameVector> footVelocitiesInWorld = new LinkedHashMap<RigidBody, YoFrameVector>();
    private final Map<RigidBody, Twist> footTwistsInWorld = new LinkedHashMap<RigidBody, Twist>();
@@ -228,7 +227,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private void reset()
    {
       rootJointPosition.setToZero();
-      rootJointLinearVelocity.setToZero();
    }
 
    /**
