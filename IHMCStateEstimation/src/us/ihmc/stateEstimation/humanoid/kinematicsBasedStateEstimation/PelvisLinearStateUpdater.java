@@ -200,7 +200,6 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.setTrustCoPAsNonSlippingContactPoint(stateEstimatorParameters.trustCoPAsNonSlippingContactPoint());
       kinematicsBasedLinearStateCalculator.useControllerDesiredCoP(stateEstimatorParameters.useControllerDesiredCenterOfPressure());
       kinematicsBasedLinearStateCalculator.setAlphaCenterOfPressure(computeAlphaGivenBreakFrequencyProperly(stateEstimatorParameters.getCoPFilterFreqInHertz(), estimatorDT));
-      kinematicsBasedLinearStateCalculator.enableTwistEstimation(stateEstimatorParameters.useTwistForPelvisLinearStateEstimation());
 
       imuBasedLinearStateCalculator = new PelvisIMUBasedLinearStateCalculator(inverseDynamicsStructure, imuProcessedOutputs, imuBiasProvider, estimatorDT,
             gravitationalAcceleration, yoGraphicsListRegistry, registry);

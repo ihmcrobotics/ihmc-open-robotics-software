@@ -1,7 +1,5 @@
 package us.ihmc.llaQuadruped;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -37,42 +35,6 @@ public class LLAQuadrupedStateEstimatorParameters extends StateEstimatorParamete
    public boolean trustCoPAsNonSlippingContactPoint()
    {
       return false;
-   }
-
-   @Override
-   public boolean useControllerDesiredCenterOfPressure()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean useIMUsForSpineJointVelocityEstimation()
-   {
-      return false;
-   }
-
-   @Override
-   public double getAlphaIMUsForSpineJointVelocityEstimation()
-   {
-      return 0;
-   }
-
-   @Override
-   public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
-   {
-      return null;
-   }
-
-   @Override
-   public boolean requestWristForceSensorCalibrationAtStart()
-   {
-      return false;
-   }
-
-   @Override
-   public SideDependentList<String> getWristForceSensorNames()
-   {
-      return null;
    }
 
    @Override
@@ -175,12 +137,6 @@ public class LLAQuadrupedStateEstimatorParameters extends StateEstimatorParamete
    public double getForceInPercentOfWeightThresholdToTrustFoot()
    {
       return 0;
-   }
-
-   @Override
-   public boolean useTwistForPelvisLinearStateEstimation()
-   {
-      return false;
    }
 
    @Override

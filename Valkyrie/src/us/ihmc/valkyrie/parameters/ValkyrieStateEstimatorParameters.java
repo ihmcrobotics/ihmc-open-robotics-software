@@ -290,18 +290,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public boolean useControllerDesiredCenterOfPressure()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean useTwistForPelvisLinearStateEstimation()
-   {
-      return true;
-   }
-
-   @Override
    public double getPelvisLinearVelocityAlphaNewTwist()
    {
       return 0.15;
