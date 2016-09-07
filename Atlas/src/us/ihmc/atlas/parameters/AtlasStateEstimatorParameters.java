@@ -177,12 +177,6 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
-   {
-      return 16.0;
-   }
-
-   @Override
    public double getCoPFilterFreqInHertz()
    {
       return 4.0;
@@ -240,12 +234,6 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    public double getPelvisLinearVelocityFusingFrequency()
    {
       return 0.4261; // alpha = 0.992 with dt = 0.003
-   }
-
-   @Override
-   public double getPelvisVelocityBacklashSlopTime()
-   {
-      return jointVelocitySlopTimeForBacklashCompensation;
    }
 
    @Override

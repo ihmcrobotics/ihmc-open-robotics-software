@@ -21,6 +21,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.BacklashCompensatingVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -66,13 +67,17 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final YoFrameVector rootJointLinearVelocityNewTwist = new YoFrameVector("estimatedRootJointVelocityNewTwist", worldFrame, registry);
    private final DoubleYoVariable alphaRootJointLinearVelocityNewTwist = new DoubleYoVariable("alphaRootJointLinearVelocityNewTwist", registry);
 
+   /** Debug variable */
    private final DoubleYoVariable alphaRootJointLinearVelocityBacklashKinematics = new DoubleYoVariable("alphaRootJointLinearVelocityBacklashKinematics", registry);
+   /** Debug variable */
    private final DoubleYoVariable slopTimeRootJointLinearVelocityBacklashKinematics = new DoubleYoVariable("slopTimeRootJointLinearVelocityBacklashKinematics", registry);
+   /** Debug variable */
    private final BacklashCompensatingVelocityYoFrameVector rootJointLinearVelocityBacklashKinematics;
 
    private final DoubleYoVariable alphaFootToRootJointPosition = new DoubleYoVariable("alphaFootToRootJointPosition", registry);
    private final Map<RigidBody, AlphaFilteredYoFrameVector> footToRootJointPositions = new LinkedHashMap<RigidBody, AlphaFilteredYoFrameVector>();
    private final Map<RigidBody, YoFramePoint> footPositionsInWorld = new LinkedHashMap<RigidBody, YoFramePoint>();
+   /** Debug variable */
    private final Map<RigidBody, YoFramePoint> rootJointPositionsPerFoot = new LinkedHashMap<>();
    private final BooleanYoVariable correctTrustedFeetPositions = new BooleanYoVariable("correctTrustedFeetPositions", registry);
 
@@ -111,8 +116,12 @@ public class PelvisKinematicsBasedLinearStateCalculator
       this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
       this.feetRigidBodies = new ArrayList<>(feetContactablePlaneBodies.keySet());
 
+      /* These are for debug purposes, not need to clutter the state estimator parameters class with them. */
+      alphaRootJointLinearVelocityBacklashKinematics.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(16.0, estimatorDT));
+      slopTimeRootJointLinearVelocityBacklashKinematics.set(0.03);
       rootJointLinearVelocityBacklashKinematics = BacklashCompensatingVelocityYoFrameVector.createBacklashCompensatingVelocityYoFrameVector("estimatedRootJointLinearVelocityBacklashKin", "",
             alphaRootJointLinearVelocityBacklashKinematics, estimatorDT, slopTimeRootJointLinearVelocityBacklashKinematics, registry, rootJointPosition);
+      /* ------------------------------------------------------------------------------------------------- */
 
       for (int i = 0; i < feetRigidBodies.size(); i++)
       {
@@ -204,12 +213,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
    public void setPelvisLinearVelocityAlphaNewTwist(double alpha)
    {
       alphaRootJointLinearVelocityNewTwist.set(alpha);
-   }
-
-   public void setPelvisLinearVelocityBacklashParameters(double alphaFilter, double slopTime)
-   {
-      alphaRootJointLinearVelocityBacklashKinematics.set(alphaFilter);
-      slopTimeRootJointLinearVelocityBacklashKinematics.set(slopTime);
    }
 
    public void setAlphaCenterOfPressure(double alphaFilter)
