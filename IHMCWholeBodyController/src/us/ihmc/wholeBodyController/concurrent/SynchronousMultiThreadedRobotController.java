@@ -12,14 +12,14 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class BlockingSynchronousMultiThreadedRealTimeRobotController implements MultiThreadedRobotControlElementCoordinator
+public class SynchronousMultiThreadedRobotController implements MultiThreadedRobotControlElementCoordinator
 {
    private final MultiThreadedRobotControlElement sensorReader;
    private final TimestampProvider timestampProvider;
    private final ArrayList<ReentrantLockedControlElementRunner> robotControllerRunners = new ArrayList<>();
    private final ThreadFactory namedThreadFactory;
 
-   public BlockingSynchronousMultiThreadedRealTimeRobotController(MultiThreadedRobotControlElement sensorReader, TimestampProvider timestampProvider)
+   public SynchronousMultiThreadedRobotController(MultiThreadedRobotControlElement sensorReader, TimestampProvider timestampProvider)
    {
       this.sensorReader = sensorReader;
       this.timestampProvider = timestampProvider;
