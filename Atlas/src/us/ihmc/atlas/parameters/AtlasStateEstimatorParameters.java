@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
@@ -269,18 +267,6 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public boolean useControllerDesiredCenterOfPressure()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean useTwistForPelvisLinearStateEstimation()
-   {
-      return true;
-   }
-
-   @Override
    public double getPelvisLinearVelocityAlphaNewTwist()
    {
       return 0.15;
@@ -308,27 +294,6 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    public double getFootSwitchCoPThresholdFraction()
    {
       return 0.02;
-   }
-
-   @Override
-   public boolean useIMUsForSpineJointVelocityEstimation()
-   {
-      // TODO For Valkyrie. Probably have to make more generic.
-      return false;
-   }
-
-   @Override
-   public double getAlphaIMUsForSpineJointVelocityEstimation()
-   {
-      // TODO For Valkyrie. Probably have to make more generic.
-      return 0;
-   }
-
-   @Override
-   public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
-   {
-      // TODO For Valkyrie. Probably have to make more generic.
-      return null;
    }
 
    @Override

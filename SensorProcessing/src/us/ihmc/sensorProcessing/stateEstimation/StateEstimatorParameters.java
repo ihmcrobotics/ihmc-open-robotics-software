@@ -12,19 +12,37 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    
    public abstract boolean trustCoPAsNonSlippingContactPoint();
 
-   public abstract boolean useControllerDesiredCenterOfPressure();
+   public boolean useControllerDesiredCenterOfPressure()
+   {
+      return false;
+   }
 
-   public abstract boolean useIMUsForSpineJointVelocityEstimation();
+   public boolean useIMUsForSpineJointVelocityEstimation()
+   {
+      return false;
+   }
 
    /** @deprecated Need to switch to frequency */
    @Deprecated
-   public abstract double getAlphaIMUsForSpineJointVelocityEstimation();
+   public double getAlphaIMUsForSpineJointVelocityEstimation()
+   {
+      return Double.NaN;
+   }
 
-   public abstract ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation();
+   public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
+   {
+      return null;
+   }
 
-   public abstract boolean requestWristForceSensorCalibrationAtStart();
+   public boolean requestWristForceSensorCalibrationAtStart()
+   {
+      return false;
+   }
 
-   public abstract SideDependentList<String> getWristForceSensorNames();
+   public SideDependentList<String> getWristForceSensorNames()
+   {
+      return null;
+   }
 
    public abstract boolean requestFootForceSensorCalibrationAtStart();
 
@@ -58,8 +76,6 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    public abstract double getDelayTimeForTrustingFoot();
    
    public abstract double getForceInPercentOfWeightThresholdToTrustFoot();
-
-   public abstract boolean useTwistForPelvisLinearStateEstimation();
 
    public abstract double getPelvisLinearVelocityAlphaNewTwist();
 

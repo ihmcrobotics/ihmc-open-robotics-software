@@ -60,7 +60,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private final YoFramePoint rootJointPosition = new YoFramePoint("estimatedRootJointPositionWithKinematics", worldFrame, registry);
    private final YoFrameVector rootJointLinearVelocity = new YoFrameVector("estimatedRootJointVelocityWithKinematics", worldFrame, registry);
-   private final BooleanYoVariable useTwistToComputeRootJointLinearVelocity = new BooleanYoVariable("useTwistToComputeRootJointLinearVelocity", registry);
 
    private final Map<RigidBody, YoFrameVector> footVelocitiesInWorld = new LinkedHashMap<RigidBody, YoFrameVector>();
    private final Map<RigidBody, Twist> footTwistsInWorld = new LinkedHashMap<RigidBody, Twist>();
@@ -211,11 +210,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
    public void setAlphaCenterOfPressure(double alphaFilter)
    {
       alphaCoPFilter.set(alphaFilter);
-   }
-
-   public void enableTwistEstimation(boolean enable)
-   {
-      useTwistToComputeRootJointLinearVelocity.set(enable);
    }
 
    private void reset()
