@@ -2,10 +2,10 @@ package us.ihmc.llaQuadruped;
 
 import java.io.IOException;
 
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.OutputWriter;
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
@@ -36,11 +36,11 @@ public class LLAQuadrupedSimulationFactory
    private static final boolean SHOW_PLOTTER = true;
    private static final boolean USE_TRACK_AND_DOLLY = false;
    private static final boolean USE_NETWORKING = false;
-   
+
    private QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
-   
+
    public SimulationConstructionSet createSimulation() throws IOException
-   {      
+   {
       QuadrupedModelFactory modelFactory = new LLAQuadrupedModelFactory();
       QuadrupedPhysicalProperties physicalProperties = new LLAQuadrupedPhysicalProperties();
       NetClassList netClassList = new LLAQuadrupedNetClassList();
@@ -51,15 +51,15 @@ public class LLAQuadrupedSimulationFactory
       QuadrupedSensorInformation sensorInformation = new LLAQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new LLAQuadrupedStateEstimatorParameters();
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new LLAQuadrupedPositionBasedCrawlControllerParameters();
-      
-      SDFFullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
-      SDFRobot sdfRobot = modelFactory.createSdfRobot();
-      
+
+      FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
+      FloatingRootJointRobot sdfRobot = modelFactory.createSdfRobot();
+
       SensorTimestampHolder timestampProvider = new LLAQuadrupedTimestampProvider(sdfRobot);
-      
+
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       OutputWriter outputWriter = new SDFPerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
-      
+
       simulationFactory.setControlDT(SIMULATION_DT);
       simulationFactory.setGravity(SIMULATION_GRAVITY);
       simulationFactory.setRecordFrequency(RECORD_FREQUENCY);
@@ -83,7 +83,7 @@ public class LLAQuadrupedSimulationFactory
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
-      
+
       return simulationFactory.createSimulation();
    }
 

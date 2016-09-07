@@ -3,8 +3,6 @@ package us.ihmc.wanderer.controlParameters;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -207,12 +205,6 @@ public class WandererStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public boolean useTwistForPelvisLinearStateEstimation()
-   {
-      return true;
-   }
-
-   @Override
    public double getPelvisLinearVelocityAlphaNewTwist()
    {
       return 0.15;
@@ -231,27 +223,6 @@ public class WandererStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public boolean useIMUsForSpineJointVelocityEstimation()
-   {
-      // TODO For Valkyrie. Probably have to make more generic.
-      return false;
-   }
-
-   @Override
-   public double getAlphaIMUsForSpineJointVelocityEstimation()
-   {
-      // TODO For Valkyrie. Probably have to make more generic.
-      return 0;
-   }
-
-   @Override
-   public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
-   {
-      // TODO For Valkyrie. Probably have to make more generic.
-      return null;
-   }
-   
-   @Override
    public double getContactThresholdHeight()
    {
       return 0.01;
@@ -262,19 +233,6 @@ public class WandererStateEstimatorParameters extends StateEstimatorParameters
    {
       return FootSwitchType.WrenchBased;
    }
-
-   @Override
-   public boolean requestWristForceSensorCalibrationAtStart()
-   {
-      return false;
-   }
-
-   @Override
-   public SideDependentList<String> getWristForceSensorNames()
-   {
-      return null;
-   }
-
 
    @Override
    public boolean requestFootForceSensorCalibrationAtStart()

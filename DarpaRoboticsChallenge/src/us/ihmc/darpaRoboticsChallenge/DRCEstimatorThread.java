@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
@@ -75,7 +75,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    private final YoVariableRegistry estimatorRegistry = new YoVariableRegistry("DRCEstimatorThread");
    private final RobotVisualizer robotVisualizer;
-   private final SDFFullHumanoidRobotModel estimatorFullRobotModel;
+   private final FullHumanoidRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
    private final CenterOfMassDataHolder centerOfMassDataHolderForEstimator;
    private final ContactSensorHolder contactSensorHolder;
@@ -306,7 +306,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       }
    }
 
-   private DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullHumanoidRobotModel estimatorFullRobotModel, DRCRobotSensorInformation sensorInformation,
+   private DRCKinematicsBasedStateEstimator createStateEstimator(FullHumanoidRobotModel estimatorFullRobotModel, DRCRobotSensorInformation sensorInformation,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
          RobotContactPointParameters contactPointParamaters, ForceSensorDataHolder estimatorForceSensorDataHolderToUpdate,
          CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,

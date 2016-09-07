@@ -17,7 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.PacketRouter;
@@ -126,7 +126,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    private BehaviorCommunicationBridge communicationBridge;
    private DoubleYoVariable yoTime;
 
-   private SDFHumanoidRobot robot;
+   private HumanoidFloatingRootJointRobot robot;
    private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
    private WalkingControllerParameters walkingControllerParameters;
@@ -444,7 +444,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       return targetMidFeetPose;
    }
 
-   private FramePose2d getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(SDFHumanoidRobot robot)
+   private FramePose2d getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(HumanoidFloatingRootJointRobot robot)
    {
       FramePose midFeetPose = getRobotMidFeetPose(robot);
 
@@ -454,7 +454,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       return ret;
    }
 
-   private FramePose getRobotMidFeetPose(SDFHumanoidRobot robot)
+   private FramePose getRobotMidFeetPose(HumanoidFloatingRootJointRobot robot)
    {
       FramePose leftFootPose = getRobotFootPose(robot, RobotSide.LEFT);
       FramePose rightFootPose = getRobotFootPose(robot, RobotSide.RIGHT);
@@ -465,7 +465,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       return ret;
    }
 
-   private FramePose getRobotFootPose(SDFHumanoidRobot robot, RobotSide robotSide)
+   private FramePose getRobotFootPose(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
    {
       List<GroundContactPoint> gcPoints = robot.getFootGroundContactPoints(robotSide);
       Joint ankleJoint = gcPoints.get(0).getParentJoint();

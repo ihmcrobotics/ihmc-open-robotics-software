@@ -2,7 +2,7 @@ package us.ihmc.steppr.hardware.visualization;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
@@ -61,7 +61,7 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
       {
          JointVariables variables = new JointVariables(joint, registry);
 
-         OneDegreeOfFreedomJoint oneDoFJoint = ((SDFRobot) robot).getOneDegreeOfFreedomJoint(joint.getSdfName());
+         OneDegreeOfFreedomJoint oneDoFJoint = ((FloatingRootJointRobot) robot).getOneDegreeOfFreedomJoint(joint.getSdfName());
          sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, StepprJoint.values.length);
          sliderBoardConfigurationManager.setSlider(1, variables.q_d, oneDoFJoint.getJointLowerLimit(), oneDoFJoint.getJointUpperLimit());
          sliderBoardConfigurationManager.setSlider(2, variables.qd_d, -1, 1);

@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurat
 
 public class GainControllerSliderBoard
 {
-   public GainControllerSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel)
+   public GainControllerSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry)
    {
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 

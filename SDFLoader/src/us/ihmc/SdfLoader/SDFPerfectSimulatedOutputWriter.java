@@ -14,17 +14,17 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 public class SDFPerfectSimulatedOutputWriter implements OutputWriter
 {
    private final String name;
-   protected final SDFRobot robot;
+   protected final FloatingRootJointRobot robot;
    protected ImmutablePair<FloatingJoint, SixDoFJoint> rootJointPair;
    protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
    
-   public SDFPerfectSimulatedOutputWriter(SDFRobot robot)
+   public SDFPerfectSimulatedOutputWriter(FloatingRootJointRobot robot)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
    }
    
-   public SDFPerfectSimulatedOutputWriter(SDFRobot robot, FullRobotModel fullRobotModel)
+   public SDFPerfectSimulatedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;

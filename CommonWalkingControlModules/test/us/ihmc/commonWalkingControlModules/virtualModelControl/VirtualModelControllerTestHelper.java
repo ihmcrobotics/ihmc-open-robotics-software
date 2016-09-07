@@ -846,6 +846,59 @@ public class VirtualModelControllerTestHelper
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
       }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
+
+      @Override
+      public double getTotalMass()
+      {
+         return Double.NaN;
+      }
+
+      @Override
+      public ReferenceFrame getLidarBaseFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getCameraFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getHeadBaseFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      {
+         return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
+      }
    }
 
    public static class RobotArm implements FullRobotModel
@@ -1138,6 +1191,59 @@ public class VirtualModelControllerTestHelper
       @Override
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
+      }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
+
+      @Override
+      public double getTotalMass()
+      {
+         return Double.NaN;
+      }
+
+      @Override
+      public ReferenceFrame getLidarBaseFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getCameraFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getHeadBaseFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      {
+         return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
       }
    }
 
@@ -1473,6 +1579,59 @@ public class VirtualModelControllerTestHelper
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
       }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
+
+      @Override
+      public double getTotalMass()
+      {
+         return Double.NaN;
+      }
+
+      @Override
+      public ReferenceFrame getLidarBaseFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getCameraFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getHeadBaseFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      {
+         return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
+      }
    }
 
    public static class PlanarForkedRobotArm implements FullRobotModel
@@ -1796,6 +1955,59 @@ public class VirtualModelControllerTestHelper
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
       }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
+
+      @Override
+      public double getTotalMass()
+      {
+         return Double.NaN;
+      }
+
+      @Override
+      public ReferenceFrame getLidarBaseFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getCameraFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getHeadBaseFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      {
+         return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
+      }
    }
 
    public static class RobotLegs extends Robot implements FullRobotModel
@@ -2002,14 +2214,65 @@ public class VirtualModelControllerTestHelper
       @Override
       public OneDoFJoint[] getControllableOneDoFJoints()
       {
-         
-         
          return null;
       }
 
       @Override
       public void getControllableOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
+      }
+
+      @Override
+      public OneDoFJoint getOneDoFJointByName(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public RigidBody getEndEffector(Enum<?> segmentEnum)
+      {
+         return null;
+      }
+
+      @Override
+      public double getTotalMass()
+      {
+         return Double.NaN;
+      }
+
+      @Override
+      public ReferenceFrame getLidarBaseFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getCameraFrame(String name)
+      {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getHeadBaseFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
+      {
+         return null;
+      }
+
+      @Override
+      public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
+      {
+      }
+
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      {
+         return null;
       }
    }
 

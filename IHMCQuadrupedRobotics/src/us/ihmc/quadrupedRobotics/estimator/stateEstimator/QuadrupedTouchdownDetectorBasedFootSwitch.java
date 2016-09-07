@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.TouchdownDetectorBasedFootswitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -16,13 +16,13 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
 {
    private final RobotQuadrant robotQuadrant;
    private final ContactablePlaneBody foot;
-   private final SDFFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private final double totalRobotWeight;
    private final YoFramePoint2d yoResolvedCoP;
    private final BooleanYoVariable touchdownDetected;
    private final BooleanYoVariable trustTouchdownDetectors;
 
-   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, SDFFullRobotModel fullRobotModel, double totalRobotWeight,
+   public QuadrupedTouchdownDetectorBasedFootSwitch(RobotQuadrant robotQuadrant, ContactablePlaneBody foot, FullRobotModel fullRobotModel, double totalRobotWeight,
          YoVariableRegistry parentRegistry)
    {
       super(robotQuadrant.getCamelCaseName() + "QuadrupedTouchdownFootSwitch", parentRegistry);

@@ -18,10 +18,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
 import us.ihmc.tools.gui.GUIMessagePanel;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class GUIMessageFrame
 {
-   private static final boolean SHOW_GUI_MESSAGE_FRAME = false;
+   private static final boolean SHOW_GUI_MESSAGE_FRAME = true;
 
    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
 
@@ -231,9 +232,9 @@ public class GUIMessageFrame
       {
          printWriter = new PrintWriter(file);
       } 
-      catch (FileNotFoundException e)
+      catch (FileNotFoundException fileNotFoundException)
       {
-         System.err.println("File not found : " + file);
+         PrintTools.error(fileNotFoundException.getMessage() + "\n" + file);
          return;
       }
       
@@ -242,6 +243,8 @@ public class GUIMessageFrame
       for (int panelIndex = 0; panelIndex < listOfPanels.size(); panelIndex++)
       {
          GUIMessagePanel guiMessagePanel = (GUIMessagePanel) jTabbedPane.getComponentAt(panelIndex);
+         
+         PrintTools.debug(guiMessagePanel.toString());
          
          String name = guiMessagePanel.getName();
          

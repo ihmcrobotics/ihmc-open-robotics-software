@@ -16,8 +16,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
 import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -68,7 +68,7 @@ public class KinematicsToolboxController
    private static final double updateDT = 1.0e-3;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final SDFFullHumanoidRobotModel desiredFullRobotModel;
+   private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
    private final GeometricJacobianHolder geometricJacobianHolder;
@@ -113,7 +113,7 @@ public class KinematicsToolboxController
 
    private final AtomicReference<PrivilegedConfigurationCommand> privilegedConfigurationCommandReference = new AtomicReference<PrivilegedConfigurationCommand>(null);
 
-   public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, SDFFullHumanoidRobotModelFactory fullRobotModelFactory,
+   public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModelFactory fullRobotModelFactory,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.commandInputManager = commandInputManager;
@@ -541,7 +541,7 @@ public class KinematicsToolboxController
       };
    }
 
-   public SDFFullHumanoidRobotModel getDesiredFullRobotModel()
+   public FullHumanoidRobotModel getDesiredFullRobotModel()
    {
       return desiredFullRobotModel;
    }

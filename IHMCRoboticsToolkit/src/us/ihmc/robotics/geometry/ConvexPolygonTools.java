@@ -417,12 +417,12 @@ public class ConvexPolygonTools
       if (bridgeCount == 0)
       {
          // check to see if a polygons is contained in another.
-         if (polygonP.isPointInside(polygonQ.getVertex(0)))
+         if (ConvexPolygon2dCalculator.isPointInside(polygonQ.getVertex(0), polygonP))
          {
             intersectingPolygonToPack.setAndUpdate(polygonQ);
          }
 
-         if (polygonQ.isPointInside(polygonP.getVertex(0)))
+         if (ConvexPolygon2dCalculator.isPointInside(polygonP.getVertex(0), polygonQ))
          {
             intersectingPolygonToPack.setAndUpdate(polygonP);
          }

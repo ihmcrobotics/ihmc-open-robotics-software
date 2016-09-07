@@ -379,7 +379,8 @@ public class DataExporterExcelWorkbookCreator
    {
       WritableSheet jointDataSheet = workbook.createSheet("Joint Data", workbook.getNumberOfSheets());
       int column = 0;
-
+      writeJointDataColumn(jointDataSheet, column++, dataBuffer.getEntry("t"), true);
+      
       for (PinJoint joint : pinJoints)
       {
          DataBufferEntry position = dataBuffer.getEntry(joint.getQ());

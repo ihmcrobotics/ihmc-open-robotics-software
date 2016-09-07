@@ -7,16 +7,19 @@ import java.util.Map;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.robotics.kinematics.JointLimit;
+import us.ihmc.robotics.robotDescription.JointDescription;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements FullQuadrupedRobotModel
+public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDescription implements FullQuadrupedRobotModel
 {
    private final BiMap<QuadrupedJointName, OneDoFJoint> jointNameOneDoFJointBiMap = HashBiMap.create();
    private final QuadrantDependentList<List<OneDoFJoint>> legOneDoFJoints = new QuadrantDependentList<>();
@@ -24,17 +27,17 @@ public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements Ful
 
    private QuadrantDependentList<RigidBody> feet;
 
-   public SDFFullQuadrupedRobotModel(SDFLinkHolder rootLink, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack,
+   public FullQuadrupedRobotModelFromDescription(RobotDescription description, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack,
          Map<QuadrupedJointName, JointLimit> jointLimits)
    {
-      this(rootLink, sdfJointNameMap, sensorLinksToTrack);
+      this(description, sdfJointNameMap, sensorLinksToTrack);
 
       this.jointLimits.putAll(jointLimits);
    }
 
-   public SDFFullQuadrupedRobotModel(SDFLinkHolder rootLink, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public FullQuadrupedRobotModelFromDescription(RobotDescription description, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
-      super(rootLink, sdfJointNameMap, sensorLinksToTrack);
+      super(description, sdfJointNameMap, sensorLinksToTrack);
 
       for (OneDoFJoint oneDoFJoint : getOneDoFJoints())
       {
@@ -60,7 +63,7 @@ public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements Ful
    }
 
    @Override
-   protected void mapRigidBody(SDFJointHolder joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
+   protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
    {
       if(feet == null)
       {
@@ -81,32 +84,55 @@ public class SDFFullQuadrupedRobotModel extends SDFFullRobotModel implements Ful
       }
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getFoot(us.ihmc.robotics.robotSide.RobotQuadrant)
+    */
    @Override
    public RigidBody getFoot(RobotQuadrant robotQuadrant)
    {
       return feet.get(robotQuadrant);
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getLegOneDoFJoints(us.ihmc.robotics.robotSide.RobotQuadrant)
+    */
+   @Override
    public List<OneDoFJoint> getLegOneDoFJoints(RobotQuadrant quadrant)
    {
       return legOneDoFJoints.get(quadrant);
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getOneDoFJointBeforeFoot(us.ihmc.robotics.robotSide.RobotQuadrant)
+    */
+   @Override
    public OneDoFJoint getOneDoFJointBeforeFoot(RobotQuadrant quadrant)
    {
       return (OneDoFJoint) getFoot(quadrant).getParentJoint();
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getOneDoFJointByName(us.ihmc.SdfLoader.partNames.QuadrupedJointName)
+    */
+   @Override
    public OneDoFJoint getOneDoFJointByName(QuadrupedJointName name)
    {
       return jointNameOneDoFJointBiMap.get(name);
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getNameForOneDoFJoint(us.ihmc.robotics.screwTheory.OneDoFJoint)
+    */
+   @Override
    public QuadrupedJointName getNameForOneDoFJoint(OneDoFJoint oneDoFJoint)
    {
       return jointNameOneDoFJointBiMap.inverse().get(oneDoFJoint);
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.SdfLoader.FullQuadrupedRobotModel#getJointLimit(us.ihmc.SdfLoader.partNames.QuadrupedJointName)
+    */
+   @Override
    public JointLimit getJointLimit(QuadrupedJointName jointName)
    {
       return jointLimits.get(jointName);

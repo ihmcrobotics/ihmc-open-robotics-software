@@ -21,7 +21,9 @@ import javax.vecmath.Vector3d;
 
 import org.apache.batik.dom.util.HashTable;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -34,6 +36,7 @@ import us.ihmc.robotDataCommunication.logger.YoVariableLogPlaybackRobot;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
@@ -78,7 +81,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, DRCRobotModel.RobotTarget.SCS, false);
       DRCRobotJointMap jointMap = model.getJointMap();
       ArmJointName[] joints = jointMap.getArmJointNames();
-      SDFFullHumanoidRobotModel robotModel = model.createFullRobotModel();
+      FullHumanoidRobotModel robotModel = model.createFullRobotModel();
       boolean showGUIAndSaveSCSVideo = false;
       boolean showCameraVideo = false;
 
@@ -98,14 +101,14 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       String[] vars = new String[49];
       int i = 0;
       int jj = 0;
-      
+
       for(RobotSide side : RobotSide.values())
       {
          jj = 0;
          for (ArmJointName joint: joints)
          {
             String jointName = robotModel.getArmJoint(side, joint).getName();
-            
+
             vars[i * joints.length * 4 + jj + 1] = "ll_in_" + jointName + "_qd_bef";
             jj++;
             vars[i * joints.length * 4 + jj + 1] = "ll_in_" + jointName + "_qd_aft";
@@ -308,7 +311,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       if (logFile != null)
       {
          System.out.println("loading log from folder:" + logFile);
-         
+
          SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
          parameters.setCreateGUI(showGUI);
          parameters.setDataBufferSize(bufferSize);
@@ -356,7 +359,17 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       parser = new YoVariableHandshakeParser("logged", true);
       parser.parseFrom(handshakeData);
 
-      robot = new YoVariableLogPlaybackRobot(selectedFile, robotModel.getGeneralizedRobotModel(), parser.getJointStates(),
+//      boolean useCollisionMeshes = false;
+//      boolean enableTorqueVelocityLimits = true;
+//      boolean enableJointDamping = true;
+//
+//      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
+//      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+//      RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+
+      RobotDescription robotDescription = robotModel.getRobotDescription();
+
+      robot = new YoVariableLogPlaybackRobot(selectedFile, robotDescription, parser.getJointStates(),
             parser.getYoVariablesList(), logProperties, scs);
 
       double dt = parser.getDt();

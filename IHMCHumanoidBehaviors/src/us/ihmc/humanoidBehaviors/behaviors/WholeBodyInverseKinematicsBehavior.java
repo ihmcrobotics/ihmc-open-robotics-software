@@ -6,7 +6,7 @@ import javax.vecmath.Quat4d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
+import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxStateMessage;
 import us.ihmc.communication.packets.KinematicsToolboxStateMessage.KinematicsToolboxState;
@@ -52,13 +52,13 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable timeSolutionSentToController;
 
-   public WholeBodyInverseKinematicsBehavior(SDFFullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
+   public WholeBodyInverseKinematicsBehavior(FullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
          OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
       this(null, fullRobotModelFactory, yoTime, outgoingCommunicationBridge);
    }
 
-   public WholeBodyInverseKinematicsBehavior(String namePrefix, SDFFullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
+   public WholeBodyInverseKinematicsBehavior(String namePrefix, FullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
          OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(namePrefix, outgoingCommunicationBridge);

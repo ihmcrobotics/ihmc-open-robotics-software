@@ -1,10 +1,20 @@
 package us.ihmc.darpaRoboticsChallenge.rosAPI;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -14,7 +24,15 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.ros.*;
+import us.ihmc.darpaRoboticsChallenge.ros.DRCROSPPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.ros.IHMCPacketToMsgPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.IHMCROSTranslationRuntimeTools;
+import us.ihmc.darpaRoboticsChallenge.ros.PeriodicRosHighLevelStatePublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosCapturabilityBasedStatusPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosRobotConfigurationDataPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.RequestControllerStopSubscriber;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
@@ -28,15 +46,10 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
-import us.ihmc.utilities.ros.publisher.PrintStreamToRosBridge;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.*;
 
 public class ThePeoplesGloriousNetworkProcessor
 {
@@ -136,7 +149,7 @@ public class ThePeoplesGloriousNetworkProcessor
    @SuppressWarnings("unchecked")
    private void setupOutputs(String namespace, String tfPrefix, String... additionalPackages)
    {
-      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
 
@@ -176,7 +189,7 @@ public class ThePeoplesGloriousNetworkProcessor
 //      System.setErr(printStreamBridge);
    }
 
-   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation,
+   private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation,
          RosRobotConfigurationDataPublisher robotConfigurationPublisher)
    {
       if (sensorInformation.getCameraParameters().length > 0)

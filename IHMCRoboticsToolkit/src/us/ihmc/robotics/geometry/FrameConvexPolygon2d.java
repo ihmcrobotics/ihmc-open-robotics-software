@@ -26,6 +26,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, ConvexPolygon2d>
 {
    protected final ConvexPolygon2d convexPolygon;
+   private final ConvexPolygon2dCalculator calculator = new ConvexPolygon2dCalculator();
+
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
 
    private Vector2d[] temporaryVectorArray;
@@ -783,18 +785,12 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    }
 
    /**
-    * Returns distance from the point to the boundary of this polygon.
-    * Positive number if inside. Negative number if outside.
-    * If inside, the distance is the exact distance to an edge.
-    * If outside, the negative distance is an underestimate.
-    * It is actually the furthest distance from a projected edge that
-    * it is outside of.
-    * @param point
-    * @return distance from point to this polygon.
+    * Returns distance from the point to the boundary of this polygon. The return value
+    * is positive if the point is inside and negative if it is outside.
     */
-   public double getDistanceInside(FramePoint2d point)
+   public double getSignedDistance(FramePoint2d point)
    {
-      return this.convexPolygon.getDistanceInside(point.tuple);
+      return ConvexPolygon2dCalculator.getSignedDistance(point.tuple, this.convexPolygon);
    }
 
    public BoundingBox2d getBoundingBoxCopy()
@@ -826,31 +822,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    public boolean isPointInside(FramePoint2d framePoint, double epsilon)
    {
       framePoint.checkReferenceFrameMatch(referenceFrame);
-
-      return convexPolygon.isPointInside(framePoint.tuple, epsilon);
-   }
-
-   /**
-    * areAllPointsInside
-    * Determines whether all the points in framePoints are inside the convex
-    * polygon.
-    *
-    * @param framePoints FramePoint2d[]
-    * @return boolean
-    */
-   public boolean areAllPointsInside(FramePoint2d[] framePoints)
-   {
-      ReferenceFrame referenceFrame = framePoints[0].getReferenceFrame();
-
-      // Check and strip reference frames
-      Point2d[] points = new Point2d[framePoints.length];
-      for (int i = 0; i < framePoints.length; i++)
-      {
-         framePoints[i].checkReferenceFrameMatch(referenceFrame);
-         points[i] = framePoints[i].getPointCopy();
-      }
-
-      return convexPolygon.areAllPointsInside(points);
+      return ConvexPolygon2dCalculator.isPointInside(framePoint.tuple, epsilon, this.convexPolygon);
    }
 
    public FrameLine2d[] getLinesOfSight(FramePoint2d observerFramePoint)
@@ -971,18 +943,11 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return ret;
    }
 
-   public double[] distanceToEachVertex(FramePoint2d point)
-   {
-      point.checkReferenceFrameMatch(referenceFrame);
-
-      return convexPolygon.distanceToEachVertex(point.getPoint());
-   }
-
    public FramePoint2d getClosestVertexCopy(FramePoint2d point)
    {
       point.checkReferenceFrameMatch(referenceFrame);
 
-      return new FramePoint2d(referenceFrame, convexPolygon.getClosestVertexCopy(point.getPoint()));
+      return new FramePoint2d(referenceFrame, ConvexPolygon2dCalculator.getClosestVertexCopy(point.getPoint(), convexPolygon));
    }
 
    public FramePoint2d getClosestVertexWithRayCopy(FrameLine2d ray, boolean throwAwayVerticesOutsideRay)
@@ -1005,14 +970,14 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    {
       point.checkReferenceFrameMatch(referenceFrame);
 
-      closestVertexToPack.setIncludingFrame(referenceFrame, convexPolygon.getClosestVertexCopy(point.getPoint()));
+      closestVertexToPack.setIncludingFrame(referenceFrame, ConvexPolygon2dCalculator.getClosestVertexCopy(point.getPoint(), convexPolygon));
    }
 
    public FramePoint2d getClosestVertexCopy(FrameLine2d line)
    {
       line.checkReferenceFrameMatch(referenceFrame);
 
-      Point2d closestVertexCopy = convexPolygon.getClosestVertexCopy(line.line);
+      Point2d closestVertexCopy = ConvexPolygon2dCalculator.getClosestVertexCopy(line.line, convexPolygon);
 
       if (closestVertexCopy == null)
          throw new RuntimeException("Closest vertex could not be found! Has at least one vertex: " + convexPolygon.hasAtLeastOneVertex());

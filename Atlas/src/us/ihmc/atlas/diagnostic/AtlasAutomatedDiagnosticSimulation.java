@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.diagnostics.AutomatedDiagnosticConfiguration;
@@ -49,9 +49,9 @@ public class AtlasAutomatedDiagnosticSimulation
       }
 
       @Override
-      public SDFHumanoidRobot createSdfRobot(boolean createCollisionMeshes)
+      public HumanoidFloatingRootJointRobot createSdfRobot(boolean createCollisionMeshes)
       {
-         SDFHumanoidRobot robot = super.createSdfRobot(createCollisionMeshes);
+         HumanoidFloatingRootJointRobot robot = super.createSdfRobot(createCollisionMeshes);
 
          Joint joint = robot.getJoint("back_bkx");
 

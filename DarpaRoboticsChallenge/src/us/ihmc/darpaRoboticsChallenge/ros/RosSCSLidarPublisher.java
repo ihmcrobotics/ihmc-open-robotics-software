@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.ros;
 
 import org.ros.message.Time;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
@@ -22,14 +22,14 @@ public class RosSCSLidarPublisher implements ObjectConsumer<SimulatedLidarScanPa
    public RosSCSLidarPublisher(ObjectCommunicator localObjectCommunicator,
          RosMainNode rosMainNode,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
-         SDFFullRobotModel fullRobotModel,
+         FullRobotModel fullRobotModel,
          DRCRobotLidarParameters[] lidarParameters)
    {
       nSensors = lidarParameters.length;
       this.rosMainNode = rosMainNode;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.lidarParameters = lidarParameters;
-      
+
       lidarPublisher = new RosLidarPublisher[nSensors];
       for (int sensorId = 0; sensorId < nSensors; sensorId++)
       {
@@ -40,7 +40,7 @@ public class RosSCSLidarPublisher implements ObjectConsumer<SimulatedLidarScanPa
 
       localObjectCommunicator.attachListener(SimulatedLidarScanPacket.class, this);
    }
-   
+
    @Override
    public void consumeObject(SimulatedLidarScanPacket simLidarScan)
    {
@@ -52,5 +52,5 @@ public class RosSCSLidarPublisher implements ObjectConsumer<SimulatedLidarScanPa
          lidarPublisher[sensorId].publish(simLidarScan, frameId, time);
       }
    }
-   
+
 }

@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.fingers;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -12,24 +12,24 @@ public enum ValkyrieSimulatedFingerJoint
    IndexFingerPitch1, IndexFingerPitch2, IndexFingerPitch3,
    MiddleFingerPitch1, MiddleFingerPitch2, MiddleFingerPitch3,
    PinkyPitch1, PinkyPitch2, PinkyPitch3;
-   
+
    public static final ValkyrieSimulatedFingerJoint[] values = ValkyrieSimulatedFingerJoint.values();
-   
-   public RevoluteJoint getRelatedRevoluteJoint(RobotSide robotSide, SDFFullRobotModel fullRobotModel)
+
+   public RevoluteJoint getRelatedRevoluteJoint(RobotSide robotSide, FullRobotModel fullRobotModel)
    {
       return (RevoluteJoint) fullRobotModel.getOneDoFJointByName(getJointName(robotSide));
    }
-   
-   public PinJoint getRelatedPinJoint(RobotSide robotSide, SDFRobot sdfRobot)
+
+   public PinJoint getRelatedPinJoint(RobotSide robotSide, FloatingRootJointRobot sdfRobot)
    {
       return (PinJoint) sdfRobot.getOneDegreeOfFreedomJoint(getJointName(robotSide));
    }
-   
+
    public String getJointName(RobotSide robotSide)
    {
       return robotSide.getCamelCaseNameForStartOfExpression() + name();
    }
-   
+
    public ValkyrieRealRobotFingerJoint getRelatedRealFingerJoint()
    {
       switch (this)

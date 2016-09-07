@@ -14,6 +14,7 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -63,11 +64,11 @@ public class SDFWorldLoader
       return groundProfile;
    }
 
-   public ImmutablePair<SDFHumanoidRobot, SDFFullHumanoidRobotModel> createRobotAndRemoveFromWorld(SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   public ImmutablePair<HumanoidFloatingRootJointRobot, FullHumanoidRobotModel> createRobotAndRemoveFromWorld(SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
       removeVisualFromWorld(sdfJointNameMap.getModelName());
 
-      ImmutablePair<SDFHumanoidRobot, SDFFullHumanoidRobotModel> ret = new ImmutablePair<SDFHumanoidRobot, SDFFullHumanoidRobotModel>(jaxbSDFLoader.createRobot(sdfJointNameMap, useCollisionMeshes),
+      ImmutablePair<HumanoidFloatingRootJointRobot, FullHumanoidRobotModel> ret = new ImmutablePair<HumanoidFloatingRootJointRobot, FullHumanoidRobotModel>(jaxbSDFLoader.createRobot(sdfJointNameMap, useCollisionMeshes),
             jaxbSDFLoader.createFullRobotModel(sdfJointNameMap));
 
       return ret;
@@ -81,7 +82,7 @@ public class SDFWorldLoader
       }
       visuals.remove(modelName);
    }
-   
+
    public GeneralizedSDFRobotModel getGeneralizedRobotModelAndRemoveFromWorld(String modelName)
    {
       removeVisualFromWorld(modelName);
@@ -95,7 +96,7 @@ public class SDFWorldLoader
       {
          ret.combine(visual);
       }
-      
+
       return ret;
    }
 

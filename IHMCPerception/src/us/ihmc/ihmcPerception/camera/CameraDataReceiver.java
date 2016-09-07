@@ -9,8 +9,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModelFactory;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoDataServer;
@@ -28,7 +28,7 @@ public class CameraDataReceiver extends Thread
    private final ArrayList<DRCStereoListener> stereoListeners = new ArrayList<DRCStereoListener>();
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
 
-   private final SDFFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private ReferenceFrame cameraFrame;
 
    private final Point3d cameraPosition = new Point3d();
@@ -39,17 +39,17 @@ public class CameraDataReceiver extends Thread
    private final LinkedBlockingQueue<CameraData> dataQueue = new LinkedBlockingQueue<>(2);
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
    private volatile boolean running = true;
-   
+
    private boolean useTimestamps = true;
-   
-   public CameraDataReceiver(SDFFullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
+
+   public CameraDataReceiver(FullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
          CompressedVideoHandler compressedVideoHandler, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       this.fullRobotModel = fullRobotModelFactory.createFullRobotModel();
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.cameraFrame = fullRobotModel.getCameraFrame(sensorNameInSdf);
-      
+
       compressedVideoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(compressedVideoHandler);
    }
 
@@ -71,17 +71,17 @@ public class CameraDataReceiver extends Thread
          try
          {
             CameraData data = dataQueue.take();
-            
+
             if (data != null)
             {
                readWriteLock.writeLock().lock();
-               
+
                if (DEBUG)
                {
                   System.out.println("Updating full robot model");
                }
                long robotTimestamp = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(data.timestamp);
-               
+
                if(useTimestamps)
                {
                   if (robotConfigurationDataBuffer.updateFullRobotModel(false, robotTimestamp, fullRobotModel, null) < 0)
@@ -90,7 +90,7 @@ public class CameraDataReceiver extends Thread
                      {
                         System.out.println("Cannot update full robot model, skipping frame");
                      }
-                     
+
                      continue;
                   }
                }
@@ -100,7 +100,7 @@ public class CameraDataReceiver extends Thread
                }
                cameraFrame.update();
                cameraFrame.getTransformToWorldFrame().get(cameraOrientation, cameraPosition);
-               
+
                if (DEBUG)
                {
                   System.out.println(cameraFrame.getTransformToParent());
@@ -111,7 +111,7 @@ public class CameraDataReceiver extends Thread
                {
                   stereoListeners.get(i).newImageAvailable(data, cameraFrame.getTransformToWorldFrame());
                }
-               
+
                compressedVideoDataServer.updateImage(data.videoSource, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);
                readWriteLock.writeLock().unlock();
             }
@@ -122,12 +122,12 @@ public class CameraDataReceiver extends Thread
          }
       }
    }
-   
+
    public void setUseTimestamps(boolean useTimestamps)
    {
       this.useTimestamps = useTimestamps;
    }
-   
+
    public void updateImage(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
    {
       dataQueue.offer(new CameraData(videoSource, bufferedImage, timeStamp, intrinsicParameters));

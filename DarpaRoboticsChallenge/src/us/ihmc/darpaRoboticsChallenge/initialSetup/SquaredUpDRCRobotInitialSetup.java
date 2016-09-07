@@ -2,14 +2,14 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRobot>
+public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    private double groundZ;
    private final RigidBodyTransform rootToWorld = new RigidBodyTransform();
@@ -25,14 +25,14 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFHu
       this.groundZ = groundZ;
    }
 
-   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       setArmJointPositions(robot);
       setLegJointPositions(robot);
       setPositionInWorld(robot);
    }
    
-   protected void setPositionInWorld(SDFHumanoidRobot robot)
+   protected void setPositionInWorld(HumanoidFloatingRootJointRobot robot)
    {
       robot.update();
       robot.getRootJointToWorldTransform(rootToWorld);
@@ -48,7 +48,7 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFHu
       robot.setPositionInWorld(offset);
    }
 
-   protected void setArmJointPositions(SDFRobot robot)
+   protected void setArmJointPositions(FloatingRootJointRobot robot)
    {
       // Avoid singularities at startup
 
@@ -59,7 +59,7 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFHu
 //      robot.getOneDoFJoint(jointNames[r_arm_elx]).setQ(-1.57);
    }
 
-   protected void setLegJointPositions(SDFRobot robot)
+   protected void setLegJointPositions(FloatingRootJointRobot robot)
    {
 //      try{
 //         robot.getOneDegreeOfFreedomJoint(jointNames[l_leg_hpy]).setQ(-0.4);

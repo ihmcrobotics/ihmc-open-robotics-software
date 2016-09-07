@@ -1,0 +1,20 @@
+Out
+{\StartGUIMessagePanelText}
+9/6/16 12:13 PM: OutMessage2
+9/6/16 12:13 PM: OutMessage1
+{\EndGUIMessagePanelText}
+Error
+{\StartGUIMessagePanelText}
+9/6/16 12:13 PM: ErrorMessage2
+9/6/16 12:13 PM: ErrorMessage1
+{\EndGUIMessagePanelText}
+Parameter
+{\StartGUIMessagePanelText}
+9/6/16 12:13 PM: ParameterMessage2
+9/6/16 12:13 PM: ParameterMessage1
+{\EndGUIMessagePanelText}
+JUnit Test Cases
+{\StartGUIMessagePanelText}
+9/6/16 12:13 PM: BambooToolsTest.testLogMessagesToFile finished. Used Memory = 3 MB.
+9/6/16 12:13 PM: BambooToolsTest.testLogMessagesToFile started. Used Memory = 0 MB.
+{\EndGUIMessagePanelText}

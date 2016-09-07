@@ -29,7 +29,8 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private double qddDesired;
    private double tau;
 
-   private double effortLimit = Double.POSITIVE_INFINITY;
+   private double effortLimitLower = Double.NEGATIVE_INFINITY;
+   private double effortLimitUpper = Double.POSITIVE_INFINITY;
    private double jointLimitLower = Double.NEGATIVE_INFINITY;
    private double jointLimitUpper = Double.POSITIVE_INFINITY;
 
@@ -56,7 +57,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private boolean isUnderPositionControl = false;
    private boolean enabled = true;
    private boolean useFeedBackForceControl = true;
-   
+
    /**
     * Describes if a joint is online
     */
@@ -346,12 +347,23 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 
    public void setEffortLimit(double effortLimit)
    {
-      this.effortLimit = effortLimit;
+      setEffortLimits(-effortLimit, effortLimit);
    }
 
-   public double getEffortLimit()
+   public void setEffortLimits(double effortLimitLower, double effortLimitUpper)
    {
-      return effortLimit;
+      this.effortLimitLower = effortLimitLower;
+      this.effortLimitUpper = effortLimitUpper;
+   }
+
+   public double getMinEffortLimit()
+   {
+      return effortLimitLower;
+   }
+
+   public double getMaxEffortLimit()
+   {
+      return effortLimitUpper;
    }
 
    public boolean getIntegrateDesiredAccelerations()
@@ -407,9 +419,9 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    {
       return kd;
    }
-   
+
    public abstract boolean isPassiveJoint();
-   
+
    /*
     * VRC HACKS
     */
@@ -474,7 +486,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    {
       return tauMeasured;
    }
-   
+
    public void setTauMeasured(double tauMeasured)
    {
       this.tauMeasured = tauMeasured;
@@ -499,12 +511,12 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    {
       this.isOnline = isOnline;
    }
-   
+
    public boolean isUseFeedBackForceControl()
    {
       return useFeedBackForceControl;
    }
-   
+
    public void setUseFeedBackForceControl(boolean useFeedBackForceControl)
    {
       this.useFeedBackForceControl = useFeedBackForceControl;

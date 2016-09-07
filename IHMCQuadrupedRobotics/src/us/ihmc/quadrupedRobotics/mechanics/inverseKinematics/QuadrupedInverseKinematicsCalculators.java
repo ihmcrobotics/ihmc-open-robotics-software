@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
@@ -32,7 +32,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
    private YoGraphicReferenceFrame bodyGraphicReferenceFrame, rootJointGraphicReferenceFrame;
 
    public QuadrupedInverseKinematicsCalculators(QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties,
-         SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
+         FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
 
@@ -64,7 +64,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
 
    @Override
    public boolean solveForEndEffectorLocationInBodyAndUpdateDesireds(RobotQuadrant robotQuadrant, Vector3d footPositionInFrameBeforeHipRoll,
-         SDFFullRobotModel fullRobotModel)
+         FullRobotModel fullRobotModel)
    {
       QuadrantHolder quadrantHolder = quadrantHolders.get(robotQuadrant);
       boolean validSolution = quadrantHolder.solveGivenFootLocationInHip(footPositionInFrameBeforeHipRoll, jointAnglesToPack);
@@ -95,7 +95,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
       quadrantHolders.get(robotQuadrant).setDesiredLegAnglesInFullRobotModel(jointAnglesToPack);
    }
 
-   public void updateSimulationBasedOnFullRobotModel(SDFRobot sdfRobot)
+   public void updateSimulationBasedOnFullRobotModel(FloatingRootJointRobot sdfRobot)
    {
       for (OneDoFJoint joint : oneDoFJoints)
       {
@@ -112,14 +112,14 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
 
       private final QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator closedFormInverseKinematicsCalculator;
 
-      private final SDFFullRobotModel fullRobotModel;
+      private final FullRobotModel fullRobotModel;
       private final ArrayList<OneDoFJoint> jointsToControl = new ArrayList<OneDoFJoint>();
       private TranslationReferenceFrame desiredFrame;
 
       private final QuadrupedReferenceFrames referenceFrames;
 
       public QuadrantHolder(RobotQuadrant robotQuadrant, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties,
-            QuadrupedReferenceFrames referenceFrames, SDFFullQuadrupedRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+            QuadrupedReferenceFrames referenceFrames, FullQuadrupedRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
       {
          this.referenceFrames = referenceFrames;
 

@@ -30,7 +30,7 @@ import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -55,7 +55,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
    DRCRobotJointMap jointMap = robotModel.getJointMap();
-   SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+   FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
    RigidBodyTransform imageToCamera = new RigidBodyTransform(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
 
@@ -292,7 +292,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       }
    }
 
-   private RigidBodyTransform computeKinematicsTargetToCamera(SDFFullHumanoidRobotModel fullRobotModel, ReferenceFrame cameraImageFrame, RigidBodyTransform targetToEE)
+   private RigidBodyTransform computeKinematicsTargetToCamera(FullHumanoidRobotModel fullRobotModel, ReferenceFrame cameraImageFrame, RigidBodyTransform targetToEE)
    {
 
       ReferenceFrame leftEEFrame = fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM);

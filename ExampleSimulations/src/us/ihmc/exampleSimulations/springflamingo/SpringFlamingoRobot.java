@@ -4,7 +4,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.RobotConstructorFromRobotDescription;
+import us.ihmc.simulationconstructionset.RobotFromDescription;
 
 /**
  * <p>Title: SpringFlamingoRobot</p>
@@ -196,8 +196,8 @@ public class SpringFlamingoRobot
    {
       SpringFlamingoRobotDescription description = new SpringFlamingoRobotDescription(name);
 
-      RobotConstructorFromRobotDescription constructor = new RobotConstructorFromRobotDescription(description);
-      return constructor.getRobot();
+      RobotFromDescription robot = new RobotFromDescription(description);
+      return robot;
    }
 
    public double getHipAngle(RobotSide robotSide)

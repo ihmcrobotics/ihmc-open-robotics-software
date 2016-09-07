@@ -2,12 +2,12 @@ package us.ihmc.atlas.initialSetup;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class SquaredUpVRCQual3Platform extends SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRobot>
+public class SquaredUpVRCQual3Platform extends SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    private final Vector3d additionalOffset = new Vector3d(16.4, 0.0, 1.0);
    private final double yaw = - 0.5*Math.PI;
@@ -24,7 +24,7 @@ public class SquaredUpVRCQual3Platform extends SquaredUpDRCRobotInitialSetup imp
       this(0.0);
    }
 
-   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       super.initializeRobot(robot, jointMap);
 

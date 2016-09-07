@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.mechanics.virtualModelController;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -31,7 +31,7 @@ public class QuadrupedVirtualModelController
 {
    private final YoVariableRegistry registry;
 
-   private final SDFFullQuadrupedRobotModel fullRobotModel;
+   private final FullQuadrupedRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame worldFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
@@ -64,7 +64,7 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<YoGraphicVector[]> yoJointTorqueGraphics;
    private final FrameVector jointAxisTempVector = new FrameVector();
 
-   public QuadrupedVirtualModelController(SDFFullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT,
+   public QuadrupedVirtualModelController(FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.fullRobotModel = fullRobotModel;

@@ -13,8 +13,8 @@ import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
 import us.ihmc.robotics.sensors.ContactSensorType;
-import us.ihmc.simulationconstructionset.graphics.GraphicsObjectsHolder;
 
 public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 {
@@ -38,8 +38,8 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       this.descriptionMutator = descriptionMutator;
       List<SDFLink> sdfLinks = model.getLinks();
       List<SDFJoint> sdfJoints = model.getJoints();
-      
-      
+
+
 
       // Populate maps
       for (SDFLink sdfLink : sdfLinks)
@@ -61,7 +61,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 
          links.put(SDFConversionsHelper.sanitizeJointName(sdfLink.getName()), linkHolder);
       }
-      
+
       if(sdfJoints != null)
       {
          for (SDFJoint sdfJoint : sdfJoints)
@@ -111,7 +111,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       }
 
       findRootLinks(links);
-      
+
       transformToRoot = SDFConversionsHelper.poseToTransform(model.getPose());
 
    }
@@ -132,27 +132,27 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
    {
       return rootLinks;
    }
-   
+
    public RigidBodyTransform getTransformToRoot()
    {
       return transformToRoot;
    }
-   
+
    public String getName()
    {
       return name;
    }
-   
+
    public SDFJointHolder getJointHolder(String name)
    {
       return joints.get(name);
    }
-   
+
    public List<String> getResourceDirectories()
    {
       return resourceDirectories;
    }
-   
+
    public Graphics3DObject getCollisionObject(String name)
    {
       for(SDFLinkHolder linkHolder : rootLinks)
@@ -162,13 +162,13 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
             return new SDFGraphics3DObject(linkHolder.getCollisions(), resourceDirectories);
          }
       }
-      
+
       return new SDFGraphics3DObject(joints.get(name).getChildLinkHolder().getCollisions(), resourceDirectories);
    }
 
    public Graphics3DObject getGraphicsObject(String name)
    {
-      
+
       for(SDFLinkHolder linkHolder : rootLinks)
       {
          if(linkHolder.getName().equals(name))
@@ -176,7 +176,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
             return new SDFGraphics3DObject(linkHolder.getVisuals(), resourceDirectories);
          }
       }
-      
+
       SDFJointHolder joint = joints.get(name);
       RigidBodyTransform visualTransform = new RigidBodyTransform();
       visualTransform.setRotation(joint.getLinkRotation());
@@ -189,7 +189,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       if(joints.get(parentJointName) != null)
          joints.get(parentJointName).addForceSensor(sdfForceSensor);
    }
-   
+
    public void addContactSensor(String sensorName, String parentJointName, ContactSensorType type)
    {
       SDFContactSensor sdfContactSensor = new SDFContactSensor(sensorName, parentJointName, type);

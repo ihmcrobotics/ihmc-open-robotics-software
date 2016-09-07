@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
@@ -13,14 +13,14 @@ import us.ihmc.tools.factories.RequiredFactoryField;
 
 public class QuadrupedFootContactableBodiesFactory
 {
-   private final RequiredFactoryField<SDFFullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
+   private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<CommonQuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
    private final RequiredFactoryField<QuadrupedPhysicalProperties> physicalProperties = new RequiredFactoryField<>("physicalProperties");
-   
+
    public QuadrantDependentList<ContactablePlaneBody> createFootContactableBodies()
    {
       FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
-      
+
       QuadrantDependentList<ContactablePlaneBody> footContactableBodies = new QuadrantDependentList<ContactablePlaneBody>();
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -34,17 +34,17 @@ public class QuadrupedFootContactableBodiesFactory
 
       return footContactableBodies;
    }
-   
-   public void setFullRobotModel(SDFFullQuadrupedRobotModel fullRobotModel)
+
+   public void setFullRobotModel(FullQuadrupedRobotModel fullRobotModel)
    {
       this.fullRobotModel.set(fullRobotModel);
    }
-   
+
    public void setReferenceFrames(CommonQuadrupedReferenceFrames referenceFrames)
    {
       this.referenceFrames.set(referenceFrames);
    }
-   
+
    public void setPhysicalProperties(QuadrupedPhysicalProperties physicalProperties)
    {
       this.physicalProperties.set(physicalProperties);

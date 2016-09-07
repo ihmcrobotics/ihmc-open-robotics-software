@@ -105,7 +105,7 @@ public class QuadrupedSoleWaypointList extends QuadrantDependentList<ArrayList<S
    public double getFinalTime()
    {
       double finalTime = 0;
-      for (RobotQuadrant quadrant : RobotQuadrant.values())
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          if (getFinalTime(quadrant) > finalTime)
          {

@@ -16,16 +16,19 @@ import java.util.zip.ZipInputStream;
 import javax.management.IntrospectionException;
 import javax.xml.bind.JAXBException;
 
+import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
+import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotDataCommunication.VisualizerRobot;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.tools.ClassLoaderTools;
 
 public class SDFModelLoader implements LogModelLoader
 {
    private final static String resourceDirectoryLocation = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "resources";
-   
+
    private String modelName;
    private byte[] model;
    private String[] resourceDirectories;
@@ -50,11 +53,18 @@ public class SDFModelLoader implements LogModelLoader
    }
 
    @Override
-   public SDFRobot createRobot()
+   public FloatingRootJointRobot createRobot()
    {
-      return new VisualizerRobot(createJaxbSDFLoader().getGeneralizedSDFRobotModel(modelName), null);
+      boolean useCollisionMeshes = false;
+      boolean enableTorqueVelocityLimits = true;
+      boolean enableJointDamping = true;
+
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = createJaxbSDFLoader().getGeneralizedSDFRobotModel(modelName);
+      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+      RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      return new VisualizerRobot(description, null);
    }
-   
+
    public JaxbSDFLoader createJaxbSDFLoader()
    {
       if(resourceZip != null)
@@ -68,7 +78,7 @@ public class SDFModelLoader implements LogModelLoader
          {
             throw new RuntimeException(e);
          }
-         
+
          ByteArrayInputStream is = new ByteArrayInputStream(resourceZip);
          ZipInputStream zip = new ZipInputStream(is);
          ZipEntry ze = null;
@@ -85,9 +95,9 @@ public class SDFModelLoader implements LogModelLoader
          }
          catch (IOException e)
          {
-            System.err.println("SDFModelLoader: Cannot load model zip file. Not unpacking robot model.");            
+            System.err.println("SDFModelLoader: Cannot load model zip file. Not unpacking robot model.");
          }
-         
+
          try
          {
             ClassLoaderTools.addURLToSystemClassLoader(resourceDirectory.toUri().toURL());

@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import java.util.ArrayList;
+
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -9,8 +11,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-import java.util.ArrayList;
-
 /**
  * A controller that does nothing, but signifies that the robot is ready to transition to stand prep
  */
@@ -18,7 +18,7 @@ public class QuadrupedForceBasedDoNothingController implements QuadrupedControll
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final SDFFullQuadrupedRobotModel fullRobotModel;
+   private final FullQuadrupedRobotModel fullRobotModel;
 
    private final ArrayList<DoubleYoVariable> desiredDoNothingTorques = new ArrayList<>();
    private final ArrayList<OneDoFJoint> legJoints = new ArrayList<>();

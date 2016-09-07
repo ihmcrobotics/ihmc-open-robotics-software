@@ -5,9 +5,9 @@ import java.io.IOException;
 
 import javax.swing.JFileChooser;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -19,7 +19,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class VisualizePoseWorkspace
 {
-   private final SDFFullHumanoidRobotModel fullRobotModelForSlider;
+   private final FullHumanoidRobotModel fullRobotModelForSlider;
    
    private PlaybackPoseSequence posePlaybackRobotPoseSequence;
 
@@ -34,7 +34,7 @@ public class VisualizePoseWorkspace
       this.controlDT = robotModel.getControllerDT();
       
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
 
       interpolator = new PlaybackPoseInterpolator(registry);
 
@@ -64,11 +64,11 @@ public class VisualizePoseWorkspace
 
    private class CaptureSnapshotListener implements VariableChangedListener
    {
-      private final SDFHumanoidRobot sdfRobot;
+      private final HumanoidFloatingRootJointRobot sdfRobot;
       private final SimulationConstructionSet scs;
       private PlaybackPose previousPose;
 
-      public CaptureSnapshotListener(SDFHumanoidRobot sdfRobot, SimulationConstructionSet scs)
+      public CaptureSnapshotListener(HumanoidFloatingRootJointRobot sdfRobot, SimulationConstructionSet scs)
       {
          this.sdfRobot = sdfRobot;
          this.scs = scs;
@@ -112,7 +112,7 @@ public class VisualizePoseWorkspace
    {
       private final SimulationConstructionSet scs;
 
-      public LoadSequenceListener(FullRobotModel fullRobotModel, SDFRobot sdfRobot, SimulationConstructionSet scs)
+      public LoadSequenceListener(FullRobotModel fullRobotModel, FloatingRootJointRobot sdfRobot, SimulationConstructionSet scs)
       {
          this.scs = scs;
       }

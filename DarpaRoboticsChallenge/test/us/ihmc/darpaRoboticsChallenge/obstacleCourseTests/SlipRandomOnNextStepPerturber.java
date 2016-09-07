@@ -4,8 +4,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -27,7 +27,7 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
    }
 
    private final SideDependentList<GroundContactPointsSlipper> groundContactPointsSlippers;
-   private final SDFRobot robot;
+   private final FloatingRootJointRobot robot;
    private final BooleanYoVariable slipNextStep;
    private final DoubleYoVariable minSlipAfterTimeDelta, maxSlipAfterTimeDelta, nextSlipAfterTimeDelta;
    private final DoubleYoVariable minSlipPercentSlipPerTick, maxSlipPercentSlipPerTick, nextSlipPercentSlipPerTick;
@@ -46,13 +46,13 @@ public class SlipRandomOnNextStepPerturber extends ModularRobotController
    private double probabilitySlip = 0.0;
    private final Random random = new Random();
 
-   public SlipRandomOnNextStepPerturber(SDFHumanoidRobot robot, long randomSeed)
+   public SlipRandomOnNextStepPerturber(HumanoidFloatingRootJointRobot robot, long randomSeed)
    {
       this(robot);
       this.random.setSeed(randomSeed);
    }
 
-   public SlipRandomOnNextStepPerturber(SDFHumanoidRobot robot)
+   public SlipRandomOnNextStepPerturber(HumanoidFloatingRootJointRobot robot)
    {
       super("SlipRandomOnNextStepPerturber");
       String name = "SlipRandom";

@@ -1,20 +1,20 @@
 package us.ihmc.robotDataCommunication;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
 import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
-public class VisualizerRobot extends SDFHumanoidRobot
+public class VisualizerRobot extends HumanoidFloatingRootJointRobot
 {
    private final YoVariableRegistry reducedRegistry;
 
-   
-   public VisualizerRobot(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFHumanoidJointNameMap sdfJointNameMap)
+
+   public VisualizerRobot(RobotDescription robotDescription, SDFHumanoidJointNameMap sdfJointNameMap)
    {
-      super(generalizedSDFRobotModel, null, sdfJointNameMap, false);
-      this.reducedRegistry = new YoVariableRegistry(generalizedSDFRobotModel.getName());
+      super(robotDescription, sdfJointNameMap);
+      this.reducedRegistry = new YoVariableRegistry(robotDescription.getName());
 
       reducedRegistry.registerVariable(getRootJoint().getQx());
       reducedRegistry.registerVariable(getRootJoint().getQy());
@@ -33,15 +33,15 @@ public class VisualizerRobot extends SDFHumanoidRobot
       reducedRegistry.registerVariable(getRootJoint().getAngularVelocityX());
       reducedRegistry.registerVariable(getRootJoint().getAngularVelocityY());
       reducedRegistry.registerVariable(getRootJoint().getAngularVelocityZ());
-      
-      for(OneDegreeOfFreedomJoint joint : getOneDoFJoints())
+
+      for(OneDegreeOfFreedomJoint joint : getOneDegreeOfFreedomJoints())
       {
          reducedRegistry.registerVariable(joint.getQ());
          reducedRegistry.registerVariable(joint.getQD());
       }
-      
+
    }
-   
+
    @Override
    public YoVariableRegistry getRobotsYoVariableRegistry()
    {

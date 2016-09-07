@@ -2,10 +2,10 @@ package us.ihmc.llaQuadruped;
 
 import java.io.IOException;
 
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.OutputWriter;
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
@@ -40,20 +40,20 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
    private static final boolean SHOW_PLOTTER = true;
    private static final boolean USE_TRACK_AND_DOLLY = false;
    private static final boolean USE_NETWORKING = false;
-   
+
    private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
-   
+
    private final OptionalFactoryField<Boolean> useStateEstimator = new OptionalFactoryField<>("useStateEstimator");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<QuadrupedParameterSet> parameterSet = new OptionalFactoryField<>("parameterSet");
-   
+
    @Override
    public GoalOrientedTestConductor createTestConductor() throws IOException
    {
       FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
-      
+
       QuadrupedModelFactory modelFactory = new LLAQuadrupedModelFactory();
       QuadrupedPhysicalProperties physicalProperties = new LLAQuadrupedPhysicalProperties();
       NetClassList netClassList = new LLAQuadrupedNetClassList();
@@ -63,15 +63,15 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
       ParameterRegistry.getInstance().loadFromResources(QuadrupedParameterSet.SIMULATION_IDEAL.getPath());
       StateEstimatorParameters stateEstimatorParameters = new LLAQuadrupedStateEstimatorParameters();
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new LLAQuadrupedPositionBasedCrawlControllerParameters();
-      
-      SDFFullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
-      SDFRobot sdfRobot = modelFactory.createSdfRobot();
-      
+
+      FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
+      FloatingRootJointRobot sdfRobot = modelFactory.createSdfRobot();
+
       SensorTimestampHolder timestampProvider = new LLAQuadrupedTimestampProvider(sdfRobot);
-      
+
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       OutputWriter outputWriter = new SDFPerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
-      
+
       QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
       simulationFactory.setControlDT(SIMULATION_DT);
       simulationFactory.setGravity(SIMULATION_GRAVITY);
@@ -116,31 +116,31 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
       }
       return new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
    }
-   
+
    @Override
    public void setControlMode(QuadrupedControlMode controlMode)
    {
       this.controlMode.set(controlMode);
    }
-   
+
    @Override
    public void setGroundContactModelType(QuadrupedGroundContactModelType groundContactModelType)
    {
       this.groundContactModelType.set(groundContactModelType);
    }
-   
+
    @Override
    public void setUseStateEstimator(boolean useStateEstimator)
    {
       this.useStateEstimator.set(useStateEstimator);
    }
-   
+
    @Override
    public void setGroundProfile3D(GroundProfile3D groundProfile3D)
    {
       providedGroundProfile3D.set(groundProfile3D);
    }
-   
+
    @Override
    public void setUsePushRobotController(boolean usePushRobotController)
    {

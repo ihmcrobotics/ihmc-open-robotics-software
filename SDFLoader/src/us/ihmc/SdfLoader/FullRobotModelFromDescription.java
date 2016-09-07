@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,15 +17,21 @@ import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
-import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
-import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotDescription.CameraSensorDescription;
+import us.ihmc.robotics.robotDescription.FloatingJointDescription;
+import us.ihmc.robotics.robotDescription.ForceSensorDescription;
+import us.ihmc.robotics.robotDescription.IMUSensorDescription;
+import us.ihmc.robotics.robotDescription.JointDescription;
+import us.ihmc.robotics.robotDescription.LidarSensorDescription;
+import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
+import us.ihmc.robotics.robotDescription.PinJointDescription;
+import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
@@ -35,17 +40,18 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.tools.containers.ContainerTools;
 
-public class SDFFullRobotModel implements FullRobotModel
+public class FullRobotModelFromDescription implements FullRobotModel
 {
+   protected final RobotDescription description;
 
    protected final SDFJointNameMap sdfJointNameMap;
    protected final EnumMap<NeckJointName, OneDoFJoint> neckJoints = ContainerTools.createEnumMap(NeckJointName.class);
    protected final EnumMap<SpineJointName, OneDoFJoint> spineJoints = ContainerTools.createEnumMap(SpineJointName.class);
    protected final String[] sensorLinksToTrack;
-   protected final SDFLinkHolder rootLink;
+//   protected final SDFLinkHolder rootLink;
    protected RigidBody chest;
    protected RigidBody head;
-   
+
    private final RigidBody pelvis;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final RigidBody elevator;
@@ -63,130 +69,100 @@ public class SDFFullRobotModel implements FullRobotModel
    private final boolean alignReferenceFramesWithJoints;
 
    private final Map<Enum<?>, RigidBody> endEffectors = new HashMap<>();
-   
-   public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+
+   public FullRobotModelFromDescription(RobotDescription description, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
-      this(rootLink, sdfJointNameMap, sensorLinksToTrack, false);
+      this(description, sdfJointNameMap, sensorLinksToTrack, false);
    }
-   
-   public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack, boolean makeReferenceFramesAlignWithTheJoints)
+
+   public FullRobotModelFromDescription(RobotDescription description, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack, boolean makeReferenceFramesAlignWithTheJoints)
    {
       super();
-      this.rootLink = rootLink;
+      this.description = description;
+
+      if (description.getRootJoints().size() != 1)
+      {
+         throw new RuntimeException("Must be exactly one root joint and it must be a FloatingJoint!");
+      }
+
+      FloatingJointDescription rootJointDescription = (FloatingJointDescription) description.getRootJoints().get(0);
+
       this.sdfJointNameMap = sdfJointNameMap;
       this.sensorLinksToTrack = sensorLinksToTrack;
       this.alignReferenceFramesWithJoints = makeReferenceFramesAlignWithTheJoints;
-      
+
       /*
        * Create root object
        */
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
       elevator = new RigidBody("elevator", elevatorFrame);
-      rootJoint = new SixDoFJoint(rootLink.getName(), elevator, elevatorFrame);
-      if (!rootLink.getName().equals(sdfJointNameMap.getPelvisName()))
+      rootJoint = new SixDoFJoint(rootJointDescription.getName(), elevator, elevatorFrame);
+      if (!rootJointDescription.getName().equals(sdfJointNameMap.getPelvisName()))
       {
          throw new RuntimeException("Pelvis joint is assumed to be the root joint");
       }
 
       //      System.out.println("Adding rigid body " + rootLink.getName() + "; Mass: " + rootLink.getMass() + "; ixx: " + rootLink.getInertia().m00 + "; iyy: " + rootLink.getInertia().m11
       //            + "; izz: " + rootLink.getInertia().m22 + "; COM Offset: " + rootLink.getCoMOffset());
-      pelvis = ScrewTools.addRigidBody(rootLink.getName(), rootJoint, rootLink.getInertia(), rootLink.getMass(), rootLink.getCoMOffset());
+      LinkDescription rootLinkDescription = rootJointDescription.getLink();
+      pelvis = ScrewTools.addRigidBody(rootJointDescription.getName(), rootJoint, rootLinkDescription.getMomentOfInertiaCopy(), rootLinkDescription.getMass(), rootLinkDescription.getCenterOfMassOffset());
 
-      checkLinkIsNeededForSensor(rootJoint, rootLink);
-      addSensorDefinitions(rootJoint, rootLink);
-      
+      checkLinkIsNeededForSensor(rootJoint, rootJointDescription);
+      addSensorDefinitions(rootJoint, rootJointDescription);
+
       if (pelvis.getName().equals(sdfJointNameMap.getHeadName()))
       {
          head = pelvis;
       }
 
-      totalMass = rootLink.getMass();
-      for (SDFJointHolder sdfJoint : rootLink.getChildren())
+      totalMass = rootJointDescription.getLink().getMass();
+      for (JointDescription jointDescription : rootJointDescription.getChildrenJoints())
       {
-         addJointsRecursively(sdfJoint, pelvis);
+         addJointsRecursively((OneDoFJointDescription) jointDescription, pelvis);
       }
    }
 
+   @Override
    public RigidBody getEndEffector(Enum<?> segmentEnum)
    {
       return endEffectors.get(segmentEnum);
    }
-   
-   public String getModelName()
-   {
-      return sdfJointNameMap.getModelName();
-   }
 
-   protected void addSensorDefinitions(InverseDynamicsJoint joint, SDFLinkHolder child)
+//   public String getModelName()
+//   {
+//      return sdfJointNameMap.getModelName();
+//   }
+
+   protected void addSensorDefinitions(InverseDynamicsJoint joint, JointDescription jointDescription)
    {
-      if (child.getSensors() != null)
+      ArrayList<IMUSensorDescription> imuSensors = jointDescription.getIMUSensors();
+
+      // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
+//      RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
+//      linkRotation.setTranslation(0.0, 0.0, 0.0);
+//      RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
+//      linkToSensorInZUp.multiply(linkRotation, SDFConversionsHelper.poseToTransform(sensor.getPose()));
+
+      for (IMUSensorDescription imuSensor : imuSensors)
       {
-         for (SDFSensor sensor : child.getSensors())
-         {
-            // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
-            RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
-            linkRotation.setTranslation(0.0, 0.0, 0.0);
-            RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
-            linkToSensorInZUp.multiply(linkRotation, SDFConversionsHelper.poseToTransform(sensor.getPose()));
-            if ("imu".equals(sensor.getType()))
-            {
-               final IMU imu = sensor.getImu();
-   
-               if (imu != null)
-               {
-                  IMUDefinition imuDefinition = new IMUDefinition(child.getName() + "_" + sensor.getName(), joint.getSuccessor(), linkToSensorInZUp);
-   
-                  imuDefinitions.add(imuDefinition);
-               }
-               else
-               {
-                  System.err.println("JAXB loader: No imu section defined for imu sensor " + sensor.getName() + ", ignoring sensor.");
-               }
-            }
-            else if("multicamera".equals(sensor.getType()) || "camera".equals(sensor.getType()))
-            {
-               List<Camera> cameras = sensor.getCamera();
-               if(cameras != null)
-               {
-                  ReferenceFrame sensorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensor.getName(), joint.getFrameAfterJoint(), linkToSensorInZUp);
-                  for(Camera camera : cameras)
-                  {
-                     RigidBodyTransform cameraTransform = SDFConversionsHelper.poseToTransform(camera.getPose()); 
-   
-                     ReferenceFrame cameraFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensor.getName() + "_" + camera.getName(), sensorFrame, cameraTransform);
-                     cameraFrames.put(cameraFrame.getName(), cameraFrame);
-                  }
-               }
-               else
-               {
-                  System.err.println("JAXB loader: No camera section defined for camera sensor " + sensor.getName() + ", ignoring sensor.");
-               }
-   
-            }
-            else if("ray".equals(sensor.getType()) || "gpu_ray".equals(sensor.getType()))
-            {
-               if(joint instanceof RevoluteJoint)
-               {
-                  ReferenceFrame lidarFrame = joint.getFrameBeforeJoint();
-                  lidarBaseFrames.put(sensor.getName(), lidarFrame);
-                  lidarBaseToSensorTransform.put(sensor.getName(), linkToSensorInZUp);
-                  lidarJoints.put(sensor.getName(), joint);
-               }
-               else if (sensor.getPose() != null)
-               {
-                  ReferenceFrame lidarFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent(sensor.getName(), joint.getFrameAfterJoint(), linkToSensorInZUp);
-                  lidarBaseFrames.put(sensor.getName(), lidarFrame);
-                  lidarBaseToSensorTransform.put(sensor.getName(), new RigidBodyTransform());
-                  lidarJoints.put(sensor.getName(), joint);
-               }
-               else
-               {
-                  System.err.println("Not supporting lidar not connected to a revolute joint or without a <pose> tag");
-               }
-            }
-   
-         }
+         IMUDefinition imuDefinition = new IMUDefinition(imuSensor.getName(), joint.getSuccessor(), imuSensor.getTransformToJoint());
+         imuDefinitions.add(imuDefinition);
       }
+
+      for (CameraSensorDescription cameraSensor : jointDescription.getCameraSensors())
+      {
+         ReferenceFrame cameraFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(cameraSensor.getName(), joint.getFrameAfterJoint(), cameraSensor.getTransformToJoint());
+         cameraFrames.put(cameraFrame.getName(), cameraFrame);
+      }
+
+      for (LidarSensorDescription lidarSensor : jointDescription.getLidarSensors())
+      {
+         ReferenceFrame lidarFrame = joint.getFrameAfterJoint();
+         lidarBaseFrames.put(lidarSensor.getName(), lidarFrame);
+         lidarBaseToSensorTransform.put(lidarSensor.getName(), lidarSensor.getTransformToJoint());
+         lidarJoints.put(lidarSensor.getName(), joint);
+      }
+
    }
 
    /** {@inheritDoc} */
@@ -304,11 +280,13 @@ public class SDFFullRobotModel implements FullRobotModel
       getOneDoFJoints(oneDoFJointsToPack);
    }
 
+   @Override
    public Map<String, OneDoFJoint> getOneDoFJointsAsMap()
    {
       return Collections.unmodifiableMap(oneDoFJoints);
    }
 
+   @Override
    public OneDoFJoint getOneDoFJointByName(String name)
    {
       return oneDoFJoints.get(name);
@@ -337,37 +315,41 @@ public class SDFFullRobotModel implements FullRobotModel
       return this.contactSensorDefinitions.toArray(new ContactSensorDefinition[this.contactSensorDefinitions.size()]);
    }
 
+   @Override
    public ReferenceFrame getCameraFrame(String name)
    {
       return cameraFrames.get(name);
    }
 
+   @Override
    public ReferenceFrame getLidarBaseFrame(String name)
    {
-   //      for(String st : lidarBaseFrames.keySet())
-   //      {
-   //         System.out.println(st);
-   //      }
-         return lidarBaseFrames.get(name);
-      }
+      //      for(String st : lidarBaseFrames.keySet())
+      //      {
+      //         System.out.println(st);
+      //      }
+      return lidarBaseFrames.get(name);
+   }
 
+   @Override
    public RigidBodyTransform getLidarBaseToSensorTransform(String name)
    {
       return lidarBaseToSensorTransform.get(name);
    }
 
+   @Override
    public ReferenceFrame getHeadBaseFrame()
    {
       return head.getParentJoint().getFrameAfterJoint();
    }
 
-   protected void checkLinkIsNeededForSensor(InverseDynamicsJoint joint, SDFLinkHolder link)
+   protected void checkLinkIsNeededForSensor(InverseDynamicsJoint joint, JointDescription jointDescription)
    {
       for(int i = 0; i < sensorLinksToTrack.length; i++)
       {
-         if(sensorLinksToTrack[i].equalsIgnoreCase(link.getName()));
-         {  
-            sensorFrames.put(link.getName(),joint.getFrameAfterJoint());
+         if(sensorLinksToTrack[i].equalsIgnoreCase(jointDescription.getName()));
+         {
+            sensorFrames.put(jointDescription.getName(),joint.getFrameAfterJoint());
          }
       }
    }
@@ -386,109 +368,95 @@ public class SDFFullRobotModel implements FullRobotModel
       }
       return sensorFrames.get(linkName);
    }
-   
-   protected void addJointsRecursively(SDFJointHolder joint, RigidBody parentBody)
+
+   protected void addJointsRecursively(OneDoFJointDescription joint, RigidBody parentBody)
    {
-   
-      Vector3d jointAxis = new Vector3d(joint.getAxisInModelFrame());
-      Vector3d offset = new Vector3d(joint.getOffsetFromParentJoint());
-      RigidBodyTransform transformToParentJoint = joint.getTransformToParentJoint();
-   
-      RigidBodyTransform visualTransform = new RigidBodyTransform();
-      visualTransform.setRotation(joint.getLinkRotation());
-   
+      Vector3d jointAxis = new Vector3d(joint.getJointAxis());
+      Vector3d offset = new Vector3d();
+      joint.getOffsetFromParentJoint(offset);
+
       OneDoFJoint inverseDynamicsJoint;
-   
-      switch(joint.getType())
+
+      if (joint instanceof PinJointDescription)
       {
-      case REVOLUTE:
-         if(alignReferenceFramesWithJoints)
-         {
-            inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, transformToParentJoint, jointAxis);
-         }
-         else
-         {
-            inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, offset, jointAxis);
-         }
-         break;
-      case PRISMATIC:
-         
-         if(alignReferenceFramesWithJoints)
-         {
-            inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, transformToParentJoint, jointAxis);
-         }
-         else
-         {
-            inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, offset, jointAxis);
-         }
-         break;
-      default:
-         throw new RuntimeException("Joint type not implemented: " + joint.getType());
+         inverseDynamicsJoint = ScrewTools.addRevoluteJoint(joint.getName(), parentBody, offset, jointAxis);
       }
-   
-      inverseDynamicsJoint.setEffortLimit(joint.getEffortLimit());
-      inverseDynamicsJoint.setJointLimitLower(joint.getLowerLimit());
-      inverseDynamicsJoint.setJointLimitUpper(joint.getUpperLimit());
-   
+      else if (joint instanceof SliderJointDescription)
+      {
+         inverseDynamicsJoint = ScrewTools.addPrismaticJoint(joint.getName(), parentBody, offset, jointAxis);
+      }
+      else
+      {
+         throw new RuntimeException("Must be either Pin or Slider here!");
+      }
+
+      inverseDynamicsJoint.setEffortLimits(-joint.getEffortLimit(), joint.getEffortLimit());
+
+      if (joint.containsLimitStops())
+      {
+         double[] limitStopParameters = joint.getLimitStopParameters();
+         inverseDynamicsJoint.setJointLimitLower(limitStopParameters[0]);
+         inverseDynamicsJoint.setJointLimitUpper(limitStopParameters[1]);
+      }
+
       oneDoFJoints.put(joint.getName(), inverseDynamicsJoint);
-   
-      SDFLinkHolder childLink = joint.getChildLinkHolder();
-   
-      checkLinkIsNeededForSensor(inverseDynamicsJoint, childLink);
-      
+
+      LinkDescription childLink = joint.getLink();
+
+      checkLinkIsNeededForSensor(inverseDynamicsJoint, joint);
+
       double mass = childLink.getMass();
       totalMass += mass;
-      Vector3d comOffset = new Vector3d(childLink.getCoMOffset());
-      Matrix3d inertia = InertiaTools.rotate(visualTransform, childLink.getInertia());
-      visualTransform.transform(comOffset);
-   
+      Vector3d comOffset = new Vector3d(childLink.getCenterOfMassOffset());
+      Matrix3d inertia = childLink.getMomentOfInertiaCopy();
+
       RigidBody rigidBody = ScrewTools.addRigidBody(childLink.getName(), inverseDynamicsJoint, inertia, mass,
             comOffset);
       //      System.out.println("Adding rigid body " + childLink.getName() + "; Mass: " + childLink.getMass() + "; ixx: " + childLink.getInertia().m00 + "; iyy: " + childLink.getInertia().m11
       //            + "; izz: " + childLink.getInertia().m22 + "; COM Offset: " + childLink.getCoMOffset());
-   
-   
+
+
       mapRigidBody(joint, inverseDynamicsJoint, rigidBody);
-      addSensorDefinitions(inverseDynamicsJoint, childLink);
-   
-   
-      for(SDFForceSensor sdfForceSensor : joint.getForceSensors())
+      addSensorDefinitions(inverseDynamicsJoint, joint);
+
+
+      for(ForceSensorDescription sdfForceSensor : joint.getForceSensors())
       {
-         ForceSensorDefinition forceSensorDefinition = new ForceSensorDefinition(sdfForceSensor.getName(), inverseDynamicsJoint.getSuccessor(), sdfForceSensor.getTransform());
+         ForceSensorDefinition forceSensorDefinition = new ForceSensorDefinition(sdfForceSensor.getName(), inverseDynamicsJoint.getSuccessor(), sdfForceSensor.getTransformToJoint());
          forceSensorDefinitions.add(forceSensorDefinition);
       }
-      
-      for(SDFContactSensor sdfContactSensor : joint.getContactSensors())
+
+//      for(SDFContactSensor sdfContactSensor : joint.getContactSensors())
+//      {
+//         ContactSensorDefinition contactSensorDefinition = new ContactSensorDefinition(sdfContactSensor.getName(), inverseDynamicsJoint.getSuccessor(),sdfContactSensor.getSensorType());
+//         contactSensorDefinitions.add(contactSensorDefinition);
+//      }
+
+      for (JointDescription sdfJoint : joint.getChildrenJoints())
       {
-         ContactSensorDefinition contactSensorDefinition = new ContactSensorDefinition(sdfContactSensor.getName(), inverseDynamicsJoint.getSuccessor(),sdfContactSensor.getSensorType());
-         contactSensorDefinitions.add(contactSensorDefinition);
-      }
-   
-      for (SDFJointHolder sdfJoint : childLink.getChildren())
-      {
-         addJointsRecursively(sdfJoint, rigidBody);
+         addJointsRecursively((OneDoFJointDescription) sdfJoint, rigidBody);
       }
    }
 
-   protected void mapRigidBody(SDFJointHolder joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
+   protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
    {
       if (rigidBody.getName().equals(sdfJointNameMap.getChestName()))
       {
          chest = rigidBody;
       }
-   
+
       if (rigidBody.getName().equals(sdfJointNameMap.getHeadName()))
       {
          head = rigidBody;
       }
-      
+
       Set<String> lastSimulatedJoints = sdfJointNameMap.getLastSimulatedJoints();
       if(lastSimulatedJoints != null && lastSimulatedJoints.contains(inverseDynamicsJoint.getName()))
       {
          Enum<?> endEffectorRobotSegment = sdfJointNameMap.getEndEffectorsRobotSegment(inverseDynamicsJoint.getName());
          endEffectors.put(endEffectorRobotSegment, rigidBody);
       }
-   
+
       JointRole jointRole = sdfJointNameMap.getJointRole(joint.getName());
       if(jointRole != null)
       {
@@ -508,7 +476,8 @@ public class SDFFullRobotModel implements FullRobotModel
          }
       }
    }
-   
+
+   @Override
    public void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack)
    {
       oneDoFJointsToPack.clear();
@@ -527,6 +496,7 @@ public class SDFFullRobotModel implements FullRobotModel
       Collections.reverse(oneDoFJointsToPack);
    }
 
+   @Override
    public double getTotalMass()
    {
       return totalMass;

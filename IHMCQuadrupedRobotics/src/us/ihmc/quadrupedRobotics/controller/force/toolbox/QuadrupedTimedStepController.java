@@ -14,6 +14,8 @@ import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
 import us.ihmc.quadrupedRobotics.util.*;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineStateChangedListener;
+import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -25,8 +27,6 @@ import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-
-import java.util.Comparator;
 
 public class QuadrupedTimedStepController
 {
@@ -207,6 +207,14 @@ public class QuadrupedTimedStepController
          }
       }
       return null;
+   }
+
+   public void attachStateChangedListener(FiniteStateMachineStateChangedListener stateChangedListener)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         stepStateMachine.get(robotQuadrant).attachStateChangedListener(stateChangedListener);
+      }
    }
 
    public void reset()

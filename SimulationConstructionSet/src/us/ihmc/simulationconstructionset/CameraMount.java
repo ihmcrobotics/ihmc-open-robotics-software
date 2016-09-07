@@ -12,7 +12,6 @@ import us.ihmc.robotics.geometry.TransformTools;
 
 public class CameraMount implements CameraMountInterface
 {
-
    private final String name;
 
    private final RigidBodyTransform offsetTransform;
@@ -24,18 +23,19 @@ public class CameraMount implements CameraMountInterface
    private final Robot rob;
 
    private DoubleYoVariable pan, tilt, roll;
-   
+
    private double fieldOfView, clipDistanceNear, clipDistanceFar;
-   
+   private int imageWidth, imageHeight;
+
    public CameraMount(String name, Vector3d offsetVector, Robot rob)
    {
       this(name, offsetVector, CameraConfiguration.DEFAULT_FIELD_OF_VIEW, CameraConfiguration.DEFAULT_CLIP_DISTANCE_NEAR, CameraConfiguration.DEFAULT_CLIP_DISTANCE_FAR, rob);
    }
-   
+
    public CameraMount(String name, RigidBodyTransform camRotation, Robot rob)
    {
       this(name, camRotation, CameraConfiguration.DEFAULT_FIELD_OF_VIEW, CameraConfiguration.DEFAULT_CLIP_DISTANCE_NEAR, CameraConfiguration.DEFAULT_CLIP_DISTANCE_FAR, rob);
-   } 
+   }
 
    public CameraMount(String name, Vector3d offsetVector, double fieldOfView, double clipDistanceNear, double clipDistanceFar, Robot rob)
    {
@@ -48,18 +48,17 @@ public class CameraMount implements CameraMountInterface
       this.rob = rob;
 
       offsetTransform = new RigidBodyTransform(offset);
-      
+
       this.fieldOfView = fieldOfView;
       this.clipDistanceNear = clipDistanceNear;
       this.clipDistanceFar = clipDistanceFar;
    }
 
-
    public String getName()
    {
       return name;
    }
-   
+
    protected void setParentJoint(Joint parent)
    {
       this.parentJoint = parent;
@@ -160,12 +159,12 @@ public class CameraMount implements CameraMountInterface
    {
       transform.set(transformToCamera);
    }
-   
+
    public void setOffset(RigidBodyTransform newOffsetTransform)
    {
       offsetTransform.set(newOffsetTransform);
    }
-   
+
    public void setRoll(double roll)
    {
       if(enablePanTiltRoll)
@@ -173,7 +172,7 @@ public class CameraMount implements CameraMountInterface
          this.roll.set(roll);
       }
    }
-   
+
    public void setPan(double pan)
    {
       if(enablePanTiltRoll)
@@ -181,7 +180,7 @@ public class CameraMount implements CameraMountInterface
          this.pan.set(pan);
       }
    }
-   
+
    public void setTilt(double tilt)
    {
       if(enablePanTiltRoll)
@@ -208,7 +207,7 @@ public class CameraMount implements CameraMountInterface
    public void zoom(double amount)
    {
       fieldOfView = fieldOfView + amount;
-      
+
       if(fieldOfView < 0.01)
       {
          fieldOfView = 0.01;
@@ -217,5 +216,25 @@ public class CameraMount implements CameraMountInterface
       {
          fieldOfView = 3.0;
       }
+   }
+
+   public int getImageWidth()
+   {
+      return imageWidth;
+   }
+
+   public int getImageHeight()
+   {
+      return imageHeight;
+   }
+
+   public void setImageWidth(int imageWidth)
+   {
+      this.imageWidth = imageWidth;
+   }
+
+   public void setImageHeight(int imageHeight)
+   {
+      this.imageHeight = imageHeight;
    }
 }
