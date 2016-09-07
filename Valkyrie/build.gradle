@@ -76,6 +76,8 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCWholeBodyController")
    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+   compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+   compile ihmc.getProjectDependency(":IHMCRobotDescription")
 
    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
    testCompile ihmc.getProjectTestDependency(":DarpaRoboticsChallenge")
