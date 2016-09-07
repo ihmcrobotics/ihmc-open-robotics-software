@@ -603,6 +603,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
             continue;
 
          DoubleYoVariable stiffness = stiffnesses.get(oneDoFJoint);
+         if (stiffness == null)
+            continue;
          DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
 
          DoubleYoVariable intermediateJointTau;
@@ -660,6 +662,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
             continue;
 
          DoubleYoVariable stiffness = stiffnesses.get(oneDoFJoint);
+         if (stiffness == null)
+            continue;
          DoubleYoVariable intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
 
          DoubleYoVariable intermediateJointTau;
