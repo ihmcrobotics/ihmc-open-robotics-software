@@ -54,7 +54,7 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>root.DoubleMassSpring.DoubleMassSpringController.kSpring,root.DoubleMassSpring.q_x1,root.DoubleMassSpring.q_x2,root.DoubleMassSpring.DoubleMassSpringController.k1,root.DoubleMassSpring.DoubleMassSpringController.k2,root.DoubleMassSpring.DoubleMassSpringController.b1,root.DoubleMassSpring.DoubleMassSpringController.b2,root.DoubleMassSpring.DoubleMassSpringController.x1Des,root.DoubleMassSpring.DoubleMassSpringController.x2Des</Entry Boxes>
+<Entry Boxes>root.DoubleMassSpring.DoubleMassSpringController.kSpring,root.DoubleMassSpring.q_x1,root.DoubleMassSpring.q_x2,root.DoubleMassSpring.DoubleMassSpringController.k1,root.DoubleMassSpring.DoubleMassSpringController.k2,root.DoubleMassSpring.DoubleMassSpringController.b1,root.DoubleMassSpring.DoubleMassSpringController.b2,root.DoubleMassSpring.DoubleMassSpringController.x1Des,root.DoubleMassSpring.DoubleMassSpringController.x2Des,root.DoubleMassSpring.DoubleMassSpringController.controlMode</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 

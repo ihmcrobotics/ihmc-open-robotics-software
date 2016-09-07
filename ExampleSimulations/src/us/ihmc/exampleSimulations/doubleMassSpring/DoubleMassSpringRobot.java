@@ -41,6 +41,10 @@ public class DoubleMassSpringRobot extends Robot
 
       this.addRootJoint(x1Joint);
       this.addRootJoint(x2Joint);
+
+      // Modes are (1 1) and (-1 1)
+      x1Joint.setQ(-0.02);
+      x2Joint.setQ(0.02);
    }
 
    public void setX1Force(double x1Force)
