@@ -222,24 +222,9 @@ public class ComposableStateEstimatorEvaluator
          }
 
          @Override
-         public boolean useControllerDesiredCenterOfPressure()
-         {
-            return false;
-         }
-
-         public boolean useTwistForPelvisLinearStateEstimation()
-         {
-            return true;
-         }
-
          public double getPelvisLinearVelocityAlphaNewTwist()
          {
             return 1.0;
-         }
-
-         public boolean createFusedIMUSensor()
-         {
-            return false;
          }
 
          public double getContactThresholdForce()
@@ -261,34 +246,6 @@ public class ComposableStateEstimatorEvaluator
          }
 
          @Override
-         public double getPelvisVelocityBacklashSlopTime()
-         {
-            // TODO Auto-generated method stub
-            return 0;
-         }
-
-         @Override
-         public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
-         {
-            // TODO For Valkyrie. Probably have to make more generic.
-            return null;
-         }
-
-         @Override
-         public boolean useIMUsForSpineJointVelocityEstimation()
-         {
-            // TODO Auto-generated method stub
-            return false;
-         }
-
-         @Override
-         public double getAlphaIMUsForSpineJointVelocityEstimation()
-         {
-            // TODO Auto-generated method stub
-            return 0;
-         }
-
-         @Override
          public double getContactThresholdHeight()
          {
             // TODO Auto-generated method stub
@@ -299,20 +256,6 @@ public class ComposableStateEstimatorEvaluator
          public FootSwitchType getFootSwitchType()
          {
             return null;
-         }
-
-         @Override
-         public SideDependentList<String> getWristForceSensorNames()
-         {
-            // TODO Auto-generated method stub
-            return null;
-         }
-
-         @Override
-         public boolean requestWristForceSensorCalibrationAtStart()
-         {
-            // TODO Auto-generated method stub
-            return false;
          }
 
          @Override
