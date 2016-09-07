@@ -1202,6 +1202,27 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return stiffesses;
    }
 
+   /**
+    * Helper to convert easily a map from joint name to @{@code DoubleYoVariable} ({@code Map<String, DoubleYoVariable>}) to a {@code Map<OneDoFJoint, DoubleYoVariable>}.
+    * @param mapToConvert {@code Map<String, DoubleYoVariable>} the map to be converted, not modified.
+    * @return {@code Map<OneDoFJoint, DoubleYoVariable>} the converted map.
+    */
+   public Map<OneDoFJoint, DoubleYoVariable> convertFromJointNameToJointMap(Map<String, DoubleYoVariable> mapToConvert)
+   {
+      LinkedHashMap<OneDoFJoint, DoubleYoVariable> newMap = new LinkedHashMap<>();
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
+         String jointName = oneDoFJoint.getName();
+         
+         DoubleYoVariable doubleYoVariable = mapToConvert.get(jointName);
+         if (doubleYoVariable != null)
+            newMap.put(oneDoFJoint, doubleYoVariable);
+      }
+      
+      return newMap;
+   }
+
    public DoubleYoVariable createMaxDeflection(String name, double defaultValue)
    {
       DoubleYoVariable maxDeflection = new DoubleYoVariable(name, registry);
