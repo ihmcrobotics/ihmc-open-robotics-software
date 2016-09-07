@@ -915,7 +915,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       if (DEBUG) System.out.println("firstEdgeIndex = " + firstEdgeIndex);
 
-      if (isEdgeEntering(firstEdgeIndex, observerPoint2d))
+      if (ConvexPolygon2dCalculator.canObserverSeeEdge(firstEdgeIndex, observerPoint2d, this))
       {
          if (DEBUG) System.out.println("firstEdgeIndex is Entering");
 
@@ -942,7 +942,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (!foundLeavingEdges)
       {
-         int edgeToTest = getMidEdgeOppositeClockwiseOrdering(enteringRightEdge, enteringLeftEdge);
+         int edgeToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(enteringRightEdge, enteringLeftEdge, this);
 
          if (DEBUG)
             System.out.println("edgeToTest is " + edgeToTest);
@@ -952,14 +952,14 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
             throw new RuntimeException("Couldn't find a leaving edge! This should never happen!!");
          }
 
-         if (isEdgeEntering(edgeToTest, observerPoint2d))
+         if (ConvexPolygon2dCalculator.canObserverSeeEdge(edgeToTest, observerPoint2d, this))
          {
             if (DEBUG)
                System.out.println("edgeToTest is entering ");
 
             // Figure out if the edgeToTest should replace the leftEdge or the rightEdge:
-            enteringLeftEdge = whichVertexIsToTheLeft(edgeToTest, enteringLeftEdge, observerPoint2d);
-            enteringRightEdge = whichVertexIsToTheRight(edgeToTest, enteringRightEdge, observerPoint2d);
+            enteringLeftEdge = ConvexPolygon2dCalculator.getVertexOnLeft(edgeToTest, enteringLeftEdge, observerPoint2d, this);
+            enteringRightEdge = ConvexPolygon2dCalculator.getVertexOnRight(edgeToTest, enteringRightEdge, observerPoint2d, this);
          }
 
          else
@@ -976,7 +976,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (!foundEnteringEdges)
       {
-         int edgeToTest = getMidEdgeOppositeClockwiseOrdering(leavingLeftEdge, leavingRightEdge);
+         int edgeToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(leavingLeftEdge, leavingRightEdge, this);
 
          if (DEBUG) System.out.println("edgeToTest is " + edgeToTest);
 
@@ -988,7 +988,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
                return false;
          }
 
-         if (isEdgeEntering(edgeToTest, observerPoint2d))
+         if (ConvexPolygon2dCalculator.canObserverSeeEdge(edgeToTest, observerPoint2d, this))
          {
             if (DEBUG) System.out.println("edgeToTest is entering ");
 
@@ -1002,8 +1002,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
             if (DEBUG) System.out.println("edgeToTest is leaving ");
 
             // Figure out if the edgeToTest should replace the leftEdge or the rightEdge:
-            int newLeavingLeftEdge = whichVertexIsToTheLeft(edgeToTest, leavingLeftEdge, observerPoint2d);
-            int newLeavingRightEdge = whichVertexIsToTheRight(edgeToTest, leavingRightEdge, observerPoint2d);
+            int newLeavingLeftEdge = ConvexPolygon2dCalculator.getVertexOnLeft(edgeToTest, leavingLeftEdge, observerPoint2d, this);
+            int newLeavingRightEdge = ConvexPolygon2dCalculator.getVertexOnRight(edgeToTest, leavingRightEdge, observerPoint2d, this);
 
             if ((newLeavingLeftEdge == leavingLeftEdge) && (newLeavingRightEdge == leavingRightEdge))
             {
@@ -1036,8 +1036,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (getNextVertexIndex(enteringLeftEdge) != leavingLeftEdge)
       {
-         int edgeToTest = getMidEdgeOppositeClockwiseOrdering(leavingLeftEdge, enteringLeftEdge);
-         if (isEdgeEntering(edgeToTest, observerPoint2d))
+         int edgeToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(leavingLeftEdge, enteringLeftEdge, this);
+         if (ConvexPolygon2dCalculator.canObserverSeeEdge(edgeToTest, observerPoint2d, this))
          {
             enteringLeftEdge = edgeToTest;
          }
@@ -1056,8 +1056,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (getNextVertexIndex(leavingRightEdge) != enteringRightEdge)
       {
-         int edgeToTest = getMidEdgeOppositeClockwiseOrdering(enteringRightEdge, leavingRightEdge);
-         if (isEdgeEntering(edgeToTest, observerPoint2d))
+         int edgeToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(enteringRightEdge, leavingRightEdge, this);
+         if (ConvexPolygon2dCalculator.canObserverSeeEdge(edgeToTest, observerPoint2d, this))
          {
             enteringRightEdge = edgeToTest;
          }
@@ -1134,7 +1134,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       // Binary search maintaining nearest left and nearest right vertices until they are adjacent: //TODO remove the q from maintaining
       while ((rightEdge != leftEdge) && (getNextVertexIndex(rightEdge) != leftEdge))
       {
-         int testEdge = getMidEdgeOppositeClockwiseOrdering(leftEdge, rightEdge);
+         int testEdge = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(leftEdge, rightEdge, this);
 
          if (isEdgeFullyToTheLeftOfObserver(testEdge, pointToProject))
          {
@@ -1277,7 +1277,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (!foundLeftVertices)
       {
-         int vertexToTest = getMidEdgeOppositeClockwiseOrdering(forwardRightVertex, behindRightVertex);
+         int vertexToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(forwardRightVertex, behindRightVertex, this);
 
          if (isVertexToTheLeftOrStraightOn(vertexToTest, lineStart, lineDirection))
          {
@@ -1289,14 +1289,14 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
          else
          {
-            forwardRightVertex = whichVertexIsToTheLeft(vertexToTest, forwardRightVertex, lineStart);
-            behindRightVertex = whichVertexIsToTheRight(vertexToTest, behindRightVertex, lineStart);
+            forwardRightVertex = ConvexPolygon2dCalculator.getVertexOnLeft(vertexToTest, forwardRightVertex, lineStart, this);
+            behindRightVertex = ConvexPolygon2dCalculator.getVertexOnRight(vertexToTest, behindRightVertex, lineStart, this);
          }
       }
 
       while (!foundRightVertices)
       {
-         int vertexToTest = getMidEdgeOppositeClockwiseOrdering(behindLeftVertex, forwardLeftVertex);
+         int vertexToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(behindLeftVertex, forwardLeftVertex, this);
 
          if (isVertexToTheRightOrStraightOn(vertexToTest, lineStart, lineDirection))
          {
@@ -1308,8 +1308,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
          else
          {
-            forwardLeftVertex = whichVertexIsToTheRight(vertexToTest, forwardLeftVertex, lineStart);
-            behindLeftVertex = whichVertexIsToTheLeft(vertexToTest, behindLeftVertex, lineStart);
+            forwardLeftVertex = ConvexPolygon2dCalculator.getVertexOnRight(vertexToTest, forwardLeftVertex, lineStart, this);
+            behindLeftVertex = ConvexPolygon2dCalculator.getVertexOnLeft(vertexToTest, behindLeftVertex, lineStart, this);
          }
       }
 
@@ -1317,7 +1317,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (getNextVertexIndex(forwardLeftVertex) != forwardRightVertex)
       {
-         int vertexToTest = getMidEdgeOppositeClockwiseOrdering(forwardRightVertex, forwardLeftVertex);
+         int vertexToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(forwardRightVertex, forwardLeftVertex, this);
          if (isVertexToTheLeftOrStraightOn(vertexToTest, lineStart, lineDirection))
          {
             forwardLeftVertex = vertexToTest;
@@ -1370,77 +1370,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       {
          return false;
       }
-   }
-
-   private int whichVertexIsToTheLeft(int index1, int index2, Point2d observerFramePoint2d)
-   {
-      int ret = whichVertexIsToTheLeftRight(index1, index2, observerFramePoint2d, true);
-
-      //    System.out.println("Checking Which edge is to the left. index1 = " + index1 + ", index2 = " + index2 + ", observerFramePoint2d = " + observerFramePoint2d + ", answer = " + ret);
-
-      return ret;
-   }
-
-   private int whichVertexIsToTheRight(int index1, int index2, Point2d observerFramePoint2d)
-   {
-      int ret = whichVertexIsToTheLeftRight(index1, index2, observerFramePoint2d, false);
-
-      //    System.out.println("Checking Which edge is to the right. index1 = " + index1 + ", index2 = " + index2 + ", observerFramePoint2d = " + observerFramePoint2d + ", answer = " + ret);
-
-      return ret;
-   }
-
-   private int whichVertexIsToTheLeftRight(int index1, int index2, Point2d observerFramePoint2d, boolean returnTheLeftOne)
-   {
-      Point2d point1 = getVertex(index1);
-      Point2d point2 = getVertex(index2);
-
-      double vectorToVertex1X = point1.getX() - observerFramePoint2d.getX();
-      double vectorToVertex1Y = point1.getY() - observerFramePoint2d.getY();
-
-      double vectorToVertex2X = point2.getX() - observerFramePoint2d.getX();
-      double vectorToVertex2Y = point2.getY() - observerFramePoint2d.getY();
-
-      double crossProduct = vectorToVertex1X * vectorToVertex2Y - vectorToVertex1Y * vectorToVertex2X;
-
-      if (crossProduct < 0.0)
-      {
-         if (returnTheLeftOne)
-            return index1;
-         else
-            return index2;
-      }
-      else
-      {
-         if (returnTheLeftOne)
-            return index2;
-         else
-            return index1;
-      }
-   }
-
-   /**
-    * Check if from the observer point you're looking at the "outside-of-polygon side of the edge"
-    * @param edgeIndex edge you look at.
-    * @param observerPoint2d point from where you look at the edge.
-    * @return true = "outside-of-polygon side of the edge".
-    */
-   private boolean isEdgeEntering(int edgeIndex, Point2d observerPoint2d)
-   {
-      Point2d vertex = getVertex(edgeIndex);
-      Point2d nextVertex = getNextVertex(edgeIndex);
-
-      // Vector perpendicular to the edge and pointing outside the polygon
-      double edgeNormalX = -(nextVertex.getY() - vertex.getY());
-      double edgeVectorY = nextVertex.getX() - vertex.getX();
-
-      double observerToVertexX = vertex.getX() - observerPoint2d.getX();
-      double observerToVertexY = vertex.getY() - observerPoint2d.getY();
-
-      // Equivalent to looking at the projection of the observerToVertex vector on the edge normal vector, since only need to look at the sign.
-      double dotProduct = edgeNormalX * observerToVertexX + edgeVectorY * observerToVertexY;
-
-      return dotProduct < 0.0;
    }
 
    @Override
@@ -1744,7 +1673,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (getNextVertexIndex(rightEnteringVertex) != leftEnteringVertex)
       {
-         int testVertex = getMidEdgeOppositeClockwiseOrdering(leftEnteringVertex, rightEnteringVertex);
+         int testVertex = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(leftEnteringVertex, rightEnteringVertex, this);
 
          if (isLineStrictlyBetweenVertices(tempPoint, tempVector1, testVertex, rightEnteringVertex))
          {
@@ -1768,7 +1697,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (getNextVertexIndex(leftLeavingVertex) != rightLeavingVertex)
       {
-         int testVertex = getMidEdgeOppositeClockwiseOrdering(rightLeavingVertex, leftLeavingVertex);
+         int testVertex = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(rightLeavingVertex, leftLeavingVertex, this);
 
          if (isLineStrictlyBetweenVertices(tempPoint, tempVector1, testVertex, rightLeavingVertex))
          {
@@ -2380,15 +2309,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          throw new IndexOutOfBoundsException("vertexIndex < 0");
       if (vertexIndex >= numberOfVertices)
          throw new IndexOutOfBoundsException("vertexIndex >= numberOfVertices. numberOfVertices = " + numberOfVertices);
-   }
-
-   protected int getMidEdgeOppositeClockwiseOrdering(int leftEdgeIndex, int rightEdgeIndex)
-   {
-      checkIfUpToDate();
-      if (rightEdgeIndex >= leftEdgeIndex)
-         return (rightEdgeIndex + (leftEdgeIndex + numberOfVertices - rightEdgeIndex + 1) / 2) % numberOfVertices;
-      else
-         return (rightEdgeIndex + leftEdgeIndex + 1) / 2;
    }
 
    @Override
