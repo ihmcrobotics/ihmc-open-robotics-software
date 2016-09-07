@@ -22,6 +22,10 @@ public class OutputProcessorBuilder
       @Override
       public void initialize()
       {
+         for (int i = 0; i < outputProcessors.size(); i++)
+         {
+            outputProcessors.get(i).initialize();
+         }
       }
 
       @Override
@@ -54,11 +58,13 @@ public class OutputProcessorBuilder
 
    private final FullRobotModel fullRobotModel;
    private final ArrayList<OutputProcessorComponent> outputProcessors;
+   private boolean outputProcessorHasBeenBuilt;
 
    public OutputProcessorBuilder(FullRobotModel fullRobotModel)
    {
       this.fullRobotModel = fullRobotModel;
       this.outputProcessors = new ArrayList<>();
+      this.outputProcessorHasBeenBuilt = false;
    }
 
    public void addComponent(OutputProcessorComponent outputProcessorComponent)
@@ -69,6 +75,14 @@ public class OutputProcessorBuilder
 
    public OutputProcessor build()
    {
+      if (outputProcessorHasBeenBuilt)
+      {
+         throw new RuntimeException("build() can only be called once for an instance of OutputProcessorBuilder");
+      }
+      else
+      {
+         outputProcessorHasBeenBuilt = true;
+      }
       return new OutputProcessorBank(outputProcessors);
    }
 }

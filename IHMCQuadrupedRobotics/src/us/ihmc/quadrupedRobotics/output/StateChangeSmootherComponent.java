@@ -57,6 +57,12 @@ public class StateChangeSmootherComponent implements OutputProcessorComponent
    }
 
    @Override
+   public void initialize()
+   {
+
+   }
+
+   @Override
    public void update()
    {
       if (hasHighLevelControllerStateChanged.get())
