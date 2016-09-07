@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class BlockingSynchronousMultiThreadedRealTimeRobotController
+public class BlockingSynchronousMultiThreadedRealTimeRobotController implements MultiThreadedRobotControlElementCoordinator
 {
    private final MultiThreadedRobotControlElement sensorReader;
    private final TimestampProvider timestampProvider;
