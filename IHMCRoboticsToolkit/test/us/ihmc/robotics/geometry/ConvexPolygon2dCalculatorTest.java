@@ -367,6 +367,97 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(polygon.getVertex(0).epsilonEquals(translation1, epsilon));
    }
 
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCanObserverSeeEdge1()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.addVertex(new Point2d(1.0, 0.0));
+      polygon.addVertex(new Point2d(0.0, 1.0));
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.update();
+
+      // observer inside polygon can not see any outside edges
+      Point2d observer1 = new Point2d(0.5, 0.5);
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+         assertFalse(ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer1, polygon));
+
+      // this observer should be able to see the edge starting at vertex (0.0, 0.0)
+      Point2d observer2 = new Point2d(-0.5, 0.5);
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         if (polygon.getVertex(i).epsilonEquals(new Point2d(0.0, 0.0), epsilon))
+            assertTrue(ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer2, polygon));
+         else
+            assertFalse(ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer2, polygon));
+      }
+
+      // this observer should be able to see the edges starting at vertex (0.0, 1.0) and at (1.0, 1.0)
+      Point2d observer3 = new Point2d(1.5, 1.5);
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         if (polygon.getVertex(i).epsilonEquals(new Point2d(0.0, 1.0), epsilon))
+            assertTrue(ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer3, polygon));
+         else if (polygon.getVertex(i).epsilonEquals(new Point2d(1.0, 1.0), epsilon))
+            assertTrue(ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer3, polygon));
+         else
+            assertFalse(ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer3, polygon));
+      }
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCanObserverSeeEdge2()
+   {
+      // line polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(1.0, 0.0));
+      polygon.addVertex(new Point2d(0.0, 1.0));
+      polygon.update();
+
+      // should be able to see one edge
+      Point2d observer1 = new Point2d(0.0, 0.0);
+      boolean seeEdge1 = ConvexPolygon2dCalculator.canObserverSeeEdge(0, observer1, polygon);
+      boolean seeEdge2 = ConvexPolygon2dCalculator.canObserverSeeEdge(1, observer1, polygon);
+      assertTrue((seeEdge1 || seeEdge2) && !(seeEdge1 && seeEdge2));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCanObserverSeeEdge3()
+   {
+      // point polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.update();
+
+      Point2d observer1 = new Point2d(0.0, 0.0);
+      assertFalse(ConvexPolygon2dCalculator.canObserverSeeEdge(0, observer1, polygon));
+   }
+
+//   @DeployableTestMethod(estimatedDuration = 0.0)
+//   @Test(timeout = 30000)
+//   public void testGetVertexOnSide1()
+//   {
+//      ConvexPolygon2d polygon = new ConvexPolygon2d();
+//      polygon.addVertex(new Point2d(0.0, 0.0));
+//      polygon.addVertex(new Point2d(1.0, 0.0));
+//      polygon.addVertex(new Point2d(0.0, 1.0));
+//      polygon.addVertex(new Point2d(1.0, 1.0));
+//      polygon.update();
+//
+//      Point2d observer1 = new Point2d(0.5, -0.5);
+//      int leftIndex = 1;
+//      int rightIndex = 3;
+//      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(leftIndex, rightIndex, observer1, polygon), leftIndex);
+//   }
+
+   private static void assertIndexCorrect(int expected, int actual)
+   {
+      assertEquals("Index did not equal expected.", expected, actual);
+   }
+
    private static void assertDistanceCorrect(double expected, double actual)
    {
       assertEquals("Distance did not equal expected.", expected, actual, epsilon);
