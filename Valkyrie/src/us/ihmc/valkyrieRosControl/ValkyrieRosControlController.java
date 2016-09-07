@@ -315,7 +315,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
       else // TODO Gazebo
       {
-         BlockingSynchronousMultiThreadedRealTimeRobotController coordinator = new BlockingSynchronousMultiThreadedRealTimeRobotController(estimatorThread, null); // TODO Timestamp Provider
+         BlockingSynchronousMultiThreadedRealTimeRobotController coordinator = new BlockingSynchronousMultiThreadedRealTimeRobotController(estimatorThread, timestampProvider);
          coordinator.addController(controllerThread, (int) (robotModel.getControllerDT() / robotModel.getEstimatorDT()));
 
          robotController = coordinator;
