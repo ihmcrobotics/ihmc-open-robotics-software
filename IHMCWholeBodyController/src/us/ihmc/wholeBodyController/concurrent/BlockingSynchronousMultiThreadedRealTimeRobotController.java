@@ -1,4 +1,4 @@
-package us.ihmc.wholeBodyController.concurrent.controllerCoreCommands;
+package us.ihmc.wholeBodyController.concurrent;
 
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.tools.TimestampProvider;
