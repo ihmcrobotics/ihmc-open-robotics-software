@@ -7,8 +7,8 @@ import java.util.EnumMap;
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -63,25 +63,25 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private static final double ESTIMATED_ROTATIONAL_INERTIA = 5.0; // TODO PDControl this when z-vel=0
    private static final int ORDER_OF_SWING_Z_POLYNOMIAL = 4;
    private static final double ICP_BOUNDS_MARGIN = 0.1;
-   
+
    // Controller Options
    public static final boolean USE_COPX_AND_COPY = true;
    public static final boolean CREATE_VISUALIZATIONS = true;
    public static final double VISUALIZATION_BALLS_PER_SWING = 20.0;
-   
+
    // Basis Vectors
    private static final double COEFFICIENT_OF_FRICTION = 0.7;
    private static final int NUMBER_OF_BASIS_VECTORS = 4;
    private static final double ANGLE_BETWEEN_BASIS_VECTORS = 2.0 * Math.PI / (double) NUMBER_OF_BASIS_VECTORS;
    private static final double BASIS_VECTOR_HEIGHT = 1.0;
-   
+
    // Inherited Variables
    private final double dt;
    private double initialStanceHeight;
    private final DoubleYoVariable yoTime;
    private final YoVariableRegistry registry = new YoVariableRegistry("TrotWalkController");
    private final QuadrupedReferenceFrames referenceFrames;
-   private final SDFFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private final QuadrantDependentList<ArrayList<OneDoFJoint>> oneDofJoints = new QuadrantDependentList<>();
    private boolean hasInitializedInheritedYoVariables = false;
    private DoubleYoVariable q_z;
@@ -110,7 +110,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector centerOfMassVelocity = new YoFrameVector("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint centerOfMassXYProjection = new YoFramePoint("centerOfMassXYProjection", ReferenceFrame.getWorldFrame(), registry);
-   
+
    // Balancing
    private final YoFramePoint2d icp = new YoFramePoint2d("icp", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector2d icpVelocity = new YoFrameVector2d("icpVelocity", ReferenceFrame.getWorldFrame(), registry);
@@ -147,13 +147,13 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final YoFrameVector bodyAngularAcceleration = new YoFrameVector("bodyAngularAcceleration", ReferenceFrame.getWorldFrame(), registry);
    private final YoWrench desiredBodyWrench;
    private final YoTwist desiredBodyTwist;
-   
+
    // Jacobian
    private final FramePoint jointPosition = new FramePoint();
    private final FrameVector jointToFootVector = new FrameVector();
    private final FrameVector vmcRequestedTorqueFromJoint = new FrameVector();
    private final FrameVector jointAxis = new FrameVector();
-   
+
    // Walking
    private final EnumYoVariable<QuadrupedGaitCycle> desiredGait = new EnumYoVariable<>("desiredGait", registry, QuadrupedGaitCycle.class);
    private final EnumYoVariable<QuadrupedGaitCycle> nextGait = new EnumYoVariable<>("nextGait", registry, QuadrupedGaitCycle.class);
@@ -190,7 +190,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final YoFramePoint2d icpTrajectory2dInitialPosition = new YoFramePoint2d("icpTrajectory2dInitialPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint2d icpTrajectory2dFinalPosition = new YoFramePoint2d("icpTrajectory2dFinalPosition", ReferenceFrame.getWorldFrame(), registry);
    private final QuadrantDependentList<BagOfBalls> swingTrajectoryBagsOfBalls = new QuadrantDependentList<>();
-   
+
    // Experimental Trot Stuff
    private final FramePoint rightMidpoint = new FramePoint();
    private final FramePoint leftMidpoint = new FramePoint();
@@ -214,13 +214,13 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private double ratioFromMidToClosest;
    private final BooleanYoVariable isInFrontOfLeftTrotLine = new BooleanYoVariable("isInFrontOfLeftTrotLine", registry);
    private final BooleanYoVariable isInFrontOfRightTrotLine = new BooleanYoVariable("isInFrontOfRightTrotLine", registry);
-   
+
    // Swing PD Controllers
    private final YoFrameVector kp_swing = new YoFrameVector("kp_swing_", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector kd_swing = new YoFrameVector("kd_swing_", ReferenceFrame.getWorldFrame(), registry);
    private final QuadrantDependentList<YoFramePoint> desiredFootPositions = new QuadrantDependentList<>();
    private final QuadrantDependentList<YoFrameVector> desiredFootVelocities = new QuadrantDependentList<>();
-   
+
    private static final EnumMap<QuadrupedGaitCycle, Double> gaitCyclePeriodMap = new EnumMap<>(QuadrupedGaitCycle.class);
    {
       gaitCyclePeriodMap.put(QuadrupedGaitCycle.STAND, 0.5);
@@ -229,14 +229,14 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       gaitCyclePeriodMap.put(QuadrupedGaitCycle.WALKING_TROT, 1.0); // 0.30);
    }
 
-   public QuadrupedVMCForceMultiGaitController(QuadrupedPhysicalProperties physicalProperties, SDFFullQuadrupedRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
+   public QuadrupedVMCForceMultiGaitController(QuadrupedPhysicalProperties physicalProperties, FullQuadrupedRobotModel fullRobotModel, QuadrantDependentList<FootSwitchInterface> footSwitches, double DT,
          DoubleYoVariable yoTime, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       this.dt = DT;
       this.yoTime = yoTime;
-      
+
       centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -246,7 +246,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          fullRobotModel.getOneDoFJointsFromRootToHere(oneDoFJointBeforeFoot, jointsToControl);
          oneDofJoints.set(robotQuadrant, jointsToControl);
       }
-      
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          vmcFootForces.set(robotQuadrant, new YoFrameVector("vmcFootForces" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
@@ -259,7 +259,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          shoulderPositionsOnGroundForVis.set(robotQuadrant, new YoFramePoint("shoulderPositionOnGroundForVis" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
          footVelocities.set(robotQuadrant, new YoFrameVector("footVelocity" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
       }
-      
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          basisForceVectors.set(robotQuadrant, new YoFrameVector[NUMBER_OF_BASIS_VECTORS]);
@@ -267,18 +267,18 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          basisTorqueVectors.set(robotQuadrant, new YoFrameVector[NUMBER_OF_BASIS_VECTORS]);
          rhoScalars.set(robotQuadrant, new double[NUMBER_OF_BASIS_VECTORS]);
          footToCoMVectors.set(robotQuadrant, new YoFrameVector("footToCoMVector" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
-         
+
          for (int i = 0; i < NUMBER_OF_BASIS_VECTORS; i++)
          {
             basisForceVectors.get(robotQuadrant)[i] = new YoFrameVector("basisForceVector" + robotQuadrant.getPascalCaseName() + i, ReferenceFrame.getWorldFrame(), registry);
             basisTorqueVectors.get(robotQuadrant)[i] = new YoFrameVector("basisTorqueVector" + robotQuadrant.getPascalCaseName() + i, ReferenceFrame.getWorldFrame(), registry);
          }
       }
-      
+
       desiredBodyWrench = new YoWrench("desiredBodyWrench", referenceFrames.getBodyZUpFrame(), ReferenceFrame.getWorldFrame(), registry);
       desiredBodyTwist = new YoTwist("desiredBodyTwist", referenceFrames.getBodyFrame(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), registry);
       bodyTwist = new YoTwist("bodyTwist", referenceFrames.getBodyFrame(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), registry);
-      
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          swingZTrajectories.set(robotQuadrant, new YoPolynomial("swingZTrajectory" + robotQuadrant.getPascalCaseName(), ORDER_OF_SWING_Z_POLYNOMIAL, registry));
@@ -289,21 +289,21 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          desiredFootPositions.set(robotQuadrant, new YoFramePoint("desiredFootPosition" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
          desiredFootVelocities.set(robotQuadrant, new YoFrameVector("desiredFootVelocity" + robotQuadrant.getPascalCaseName(), ReferenceFrame.getWorldFrame(), registry));
       }
-      
+
       yoGraphicsListRegistry.hideYoGraphics();
       yoGraphicsListRegistry.hideArtifacts();
-      
+
       if (CREATE_VISUALIZATIONS)
       {
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             swingTrajectoryBagsOfBalls.set(robotQuadrant, new BagOfBalls((int) VISUALIZATION_BALLS_PER_SWING, 0.01, "swingTrajectoryBagOfBalls" + robotQuadrant.getPascalCaseName(), YoAppearance.White(), registry, yoGraphicsListRegistry));
-            
+
             yoGraphicsListRegistry.registerYoGraphic(getName() + "FootForces", new YoGraphicVector("vmcFootForce" + robotQuadrant.getPascalCaseName(), footPositions.get(robotQuadrant), vmcFootForces.get(robotQuadrant), 0.007, YoAppearance.Yellow(), true, 0.01));
             yoGraphicsListRegistry.registerArtifact(getName() + "FootPositions", new YoArtifactPosition("footPosition" + robotQuadrant.getPascalCaseName() + "Vis", footPositions.get(robotQuadrant).getYoX(), footPositions.get(robotQuadrant).getYoY(), GraphicType.BALL_WITH_CROSS, YoAppearance.Color(robotQuadrant.getColor()).getAwtColor(), 0.02));
             yoGraphicsListRegistry.registerArtifact(getName() + "ShoulderPositions", new YoArtifactPosition("shoulderPosition" + robotQuadrant.getPascalCaseName() + "Vis", shoulderPositions.get(robotQuadrant).getYoX(), shoulderPositions.get(robotQuadrant).getYoY(), GraphicType.BALL_WITH_CROSS, YoAppearance.Chartreuse().getAwtColor(), 0.02));
             yoGraphicsListRegistry.registerYoGraphic(getName() + "ShoulderPositionsOnGroundForVis", new YoGraphicPosition("shoulderPositionOnGroundForVis" + robotQuadrant.getPascalCaseName() + "Vis", shoulderPositionsOnGroundForVis.get(robotQuadrant), 0.01, YoAppearance.Chartreuse()));
-            
+
             yoGraphicsListRegistry.registerYoGraphic(getName() + "BasisVectors", new YoGraphicVector("basisCoPYoGraphicVectors" + robotQuadrant.getPascalCaseName(), footPositions.get(robotQuadrant), basisCoPVectors.get(robotQuadrant), 500, YoAppearance.DarkBlue(), true, 0.01));
             for (int i = 0; i < NUMBER_OF_BASIS_VECTORS; i++)
             {
@@ -334,7 +334,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          yoGraphicsListRegistry.registerYoGraphic(getName() + "BodyWrench", new YoGraphicVector("desiredBodyForceForVis", desiredBodyForceOriginForVis, bodyLinearAcceleration, 0.1, YoAppearance.Cyan(), true, 0.01));
          yoGraphicsListRegistry.registerYoGraphic(getName() + "BodyWrench", new YoGraphicVector("desiredBodyTorqueForVis", desiredBodyTorqueOriginForVis, bodyAngularAcceleration, 0.1, YoAppearance.Orange(), true, 0.01));
       }
-      
+
       parentRegistry.addChild(registry);
    }
 
@@ -353,7 +353,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          currentSupportPolygon.setFootstep(robotQuadrant, footPositions.get(robotQuadrant).getFrameTuple());
       }
       targetSupportPolygon.setWithoutChecks(currentSupportPolygon);
-      
+
       currentGait.set(QuadrupedGaitCycle.STAND);
       currentGaitStartTime.set(0.0);
       desiredGaitPeriod.set(gaitCyclePeriodMap.get(currentGait.getEnumValue()));
@@ -365,13 +365,13 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       previousGaitPhase.set(QuadrupedSupportConfiguration.ALL_FOURS);
       currentGaitPhase.set(QuadrupedSupportConfiguration.ALL_FOURS);
       currentGaitCompletion.set(0.0);
-      
+
       updatePreGaitCheckEstimates();
-      
+
       initialStanceHeight = stancePose.getZ();
       desiredStancePose.set(stancePose);
       desiredStancePoseOffset.setToZero();
-      
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          ArrayList<OneDoFJoint> legJoints = oneDofJoints.get(robotQuadrant);
@@ -380,36 +380,36 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
             legJoints.get(i).setUnderPositionControl(false);
          }
       }
-      
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          desiredFootPositions.get(robotQuadrant).set(footPositions.get(robotQuadrant));
       }
-      
+
       handlePhaseChange();
-      
+
       updatePostGaitCheckEstimates();
-      
+
       targetSupportPolygon.setWithoutChecks(currentSupportPolygon);
-   
+
       kp_icp.set(3.0);
       kd_icp.set(0.1);
-      
+
       kp_x.set(50.0);
       kd_x.set(10.0);
-   
+
       kp_y.set(50.0);
       kd_y.set(10.0);
-   
+
       kp_roll.set(-700.0);
       kd_roll.set(-20.0);
-   
+
       kp_pitch.set(-700.0);
       kd_pitch.set(-30.0);
-   
+
       kp_yaw.set(-700.0);
       kd_yaw.set(-100.0);
-   
+
       kp_z.set(300.0);
       kd_z.set(25.0);
 
@@ -427,13 +427,13 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       updatePreGaitCheckEstimates();
       checkGaitTransitionConditions();
       updatePostGaitCheckEstimates();
-      
+
       computeSwingTrajectories();
-      
+
       doICPControl();
       doVirtualModelControl();
       distributeForcesToFeet();
-      
+
       computeStanceJacobians();
 
       return null;
@@ -444,17 +444,17 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       if (!hasInitializedInheritedYoVariables)
       {
          hasInitializedInheritedYoVariables = true;
-         
+
          YoVariableRegistry rootRegistry = registry;
          while (rootRegistry.getParent() != null)
          {
             rootRegistry = rootRegistry.getParent();
          }
-         
+
          q_z = (DoubleYoVariable) rootRegistry.getVariable("root.babyBeastSimple", "q_z");
       }
    }
-   
+
    private void updatePreGaitCheckEstimates()
    {
       //update frames
@@ -471,33 +471,33 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          footVelocities.get(robotQuadrant).sub(footPositions.get(robotQuadrant));
          footVelocities.get(robotQuadrant).scale(-1.0 / dt);
       }
-      
+
       bodyPoseWorld.setFromReferenceFrame(referenceFrames.getBodyFrame());
       if (q_z != null)
       {
          bodyPoseWorld.setZ(q_z.getDoubleValue() + SIMULATION_TO_ROBOT_MODEL_Z_DIFFERNCE);
       }
       bodyPoseReferenceFrame.setPoseAndUpdate(bodyPoseWorld.getPosition().getFrameTuple(), bodyPoseWorld.getOrientation().getFrameOrientation());
-      
+
       bodyTwist.setLinearPart(fullRobotModel.getRootJoint().getLinearVelocityForReading());
       bodyTwist.setAngularPart(fullRobotModel.getRootJoint().getAngularVelocityForReading());
-      
+
       stancePose.set(bodyPoseWorld);
-      
+
       stancePoseHigherForVis.set(stancePose.getPosition());
       stancePoseHigherForVis.add(0.0, 0.0, 0.3);
 
       // compute center of mass position and velocity
       centerOfMass.setFromReferenceFrame(referenceFrames.getCenterOfMassZUpFrame());
       centerOfMassXYProjection.set(centerOfMass.getReferenceFrame(), centerOfMass.getX(), centerOfMass.getY(), 0.0);
-      
+
       centerOfMassJacobian.compute();
-      
+
       FrameVector tempVector = centerOfMassVelocity.getFrameTuple();
       centerOfMassJacobian.getCenterOfMassVelocity(tempVector);
       tempVector.changeFrame(centerOfMassVelocity.getReferenceFrame());
       centerOfMassVelocity.setWithoutChecks(tempVector);
-      
+
       currentGaitCompletion.set((yoTime.getDoubleValue() - currentGaitStartTime.getDoubleValue()) / desiredGaitPeriod.getDoubleValue());
       if (currentGaitCompletion.getDoubleValue() >= 1.0)
       {
@@ -505,7 +505,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          currentGaitCompletion.set(currentGaitCompletion.getDoubleValue() % 1.0);
       }
    }
-   
+
    private void checkGaitTransitionConditions()
    {
       if (gaitCompleted.getBooleanValue())
@@ -543,7 +543,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       {
          nextGaitPhase.set(currentGait.getEnumValue().getNextGaitPhase(currentGaitCompletion.getDoubleValue()));
       }
-      
+
       // Update support polygons
       previousSupportPolygon.setWithoutChecks(currentSupportPolygon);
       nextSupportPolygon.clear();
@@ -555,18 +555,18 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          nextSupportPolygon.getFootstep(robotQuadrant).setY(shoulderPositions.get(robotQuadrant).getY());
 //         nextSupportPolygon.getFootstep(robotQuadrant).setZ(0.0);
       }
-      
+
       // Update Swing Parameters
       for (RobotQuadrant robotQuadrant : previousGaitPhase.getEnumValue().supportQuadrants())
       {
          swingInitialZHeights.get(robotQuadrant).set(footPositions.get(robotQuadrant).getZ());
          gaitCompletionAtStartOfSwing.get(robotQuadrant).set(currentGaitCompletion.getDoubleValue());
-         
+
          // Measure durations of legs switching to swing
          if (currentGaitPhase.getEnumValue().isSwingQuadrant(robotQuadrant))
          {
             swingDurations.get(robotQuadrant).set(currentGait.getEnumValue().getRemainingSwingDuration(robotQuadrant, currentGaitCompletion.getDoubleValue()));
-         
+
             // Create trajectory visualization
             if (CREATE_VISUALIZATIONS)
             {
@@ -581,7 +581,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          }
       }
    }
-   
+
    private void updatePostGaitCheckEstimates()
    {
       currentGaitPhaseCompletion.set((currentGaitCompletion.getDoubleValue() - currentGaitPhaseStartTime.getDoubleValue()) / currentGaitPhaseDuration.getDoubleValue());
@@ -589,7 +589,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       {
          currentSwingCompletions.get(robotQuadrant).set((currentGaitCompletion.getDoubleValue() - gaitCompletionAtStartOfSwing.get(robotQuadrant).getDoubleValue()) / swingDurations.get(robotQuadrant).getDoubleValue());
       }
-      
+
       currentSupportPolygon.clear();
       for (RobotQuadrant robotQuadrant : currentGaitPhase.getEnumValue().supportQuadrants())
       {
@@ -597,13 +597,13 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       }
       currentShrunkenSupportPolygon.setWithoutChecks(currentSupportPolygon);
       currentShrunkenSupportPolygon.shrinkPolygon2d(ICP_BOUNDS_MARGIN);
-      
+
       targetSupportPolygon.packYoFrameConvexPolygon2d(targetYoFrameConvexPolygon2d);
       previousSupportPolygon.packYoFrameConvexPolygon2d(previousYoFrameConvexPolygon2d);
       currentSupportPolygon.packYoFrameConvexPolygon2d(currentYoFrameConvexPolygon2d);
       currentShrunkenSupportPolygon.packYoFrameConvexPolygon2d(currentYoFrameConvexPolygon2d);
       nextSupportPolygon.packYoFrameConvexPolygon2d(nextYoFrameConvexPolygon2d);
-      
+
       currentSupportPolygon.getCentroid(centroid);
 
       // compute instantaneous capture point
@@ -614,7 +614,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       icp.setY(centerOfMass.getY() + centerOfMassVelocity.getY() / omega);
       icpVelocity.sub(icp);
       icpVelocity.scale(-1.0 / dt);
-      
+
       // update CoP
       double fzTotal = 0.0;
       centerOfPressure.setToZero();
@@ -633,14 +633,14 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       {
          centerOfPressure.scale(1.0 / fzTotal);
       }
-      
+
       for (RobotQuadrant robotQuadrant : currentSupportPolygon.getSupportingQuadrantsInOrder())
       {
          footToCoMVectors.get(robotQuadrant).set(centerOfMass);
          footToCoMVectors.get(robotQuadrant).sub(footPositions.get(robotQuadrant));
          calculateBasisVectors(robotQuadrant, footToCoMVectors.get(robotQuadrant));
       }
-      
+
       if (currentGait.getEnumValue() != QuadrupedGaitCycle.STAND)
       {
          targetSupportPolygon.translateForward(desiredRobotVelocity.getX() * dt);
@@ -658,12 +658,12 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          basisForceVectors.get(robotQuadrant)[i].scale(COEFFICIENT_OF_FRICTION);
          basisForceVectors.get(robotQuadrant)[i].setZ(BASIS_VECTOR_HEIGHT);
          basisForceVectors.get(robotQuadrant)[i].normalize();
-         
-         
+
+
          basisTorqueVectors.get(robotQuadrant)[i].cross(footToCoMVector, basisForceVectors.get(robotQuadrant)[i]);
          basisTorqueVectors.get(robotQuadrant)[i].normalize();
       }
-      
+
       basisCoPVectors.get(robotQuadrant).sub(footPositions.get(robotQuadrant), bodyPoseWorld.getPosition());
       basisCoPVectors.get(robotQuadrant).setZ(0.0);
       basisCoPVectors.get(robotQuadrant).scale(1.0 / desiredBodyWrench.getLinearPartZ());
@@ -690,10 +690,10 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       double zVelocityFinal = swingImpactVelocityZ.getDoubleValue();
       swingZTrajectories.get(robotQuadrant).setCubicWithIntermediatePositionAndFinalVelocityConstraint(timeStart, timePeak, timeEnd, zStart, zMid, zEnd, zVelocityFinal);
       swingZTrajectories.get(robotQuadrant).compute(currentPhaseCompletion);
-      
+
       desiredFootPositions.get(robotQuadrant).setZ(swingZTrajectories.get(robotQuadrant).getPosition());
       desiredFootVelocities.get(robotQuadrant).setZ(swingZTrajectories.get(robotQuadrant).getVelocity());
-      
+
       // Swing Trajectory X and Y
       double startX = previousSupportPolygon.getFootstep(robotQuadrant).getX();
       double startY = previousSupportPolygon.getFootstep(robotQuadrant).getY();
@@ -701,14 +701,14 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 //      double endY = nextSupportPolygon.getFootstep(robotQuadrant).getY();
       double endX = targetSupportPolygon.getFootstep(robotQuadrant).getX();
       double endY = targetSupportPolygon.getFootstep(robotQuadrant).getY();
-      
+
       desiredFootPositions.get(robotQuadrant).setX((endX - startX) * currentPhaseCompletion + startX);
       desiredFootPositions.get(robotQuadrant).setY((endY - startY) * currentPhaseCompletion + startY);
-      
+
       int ballIndex = MathTools.clipToMinMax((int) Math.floor(currentPhaseCompletion * 20.0), 0, 20);
       swingTrajectoryBagsOfBalls.get(robotQuadrant).setBall(desiredFootPositions.get(robotQuadrant).getFrameTuple(), YoAppearance.White(), ballIndex);
    }
-   
+
    private void doICPControl()
    {
       // Update desired ICP trajectory
@@ -730,10 +730,10 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       icpTrajectory.getProjectedOntoXYPlane(desiredICP);
       icpTrajectory2dInitialPosition.setByProjectionOntoXYPlane(icpTrajectory.getInitialPosition());
       icpTrajectory2dFinalPosition.setByProjectionOntoXYPlane(icpTrajectory.getFinalPosition());
-      
+
       targetSupportPolygon.getCentroid2d(desiredICP);
       desiredICP.add(desiredStancePoseOffset.getX(), desiredStancePoseOffset.getY());
-      
+
       desiredICPVelocity.setToZero();
       desiredICPVelocity.add(desiredRobotVelocity);
 
@@ -742,10 +742,10 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       icpActionVector.getYoY().add(kp_icp.getDoubleValue() * (desiredICP.getY() - icp.getY()));
       icpActionVector.getYoX().add(kd_icp.getDoubleValue() * (desiredICPVelocity.getX() - icpVelocity.getX()));
       icpActionVector.getYoY().add(kd_icp.getDoubleValue() * (desiredICPVelocity.getY() - icpVelocity.getY()));
-      
+
       desiredCenterOfPressure.set(icp);
       desiredCenterOfPressure.sub(icpActionVector);
-      
+
       if (currentSupportPolygon.size() < 3)
       {
          snappedDesiredCenterOfPressure.set(findTrotSpecificCenterOfPressure());
@@ -754,36 +754,36 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       {
          snappedDesiredCenterOfPressure.set(desiredCenterOfPressure);
       }
-      
+
       currentShrunkenSupportPolygon.snapPointToClosestEdgeOfPolygonIfOutside2d(snappedDesiredCenterOfPressure);
    }
-   
+
    private YoFramePoint2d findTrotSpecificCenterOfPressure()
    {
       targetSupportPolygon.getFrontMidpoint(frontMidpoint);
       targetSupportPolygon.getRightMidpoint(rightMidpoint);
       targetSupportPolygon.getHindMidpoint(hindMidpoint);
       targetSupportPolygon.getLeftMidpoint(leftMidpoint);
-   
+
       frontDirection.setByProjectionOntoXYPlane(frontMidpoint);
       frontDirection.sub(hindMidpoint.getX(), hindMidpoint.getY());
-   
+
       sidewaysMidLine.setByProjectionOntoXYPlane(leftMidpoint, rightMidpoint);
       lengthwiseMidLine.setByProjectionOntoXYPlane(frontMidpoint, hindMidpoint);
-   
+
       lineSegmentLeftTrot.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_RIGHT).getFrameTuple(), footPositions.get(RobotQuadrant.FRONT_LEFT).getFrameTuple());
       lineSegmentRightTrot.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_LEFT).getFrameTuple(), footPositions.get(RobotQuadrant.FRONT_RIGHT).getFrameTuple());
-   
+
       leftTrotLine.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_RIGHT).getFrameTuple(), footPositions.get(RobotQuadrant.FRONT_LEFT).getFrameTuple());
       rightTrotLine.setByProjectionOntoXYPlane(footPositions.get(RobotQuadrant.HIND_LEFT).getFrameTuple(), footPositions.get(RobotQuadrant.FRONT_RIGHT).getFrameTuple());
-      
+
       leftTrotLine.getIntersectionWithLine(rightTrotLine, trotCrossPoint);
-   
+
       isInFrontOfLeftTrotLine.set(leftTrotLine.isPointInFrontOfLine(frontDirection, desiredCenterOfPressure.getFrameTuple2d()));
       isInFrontOfRightTrotLine.set(rightTrotLine.isPointInFrontOfLine(frontDirection, desiredCenterOfPressure.getFrameTuple2d()));
-   
+
       lineForFindingClosestLineSegment.setPoint(desiredCenterOfPressure.getFrameTuple2d());
-   
+
       if (isInFrontOfLeftTrotLine.getBooleanValue() == isInFrontOfRightTrotLine.getBooleanValue())
       {
          lineForFindingClosestLineSegment.getLine2d().getNormalizedVector().set(sidewaysMidLine.getLine2d().getNormalizedVector());
@@ -792,19 +792,19 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       {
          lineForFindingClosestLineSegment.getLine2d().getNormalizedVector().set(lengthwiseMidLine.getLine2d().getNormalizedVector());
       }
-   
+
       FramePoint2d closestIntersectionFrameTuple = closestIntersection.getFrameTuple2d();
       leftTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, closestIntersectionFrameTuple);
       closestIntersection.setWithoutChecks(closestIntersectionFrameTuple);
-   
+
       double distanceUpward = closestIntersection.distance(desiredCenterOfPressure.getFrameTuple2d());
-   
+
       FramePoint2d secondClosestIntersectionFramePoint = secondClosestIntersection.getFrameTuple2d();
       rightTrotLine.getIntersectionWithLine(lineForFindingClosestLineSegment, secondClosestIntersectionFramePoint);
       secondClosestIntersection.setWithoutChecks(secondClosestIntersectionFramePoint);
-   
+
       double distanceDownward = secondClosestIntersection.distance(desiredCenterOfPressure.getFrameTuple2d());
-   
+
       if (distanceUpward > distanceDownward)
       {
          double x = secondClosestIntersection.getFrameTuple2d().getX();
@@ -812,25 +812,25 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          secondClosestIntersection.set(closestIntersection.getFrameTuple2d());
          closestIntersection.set(x, y);
       }
-   
+
       midPointOfIntersections.interpolate(closestIntersection.getFrameTuple2d(), secondClosestIntersection.getFrameTuple2d(), 0.5);
-   
+
       double midPointOfIntersectionsToDesiredCenterOfPressure = midPointOfIntersections.distance(desiredCenterOfPressure.getFrameTuple2d());
       double midPointOfIntersectionsToClosestIntersection = midPointOfIntersections.distance(closestIntersection.getFrameTuple2d());
-      
+
       ratioFromMidToClosest = midPointOfIntersectionsToDesiredCenterOfPressure / midPointOfIntersectionsToClosestIntersection;
-   
+
       innerCenterOfPressure.interpolate(secondClosestIntersection.getFrameTuple2d(), trotCrossPoint, ratioFromMidToClosest);
-   
+
       awayFromCentroidToClosestIntersection.sub(closestIntersection.getFrameTuple2d(), trotCrossPoint);
       awayFromCentroidToClosestIntersection.scale(ratioFromMidToClosest);
-   
+
       outerCenterOfPressure.set(closestIntersection.getFrameTuple2d());
       outerCenterOfPressure.add(awayFromCentroidToClosestIntersection);
-   
+
       double distanceFromInnerCenterOfPressureToPolygon = currentSupportPolygon.getDistanceInside2d(innerCenterOfPressure.getFrameTuple2d());
       double distanceFromOuterCenterOfPressureToPolygon = currentSupportPolygon.getDistanceInside2d(outerCenterOfPressure.getFrameTuple2d());
-      
+
       if (distanceFromInnerCenterOfPressureToPolygon > distanceFromOuterCenterOfPressureToPolygon)
       {
          return innerCenterOfPressure;
@@ -849,7 +849,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       desiredStancePose.setZ(initialStanceHeight + desiredStancePoseOffset.getZ());
       desiredStancePose.getOrientation().add(desiredStancePoseOffset.getOrientation());
       desiredStancePose.getOrientation().getYaw().add(targetSupportPolygon.getNominalYaw());
-      
+
       desiredStancePoseHigherForVis.set(desiredStancePose.getPosition());
       desiredStancePoseHigherForVis.add(0.0, 0.0, 0.3);
       desiredBodyForceOriginForVis.set(desiredStancePoseHigherForVis);
@@ -895,12 +895,12 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       {
 //         FramePoint2d snappedDesiredCenterOfPressureBodyFrame = snappedDesiredCenterOfPressure.getFrameTuple2d();
 //         snappedDesiredCenterOfPressureBodyFrame.changeFrameAndProjectToXYPlane(bodyPoseReferenceFrame);
-//         
+//
 //         bodyWrenchMatrix.set(0, 0, snappedDesiredCenterOfPressureBodyFrame.getX());
 //         bodyWrenchMatrix.set(1, 0, snappedDesiredCenterOfPressureBodyFrame.getY());
          bodyWrenchMatrix.set(0, 0, snappedDesiredCenterOfPressure.getX() - bodyPoseWorld.getX());
          bodyWrenchMatrix.set(1, 0, snappedDesiredCenterOfPressure.getY() - bodyPoseWorld.getY());
-         
+
 //         snappedDesiredCenterOfPressureBodyFrame.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
       }
       else
@@ -908,15 +908,15 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          bodyWrenchMatrix.set(0, 0, desiredBodyWrench.getLinearPartX());
          bodyWrenchMatrix.set(1, 0, desiredBodyWrench.getLinearPartY());
       }
-      
+
       bodyWrenchMatrix.set(2, 0, desiredBodyWrench.getLinearPartZ());
       bodyWrenchMatrix.set(3, 0, desiredBodyWrench.getAngularPartX());
       bodyWrenchMatrix.set(4, 0, desiredBodyWrench.getAngularPartY());
       bodyWrenchMatrix.set(5, 0, desiredBodyWrench.getAngularPartZ());
-      
+
       basisMatrix.reshape(6, currentSupportPolygon.size() * NUMBER_OF_BASIS_VECTORS);
       rhoMatrix.reshape(currentSupportPolygon.size() * NUMBER_OF_BASIS_VECTORS, 1);
-      
+
       for (int quadrantIndex = 0; quadrantIndex < currentSupportPolygon.getSupportingQuadrantsInOrder().length; quadrantIndex++)
       {
          RobotQuadrant robotQuadrant = currentSupportPolygon.getSupportingQuadrantsInOrder()[quadrantIndex];
@@ -938,10 +938,10 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
             basisMatrix.set(5, quadrantIndex * NUMBER_OF_BASIS_VECTORS + basisIndex, basisTorqueVectors.get(robotQuadrant)[basisIndex].getZ());
          }
       }
-      
+
       solver.setA(basisMatrix);
       solver.solve(bodyWrenchMatrix, rhoMatrix);
-      
+
       for (int quadrantIndex = 0; quadrantIndex < currentSupportPolygon.getSupportingQuadrantsInOrder().length; quadrantIndex++)
       {
          RobotQuadrant robotQuadrant = currentSupportPolygon.getSupportingQuadrantsInOrder()[quadrantIndex];
@@ -950,7 +950,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
             rhoScalars.get(robotQuadrant)[basisIndex] = rhoMatrix.get(quadrantIndex * NUMBER_OF_BASIS_VECTORS + basisIndex, 0);
          }
       }
-      
+
       for (RobotQuadrant robotQuadrant : currentSupportPolygon.getSupportingQuadrantsInOrder())
       {
          vmcFootForces.get(robotQuadrant).setToZero();
@@ -976,7 +976,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          vmcFootForces.get(robotQuadrant).getYoZ().add(kd_swing.getZ() * (desiredFootVelocities.get(robotQuadrant).getZ() - footVelocities.get(robotQuadrant).getZ()));
       }
    }
-   
+
    private void computeStanceJacobians()
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -990,20 +990,20 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       for (OneDoFJoint oneDoFJoint : oneDofJoints.get(robotQuadrant))
       {
          jointPosition.setFromReferenceFrame(oneDoFJoint.getFrameBeforeJoint());
-         
+
          oneDoFJoint.getJointAxis(jointAxis);
          jointAxis.changeFrame(ReferenceFrame.getWorldFrame());
-         
+
          jointToFootVector.set(footPositions.get(robotQuadrant).getFrameTuple());
          jointToFootVector.sub(jointPosition);
-         
+
          vmcRequestedTorqueFromJoint.setToZero();
          vmcRequestedTorqueFromJoint.cross(jointToFootVector, vmcFootForces.get(robotQuadrant).getFrameTuple());
-         
+
          double tau = -jointAxis.dot(vmcRequestedTorqueFromJoint);
-         
+
          tau = MathTools.clipToMinMax(tau, 100); // TODO Implement actual torque limits
-         
+
          oneDoFJoint.setTau(tau);
       }
    }

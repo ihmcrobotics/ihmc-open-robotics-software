@@ -17,8 +17,8 @@ import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -34,7 +34,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    boolean isLeft;
 
    //robot model and data
-   private final SDFFullHumanoidRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final ArrayList<Map<String, Object>> qdata;
    private final ArrayList<Map<String, Double>> q;
    private final List<String> calJointNames;
@@ -58,7 +58,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
 
    public final RobotSide activeSide;
 
-   public KinematicCalibrationHeadLoopResidual(SDFFullHumanoidRobotModel fullRobotModel,
+   public KinematicCalibrationHeadLoopResidual(FullHumanoidRobotModel fullRobotModel,
                                                boolean isLeft,
                                                IntrinsicParameters intrinsic,
                                                PlanarCalibrationDetector calibGrid,
@@ -76,7 +76,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       this.calJointNames = getOrderedArmJointsNames(fullRobotModel, isLeft);
    }
 
-   public static List<String> getOrderedArmJointsNames(SDFFullRobotModel fullRobotModel, boolean isLeft)
+   public static List<String> getOrderedArmJointsNames(FullRobotModel fullRobotModel, boolean isLeft)
    {
       final OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
 

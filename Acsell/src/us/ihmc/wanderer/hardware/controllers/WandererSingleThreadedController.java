@@ -5,7 +5,7 @@ import java.util.EnumMap;
 
 import javax.vecmath.Quat4d;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.acsell.hardware.AcsellSetup;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
@@ -86,7 +86,7 @@ public class WandererSingleThreadedController extends RealtimeThread
       this.outputWriter = new UDPAcsellOutputWriter(command);
 
       
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       rootJoint = fullRobotModel.getRootJoint();
 
       for (WandererJoint joint : WandererJoint.values)

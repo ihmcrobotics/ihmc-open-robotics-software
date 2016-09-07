@@ -678,134 +678,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       update();
    }
 
-   public double[] distanceToEachVertex(Point2d point)
-   {
-      checkIfUpToDate();
-      double[] ret = new double[numberOfVertices];
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         ret[i] = point.distance(getVertex(i));
-      }
-
-      return ret;
-   }
-
-   /**
-    * Returns distance from the point to the boundary of this polygon.
-    * Positive number if inside. Negative number if outside.
-    * If inside, the distance is the exact distance to an edge.
-    * If outside, the negative distance is an underestimate.
-    * It is actually the furthest distance from a projected edge that
-    * it is outside of.
-    * @param point
-    * @return distance from point to this polygon.
-    */
-   public double getDistanceInside(Point2d point)
-   {
-      checkIfUpToDate();
-
-      if (numberOfVertices == 1)
-      {
-         return -point.distance(getVertex(0));
-      }
-
-      if (numberOfVertices == 2)
-      {
-         Point2d pointOne = getVertex(0);
-         Point2d pointTwo = getVertex(1);
-
-         return -Math.abs(computeDistanceToSideOfSegment(point, pointOne, pointTwo));
-      }
-
-      double closestDistance = Double.POSITIVE_INFINITY;
-
-      for (int index = 0; index < numberOfVertices; index++)
-      {
-         Point2d pointOne = getVertex(index);
-         int nextIndex = index+1;
-         if (nextIndex == numberOfVertices)
-            nextIndex = 0;
-
-         Point2d pointTwo = getVertex(nextIndex);
-
-         double distance = computeDistanceToSideOfSegment(point, pointOne, pointTwo);
-         if (distance < closestDistance)
-         {
-            closestDistance = distance;
-         }
-      }
-
-      return closestDistance;
-   }
-
-   private double computeDistanceToSideOfSegment(Point2d point, Point2d pointOne, Point2d pointTwo)
-   {
-      double x0 = point.getX();
-      double y0 = point.getY();
-
-      double x1 = pointOne.getX();
-      double y1 = pointOne.getY();
-
-      double x2 = pointTwo.getX();
-      double y2 = pointTwo.getY();
-
-      double numerator = (y2 - y1) * x0 - (x2 - x1) * y0 + x2*y1 - y2*x1;
-      double denominator = Math.sqrt((y2-y1) * (y2-y1) + (x2-x1) * (x2-x1));
-
-      return numerator/denominator;
-   }
-
-   public Point2d getClosestVertexCopy(Point2d point)
-   {
-      checkIfUpToDate();
-      // throw new RuntimeException("Not yet implemented");
-      // O(n) for now, maybe there's a faster way?
-
-      double minDistance = Double.POSITIVE_INFINITY;
-      Point2d ret = null;
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         Point2d vertex = getVertex(i);
-         double distance = vertex.distance(point);
-         if (distance < minDistance)
-         {
-            ret = vertex;
-            minDistance = distance;
-         }
-      }
-
-      return ret;
-   }
-
-   public Point2d getClosestVertexCopy(Line2d line)
-   {
-      Point2d point = new Point2d();
-      getClosestVertex(line, point);
-      return point;
-   }
-
-   public boolean getClosestVertex(Line2d line, Point2d pointToPack)
-   {
-      checkIfUpToDate();
-      // O(n) for now, maybe there's a faster way?
-
-      double minDistanceSquared = Double.POSITIVE_INFINITY;
-      pointToPack.set(Double.NaN, Double.NaN);
-
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         Point2d vertex = getVertex(i);
-         double distanceSquared = line.distanceSquared(vertex);
-         if (distanceSquared < minDistanceSquared)
-         {
-            pointToPack.set(vertex);
-            minDistanceSquared = distanceSquared;
-         }
-      }
-
-      return !Double.isInfinite(minDistanceSquared);
-   }
-
+   // here ---------------------
+   // nuke this
    public Point2d getClosestVertexWithRayCopy(Line2d ray, boolean throwAwayVerticesOutsideRay)
    {
       checkIfUpToDate();
@@ -842,6 +716,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          return new Point2d(ret);
    }
 
+   // nuke this
    public boolean getClosestVertexWithRay(Point2d closestVertexToPack, Line2d ray, boolean throwAwayVerticesOutsideRay)
    {
       checkIfUpToDate();
@@ -876,6 +751,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return success;
    }
 
+   // nuke this
    public double distanceToClosestVertex(Point2d point)
    {
       checkIfUpToDate();
@@ -892,156 +768,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       }
 
       return minDistance;
-   }
-
-   public boolean isPointInside(Point2d point)
-   {
-      checkIfUpToDate();
-      return isPointInside(point, 0.0);
-   }
-
-   /**
-    * isPointInside
-    * Determines whether a point is inside the convex polygon (point in polygon test).
-    * Uses the orientation method (Nordbeck, Rystedt, 1967)
-    * Test is only valid for convex polygons, and only if the vertices are ordered clockwise.
-    *
-    * @param point Point2d the point to be tested
-    * @return boolean true if the point is inside the polygon
-    */
-   public boolean isPointInside(Point2d point, double epsilon)
-   {
-      checkIfUpToDate();
-      return isPointInside(point.getX(), point.getY(), epsilon);
-   }
-
-   public ConvexPolygon2d translateCopy(Tuple2d translation)
-   {
-      checkIfUpToDate();
-      ArrayList<Point2d> points = new ArrayList<Point2d>(numberOfVertices);
-
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         Point2d newPoint = new Point2d(getVertex(i));
-         newPoint.add(translation);
-         points.add(newPoint);
-      }
-
-      return new ConvexPolygon2d(points);
-   }
-
-   public boolean isPointInside(double x, double y)
-   {
-      checkIfUpToDate();
-      return isPointInside(x, y, 0.0);
-   }
-
-   /**
-    * isPointInside
-    * Determines whether a point is inside the convex polygon (point in polygon test).
-    * Uses the orientation method (Nordbeck, Rystedt, 1967)
-    * Test is only valid for convex polygons, and only if the vertices are ordered clockwise.
-    *
-    * @param x
-    * @param y
-    * @return boolean true if the point is inside the polygon
-    */
-   public boolean isPointInside(double x, double y, double epsilon)
-   {
-      checkIfUpToDate();
-      if (hasAtLeastThreeVertices())
-      {
-         if (x < boundingBox.getMinPoint().getX() - epsilon)
-            return false;
-         if (y < boundingBox.getMinPoint().getY() - epsilon)
-            return false;
-
-         if (x > boundingBox.getMaxPoint().getX() + epsilon)
-            return false;
-         if (y > boundingBox.getMaxPoint().getY() + epsilon)
-            return false;
-
-         // Determine whether the point is on the right side of each edge:
-         for (int i = 0; i < numberOfVertices; i++)
-         {
-            double x0 = getVertex(i).getX();
-            double y0 = getVertex(i).getY();
-
-            double x1 = getNextVertex(i).getX();
-            double y1 = getNextVertex(i).getY();
-
-            if ((y - y0) * (x1 - x0) - (x - x0) * (y1 - y0) > epsilon)
-            {
-               return false;
-            }
-         }
-
-         return true;
-      }
-      else if (hasAtLeastTwoVertices())
-      {
-         Point2d point0 = getVertex(0);
-         Point2d point1 = getVertex(1);
-         if (LineSegment2d.areEndpointsTheSame(point0, point1))
-         {
-            return (point0.getX() == x) && (point0.getY() == y);
-         }
-         else
-         {
-            LineSegment2d lineSegment = new LineSegment2d(point0.getX(), point0.getY(), point1.getX(), point1.getY());
-            return lineSegment.isPointOnLineSegment(new Point2d(x, y));
-         }
-      }
-      else if (hasAtLeastOneVertex())
-      {
-         Point2d point = getVertex(0);
-
-         return (point.getX() == x) && (point.getY() == y);
-      }
-
-      return false;
-   }
-
-   /**
-    * areAllPointsInside
-    * Determines whether all the points in points are inside the convex
-    * polygon.
-    *
-    * @param points Point2d[]
-    * @return boolean
-    */
-   public boolean areAllPointsInside(Point2d[] points)
-   {
-      checkIfUpToDate();
-      for (Point2d point : points)
-      {
-         if (!isPointInside(point))
-         {
-            return false;
-         }
-      }
-
-      return true;
-   }
-
-   /**
-    * checks to see if the passed polygon is inside of this one.
-    *
-    * @param polygon2
-    * @return true if polygon2 is inside of this polygon
-    */
-   public boolean isPolygonInside(ConvexPolygon2d polygon2)
-   {
-      checkIfUpToDate();
-      for (int i = 0; i < polygon2.getNumberOfVertices(); i++)
-      {
-         if (!isPointInside(polygon2.getVertex(i)))
-         {
-            return false;
-         }
-      }
-
-      return true;
    }
 
    public Line2d[] getLinesOfSight(Point2d observerPoint)
@@ -1189,7 +915,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       if (DEBUG) System.out.println("firstEdgeIndex = " + firstEdgeIndex);
 
-      if (isEdgeEntering(firstEdgeIndex, observerPoint2d))
+      if (ConvexPolygon2dCalculator.canObserverSeeEdge(firstEdgeIndex, observerPoint2d, this))
       {
          if (DEBUG) System.out.println("firstEdgeIndex is Entering");
 
@@ -1216,7 +942,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (!foundLeavingEdges)
       {
-         int edgeToTest = getMidEdgeOppositeClockwiseOrdering(enteringRightEdge, enteringLeftEdge);
+         int edgeToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(enteringRightEdge, enteringLeftEdge, this);
 
          if (DEBUG)
             System.out.println("edgeToTest is " + edgeToTest);
@@ -1226,14 +952,14 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
             throw new RuntimeException("Couldn't find a leaving edge! This should never happen!!");
          }
 
-         if (isEdgeEntering(edgeToTest, observerPoint2d))
+         if (ConvexPolygon2dCalculator.canObserverSeeEdge(edgeToTest, observerPoint2d, this))
          {
             if (DEBUG)
                System.out.println("edgeToTest is entering ");
 
             // Figure out if the edgeToTest should replace the leftEdge or the rightEdge:
-            enteringLeftEdge = whichVertexIsToTheLeft(edgeToTest, enteringLeftEdge, observerPoint2d);
-            enteringRightEdge = whichVertexIsToTheRight(edgeToTest, enteringRightEdge, observerPoint2d);
+            enteringLeftEdge = ConvexPolygon2dCalculator.getVertexOnLeft(edgeToTest, enteringLeftEdge, observerPoint2d, this);
+            enteringRightEdge = ConvexPolygon2dCalculator.getVertexOnRight(edgeToTest, enteringRightEdge, observerPoint2d, this);
          }
 
          else
@@ -1250,7 +976,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (!foundEnteringEdges)
       {
-         int edgeToTest = getMidEdgeOppositeClockwiseOrdering(leavingLeftEdge, leavingRightEdge);
+         int edgeToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(leavingLeftEdge, leavingRightEdge, this);
 
          if (DEBUG) System.out.println("edgeToTest is " + edgeToTest);
 
@@ -1262,7 +988,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
                return false;
          }
 
-         if (isEdgeEntering(edgeToTest, observerPoint2d))
+         if (ConvexPolygon2dCalculator.canObserverSeeEdge(edgeToTest, observerPoint2d, this))
          {
             if (DEBUG) System.out.println("edgeToTest is entering ");
 
@@ -1276,8 +1002,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
             if (DEBUG) System.out.println("edgeToTest is leaving ");
 
             // Figure out if the edgeToTest should replace the leftEdge or the rightEdge:
-            int newLeavingLeftEdge = whichVertexIsToTheLeft(edgeToTest, leavingLeftEdge, observerPoint2d);
-            int newLeavingRightEdge = whichVertexIsToTheRight(edgeToTest, leavingRightEdge, observerPoint2d);
+            int newLeavingLeftEdge = ConvexPolygon2dCalculator.getVertexOnLeft(edgeToTest, leavingLeftEdge, observerPoint2d, this);
+            int newLeavingRightEdge = ConvexPolygon2dCalculator.getVertexOnRight(edgeToTest, leavingRightEdge, observerPoint2d, this);
 
             if ((newLeavingLeftEdge == leavingLeftEdge) && (newLeavingRightEdge == leavingRightEdge))
             {
@@ -1310,8 +1036,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (getNextVertexIndex(enteringLeftEdge) != leavingLeftEdge)
       {
-         int edgeToTest = getMidEdgeOppositeClockwiseOrdering(leavingLeftEdge, enteringLeftEdge);
-         if (isEdgeEntering(edgeToTest, observerPoint2d))
+         int edgeToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(leavingLeftEdge, enteringLeftEdge, this);
+         if (ConvexPolygon2dCalculator.canObserverSeeEdge(edgeToTest, observerPoint2d, this))
          {
             enteringLeftEdge = edgeToTest;
          }
@@ -1330,8 +1056,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (getNextVertexIndex(leavingRightEdge) != enteringRightEdge)
       {
-         int edgeToTest = getMidEdgeOppositeClockwiseOrdering(enteringRightEdge, leavingRightEdge);
-         if (isEdgeEntering(edgeToTest, observerPoint2d))
+         int edgeToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(enteringRightEdge, leavingRightEdge, this);
+         if (ConvexPolygon2dCalculator.canObserverSeeEdge(edgeToTest, observerPoint2d, this))
          {
             enteringRightEdge = edgeToTest;
          }
@@ -1408,7 +1134,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       // Binary search maintaining nearest left and nearest right vertices until they are adjacent: //TODO remove the q from maintaining
       while ((rightEdge != leftEdge) && (getNextVertexIndex(rightEdge) != leftEdge))
       {
-         int testEdge = getMidEdgeOppositeClockwiseOrdering(leftEdge, rightEdge);
+         int testEdge = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(leftEdge, rightEdge, this);
 
          if (isEdgeFullyToTheLeftOfObserver(testEdge, pointToProject))
          {
@@ -1551,7 +1277,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (!foundLeftVertices)
       {
-         int vertexToTest = getMidEdgeOppositeClockwiseOrdering(forwardRightVertex, behindRightVertex);
+         int vertexToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(forwardRightVertex, behindRightVertex, this);
 
          if (isVertexToTheLeftOrStraightOn(vertexToTest, lineStart, lineDirection))
          {
@@ -1563,14 +1289,14 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
          else
          {
-            forwardRightVertex = whichVertexIsToTheLeft(vertexToTest, forwardRightVertex, lineStart);
-            behindRightVertex = whichVertexIsToTheRight(vertexToTest, behindRightVertex, lineStart);
+            forwardRightVertex = ConvexPolygon2dCalculator.getVertexOnLeft(vertexToTest, forwardRightVertex, lineStart, this);
+            behindRightVertex = ConvexPolygon2dCalculator.getVertexOnRight(vertexToTest, behindRightVertex, lineStart, this);
          }
       }
 
       while (!foundRightVertices)
       {
-         int vertexToTest = getMidEdgeOppositeClockwiseOrdering(behindLeftVertex, forwardLeftVertex);
+         int vertexToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(behindLeftVertex, forwardLeftVertex, this);
 
          if (isVertexToTheRightOrStraightOn(vertexToTest, lineStart, lineDirection))
          {
@@ -1582,8 +1308,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
          else
          {
-            forwardLeftVertex = whichVertexIsToTheRight(vertexToTest, forwardLeftVertex, lineStart);
-            behindLeftVertex = whichVertexIsToTheLeft(vertexToTest, behindLeftVertex, lineStart);
+            forwardLeftVertex = ConvexPolygon2dCalculator.getVertexOnRight(vertexToTest, forwardLeftVertex, lineStart, this);
+            behindLeftVertex = ConvexPolygon2dCalculator.getVertexOnLeft(vertexToTest, behindLeftVertex, lineStart, this);
          }
       }
 
@@ -1591,7 +1317,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (getNextVertexIndex(forwardLeftVertex) != forwardRightVertex)
       {
-         int vertexToTest = getMidEdgeOppositeClockwiseOrdering(forwardRightVertex, forwardLeftVertex);
+         int vertexToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(forwardRightVertex, forwardLeftVertex, this);
          if (isVertexToTheLeftOrStraightOn(vertexToTest, lineStart, lineDirection))
          {
             forwardLeftVertex = vertexToTest;
@@ -1646,77 +1372,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       }
    }
 
-   private int whichVertexIsToTheLeft(int index1, int index2, Point2d observerFramePoint2d)
-   {
-      int ret = whichVertexIsToTheLeftRight(index1, index2, observerFramePoint2d, true);
-
-      //    System.out.println("Checking Which edge is to the left. index1 = " + index1 + ", index2 = " + index2 + ", observerFramePoint2d = " + observerFramePoint2d + ", answer = " + ret);
-
-      return ret;
-   }
-
-   private int whichVertexIsToTheRight(int index1, int index2, Point2d observerFramePoint2d)
-   {
-      int ret = whichVertexIsToTheLeftRight(index1, index2, observerFramePoint2d, false);
-
-      //    System.out.println("Checking Which edge is to the right. index1 = " + index1 + ", index2 = " + index2 + ", observerFramePoint2d = " + observerFramePoint2d + ", answer = " + ret);
-
-      return ret;
-   }
-
-   private int whichVertexIsToTheLeftRight(int index1, int index2, Point2d observerFramePoint2d, boolean returnTheLeftOne)
-   {
-      Point2d point1 = getVertex(index1);
-      Point2d point2 = getVertex(index2);
-
-      double vectorToVertex1X = point1.getX() - observerFramePoint2d.getX();
-      double vectorToVertex1Y = point1.getY() - observerFramePoint2d.getY();
-
-      double vectorToVertex2X = point2.getX() - observerFramePoint2d.getX();
-      double vectorToVertex2Y = point2.getY() - observerFramePoint2d.getY();
-
-      double crossProduct = vectorToVertex1X * vectorToVertex2Y - vectorToVertex1Y * vectorToVertex2X;
-
-      if (crossProduct < 0.0)
-      {
-         if (returnTheLeftOne)
-            return index1;
-         else
-            return index2;
-      }
-      else
-      {
-         if (returnTheLeftOne)
-            return index2;
-         else
-            return index1;
-      }
-   }
-
-   /**
-    * Check if from the observer point you're looking at the "outside-of-polygon side of the edge"
-    * @param edgeIndex edge you look at.
-    * @param observerPoint2d point from where you look at the edge.
-    * @return true = "outside-of-polygon side of the edge".
-    */
-   private boolean isEdgeEntering(int edgeIndex, Point2d observerPoint2d)
-   {
-      Point2d vertex = getVertex(edgeIndex);
-      Point2d nextVertex = getNextVertex(edgeIndex);
-
-      // Vector perpendicular to the edge and pointing outside the polygon
-      double edgeNormalX = -(nextVertex.getY() - vertex.getY());
-      double edgeVectorY = nextVertex.getX() - vertex.getX();
-
-      double observerToVertexX = vertex.getX() - observerPoint2d.getX();
-      double observerToVertexY = vertex.getY() - observerPoint2d.getY();
-
-      // Equivalent to looking at the projection of the observerToVertex vector on the edge normal vector, since only need to look at the sign.
-      double dotProduct = edgeNormalX * observerToVertexX + edgeVectorY * observerToVertexY;
-
-      return dotProduct < 0.0;
-   }
-
    @Override
    public Point2d[] intersectionWith(LineSegment2d lineSegment2d)
    {
@@ -1745,16 +1400,16 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       boolean onePointIsInside;
 
       // First make sure that the ray goes from an outside point...
-      if (isPointInside(endPoints[0]))
+      if (ConvexPolygon2dCalculator.isPointInside(endPoints[0], this))
       {
-         if (isPointInside(endPoints[1]))
+         if (ConvexPolygon2dCalculator.isPointInside(endPoints[1], this))
             return null; // Both Points are inside!
 
          outsidePoint = endPoints[1];
          otherPoint = endPoints[0];
          onePointIsInside = true;
       }
-      else if (isPointInside(endPoints[1]))
+      else if (ConvexPolygon2dCalculator.isPointInside(endPoints[1], this))
       {
          outsidePoint = endPoints[0];
          otherPoint = endPoints[1];
@@ -1883,7 +1538,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       {
          // TODO: this duplicates the computation in intersectionWith(ray) - same below
          if (tempSegment1.intersectionWith(ray) == null)
-            getClosestVertex(ray, intersectionToPack1);
+            ConvexPolygon2dCalculator.getClosestVertex(ray, this, intersectionToPack1);
          else
             intersectionToPack1.set(tempSegment1.intersectionWith(ray));
 
@@ -1894,12 +1549,12 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       else if (intersectingEdges == 2)
       {
          if (tempSegment1.intersectionWith(ray) == null)
-            getClosestVertex(ray, intersectionToPack1);
+            ConvexPolygon2dCalculator.getClosestVertex(ray, this, intersectionToPack1);
          else
             intersectionToPack1.set(tempSegment1.intersectionWith(ray));
 
          if (tempSegment2.intersectionWith(ray) == null)
-            getClosestVertex(ray, intersectionToPack2);
+            ConvexPolygon2dCalculator.getClosestVertex(ray, this, intersectionToPack2);
          else
             intersectionToPack2.set(tempSegment2.intersectionWith(ray));
 
@@ -2018,7 +1673,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (getNextVertexIndex(rightEnteringVertex) != leftEnteringVertex)
       {
-         int testVertex = getMidEdgeOppositeClockwiseOrdering(leftEnteringVertex, rightEnteringVertex);
+         int testVertex = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(leftEnteringVertex, rightEnteringVertex, this);
 
          if (isLineStrictlyBetweenVertices(tempPoint, tempVector1, testVertex, rightEnteringVertex))
          {
@@ -2042,7 +1697,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       while (getNextVertexIndex(leftLeavingVertex) != rightLeavingVertex)
       {
-         int testVertex = getMidEdgeOppositeClockwiseOrdering(rightLeavingVertex, leftLeavingVertex);
+         int testVertex = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(rightLeavingVertex, leftLeavingVertex, this);
 
          if (isLineStrictlyBetweenVertices(tempPoint, tempVector1, testVertex, rightLeavingVertex))
          {
@@ -2446,23 +2101,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return false;
    }
 
-   public boolean isCompletelyInside(ConvexPolygon2d polygonQ)
-   {
-      return isCompletelyInside(polygonQ, 0.0);
-   }
-
-   public boolean isCompletelyInside(ConvexPolygon2d polygonQ, double epsilon)
-   {
-      checkIfUpToDate();
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         if (!polygonQ.isPointInside(getVertex(i), epsilon))
-            return false;
-      }
-
-      return true;
-   }
-
    @Override
    public boolean epsilonEquals(ConvexPolygon2d convexPolygon, double threshold)
    {
@@ -2673,15 +2311,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          throw new IndexOutOfBoundsException("vertexIndex >= numberOfVertices. numberOfVertices = " + numberOfVertices);
    }
 
-   protected int getMidEdgeOppositeClockwiseOrdering(int leftEdgeIndex, int rightEdgeIndex)
-   {
-      checkIfUpToDate();
-      if (rightEdgeIndex >= leftEdgeIndex)
-         return (rightEdgeIndex + (leftEdgeIndex + numberOfVertices - rightEdgeIndex + 1) / 2) % numberOfVertices;
-      else
-         return (rightEdgeIndex + leftEdgeIndex + 1) / 2;
-   }
-
    @Override
    public void set(ConvexPolygon2d other)
    {
@@ -2730,4 +2359,29 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return false;
    }
 
+   // --- remove these eventually ---
+   public boolean isPointInside(double x, double y)
+   {
+      return ConvexPolygon2dCalculator.isPointInside(x, y, this);
+   }
+
+   public boolean isPointInside(double x, double y, double epsilon)
+   {
+      return ConvexPolygon2dCalculator.isPointInside(x, y, epsilon, this);
+   }
+
+   public boolean isPointInside(Point2d point)
+   {
+      return ConvexPolygon2dCalculator.isPointInside(point, this);
+   }
+
+   public boolean isPointInside(Point2d point, double epsilon)
+   {
+      return ConvexPolygon2dCalculator.isPointInside(point, epsilon, this);
+   }
+
+   public ConvexPolygon2d translateCopy(Tuple2d translation)
+   {
+      return ConvexPolygon2dCalculator.translatePolygonCopy(translation, this);
+   }
 }

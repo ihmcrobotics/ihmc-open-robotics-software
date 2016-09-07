@@ -9,7 +9,6 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.robotDataCommunication.LogIndex;
 import us.ihmc.robotDataCommunication.VisualizerRobot;
 import us.ihmc.robotDataCommunication.jointState.JointState;
@@ -20,6 +19,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -27,7 +27,7 @@ import us.ihmc.tools.compression.SnappyUtils;
 
 public class YoVariableLogPlaybackRobot extends VisualizerRobot implements RewoundListener
 {
-   
+
    private final SimulationConstructionSet scs;
    private final LongYoVariable timestamp;
    private final DoubleYoVariable robotTime;
@@ -42,7 +42,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
 
    private final List<JointState<? extends Joint>> jointStates;
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<JointUpdater>();
-   
+
    private final ArrayList<YoVariableLogPlaybackListener> listeners = new ArrayList<>();
 
    private final ByteBuffer logLine;
@@ -56,17 +56,17 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
 
    private int readEveryNTicks = 1;
 
-   public YoVariableLogPlaybackRobot(File selectedFile, GeneralizedSDFRobotModel generalizedSDFRobotModel,
+   public YoVariableLogPlaybackRobot(File selectedFile, RobotDescription robotDescription,
          List<JointState<? extends Joint>> jointStates, List<YoVariable<?>> variables, LogPropertiesReader logProperties, SimulationConstructionSet scs)
          throws IOException
    {
-      super(generalizedSDFRobotModel, null);
-      
+      super(robotDescription, null);
+
       this.timestamp = new LongYoVariable("timestamp", getRobotsYoVariableRegistry());
       this.robotTime = new DoubleYoVariable("robotTime", getRobotsYoVariableRegistry());
-      
 
-      
+
+
       this.jointStates = jointStates;
       this.variables = variables;
       this.scs = scs;
@@ -220,12 +220,12 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
          {
             jointUpdaters.get(i).update();
          }
-         
+
          for (int i = 0; i < listeners.size(); i++)
          {
             listeners.get(i).updated(timestamp.getLongValue());
          }
-         
+
       }
       catch (IOException e)
       {
@@ -243,7 +243,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
          index = position;
          if(index < logIndex.dataOffsets.length)
          {
-            logChannel.position(logIndex.dataOffsets[position]);            
+            logChannel.position(logIndex.dataOffsets[position]);
          }
       }
       else
@@ -251,14 +251,14 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
          logChannel.position(((long)position) * ((long)logLine.capacity()));
       }
    }
-   
+
    public long getTimestamp(int position)
    {
       if(!compressed)
       {
          throw new RuntimeException("Cannot get timestamp for non-compressed logs");
       }
-      
+
       return logIndex.timestamps[position];
    }
 
@@ -278,7 +278,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
          compressedBuffer.limit(size);
 
          int read = logChannel.read(compressedBuffer);
-         
+
          if(read != size)
          {
             throw new RuntimeException("Expected read of " + size + ", got " + read + ". TODO: Implement loop for reading the full log line.");
@@ -335,5 +335,5 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
       listeners.add(listener);
    }
 
-   
+
 }

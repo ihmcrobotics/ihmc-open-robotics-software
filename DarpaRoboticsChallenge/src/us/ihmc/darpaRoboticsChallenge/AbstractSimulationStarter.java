@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.net.LocalObjectCommunicator;
@@ -75,7 +75,7 @@ public interface AbstractSimulationStarter
     * Set a robot initial setup to use instead of the one in DRCRobotModel.
     * @param robotInitialSetup
     */
-   public abstract void setRobotInitialSetup(DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup);
+   public abstract void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup);
 
    /**
     * Set a specific starting location. By default, the robot will start at (0, 0) in world with no yaw.
@@ -134,7 +134,7 @@ public interface AbstractSimulationStarter
 
    public abstract SimulationConstructionSet getSimulationConstructionSet();
 
-   public abstract SDFHumanoidRobot getSDFRobot();
+   public abstract HumanoidFloatingRootJointRobot getSDFRobot();
 
    public abstract PacketRouter<PacketDestination> getPacketRouter();
 

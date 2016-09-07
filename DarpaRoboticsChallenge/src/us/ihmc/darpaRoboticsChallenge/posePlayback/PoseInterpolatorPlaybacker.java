@@ -1,13 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class PoseInterpolatorPlaybacker
 {
-   public static void playASequence(SDFHumanoidRobot sdfRobot, PlaybackPoseSequence sequence, boolean showGui, PoseCheckerCallback poseCheckerCallback)
+   public static void playASequence(HumanoidFloatingRootJointRobot sdfRobot, PlaybackPoseSequence sequence, boolean showGui, PoseCheckerCallback poseCheckerCallback)
    {
       YoVariableRegistry registry = new YoVariableRegistry("PoseInterpolatorPlaybacker");
       PlaybackPoseInterpolator interpolator = new PlaybackPoseInterpolator(registry);

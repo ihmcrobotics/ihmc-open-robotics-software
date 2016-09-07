@@ -2,8 +2,8 @@ package us.ihmc.wanderer.hardware.output;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
 import us.ihmc.acsell.springs.HystereticSpringProperties;
@@ -66,9 +66,9 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    private final EnumMap<WandererJoint, DoubleYoVariable> desiredQddFeedForwardGain = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
    private final EnumMap<WandererJoint, DoubleYoVariable> desiredJointQ = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
    private final EnumYoVariable<WalkingStateEnum>  yoWalkingState = new EnumYoVariable<WalkingStateEnum>("sow_walkingState", registry, WalkingStateEnum.class);
-   
+
    private final DoubleYoVariable masterMotorDamping = new DoubleYoVariable("masterMotorDamping", registry);
-   
+
    private final HystereticSpringProperties leftHipXSpringProperties = new WandererLeftHipXSpringProperties();
    private final HystereticSpringProperties rightHipXSpringProperties = new WandererRightHipXSpringProperties();
    private final SpringCalculator leftHipXSpringCalculator;
@@ -77,7 +77,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    private final HystereticSpringProperties rightAnkleSpringProperties = new WandererRightAnkleSpringProperties();
    private final SpringCalculator leftAnkleSpringCalculator;
    private final SpringCalculator rightAnkleSpringCalculator;
-   
+
 
    enum JointControlMode
    {
@@ -86,13 +86,13 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
 
    private final EnumMap<WandererJoint, EnumYoVariable<JointControlMode>> jointControlMode = new EnumMap<WandererJoint, EnumYoVariable<JointControlMode>>(
          WandererJoint.class);
-         
+
    private WalkingStateEnum currentWalkingState;
 
    public WandererOutputWriter(DRCRobotModel robotModel)
    {
 
-      SDFFullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
+      FullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
       standPrepJoints = WandererUtil.createJointMap(standPrepFullRobotModel.getOneDoFJoints());
 
       tauControllerOutput = new EnumMap<WandererJoint, DoubleYoVariable>(WandererJoint.class);
@@ -100,11 +100,11 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
       {
          tauControllerOutput.put(joint, new DoubleYoVariable(joint.getSdfName() + "tauControllerOutput", registry));
          yoMotorDamping.put(joint, new DoubleYoVariable(joint.getSdfName() + "motorDamping", registry));
-         
-         
+
+
          DoubleYoVariable inertia = new DoubleYoVariable(joint.getSdfName()+"ReflectedMotorInertia", registry);
          inertia.set(joint.getActuators()[0].getMotorInertia()*joint.getRatio()*joint.getRatio()); //hacky
-         yoReflectedMotorInertia.put(joint, inertia);  
+         yoReflectedMotorInertia.put(joint, inertia);
          yoTauInertiaViz.put(joint, new DoubleYoVariable(joint.getSdfName()+"TauInertia", registry));
          desiredQddFeedForwardGain.put(joint, new DoubleYoVariable(joint.getSdfName()+"QddFeedForwardGain", registry));
          desiredJointQ.put(joint, new DoubleYoVariable(joint.getSdfName()+"_Q_desired",registry));
@@ -122,12 +122,12 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
       yoAngleSpring.put(WandererJoint.RIGHT_HIP_X, new DoubleYoVariable(WandererJoint.RIGHT_HIP_X.getSdfName() + "_q_Spring", registry));
       yoAngleSpring.put(WandererJoint.LEFT_ANKLE_Y, new DoubleYoVariable(WandererJoint.LEFT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
       yoAngleSpring.put(WandererJoint.RIGHT_ANKLE_Y, new DoubleYoVariable(WandererJoint.RIGHT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
-      
+
       leftHipXSpringCalculator = new LinearSpringCalculator(leftHipXSpringProperties);
       rightHipXSpringCalculator = new LinearSpringCalculator(rightHipXSpringProperties);
       leftAnkleSpringCalculator = new LinearSpringCalculator(leftAnkleSpringProperties);
       rightAnkleSpringCalculator = new LinearSpringCalculator(rightAnkleSpringProperties);
-            
+
       initializeJointControlMode(robotModel.getWalkingControllerParameters().getJointsToIgnoreInController());
       initializeMotorDamping();
       initializeFeedForwardTorqueFromDesiredAcceleration();
@@ -155,9 +155,9 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
       yoMotorDamping.get(WandererJoint.RIGHT_HIP_Y).set(1.0*0.612);
       yoMotorDamping.get(WandererJoint.RIGHT_HIP_X).set(10.0*2.286);
       masterMotorDamping.set(1.0);
-      
+
    }
-   
+
    private void initializeFeedForwardTorqueFromDesiredAcceleration()
    {
       desiredQddFeedForwardGain.get(WandererJoint.LEFT_ANKLE_Y).set(0.5);
@@ -192,13 +192,13 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
             outputEnabled = false;
          }
          computeOutputCommand(timestamp);
-            
+
       }
 
       outputWriter.write();
 
    }
-   
+
    private void computeOutputCommand(long timestamp)
    {
          /*
@@ -226,7 +226,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
             RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlJoint);
 
             double controlRatio = getControlRatioByJointControlMode(joint);
-            
+
             double desiredAcceleration = wholeBodyControlJoint.getQddDesired();
             double motorReflectedInertia = yoReflectedMotorInertia.get(joint).getDoubleValue();
             double motorInertiaTorque = motorReflectedInertia * desiredAcceleration;
@@ -247,11 +247,11 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
                tauSpring = calcSpringTorque(joint, rawSensorData.getQ_raw());
                yoTauSpringCorrection.get(joint).set(tauSpring);
                yoTauTotal.get(joint).set(tau);
-            } 
+            }
             jointCommand.setTauDesired(tau - tauSpring, wholeBodyControlJoint.getQddDesired(), rawSensorData);
-                        
+
             jointCommand.setDamping(kd);
-            
+
             // Slightly hackish but won't change any ATLAS code.
             wholeBodyControlJoint.setTau(tau);
 
@@ -319,8 +319,8 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
         yoAngleSpring.get(joint).set(q);
         leftAnkleSpringCalculator.update(q);
         if(USE_LEFT_ANKLE_SPRING)
-           return (currentWalkingState != WalkingStateEnum.WALKING_RIGHT_SUPPORT) ? 
-              leftAnkleSpringCalculator.getSpringForce() : 
+           return (currentWalkingState != WalkingStateEnum.WALKING_RIGHT_SUPPORT) ?
+              leftAnkleSpringCalculator.getSpringForce() :
               leftAnkleSpringCalculator.getSpringForce()*0.75;//0.75 at DRC
         else
            return 0.0;
@@ -342,7 +342,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    }
 
    @Override
-   public void setFullRobotModel(SDFFullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       wholeBodyControlJoints = WandererUtil.createJointMap(controllerModel.getOneDoFJoints());
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
@@ -359,7 +359,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    {
       return registry;
    }
-   
+
    @Override
    public void controllerStateHasChanged(Enum<?> oldState, Enum<?> newState)
    {
@@ -369,7 +369,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
          yoWalkingState.set(currentWalkingState);
       }
    }
-   
+
    @Override
    public void controllerFailed(FrameVector2d fallingDirection)
    {

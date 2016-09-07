@@ -4,8 +4,8 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -22,7 +22,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
    private final GroundContactPointsSlipper groundContactPointsSlipper;
    private final List<GroundContactPoint> groundContactPoints;
 
-   private final SDFRobot robot;
+   private final FloatingRootJointRobot robot;
 
    private final EnumYoVariable<SlipState> slipState;
    private final BooleanYoVariable slipNextStep;
@@ -30,7 +30,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
    private final YoFrameVector amountToSlipNextStep;
    private final YoFrameOrientation rotationToSlipNextStep;
 
-   public SlipOnNextStepPerturber(SDFHumanoidRobot robot, RobotSide robotSide)
+   public SlipOnNextStepPerturber(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
    {
       super(robotSide.getCamelCaseNameForStartOfExpression() + "SlipOnEachStepPerturber");
 

@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 public class FullRobotModelVisualizer implements RobotVisualizer
 {
    private final String name;
-   private final SDFRobot robot;
+   private final FloatingRootJointRobot robot;
    private final double updateDT;
    private final FullRobotModel fullRobot;
 
@@ -40,14 +40,14 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    {   
       this.fullRobot = fullRobotModel;
       this.scs = scs;
-      this.robot = (SDFRobot) scs.getRobots()[0];
+      this.robot = (FloatingRootJointRobot) scs.getRobots()[0];
       this.name = robot.getName() + "Simulated";    
       this.updateDT = updateDT;
       this.robotRegistry = robot.getRobotsYoVariableRegistry();
       this.setMainRegistry(robotRegistry, fullRobotModel, null);
    }
 
-   public SDFRobot getSDFRobot()
+   public FloatingRootJointRobot getSDFRobot()
    {
       return robot;
    }

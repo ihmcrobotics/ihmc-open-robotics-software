@@ -7,27 +7,27 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
-import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.MidFootZUpSwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser.SwingTargetGenerator;
 import us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser.DefaultGaitSwingLegChooser;
 import us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser.NextSwingLegChooser;
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedSwingTrajectoryGenerator;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -79,45 +79,45 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactOval;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactOval;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 
 public class QuadrupedPositionBasedCrawlController implements QuadrupedController
 {
    private static final double MAX_YAW_IN_PLACE = 0.4;
-   
-   
+
+
    private static final double DEFAULT_HEADING_CORRECTION_BREAK_FREQUENCY = 1.0;
    private static final double DEFAULT_YAW_IN_PLACE_RATE_LIMIT = 0.2;
    private static final double DEFAULT_COM_PITCH_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_ROLL_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY = 0.5;
    private static final double DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT = 0.01;
-   
+
    private final double dt;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final DoubleYoVariable robotTimestamp;
-   
+
    public enum CrawlGateWalkingState
    {
       QUADRUPLE_SUPPORT, TRIPLE_SUPPORT, ALPHA_FILTERING_DESIREDS
    }
-   
+
    private enum SafeStartingShiftMode
    {
       COMMON_TRIANGLE, CENTROID, TTR, COM_INCIRCLE, TROTLINE_MIDPOINT
    };
-   
+
    private final EnumYoVariable<SafeStartingShiftMode> safeToShiftMode = new EnumYoVariable<>("safeStartingShiftMode", registry, SafeStartingShiftMode.class);
    {
       safeToShiftMode.set(SafeStartingShiftMode.TROTLINE_MIDPOINT);
    }
-   
-   private final SDFFullQuadrupedRobotModel feedForwardFullRobotModel;
+
+   private final FullQuadrupedRobotModel feedForwardFullRobotModel;
    private final QuadrupedReferenceFrames feedForwardReferenceFrames;
-   
+
    private final StateMachine<CrawlGateWalkingState> walkingStateMachine;
    private final QuadrupleSupportState quadrupleSupportState;
    private final FilterDesiredsToMatchCrawlControllerState filterDesiredsToMatchCrawlControllerOnTransitionIn;
@@ -125,9 +125,9 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final NextSwingLegChooser nextSwingLegChooser;
    private final SwingTargetGenerator swingTargetGenerator;
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
-   private final SDFFullRobotModel actualFullRobotModel;
+   private final FullRobotModel actualFullRobotModel;
    private final SixDoFJoint actualRobotRootJoint;
-   
+
    private final QuadrupedReferenceFrames referenceFrames;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final CenterOfMassJacobian feedForwardCenterOfMassJacobian;
@@ -138,12 +138,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final DoubleYoVariable feedForwardCenterOfMassOffsetAlpha;
    private final YoFramePoint feedForwardCenterOfMassOffset;
    private final AlphaFilteredYoFramePoint filteredFeedForwardCenterOfMassOffset;
-   
+
    private final TranslationReferenceFrame feedForwardCenterOfMassFrame;
    private final PoseReferenceFrame desiredCoMPoseReferenceFrame = new PoseReferenceFrame("desiredCoMPoseReferenceFrame", ReferenceFrame.getWorldFrame());
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector desiredCoMVelocity = new YoFrameVector("desiredCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
-   
+
    private final GlobalTimer calculateNextThreeFootstepsTimer = new GlobalTimer("calculateNextThreeFootstepsTimer", registry);
    private final GlobalTimer doTransitionIntoQuadrupleSupportTimer = new GlobalTimer("doTransitionIntoQuadrupleSupportTimer", registry);
    private final GlobalTimer doTransitionIntoTripleSupportTimer = new GlobalTimer("doTransitionIntoTripleSupportTimer", registry);
@@ -153,27 +153,27 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final GlobalTimer calculateNextCoMTargetTimer = new GlobalTimer("calculateNextCoMTargetTimer", registry);
    private final GlobalTimer calculateNextThreeFootStepsOneOffTimer = new GlobalTimer("calculateNextThreeFootStepsOneOffTimer", registry);
    private boolean oneOffHappened = false;
-   
+
    private final OneDoFJoint[] oneDoFJointsFeedforward;
    private final OneDoFJoint[] oneDoFJointsActual;
 
    private final FramePoint desiredCoMFramePosition = new FramePoint(ReferenceFrame.getWorldFrame());
    private final FramePose desiredCoMFramePose = new FramePose(ReferenceFrame.getWorldFrame());
-   
+
    private final FrameVector tempComTrajComputedVelocity = new FrameVector();
    private final FrameVector tempDesiredVelocityVector = new FrameVector();
-   
+
    private final BooleanYoVariable runOpenLoop = new BooleanYoVariable("runOpenLoop", "If true, runs in open loop mode. The leg motions will not depend on any feedback signals.", registry);
-   
+
    private final YoFramePoint2d desiredCoMOffset;
    private final DoubleYoVariable distanceInsideSupportPolygonBeforeSwingingLeg = new DoubleYoVariable("distanceInsideSupportPolygonBeforeSwingingLeg", registry);
-   
+
    private final DoubleYoVariable filteredDesiredCoMYawAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMYawAlphaBreakFrequency", registry);
    private final DoubleYoVariable filteredDesiredCoMYawAlpha = new DoubleYoVariable("filteredDesiredCoMYawAlpha", registry);
-   
+
    private final DoubleYoVariable filteredDesiredCoMPitchAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMPitchAlphaBreakFrequency", registry);
    private final DoubleYoVariable filteredDesiredCoMPitchAlpha = new DoubleYoVariable("filteredDesiredCoMOrientationAlpha", registry);
-   
+
    private final DoubleYoVariable filteredDesiredCoMRollAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMRollAlphaBreakFrequency", registry);
    private final DoubleYoVariable filteredDesiredCoMRollAlpha = new DoubleYoVariable("filteredDesiredCoMRollAlpha", registry);
 
@@ -181,7 +181,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final DoubleYoVariable filteredDesiredCoMHeightAlphaBreakFrequency = new DoubleYoVariable("filteredDesiredCoMHeightAlphaBreakFrequency", registry);
    private final DoubleYoVariable filteredDesiredCoMHeightAlpha = new DoubleYoVariable("filteredDesiredCoMHeightAlpha", registry);
    private final AlphaFilteredYoVariable filteredDesiredCoMHeight = new AlphaFilteredYoVariable("filteredDesiredCoMHeight", registry, filteredDesiredCoMHeightAlpha , desiredCoMHeight );
-   
+
    private final YoFrameOrientation desiredCoMOrientation = new YoFrameOrientation("desiredCoMOrientation", ReferenceFrame.getWorldFrame(), registry);
    private final AlphaFilteredWrappingYoVariable filteredDesiredCoMYaw = new AlphaFilteredWrappingYoVariable("filteredDesiredCoMYaw", "", registry, desiredCoMOrientation.getYaw(), filteredDesiredCoMYawAlpha, -Math.PI, Math.PI);
    private final AlphaFilteredWrappingYoVariable filteredDesiredCoMPitch = new AlphaFilteredWrappingYoVariable("filteredDesiredCoMPitch", "", registry, desiredCoMOrientation.getPitch(), filteredDesiredCoMPitchAlpha, -Math.PI, Math.PI);
@@ -211,18 +211,18 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final DoubleYoVariable shrunkenPolygonSize = new DoubleYoVariable("shrunkenPolygonSize", registry);
 
    private final DoubleYoVariable nominalYaw = new DoubleYoVariable("nominalYaw", registry);
-   
+
    private final DoubleYoVariable desiredYawInPlace = new DoubleYoVariable("desiredYawInPlace", registry);
    private final DoubleYoVariable desiredYawInPlaceRateLimit = new DoubleYoVariable("desiredYawInPlaceRateLimit", registry);
    private final RateLimitedYoVariable desiredYawInPlaceRateLimited;
-   
-   
+
+
    private final YoFrameLineSegment2d nominalYawLineSegment = new YoFrameLineSegment2d("nominalYawLineSegment", "", ReferenceFrame.getWorldFrame(), registry);
    private final YoArtifactLineSegment2d nominalYawArtifact = new YoArtifactLineSegment2d("nominalYawArtifact", nominalYawLineSegment, Color.YELLOW, 0.02, 0.02);
    private final FramePoint2d endPoint2d = new FramePoint2d();
    private final FramePoint centroidFramePoint = new FramePoint();
    private final FramePoint2d centroidFramePoint2d = new FramePoint2d();
-   
+
    private final QuadrupedSupportPolygon safeToStepSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon currentSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
@@ -243,25 +243,25 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final QuadrantDependentList<YoFramePoint> desiredFeetLocations = new QuadrantDependentList<YoFramePoint>();
    private final FramePoint desiredFootPosition = new FramePoint();
    private final FramePoint desiredFootPositionInBody = new FramePoint();
-   
+
    private final QuadrantDependentList<YoFrameVector> desiredFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
    private final QuadrantDependentList<YoFrameVector> actualFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
    private final Vector3d desiredFootPositionForInverseKinematics = new Vector3d();
-   
+
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoFrameConvexPolygon2d currentTriplePolygon = new YoFrameConvexPolygon2d("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final YoFrameConvexPolygon2d upcomingTriplePolygon = new YoFrameConvexPolygon2d("upcomingTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final YoFrameConvexPolygon2d commonTriplePolygon = new YoFrameConvexPolygon2d("commonTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
-   
+
    private final YoFrameConvexPolygon2d commonTriplePolygonLeft = new YoFrameConvexPolygon2d("commonTriplePolygonLeft", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final YoFrameConvexPolygon2d commonTriplePolygonRight = new YoFrameConvexPolygon2d("commonTriplePolygonRight", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final SideDependentList<YoFrameConvexPolygon2d> commonTriplePolygons = new SideDependentList<>(commonTriplePolygonLeft, commonTriplePolygonRight);
 //   private final YoFrameConvexPolygon2d[] tripleSupportPolygons = new YoFrameConvexPolygon2d[6];
 //   private final YoArtifactPolygon[] tripleSupportArtifactPolygons = new YoArtifactPolygon[6];
-   
+
    private final QuadrantDependentList<YoFrameConvexPolygon2d> tripleSupportPolygons = new QuadrantDependentList<YoFrameConvexPolygon2d>();
    private final QuadrantDependentList<YoArtifactPolygon> tripleSupportArtifactPolygons = new QuadrantDependentList<YoArtifactPolygon>();
-   
+
    private final YoFramePoint circleCenter = new YoFramePoint("circleCenter", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint2d circleCenter2d = new FramePoint2d();
    private final FramePoint circleCenter3d = new FramePoint();
@@ -269,7 +269,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
    private final DoubleYoVariable inscribedCircleRadius = new DoubleYoVariable("inscribedCircleRadius", registry);
    private final YoArtifactOval inscribedCircle = new YoArtifactOval("inscribedCircle", circleCenter, inscribedCircleRadius, Color.BLACK);
-   
+
    private final BooleanYoVariable useSubCircleForBodyShiftTarget = new BooleanYoVariable("useSubCircleForBodyShiftTarget", registry);
    private final DoubleYoVariable subCircleRadius = new DoubleYoVariable("subCircleRadius", registry);
    private final DoubleYoVariable comCloseRadius = new DoubleYoVariable("comCloseRadius", "Distance check from final desired circle to CoM for transitioning into swing state", registry);
@@ -279,47 +279,47 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final FramePoint desiredRootJointPosition = new FramePoint();
    private final FrameVector vectorToSubtractHolder = new FrameVector();
    private final Vector3d linearVelocityHolder = new Vector3d();
-   
+
    private final BooleanYoVariable isCoMInsideTriangleForSwingLeg = new BooleanYoVariable("isCoMInsideTriangleForSwingLeg", registry);
    private final BooleanYoVariable isCoMCloseToFinalDesired = new BooleanYoVariable("isCoMCloseToFinalDesired", registry);
    private final BooleanYoVariable useCommonTriangleForSwingTransition = new BooleanYoVariable("useCommonTriangleForSwingTransition", registry);
 
    private final YoFrameVector feedForwardCenterOfMassVelocity = new YoFrameVector("feedForwardCenterOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
-   
+
    private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector centerOfMassVelocity = new YoFrameVector("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
 
    private final FramePoint centerOfMassFramePoint = new FramePoint();
    private final FramePoint2d centerOfMassPoint2d = new FramePoint2d();
    private final YoGraphicPosition centerOfMassViz = new YoGraphicPosition("centerOfMass", centerOfMassPosition, 0.02, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
-   
+
    private final YoFramePoint currentSwingTarget = new YoFramePoint("currentSwingTarget", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint finalSwingTarget = new YoFramePoint("finalSwingTarget", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition currentSwingTargetViz = new YoGraphicPosition("currentSwingTarget", currentSwingTarget, 0.01, YoAppearance.Red());
    private final YoGraphicPosition finalSwingTargetViz = new YoGraphicPosition("finalSwingTarget", finalSwingTarget, 0.01, YoAppearance.Purple());
-   
+
    private final YoFramePoint desiredCoMTarget = new YoFramePoint("desiredCoMTarget", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition desiredCoMTargetViz = new YoGraphicPosition("desiredCoMTargetViz", desiredCoMTarget, 0.01, YoAppearance.Turquoise());
 
    private final YoFramePoint desiredCoM = new YoFramePoint("desiredCoM", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition desiredCoMViz = new YoGraphicPosition("desiredCoMViz", desiredCoM, 0.01, YoAppearance.HotPink());
-   
+
    private final YoFramePoint currentICP = new YoFramePoint("currentICP", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition currentICPViz = new YoGraphicPosition("currentICPViz", currentICP, 0.01, YoAppearance.DarkSlateBlue());
-   
+
    private final YoFramePoint feedForwardICP = new YoFramePoint("feedForwardICP", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition feedForwardICPViz = new YoGraphicPosition("feedForwardICPViz", feedForwardICP, 0.01, YoAppearance.DarkSlateBlue());
-   
+
    private final YoGraphicReferenceFrame desiredCoMPoseYoGraphic = new YoGraphicReferenceFrame(desiredCoMPoseReferenceFrame, registry, 0.45);
    private final YoGraphicReferenceFrame comPoseYoGraphic, feedForwardCoMPoseYoGraphic;
-   
+
    private final YoGraphicReferenceFrame centroidWithNominal;
    private final YoGraphicReferenceFrame centroidZUpWithNominal;
    private final QuadrantDependentList<YoGraphicReferenceFrame> tripleSupportFrames = new QuadrantDependentList<>();
-   
+
    public final BooleanYoVariable isVelocityNegative = new BooleanYoVariable("isVelocityNegative", registry);
    public final DoubleYoVariable velocitySign = new DoubleYoVariable("velocitySign", registry);
-   
+
    private final QuadrantDependentList<YoGraphicReferenceFrame> desiredAttachmentFrames = new QuadrantDependentList<YoGraphicReferenceFrame>();
    private final QuadrantDependentList<YoGraphicReferenceFrame> actualAttachmentFrames = new QuadrantDependentList<YoGraphicReferenceFrame>();
 
@@ -330,7 +330,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final VelocityConstrainedPositionTrajectoryGenerator comTrajectoryGenerator = new VelocityConstrainedPositionTrajectoryGenerator("comTraj", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint initialCoMPosition = new YoFramePoint("initialCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector initialCoMVelocity = new YoFrameVector("initialCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
-   
+
    private final DoubleYoVariable comTrajectoryTimeStart = new DoubleYoVariable("comTrajectoryTimeStart", registry);
    private final DoubleYoVariable comTrajectoryTimeCurrent = new DoubleYoVariable("comTrajectoryTimeCurrent", registry);
    private final DoubleYoVariable comTrajectoryTimeDesired = new DoubleYoVariable("comTrajectoryTimeDesired", registry);
@@ -347,7 +347,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final DoubleYoVariable comTrajectoryDuration = new DoubleYoVariable("comTrajectoryDuration", registry);
    private final DoubleYoVariable maximumCoMTrajectoryDuration = new DoubleYoVariable("maximumCoMTrajectoryDuration", registry);
    private final DoubleYoVariable minimumCoMTrajectoryDuration = new DoubleYoVariable("minimumCoMTrajectoryDuration", registry);
-   
+
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
 
@@ -360,7 +360,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             environment.getParentRegistry(), environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
    }
 
-   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, SDFFullQuadrupedRobotModel fullRobotModel,
+   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, FullQuadrupedRobotModel fullRobotModel,
          QuadrupedPostureInputProviderInterface postureProvider, QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrantDependentList<FootSwitchInterface> footSwitches, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
    {
@@ -373,23 +373,23 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       maxYawRate.set(quadrupedControllerParameters.getMaxYawRate());
       distanceInsideSupportPolygonBeforeSwingingLeg.set(0.02);
       turnInPlaceCoMTrajectoryBuffer.set(0.5);
-      
+
       useImuFeedback.set(false);
       pitchPidController.setProportionalGain(10.0);
       pitchPidController.setDerivativeGain(0.4);
       pitchPidController.setIntegralGain(0.4);
       pitchPidController.setMaxIntegralError(0.1);
-      
+
       rollPidController.setProportionalGain(10.0);
       rollPidController.setDerivativeGain(0.4);
       rollPidController.setIntegralGain(0.1);
       rollPidController.setMaxIntegralError(0.1);
-      
+
       useSubCircleForBodyShiftTarget.set(true);
       swingLeg.set(RobotQuadrant.HIND_LEFT);
-      
+
       runOpenLoop.set(true);
-      
+
       this.postureProvider = postureProvider;
       this.planarVelocityProvider = planarVelocityProvider;
       this.robotTimestamp = yoTime;
@@ -399,12 +399,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
       this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>("QuadrupedCrawlState", "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
       this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
-      
+
       actualRobotRootJoint = actualFullRobotModel.getRootJoint();
       twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), actualFullRobotModel.getElevator());
       referenceFrames.updateFrames();
       comFrame = referenceFrames.getCenterOfMassFrame();
-      
+
       feedForwardFullRobotModel = modelFactory.createFullRobotModel();
       this.feedForwardCenterOfMassJacobian = new CenterOfMassJacobian(feedForwardFullRobotModel.getElevator());
       feedForwardReferenceFrames = new QuadrupedReferenceFrames(feedForwardFullRobotModel, physicalProperties);
@@ -413,33 +413,33 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       feedForwardBodyFrame = feedForwardReferenceFrames.getBodyFrame();
 //      this.nextSwingLegChooser = new QuadrupedGaitSwingLegChooser(feedForwardReferenceFrames, registry, yoGraphicsListRegistry);
       this.nextSwingLegChooser = new DefaultGaitSwingLegChooser();
-      
+
       oneDoFJointsFeedforward = feedForwardFullRobotModel.getOneDoFJoints();
       oneDoFJointsActual = fullRobotModel.getOneDoFJoints();
-      
+
       desiredCoMOffset = new YoFramePoint2d("desiredCoMOffset", feedForwardReferenceFrames.getBodyZUpFrame(), registry);
       desiredCoMOffset.set(quadrupedControllerParameters.getDefaultDesiredCoMOffset());
 
       updateFeedForwardModelAndFrames();
-      
+
       for (RobotQuadrant robotQuadrant: RobotQuadrant.values)
       {
     	  YoGraphicReferenceFrame desiredAttachmentFrame = new YoGraphicReferenceFrame("ffLegAttachment", feedForwardReferenceFrames.getLegAttachmentFrame(robotQuadrant), registry, 0.25, YoAppearance.Purple());
     	  desiredAttachmentFrames.set(robotQuadrant, desiredAttachmentFrame);
-    	  
+
     	  YoGraphicReferenceFrame actualAttachmentFrame = new YoGraphicReferenceFrame("legAttachment", referenceFrames.getLegAttachmentFrame(robotQuadrant), registry, 0.25, YoAppearance.Green());
     	  actualAttachmentFrames.set(robotQuadrant, actualAttachmentFrame);
-    	  
+
           yoGraphicsListRegistry.registerYoGraphic("AttachementFrames", desiredAttachmentFrame);
           yoGraphicsListRegistry.registerYoGraphic("AttachementFrames", actualAttachmentFrame);
       }
-      
+
       this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, feedForwardReferenceFrames, registry);
       this.footSwitches = footSwitches;
 
       desiredVelocity = new YoFrameVector("desiredVelocity", feedForwardBodyFrame, registry);
-      lastDesiredVelocity = new YoFrameVector("lastDesiredVelocity", feedForwardBodyFrame, registry); 
-      
+      lastDesiredVelocity = new YoFrameVector("lastDesiredVelocity", feedForwardBodyFrame, registry);
+
       desiredVelocity.setX(0.0);
       comTrajectoryTimeDesired.set(1.0);
       maximumCoMTrajectoryDuration.set(6.0);
@@ -449,47 +449,47 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       shrunkenPolygonSize.set(0.02);
 
       timeToFilterDesiredAtCrawlStart.set(4.0);
-      
+
       comPoseYoGraphic = new YoGraphicReferenceFrame("rasta_", comFrame, registry, 0.25, YoAppearance.Green());
       feedForwardCoMPoseYoGraphic = new YoGraphicReferenceFrame("feedForwardRasta_", feedForwardCenterOfMassFrame, registry, 0.25, YoAppearance.Purple());
-      
+
       feedForwardCenterOfMassOffsetAlpha = new DoubleYoVariable("feedForwardCenterOfMassOffsetAlpha", registry);
       feedForwardCenterOfMassOffsetAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, dt));
       feedForwardCenterOfMassOffset = new YoFramePoint("feedForwardCenterOfMassOffset", feedForwardCenterOfMassFrame, registry);
       filteredFeedForwardCenterOfMassOffset = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint("filteredFeedForwardCenterOfMassOffset", "", registry, feedForwardCenterOfMassOffsetAlpha, feedForwardCenterOfMassOffset);
-      
+
 
       centroidWithNominal = new YoGraphicReferenceFrame(referenceFrames.getCenterOfFeetFrameAveragingLowestZHeightsAcrossEnds(), registry, 0.1);
       centroidZUpWithNominal = new YoGraphicReferenceFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), registry, 0.1);
-      
+
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          tripleSupportFrames.set(robotQuadrant, new YoGraphicReferenceFrame(referenceFrames.getTripleSupportFrameAveragingLowestZHeightsAcrossEnds(robotQuadrant), registry, 0.1));
       }
-      
+
       filteredDesiredCoMYawAlphaBreakFrequency.set(DEFAULT_HEADING_CORRECTION_BREAK_FREQUENCY);
       filteredDesiredCoMYawAlpha.set(
             AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filteredDesiredCoMYawAlphaBreakFrequency.getDoubleValue(), dt));
       filteredDesiredCoMYawAlphaBreakFrequency.addVariableChangedListener(
             createBreakFrequencyChangeListener(dt, filteredDesiredCoMYawAlphaBreakFrequency, filteredDesiredCoMYawAlpha));
-      
+
       filteredDesiredCoMPitchAlphaBreakFrequency.set(DEFAULT_COM_PITCH_FILTER_BREAK_FREQUENCY);
       filteredDesiredCoMPitchAlpha.set(
             AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filteredDesiredCoMPitchAlphaBreakFrequency.getDoubleValue(), dt));
       filteredDesiredCoMPitchAlphaBreakFrequency.addVariableChangedListener(
             createBreakFrequencyChangeListener(dt, filteredDesiredCoMPitchAlphaBreakFrequency, filteredDesiredCoMPitchAlpha));
-      
+
       filteredDesiredCoMRollAlphaBreakFrequency.set(DEFAULT_COM_ROLL_FILTER_BREAK_FREQUENCY);
       filteredDesiredCoMRollAlpha.set(
             AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filteredDesiredCoMRollAlphaBreakFrequency.getDoubleValue(), dt));
       filteredDesiredCoMRollAlphaBreakFrequency.addVariableChangedListener(
             createBreakFrequencyChangeListener(dt, filteredDesiredCoMRollAlphaBreakFrequency, filteredDesiredCoMRollAlpha));
-      
-      
+
+
       desiredYawInPlaceRateLimited  = new RateLimitedYoVariable("desiredYawInPlaceRateLimited", registry, desiredYawInPlaceRateLimit, dt);
       desiredYawInPlaceRateLimit.set(DEFAULT_YAW_IN_PLACE_RATE_LIMIT);
-      
-      
+
+
       filteredDesiredCoMHeightAlphaBreakFrequency.set(DEFAULT_COM_HEIGHT_Z_FILTER_BREAK_FREQUENCY);
       filteredDesiredCoMHeightAlpha.set(
             AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filteredDesiredCoMHeightAlphaBreakFrequency.getDoubleValue(), dt));
@@ -503,7 +503,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
          }
       });
-      
+
       referenceFrames.updateFrames();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -511,29 +511,29 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
          ReferenceFrame footReferenceFrame = referenceFrames.getFootFrame(robotQuadrant);
          ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
-         
+
          legAttachmentFrames.set(robotQuadrant, legAttachmentFrame);
 
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         
+
          YoFramePoint actualFootPosition = new YoFramePoint(prefix + "actualFootPosition", ReferenceFrame.getWorldFrame(), registry);
          actualFeetLocations.set(robotQuadrant, actualFootPosition);
-         
+
          YoFramePoint desiredFootLocation = new YoFramePoint(prefix + "FootDesiredPosition", ReferenceFrame.getWorldFrame(), registry);
-         
+
          FramePoint footPosition = new FramePoint(footReferenceFrame);
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          footPosition.setZ(0.0);
          desiredFootLocation.set(footPosition);
          desiredFeetLocations.set(robotQuadrant, desiredFootLocation);
-         
+
          YoFrameVector footPositionInLegAttachementFrame = new YoFrameVector(prefix + "FootPositionInLegFrame", referenceFrames.getLegAttachmentFrame(robotQuadrant), registry);
          desiredFeetPositionsInLegAttachmentFrame.set(robotQuadrant, footPositionInLegAttachementFrame);
-         
+
          YoFrameVector actualFootPositionInLegAttachementFrame = new YoFrameVector(prefix + "ActualFootPositionInLegFrame", referenceFrames.getLegAttachmentFrame(robotQuadrant), registry);
          actualFeetPositionsInLegAttachmentFrame.set(robotQuadrant, actualFootPositionInLegAttachementFrame);
       }
-      
+
 //      for (int i = 0; i < tripleSupportPolygons.length; i++)
 //      {
 //         String polygonName = "tripleSupport" + i;
@@ -548,28 +548,28 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 //         yoGraphicsListRegistry.registerArtifact(polygonName, tripleSupportArtifactPolygons[i]);
 //         yoGraphicsListRegistryForDetachedOverhead.registerArtifact(polygonName, tripleSupportArtifactPolygons[i]);
 //      }
-      
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String polygonName = robotQuadrant.getCamelCaseNameForStartOfExpression() + "TripleSupportPolyon";
          YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d(polygonName, "", ReferenceFrame.getWorldFrame(), 3, registry);
          tripleSupportPolygons.set(robotQuadrant, yoFrameConvexPolygon2d);
-         
+
          float saturation = 0.5f;
          float brightness = 0.5f;
          float hue = (float) (0.1 * robotQuadrant.ordinal());
-         
+
          YoArtifactPolygon yoArtifactPolygon = new YoArtifactPolygon(polygonName, yoFrameConvexPolygon2d, Color.getHSBColor(hue, saturation, brightness), false);
          tripleSupportArtifactPolygons.set(robotQuadrant, yoArtifactPolygon);
          yoGraphicsListRegistry.registerArtifact(polygonName, yoArtifactPolygon);
          yoGraphicsListRegistryForDetachedOverhead.registerArtifact(polygonName, yoArtifactPolygon);
       }
-      
+
       createGraphicsAndArtifacts(yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead);
-      
+
       referenceFrames.updateFrames();
       updateFeetLocations();
-      
+
       FramePose centerOfMassPose = new FramePose(referenceFrames.getCenterOfFourHipsFrame());
       centerOfMassPose.changeFrame(ReferenceFrame.getWorldFrame());
       desiredCoMHeight.set(quadrupedControllerParameters.getInitalCoMHeight());
@@ -579,12 +579,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       desiredCoM.set(centerOfMassPose.getFramePointCopy());
       desiredCoMPoseReferenceFrame.setPoseAndUpdate(centerOfMassPose);
       updateFeedForwardModelAndFrames();
-      
+
       quadrupleSupportState = new QuadrupleSupportState(CrawlGateWalkingState.QUADRUPLE_SUPPORT, DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT, 0.2);
       TripleSupportState tripleSupportState = new TripleSupportState(CrawlGateWalkingState.TRIPLE_SUPPORT);
-      
+
       filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS, modelFactory);
-      
+
       walkingStateMachine.addState(filterDesiredsToMatchCrawlControllerOnTransitionIn);
       walkingStateMachine.addState(quadrupleSupportState);
       walkingStateMachine.addState(tripleSupportState);
@@ -593,7 +593,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       StateTransitionCondition quadrupleToTripleCondition = new QuadrupleToTripleCondition(quadrupleSupportState);
       StateTransitionCondition tripleToQuadrupleCondition = new TripleToQuadrupleCondition(tripleSupportState);
       StateTransitionCondition filterToQuadrupleCondition = new FilterToQuadrupleCondition(filterDesiredsToMatchCrawlControllerOnTransitionIn);
-      
+
       filterDesiredsToMatchCrawlControllerOnTransitionIn.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, filterToQuadrupleCondition));
       quadrupleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.TRIPLE_SUPPORT, quadrupleToTripleCondition));
       tripleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, tripleToQuadrupleCondition));
@@ -627,14 +627,14 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       YoArtifactPolygon commonTriplePolygonArtifact = new YoArtifactPolygon("commonTriplePolygonArtifact", commonTriplePolygon, Color.RED, false);
       YoArtifactPolygon commonTriplePolygonLeftArtifact = new YoArtifactPolygon("commonTriplePolygonLeftArtifact", commonTriplePolygonLeft, Color.pink, false);
       YoArtifactPolygon commonTriplePolygonRightArtifact = new YoArtifactPolygon("commonTriplePolygonRightArtifact", commonTriplePolygonRight, Color.MAGENTA, false);
-      
+
       yoGraphicsListRegistry.registerArtifact("supportPolygon", supportPolygonArtifact);
       yoGraphicsListRegistry.registerArtifact("currentTriplePolygon", currentTriplePolygonArtifact);
       yoGraphicsListRegistry.registerArtifact("upcomingTriplePolygon", upcomingTriplePolygonArtifact);
       yoGraphicsListRegistry.registerArtifact("commonTriplePolygon", commonTriplePolygonArtifact);
       yoGraphicsListRegistry.registerArtifact("commonTriplePolygonLeft", commonTriplePolygonLeftArtifact);
       yoGraphicsListRegistry.registerArtifact("commonTriplePolygonRight", commonTriplePolygonRightArtifact);
-      
+
       yoGraphicsListRegistryForDetachedOverhead.registerArtifact("supportPolygon", supportPolygonArtifact);
       yoGraphicsListRegistryForDetachedOverhead.registerArtifact("currentTriplePolygon", currentTriplePolygonArtifact);
       yoGraphicsListRegistryForDetachedOverhead.registerArtifact("upcomingTriplePolygon", upcomingTriplePolygonArtifact);
@@ -651,7 +651,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       yoGraphicsListRegistry.registerArtifact("desiredCoMViz", desiredCoMViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("currentICPViz", currentICPViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("feedForwardICPViz", feedForwardICPViz.createArtifact());
-      
+
       yoGraphicsListRegistryForDetachedOverhead.registerArtifact("inscribedCircle", inscribedCircle);
       yoGraphicsListRegistryForDetachedOverhead.registerArtifact("circleCenterViz", circleCenterGraphic.createArtifact());
       yoGraphicsListRegistryForDetachedOverhead.registerArtifact("centerOfMassViz", centerOfMassViz.createArtifact());
@@ -668,11 +668,11 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       yoGraphicsListRegistry.registerYoGraphic("desiredCoMPoseYoGraphic", desiredCoMPoseYoGraphic);
       yoGraphicsListRegistry.registerYoGraphic("comPoseYoGraphic", comPoseYoGraphic);
       yoGraphicsListRegistry.registerYoGraphic("feedForwardCoMPoseYoGraphic", feedForwardCoMPoseYoGraphic);
-      
-      
+
+
       yoGraphicsListRegistry.registerYoGraphic("centroidWithNominal", centroidWithNominal);
       yoGraphicsListRegistry.registerYoGraphic("centroidZUpWithNominal", centroidZUpWithNominal);
-      
+
       yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("centerOfMassViz", centerOfMassViz);
       yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("desiredCoMPoseYoGraphic", desiredCoMPoseYoGraphic);
       yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("comPoseYoGraphic", comPoseYoGraphic);
@@ -680,11 +680,11 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         
+
          YoFramePoint footPosition = actualFeetLocations.get(robotQuadrant);
          YoGraphicPosition actualFootPositionViz = new YoGraphicPosition(prefix + "actualFootPositionViz", footPosition, 0.02,
                getYoAppearance(robotQuadrant), GraphicType.BALL_WITH_CROSS);
-         
+
          yoGraphicsListRegistry.registerYoGraphic("actualFootPosition", actualFootPositionViz);
          yoGraphicsListRegistry.registerArtifact("actualFootPosition", actualFootPositionViz.createArtifact());
          yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("actualFootPosition", actualFootPositionViz);
@@ -694,16 +694,16 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          YoGraphicPosition desiredFootPositionViz = new YoGraphicPosition(prefix + "desiredFootPositionViz", desiredFootPosition, 0.01,
                YoAppearance.Red());
 //         desiredFootPositionViz.hideGraphicObject();
-         
+
          yoGraphicsListRegistry.registerYoGraphic("Desired Feet", desiredFootPositionViz);
          yoGraphicsListRegistry.registerArtifact("Desired Feet", desiredFootPositionViz.createArtifact());
          yoGraphicsListRegistryForDetachedOverhead.registerYoGraphic("Desired Feet", desiredFootPositionViz);
          yoGraphicsListRegistryForDetachedOverhead.registerArtifact("Desired Feet", desiredFootPositionViz.createArtifact());
-         
+
          yoGraphicsListRegistry.registerYoGraphic(prefix + "TripleSupportFrame", tripleSupportFrames.get(robotQuadrant));
       }
    }
-   
+
    private AppearanceDefinition getYoAppearance(RobotQuadrant robotQuadrant)
    {
       switch (robotQuadrant)
@@ -725,7 +725,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    public ControllerEvent process()
    {
       doActionTimer.startTimer();
-      
+
       referenceFrames.updateFrames();
       updateEstimates();
       updateGraphics();
@@ -745,9 +745,9 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds(oneDoFJointsActual);
       }
-      
+
       updateFeedForwardModelAndFrames();
-      
+
       doActionTimer.stopTimer();
       return null;
    }
@@ -765,7 +765,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          velocitySign.set(1.0);
       }
    }
-   
+
    private boolean isDesiredVelocityAndYawRateZero()
    {
       boolean isDesiredVelocityZero = desiredVelocity.length() < 0.1e-3;
@@ -783,26 +783,26 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
          oneDoFJointFeedforward.setQ(oneDoFJoint.getqDesired());
       }
-      
+
       feedForwardReferenceFrames.updateFrames();
       actualFullRobotModel.updateFrames();
-      
+
       SixDoFJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
-      
+
       actualRobotRootJoint.getJointTransform3D(rootJointPose);
       feedForwardRootJoint.setPositionAndRotation(rootJointPose);
-      
+
       feedForwardReferenceFrames.updateFrames();
-      
+
       centerOfMassFramePoint.setToZero(feedForwardCenterOfMassFrame);
       centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       centerOfMassPosition.set(centerOfMassFramePoint);
       desiredCoMPosition.set(centerOfMassPosition);
-      
+
       filteredDesiredCoMYaw.reset();
       filteredDesiredCoMPitch.reset();
       filteredDesiredCoMRoll.reset();
-      
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          ReferenceFrame footFrame = feedForwardReferenceFrames.getFootFrame(robotQuadrant);
@@ -810,16 +810,16 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          desiredFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
          fourFootSupportPolygon.setFootstep(robotQuadrant, desiredFootPosition);
       }
-      
+
       double desiredZInWorld = desiredCoMPosition.getZ();
       double lowestZ = fourFootSupportPolygon.getLowestFootstepZHeight();
 //      double comHeight = desiredZInWorld - lowestZ;
       double comHeight = desiredZInWorld;
-      
-      
+
+
       desiredCoMHeight.set(comHeight);
       filteredDesiredCoMHeight.reset();
-      
+
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
@@ -828,7 +828,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
          YoFramePoint yoActualFootLocation = actualFeetLocations.get(robotQuadrant);
          yoActualFootLocation.set(actualFootLocation);
-         
+
          YoFramePoint yoDesiredFootLocation = desiredFeetLocations.get(robotQuadrant);
          yoDesiredFootLocation.set(actualFootLocation);
 
@@ -836,7 +836,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       }
    }
 
-   private void updateFeedForwardModelAndFrames() 
+   private void updateFeedForwardModelAndFrames()
    {
 	   for (int i=0; i<oneDoFJointsActual.length; i++)
 	   {
@@ -845,28 +845,28 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
 //		   oneDoFJointFeedforward.setQ(oneDoFJoint.getQ());
 		   double qd = oneDoFJoint.getqDesired() - oneDoFJointFeedforward.getQ();
-		   oneDoFJointFeedforward.setQd(qd * 1.0 / dt);   	  
+		   oneDoFJointFeedforward.setQd(qd * 1.0 / dt);
 		   oneDoFJointFeedforward.setQ(oneDoFJoint.getqDesired());
 	   }
 
 	   SixDoFJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
-	   
+
 	   feedForwardRootJoint.setRotation(filteredDesiredCoMOrientation.getYaw().getDoubleValue(), filteredDesiredCoMOrientation.getPitch().getDoubleValue(), filteredDesiredCoMOrientation.getRoll().getDoubleValue());
 	   feedForwardFullRobotModel.updateFrames();
-	   
+
 //	   Vector3d rootJointPosition = new Vector3d();
 //	   rootJoint.packTranslation(rootJointPosition);
 //	   feedForwardRootJoint.setPosition(rootJointPosition);
-	   
+
 	   centerOfMassInBody.setIncludingFrame(feedForwardCenterOfMassFrame, 0.0, 0.0, 0.0);
 	   centerOfMassInBody.changeFrame(feedForwardRootJoint.getFrameAfterJoint());
-	   
+
 	   vectorToSubtractHolder.setIncludingFrame(feedForwardFullRobotModel.getRootJoint().getFrameAfterJoint(), centerOfMassInBody.getPoint());
 	   vectorToSubtractHolder.changeFrame(ReferenceFrame.getWorldFrame());
 
 	   yoVectorToSubtract.set(vectorToSubtractHolder);
 //	   System.out.println("VectorToSubtract = " + vectorToSubtract);
-	   
+
 	   desiredRootJointPosition.setIncludingFrame(desiredCoM.getFrameTuple());
 	   desiredRootJointPosition.sub(vectorToSubtractHolder);
       feedForwardRootJoint.getTranslation(linearVelocityHolder);
@@ -880,20 +880,20 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
    private double lastProvidedDesiredYawRate = 0.0;
    private final FrameVector providedDesiredVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-   
+
    private void pollDataProviders()
    {
-      
+
       if(postureProvider != null)
       {
          postureProvider.getComVelocityInput();// support z up
-         
+
          //body velocity
          Vector3d planarVelocityInput = planarVelocityProvider.get();//Frame up to controller - feedForwardBodyFrame
          desiredVelocity.setVector(planarVelocityInput);
          desiredVelocity.setY(0.0);
          desiredVelocity.setZ(0.0);
-         
+
          //yaw rate
          double providedDesiredYawRate = planarVelocityInput.getZ();
          providedDesiredYawRate = MathTools.clipToMinMax(providedDesiredYawRate, minYawRate.getDoubleValue(), maxYawRate.getDoubleValue());
@@ -902,7 +902,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             desiredYawRate.set(providedDesiredYawRate);
             lastProvidedDesiredYawRate = providedDesiredYawRate;
          }
-         
+
          //body orientation
          Quat4d bodyOrientationInput = postureProvider.getBodyOrientationInput();// support z up
 //            double providedDesiredYawInPlace = desiredYawInPlaceProvider.getValue();
@@ -911,24 +911,24 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          if (isDesiredVelocityAndYawRateZero())
          {
             desiredYawInPlace.set(providedDesiredYawInPlace);
-         } 
+         }
 
          desiredCoMOrientation.setPitch(RotationTools.computePitch(bodyOrientationInput));
          desiredCoMOrientation.setRoll(RotationTools.computeRoll(bodyOrientationInput));
-         
+
          //com height
          Point3d comPositionInput = postureProvider.getComPositionInput();// support z up
          desiredCoMHeight.set(comPositionInput.getZ());
       }
    }
-   
+
    private final double[] yawPitchRollArray = new double[3];
    private final Point3d centerOfMassOffset = new Point3d();
    private final FramePoint actualFootLocation = new FramePoint();
    private final FrameVector tempFrameVector = new FrameVector();
 
 
-   
+
    /**
     * uses feedback to update the CoM Velocity, ICP, and Actual Foot Positions
     */
@@ -936,16 +936,16 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    {
       twistCalculator.compute();
       twistCalculator.getTwistOfBody(bodyTwist, actualFullRobotModel.getPelvis());
-      
+
       actualRobotRootJoint.getRotation(yawPitchRollArray);
       actualYaw.set(yawPitchRollArray[0]);
       actualPitch.set(yawPitchRollArray[1]);
       actualRoll.set(yawPitchRollArray[2]);
-      
+
       filteredFeedForwardCenterOfMassOffset.update();
       filteredFeedForwardCenterOfMassOffset.get(centerOfMassOffset);
       feedForwardCenterOfMassFrame.updateTranslation(centerOfMassOffset);
-      
+
       // compute center of mass position and velocity
       feedForwardCoMPosition.setIncludingFrame(feedForwardCenterOfMassFrame, 0.0, 0.0, 0.0);
       feedForwardCoMPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -1024,11 +1024,11 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       return distanceToTrotLine;
    }
-   
+
    private void computeCurrentSupportPolygonAndDistanceInside(RobotQuadrant swingQuadrant)
    {
       currentSupportPolygon.set(fourFootSupportPolygon);
-      if (swingQuadrant != null) currentSupportPolygon.removeFootstep(swingQuadrant); 
+      if (swingQuadrant != null) currentSupportPolygon.removeFootstep(swingQuadrant);
       centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       distanceInside.set(currentSupportPolygon.getDistanceInside2d(centerOfMassFramePoint));
    }
@@ -1046,7 +1046,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       drawSupportPolygon(currentSupportPolygon, supportPolygon);
       centroidWithNominal.update();
       centroidZUpWithNominal.update();
-      
+
       for (RobotQuadrant robotQuadrant: RobotQuadrant.values)
       {
          tripleSupportFrames.get(robotQuadrant).update();
@@ -1054,9 +1054,9 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
     	  actualAttachmentFrames.get(robotQuadrant).update();
       }
    }
-   
+
    /**
-    * sets the desired X and Y CoM positions to the current positions 
+    * sets the desired X and Y CoM positions to the current positions
     * along the trajectory in world and uses the desired CoM height for Z
     */
    private void updateDesiredCoMTrajectory()
@@ -1071,7 +1071,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          comTrajectoryGenerator.getPosition(desiredCoMFramePosition);
          comTrajectoryGenerator.getVelocity(desiredCoMVelocity);
          desiredCoMFramePosition.setZ(desiredCoMPose.getPosition().getZ());
-         
+
          desiredCoMPose.setPosition(desiredCoMFramePosition);
 
          comTrajectoryTimeLastCalled.set(robotTimestamp.getDoubleValue());
@@ -1085,15 +1085,15 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    {
       fourFootSupportPolygon.getCentroid(centroidFramePoint);
       nominalYaw.set(fourFootSupportPolygon.getNominalYaw());
-      
+
       centroidFramePoint2d.setByProjectionOntoXYPlaneIncludingFrame(centroidFramePoint);
       endPoint2d.set(centroidFramePoint2d);
       endPoint2d.add(0.4,0.0);
       endPoint2d.yawAboutPoint(centroidFramePoint2d, endPoint2d, nominalYaw.getDoubleValue());
-      
+
       nominalYawLineSegment.set(centroidFramePoint2d, endPoint2d);
       DoubleYoVariable desiredYaw = desiredCoMOrientation.getYaw();
-      
+
       //only let desiredYawInPlace be non zero when not walking
       double maxYawInPlace = MAX_YAW_IN_PLACE;
       if (!isDesiredVelocityAndYawRateZero())
@@ -1107,12 +1107,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          else if (desiredYawInPlace.getDoubleValue() < -maxYawInPlace)
             desiredYawInPlace.set(-maxYawInPlace);
       }
-      
-    
+
+
       desiredYawInPlaceRateLimited.update(desiredYawInPlace.getDoubleValue());
       desiredYaw.set(nominalYaw.getDoubleValue() + desiredYawInPlaceRateLimited.getDoubleValue());
    }
-   
+
    /**
     * desired CoM height in world
     */
@@ -1123,22 +1123,22 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 //      double zHeight = fourFootSupportPolygon.getLowestFootStepZHeight() + filteredDesiredCoMHeight.getDoubleValue();
       desiredCoMPosition.setZ(zHeight);
    }
-   
+
    private final Vector3d bodyOrienation = new Vector3d();
    private void updateDesiredBodyOrientation()
    {
       filteredDesiredCoMYaw.update();
       filteredDesiredCoMPitch.update();
       filteredDesiredCoMRoll.update();
-      
+
       bodyTwist.changeFrame(referenceFrames.getBodyFrame());
       bodyTwist.getAngularPart(bodyOrienation);
-      
+
       if(useImuFeedback.getBooleanValue())
       {
          double pitchError = pitchPidController.compute(actualPitch.getDoubleValue(), filteredDesiredCoMPitch.getDoubleValue(), bodyOrienation.getY(), 0.0, dt);
          desiredCoMPitch.set(filteredDesiredCoMPitch.getDoubleValue() + pitchError);
-         
+
          double rollError = rollPidController.compute(actualRoll.getDoubleValue(), filteredDesiredCoMRoll.getDoubleValue(), bodyOrienation.getX(), 0.0, dt);
          desiredCoMRoll.set(filteredDesiredCoMRoll.getDoubleValue() + rollError);
       }
@@ -1149,40 +1149,40 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       }
       desiredCoMYaw.set(filteredDesiredCoMYaw.getDoubleValue());
    }
-   
+
    private void updateDesiredCoMPose()
    {
       desiredCoMPose.getFramePose(desiredCoMFramePose);
       desiredCoM.set(desiredCoMFramePose.getX(), desiredCoMFramePose.getY(), desiredCoMFramePose.getZ());
       desiredCoMPoseReferenceFrame.setPoseAndUpdate(desiredCoMFramePose);
    }
-   
+
    private FramePoint actualFootPositionInLegAttachmentFrame = new FramePoint();
-   
+
    private void updateLegsBasedOnDesiredCoM()
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          packFootPositionUsingDesiredBodyToBodyHack(robotQuadrant);
-         
+
          actualFootPositionInLegAttachmentFrame.setIncludingFrame(referenceFrames.getFootFrame(robotQuadrant), 0.0, 0.0, 0.0);
          actualFootPositionInLegAttachmentFrame.changeFrame(referenceFrames.getLegAttachmentFrame(robotQuadrant));
          actualFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(actualFootPositionInLegAttachmentFrame);
       }
    }
-   
-   private void computeDesiredPositionsAndStoreInFullRobotModel(SDFFullRobotModel fullRobotModel)
+
+   private void computeDesiredPositionsAndStoreInFullRobotModel(FullRobotModel fullRobotModel)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {         
+      {
          desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).get(desiredFootPositionForInverseKinematics);
          inverseKinematicsCalculators.solveForEndEffectorLocationInBodyAndUpdateDesireds(robotQuadrant, desiredFootPositionForInverseKinematics, fullRobotModel);
       }
    }
-   
+
    /**
-    * currently uses the difference between the actual CoM and desired CoM to move the body, 
-    * This should be a feedforward psuedo actual, integrated from the desired, relating to the desiredBody 
+    * currently uses the difference between the actual CoM and desired CoM to move the body,
+    * This should be a feedforward psuedo actual, integrated from the desired, relating to the desiredBody
     */
    private void packFootPositionUsingDesiredBodyToBodyHack(RobotQuadrant robotQuadrant)
    {
@@ -1195,8 +1195,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(desiredFootPositionInBody.getPoint());
    }
-   
-   
+
+
    FrameVector expectedAverageVelocity = new FrameVector();
    /**
    * Calculates the next swing target in world using the actual feet,
@@ -1206,10 +1206,10 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    {
       tempComTrajComputedVelocity.setIncludingFrame(desiredCoMVelocity.getFrameTuple());
       tempDesiredVelocityVector.setIncludingFrame(desiredVelocity.getFrameTuple());
-      
+
       tempComTrajComputedVelocity.changeFrame(feedForwardBodyFrame);
       tempDesiredVelocityVector.changeFrame(feedForwardBodyFrame);
-      
+
       if(tempDesiredVelocityVector.length() < 1e-3)
       {
          expectedAverageVelocity.setIncludingFrame(tempDesiredVelocityVector);
@@ -1218,7 +1218,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          expectedAverageVelocity.setIncludingFrame(tempDesiredVelocityVector);
          expectedAverageVelocity.scale(swingDuration.getDoubleValue() / 3.0);
-      } 
+      }
       else
       {
          expectedAverageVelocity.setIncludingFrame(tempDesiredVelocityVector);
@@ -1226,12 +1226,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          expectedAverageVelocity.scale(swingDuration.getDoubleValue() / 3.0);
          expectedAverageVelocity.add(tempComTrajComputedVelocity);
       }
-      
+
       double yawRate = desiredYawRate.getDoubleValue();
       swingTargetGenerator.getSwingTarget(swingLeg, feedForwardReferenceFrames.getLegAttachmentFrame(swingLeg), expectedAverageVelocity, swingDuration.getDoubleValue(), framePointToPack, yawRate);
       framePointToPack.setZ(0.0);
    }
-   
+
    private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
    {
       tempSupportPolygonFramePointHolder.clear();
@@ -1239,10 +1239,10 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          tempSupportPolygonFramePointHolder.add(quadrant).setIncludingFrame(supportPolygon.getFootstep(quadrant));
       }
-      
+
       yoFramePolygon.setConvexPolygon2d(tempSupportPolygonFramePointHolder.values());
    }
-   
+
    /**
     * Uses the current CoM position to decide if it's safe to swing
     *
@@ -1254,7 +1254,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          this.quadrupleSupportState = quadSupportState;
       }
-      
+
       @Override
       public boolean checkCondition()
       {
@@ -1262,12 +1262,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          {
             return false;
          }
-         
+
          if(quadrupleSupportState.isTransitioningToSafePosition())
          {
             return false;
          }
-         
+
          if (swingLeg.getEnumValue().isQuadrantInHind())
          {
             if(isVelocityNegative.getBooleanValue())
@@ -1290,7 +1290,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
                isCoMCloseToFinalDesired.set(true);
             }
          }
-         
+
          if (useCommonTriangleForSwingTransition.getBooleanValue())
          {
              isCoMInsideTriangleForSwingLeg.set(quadrupleSupportState.isCoMInsideCommonTriangleForSwingLeg(swingLeg.getEnumValue()));
@@ -1299,15 +1299,15 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          {
            isCoMInsideTriangleForSwingLeg.set(quadrupleSupportState.isCoMInsideTriangleForSwingLeg(swingLeg.getEnumValue()));
          }
-         
+
          return isCoMCloseToFinalDesired.getBooleanValue() && isCoMInsideTriangleForSwingLeg.getBooleanValue() && (desiredVelocity.length() != 0.0 || desiredYawRate.getDoubleValue() != 0); //bodyTrajectoryGenerator.isDone() &&
       }
    }
-   
+
    private class TripleToQuadrupleCondition implements StateTransitionCondition
    {
       private final TripleSupportState tripleSupportState;
-      
+
       public TripleToQuadrupleCondition(TripleSupportState tripleSupportState)
       {
          this.tripleSupportState = tripleSupportState;
@@ -1325,37 +1325,37 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
         	  FootSwitchInterface footSwitch = footSwitches.get(swingQuadrant);
      	     swingFootHitGround = footSwitch.hasFootHitGround();
     	  }
-    	  
+
     	  return ((swingTrajectoryIsDone || swingFootHitGround) && inSwingStateLongEnough);
       }
    }
-   
+
    private class FilterToQuadrupleCondition implements StateTransitionCondition
    {
       private final FilterDesiredsToMatchCrawlControllerState filterDesiredsToMatchCrawlControllerState;
-      
+
       public FilterToQuadrupleCondition(FilterDesiredsToMatchCrawlControllerState filterDesiredsToMatchCrawlControllerState)
       {
          this.filterDesiredsToMatchCrawlControllerState = filterDesiredsToMatchCrawlControllerState;
       }
-      
+
       @Override
       public boolean checkCondition()
       {
          return filterDesiredsToMatchCrawlControllerState.isInterpolationFinished();
       }
    }
-   
+
    private class FilterDesiredsToMatchCrawlControllerState extends State<CrawlGateWalkingState>
    {
-      private final SDFFullRobotModel initialDesiredsUponEnteringFullRobotModel;
+      private final FullRobotModel initialDesiredsUponEnteringFullRobotModel;
 
       private final MinimumJerkTrajectory minimumJerkTrajectory = new MinimumJerkTrajectory();
 
       public FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState stateEnum, QuadrupedModelFactory robotParameters)
       {
          super(stateEnum);
-         
+
          initialDesiredsUponEnteringFullRobotModel = robotParameters.createFullRobotModel();
       }
 
@@ -1365,16 +1365,16 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          {
             OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
             String jointName = actualOneDoFJoint.getName();
-            
+
             OneDoFJoint intialOneDoFJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(jointName);
 
             double alpha = minimumJerkTrajectory.getPosition(); //filterStandPrepDesiredsToWalkingDesireds.getDoubleValue();
-            
+
             double alphaFilteredQ = (1.0 - alpha) * intialOneDoFJoint.getqDesired() + alpha * actualOneDoFJoint.getqDesired();
             actualOneDoFJoint.setqDesired(alphaFilteredQ);
-         }         
+         }
       }
-      
+
       public boolean isInterpolationFinished()
       {
          return  minimumJerkTrajectory.getTimeInMove() >=  timeToFilterDesiredAtCrawlStart.getDoubleValue(); //filterStandPrepDesiredsToWalkingDesireds.getDoubleValue() >= 0.9999;
@@ -1403,24 +1403,24 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       @Override
       public void doTransitionOutOfAction()
       {
-         
+
       }
    }
-   
+
    private class QuadrupleSupportState extends State<CrawlGateWalkingState>
    {
       private final FramePoint swingDesired = new FramePoint();
       private final QuadrupedSupportPolygon quadStateAfterFirstStep = new QuadrupedSupportPolygon();
       private final QuadrupedSupportPolygon quadStateAfterSecondStep = new QuadrupedSupportPolygon();
       private final QuadrupedSupportPolygon quadStateAfterThirdStep = new QuadrupedSupportPolygon();
-      
+
       private final RecyclingQuadrantDependentList<QuadrupedSupportPolygon> upcomingTripleSupportPolygons = new RecyclingQuadrantDependentList<>(QuadrupedSupportPolygon.class);
       private final QuadrupedSupportPolygon tripleStateWithFirstStepSwinging = new QuadrupedSupportPolygon();
       private final QuadrupedSupportPolygon tripleStateAfterFirstStepWithSecondSwinging = new QuadrupedSupportPolygon();
       private final QuadrupedSupportPolygon tripleStateAfterSecondStepWithThirdSwinging = new QuadrupedSupportPolygon();
-      private final QuadrupedSupportPolygon tripleStateAfterThirdStepWithFourthSwinging = new QuadrupedSupportPolygon(); 
+      private final QuadrupedSupportPolygon tripleStateAfterThirdStepWithFourthSwinging = new QuadrupedSupportPolygon();
       private final QuadrupedSupportPolygon temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg = new QuadrupedSupportPolygon();
-      
+
       private final RecyclingQuadrantDependentList<QuadrupedSupportPolygon> estimatedCommonTriangle = new RecyclingQuadrantDependentList<>(QuadrupedSupportPolygon.class);
       private final DoubleYoVariable minimumTimeInQuadSupport;
       private final DoubleYoVariable minimumTimeInQuadSupportForNormalOperation;
@@ -1428,7 +1428,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       private final BooleanYoVariable minimumTimeInQuadSupportElapsed;
       private final BooleanYoVariable transitioningToSafePosition;
       private final BooleanYoVariable swingLegUpdatedOnTransition;
-      
+
       public QuadrupleSupportState(CrawlGateWalkingState stateEnum, double minimumTimeInQuadSupport, double minimumTimeInQuadAfterReverseDirection)
       {
          super(stateEnum);
@@ -1438,7 +1438,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          this.minimumTimeInQuadSupportElapsed = new BooleanYoVariable("minimumTimeInQuadSupportElapsed", registry);
          this.transitioningToSafePosition = new BooleanYoVariable("transitioningToSafePosition", registry);
          this.swingLegUpdatedOnTransition = new BooleanYoVariable("swingLegUpdatedOnTransition", registry);
-         
+
          this.minimumTimeInQuadSupport.set(minimumTimeInQuadSupport);
          this.minimumTimeInQuadSupportForNormalOperation.set(minimumTimeInQuadSupport);
          this.minimumTimeInQuadSupportAfterReverseDirection.set(minimumTimeInQuadAfterReverseDirection);
@@ -1448,21 +1448,21 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       public void doAction()
       {
          doActionQuadrupleSupportTimer.startTimer();
-         
+
          processVelocityChanges();
-         
+
          if(isTransitioningToSafePosition() && comTrajectoryGenerator.isDone())
          {
             transitioningToSafePosition.set(false);
          }
-         
+
          else if(shouldTranistionToTripleButItsNotSafeToStep())
          {
             shiftCoMToSafeStartingPosition();
          }
 
          computeCurrentSupportPolygonAndDistanceInside(null);
-         
+
          doActionQuadrupleSupportTimer.stopTimer();
       }
 
@@ -1482,7 +1482,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             {
                setCoMTrajectoryToCurrentAndSetToDone();
             }
-            
+
             if(!isDesiredVelocityAndYawRateZero())
             {
                //reversing sign
@@ -1495,13 +1495,13 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
                   }
                   calculateNextCoMTarget(true);
                }
-               
+
                //same sign change
                else if(isVelocityChangingButKeepingSign())
                {
                   reinitializeCoMTrajectory();
                }
-               
+
                //Coming from zero to nonZero
                else
                {
@@ -1509,7 +1509,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
                }
             }
          }
-         
+
          lastDesiredVelocity.set(desiredVelocity);
          lastDesiredYawRate.set(desiredYawRate.getDoubleValue());
       }
@@ -1548,7 +1548,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             initializeCoMTrajectory(circleCenter2d);
          }
       }
-      
+
       private void shiftCoMToSafeStartingPosition()
       {
          transitioningToSafePosition.set(true);
@@ -1556,14 +1556,14 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          RobotQuadrant sameSidQuadrant = currentSwingLeg.getSameSideQuadrant();
          RobotQuadrant diagonalQuadrant = currentSwingLeg.getDiagonalOppositeQuadrant();
          RobotQuadrant acrossBodyQuadrant = currentSwingLeg.getAcrossBodyQuadrant();
-         
+
          FramePoint sameSideFootstep = fourFootSupportPolygon.getFootstep(sameSidQuadrant);
          FramePoint diagonalFootstep = fourFootSupportPolygon.getFootstep(diagonalQuadrant);
          FramePoint acrossBodyFootstep = fourFootSupportPolygon.getFootstep(acrossBodyQuadrant);
-         
+
          centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
          centerOfMassFramePoint.getFramePoint2d(centerOfMassPoint2d);
-         
+
          FramePoint2d sameSideFootstep2d = new FramePoint2d();
          FramePoint2d diagonalFootstep2d = new FramePoint2d();
          FramePoint2d acrossBodyFootstep2d = new FramePoint2d();
@@ -1573,10 +1573,10 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          FrameLineSegment2d lineSegment = new FrameLineSegment2d(ReferenceFrame.getWorldFrame());
          FramePoint2d comProjectionOnOutsideLegs2d = new FramePoint2d(ReferenceFrame.getWorldFrame());
          FramePoint comProjectionOnOutsideLegs = new FramePoint(ReferenceFrame.getWorldFrame());
-         
+
          QuadrupedSupportPolygon tripleStateWithoutCurrentSwing = new QuadrupedSupportPolygon();
          fourFootSupportPolygon.getAndRemoveFootstep(tripleStateWithoutCurrentSwing, currentSwingLeg);
-         
+
          switch(safeToShiftMode.getEnumValue())
          {
          case COMMON_TRIANGLE:
@@ -1589,16 +1589,16 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
                initializeCoMTrajectory(circleCenter2d);
             }
             break;
-            
+
          case CENTROID:
             tripleStateWithoutCurrentSwing.getCentroid2d(circleCenter2d);
             break;
-            
+
          case COM_INCIRCLE:
             lineSegment.set(diagonalFootstep2d, acrossBodyFootstep2d);
             lineSegment.getClosestPointOnLineSegment(comProjectionOnOutsideLegs2d, centerOfMassPoint2d);
             comProjectionOnOutsideLegs.setXY(comProjectionOnOutsideLegs2d);
-            
+
             safeToStepSupportPolygon.clear();
             safeToStepSupportPolygon.setFootstep(currentSwingLeg, centerOfMassFramePoint);
             safeToStepSupportPolygon.setFootstep(diagonalQuadrant, fourFootSupportPolygon.getFootstep(diagonalQuadrant));
@@ -1606,14 +1606,14 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             safeToStepSupportPolygon.getInCircle2d(circleCenter3d);
             circleCenter2d.set(circleCenter3d.getX(), circleCenter3d.getY());
             break;
-            
+
          case TTR:
             tripleStateWithoutCurrentSwing.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(currentSwingLeg.getAcrossBodyQuadrant(), 0.1, circleCenter2d);
             break;
-            
+
          case TROTLINE_MIDPOINT:
             lineSegment.set(sameSideFootstep2d, acrossBodyFootstep2d);
-            
+
             FramePoint2d midpoint = lineSegment.midpoint();
             double bisectorLengthDesired = 0.1;
             FrameVector2d perpendicularBisector = new FrameVector2d();
@@ -1626,19 +1626,19 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             }
             break;
          }
-         
+
          /**
-          * something went wrong! 
+          * something went wrong!
           */
          if(!tripleStateWithoutCurrentSwing.isInside(circleCenter2d))
          {
             System.err.println(safeToShiftMode + " tried to shift outside of the support polygon. Fix this");
             tripleStateWithoutCurrentSwing.getCentroid2d(circleCenter2d);
          }
-       
+
          initializeCoMTrajectory(circleCenter2d);
       }
-      
+
       public boolean isTransitioningToSafePosition()
       {
          return transitioningToSafePosition.getBooleanValue();
@@ -1650,20 +1650,20 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          boolean isBodyVelocityYChanging = Math.abs(desiredVelocity.getY() - lastDesiredVelocity.getY()) > 0.1e-3;
          return isBodyVelocityXChanging || isBodyVelocityYChanging;
       }
-      
+
       private boolean isDesiredYawRateChanging()
       {
          boolean isYawRateChanging = Math.abs(desiredYawRate.getDoubleValue() - lastDesiredYawRate.getDoubleValue()) > 0.1e-3;
          return isYawRateChanging;
       }
-      
+
       private boolean isDesiredVelocityOrYawRateChanging()
       {
          boolean isDesiredVelocityChanging = isDesiredVelocityChanging();
          boolean isDesiredYawRateChanging = isDesiredYawRateChanging();
          return isDesiredVelocityChanging || isDesiredYawRateChanging;
       }
-      
+
       private boolean isVelocityChangingButKeepingSign()
       {
          return desiredVelocity.getX() > 0 && lastDesiredVelocity.getX() > 0 || desiredVelocity.getX() < 0 && lastDesiredVelocity.getX() < 0;
@@ -1675,27 +1675,27 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          {
             return false;
          }
-         
+
          return desiredVelocity.getX() > 0 && lastDesiredVelocity.getX() < 0 || desiredVelocity.getX() < 0 && lastDesiredVelocity.getX() > 0;
       }
-      
+
       private boolean shouldTranistionToTripleButItsNotSafeToStep()
       {
          if(!comTrajectoryGenerator.isDone())
          {
             return false;
          }
-         
+
          if(!isMinimumTimeInQuadSupportElapsed())
          {
             return false;
          }
-         
+
          if(desiredVelocity.length() == 0.0 && desiredYawRate.getDoubleValue() == 0)
          {
             return false;
          }
-         
+
          return true;
       }
 
@@ -1706,7 +1706,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       public void doTransitionIntoAction()
       {
          doTransitionIntoQuadrupleSupportTimer.startTimer();
-         
+
          if(!isDesiredVelocityAndYawRateZero() && !isDesiredVelocityReversing())
          {
             swingLegUpdatedOnTransition.set(true);
@@ -1715,44 +1715,44 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             calculateNextCoMTarget(false);
             calculateNextCoMTargetTimer.stopTimer();
          }
-         
+
          doTransitionIntoQuadrupleSupportTimer.stopTimer();
       }
-      
+
       public void calculateNextThreeFootSteps2(RobotQuadrant firstSwingLeg)
       {
          RobotQuadrant secondSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, firstSwingLeg, desiredBodyVelocity, desiredYawRate.getDoubleValue());//firstSwingLeg.getNextRegularGaitSwingQuadrant();
          RobotQuadrant thirdSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, secondSwingLeg, desiredBodyVelocity, desiredYawRate.getDoubleValue());//secondSwingLeg.getNextRegularGaitSwingQuadrant();
          RobotQuadrant fourthSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, thirdSwingLeg, desiredBodyVelocity, desiredYawRate.getDoubleValue());//thirdSwingLeg.getNextRegularGaitSwingQuadrant();
-         
+
          FrameVector desiredVelocityVector = desiredVelocity.getFrameTuple();
          double yawRate = desiredYawRate.getDoubleValue();
-         
+
          swingDesired.changeFrame(ReferenceFrame.getWorldFrame());
          calculateSwingTarget(firstSwingLeg, swingDesired);
          fourFootSupportPolygon.getAndReplaceFootstep(quadStateAfterFirstStep, firstSwingLeg, swingDesired);
-         
+
          swingTargetGenerator.getSwingTarget(quadStateAfterFirstStep, secondSwingLeg, desiredVelocityVector, swingDesired, yawRate);
          quadStateAfterFirstStep.getAndReplaceFootstep(quadStateAfterSecondStep, secondSwingLeg, swingDesired);
-         
+
          swingTargetGenerator.getSwingTarget(quadStateAfterSecondStep, thirdSwingLeg, desiredVelocityVector, swingDesired, yawRate);
          quadStateAfterSecondStep.getAndReplaceFootstep(quadStateAfterThirdStep, thirdSwingLeg, swingDesired);
-         
+
          quadStateAfterFirstStep.getAndRemoveFootstep(tripleStateWithFirstStepSwinging, secondSwingLeg);
          quadStateAfterFirstStep.getAndRemoveFootstep(tripleStateAfterFirstStepWithSecondSwinging, secondSwingLeg);
          quadStateAfterSecondStep.getAndRemoveFootstep(tripleStateAfterSecondStepWithThirdSwinging, thirdSwingLeg);
          quadStateAfterThirdStep.getAndRemoveFootstep(tripleStateAfterThirdStepWithFourthSwinging, fourthSwingLeg);
-         
+
          drawSupportPolygon(tripleStateWithFirstStepSwinging, tripleSupportPolygons.get(firstSwingLeg));
          drawSupportPolygon(tripleStateAfterFirstStepWithSecondSwinging, tripleSupportPolygons.get(secondSwingLeg));
-         QuadrupedSupportPolygon firstAndSecondCommonPolygon = tempCommonShrunkenPolygon; 
+         QuadrupedSupportPolygon firstAndSecondCommonPolygon = tempCommonShrunkenPolygon;
          tripleStateWithFirstStepSwinging.getShrunkenCommonTriangle2d(tripleStateAfterFirstStepWithSecondSwinging, firstAndSecondCommonPolygon, tempPolygonForCommonShrunken, firstSwingLeg, shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue(), shrunkenPolygonSize.getDoubleValue());
          estimatedCommonTriangle.add(firstSwingLeg).set(firstAndSecondCommonPolygon);
          estimatedCommonTriangle.add(firstSwingLeg.getSameSideQuadrant());
          estimatedCommonTriangle.get(firstSwingLeg.getSameSideQuadrant()).clear();
          firstAndSecondCommonPolygon.getAndSwapSameSideFootsteps(estimatedCommonTriangle.get(firstSwingLeg.getSameSideQuadrant()), firstSwingLeg.getSide());
          drawSupportPolygon(firstAndSecondCommonPolygon, commonTriplePolygons.get(firstSwingLeg.getSide()));
-         
+
          drawSupportPolygon(tripleStateAfterFirstStepWithSecondSwinging, tripleSupportPolygons.get(thirdSwingLeg));
          drawSupportPolygon(tripleStateAfterSecondStepWithThirdSwinging, tripleSupportPolygons.get(fourthSwingLeg));
          QuadrupedSupportPolygon secondAndThirdCommonPolygon = tempCommonShrunkenPolygon;
@@ -1762,7 +1762,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          estimatedCommonTriangle.get(secondSwingLeg.getSameSideQuadrant()).clear();
          secondAndThirdCommonPolygon.getAndSwapSameSideFootsteps(estimatedCommonTriangle.get(secondSwingLeg.getSameSideQuadrant()), secondSwingLeg.getSide());
          drawSupportPolygon(secondAndThirdCommonPolygon, commonTriplePolygons.get(secondSwingLeg.getSide()));
-         
+
          drawSupportPolygon(tripleStateAfterSecondStepWithThirdSwinging, tripleSupportPolygons.get(thirdSwingLeg));
          drawSupportPolygon(tripleStateAfterThirdStepWithFourthSwinging, tripleSupportPolygons.get(fourthSwingLeg));
          QuadrupedSupportPolygon thirdAndFourthCommonPolygon = tempCommonShrunkenPolygon;
@@ -1773,46 +1773,46 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          thirdAndFourthCommonPolygon.getAndSwapSameSideFootsteps(estimatedCommonTriangle.get(thirdSwingLeg.getSameSideQuadrant()), thirdSwingLeg.getSide());
          drawSupportPolygon(thirdAndFourthCommonPolygon, commonTriplePolygons.get(thirdSwingLeg.getSide()));
       }
-      
+
       public void calculateNextThreeFootSteps(RobotQuadrant firstSwingLeg)
       {
          calculateNextThreeFootstepsTimer.startTimer();
-         
+
          // 1.7 MS START
          FrameVector desiredVelocityVector = desiredVelocity.getFrameTuple();
          double yawRate = desiredYawRate.getDoubleValue();
          double shrunkenPolygonOffset = shrunkenPolygonSize.getDoubleValue();
-         
+
          calculateSwingTarget(firstSwingLeg, swingDesired);
-         
+
          fourFootSupportPolygon.getAndReplaceFootstep(quadStateAfterFirstStep, firstSwingLeg, swingDesired);
-         
+
          RobotQuadrant secondSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(quadStateAfterFirstStep, firstSwingLeg, desiredVelocityVector, yawRate);
          quadStateAfterSecondStep.set(quadStateAfterFirstStep);
          calculateNextSupportPolygon(quadStateAfterSecondStep, secondSwingLeg, desiredVelocityVector, yawRate, quadStateAfterSecondStep);
-         
+
          RobotQuadrant thirdSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(quadStateAfterSecondStep, secondSwingLeg, desiredVelocityVector, yawRate);
          quadStateAfterThirdStep.set(quadStateAfterSecondStep);
          calculateNextSupportPolygon(quadStateAfterThirdStep, thirdSwingLeg, desiredVelocityVector, yawRate, quadStateAfterThirdStep);
-         
+
          RobotQuadrant fourthSwingLeg = nextSwingLegChooser.chooseNextSwingLeg(fourFootSupportPolygon, thirdSwingLeg, desiredVelocityVector, yawRate);
          // 1.7 MS STOP
-         
+
          upcomingTripleSupportPolygons.add(firstSwingLeg).clear();
          fourFootSupportPolygon.getAndRemoveFootstep(upcomingTripleSupportPolygons.get(firstSwingLeg), firstSwingLeg);
          upcomingTripleSupportPolygons.add(secondSwingLeg).clear();
          fourFootSupportPolygon.getAndRemoveFootstep(upcomingTripleSupportPolygons.get(secondSwingLeg), firstSwingLeg);
-         
+
          fourFootSupportPolygon.getAndRemoveFootstep(tripleStateWithFirstStepSwinging, secondSwingLeg);
          quadStateAfterFirstStep.getAndRemoveFootstep(tripleStateAfterFirstStepWithSecondSwinging, secondSwingLeg);
          quadStateAfterSecondStep.getAndRemoveFootstep(tripleStateAfterSecondStepWithThirdSwinging, thirdSwingLeg);
          quadStateAfterThirdStep.getAndRemoveFootstep(tripleStateAfterThirdStepWithFourthSwinging, fourthSwingLeg);
-         
+
          for(RobotQuadrant robotQuadrant :  RobotQuadrant.values)
          {
             tripleSupportPolygons.get(robotQuadrant).hide();
          }
-         
+
          // 5.1/7.2 MS 71% START
          if (!oneOffHappened) calculateNextThreeFootStepsOneOffTimer.startTimer();
          updateAndDrawCommonTriangle(tripleStateWithFirstStepSwinging, tripleStateAfterFirstStepWithSecondSwinging, firstSwingLeg, secondSwingLeg, shrunkenPolygonOffset);
@@ -1822,10 +1822,10 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          // 5.1/7.2 MS 71% STOP
 
          calculateNextThreeFootstepsTimer.stopTimer();
-         
+
          oneOffHappened = true;
       }
-      
+
       private void calculateNextSupportPolygon(QuadrupedSupportPolygon supportPolygon, RobotQuadrant nextSwingLeg, FrameVector desiredVelocity, double desiredYawRate, QuadrupedSupportPolygon quadrupedSupportPolygonToPack)
       {
          swingDesired.changeFrame(ReferenceFrame.getWorldFrame());
@@ -1833,14 +1833,14 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          quadrupedSupportPolygonToPack.set(supportPolygon);
          quadrupedSupportPolygonToPack.setFootstep(nextSwingLeg, swingDesired);
       }
-      
+
       private void updateAndDrawCommonTriangle(QuadrupedSupportPolygon firstTripleSupportPolygon, QuadrupedSupportPolygon secondTripleSupportPolygon, RobotQuadrant firstSwingLeg, RobotQuadrant secondSwingLeg, double shrunkenPolygonOffset)
       {
          if (firstTripleSupportPolygon.getFirstNonSupportingQuadrant().getSameSideQuadrant() != secondTripleSupportPolygon.getFirstNonSupportingQuadrant())
          {
             return;
          }
-         
+
          firstTripleSupportPolygon.getShrunkenCommonTriangle2d(secondTripleSupportPolygon, tempCommonShrunkenPolygon, tempPolygonForCommonShrunken, firstSwingLeg, shrunkenPolygonOffset, shrunkenPolygonOffset, shrunkenPolygonOffset);
          estimatedCommonTriangle.add(firstSwingLeg).set(tempCommonShrunkenPolygon);
          estimatedCommonTriangle.add(firstSwingLeg.getSameSideQuadrant()).clear();
@@ -1851,9 +1851,9 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          drawSupportPolygon(firstTripleSupportPolygon, firstTripleSupportPolygonGraphic);
          drawSupportPolygon(secondTripleSupportPolygon, tripleSupportPolygons.get(secondSwingLeg));
       }
-       
+
       private final FrameVector2d tempFrameVector = new FrameVector2d();
-      
+
       private void calculateTrajectoryTarget(RobotQuadrant upcomingSwingLeg, QuadrupedSupportPolygon commonTriangle, FramePoint2d comTargetToPack)
       {
          commonSupportPolygon.set(commonTriangle);
@@ -1862,7 +1862,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          boolean requestedRadiusLargerThanInCircle = true;
          if(useSubCircleForBodyShiftTarget.getBooleanValue() && hasEnoughSides)
          {
-            requestedRadiusLargerThanInCircle = 
+            requestedRadiusLargerThanInCircle =
                   !commonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(upcomingSwingLeg, radius, comTargetToPack);
          }
          if(hasEnoughSides && requestedRadiusLargerThanInCircle)
@@ -1871,22 +1871,22 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             comTargetToPack.set(circleCenter3d.getX(), circleCenter3d.getY());
          }
          inscribedCircleRadius.set(radius);
-         
+
          desiredCoMOffset.getFrameTuple2dIncludingFrame(tempFrameVector);
 //         tempFrameVector.scale(velocitySign.getDoubleValue());
          tempFrameVector.changeFrame(ReferenceFrame.getWorldFrame());
-         
+
          comTargetToPack.add(tempFrameVector.getVector());
          circleCenter.setXY(comTargetToPack);
       }
-      
+
       public void reinitializeCoMTrajectory()
       {
          FramePoint finalPosition = new FramePoint(ReferenceFrame.getWorldFrame());
          comTrajectoryGenerator.getFinalPosition(finalPosition);
          initializeCoMTrajectory(new FramePoint2d(ReferenceFrame.getWorldFrame(), finalPosition.getX(), finalPosition.getY()));
       }
-      
+
       public void setCoMTrajectoryToCurrentAndSetToDone()
       {
          desiredCoMVelocity.setToZero();
@@ -1901,16 +1901,16 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          FramePoint desiredBodyCurrent = desiredCoMPose.getPosition().getFrameTuple();
          initialCoMPosition.set(desiredBodyCurrent);
-         
+
          FrameVector desiredBodyVelocityCurrent = desiredCoMVelocity.getFrameTuple();
          initialCoMVelocity.set(desiredBodyVelocityCurrent);
-         
+
          desiredCoMTarget.setXY(target);
          desiredCoMTarget.setZ(desiredBodyCurrent.getZ());
-         
+
          double distance = initialCoMPosition.distance(desiredCoMTarget);
          desiredVelocity.getFrameTupleIncludingFrame(desiredBodyVelocity);
-         
+
          if (!MathTools.epsilonEquals(desiredBodyVelocity.length(), 0.0, 1e-5))
          {
             // Use average velocity to estimate how long it'll take.
@@ -1922,7 +1922,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          {
             comTrajectoryDuration.set(swingDuration.getDoubleValue() * 2 + turnInPlaceCoMTrajectoryBuffer.getDoubleValue());
          }
-         
+
          if (comTrajectoryDuration.getDoubleValue() > maximumCoMTrajectoryDuration.getDoubleValue()) comTrajectoryDuration.set(maximumCoMTrajectoryDuration.getDoubleValue());
          if (comTrajectoryDuration.getDoubleValue() < minimumCoMTrajectoryDuration.getDoubleValue()) comTrajectoryDuration.set(minimumCoMTrajectoryDuration.getDoubleValue());
 
@@ -1932,7 +1932,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          comTrajectoryGenerator.setTrajectoryTime(comTrajectoryDuration.getDoubleValue());
 
          desiredBodyVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-         
+
          comTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
          comTrajectoryTimeLastCalled.set(comTrajectoryTimeStart.getDoubleValue());
          comTrajectoryTimeCurrent.set(0.0);
@@ -1950,7 +1950,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          }
          return minimumTimeInQuadSupportElapsed.getBooleanValue();
       }
-      
+
       @Override
       public void doTransitionOutOfAction()
       {
@@ -1958,12 +1958,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          minimumTimeInQuadSupport.set(minimumTimeInQuadSupportForNormalOperation.getDoubleValue());
          swingLegUpdatedOnTransition.set(false);
       }
-      
+
       public boolean isCommonTriangleNull(RobotQuadrant swingLeg)
       {
          return estimatedCommonTriangle.get(swingLeg) == null;
       }
-      
+
       public boolean isCoMInsideCommonTriangleForSwingLeg(RobotQuadrant swingLeg)
       {
          if(isCommonTriangleNull(swingLeg))
@@ -1972,10 +1972,10 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          }
          centerOfMassFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
          centerOfMassFramePoint.getFramePoint2d(centerOfMassPoint2d);
-        
+
          return estimatedCommonTriangle.get(swingLeg).isInside(centerOfMassFramePoint);
       }
-      
+
       /**
        * uses actuals
        */
@@ -1987,14 +1987,14 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 //         return temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg.isInside(centerOfMassFramePoint);
          return temporaryQuadrupedSupportPolygonForCheckingCoMInsideTriangleForSwingLeg.getDistanceInside2d(centerOfMassFramePoint) > distanceInsideSupportPolygonBeforeSwingingLeg.getDoubleValue();
       }
-      
+
       public boolean isCoMCloseToFinalDesired(double distanceToCheck)
       {
-         double distanceFromDesiredToTarget = desiredCoMTarget.distance(desiredCoMFramePosition); 
+         double distanceFromDesiredToTarget = desiredCoMTarget.distance(desiredCoMFramePosition);
          return (distanceFromDesiredToTarget < distanceToCheck);
       }
    }
-   
+
    /**
     * Nothing fancy, just calculate where to swing the leg and swing it until it's done
     */
@@ -2016,7 +2016,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       public void doAction()
       {
          doActionTripleSupportTimer.startTimer();
-         
+
          RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
 
          computeFootPositionAlongSwingTrajectory(swingQuadrant, currentDesiredInTrajectory);
@@ -2042,15 +2042,15 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       public void doTransitionIntoAction()
       {
          doTransitionIntoTripleSupportTimer.startTimer();
-         
+
          RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
          swingTarget.setToZero(ReferenceFrame.getWorldFrame());
          calculateSwingTarget(swingQuadrant, swingTarget);
-         
+
          YoFramePoint yoDesiredFootPosition = desiredFeetLocations.get(swingQuadrant);
          currentSwingTarget.set(swingTarget);
          finalSwingTarget.set(swingTarget);
-         
+
          initializeSwingTrajectory(swingQuadrant, yoDesiredFootPosition.getFrameTuple(), swingTarget, swingDuration.getDoubleValue());
          doTransitionIntoTripleSupportTimer.stopTimer();
 
@@ -2138,7 +2138,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
          return distanceTraveled;
       }
-      
+
 
       @Override
       public void doTransitionOutOfAction()
@@ -2160,7 +2160,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          double distanceInside = currentSupportPolygon.getDistanceInside2d(cOMTarget);
          return distanceInside > thresholdDistance;
       }
-      
+
       /**
        * tries to do some fancy ground speed matching, not well tuned
        */
@@ -2172,17 +2172,17 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          speedMatchVelocity.scale(speedMatchScalar.getDoubleValue());
          swingTrajectoryGenerator.initializeSwing(swingTime, swingInitial, swingHeight.getDoubleValue(), swingTarget, speedMatchVelocity);
       }
-      
+
       private void computeFootPositionAlongSwingTrajectory(RobotQuadrant swingLeg, FramePoint framePointToPack)
       {
          QuadrupedSwingTrajectoryGenerator swingTrajectoryGenerator = swingTrajectoryGenerators.get(swingLeg);
          swingTrajectoryGenerator.computeSwing(framePointToPack);
-         
+
          swingTimeRemaining.set(swingTrajectoryGenerator.getTimeRemaining());
       }
    }
-   
-   
+
+
 
    public YoVariableRegistry getYoVariableRegistry()
    {
@@ -2209,6 +2209,6 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    @Override
    public void onExit()
    {
-      
+
    }
 }

@@ -17,7 +17,7 @@ import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -37,7 +37,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    final ReferenceFrame cameraFrame;
 
    protected final Map<String, Double> qbias = new HashMap<>();
-   protected final SDFFullHumanoidRobotModel fullRobotModel;
+   protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final OneDoFJoint[] joints;
    protected final ArrayList<Map<String, Double>> q = new ArrayList<>();

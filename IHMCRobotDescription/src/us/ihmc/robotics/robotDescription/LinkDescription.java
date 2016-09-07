@@ -93,6 +93,21 @@ public class LinkDescription
       }
    }
 
+   public Matrix3d getMomentOfInertiaCopy()
+   {
+      Matrix3d momentOfInertia = new Matrix3d();
+
+      for (int i=0; i<3; i++)
+      {
+         for (int j=0; j<3; j++)
+         {
+            momentOfInertia.setElement(i, j, this.momentOfInertia.get(i, j));
+         }
+      }
+
+      return momentOfInertia;
+   }
+
    public void getMomentOfInertia(DenseMatrix64F momentOfInertiaToPack)
    {
       momentOfInertiaToPack.set(momentOfInertia);

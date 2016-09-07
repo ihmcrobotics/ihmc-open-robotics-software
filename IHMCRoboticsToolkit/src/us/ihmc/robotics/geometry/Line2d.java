@@ -129,11 +129,11 @@ public class Line2d implements Geometry2d<Line2d>
    public void getPointGivenParameter(double t, Point2d pointToPack)
    {
       pointToPack.set(point);
-      
+
       pointToPack.setX(pointToPack.getX() + t * normalizedVector.getX());
       pointToPack.setY(pointToPack.getY() + t * normalizedVector.getY());
    }
-   
+
    public Point2d getPointGivenParameter(double t)
    {
       Point2d pointToReturn = new Point2d();
@@ -326,7 +326,7 @@ public class Line2d implements Geometry2d<Line2d>
    {
       vectorToPack.set(normalizedVector.getY(), -normalizedVector.getX());
    }
-   
+
    public Vector2d perpendicularVector()
    {
       Vector2d vectorToReturn = new Vector2d();
@@ -398,19 +398,19 @@ public class Line2d implements Geometry2d<Line2d>
 
       return true;
    }
-   
+
    public void intersectionWith(Line2d line, Point3d intersectionToPack)
    {
       intersectionWith(line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
       intersectionToPack.set(tempPoint2d.getX(), tempPoint2d.getY(), intersectionToPack.getZ());
    }
-   
+
    public void intersectionWith(Line2d line, Point2d intersectionToPack)
    {
       intersectionWith(line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
       intersectionToPack.set(tempPoint2d);
    }
-   
+
    private Point2d intersectionWith(double x1, double y1, double vx1, double vy1)
    {
       GeometryTools.intersection(point.getX(), point.getY(), normalizedVector.getX(), normalizedVector.getY(), x1, y1, vx1, vy1, tempAlphaBeta);
@@ -432,7 +432,7 @@ public class Line2d implements Geometry2d<Line2d>
    {
       tempPoint2d.set(this.point);
       tempPoint2d.add(normalizedVector);
-      
+
       return GeometryTools.distanceFromPointToLine(point, this.point, tempPoint2d);
    }
 
@@ -532,18 +532,24 @@ public class Line2d implements Geometry2d<Line2d>
    {
       return isPointOnSideOfLine(point.getX(), point.getY(), side);
    }
-   
+
    private boolean isPointOnSideOfLine(double x, double y, RobotSide side)
    {
-      double vectorX = normalizedVector.getX();
-      double vectorY = normalizedVector.getY();
-      double pointToPointX = x - point.getX();
-      double pointToPointY = y - point.getY();
+      return isPointOnSideOfLine(x, y, normalizedVector.getX(), normalizedVector.getY(), point.getX(), point.getY(), side);
+   }
 
-      double crossProduct = vectorX * pointToPointY - pointToPointX * vectorY;
+   /**
+    * Checks whether a point is on the specified side of a line. If the direction of the line is zero this will return false.
+    */
+   public static boolean isPointOnSideOfLine(double pointX, double pointY, double directionX, double directionY, double pointOnLineX, double pointOnLineY,
+         RobotSide side)
+   {
+      double pointToPointX = pointX - pointOnLineX;
+      double pointToPointY = pointY - pointOnLineY;
+      double crossProduct = directionX * pointToPointY - pointToPointX * directionY;
       return side.negateIfRightSide(crossProduct) > 0.0;
    }
-   
+
    /**
     * This method could be improved but must be tested better first.
     */
@@ -552,13 +558,13 @@ public class Line2d implements Geometry2d<Line2d>
       double lineAngle = MathTools.angleFromZeroToTwoPi(normalizedVector.getX(), normalizedVector.getY());
       double frontAngle = MathTools.angleFromZeroToTwoPi(frontDirection.getX(), frontDirection.getY());
       double pointAngle = MathTools.angleFromZeroToTwoPi(point.getX() - this.point.getX(), point.getY() - this.point.getY());
-      
+
       double lineToFront = frontAngle - lineAngle;
       double lineToPoint = pointAngle - lineAngle;
-      
+
       if (Math.abs(lineToFront) > Math.PI) lineToFront = -(lineToFront % Math.PI);
       if (Math.abs(lineToPoint) > Math.PI) lineToPoint = -(lineToPoint % Math.PI);
-      
+
       if (lineToFront > 0.0 == lineToPoint > 0.0)
       {
          return true;
@@ -580,7 +586,7 @@ public class Line2d implements Geometry2d<Line2d>
    {
       return isPointInFrontOfLine(point.getX(), point.getY());
    }
-   
+
    private boolean isPointInFrontOfLine(double x, double y)
    {
       if (normalizedVector.getY() > 0.0)
@@ -722,7 +728,7 @@ public class Line2d implements Geometry2d<Line2d>
    {
       if (!this.point.epsilonEquals(other.point, epsilon)) return false;
       if (!this.normalizedVector.epsilonEquals(other.normalizedVector, epsilon)) return false;
-      
+
       return true;
    }
 }

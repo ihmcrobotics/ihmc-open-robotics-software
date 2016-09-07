@@ -25,10 +25,10 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    private static final boolean SHOW_ONLY_WRENCH_VISUALIZER = false;
    private static final boolean SHOW_EXPORT_TORQUE_AND_SPEED = true;
    private static final boolean SHOW_OVERHEAD_VIEW = true;
-   
+
    private final SimulationConstructionSetParameters simulationConstructionSetParameters;
-   
-   
+
+
    private boolean is3dGraphicsShown = true;
    private final boolean groundProfileVisible;
    private final boolean drawPlaneAtZ0;
@@ -55,7 +55,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    {
       return simulationConstructionSetParameters;
    }
-   
+
    public void initializeGUI(SimulationConstructionSet scs, Robot robot)
    {
       // use
@@ -90,7 +90,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       if (drawPlaneAtZ0)
       {
          Graphics3DObject planeAtZ0 = new Graphics3DObject();
-         
+
          HeightMap heightMap = new FlatGroundProfile();
          planeAtZ0.addHeightMap(heightMap, 100, 100, null);
          scs.addStaticLinkGraphics(planeAtZ0);
@@ -116,7 +116,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       }
 
       //TODO: Clean this up!
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
+//      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
 
       if (DRCConfigParameters.MAKE_SLIDER_BOARD)
       {
@@ -128,7 +128,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    {
       return simulationConstructionSetParameters.getCreateGUI();
    }
-   
+
    public boolean getShowWindow()
    {
       return simulationConstructionSetParameters.getShowWindows();
@@ -138,12 +138,12 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    {
       this.simulationConstructionSetParameters.setCreateGUI(createGUI);
    }
-   
+
    public void setShowWindow(boolean showWindow)
    {
       this.simulationConstructionSetParameters.setShowSplashScreen(showWindow);
       this.simulationConstructionSetParameters.setShowWindows(showWindow);
-      
+
    }
 
    public Graphics3DAdapter getGraphics3DAdapter()

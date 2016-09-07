@@ -25,7 +25,7 @@ public class SimulationOverheadPlotter implements PlaybackListener
    private JMenuBar menuBar;
    private JCheckBoxMenuItem trackBodyCB;
 
-   private DoubleYoVariable xVariableToTrack, yVariableToTrack;
+   private DoubleYoVariable xVariableToTrack, yVariableToTrack, yawVariableToTrack;
 
    public SimulationOverheadPlotter()
    {
@@ -41,6 +41,7 @@ public class SimulationOverheadPlotter implements PlaybackListener
       JFrame jFrame = new JFrame("Simulation Overhead Plotter");
       jFrame.addWindowListener(new WindowAdapter()
       {
+         @Override
          public void windowClosing(WindowEvent e)
          {
 //          System.exit(0);
@@ -68,6 +69,11 @@ public class SimulationOverheadPlotter implements PlaybackListener
    public void setYVariableToTrack(DoubleYoVariable yVariableToTrack)
    {
       this.yVariableToTrack = yVariableToTrack;
+   }
+   
+   public void setYawVariableToTrack(DoubleYoVariable yawVariableToTrack)
+   {
+      this.yawVariableToTrack = yawVariableToTrack;
    }
 
    public void setDrawHistory(boolean drawHistory)
@@ -135,18 +141,23 @@ public class SimulationOverheadPlotter implements PlaybackListener
             plotter.setFocusPointX(xVariableToTrack.getDoubleValue());
          if (yVariableToTrack != null)
             plotter.setFocusPointY(yVariableToTrack.getDoubleValue());
+         if (yawVariableToTrack != null)
+            plotter.setFocusOrientationYaw(yawVariableToTrack.getDoubleValue());
       }
    }
 
+   @Override
    public void indexChanged(int newIndex, double newTime)
    {
       update();
    }
 
+   @Override
    public void play(double realTimeRate)
    {
    }
 
+   @Override
    public void stop()
    {
    }

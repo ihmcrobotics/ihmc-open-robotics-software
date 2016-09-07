@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -33,12 +33,12 @@ public class LockPelvisController implements RobotController
    private final DoubleYoVariable desiredHeight = new DoubleYoVariable("desiredHeight", registry);
    private final double robotMass, robotWeight;
 
-   private final SDFRobot robot;
+   private final FloatingRootJointRobot robot;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<YoGraphicPosition> efp_positionViz = new ArrayList<>();
 
-   public LockPelvisController(SDFRobot robot, SimulationConstructionSet scs, SDFFullRobotModel sdfFullRobotModel, double desiredHeight)
+   public LockPelvisController(FloatingRootJointRobot robot, SimulationConstructionSet scs, FullRobotModel fullRobotModel, double desiredHeight)
    {
       this.robot = robot;
       robotMass = robot.computeCenterOfMass(new Point3d());
@@ -48,15 +48,15 @@ public class LockPelvisController implements RobotController
       Joint jointToAddExternalForcePoints;
       try
       {
-         //            String lastSpineJointName = sdfFullRobotModel.getChest().getParentJoint().getName();
-         jointToAddExternalForcePoints = robot.getJoint(sdfFullRobotModel.getPelvis().getParentJoint().getName());
+         //            String lastSpineJointName = fullRobotModel.getChest().getParentJoint().getName();
+         jointToAddExternalForcePoints = robot.getJoint(fullRobotModel.getPelvis().getParentJoint().getName());
       }
       catch (NullPointerException e)
       {
          System.err.println("No chest or spine found. Stack trace:");
          e.printStackTrace();
 
-         jointToAddExternalForcePoints = robot.getPelvisJoint();
+         jointToAddExternalForcePoints = robot.getRootJoint();
       }
 
       holdPelvisKp.set(5000.0);

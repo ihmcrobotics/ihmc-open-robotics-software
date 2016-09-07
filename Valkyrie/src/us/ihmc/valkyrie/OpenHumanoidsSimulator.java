@@ -13,6 +13,7 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
+import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.LocalObjectCommunicator;
@@ -69,11 +70,15 @@ public class OpenHumanoidsSimulator
    public OpenHumanoidsSimulator(String model, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
          boolean runAutomaticDiagnosticRoutine, boolean disableViz, boolean extra_sim_points, Collection<Class> additionalPacketTypes) throws IOException
    {
-	      DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, model);
+	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, model);
+
+	      //TODO: Get this stuff from the RobotDescription rather than the SDF stuff...
+	      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
+
 	      if(load_sdf_contacts)
 	      {
 	    	  ValkyrieContactPointParameters contactPointParameters = (ValkyrieContactPointParameters) robotModel.getContactPointParameters();
-		      contactPointParameters.setupContactPointsFromRobotModel(robotModel, replace_contacts);
+		      contactPointParameters.setupContactPointsFromRobotModel(generalizedSDFRobotModel, replace_contacts);
 	      }
 	      if(extra_sim_points)
 	      {

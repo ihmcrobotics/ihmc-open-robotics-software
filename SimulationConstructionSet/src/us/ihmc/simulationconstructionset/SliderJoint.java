@@ -343,16 +343,17 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
    {
       return q_max;
    }
-   
+
    @Override
    public double getJointLowerLimit()
    {
       return q_min;
    }
-   
+
    @Override
    public double getJointStiction()
    {
       return f_stiction;
    }
+
 }

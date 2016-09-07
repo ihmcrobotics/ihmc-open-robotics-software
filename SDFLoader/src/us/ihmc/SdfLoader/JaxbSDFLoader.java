@@ -14,11 +14,13 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.sensors.ContactSensorType;
 
 public class JaxbSDFLoader
@@ -31,7 +33,7 @@ public class JaxbSDFLoader
    {
       this(new FileInputStream(file), resourceDirectories);
    }
-   
+
    public JaxbSDFLoader(InputStream inputStream, List<String> resourceDirectories) throws JAXBException, FileNotFoundException
    {
       this(inputStream, resourceDirectories, null);
@@ -41,7 +43,7 @@ public class JaxbSDFLoader
    {
       this(new FileInputStream(file), Arrays.asList(resourceDirectory), mutator);
    }
-   
+
    public JaxbSDFLoader(InputStream inputStream, String[] resourceDirectories, SDFDescriptionMutator mutator) throws JAXBException, FileNotFoundException
    {
       this(inputStream, Arrays.asList(resourceDirectories), mutator);
@@ -108,29 +110,30 @@ public class JaxbSDFLoader
       return generalizedSDFRobotModels.get(name);
    }
 
-   public SDFHumanoidRobot createRobot(SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   public HumanoidFloatingRootJointRobot createRobot(SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
       return createRobot(sdfJointNameMap.getModelName(), sdfJointNameMap, useCollisionMeshes);
    }
 
-   public SDFRobot createRobot(String modelName, boolean useCollisionMeshes)
+   public FloatingRootJointRobot createRobot(String modelName, boolean useCollisionMeshes)
    {
       return createRobot(modelName, null, useCollisionMeshes);
    }
 
-   private SDFHumanoidRobot createRobot(String modelName, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   private HumanoidFloatingRootJointRobot createRobot(String modelName, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
       return createRobot(modelName, sdfJointNameMap, useCollisionMeshes, true, true);
    }
 
-   public SDFHumanoidRobot createRobot(String modelName, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits,
-           boolean enableDamping)
+   public HumanoidFloatingRootJointRobot createRobot(String modelName, SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits,
+           boolean enableJointDamping)
    {
       checkModelName(modelName);
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = generalizedSDFRobotModels.get(modelName);
-
-      return new SDFHumanoidRobot(generalizedSDFRobotModel, generalizedSDFRobotModel.getSDFDescriptionMutator(), sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+      RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      return new HumanoidFloatingRootJointRobot(description, sdfJointNameMap);
    }
 
    public void addForceSensor(SDFJointNameMap jointMap, String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)
@@ -143,19 +146,26 @@ public class JaxbSDFLoader
       generalizedSDFRobotModels.get(jointMap.getModelName()).addContactSensor(sensorName, parentJointName, type);
    }
 
-   public SDFFullHumanoidRobotModel createFullRobotModel(SDFHumanoidJointNameMap sdfJointNameMap)
+   public FullHumanoidRobotModel createFullRobotModel(SDFHumanoidJointNameMap sdfJointNameMap)
    {
       return createFullRobotModel(sdfJointNameMap, new String[0]);
    }
 
-   public SDFFullHumanoidRobotModel createFullRobotModel(SDFHumanoidJointNameMap sdfJointNameMap, String[] sensorFramesToTrack)
+   public FullHumanoidRobotModel createFullRobotModel(SDFHumanoidJointNameMap sdfJointNameMap, String[] sensorFramesToTrack)
    {
       if (sdfJointNameMap != null)
       {
          String modelName = sdfJointNameMap.getModelName();
          checkModelName(modelName);
 
-         return new SDFFullHumanoidRobotModel(generalizedSDFRobotModels.get(modelName).getRootLinks().get(0), sdfJointNameMap, sensorFramesToTrack);
+         boolean useCollisionMeshes = false;
+         boolean enableTorqueVelocityLimits = true;
+         boolean enableJointDamping = true;
+
+         RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+         RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModels.get(modelName), sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+
+         return new FullHumanoidRobotModelFromDescription(description, sdfJointNameMap, sensorFramesToTrack);
       }
       else
       {

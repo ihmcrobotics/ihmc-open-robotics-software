@@ -10,6 +10,9 @@ public class CameraSensorDescription extends SensorDescription
    private double clipNear;
    private double clipFar;
 
+   private int imageWidth;
+   private int imageHeight;
+
    public CameraSensorDescription(String name, Vector3d offsetFromJoint)
    {
       super(name, offsetFromJoint);
@@ -58,6 +61,26 @@ public class CameraSensorDescription extends SensorDescription
    public void setClipFar(double clipFar)
    {
       this.clipFar = clipFar;
+   }
+
+   public int getImageWidth()
+   {
+      return imageWidth;
+   }
+
+   public void setImageWidth(int imageWidth)
+   {
+      this.imageWidth = imageWidth;
+   }
+
+   public int getImageHeight()
+   {
+      return imageHeight;
+   }
+
+   public void setImageHeight(int imageHeight)
+   {
+      this.imageHeight = imageHeight;
    }
 
 }

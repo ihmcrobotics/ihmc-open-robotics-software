@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.PacketRouter;
@@ -66,7 +66,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final DoubleYoVariable yoTimeLastFullRobotModelUpdate;
 
    private final DRCRobotModel drcRobotModel;
-   private final SDFFullHumanoidRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    private final PacketRouter<PacketDestination> networkProcessor;
    private final PacketCommunicator mockUIPacketCommunicatorServer;//send packets as if it was sent from the UI
@@ -147,7 +147,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       referenceFrames = robotDataReceiver.getReferenceFrames();
    }
 
-   public SDFFullHumanoidRobotModel getSDFFullRobotModel()
+   public FullHumanoidRobotModel getSDFFullRobotModel()
    {
       boolean robotModelIsUpToDate = yoTimeRobot.getDoubleValue() == yoTimeLastFullRobotModelUpdate.getDoubleValue();
 

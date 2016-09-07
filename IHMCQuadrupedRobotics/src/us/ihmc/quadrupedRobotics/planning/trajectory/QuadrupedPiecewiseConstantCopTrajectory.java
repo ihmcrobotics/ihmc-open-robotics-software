@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
+import java.util.ArrayList;
+
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -8,8 +10,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import java.util.ArrayList;
 
 public class QuadrupedPiecewiseConstantCopTrajectory
 {
@@ -89,7 +89,6 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       return normalizedPressureContributedByQueuedSteps.get(interval).doubleValue();
    }
 
-
    public ArrayList<MutableDouble> getTimeAtStartOfInterval()
    {
       return timeAtStartOfInterval;
@@ -150,11 +149,12 @@ public class QuadrupedPiecewiseConstantCopTrajectory
             }
             if (isInitialContactState.get(robotQuadrant).booleanValue())
             {
-               normalizedPressureContributedByInitialContacts.get(interval).add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant));
+               normalizedPressureContributedByInitialContacts.get(interval)
+                     .add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant).doubleValue());
             }
             else
             {
-               normalizedPressureContributedByQueuedSteps.add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant));
+               normalizedPressureContributedByQueuedSteps.get(interval).add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant).doubleValue());
             }
          }
          timeAtStartOfInterval.get(interval).setValue(timedContactSequence.get(interval).getTimeInterval().getStartTime());

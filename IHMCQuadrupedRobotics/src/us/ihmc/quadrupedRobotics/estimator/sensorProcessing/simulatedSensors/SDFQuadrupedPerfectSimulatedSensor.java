@@ -2,8 +2,8 @@ package us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -22,24 +22,24 @@ import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedContactBasedF
 public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSensorReader implements FootSwitchOutputReadOnly, SensorReader
 {
    private final QuadrantDependentList<ContactBasedFootSwitch> footSwitches = new QuadrantDependentList<>();
-   
+
    private final OneDoFJoint[] sensorOneDoFJoints;
-   
+
    private final BooleanYoVariable enableDrives;
-   
-   public SDFQuadrupedPerfectSimulatedSensor(SDFRobot sdfRobot, SDFFullQuadrupedRobotModel sdfFullRobotModel, CommonQuadrupedReferenceFrames referenceFrames)
+
+   public SDFQuadrupedPerfectSimulatedSensor(FloatingRootJointRobot sdfRobot, FullQuadrupedRobotModel fullRobotModel, CommonQuadrupedReferenceFrames referenceFrames)
    {
-      super(sdfRobot, sdfFullRobotModel, referenceFrames);
-      
-      sensorOneDoFJoints = sdfFullRobotModel.getOneDoFJoints();
-      
+      super(sdfRobot, fullRobotModel, referenceFrames);
+
+      sensorOneDoFJoints = fullRobotModel.getOneDoFJoints();
+
       //FootSwitches
       ArrayList<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
-      
+
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
          String prefix = quadrant.getCamelCaseNameForStartOfExpression();
-         OneDoFJoint jointBeforeFoot = sdfFullRobotModel.getOneDoFJointBeforeFoot(quadrant);
+         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(quadrant);
 
          for(GroundContactPoint groundContactPoint : groundContactPoints)
          {
@@ -49,11 +49,11 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
             }
          }
       }
-      
+
       enableDrives = new BooleanYoVariable("enableDrives", getYoVariableRegistry());
       enableDrives.set(true);
    }
-   
+
    @Override
    public void read()
    {
@@ -70,7 +70,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    {
       return footSwitches.get(quadrant).isInContact();
    }
-   
+
    @Override
    public double getJointPositionProcessedOutput(OneDoFJoint oneDoFJoint)
    {
@@ -122,7 +122,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       }
       return 0.0;
    }
-   
+
    @Override
    public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
    {

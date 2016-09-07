@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
@@ -20,6 +20,7 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -36,7 +37,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 1.0);
    private final DoubleParameter stanceLengthParameter = parameterFactory.createDouble("stanceLength", 1.0);
-   private final DoubleParameter stanceWidthParameter = parameterFactory.createDouble("stanceWidth", 0.5);
+   private final DoubleParameter stanceWidthParameter = parameterFactory.createDouble("stanceWidth", 0.35);
    private final DoubleParameter stanceHeightParameter = parameterFactory.createDouble("stanceHeight", 0.60);
    private final DoubleParameter stanceXOffsetParameter = parameterFactory.createDouble("stanceXOffset", 0.05);
    private final DoubleParameter stanceYOffsetParameter = parameterFactory.createDouble("stanceYOffset", 0.0);
@@ -49,7 +50,10 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 100, 100, 100);
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
-   private final BooleanParameter useForceFeedbackControl = parameterFactory.createBoolean("useForceFeedbackControl", true);
+   private final BooleanParameter useForceFeedbackControlParameter = parameterFactory.createBoolean("useForceFeedbackControl", false);
+
+   // Yo variables
+   private final BooleanYoVariable yoUseForceFeedbackControl;
 
    // Task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
@@ -64,7 +68,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private FramePoint solePositionSetpoint;
    private final Vector3d zeroVelocity;
    private final double robotLength;
-   private SDFFullQuadrupedRobotModel fullRobotModel;
+   private FullQuadrupedRobotModel fullRobotModel;
 
    public QuadrupedForceBasedStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox)
    {
@@ -84,6 +88,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
       yoPositionControllerGains = new YoEuclideanPositionGains("positionControllerGains", registry);
+      yoUseForceFeedbackControl = new BooleanYoVariable("useForceFeedbackControl", registry);
 
       // Calculate the robot length
       referenceFrames.updateFrames();
@@ -130,12 +135,13 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceController.reset();
 
       // Initialize force feedback
-      for (QuadrupedJointName jointName : QuadrupedJointName.values)
+      yoUseForceFeedbackControl.set(useForceFeedbackControlParameter.get());
+      for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControl.get());
+            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
          }
       }
    }
@@ -152,12 +158,13 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    @Override
    public void onExit()
    {
-      for (QuadrupedJointName jointName : QuadrupedJointName.values)
+      yoUseForceFeedbackControl.set(false);  // This bool should match that used in the standReady controller (freeze)
+      for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(true);
+            oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());
          }
       }
    }

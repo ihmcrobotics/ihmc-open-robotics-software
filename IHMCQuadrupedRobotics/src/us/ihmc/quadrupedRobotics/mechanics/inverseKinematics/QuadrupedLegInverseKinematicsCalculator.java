@@ -2,10 +2,10 @@ package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public interface QuadrupedLegInverseKinematicsCalculator
 {
-   boolean solveForEndEffectorLocationInBodyAndUpdateDesireds(RobotQuadrant robotQuadrant, Vector3d footPositionInFrameBeforeHipRoll, SDFFullRobotModel fullRobotModel);
+   boolean solveForEndEffectorLocationInBodyAndUpdateDesireds(RobotQuadrant robotQuadrant, Vector3d footPositionInFrameBeforeHipRoll, FullRobotModel fullRobotModel);
 }

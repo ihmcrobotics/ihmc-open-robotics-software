@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.state;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +36,11 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
    private final Map<Class<?>, List<FiniteStateMachineCallback<S, ? extends Enum<?>>>> callbacks;
 
    /**
+    * The list of state changed listeners to be notified of each state transition.
+    */
+   private final ArrayList<FiniteStateMachineStateChangedListener> stateChangedListeners;
+
+   /**
     * The default type of events, {@link E}. Specifying this is a convenience that allows the type to be omitted from calls to {@link #trigger(Enum)} unless the
     * event is of a different type.
     */
@@ -68,10 +74,20 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
       this.states = states;
       this.transitions = transitions;
       this.callbacks = callbacks;
+      this.stateChangedListeners = new ArrayList<>();
       this.initialState = initialState;
       this.standardEventType = standardEventType;
       this.state = new EnumYoVariable<>(yoVariableName, registry, enumType);
       this.state.set(initialState);
+   }
+
+   /**
+    * Add a state change listener to be notified of each state transition.
+    * @param listener the state change listener
+    */
+   public void attachStateChangedListener(FiniteStateMachineStateChangedListener listener)
+   {
+      stateChangedListeners.add(listener);
    }
 
    /**
@@ -121,6 +137,10 @@ public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>>
             // Check if this transition matches the source state and event.
             if (transition.getFrom() == getState() && event == transition.getEvent())
             {
+               for (int j = 0; j < stateChangedListeners.size(); j++)
+               {
+                  stateChangedListeners.get(j).stateHasChanged(transition.getFrom(), transition.getTo());
+               }
                transition(transition.getFrom(), transition.getTo());
                break;
             }

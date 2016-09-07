@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -30,7 +30,7 @@ public class OscillateFeetPerturber extends ModularRobotController
 
    private final double deltaT;
    
-   public OscillateFeetPerturber(SDFHumanoidRobot robot, double deltaT)
+   public OscillateFeetPerturber(HumanoidFloatingRootJointRobot robot, double deltaT)
    {
       super("NoisilyShakeFeetPerturber");
       String name = "ShakeFeet";

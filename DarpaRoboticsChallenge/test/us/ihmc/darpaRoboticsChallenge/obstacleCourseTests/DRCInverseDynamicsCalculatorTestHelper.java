@@ -12,9 +12,9 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -58,8 +58,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
    private final YoFrameVector leftFootComputedWrenchForce = new YoFrameVector("wrench_computed_leftFootForce", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector rightFootComputedWrenchForce = new YoFrameVector("wrench_computed_rightFootForce", ReferenceFrame.getWorldFrame(), registry);
 
-   private final SDFHumanoidRobot robot;
-   private final SDFFullHumanoidRobotModel fullRobotModel;
+   private final HumanoidFloatingRootJointRobot robot;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final SimulationConstructionSet scs;
    private final TwistCalculator twistCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
@@ -75,7 +75,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    private final SideDependentList<ExternalForcePoint> feetExternalForcePoints;
 
-   public DRCInverseDynamicsCalculatorTestHelper(SDFFullHumanoidRobotModel fullRobotModel, SDFHumanoidRobot robot, boolean visualize, double gravityZ)
+   public DRCInverseDynamicsCalculatorTestHelper(FullHumanoidRobotModel fullRobotModel, HumanoidFloatingRootJointRobot robot, boolean visualize, double gravityZ)
    {
       this.fullRobotModel = fullRobotModel;
       this.robot = robot;
@@ -189,7 +189,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       }
    }
 
-   public void setRobotTorquesToMatchFullRobotModelButCheckAgainstOtherRobot(SDFRobot otherRobot, double epsilon)
+   public void setRobotTorquesToMatchFullRobotModelButCheckAgainstOtherRobot(FloatingRootJointRobot otherRobot, double epsilon)
    {
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
@@ -222,7 +222,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       }
    }
 
-   public void setRobotTorquesToMatchOtherRobot(SDFRobot otherRobot)
+   public void setRobotTorquesToMatchOtherRobot(FloatingRootJointRobot otherRobot)
    {
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
@@ -375,7 +375,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       }
    }
 
-   public void setRobotStateToMatchOtherRobot(SDFRobot otherRobot)
+   public void setRobotStateToMatchOtherRobot(FloatingRootJointRobot otherRobot)
    {
       otherRobot.update();
 
@@ -681,7 +681,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       setRobotsExternalForcesToMatchFullRobotModel(inverseDynamicsCalculator);
    }
 
-   public void setRobotsExternalForcesToMatchOtherRobot(SDFRobot otherRobot)
+   public void setRobotsExternalForcesToMatchOtherRobot(FloatingRootJointRobot otherRobot)
    {
       ArrayList<GroundContactPoint> otherGroundContactPoints = otherRobot.getAllGroundContactPoints();
       ArrayList<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();
@@ -875,7 +875,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       return simulationTestingParameters;
    }
 
-   public SDFFullHumanoidRobotModel getFullRobotModel()
+   public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }

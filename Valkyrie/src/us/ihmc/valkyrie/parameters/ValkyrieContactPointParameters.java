@@ -121,12 +121,11 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
       return new Point2d(point.getX(), point.getY());
    }
 
-   public void setupContactPointsFromRobotModel(DRCRobotModel robot, boolean removeExistingContacts)
+   public void setupContactPointsFromRobotModel(GeneralizedSDFRobotModel sdf, boolean removeExistingContacts)
    {
       if (removeExistingContacts)
          clearSimulationContactPoints();
 
-      GeneralizedSDFRobotModel sdf = robot.getGeneralizedRobotModel();
       for (SDFLinkHolder link : sdf.getRootLinks())
       {
          for (SDFJointHolder joint : link.getChildren())

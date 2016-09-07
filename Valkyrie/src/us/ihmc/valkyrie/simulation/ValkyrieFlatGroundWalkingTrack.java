@@ -2,7 +2,7 @@ package us.ihmc.valkyrie.simulation;
 
 import java.net.URI;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
@@ -38,7 +38,7 @@ public class ValkyrieFlatGroundWalkingTrack
       scsInitialSetup.setInitializeEstimatorToActual(true);
       
       double initialYaw = 0.0;
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
 
       boolean useVelocityAndHeadingScript = !USE_JOYSTICK_CONTROLLER;;
       boolean cheatWithGroundHeightAtForFootstep = false;

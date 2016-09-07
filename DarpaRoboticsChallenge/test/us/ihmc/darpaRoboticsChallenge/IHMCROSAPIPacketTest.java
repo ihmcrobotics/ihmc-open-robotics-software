@@ -6,8 +6,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.ros.RosCore;
 import org.ros.internal.message.Message;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -141,8 +141,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       packetRouter.attachPacketCommunicator(PacketDestination.ROS_API, rosAPI_communicator_client);
       packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerCommunicatorClient);
 
-      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
       DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);
       HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(controllerCommunicatorServer);
@@ -150,7 +150,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       AbstractThreadedRobotController robotController = createController(robotModel, controllerCommunicatorServer, globalDataProducer, outputWriter, sdfRobot);
       sdfRobot.setController(robotController);
 
-      OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDoFJoints();
+      OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDegreeOfFreedomJoints();
 
       robotController.doControl();
       controllerCommunicatorServer.send(new HighLevelStateMessage(HighLevelState.WALKING));
@@ -239,8 +239,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
          throw new RuntimeException(e);
       }
 
-      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
       DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);
       HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(packetCommunicatorServer);
@@ -248,7 +248,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       AbstractThreadedRobotController robotController = createController(robotModel, packetCommunicatorServer, globalDataProducer, outputWriter, sdfRobot);
       sdfRobot.setController(robotController);
 
-      OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDoFJoints();
+      OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDegreeOfFreedomJoints();
 
       robotController.doControl();
       packetCommunicatorClient.send(new HighLevelStateMessage(HighLevelState.WALKING));
@@ -303,7 +303,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
    }
 
    private AbstractThreadedRobotController createController(DRCRobotModel robotModel, PacketCommunicator packetCommunicator,
-         HumanoidGlobalDataProducer dataProducer, DRCSimulationOutputWriter outputWriter, SDFRobot sdfRobot)
+         HumanoidGlobalDataProducer dataProducer, DRCSimulationOutputWriter outputWriter, FloatingRootJointRobot sdfRobot)
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       double gravity = -9.7925;

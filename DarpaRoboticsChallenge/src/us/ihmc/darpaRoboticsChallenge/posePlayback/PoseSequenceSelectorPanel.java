@@ -13,7 +13,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -27,7 +27,7 @@ public class PoseSequenceSelectorPanel extends JPanel
    private static final long serialVersionUID = 7616401668436177628L;
 
    private final YoVariableRegistry registry;
-   private final SDFHumanoidRobot sdfRobot;
+   private final HumanoidFloatingRootJointRobot sdfRobot;
    private final FullHumanoidRobotModel fullRobotModel;
    private final DRCRobotMidiSliderBoardPositionManipulation sliderBoard;
 
@@ -98,7 +98,7 @@ public class PoseSequenceSelectorPanel extends JPanel
       add(scrollPane);
    }
 
-   public PoseSequenceSelectorPanel(YoVariableRegistry registry, SDFHumanoidRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
+   public PoseSequenceSelectorPanel(YoVariableRegistry registry, HumanoidFloatingRootJointRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, DRCRobotMidiSliderBoardPositionManipulation sliderBoard)
    {
       super(new GridLayout(1, 0));
 

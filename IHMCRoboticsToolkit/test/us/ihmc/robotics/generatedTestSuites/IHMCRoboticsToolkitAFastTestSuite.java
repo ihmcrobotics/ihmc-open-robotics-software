@@ -41,6 +41,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.geometry.BoundingBox3dTest.class,
    us.ihmc.robotics.geometry.CapsuleTest.class,
    us.ihmc.robotics.geometry.ConvexHullCalculator2dTest.class,
+   us.ihmc.robotics.geometry.ConvexPolygon2dCalculatorTest.class,
    us.ihmc.robotics.geometry.ConvexPolygon2dTest.class,
    us.ihmc.robotics.geometry.ConvexPolygonShrinkerTest.class,
    us.ihmc.robotics.geometry.ConvexPolygonToolsTest.class,

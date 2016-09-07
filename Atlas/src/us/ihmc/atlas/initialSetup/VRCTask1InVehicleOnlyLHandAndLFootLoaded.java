@@ -32,12 +32,12 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class VRCTask1InVehicleOnlyLHandAndLFootLoaded implements DRCRobotInitialSetup<SDFHumanoidRobot>
+public class VRCTask1InVehicleOnlyLHandAndLFootLoaded implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
 
    private double groundZ;
@@ -49,7 +49,7 @@ public class VRCTask1InVehicleOnlyLHandAndLFootLoaded implements DRCRobotInitial
       this.groundZ = groundZ;
    }
 
-   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       // Avoid singularities at startup
       robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_shz]).setQ(-0.8528);

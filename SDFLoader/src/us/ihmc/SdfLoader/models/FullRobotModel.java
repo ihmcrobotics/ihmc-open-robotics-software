@@ -1,10 +1,12 @@
 package us.ihmc.SdfLoader.models;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -50,6 +52,8 @@ public interface FullRobotModel
     */
    public abstract OneDoFJoint getSpineJoint(SpineJointName spineJointName);
 
+   public abstract RigidBody getEndEffector(Enum<?> segmentEnum);
+
    /**
     * Return the {@link OneDoFJoint} describing the the corresponding leg joint.
     * @param robotSide Refers to which leg the joint belongs to (assuming there is only one left and one right leg).
@@ -63,6 +67,12 @@ public interface FullRobotModel
     * @return TODO
     */
    public abstract InverseDynamicsJoint getLidarJoint(String lidarName);
+
+   public abstract ReferenceFrame getLidarBaseFrame(String name);
+
+   public abstract RigidBodyTransform getLidarBaseToSensorTransform(String name);
+
+   public abstract ReferenceFrame getCameraFrame(String name);
 
    /**
     * Returns the {@link RigidBody} describing the pelvis of this robot.
@@ -82,8 +92,14 @@ public interface FullRobotModel
     */
    public abstract RigidBody getHead();
 
+   public abstract ReferenceFrame getHeadBaseFrame();
+
    /** Returns all the one DoF joints that this robot has. */
    public abstract OneDoFJoint[] getOneDoFJoints();
+
+   public abstract Map<String, OneDoFJoint> getOneDoFJointsAsMap();
+
+   public abstract void getOneDoFJointsFromRootToHere(OneDoFJoint oneDoFJointAtEndOfChain, ArrayList<OneDoFJoint> oneDoFJointsToPack);
 
    /** Returns all one DoF joints, excluding joints that do not exist in the controller. */
    public abstract OneDoFJoint[] getControllableOneDoFJoints();
@@ -94,6 +110,14 @@ public interface FullRobotModel
     *  @param oneDoFJointsToPack {@code ArrayList<OneDoFJoint>} that will be packed will all the one DoF joints.
     */
    public abstract void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack);
+
+   /**
+    * Gets the one DoF joint with the given name.
+    *
+    * @param name Name of the OneDoFJoint to return.
+    * @return
+    */
+   public abstract OneDoFJoint getOneDoFJointByName(String name);
 
    /**
     *  Gets all one DoF joints, excluding joints that do not exist in the controller.
@@ -119,4 +143,6 @@ public interface FullRobotModel
     */
    public abstract ContactSensorDefinition[] getContactSensorDefinitions();
 
+
+   public abstract double getTotalMass();
 }

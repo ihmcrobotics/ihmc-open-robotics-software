@@ -22,7 +22,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
@@ -90,7 +90,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -137,7 +137,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
       double firstTrajectoryPointTime = 1.5;
       double timePerWaypoint = 0.1;
@@ -251,7 +251,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
       double firstTrajectoryPointTime = 0.5;
       int numberOfTrajectoryPoints = 100;
@@ -390,7 +390,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
       double firstTrajectoryPointTime = 0.5;
       int numberOfTrajectoryPoints = 10;
@@ -530,7 +530,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
       double firstTrajectoryPointTime = 0.5;
       int numberOfTrajectoryPoints = 10;
@@ -642,7 +642,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       fullRobotModel.updateFrames();
       double firstTrajectoryPointTime = 0.5;
       int numberOfTrajectoryPoints = 10;
@@ -781,7 +781,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   public static FrameOrientation computeBestOrientationForDesiredPosition(SDFFullHumanoidRobotModel fullRobotModel, RobotSide robotSide,
+   public static FrameOrientation computeBestOrientationForDesiredPosition(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide,
          FramePoint desiredPosition, TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator, int numberOfIterations)
    {
       RigidBody chest = fullRobotModel.getChest();
@@ -803,7 +803,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       return tempOrientation;
    }
 
-   public static TaskspaceToJointspaceCalculator createTaskspaceToJointspaceCalculator(SDFFullHumanoidRobotModel fullRobotModel, RobotSide robotSide)
+   public static TaskspaceToJointspaceCalculator createTaskspaceToJointspaceCalculator(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide)
    {
       RigidBody chest = fullRobotModel.getChest();
       RigidBody hand = fullRobotModel.getHand(robotSide);
@@ -834,7 +834,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
-      SDFFullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       for (RobotSide robotSide : RobotSide.values)
       {

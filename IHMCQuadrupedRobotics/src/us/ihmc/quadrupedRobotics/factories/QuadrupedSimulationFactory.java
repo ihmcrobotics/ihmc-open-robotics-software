@@ -7,9 +7,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.OutputWriter;
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.communication.net.NetClassList;
@@ -39,8 +39,8 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
-import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
+import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -79,10 +79,10 @@ import us.ihmc.util.PeriodicThreadScheduler;
 
 public class QuadrupedSimulationFactory
 {
-   private final RequiredFactoryField<SDFFullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
+   private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<QuadrupedPhysicalProperties> physicalProperties = new RequiredFactoryField<>("physicalProperties");
    private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
-   private final RequiredFactoryField<SDFRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
+   private final RequiredFactoryField<FloatingRootJointRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
    private final RequiredFactoryField<Double> controlDT = new RequiredFactoryField<>("controlDT");
    private final RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
    private final RequiredFactoryField<Integer> recordFrequency = new RequiredFactoryField<>("recordFrequency");
@@ -101,12 +101,13 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
    private final RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
    private final RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
-   
+
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
-   
+   private final OptionalFactoryField<FootSwitchType> footSwitchType = new OptionalFactoryField<>("footSwitchType");
+
    // TO CONSTRUCT
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead;
@@ -123,23 +124,23 @@ public class QuadrupedSimulationFactory
    private LinearGroundContactModel groundContactModel;
    private QuadrupedSimulationController simulationController;
    private QuadrupedLegInverseKinematicsCalculator legInverseKinematicsCalculator;
-   
+
    // CREATION
-   
+
    private void setupYoRegistries()
    {
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(true);
       yoGraphicsListRegistryForDetachedOverhead = new YoGraphicsListRegistry();
    }
-   
+
    private void createPushRobotController()
    {
       if (usePushRobotController.hasBeenSet() && usePushRobotController.get())
       {
          PushRobotController bodyPushRobotController = new PushRobotController(sdfRobot.get(), "body", new Vector3d(0.0, -0.00057633, 0.0383928));
          yoGraphicsListRegistry.registerYoGraphic("PushRobotControllers", bodyPushRobotController.getForceVisualizer());
-         
+
          for (QuadrupedJointName quadrupedJointName : modelFactory.get().getQuadrupedJointNames())
          {
             String jointName = modelFactory.get().getSDFNameForJointName(quadrupedJointName);
@@ -172,7 +173,7 @@ public class QuadrupedSimulationFactory
          sensorReader = new SDFQuadrupedPerfectSimulatedSensor(sdfRobot.get(), fullRobotModel.get(), referenceFrames.get());
       }
    }
-   
+
    private void createContactibleFeet()
    {
       QuadrupedFootContactableBodiesFactory footContactableBodiesFactory = new QuadrupedFootContactableBodiesFactory();
@@ -181,18 +182,22 @@ public class QuadrupedSimulationFactory
       footContactableBodiesFactory.setReferenceFrames(referenceFrames.get());
       contactableFeet = footContactableBodiesFactory.createFootContactableBodies();
    }
-   
+
    private void createFootSwitches()
    {
       QuadrupedFootSwitchFactory footSwitchFactory = new QuadrupedFootSwitchFactory();
       footSwitchFactory.setFootContactableBodies(contactableFeet);
       footSwitchFactory.setFullRobotModel(fullRobotModel.get());
       footSwitchFactory.setGravity(gravity.get());
+      footSwitchFactory.setSimulatedRobot(sdfRobot.get());
       footSwitchFactory.setYoVariableRegistry(sdfRobot.get().getRobotsYoVariableRegistry());
-      footSwitchFactory.setFootSwitchType(FootSwitchType.TouchdownBased);
+      if (footSwitchType.hasBeenSet())
+         footSwitchFactory.setFootSwitchType(footSwitchType.get());
+      else
+         footSwitchFactory.setFootSwitchType(FootSwitchType.TouchdownBased);
       footSwitches = footSwitchFactory.createFootSwitches();
    }
-   
+
    private void createStateEstimator()
    {
       if (useStateEstimator.get())
@@ -215,7 +220,7 @@ public class QuadrupedSimulationFactory
          stateEstimator = null;
       }
    }
-   
+
    private void createPacketCommunicator() throws IOException
    {
       if (useNetworking.get())
@@ -233,7 +238,7 @@ public class QuadrupedSimulationFactory
          }
       }
    }
-   
+
    private void createGlobalDataProducer()
    {
       if (useNetworking.get())
@@ -241,7 +246,7 @@ public class QuadrupedSimulationFactory
          globalDataProducer = new QuadrupedGlobalDataProducer(packetCommunicator);
       }
    }
-   
+
    private void createHeadController()
    {
       if (headControllerFactory.hasBeenSet())
@@ -249,11 +254,11 @@ public class QuadrupedSimulationFactory
          headControllerFactory.get().setControlDt(controlDT.get());
          headControllerFactory.get().setFullRobotModel(fullRobotModel.get());
          headControllerFactory.get().setGlobalDataProducer(globalDataProducer);
-      
+
          headController = headControllerFactory.get().createRobotController();
       }
    }
-   
+
    private void createInverseKinematicsCalculator()
    {
       if (controlMode.get() == QuadrupedControlMode.POSITION || controlMode.get() == QuadrupedControlMode.POSITION_DEV)
@@ -262,10 +267,10 @@ public class QuadrupedSimulationFactory
                                                                                     sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
       }
    }
-   
+
    public void createControllerManager() throws IOException
    {
-      
+
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(), sdfRobot.get().getRobotsYoVariableRegistry(),
                                                            yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead, globalDataProducer, footSwitches);
       switch (controlMode.get())
@@ -289,7 +294,7 @@ public class QuadrupedSimulationFactory
          break;
       }
    }
-   
+
    private void createPoseCommunicator()
    {
       if (useNetworking.get())
@@ -305,7 +310,7 @@ public class QuadrupedSimulationFactory
          poseCommunicator = null;
       }
    }
-   
+
    private void createGroundContactModel()
    {
       if (groundContactModelType.hasBeenSet() && !providedGroundProfile3D.hasBeenSet())
@@ -346,7 +351,7 @@ public class QuadrupedSimulationFactory
       {
          groundProfile3D = new FlatGroundProfile(0.0);
       }
-      
+
       groundContactModel = new LinearGroundContactModel(sdfRobot.get(), sdfRobot.get().getRobotsYoVariableRegistry());
       groundContactModel.setZStiffness(groundContactParameters.get().getZStiffness());
       groundContactModel.setZDamping(groundContactParameters.get().getZDamping());
@@ -354,13 +359,13 @@ public class QuadrupedSimulationFactory
       groundContactModel.setXYDamping(groundContactParameters.get().getXYDamping());
       groundContactModel.setGroundProfile3D(groundProfile3D);
    }
-   
+
    private void createSimulationController()
    {
       simulationController = new QuadrupedSimulationController(sdfRobot.get(), sensorReader, outputWriter.get(), controllerManager,
                                                                stateEstimator, poseCommunicator, headController);
    }
-   
+
    private void setupSDFRobot()
    {
       sdfRobot.get().setController(simulationController);
@@ -380,26 +385,26 @@ public class QuadrupedSimulationFactory
       {
          throw new RuntimeException("UnreasonableAccelerationException");
       }
-      
+
       Point3d initialCoMPosition = new Point3d();
       double totalMass = sdfRobot.get().computeCenterOfMass(initialCoMPosition);
-      
+
       if (useStateEstimator.get())
       {
          Quat4d initialEstimationLinkOrientation = new Quat4d();
-         sdfRobot.get().getPelvisJoint().getJointTransform3D().getRotation(initialEstimationLinkOrientation);
+         sdfRobot.get().getRootJoint().getJointTransform3D().getRotation(initialEstimationLinkOrientation);
          stateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
       }
-      
+
       sdfRobot.get().setGravity(gravity.get());
       sdfRobot.get().setGroundContactModel(groundContactModel);
       PrintTools.info(this, sdfRobot.get().getName() + " total mass: " + totalMass);
    }
-   
+
    public SimulationConstructionSet createSimulation() throws IOException
    {
       FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
-      
+
       setupYoRegistries();
       createPushRobotController();
       createSensorReader();
@@ -415,7 +420,7 @@ public class QuadrupedSimulationFactory
       createGroundContactModel();
       createSimulationController();
       setupSDFRobot();
-      
+
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot.get(), scsParameters.get());
       if (groundContactModelType.hasBeenSet() && groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE)
       {
@@ -439,104 +444,104 @@ public class QuadrupedSimulationFactory
       }
       return scs;
    }
-   
+
    // OPTIONS
-   
+
    public void setControlDT(double controlDT)
    {
       this.controlDT.set(controlDT);
    }
-   
+
    public void setGravity(double gravity)
    {
       this.gravity.set(gravity);
    }
-   
+
    public void setRecordFrequency(int recordFrequency)
    {
       this.recordFrequency.set(recordFrequency);
    }
-   
+
    public void setUseTrackAndDolly(boolean useTrackAndDolly)
    {
       this.useTrackAndDolly.set(useTrackAndDolly);
    }
-   
+
    public void setShowPlotter(boolean showPlotter)
    {
       this.showPlotter.set(showPlotter);
    }
-   
+
    public void setModelFactory(QuadrupedModelFactory modelFactory)
    {
       this.modelFactory.set(modelFactory);
    }
-   
+
    public void setSCSParameters(SimulationConstructionSetParameters scsParameters)
    {
       this.scsParameters.set(scsParameters);
    }
-   
+
    public void setGroundContactModelType(QuadrupedGroundContactModelType groundContactModelType)
    {
       this.groundContactModelType.set(groundContactModelType);
    }
-   
+
    public void setGroundContactParameters(GroundContactParameters groundContactParameters)
    {
       this.groundContactParameters.set(groundContactParameters);
    }
-   
+
    public void setHeadControllerFactory(QuadrupedRobotControllerFactory headControllerFactory)
    {
       this.headControllerFactory.set(headControllerFactory);
    }
-   
+
    public void setOutputWriter(OutputWriter outputWriter)
    {
       this.outputWriter.set(outputWriter);
    }
-   
+
    public void setInitialPositionParameters(QuadrupedSimulationInitialPositionParameters initialPositionParameters)
    {
       this.initialPositionParameters.set(initialPositionParameters);
    }
-   
+
    public void setPhysicalProperties(QuadrupedPhysicalProperties physicalProperties)
    {
       this.physicalProperties.set(physicalProperties);
    }
-   
+
    public void setControlMode(QuadrupedControlMode controlMode)
    {
       this.controlMode.set(controlMode);
    }
-   
-   public void setFullRobotModel(SDFFullQuadrupedRobotModel fullRobotModel)
+
+   public void setFullRobotModel(FullQuadrupedRobotModel fullRobotModel)
    {
       this.fullRobotModel.set(fullRobotModel);
    }
-   
+
    public void setUseNetworking(boolean useNetworking)
    {
       this.useNetworking.set(useNetworking);
    }
-   
+
    public void setNetClassList(NetClassList netClassList)
    {
       this.netClassList.set(netClassList);
    }
-   
+
    public void setTimestampHolder(SensorTimestampHolder timestampProvider)
    {
       this.timestampProvider.set(timestampProvider);
    }
 
-   public void setSDFRobot(SDFRobot sdfRobot)
+   public void setSDFRobot(FloatingRootJointRobot sdfRobot)
    {
       this.sdfRobot.set(sdfRobot);
    }
-   
+
    public void setUseStateEstimator(boolean useStateEstimator)
    {
       this.useStateEstimator.set(useStateEstimator);
@@ -556,19 +561,24 @@ public class QuadrupedSimulationFactory
    {
       this.referenceFrames.set(referenceFrames);
    }
-   
+
    public void setPositionBasedCrawlControllerParameters(QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters)
    {
       this.positionBasedCrawlControllerParameters.set(positionBasedCrawlControllerParameters);
    }
-   
+
    public void setGroundProfile3D(GroundProfile3D groundProfile3D)
    {
       providedGroundProfile3D.set(groundProfile3D);
    }
-   
+
    public void setUsePushRobotController(boolean usePushRobotController)
    {
       this.usePushRobotController.set(usePushRobotController);
+   }
+
+   public void setFootSwitchType(FootSwitchType footSwitchType)
+   {
+      this.footSwitchType.set(footSwitchType);
    }
 }

@@ -1,11 +1,12 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSoleForceEstimator;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -18,6 +19,7 @@ import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSoleWaypointController;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -26,7 +28,7 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    // Yo variables
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoEuclideanPositionGains yoPositionControllerGains;
-
+   private final BooleanYoVariable yoUseForceFeedbackControl;
    // Parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
@@ -38,6 +40,7 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
    private final BooleanParameter useForceFeedbackControlParameter = parameterFactory.createBoolean("useForceFeedbackControl", false);
+   private final BooleanParameter useInitialSoleForces = parameterFactory.createBoolean("useInitialSoleForces", true);
 
    // Task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
@@ -48,8 +51,9 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    private final QuadrupedSoleWaypointController quadrupedSoleWaypointController;
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
+   private final QuadrupedSoleForceEstimator soleForceEstimator;
 
-   private SDFFullQuadrupedRobotModel fullRobotModel;
+   private FullQuadrupedRobotModel fullRobotModel;
 
    public QuadrupedForceBasedSoleWaypointController(QuadrupedRuntimeEnvironment environment, QuadrupedForceControllerToolbox controllerToolbox,
          QuadrupedSoleWaypointInputProvider inputProvider)
@@ -58,10 +62,12 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
       quadrupedSoleWaypointController = controllerToolbox.getSoleWaypointController();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
+      soleForceEstimator = controllerToolbox.getSoleForceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
       yoPositionControllerGains = new YoEuclideanPositionGains("positionControllerGains", registry);
+      yoUseForceFeedbackControl = new BooleanYoVariable("useForceFeedbackControl", registry);
       fullRobotModel = environment.getFullRobotModel();
 
       environment.getParentRegistry().addChild(registry);
@@ -82,14 +88,24 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
       }
       taskSpaceController.reset();
-      quadrupedSoleWaypointController.initialize(soleWaypointInputProvider.get(), yoPositionControllerGains, taskSpaceEstimates);
+      // Initialize sole force estimator
+      soleForceEstimator.reset();
+      soleForceEstimator.compute();
+
+      if(useInitialSoleForces.get()){
+         quadrupedSoleWaypointController.initialize(soleWaypointInputProvider.get(), yoPositionControllerGains, taskSpaceEstimates, soleForceEstimator);
+      }
+      else{
+         quadrupedSoleWaypointController.initialize(soleWaypointInputProvider.get(), yoPositionControllerGains, taskSpaceEstimates);
+      }
+      yoUseForceFeedbackControl.set(useForceFeedbackControlParameter.get());
       // Initialize force feedback
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
+            oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());
          }
       }
    }
@@ -106,12 +122,13 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    @Override
    public void onExit()
    {
+      yoUseForceFeedbackControl.set(true);
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(true);
+            oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());
          }
       }
    }

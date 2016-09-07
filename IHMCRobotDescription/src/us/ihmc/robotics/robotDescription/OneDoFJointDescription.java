@@ -9,8 +9,7 @@ public class OneDoFJointDescription extends JointDescription
    private boolean containsLimitStops;
    private double qMin, qMax, kLimit, bLimit;
 
-   private double maxTorqueLimit = Double.POSITIVE_INFINITY;
-   private double minTorqueLimit = Double.NEGATIVE_INFINITY;
+   private double effortLimit = Double.POSITIVE_INFINITY;
 
    private double velocityLimit = Double.POSITIVE_INFINITY;
    private double velocityDamping = 0.0;
@@ -50,7 +49,6 @@ public class OneDoFJointDescription extends JointDescription
       this.jointAxis.set(jointAxis);
    }
 
-
    public void setVelocityLimits(double velocityLimit, double velocityDamping)
    {
       this.velocityLimit = velocityLimit;
@@ -60,6 +58,26 @@ public class OneDoFJointDescription extends JointDescription
    public void setDamping(double damping)
    {
       this.damping = damping;
+   }
+
+   public double getDamping()
+   {
+      return damping;
+   }
+
+   public double getStiction()
+   {
+      return stiction;
+   }
+
+   public double getVelocityLimit()
+   {
+      return velocityLimit;
+   }
+
+   public double getVelocityDamping()
+   {
+      return velocityDamping;
    }
 
    public void setStiction(double stiction)
@@ -88,13 +106,26 @@ public class OneDoFJointDescription extends JointDescription
 
    public double[] getLimitStopParameters()
    {
-      return new double[]{qMin, qMax, kLimit, bLimit};
+      return new double[] { qMin, qMax, kLimit, bLimit };
    }
 
-   public void setTorqueLimits(double torqueLimit)
+   public double getLowerLimit()
    {
-      this.maxTorqueLimit = Math.abs(torqueLimit);
-      this.minTorqueLimit = -Math.abs(torqueLimit);
+      return qMin;
    }
 
+   public double getUpperLimit()
+   {
+      return qMax;
+   }
+
+   public void setEffortLimit(double effortLimit)
+   {
+      this.effortLimit = effortLimit;
+   }
+
+   public double getEffortLimit()
+   {
+      return effortLimit;
+   }
 }

@@ -49,6 +49,7 @@ public class SmartCMPProjector extends CMPProjector
    private final FrameVector2d icpToCandidateVector = new FrameVector2d();
    private final FrameLine2d finalICPToICPLine = new FrameLine2d();
    private final FrameVector2d finalICPToICPVector = new FrameVector2d();
+   private final FramePoint2d centroid = new FramePoint2d();
 
    // for debugging and to check what method was used
    public enum ProjectionMethod {
@@ -145,8 +146,13 @@ public class SmartCMPProjector extends CMPProjector
       }
 
       // if the ICP is just on the edge move it out a little bit
-      if (projectionArea.distance(capturePoint) < 1.0e-5)
-         projectionArea.pullPointTowardsCentroid(capturePoint, -1.0e-10);
+      if (projectionArea.distance(capturePoint) < 1.0e-6)
+      {
+         projectionArea.getCentroid(centroid);
+         centroid.sub(capturePoint);
+         centroid.scale(1.0e-6);
+         capturePoint.sub(centroid);
+      }
 
       // if a ray (!) from ICP through the CMP intersects the support chose the intersection closest to the desired CMP
       icpToCMPLine.setIncludingFrame(capturePoint, desiredCMP);
@@ -208,7 +214,7 @@ public class SmartCMPProjector extends CMPProjector
             if (newAngle < angle)
             {
                angle = newAngle;
-               projectedCMP.set(vertex);
+               projectedCMP.setIncludingFrame(vertex);
             }
          }
          // only do this if it actually helps (pushed the ICP in the right direction)

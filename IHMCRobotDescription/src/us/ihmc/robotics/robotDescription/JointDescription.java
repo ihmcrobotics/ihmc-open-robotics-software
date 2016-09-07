@@ -22,6 +22,9 @@ public class JointDescription
    private final ArrayList<CameraSensorDescription> cameraSensors = new ArrayList<>();
    private final ArrayList<IMUSensorDescription> imuSensors = new ArrayList<>();
    private final ArrayList<LidarSensorDescription> lidarSensors = new ArrayList<>();
+   private final ArrayList<ForceSensorDescription> forceSensors = new ArrayList<>();
+
+   private boolean isDynamic = true;
 
    public JointDescription(String name, Vector3d offsetFromParentJoint)
    {
@@ -144,4 +147,23 @@ public class JointDescription
       return lidarSensors;
    }
 
+   public void addForceSensor(ForceSensorDescription forceSensor)
+   {
+      forceSensors.add(forceSensor);
+   }
+
+   public ArrayList<ForceSensorDescription> getForceSensors()
+   {
+      return forceSensors;
+   }
+
+   public void setIsDynamic(boolean isDynamic)
+   {
+      this.isDynamic = isDynamic;
+   }
+
+   public boolean isDynamic()
+   {
+      return isDynamic;
+   }
 }

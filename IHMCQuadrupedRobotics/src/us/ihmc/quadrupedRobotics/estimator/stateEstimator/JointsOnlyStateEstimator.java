@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeTools;
@@ -14,15 +14,15 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStat
 
 public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
 {
-   private final SDFFullRobotModel sdfFullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final JointStateUpdater jointStateUpdater;
 
 
 
-   public JointsOnlyStateEstimator(SDFFullRobotModel sdfFullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly, JointStateUpdater jointStateUpdater)
+   public JointsOnlyStateEstimator(FullRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutputMapReadOnly, JointStateUpdater jointStateUpdater)
    {
-      this.sdfFullRobotModel = sdfFullRobotModel;
+      this.fullRobotModel = fullRobotModel;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
       this.jointStateUpdater = jointStateUpdater;
    }
@@ -30,18 +30,18 @@ public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
    public void initialize()
    {
       jointStateUpdater.initialize();
-      sdfFullRobotModel.updateFrames();
+      fullRobotModel.updateFrames();
    }
 
    public void enable()
    {
-      
+
    }
 
    public void doControl()
    {
       jointStateUpdater.updateJointState();
-      sdfFullRobotModel.updateFrames();
+      fullRobotModel.updateFrames();
    }
 
    public boolean isFootInContact(RobotQuadrant quadrant)
@@ -81,7 +81,7 @@ public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
    @Override
    public void initializeEstimatorToActual(Tuple3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
    {
-      
+
    }
 
 }

@@ -5,9 +5,9 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.DelayedDoubleYoVariable;
@@ -28,7 +28,7 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
    private final ArrayList<RawOutputWriter> rawOutputWriters = new ArrayList<RawOutputWriter>();
 
-   public DRCSimulationOutputWriter(SDFRobot robot)
+   public DRCSimulationOutputWriter(FloatingRootJointRobot robot)
    {
       super(robot);
    }
@@ -69,7 +69,7 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
    }
 
    @Override
-   public void setFullRobotModel(SDFFullHumanoidRobotModel fullRobotModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setFullRobotModel(FullHumanoidRobotModel fullRobotModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       super.setFullRobotModel(fullRobotModel);
 

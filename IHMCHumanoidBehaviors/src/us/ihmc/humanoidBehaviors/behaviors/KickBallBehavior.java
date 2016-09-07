@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.KickBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
@@ -55,7 +55,7 @@ public class KickBallBehavior extends AbstractBehavior
    private final KickBallBehaviorCoactiveElementBehaviorSide coactiveElement;
 
    public KickBallBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
-         SDFFullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
+         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(behaviorCommunicationBridge);
 

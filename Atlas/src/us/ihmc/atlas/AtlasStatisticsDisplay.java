@@ -7,6 +7,7 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPResult;
 
+import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 public class AtlasStatisticsDisplay
@@ -43,15 +44,15 @@ public class AtlasStatisticsDisplay
 
          return;
       }
-      
+
       try
       {
     	  Class<?> clazz = Class.forName("us.ihmc.humanoidOperatorInterface.networking.StatisticsDisplay");
-    	  Constructor<?> constructor = clazz.getDeclaredConstructor(us.ihmc.SdfLoader.SDFFullHumanoidRobotModel.class);
+    	  Constructor<?> constructor = clazz.getDeclaredConstructor(FullHumanoidRobotModel.class);
     	  constructor.newInstance(model.createFullRobotModel());
       }
       catch (ClassNotFoundException e)
-      {	
+      {
         // TODO insert Dennis Nedry troll here
     	  e.printStackTrace();
       }

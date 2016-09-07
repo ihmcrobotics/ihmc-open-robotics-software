@@ -6,8 +6,8 @@ import java.util.HashSet;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -32,32 +32,32 @@ public class ValkyrieSDFLoadingDemo
    public ValkyrieSDFLoadingDemo()
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
-      
-      SDFRobot valkyrieRobot = robotModel.createSdfRobot(false);
+
+      FloatingRootJointRobot valkyrieRobot = robotModel.createSdfRobot(false);
       valkyrieRobot.setPositionInWorld(new Vector3d());
-      
+
       if (SHOW_ELLIPSOIDS)
       {
          addIntertialEllipsoidsToVisualizer(valkyrieRobot);
       }
-      
+
       if (SHOW_COORDINATES_AT_JOINT_ORIGIN)
          addJointAxis(valkyrieRobot);
 
-      SDFFullRobotModel sdfFullRobotModel = robotModel.createFullRobotModel();
-      
+      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      CommonInertiaEllipsoidsVisualizer inertiaVis = new CommonInertiaEllipsoidsVisualizer(sdfFullRobotModel.getElevator(), yoGraphicsListRegistry);
+      CommonInertiaEllipsoidsVisualizer inertiaVis = new CommonInertiaEllipsoidsVisualizer(fullRobotModel.getElevator(), yoGraphicsListRegistry);
       inertiaVis.update();
-      
-      
+
+
       scs = new SimulationConstructionSet(valkyrieRobot);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setGroundVisible(false);
       scs.startOnAThread();
    }
 
-   private void addIntertialEllipsoidsToVisualizer(SDFRobot valkyrieRobot)
+   private void addIntertialEllipsoidsToVisualizer(FloatingRootJointRobot valkyrieRobot)
    {
       ArrayList<Joint> joints = new ArrayList<>();
       joints.add(valkyrieRobot.getRootJoint());
@@ -89,11 +89,11 @@ public class ValkyrieSDFLoadingDemo
       return links;
    }
 
-   public void addJointAxis(SDFRobot valkyrieRobot)
+   public void addJointAxis(FloatingRootJointRobot valkyrieRobot)
    {
 
-      ArrayList<OneDegreeOfFreedomJoint> joints = new ArrayList<>(Arrays.asList(valkyrieRobot.getOneDoFJoints()));
-      
+      ArrayList<OneDegreeOfFreedomJoint> joints = new ArrayList<>(Arrays.asList(valkyrieRobot.getOneDegreeOfFreedomJoints()));
+
       for (OneDegreeOfFreedomJoint joint : joints)
       {
          Graphics3DObject linkGraphics = new Graphics3DObject();

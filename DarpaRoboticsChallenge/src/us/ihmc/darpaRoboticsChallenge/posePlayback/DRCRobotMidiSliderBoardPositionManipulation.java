@@ -9,7 +9,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
@@ -135,7 +135,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final SideDependentList<YoFramePose> feetIKs = new SideDependentList<>();
    private final SideDependentList<YoFramePose> handIKs = new SideDependentList<>();
 
-   private final SDFRobot sdfRobot;
+   private final FloatingRootJointRobot sdfRobot;
    private final FullHumanoidRobotModel fullRobotModel;
    private final SDFPerfectSimulatedSensorReader reader;
    private final SDFPerfectSimulatedOutputWriter writer;
@@ -152,12 +152,12 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    
    private final BooleanYoVariable controlFingers = new BooleanYoVariable("controlFingers", registry);
 
-   public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs, SDFRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public DRCRobotMidiSliderBoardPositionManipulation(SimulationConstructionSet scs, FloatingRootJointRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(false, scs, sdfRobot, fullRobotModel, yoGraphicsListRegistry);
    }
    
-   public DRCRobotMidiSliderBoardPositionManipulation(boolean controlFingers, SimulationConstructionSet scs, SDFRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public DRCRobotMidiSliderBoardPositionManipulation(boolean controlFingers, SimulationConstructionSet scs, FloatingRootJointRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.scs = scs;
       this.fullRobotModel = fullRobotModel;

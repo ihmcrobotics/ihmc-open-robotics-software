@@ -86,7 +86,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
    {
       testState(HighLevelState.DO_NOTHING_BEHAVIOR);
 
-      OneDegreeOfFreedomJoint[] oneDofJoints = drcBehaviorTestHelper.getRobot().getOneDoFJoints();
+      OneDegreeOfFreedomJoint[] oneDofJoints = drcBehaviorTestHelper.getRobot().getOneDegreeOfFreedomJoints();
 
       for (OneDegreeOfFreedomJoint joint : oneDofJoints)
       {

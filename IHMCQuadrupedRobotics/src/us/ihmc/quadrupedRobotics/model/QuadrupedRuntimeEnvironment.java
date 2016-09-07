@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.model;
 
-import us.ihmc.SdfLoader.SDFFullQuadrupedRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -12,7 +12,7 @@ public class QuadrupedRuntimeEnvironment
 {
    private final double controlDT;
    private final DoubleYoVariable robotTimestamp;
-   private final SDFFullQuadrupedRobotModel fullRobotModel;
+   private final FullQuadrupedRobotModel fullRobotModel;
    private final YoVariableRegistry parentRegistry;
    private final YoGraphicsListRegistry graphicsListRegistry;
    private final YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead;
@@ -21,7 +21,7 @@ public class QuadrupedRuntimeEnvironment
    // TODO: These are used to provide feedback from the controllers to the state estimator. Can they be moved somewhere else?
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
 
-   public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp, SDFFullQuadrupedRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
+   public QuadrupedRuntimeEnvironment(double controlDT, DoubleYoVariable robotTimestamp, FullQuadrupedRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead, GlobalDataProducer globalDataProducer,
          QuadrantDependentList<FootSwitchInterface> footSwitches)
    {
@@ -45,7 +45,7 @@ public class QuadrupedRuntimeEnvironment
       return robotTimestamp;
    }
 
-   public SDFFullQuadrupedRobotModel getFullRobotModel()
+   public FullQuadrupedRobotModel getFullRobotModel()
    {
       return fullRobotModel;
    }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -16,11 +16,11 @@ public class JointAnglesWriter
 {
 
    private String name;
-   private SDFRobot robot;
+   private FloatingRootJointRobot robot;
    protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
    protected ImmutablePair<FloatingJoint, SixDoFJoint> rootJointPair;
 
-   public JointAnglesWriter(SDFRobot robot, FullRobotModel fullRobotModel)
+   public JointAnglesWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
