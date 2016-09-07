@@ -3,7 +3,6 @@ package us.ihmc.quadrupedRobotics.model;
 import java.util.Collection;
 
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.FullQuadrupedRobotModelFactory;
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
