@@ -302,17 +302,16 @@ public class ConvexPolygon2dCalculatorTest
    {
       // foot polygon
       ConvexPolygon2d polygon = new ConvexPolygon2d();
-      polygon.addVertex(new Point2d(-0.0682, -0.084));
-      polygon.addVertex(new Point2d(0.1418, -0.0834));
-      polygon.addVertex(new Point2d(0.1421, -0.1934));
-      polygon.addVertex(new Point2d(-0.0679, -0.194));
+      polygon.addVertex(new Point2d(-0.06, -0.08));
+      polygon.addVertex(new Point2d(0.14, -0.08));
+      polygon.addVertex(new Point2d(0.14, -0.19));
+      polygon.addVertex(new Point2d(-0.06, -0.19));
       polygon.update();
 
-      Point2d point1 = new Point2d(0.0342, -0.0006);
-      System.out.println(ConvexPolygon2dCalculator.getSignedDistance(point1, polygon));
+      Point2d point1 = new Point2d(0.03, 0.0);
       assertFalse(ConvexPolygon2dCalculator.isPointInside(point1, 0.02, polygon));
 
-      Point2d point2 = new Point2d(0.0351, -0.0983);
+      Point2d point2 = new Point2d(0.03, -0.09);
       assertTrue(ConvexPolygon2dCalculator.isPointInside(point2, polygon));
    }
 
