@@ -105,6 +105,9 @@ public class PelvisICPBasedTranslationManager
 
       boolean allowMultipleFrames = true;
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisOffset", allowMultipleFrames, worldFrame, registry);
+      positionTrajectoryGenerator.registerNewTrajectoryFrame(midFeetZUpFrame);
+      for (RobotSide robotSide : RobotSide.values)
+         positionTrajectoryGenerator.registerNewTrajectoryFrame(ankleZUpFrames.get(robotSide));
 
       proportionalGain.set(0.5);
       integralGain.set(1.5);
@@ -174,6 +177,7 @@ public class PelvisICPBasedTranslationManager
             }
          }
          positionTrajectoryGenerator.getPosition(tempPosition);
+         tempPosition.changeFrame(desiredPelvisPosition.getReferenceFrame());
          desiredPelvisPosition.setByProjectionOntoXYPlane(tempPosition);
       }
 
@@ -300,7 +304,11 @@ public class PelvisICPBasedTranslationManager
          positionTrajectoryGenerator.appendWaypoint(command.getTrajectoryPoint(trajectoryPointIndex));
       }
 
-      positionTrajectoryGenerator.changeFrame(worldFrame);
+      if (supportFrame != null)
+         positionTrajectoryGenerator.changeFrame(supportFrame);
+      else
+         positionTrajectoryGenerator.changeFrame(worldFrame);
+
       positionTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);
       isRunning.set(true);
