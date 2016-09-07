@@ -85,14 +85,7 @@ public class WandererRobotModel implements DRCRobotModel
       this.runningOnRealRobot = runningOnRealRobot;
       sensorInformation = new WandererSensorInformation();
 
-      if (headless)
-      {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[] {}, getSdfFileAsStream(), true, null);
-      }
-      else
-      {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), false, null);
-      }
+      this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSdfFileAsStream(), null);
 
       for (String forceSensorNames : getSensorInformation().getForceSensorNames())
       {
