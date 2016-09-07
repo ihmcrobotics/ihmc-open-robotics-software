@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 
-public class RobotDescription implements GraphicsObjectsHolder
+public class RobotDescription implements RobotDescriptionNode, GraphicsObjectsHolder
 {
    private String name;
    private final ArrayList<JointDescription> rootJoints = new ArrayList<>();
@@ -19,6 +19,7 @@ public class RobotDescription implements GraphicsObjectsHolder
       this.rootJoints.add(rootJoint);
    }
 
+   @Override
    public String getName()
    {
       return name;
@@ -32,6 +33,12 @@ public class RobotDescription implements GraphicsObjectsHolder
    public ArrayList<JointDescription> getRootJoints()
    {
       return rootJoints;
+   }
+
+   @Override
+   public ArrayList<JointDescription> getChildrenJoints()
+   {
+      return getRootJoints();
    }
 
    public JointDescription getJointDescription(String name)
@@ -81,4 +88,5 @@ public class RobotDescription implements GraphicsObjectsHolder
 
       return jointDescription.getLink().getLinkGraphics();
    }
+
 }
