@@ -343,4 +343,10 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    {
       return false;
    }
+
+   @Override
+   public boolean correctTrustedFeetPositions()
+   {
+      return true;
+   }
 }
