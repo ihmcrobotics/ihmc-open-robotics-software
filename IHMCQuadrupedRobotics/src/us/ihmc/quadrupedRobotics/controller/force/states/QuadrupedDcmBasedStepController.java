@@ -161,8 +161,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       {
          groundPlanePositions.set(robotQuadrant, new FramePoint());
       }
-      timedContactSequence = new QuadrupedTimedContactSequence(timedStepController.getStepSequenceCapacity());
-      piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedStepController.getStepSequenceCapacity());
+      timedContactSequence = new QuadrupedTimedContactSequence(4, 2 * timedStepController.getStepSequenceCapacity());
+      piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedContactSequence.capacity());
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(timedStepController.getStepSequenceCapacity(), gravity, postureProvider.getComPositionInput().getZ());
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
       dcmPositionWaypoint = new FramePoint();
@@ -277,7 +277,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       double currentTime = robotTimestamp.getDoubleValue();
       QuadrantDependentList<FramePoint> currentSolePosition = taskSpaceEstimates.getSolePosition();
       QuadrantDependentList<ContactState> currentContactState = taskSpaceControllerSettings.getContactState();
-      timedContactSequence.compute(stepPlan, currentSolePosition, currentContactState, currentTime);
+      timedContactSequence.update(stepPlan, currentSolePosition, currentContactState, currentTime);
       piecewiseConstanceCopTrajectory.initializeTrajectory(timedContactSequence);
 
       // compute dcm trajectory with final boundary constraint
@@ -431,6 +431,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
          groundPlanePositions.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
       }
       groundPlaneEstimator.compute(groundPlanePositions);
+
+      // initialize timed contact sequence
+      timedContactSequence.initialize();
 
       // compute absolute step adjustment
       computeAbsoluteStepAdjustment();

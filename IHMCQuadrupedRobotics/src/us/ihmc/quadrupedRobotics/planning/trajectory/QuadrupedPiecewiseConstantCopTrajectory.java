@@ -26,9 +26,8 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private final ArrayList<MutableDouble> normalizedPressureContributedByInitialContacts;
    private final ArrayList<MutableDouble> normalizedPressureContributedByQueuedSteps;
 
-   public QuadrupedPiecewiseConstantCopTrajectory(int maxSteps)
+   public QuadrupedPiecewiseConstantCopTrajectory(int maxIntervals)
    {
-      int maxIntervals = 2 * maxSteps + 2;
       initialContactState = new QuadrantDependentList<>();
       isInitialContactState = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
