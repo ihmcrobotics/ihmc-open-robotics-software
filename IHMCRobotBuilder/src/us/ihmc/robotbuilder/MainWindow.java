@@ -1,6 +1,5 @@
 package us.ihmc.robotbuilder;
 
-import com.jme3.math.Vector3f;
 import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -104,7 +103,7 @@ public class MainWindow extends Application {
 
         SubScene scene3d = new SubScene(group, view3D.getWidth(), view3D.getHeight(), true, SceneAntialiasing.DISABLED);
         scene3d.setFill(Color.BLACK);
-        PerspectiveCamera camera = Util.lookAtNodeFromDirection((int) view3D.getWidth(), (int) view3D.getHeight(), new Vector3f(1, 0, 0), group, new Vector3f(0, 1, 0));
+        PerspectiveCamera camera = Util.lookAtNodeFromDirection(group, 60, new Vector3d(1, 0, 0), new Vector3d(0, 1, 0));
         scene3d.setCamera(camera);
 
         //FocusBasedCameraMouseEventHandler cameraController = new FocusBasedCameraMouseEventHandler(scene3d.widthProperty(), scene3d.heightProperty(), camera, new Vector3d(0, 1, 0));
