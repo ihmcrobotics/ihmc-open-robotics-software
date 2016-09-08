@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.touchdownDetector;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
@@ -12,7 +11,6 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    private final DoubleYoVariable jointTorque;
    private final DoubleYoVariable torqueThreshold;
    private final BooleanYoVariable touchdownDetected;
-   private final GlitchFilteredBooleanYoVariable touchdownDetectedFiltered;
 
    private double signum;
 
@@ -22,7 +20,6 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
       jointTorque = new DoubleYoVariable(joint.getName() + "_torqueUsedForTouchdownDetection", registry);
       torqueThreshold = new DoubleYoVariable(joint.getName() + "_touchdownTorqueThreshold", registry);
       touchdownDetected = new BooleanYoVariable(joint.getName() + "_torqueBasedTouchdownDetected", registry);
-      touchdownDetectedFiltered = new GlitchFilteredBooleanYoVariable(joint.getName() + "_torqueBasedTouchdownDetectedFiltered", touchdownDetected, 20);
    }
 
    /**
@@ -42,7 +39,7 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
    @Override
    public boolean hasTouchedDown()
    {
-      return touchdownDetectedFiltered.getBooleanValue();
+      return touchdownDetected.getBooleanValue();
    }
 
    @Override
@@ -54,6 +51,5 @@ public class JointTorqueBasedTouchdownDetector implements TouchdownDetector
       jointTorque.set(joint.getTauMeasured());
 
       touchdownDetected.set(torque > threshold);
-      touchdownDetectedFiltered.update();
    }
 }
