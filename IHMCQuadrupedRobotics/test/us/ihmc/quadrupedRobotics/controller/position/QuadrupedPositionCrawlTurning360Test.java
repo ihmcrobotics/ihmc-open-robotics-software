@@ -59,7 +59,7 @@ public abstract class QuadrupedPositionCrawlTurning360Test implements QuadrupedM
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputZ().set(-0.2);
+      variables.getYoPlanarVelocityInputZ().set(-0.1);
       
       int numSpins = 1;
       for (int i = 0; i < numSpins; i++)
@@ -86,7 +86,7 @@ public abstract class QuadrupedPositionCrawlTurning360Test implements QuadrupedM
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputZ().set(0.2);
+      variables.getYoPlanarVelocityInputZ().set(0.1);
       
       int numSpins = 1;
       for (int i = 0; i < numSpins; i++)
