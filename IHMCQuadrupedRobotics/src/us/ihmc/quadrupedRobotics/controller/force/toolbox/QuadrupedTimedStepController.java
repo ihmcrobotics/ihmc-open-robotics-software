@@ -165,7 +165,7 @@ public class QuadrupedTimedStepController
    public void removeSteps()
    {
       double currentTime = timestamp.getDoubleValue();
-      TimeIntervalTools.removeStartTimesAfter(currentTime, stepSequence);
+      TimeIntervalTools.removeStartTimesGreaterThan(currentTime, stepSequence);
    }
 
    public PreallocatedList<QuadrupedTimedStep> getStepSequence()
@@ -243,7 +243,7 @@ public class QuadrupedTimedStepController
 
       // dequeue completed steps
       double currentTime = timestamp.getDoubleValue();
-      TimeIntervalTools.removeEndTimesBefore(currentTime, stepSequence);
+      TimeIntervalTools.removeEndTimesLessThan(currentTime, stepSequence);
 
       updateGraphics();
 

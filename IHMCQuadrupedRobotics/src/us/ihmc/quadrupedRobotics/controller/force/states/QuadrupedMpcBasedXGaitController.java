@@ -360,6 +360,9 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       }
       taskSpaceController.reset();
 
+      // initialize mpc optimization
+      mpcOptimization.initialize();
+
       // initialize body yaw trajectory
       taskSpaceEstimates.getBodyOrientation().changeFrame(worldFrame);
       bodyYawSetpoint = taskSpaceEstimates.getBodyOrientation().getYaw();

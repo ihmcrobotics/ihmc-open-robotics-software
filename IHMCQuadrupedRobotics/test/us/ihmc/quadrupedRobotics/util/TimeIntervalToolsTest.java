@@ -78,8 +78,8 @@ public class TimeIntervalToolsTest
          preallocatedValues.get(i).set(tv);
       }
 
-      TimeIntervalTools.removeEndTimesAfter(8.5, arrayValues);
-      TimeIntervalTools.removeEndTimesAfter(8.5, preallocatedValues);
+      TimeIntervalTools.removeEndTimesGreaterThan(8.5, arrayValues);
+      TimeIntervalTools.removeEndTimesGreaterThan(8.5, preallocatedValues);
       size = 8;
       assertEquals(arrayValues.size(), size);
       assertEquals(preallocatedValues.size(), size);
@@ -89,8 +89,8 @@ public class TimeIntervalToolsTest
          assertEquals(preallocatedValues.get(i).getValue(), i, epsilon);
       }
 
-      TimeIntervalTools.removeStartTimesAfter(6.5, arrayValues);
-      TimeIntervalTools.removeStartTimesAfter(6.5, preallocatedValues);
+      TimeIntervalTools.removeStartTimesGreaterThan(6.5, arrayValues);
+      TimeIntervalTools.removeStartTimesGreaterThan(6.5, preallocatedValues);
       size = 7;
       assertEquals(arrayValues.size(), size);
       assertEquals(preallocatedValues.size(), size);
@@ -100,8 +100,8 @@ public class TimeIntervalToolsTest
          assertEquals(preallocatedValues.get(i).getValue(), i, epsilon);
       }
 
-      TimeIntervalTools.removeStartTimesBefore(1.5, arrayValues);
-      TimeIntervalTools.removeStartTimesBefore(1.5, preallocatedValues);
+      TimeIntervalTools.removeStartTimesLessThan(1.5, arrayValues);
+      TimeIntervalTools.removeStartTimesLessThan(1.5, preallocatedValues);
       size = 5;
       assertEquals(arrayValues.size(), size);
       assertEquals(preallocatedValues.size(), size);
@@ -111,8 +111,8 @@ public class TimeIntervalToolsTest
          assertEquals(preallocatedValues.get(i).getValue(), i + 2, epsilon);
       }
 
-      TimeIntervalTools.removeEndTimesBefore(6.5, arrayValues);
-      TimeIntervalTools.removeEndTimesBefore(6.5, preallocatedValues);
+      TimeIntervalTools.removeEndTimesLessThan(6.5, arrayValues);
+      TimeIntervalTools.removeEndTimesLessThan(6.5, preallocatedValues);
       assertEquals(arrayValues.size(), 1);
       assertEquals(preallocatedValues.size(), 1);
       assertEquals(arrayValues.get(0).getValue(), 6, epsilon);

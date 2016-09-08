@@ -9,6 +9,8 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 
 public interface QuadrupedMpcOptimizationWithLaneChange
 {
+   void initialize();
+
    /**
     * Compute optimal step adjustment and centroidal moment pivot using model predictive control.
     * @param stepAdjustmentVector output step adjustment vector

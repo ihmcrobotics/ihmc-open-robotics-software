@@ -64,8 +64,8 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       this.linearInvertedPendulumModel = dcmPositionEstimator.getLinearInvertedPendulumModel();
       this.dcmPositionEstimator = dcmPositionEstimator;
       this.currentDcmEstimate = new FramePoint();
-      this.timedContactSequence = new QuadrupedTimedContactSequence(maxPreviewSteps + 4);
-      this.piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(maxPreviewSteps + 4);
+      this.timedContactSequence = new QuadrupedTimedContactSequence(4, 2 * maxPreviewSteps + 4);
+      this.piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedContactSequence.capacity());
 
       if (graphicsListRegistry != null)
       {
@@ -75,6 +75,12 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
          graphicsListRegistry.registerArtifact(getClass().getSimpleName(), cmpPositionGraphic.createArtifact());
       }
       parentRegistry.addChild(registry);
+   }
+
+   @Override
+   public void initialize()
+   {
+      timedContactSequence.initialize();
    }
 
    @Override
@@ -123,7 +129,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       }
 
       // Compute nominal piecewise center of pressure plan.
-      timedContactSequence.compute(queuedSteps, currentSolePosition, currentContactState, currentTime);
+      timedContactSequence.update(queuedSteps, currentSolePosition, currentContactState, currentTime);
       piecewiseConstantCopTrajectory.initializeTrajectory(timedContactSequence);
       numberOfIntervals = piecewiseConstantCopTrajectory.getNumberOfIntervals();
 

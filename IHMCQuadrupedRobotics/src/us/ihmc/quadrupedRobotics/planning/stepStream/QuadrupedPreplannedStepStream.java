@@ -57,7 +57,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    {
       // dequeue completed steps
       double currentTime = timestamp.getDoubleValue();
-      TimeIntervalTools.removeEndTimesBefore(currentTime, stepSequence);
+      TimeIntervalTools.removeEndTimesLessThan(currentTime, stepSequence);
 
       bodyOrientation.setToZero(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
    }

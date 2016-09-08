@@ -46,7 +46,7 @@ public class TimeIntervalTools
       ListSorter.sort((List<TimeIntervalProvider>)timeIntervalProviders, compareTimeIntervalProvidersByEndTime.reversed());
    }
 
-   static public void removeStartTimesBefore(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
+   static public void removeStartTimesLessThan(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
       for (int i = 0; i < timeIntervalProviders.size(); i++)
       {
@@ -58,7 +58,19 @@ public class TimeIntervalTools
       }
    }
 
-   static public void removeStartTimesAfter(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
+   static public void removeStartTimesLessThanOrEqualTo(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
+   {
+      for (int i = 0; i < timeIntervalProviders.size(); i++)
+      {
+         if (timeIntervalProviders.get(i).getTimeInterval().getStartTime() <= time)
+         {
+            timeIntervalProviders.remove(i);
+            i--;
+         }
+      }
+   }
+
+   static public void removeStartTimesGreaterThan(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
       for (int i = timeIntervalProviders.size() - 1; i >= 0; i--)
       {
@@ -69,7 +81,18 @@ public class TimeIntervalTools
       }
    }
 
-   static public void removeEndTimesBefore(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
+   static public void removeStartTimesGreaterThanOrEqualTo(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
+   {
+      for (int i = timeIntervalProviders.size() - 1; i >= 0; i--)
+      {
+         if (timeIntervalProviders.get(i).getTimeInterval().getStartTime() >= time)
+         {
+            timeIntervalProviders.remove(i);
+         }
+      }
+   }
+
+   static public void removeEndTimesLessThan(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
       for (int i = 0; i < timeIntervalProviders.size(); i++)
       {
@@ -81,11 +104,34 @@ public class TimeIntervalTools
       }
    }
 
-   static public void removeEndTimesAfter(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
+   static public void removeEndTimesLessThanOrEqualTo(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
+   {
+      for (int i = 0; i < timeIntervalProviders.size(); i++)
+      {
+         if (timeIntervalProviders.get(i).getTimeInterval().getEndTime() <= time)
+         {
+            timeIntervalProviders.remove(i);
+            i--;
+         }
+      }
+   }
+
+   static public void removeEndTimesGreaterThan(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
    {
       for (int i = timeIntervalProviders.size() - 1; i >= 0; i--)
       {
          if (timeIntervalProviders.get(i).getTimeInterval().getEndTime() > time)
+         {
+            timeIntervalProviders.remove(i);
+         }
+      }
+   }
+
+   static public void removeEndTimesGreaterThanOrEqualTo(double time, List<? extends TimeIntervalProvider> timeIntervalProviders)
+   {
+      for (int i = timeIntervalProviders.size() - 1; i >= 0; i--)
+      {
+         if (timeIntervalProviders.get(i).getTimeInterval().getEndTime() >= time)
          {
             timeIntervalProviders.remove(i);
          }
