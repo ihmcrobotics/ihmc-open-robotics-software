@@ -45,6 +45,12 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
    @Override
    public boolean hasTouchedDown()
    {
+      return touchdownDetected.getBooleanValue();
+   }
+
+   @Override
+   public void update()
+   {
       if(initialized)
       {
          velocityFiniteDifferenceFiltered.update(Math.abs(joint.getQd() - previousVelocity) * 1000);
@@ -68,7 +74,5 @@ public class JointVelocityFiniteDifferenceBasedTouchdownDetector implements Touc
          previousVelocity = joint.getQd();
          initialized = true;
       }
-
-      return touchdownDetected.getBooleanValue();
    }
 }
