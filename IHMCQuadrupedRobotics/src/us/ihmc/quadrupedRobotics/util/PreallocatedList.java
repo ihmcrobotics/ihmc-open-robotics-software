@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.util;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class PreallocatedList<E> implements List<E>
@@ -10,6 +11,11 @@ public class PreallocatedList<E> implements List<E>
 
    public PreallocatedList(Class<E> element, int capacity)
    {
+      if (capacity < 0)
+      {
+         throw new RuntimeException("List capacity must be nonnegative.");
+      }
+
       size = 0;
       position = 0;
       elements = new ArrayList<>();
@@ -190,6 +196,35 @@ public class PreallocatedList<E> implements List<E>
    }
 
    @Override
+   public Object[] toArray()
+   {
+      Object[] objects = new Object[size];
+      for (int i = 0; i < size; i++)
+      {
+         objects[i] = get(i);
+      }
+      return objects;
+   }
+
+   @Override
+   public <T> T[] toArray(T[] ts)
+   {
+      if (ts.length < size)
+      {
+         ts = (T[]) Array.newInstance(ts.getClass().getComponentType(), size);
+      }
+      else if (ts.length > size)
+      {
+         ts[size] = null;
+      }
+      for (int i = 0; i < size; i++)
+      {
+         ts[i] = (T)get(i);
+      }
+      return ts;
+   }
+
+   @Override
    public boolean add(E e)
    {
       throw new UnsupportedOperationException();
@@ -239,18 +274,6 @@ public class PreallocatedList<E> implements List<E>
 
    @Override
    public Iterator<E> iterator()
-   {
-      throw new UnsupportedOperationException();
-   }
-
-   @Override
-   public Object[] toArray()
-   {
-      throw new UnsupportedOperationException();
-   }
-
-   @Override
-   public <T> T[] toArray(T[] ts)
    {
       throw new UnsupportedOperationException();
    }

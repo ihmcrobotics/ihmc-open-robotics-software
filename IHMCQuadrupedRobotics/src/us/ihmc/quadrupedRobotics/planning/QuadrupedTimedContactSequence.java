@@ -7,7 +7,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.simulationconstructionset.Robot;
 
 import javax.vecmath.Point3d;
 import java.util.Comparator;
@@ -53,8 +52,13 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
 
    public QuadrupedTimedContactSequence(int pastContactPhaseCapacity, int futureContactPhaseCapacity)
    {
-      super(QuadrupedTimedContactPhase.class, pastContactPhaseCapacity + futureContactPhaseCapacity);
+      super(QuadrupedTimedContactPhase.class, pastContactPhaseCapacity + futureContactPhaseCapacity + 1);
       this.pastContactPhaseCapacity = pastContactPhaseCapacity;
+
+      if (capacity() < 1)
+      {
+         throw new RuntimeException("Sequence capacity must be greater than zero.");
+      }
 
       stepTransition = new QuadrupedStepTransition[capacity()];
       transitionStep = new QuadrupedTimedStep[capacity()];
@@ -131,37 +135,32 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
 
       // retain desired number of past contact phases
       TimeIntervalTools.removeStartTimesGreaterThanOrEqualTo(currentTime, this);
-      while (super.size() > pastContactPhaseCapacity)
+      while (super.size() > pastContactPhaseCapacity + 1)
       {
          super.remove(0);
       }
 
-      // initialize current contact phase
       QuadrupedTimedContactPhase contactPhase;
-      if (super.size() > 0)
+      if (super.size() == 0)
       {
-         contactPhase = super.get(super.size() - 1);
-         if (isEqualContactState(contactPhase.getContactState(), currentContactState))
+         contactPhase = createNewContactPhase(currentTime, contactState, solePosition);
+      }
+      else
+      {
+         QuadrupedTimedContactPhase lastContactPhase = super.get(super.size() - 1);
+         if (isEqualContactState(lastContactPhase.getContactState(), currentContactState))
          {
+            // extend current contact phase
+            contactPhase = lastContactPhase;
             contactPhase.setSolePosition(solePosition);
          }
          else
          {
-            contactPhase.getTimeInterval().setEndTime(currentTime);
-            super.add();
-            contactPhase = super.get(super.size() - 1);
-            contactPhase.getTimeInterval().setStartTime(currentTime);
-            contactPhase.setContactState(contactState);
-            contactPhase.setSolePosition(solePosition);
+            // end previous contact phase
+            lastContactPhase.getTimeInterval().setEndTime(currentTime);
+            super.remove(0);
+            contactPhase = createNewContactPhase(currentTime, contactState, solePosition);
          }
-      }
-      else
-      {
-         super.add();
-         contactPhase = super.get(super.size() - 1);
-         contactPhase.getTimeInterval().setStartTime(currentTime);
-         contactPhase.setContactState(contactState);
-         contactPhase.setSolePosition(solePosition);
       }
 
       // compute transition time and center of pressure for each time interval
@@ -181,14 +180,8 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
          if ((i + 1 == numberOfStepTransitions) || (stepTransition[i].time != stepTransition[i + 1].time))
          {
             contactPhase.getTimeInterval().setEndTime(stepTransition[i].time);
-            if (super.add())
-            {
-               contactPhase = super.get(super.size() - 1);
-               contactPhase.setSolePosition(solePosition);
-               contactPhase.setContactState(contactState);
-               contactPhase.getTimeInterval().setStartTime(stepTransition[i].time);
-            }
-            else
+            contactPhase = createNewContactPhase(stepTransition[i].time, contactState, solePosition);
+            if (contactPhase == null)
             {
                return;
             }
@@ -205,6 +198,23 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
             return false;
       }
       return true;
+   }
+
+   private QuadrupedTimedContactPhase createNewContactPhase(double startTime, QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint> solePosition)
+   {
+      if (super.add())
+      {
+         QuadrupedTimedContactPhase contactPhase;
+         contactPhase = super.get(super.size() - 1);
+         contactPhase.getTimeInterval().setStartTime(startTime);
+         contactPhase.setContactState(contactState);
+         contactPhase.setSolePosition(solePosition);
+         return contactPhase;
+      }
+      else
+      {
+         return null;
+      }
    }
 }
 
