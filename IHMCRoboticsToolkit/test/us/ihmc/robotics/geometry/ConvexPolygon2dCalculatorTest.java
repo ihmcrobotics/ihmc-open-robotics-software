@@ -298,6 +298,25 @@ public class ConvexPolygon2dCalculatorTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testIsPointInside5()
+   {
+      // foot polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(-0.06, -0.08));
+      polygon.addVertex(new Point2d(0.14, -0.08));
+      polygon.addVertex(new Point2d(0.14, -0.19));
+      polygon.addVertex(new Point2d(-0.06, -0.19));
+      polygon.update();
+
+      Point2d point1 = new Point2d(0.03, 0.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInside(point1, 0.02, polygon));
+
+      Point2d point2 = new Point2d(0.03, -0.09);
+      assertTrue(ConvexPolygon2dCalculator.isPointInside(point2, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testIsPolygonInside1()
    {
       ConvexPolygon2d polygon = new ConvexPolygon2d();
@@ -365,6 +384,231 @@ public class ConvexPolygon2dCalculatorTest
       Vector2d translation1 = new Vector2d(-0.1, 0.0);
       ConvexPolygon2dCalculator.translatePolygon(translation1, polygon);
       assertTrue(polygon.getVertex(0).epsilonEquals(translation1, epsilon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCanObserverSeeEdge1()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.addVertex(new Point2d(1.0, 0.0));
+      polygon.addVertex(new Point2d(0.0, 1.0));
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.update();
+
+      // observer inside polygon can not see any outside edges
+      Point2d observer1 = new Point2d(0.5, 0.5);
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+         assertFalse(ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer1, polygon));
+
+      // this observer should be able to see the edge starting at vertex (0.0, 0.0)
+      Point2d observer2 = new Point2d(-0.5, 0.5);
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         if (polygon.getVertex(i).epsilonEquals(new Point2d(0.0, 0.0), epsilon))
+            assertTrue(ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer2, polygon));
+         else
+            assertFalse(ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer2, polygon));
+      }
+
+      // this observer should be able to see the edges starting at vertex (0.0, 1.0) and at (1.0, 1.0)
+      Point2d observer3 = new Point2d(1.5, 1.5);
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         if (polygon.getVertex(i).epsilonEquals(new Point2d(0.0, 1.0), epsilon))
+            assertTrue(ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer3, polygon));
+         else if (polygon.getVertex(i).epsilonEquals(new Point2d(1.0, 1.0), epsilon))
+            assertTrue(ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer3, polygon));
+         else
+            assertFalse(ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer3, polygon));
+      }
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCanObserverSeeEdge2()
+   {
+      // line polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(1.0, 0.0));
+      polygon.addVertex(new Point2d(0.0, 1.0));
+      polygon.update();
+
+      // should be able to see one edge
+      Point2d observer1 = new Point2d(0.0, 0.0);
+      boolean seeEdge1 = ConvexPolygon2dCalculator.canObserverSeeEdge(0, observer1, polygon);
+      boolean seeEdge2 = ConvexPolygon2dCalculator.canObserverSeeEdge(1, observer1, polygon);
+      assertTrue((seeEdge1 || seeEdge2) && !(seeEdge1 && seeEdge2));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCanObserverSeeEdge3()
+   {
+      // point polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.update();
+
+      Point2d observer1 = new Point2d(0.0, 0.0);
+      assertFalse(ConvexPolygon2dCalculator.canObserverSeeEdge(0, observer1, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetVertexOnSide1()
+   {
+      // add vertices in clockwise order so updating the polygon does not change indices
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 1.0));
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.addVertex(new Point2d(1.0, 0.0));
+      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.update();
+
+      Point2d observer1 = new Point2d(0.5, -0.5);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 0, observer1, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 1, observer1, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 2, observer1, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 3, observer1, polygon), 3);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(1, 1, observer1, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(1, 2, observer1, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(1, 3, observer1, polygon), 3);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(2, 2, observer1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(2, 3, observer1, polygon), 3);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(3, 3, observer1, polygon), 3);
+
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 0, observer1, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(1, 0, observer1, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(2, 0, observer1, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(3, 0, observer1, polygon), 3);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(1, 1, observer1, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(2, 1, observer1, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(3, 1, observer1, polygon), 3);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(2, 2, observer1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(3, 2, observer1, polygon), 3);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(3, 3, observer1, polygon), 3);
+
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(0, 0, observer1, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(0, 1, observer1, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(0, 2, observer1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(0, 3, observer1, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(1, 1, observer1, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(1, 2, observer1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(1, 3, observer1, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(2, 2, observer1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(2, 3, observer1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(3, 3, observer1, polygon), 3);
+
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(0, 0, observer1, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(1, 0, observer1, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(2, 0, observer1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(3, 0, observer1, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(1, 1, observer1, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(2, 1, observer1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(3, 1, observer1, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(2, 2, observer1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(3, 2, observer1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnRight(3, 3, observer1, polygon), 3);
+
+      Point2d observer2 = new Point2d(0.5, 0.5);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 0, observer2, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 1, observer2, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 2, observer2, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 3, observer2, polygon), 3);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetVertexOnSide2()
+   {
+      // add vertices in clockwise order so updating the polygon does not change indices
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 1.0));
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.update();
+
+      Point2d observer1 = new Point2d(0.0, 0.0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 1, observer1, polygon), 0);
+
+      Point2d observer2 = new Point2d(0.0, 2.0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 1, observer2, polygon), 1);
+
+      Point2d observer3 = new Point2d(10.0, 0.0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 1, observer3, polygon), 0);
+
+      Point2d observer4 = new Point2d(2.0, 2.0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 1, observer4, polygon), 1);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetMiddleIndexCounterClockwise1()
+   {
+      // do not update polygon to keep number of vertices
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      for (int i = 0; i < 6; i++)
+         polygon.addVertex(new Point2d());
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 0, polygon), 3);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(1, 1, polygon), 4);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 2, polygon), 5);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(3, 3, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(4, 4, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(5, 5, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(1, 0, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 0, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(3, 0, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(4, 0, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(5, 0, polygon), 3);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(3, 1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(4, 1, polygon), 3);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(5, 1, polygon), 3);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(3, 2, polygon), 3);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(4, 2, polygon), 3);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(5, 2, polygon), 4);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(4, 3, polygon), 4);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(5, 3, polygon), 4);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(5, 4, polygon), 5);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 1, polygon), 4);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 2, polygon), 4);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 3, polygon), 5);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 4, polygon), 5);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 5, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(1, 2, polygon), 5);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(1, 3, polygon), 5);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(1, 4, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(1, 5, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 3, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 4, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 5, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(3, 4, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(3, 5, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(4, 5, polygon), 2);
+
+      polygon.clear();
+      for (int i = 0; i < 3; i++)
+         polygon.addVertex(new Point2d());
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 0, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(1, 1, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 2, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 1, polygon), 2);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 2, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(1, 2, polygon), 0);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(1, 0, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 0, polygon), 1);
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(2, 1, polygon), 2);
+
+      polygon.clear();
+      polygon.addVertex(new Point2d());
+      assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 0, polygon), 0);
+
+   }
+
+   private static void assertIndexCorrect(int expected, int actual)
+   {
+      assertEquals("Index did not equal expected.", expected, actual);
    }
 
    private static void assertDistanceCorrect(double expected, double actual)

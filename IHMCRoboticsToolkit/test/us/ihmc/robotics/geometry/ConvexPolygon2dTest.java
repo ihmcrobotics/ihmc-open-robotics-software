@@ -1582,7 +1582,7 @@ public class ConvexPolygon2dTest
          int rightEdge = leftRightNumExpected[1];
          int expectedAnswer = leftRightNumExpected[3];
 
-         int answer = polygon.getMidEdgeOppositeClockwiseOrdering(leftEdge, rightEdge);
+         int answer = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(leftEdge, rightEdge, polygon);
 
          if (answer != expectedAnswer)
             throw new RuntimeException("leftEdge = " + leftEdge + ", rightEdge = " + rightEdge + ", numEdges = " + numEdges + ", expectedAnswer = "

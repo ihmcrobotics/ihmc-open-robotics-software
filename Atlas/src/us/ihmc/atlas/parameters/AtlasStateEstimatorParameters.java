@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
@@ -179,12 +177,6 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
-   {
-      return 16.0;
-   }
-
-   @Override
    public double getCoPFilterFreqInHertz()
    {
       return 4.0;
@@ -245,12 +237,6 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getPelvisVelocityBacklashSlopTime()
-   {
-      return jointVelocitySlopTimeForBacklashCompensation;
-   }
-
-   @Override
    public double getDelayTimeForTrustingFoot()
    {
       return 0.02;
@@ -264,18 +250,6 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 
    @Override
    public boolean trustCoPAsNonSlippingContactPoint()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean useControllerDesiredCenterOfPressure()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean useTwistForPelvisLinearStateEstimation()
    {
       return true;
    }
@@ -308,27 +282,6 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    public double getFootSwitchCoPThresholdFraction()
    {
       return 0.02;
-   }
-
-   @Override
-   public boolean useIMUsForSpineJointVelocityEstimation()
-   {
-      // TODO For Valkyrie. Probably have to make more generic.
-      return false;
-   }
-
-   @Override
-   public double getAlphaIMUsForSpineJointVelocityEstimation()
-   {
-      // TODO For Valkyrie. Probably have to make more generic.
-      return 0;
-   }
-
-   @Override
-   public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
-   {
-      // TODO For Valkyrie. Probably have to make more generic.
-      return null;
    }
 
    @Override
@@ -377,5 +330,11 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    public boolean useGroundReactionForcesToComputeCenterOfMassVelocity()
    {
       return false;
+   }
+
+   @Override
+   public boolean correctTrustedFeetPositions()
+   {
+      return true;
    }
 }

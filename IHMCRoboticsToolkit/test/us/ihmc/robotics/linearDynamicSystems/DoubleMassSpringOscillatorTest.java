@@ -13,15 +13,19 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class DoubleMassSpringOscillatorTest
 {
-   private static final boolean VERBOSE = false;
+   private static final boolean VERBOSE = true;
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDecomposerGotEigenvaluesRight()
    {
       Matrix matrixA = new Matrix(new double[][] { { 0.0, 1.0, 0.0, 0.0 }, { -2.0, 0.0, 1.0, 0.0 }, { 0.0, 0.0, 0.0, 1.0 }, { 1.0, 0.0, -2.0, 0.0 } });
+      Matrix matrixB = new Matrix(new double[][] { { 0.0 }, { 1.0 }, { 0.0 }, { 0.0 } });
       if (VERBOSE)
+      {
          DynamicSystemsTestHelpers.printMatrix("Double Mass Spring. \n\nA Matrix:", matrixA);
+         DynamicSystemsTestHelpers.printMatrix("\nB Matrix:", matrixB);
+      }
 
       EigenvalueDecomposer eigenvalueDecomposerA = new EigenvalueDecomposer(matrixA);
 
@@ -50,7 +54,7 @@ public class DoubleMassSpringOscillatorTest
       if (VERBOSE)
          DynamicSystemsTestHelpers.printComplexConjugateModeArray("\nComplex Conjugate Modes:", complexConjugateModes);
 
-      LinearDynamicSystem system = new LinearDynamicSystem(matrixA, null, null, null);
+      LinearDynamicSystem system = new LinearDynamicSystem(matrixA, matrixB, null, null);
       TransferFunctionMatrix transferFunctionMatrix = system.getTransferFunctionMatrix();
 
       if (VERBOSE)
@@ -66,7 +70,7 @@ public class DoubleMassSpringOscillatorTest
       Polynomial numeratorPolynomial = transferFunction.getNumeratorPolynomial();
 
       assertTrue(denominatorPolynomial.epsilonEquals(new Polynomial(new double[] { 1.0, 0.0, 4.0, 0.0, 3.0 }), 1e-7));
-      assertTrue(numeratorPolynomial.epsilonEquals(new Polynomial(new double[] { 1.0, 0.0, 2.0, 0.0 }), 1e-7));
+      assertTrue(numeratorPolynomial.epsilonEquals(new Polynomial(new double[] { 1.0, 0.0, 2.0 }), 1e-7));
 
       double stepSize = 0.001;
       int numTicks = (int) (2.0 / stepSize);

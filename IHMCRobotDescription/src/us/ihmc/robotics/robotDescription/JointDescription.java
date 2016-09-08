@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
-public class JointDescription
+public class JointDescription implements RobotDescriptionNode
 {
    private String name;
    private final ArrayList<JointDescription> childrenJointDescriptions = new ArrayList<>();
@@ -32,6 +32,7 @@ public class JointDescription
       this.offsetFromParentJoint.set(offsetFromParentJoint);
    }
 
+   @Override
    public String getName()
    {
       return name;
@@ -72,6 +73,7 @@ public class JointDescription
       childrenJointDescriptions.add(childJointDescription);
    }
 
+   @Override
    public ArrayList<JointDescription> getChildrenJoints()
    {
       return childrenJointDescriptions;

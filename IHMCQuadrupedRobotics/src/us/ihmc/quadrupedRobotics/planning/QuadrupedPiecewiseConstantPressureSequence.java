@@ -1,13 +1,15 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import java.util.ArrayList;
+
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
+
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import java.util.ArrayList;
 
 public class QuadrupedPiecewiseConstantPressureSequence
 {
@@ -125,16 +127,17 @@ public class QuadrupedPiecewiseConstantPressureSequence
          isInitialContactState.get(robotQuadrant).setTrue();
       }
 
+      numberOfIntervals = contactStatePlan.getNumberOfIntervals();
       for (int interval = 0; interval < contactStatePlan.getNumberOfIntervals(); interval++)
       {
-         numberOfIntervals = contactStatePlan.getNumberOfIntervals();
          QuadrantDependentList<FramePoint> solePosition = contactStatePlan.getSolePositionAtStartOfInterval().get(interval);
          QuadrantDependentList<ContactState> contactState = contactStatePlan.getContactStateAtStartOfInterval().get(interval);
 
          computeNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState);
          computeCenterOfPressure(centerOfPressureAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
          normalizedPressureContributedByQueuedSteps.get(interval).setValue(0.0);
-         normalizedPressureContributedByInitialContacts.get(interval).setValue(0.0);
+         MutableDouble normalizedPressureContributedByInitialContact = normalizedPressureContributedByInitialContacts.get(interval);
+         normalizedPressureContributedByInitialContact.setValue(0.0);
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             if (contactState.get(robotQuadrant) != initialContactState.get(robotQuadrant))
@@ -143,11 +146,11 @@ public class QuadrupedPiecewiseConstantPressureSequence
             }
             if (isInitialContactState.get(robotQuadrant).booleanValue())
             {
-               normalizedPressureContributedByInitialContacts.get(interval).add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant));
+               normalizedPressureContributedByInitialContact.setValue(normalizedPressureContributedByInitialContact.doubleValue() + normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant).doubleValue());
             }
             else
             {
-               normalizedPressureContributedByQueuedSteps.add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant));
+               normalizedPressureContributedByQueuedSteps.get(interval).add(normalizedPressureAtStartOfInterval.get(interval).get(robotQuadrant));
             }
          }
          timeAtStartOfInterval.get(interval).setValue(contactStatePlan.getTimeAtStartOfInterval().get(interval));
