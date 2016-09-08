@@ -96,6 +96,7 @@ public class Util {
      * @return transform representing the rotation
      */
     private static Affine lookAt(Vector3d cameraLocation, Vector3d target, Vector3d up) {
+        // Adjusted from JMonkey Engine code
         Vector3d newDirection = new Vector3d();
         Vector3d newUp = new Vector3d();
         Vector3d newLeft = new Vector3d();
