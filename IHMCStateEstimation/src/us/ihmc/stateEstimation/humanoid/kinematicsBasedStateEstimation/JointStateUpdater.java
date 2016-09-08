@@ -84,7 +84,7 @@ public class JointStateUpdater
       if (pelvisIMU != null && chestIMU != null)
       {
          double estimatorDT = stateEstimatorParameters.getEstimatorDT();
-         double slopTime = stateEstimatorParameters.getPelvisVelocityBacklashSlopTime();
+         double slopTime = stateEstimatorParameters.getIMUJointVelocityEstimationBacklashSlopTime();
          IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator = new IMUBasedJointVelocityEstimator(pelvisIMU, chestIMU, sensorOutputMapReadOnly, estimatorDT, slopTime, parentRegistry);
          iMUBasedJointVelocityEstimator.compute();
          iMUBasedJointVelocityEstimator.setAlphaFuse(stateEstimatorParameters.getAlphaIMUsForSpineJointVelocityEstimation());

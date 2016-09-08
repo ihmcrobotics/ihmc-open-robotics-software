@@ -60,7 +60,7 @@ public abstract class QuadrupedPositionCrawlBumpyGroundWalkingTest implements Qu
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
       variables.getYoPlanarVelocityInputX().set(0.05);
-      variables.getYoPlanarVelocityInputZ().set(0.15);
+      variables.getYoPlanarVelocityInputZ().set(0.05);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 35.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 0.4));

@@ -32,7 +32,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 
    private final double estimatorDT;
 
-   private final double kinematicsPelvisLinearVelocityFilterFreqInHertz;
    private final double kinematicsPelvisPositionFilterFreqInHertz;
 
    private final double lowerBodyJointVelocityBacklashSlopTime;
@@ -99,7 +98,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
          jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 8000.0);
 
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
-      kinematicsPelvisLinearVelocityFilterFreqInHertz = 50.0;
    }
 
    @Override
@@ -196,12 +194,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
-   {
-      return kinematicsPelvisLinearVelocityFilterFreqInHertz;
-   }
-
-   @Override
    public double getCoPFilterFreqInHertz()
    {
       return 4.0;
@@ -266,7 +258,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getPelvisVelocityBacklashSlopTime()
+   public double getIMUJointVelocityEstimationBacklashSlopTime()
    {
       return lowerBodyJointVelocityBacklashSlopTime;
    }
@@ -285,18 +277,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 
    @Override
    public boolean trustCoPAsNonSlippingContactPoint()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean useControllerDesiredCenterOfPressure()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean useTwistForPelvisLinearStateEstimation()
    {
       return true;
    }

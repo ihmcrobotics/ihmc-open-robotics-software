@@ -143,14 +143,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       }
 
-      if (headless)
-      {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[] {}, sdf, true, this);
-      }
-      else
-      {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), sdf, false, this);
-      }
+      this.loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), sdf, this);
 
       for (String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)
       {

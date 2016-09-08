@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineStateChangedListener;
 import us.ihmc.quadrupedRobotics.util.PreallocatedDeque;
 import us.ihmc.quadrupedRobotics.util.PreallocatedDequeSorter;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
@@ -25,6 +26,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.stateMachines.StateChangedListener;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -222,6 +225,14 @@ public class QuadrupedTimedStepController
       return null;
    }
 
+   public void attachStateChangedListener(FiniteStateMachineStateChangedListener stateChangedListener)
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         stepStateMachine.get(robotQuadrant).attachStateChangedListener(stateChangedListener);
+      }
+   }
+
    public void reset()
    {
       while (stepDeque.size() > 0)
@@ -233,6 +244,7 @@ public class QuadrupedTimedStepController
          stepStateMachine.get(robotQuadrant).reset();
          contactForceLimits.setPressureUpperLimit(robotQuadrant, contactPressureUpperLimitParameter.get());
          contactForceLimits.setPressureLowerLimit(robotQuadrant, contactPressureLowerLimitParameter.get());
+         contactState.set(robotQuadrant, ContactState.IN_CONTACT);
       }
    }
 

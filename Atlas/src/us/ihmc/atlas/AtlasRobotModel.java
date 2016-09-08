@@ -115,23 +115,14 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private boolean enableJointDamping = true;
 
    private final RobotDescription robotDescription;
-
+   
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
    {
       selectedVersion = atlasVersion;
       jointMap = new AtlasJointMap(selectedVersion);
       this.target = target;
 
-      if (!headless)
-      {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), false, this);
-      }
-      else
-      {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[]
-         {
-         }, selectedVersion.getSdfFileAsStream(), headless, this);
-      }
+      this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), this);
 
       for (String forceSensorNames : AtlasSensorInformation.forceSensorNames)
       {
