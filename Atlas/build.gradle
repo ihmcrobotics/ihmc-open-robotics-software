@@ -82,6 +82,8 @@ dependencies {
     compile ihmc.getProjectDependency(":SDFLoader")
     compile ihmc.getProjectDependency(":SensorProcessing")
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
+    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+    compile ihmc.getProjectDependency(":IHMCRobotDescription")
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
     testCompile ihmc.getProjectTestDependency(":CommonWalkingControlModules")
