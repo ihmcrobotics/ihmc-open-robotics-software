@@ -63,7 +63,7 @@ public class Util {
         Vector3f dirVec = dir;
         Vector3f min = new Vector3f((float)box.getMinX(), (float)box.getMinY(), (float)box.getMinZ());
         Vector3f max = new Vector3f((float)box.getMaxX(), (float)box.getMaxY(), (float)box.getMaxZ());
-        Vector3f center = min.add(max.mult(0.5f));
+        Vector3f center = min.add(max).mult(0.5f);
 
         dirVec = dirVec.normalize();
 
@@ -84,7 +84,6 @@ public class Util {
         result.setFieldOfView(fov);
         result.setNearClip(tmpCamera.getFrustumNear());
         result.setFarClip(tmpCamera.getFrustumFar());
-        result.getTransforms().add(new Rotate(180, Rotate.Z_AXIS)); // y up
         float[] viewMat = new float[16];
         tmpCamera.getViewMatrix().fillFloatArray(viewMat, false);
         double[] viewMatDouble = new double[16];
@@ -93,6 +92,7 @@ public class Util {
         }
 
         result.getTransforms().add(new Affine(viewMatDouble, MatrixType.MT_3D_4x4, 0));
+        result.getTransforms().add(new Rotate(-90, Rotate.Y_AXIS));
         return result;
     }
 }
