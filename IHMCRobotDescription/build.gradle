@@ -41,8 +41,6 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-    //Exclude incompatible version of jinput
-    exclude group: 'net.java.jinput', module: 'jinput'
     compile group: 'org.ejml', name: 'core', version: '0.28'
 
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
