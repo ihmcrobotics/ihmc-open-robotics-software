@@ -17,14 +17,14 @@ public class NewtonsCradleSimulation
    public static void createNewtonsCradleSimulation()
    {
       NewtonsCradleRobot robot = new NewtonsCradleRobot();
-      
+
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.setDT(0.0001, 100);
       scs.startOnAThread();
 
 //      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
 //      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
-      CollisionHandler handler = new DefaultCollisionHandler(1.0, 0.0);
+      CollisionHandler handler = new DefaultCollisionHandler(0.9, 0.3);
 
       DefaultCollisionVisualize visualize = new DefaultCollisionVisualize();
 
@@ -36,11 +36,11 @@ public class NewtonsCradleSimulation
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
    }
-   
+
    public static void createStackOfBouncyBallsSimulation()
    {
       StackOfBouncyBallsRobot robot = new StackOfBouncyBallsRobot();
-      
+
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.setDT(0.0001, 100);
       scs.startOnAThread();
@@ -62,11 +62,11 @@ public class NewtonsCradleSimulation
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
    }
-   
+
    public static void createRowOfDominosSimulation()
    {
       RowOfDominosRobot robot = new RowOfDominosRobot();
-      
+
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.setDT(0.0001, 100);
       scs.setGroundVisible(false);
@@ -88,20 +88,20 @@ public class NewtonsCradleSimulation
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
    }
-   
+
    public static void createPileOfRandomObjectsSimulation()
    {
       PileOfRandomObjectsRobot pileOfRandomObjectsRobot = new PileOfRandomObjectsRobot();
       ArrayList<Robot> robots = pileOfRandomObjectsRobot.getRobots();
-      
+
       boolean showGUI = true;
-      
+
       Robot[] robotArray = new Robot[robots.size()];
       robots.toArray(robotArray);
-      
+
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(showGUI);
-      
+
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
       scs.setDT(0.0001, 100);
       scs.setGroundVisible(false);
@@ -118,9 +118,9 @@ public class NewtonsCradleSimulation
       collisionDetector.initialize(handler);
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
-      
+
       scs.simulate();
-      
+
       long wallStartTime = System.currentTimeMillis();
       while(true)
       {
@@ -137,9 +137,9 @@ public class NewtonsCradleSimulation
 
    public static void main(String[] args)
    {
-      createNewtonsCradleSimulation();
+//      createNewtonsCradleSimulation();
 //      createStackOfBouncyBallsSimulation();
 //      createRowOfDominosSimulation();
-//      createPileOfRandomObjectsSimulation();
+      createPileOfRandomObjectsSimulation();
    }
 }

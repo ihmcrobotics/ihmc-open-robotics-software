@@ -25,10 +25,10 @@ public class PileOfRandomObjectsRobot
    private final ScsCollisionDetector collisionDetector;
 
    private final ArrayList<Robot> robots = new ArrayList<Robot>();
-   
+
    public PileOfRandomObjectsRobot()
    {
-      int numberOfObjects = 200;
+      int numberOfObjects = 200; //200;
 
       YoVariableRegistry registry = new YoVariableRegistry("Collision");
       collisionDetector = new GdxCollisionDetector(registry, 100.0);
@@ -40,30 +40,25 @@ public class PileOfRandomObjectsRobot
       for (int i = 0; i < numberOfObjects; i++)
       {
          Robot robot = new Robot("RandomRobot" + i);
-         
-         double objectWidth = RandomTools.generateRandomDouble(random, 0.01, 0.1);
-         double objectLength = RandomTools.generateRandomDouble(random, 0.01, 0.1);
-         double objectHeight = RandomTools.generateRandomDouble(random, 0.01, 0.1);
-         double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
 
          Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
          FloatingJoint floatingJoint = new FloatingJoint("object" + i, "object" + i, offset, robot);
 
-         Link link = new Link("object" + i);
-         link.setMassAndRadiiOfGyration(objectMass, objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
-         link.setComOffset(0.0, 0.0, 0.0);
+         Link link;
 
-         Graphics3DObject linkGraphics = new Graphics3DObject();
-         linkGraphics.translate(0.0, 0.0, -objectHeight / 2.0);
-         AppearanceDefinition randomColor = YoAppearance.randomColor(random);
-         linkGraphics.addCube(objectLength, objectWidth, objectHeight, randomColor);
-         link.setLinkGraphics(linkGraphics);
-
-         CollisionShapeDescription shapeDesc = collisionShapeFactory.createBox(objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
-         RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-         shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
-         collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
-         link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
+         int shape = random.nextInt(3);
+         if (shape == 0)
+         {
+            link = createRandomBox(collisionShapeFactory, random, i, robot);
+         }
+         else if (shape == 1)
+         {
+            link = createRandomSphere(collisionShapeFactory, random, i, robot);
+         }
+         else
+         {
+            link = createRandomCylinder(collisionShapeFactory, random, i, robot);
+         }
 
          floatingJoint.setLink(link);
          robot.addRootJoint(floatingJoint);
@@ -78,7 +73,7 @@ public class PileOfRandomObjectsRobot
 
          floatingJoint.setPosition(x, y, z);
          floatingJoint.setYawPitchRoll(yaw, pitch, roll);
-        
+
          this.robots.add(robot);
       }
 
@@ -108,15 +103,90 @@ public class PileOfRandomObjectsRobot
 
       baseRobot.addStaticLink(baseLink);
       this.robots.add(baseRobot);
-      
+
       baseRobot.getRobotsYoVariableRegistry().addChild(registry);
+   }
+
+   private Link createRandomBox(CollisionShapeFactory collisionShapeFactory, Random random, int i, Robot robot)
+   {
+      double objectWidth = RandomTools.generateRandomDouble(random, 0.01, 0.1);
+      double objectLength = RandomTools.generateRandomDouble(random, 0.01, 0.1);
+      double objectHeight = RandomTools.generateRandomDouble(random, 0.01, 0.1);
+      double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
+
+      Link link = new Link("object" + i);
+      link.setMassAndRadiiOfGyration(objectMass, objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
+      link.setComOffset(0.0, 0.0, 0.0);
+
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      linkGraphics.translate(0.0, 0.0, -objectHeight / 2.0);
+      AppearanceDefinition randomColor = YoAppearance.randomColor(random);
+      linkGraphics.addCube(objectLength, objectWidth, objectHeight, randomColor);
+      link.setLinkGraphics(linkGraphics);
+
+      CollisionShapeDescription shapeDesc = collisionShapeFactory.createBox(objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
+
+      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
+      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
+      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
+      link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
+      return link;
+   }
+
+   private Link createRandomSphere(CollisionShapeFactory collisionShapeFactory, Random random, int i, Robot robot)
+   {
+      double objectRadius = RandomTools.generateRandomDouble(random, 0.01, 0.1);
+      double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
+
+      Link link = new Link("object" + i);
+      link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectRadius / 2.0);
+      link.setComOffset(0.0, 0.0, 0.0);
+
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      AppearanceDefinition randomColor = YoAppearance.randomColor(random);
+      linkGraphics.addSphere(objectRadius, randomColor);
+      link.setLinkGraphics(linkGraphics);
+
+      CollisionShapeDescription shapeDesc = collisionShapeFactory.createSphere(objectRadius);
+
+      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
+      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
+      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
+      link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
+      return link;
+   }
+
+   private Link createRandomCylinder(CollisionShapeFactory collisionShapeFactory, Random random, int i, Robot robot)
+   {
+      double objectHeight = RandomTools.generateRandomDouble(random, 0.1, 0.15);
+      double objectRadius = RandomTools.generateRandomDouble(random, 0.01, 0.03);
+      double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
+
+      Link link = new Link("object" + i);
+      link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectRadius / 2.0);
+      link.setComOffset(0.0, 0.0, 0.0);
+
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      linkGraphics.translate(0.0, 0.0, -objectHeight / 2.0);
+
+      AppearanceDefinition randomColor = YoAppearance.randomColor(random);
+      linkGraphics.addCylinder(objectHeight, objectRadius, randomColor);
+      link.setLinkGraphics(linkGraphics);
+
+      CollisionShapeDescription shapeDesc = collisionShapeFactory.createCylinder(objectRadius, objectHeight);
+
+      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
+      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
+      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
+      link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
+      return link;
    }
 
    public ArrayList<Robot> getRobots()
    {
       return robots;
    }
-   
+
    public ScsCollisionDetector getCollisionDetector()
    {
       return collisionDetector;

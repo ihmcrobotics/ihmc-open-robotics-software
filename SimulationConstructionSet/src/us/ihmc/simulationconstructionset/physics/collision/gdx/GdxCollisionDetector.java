@@ -6,17 +6,6 @@ import java.util.List;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.physics.CollisionHandler;
-import us.ihmc.simulationconstructionset.physics.CollisionShape;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
-import us.ihmc.simulationconstructionset.physics.Contacts;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.ScsForceSensor;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.Bullet;
@@ -27,10 +16,22 @@ import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionWorld;
 import com.badlogic.gdx.physics.bullet.collision.btCylinderShape;
+import com.badlogic.gdx.physics.bullet.collision.btCylinderShapeZ;
 import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
 import com.badlogic.gdx.physics.bullet.collision.btPersistentManifold;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 import com.badlogic.gdx.physics.bullet.linearmath.btVector3;
+
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.physics.CollisionHandler;
+import us.ihmc.simulationconstructionset.physics.CollisionShape;
+import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
+import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
+import us.ihmc.simulationconstructionset.physics.Contacts;
+import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.ScsForceSensor;
 
 /**
  * @author Peter Abeles
@@ -152,7 +153,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          // you can un-comment out this line, and then all points are removed
          // contactManifold->clearManifold();
       }
-      
+
       handler.maintenanceAfterCollisionDetection();
    }
 
@@ -175,7 +176,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
       public CollisionShapeDescription createCylinder(double radius, double height)
       {
-         btCylinderShape shape = new btCylinderShape(new Vector3((float) radius, (float) height / 2.0f, (float) 0.0));
+         btCylinderShape shape = new btCylinderShapeZ(new Vector3((float) radius, (float) height / 2.0f, (float) 0.0));
          shape.setMargin((float) margin);
 
          return new ShapeDescription(shape);
@@ -233,7 +234,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       private final ShapeDescription description;
       private final Link link;
       private final boolean isGround;
-      
+
       // transform from shapeToLink coordinate system
       RigidBodyTransform shapeToLink = new RigidBodyTransform();
 
@@ -274,7 +275,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       {
          return link;
       }
-      
+
       public boolean isGround()
       {
          return isGround;
