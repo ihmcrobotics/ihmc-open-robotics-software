@@ -37,6 +37,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
@@ -111,14 +112,29 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       drcSimulationTestHelper.send(pelvisTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 + trajectoryTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      Vector3d midFeetZup = findVector3d(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUp", scs);
 
-      desiredPosition.setX(desiredPosition.getX() - midFeetZup.getX());
-      desiredPosition.setY(desiredPosition.getY() - midFeetZup.getY());
+      RigidBodyTransform fromWorldToMidFeetZUpTransform = new RigidBodyTransform();
+      Vector3d midFeetZup = findVector3d(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUp", scs);
+      double midFeetZupYaw = scs.getVariable(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUpYaw").getValueAsDouble();
+      double midFeetZupPitch = scs.getVariable(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUpPitch").getValueAsDouble();
+      double midFeetZupRoll = scs.getVariable(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUpRoll").getValueAsDouble();
+      fromWorldToMidFeetZUpTransform.setRotationEulerAndZeroTranslation(midFeetZupRoll, midFeetZupPitch, midFeetZupYaw);
+      fromWorldToMidFeetZUpTransform.setTranslation(midFeetZup);
+      fromWorldToMidFeetZUpTransform.invert();
+
+      TransformablePoint2d desiredPosition2d = new TransformablePoint2d();
+      desiredPosition2d.set(desiredPosition.getX(), desiredPosition.getY());
+      desiredPosition2d.applyTransform(fromWorldToMidFeetZUpTransform);
+
+      desiredPosition.setX(desiredPosition2d.getX());
+      desiredPosition.setY(desiredPosition2d.getY());
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 + trajectoryTime);
+      assertTrue(success);
 
       assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
    }
