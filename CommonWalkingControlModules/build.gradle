@@ -53,7 +53,6 @@ dependencies {
     compile ihmc.getProjectDependency(":SDFLoader")
     compile ihmc.getProjectDependency(":Plotting")
     compile ihmc.getProjectDependency(":SensorProcessing")
-    compile ihmc.getProjectDependency(":Graphics3DAdapter")
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":IHMCCommunication")
     compile ihmc.getProjectDependency(":ConvexOptimizationAdapter")
@@ -61,6 +60,7 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
     testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
