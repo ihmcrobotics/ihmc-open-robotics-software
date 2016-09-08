@@ -3,8 +3,9 @@ package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 import java.util.List;
 
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
+import us.ihmc.commonWalkingControlModules.touchdownDetector.ForceBasedTouchDownDetection;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTouchdownDetector;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
@@ -32,7 +33,7 @@ public class QuadrupedFootSwitchFactory
    private final RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
    private final RequiredFactoryField<YoVariableRegistry> yoVariableRegistry = new RequiredFactoryField<>("yoVariableRegistry");
    private final RequiredFactoryField<QuadrantDependentList<ContactablePlaneBody>> footContactableBodies = new RequiredFactoryField<>("footContactableBodies");
-   private final RequiredFactoryField<FullRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
+   private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<FootSwitchType> footSwitchType = new RequiredFactoryField<>("footSwitchType");
 
    // Used to create the ground contact point based foot switches.
@@ -42,7 +43,12 @@ public class QuadrupedFootSwitchFactory
    private final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedFootSwitchManagerRegistry");
 
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter jointTorqueTouchdownThreshold = parameterFactory.createDouble("jointTorqueTouchdownThreshold", 3.0);
+   private final QuadrantDependentList<DoubleParameter> jointTorqueTouchdownThresholds = new QuadrantDependentList<>(
+         parameterFactory.createDouble("frontLeftJointTorqueTouchdownThreshold", 5.0),
+         parameterFactory.createDouble("frontRightJointTorqueTouchdownThreshold", 5.0),
+         parameterFactory.createDouble("hindLeftJointTorqueTouchdownThreshold", -5.0),
+         parameterFactory.createDouble("hindRightJointTorqueTouchdownThreshold", -5.0)
+   );
 
    private void setupTouchdownBasedFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
@@ -50,12 +56,15 @@ public class QuadrupedFootSwitchFactory
       {
          QuadrupedTouchdownDetectorBasedFootSwitch touchdownDetectorBasedFootSwitch;
          touchdownDetectorBasedFootSwitch = new QuadrupedTouchdownDetectorBasedFootSwitch(robotQuadrant, footContactableBodies.get().get(robotQuadrant),
-                                                                                          fullRobotModel.get(), totalRobotWeight, registry);
+                                                                                          totalRobotWeight, registry);
 
          JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector;
          jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.get().getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), registry);
-         jointTorqueBasedTouchdownDetector.setTorqueThreshold(jointTorqueTouchdownThreshold.get());
+         jointTorqueBasedTouchdownDetector.setTorqueThreshold(jointTorqueTouchdownThresholds.get(robotQuadrant).get());
          touchdownDetectorBasedFootSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
+         
+         ForceBasedTouchDownDetection forceBasedTouchDownDetection = new ForceBasedTouchDownDetection(fullRobotModel.get(), robotQuadrant, footContactableBodies.get().get(robotQuadrant).getSoleFrame(), registry);
+         touchdownDetectorBasedFootSwitch.addTouchdownDetector(forceBasedTouchDownDetection);
 
          footSwitches.set(robotQuadrant, touchdownDetectorBasedFootSwitch);
       }
@@ -136,7 +145,7 @@ public class QuadrupedFootSwitchFactory
       this.footContactableBodies.set(footContactableBodies);
    }
 
-   public void setFullRobotModel(FullRobotModel fullRobotModel)
+   public void setFullRobotModel(FullQuadrupedRobotModel fullRobotModel)
    {
       this.fullRobotModel.set(fullRobotModel);
    }

@@ -35,12 +35,16 @@ public class ActuatorForceBasedTouchdownDetector implements TouchdownDetector
    @Override
    public boolean hasTouchedDown()
    {
+      return touchdownDetectedFiltered.getBooleanValue();
+   }
+
+   @Override
+   public void update()
+   {
       foreSensorData.getWrench(wrenchToPack);
       wrenchToPack.getLinearPart(vectorToPack);
 
       touchdownDetected.set(vectorToPack.length() > touchdownForceThreshold.getDoubleValue());
       touchdownDetectedFiltered.update();
-
-      return touchdownDetectedFiltered.getBooleanValue();
    }
 }
