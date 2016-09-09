@@ -690,20 +690,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       vertexToPack.setXYIncludingFrame(referenceFrame, convexPolygon.getVertex(vertexIndex));
    }
 
-//   public FramePoint2d getFrameVertex(int vertexIndex)
-//   {
-//      convexPolygon.checkIfUpToDate();
-//      return getFrameVertexUnsafe(vertexIndex);
-//   }
-//
-//   /** Same as getVertex(vertexIndex) but without checking if the polygon has been updated. Be careful when using it! */
-//   protected FramePoint2d getFrameVertexUnsafe(int vertexIndex)
-//   {
-//      convexPolygon.checkNonEmpty();
-//      convexPolygon.checkIndexInBoundaries(vertexIndex);
-//      return frameVertices.get(vertexIndex);
-//   }
-
    public void getNextFrameVertex(int vertexIndex, FramePoint2d vertexToPack)
    {
       getFrameVertex(convexPolygon.getNextVertexIndex(vertexIndex), vertexToPack);
@@ -983,13 +969,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
          throw new RuntimeException("Closest vertex could not be found! Has at least one vertex: " + convexPolygon.hasAtLeastOneVertex());
 
       return new FramePoint2d(referenceFrame, closestVertexCopy);
-   }
-
-   public double distanceToClosestVertex(FramePoint2d point)
-   {
-      point.checkReferenceFrameMatch(referenceFrame);
-
-      return convexPolygon.distanceToClosestVertex(point.getPoint());
    }
 
    @Override
