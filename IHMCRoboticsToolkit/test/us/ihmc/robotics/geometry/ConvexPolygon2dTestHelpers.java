@@ -340,7 +340,8 @@ public class ConvexPolygon2dTestHelpers
       {
          FramePoint2d[] enteringVertices = enteringEdge.getEndFramePointsCopy();
 
-         if (!isLineBetweenOrIntersectingVertices(frameLine2d, enteringVertices[1], enteringVertices[0]))
+         if (!isLineBetweenOrIntersectingVertices(frameLine2d, enteringVertices[1], enteringVertices[0])
+               && !isLineBetweenOrIntersectingVertices(frameLine2d, enteringVertices[0], enteringVertices[1]))
          {
             throw new RuntimeException();
          }
@@ -348,7 +349,8 @@ public class ConvexPolygon2dTestHelpers
 
       FramePoint2d[] leavingVertices = leavingEdge.getEndFramePointsCopy();
 
-      if (!isLineBetweenOrIntersectingVertices(frameLine2d, leavingVertices[0], leavingVertices[1]))
+      if (!isLineBetweenOrIntersectingVertices(frameLine2d, leavingVertices[0], leavingVertices[1])
+            && !isLineBetweenOrIntersectingVertices(frameLine2d, leavingVertices[1], leavingVertices[0]))
       {
          throw new RuntimeException();
       }
