@@ -325,7 +325,7 @@ public class ConvexPolygon2dCalculator
    {
       int numberOfVertices = polygon.getNumberOfVertices();
       if (secondIndex >= firstIndex)
-         return (secondIndex + (firstIndex + numberOfVertices  - secondIndex + 1) / 2) % numberOfVertices;
+         return (secondIndex + (firstIndex + numberOfVertices - secondIndex + 1) / 2) % numberOfVertices;
       else
          return (secondIndex + firstIndex + 1) / 2;
    }
@@ -362,7 +362,7 @@ public class ConvexPolygon2dCalculator
       }
 
       int numberOfVertices = polygon.getNumberOfVertices();
-      boolean edgeVisible = ConvexPolygon2dCalculator.canObserverSeeEdge(numberOfVertices-1, observer, polygon);
+      boolean edgeVisible = ConvexPolygon2dCalculator.canObserverSeeEdge(numberOfVertices - 1, observer, polygon);
       int foundCorners = 0;
       for (int i = 0; i < numberOfVertices; i++)
       {
@@ -386,6 +386,80 @@ public class ConvexPolygon2dCalculator
          return false;
 
       return true;
+   }
+
+   /**
+    * This finds the edges of the polygon that intersect the given line. Will pack the edges into edgeToPack1 and
+    * edgeToPack2. Returns number of intersections found. The edged will be ordered according to their index.
+    */
+   public static int getIntersectingEdges(Line2d line, LineSegment2d edgeToPack1, LineSegment2d edgeToPack2, ConvexPolygon2d polygon)
+   {
+      int foundEdges = 0;
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         if (doesLineIntersectEdge(line, i, polygon))
+         {
+            if (foundEdges == 0)
+               edgeToPack1.set(polygon.getVertex(i), polygon.getNextVertex(i));
+            else
+               edgeToPack2.set(polygon.getVertex(i), polygon.getNextVertex(i));
+            foundEdges++;
+         }
+
+         if (foundEdges == 2) break; // performance only
+      }
+
+      return foundEdges;
+   }
+
+   /**
+    * Checks if a line intersects the edge with the given index.
+    */
+   public static boolean doesLineIntersectEdge(Line2d line, int edgeIndex, ConvexPolygon2d polygon)
+   {
+      if (!polygon.hasAtLeastTwoVertices())
+         return false;
+
+      Point2d edgePointOne = polygon.getVertex(edgeIndex);
+      Point2d edgePointTwo = polygon.getNextVertex(edgeIndex);
+
+      double edgeVectorX = edgePointTwo.x - edgePointOne.x;
+      double edgeVectorY = edgePointTwo.y - edgePointOne.y;
+      double lambdaOne = getIntersectionLambda(edgePointOne.x, edgePointOne.y, edgeVectorX, edgeVectorY, line.getPoint().x, line.getPoint().y,
+            line.getNormalizedVector().x, line.getNormalizedVector().y);
+      if (Double.isNaN(lambdaOne) || lambdaOne < 0.0)
+         return false;
+
+      double edgeVectorInvX = edgePointOne.x - edgePointTwo.x;
+      double edgeVectorInvY = edgePointOne.y - edgePointTwo.y;
+      double lambdaTwo = getIntersectionLambda(edgePointTwo.x, edgePointTwo.y, edgeVectorInvX, edgeVectorInvY, line.getPoint().x, line.getPoint().y,
+            line.getNormalizedVector().x, line.getNormalizedVector().y);
+      if (lambdaTwo < 0.0)
+         return false;
+
+      return true;
+   }
+
+   /**
+    * Method that intersects two lines. Returns lambda such that the intersection point is
+    * intersection = point1 + lambda * direction1
+    */
+   public static double getIntersectionLambda(double point1X, double point1Y, double direction1X, double direction1Y, double point2X, double point2Y,
+         double direction2X, double direction2Y)
+   {
+      if (direction2X == 0.0 && direction1X != 0.0)
+         return (point2X - point1X) / direction1X;
+      if (direction2Y == 0.0 && direction1Y != 0.0)
+         return (point2Y - point1Y) / direction1Y;
+
+      double denumerator = direction1X / direction2X - direction1Y / direction2Y;
+
+      // check if lines parallel:
+      if (Math.abs(denumerator) < 10E-10)
+         return Double.NaN;
+
+      double numerator = (point1Y - point2Y) / direction2Y - (point1X - point2X) / direction2X;
+      return numerator / denumerator;
    }
 
    // --- Methods that generate garbage ---
@@ -428,7 +502,21 @@ public class ConvexPolygon2dCalculator
 
       Point2d point1 = new Point2d(polygon.getVertex(indices[0]));
       Point2d point2 = new Point2d(polygon.getVertex(indices[1]));
+
+      if (indices[0] == indices[1])
+         return new Point2d[] {point1};
       return new Point2d[] {point1, point2};
+   }
+
+   public static LineSegment2d[] getIntersectingEdgesCopy(Line2d line, ConvexPolygon2d polygon)
+   {
+      LineSegment2d edge1 = new LineSegment2d();
+      LineSegment2d edge2 = new LineSegment2d();
+
+      int edges = getIntersectingEdges(line, edge1, edge2, polygon);
+      if (edges == 2)
+         return new LineSegment2d[] {edge1, edge2};
+      return null;
    }
 
 }

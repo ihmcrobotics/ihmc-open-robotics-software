@@ -2068,7 +2068,7 @@ public class ConvexPolygon2dTest
          assertTrue(ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithOnePoint).equals(pointThatDefinesThePolygon));
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
          assertTrue(polygonWithOnePoint.getVertexCCW(0).equals(pointThatDefinesThePolygon));
-         assertTrue(polygonWithOnePoint.getIntersectingEdges(arbitraryLine) == null);
+         assertTrue(ConvexPolygon2dCalculator.getIntersectingEdgesCopy(arbitraryLine, polygonWithOnePoint) == null);
          assertEquals(1, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithOnePoint).length);
          assertTrue(ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithOnePoint)[0].equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getCentroid().equals(pointThatDefinesThePolygon));
@@ -2259,7 +2259,7 @@ public class ConvexPolygon2dTest
          assertTrue(polygonResult.distance(pointResult) < epsilon);
 
          // getIntersectingEdges
-         LineSegment2d[] intersectingEdges = polygonWithTwoPoints.getIntersectingEdges(arbitraryLine);
+         LineSegment2d[] intersectingEdges = ConvexPolygon2dCalculator.getIntersectingEdgesCopy(arbitraryLine, polygonWithTwoPoints);
          boolean isLineAbovePoint0 = ((pointThatDefinesThePolygon0.getX() - arbitraryLine.getPoint().getX()) * arbitraryLine.getSlope() + arbitraryLine.getPoint().getY()) >= pointThatDefinesThePolygon0.getY();
          boolean isLineAbovePoint1 = ((pointThatDefinesThePolygon1.getX() - arbitraryLine.getPoint().getX()) * arbitraryLine.getSlope() + arbitraryLine.getPoint().getY()) >= pointThatDefinesThePolygon1.getY();
          boolean lineCrossesThroughPolygon = isLineAbovePoint0 ^ isLineAbovePoint1;
@@ -2482,16 +2482,6 @@ public class ConvexPolygon2dTest
          System.out.println(actual1);
          fail("Doubles are not equal in either order.");
       }
-   }
-
-   private void assertEqualsInEitherOrder(Line2d expected0, Line2d expected1, Line2d actual0, Line2d actual1)
-   {
-      if ((expected0.getSlope() == actual0.getSlope()) && (expected0.getPoint().equals(actual0.getPoint())))
-         assertTrue((expected1.getSlope() == actual1.getSlope()) && (expected1.getPoint().equals(actual1.getPoint())));
-      else if ((expected0.getSlope() == actual1.getSlope()) && (expected0.getPoint().equals(actual1.getPoint())))
-         assertTrue((expected1.getSlope() == actual0.getSlope()) && (expected1.getPoint().equals(actual0.getPoint())));
-      else
-         fail("Lines are not equal in either order.");
    }
 
    private void pauseOneSecond()

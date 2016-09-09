@@ -875,7 +875,7 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    {
       frameLine2d.checkReferenceFrameMatch(referenceFrame);
 
-      LineSegment2d[] lineSegments = convexPolygon.getIntersectingEdges(frameLine2d.getLine2dCopy());
+      LineSegment2d[] lineSegments = ConvexPolygon2dCalculator.getIntersectingEdgesCopy(frameLine2d.getLine2dCopy(), convexPolygon);
       if (lineSegments == null)
          return null;
 
