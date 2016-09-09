@@ -34,25 +34,57 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Packs the closest vertex of the polygon to the given line.
+    * Returns the index of the closest vertex of the polygon to the given line.
     */
-   public static boolean getClosestVertex(Line2d line, ConvexPolygon2d polygon, Point2d pointToPack)
+   public static int getClosestVertexIndex(Line2d line, ConvexPolygon2d polygon)
    {
       double minDistance = Double.POSITIVE_INFINITY;
-      pointToPack.set(Double.NaN, Double.NaN);
-
+      int index = -1;
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
          Point2d vertex = polygon.getVertex(i);
          double distance = line.distance(vertex);
          if (distance < minDistance)
          {
-            pointToPack.set(vertex);
+            index = i;
             minDistance = distance;
          }
       }
 
-      return !Double.isInfinite(minDistance);
+      return index;
+   }
+
+   /**
+    * Packs the closest vertex of the polygon to the given line.
+    */
+   public static boolean getClosestVertex(Line2d line, ConvexPolygon2d polygon, Point2d pointToPack)
+   {
+      int index = getClosestVertexIndex(line, polygon);
+      if (index < 0)
+         return false;
+      pointToPack.set(polygon.getVertex(index));
+      return true;
+   }
+
+   /**
+    * Returns the index of the closest vertex of the polygon to the given point
+    */
+   public static int getClosestVertexIndex(Point2d point, ConvexPolygon2d polygon)
+   {
+      double minDistance = Double.POSITIVE_INFINITY;
+      int index = -1;
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         Point2d vertex = polygon.getVertex(i);
+         double distance = vertex.distance(point);
+         if (distance < minDistance)
+         {
+            index = i;
+            minDistance = distance;
+         }
+      }
+
+      return index;
    }
 
    /**
@@ -60,21 +92,11 @@ public class ConvexPolygon2dCalculator
     */
    public static boolean getClosestVertex(Point2d point, ConvexPolygon2d polygon, Point2d pointToPack)
    {
-      double minDistance = Double.POSITIVE_INFINITY;
-      pointToPack.set(Double.NaN, Double.NaN);
-
-      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-      {
-         Point2d vertex = polygon.getVertex(i);
-         double distance = vertex.distance(point);
-         if (distance < minDistance)
-         {
-            pointToPack.set(vertex);
-            minDistance = distance;
-         }
-      }
-
-      return !Double.isInfinite(minDistance);
+      int index = getClosestVertexIndex(point, polygon);
+      if (index < 0)
+         return false;
+      pointToPack.set(polygon.getVertex(index));
+      return true;
    }
 
    /**
