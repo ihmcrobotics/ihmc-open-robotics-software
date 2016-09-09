@@ -176,7 +176,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
       public CollisionShapeDescription createCylinder(double radius, double height)
       {
-         btCylinderShape shape = new btCylinderShapeZ(new Vector3((float) radius, (float) height / 2.0f, (float) 0.0));
+         btCylinderShape shape = new btCylinderShapeZ(new Vector3((float) radius, (float) radius, (float) height / 2.0f));
          shape.setMargin((float) margin);
 
          return new ShapeDescription(shape);
