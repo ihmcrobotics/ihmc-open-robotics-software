@@ -44,6 +44,11 @@ public abstract class LogProperties extends Properties
          return new String[] {};
       }
    }
+   
+   public void removeVideos()
+   {
+      remove("videoStreams");
+   }
 
    public void addVideoFile(String description)
    {
