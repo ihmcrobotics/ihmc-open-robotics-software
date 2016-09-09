@@ -310,11 +310,11 @@ public class ConvexPolygon2dCalculator
 
    /**
     * An observer looking at the polygon from the outside will see two vertices at the outside edges of the
-    * polygon. This method packs the indices corresponding to this vertices. The vertex on the left from the
-    * observer point of view will be the first vertex packed. The argument verticesIndices is expected to
+    * polygon. This method packs the indices corresponding to these vertices. The vertex on the left from the
+    * observer point of view will be the first vertex packed. The argument vertexIndices is expected to
     * have at least length two. If it is longer only the first two entries will be used.
     */
-   public static boolean getLineOfSightVertexIndices(Point2d observer, int[] verticesIndices, ConvexPolygon2d polygon)
+   public static boolean getLineOfSightVertexIndices(Point2d observer, int[] vertexIndicesToPack, ConvexPolygon2d polygon)
    {
       if (!polygon.hasAtLeastOneVertex())
          return false;
@@ -324,8 +324,8 @@ public class ConvexPolygon2dCalculator
          if (isPointInside(observer, polygon))
             return false;
 
-         verticesIndices[0] = 0;
-         verticesIndices[1] = 0;
+         vertexIndicesToPack[0] = 0;
+         vertexIndicesToPack[1] = 0;
          return true;
       }
 
@@ -334,8 +334,8 @@ public class ConvexPolygon2dCalculator
          if (isPointInside(observer, polygon))
             return false;
 
-         verticesIndices[0] = getVertexOnLeft(0, 1, observer, polygon);
-         verticesIndices[1] = verticesIndices[0] == 0 ? 1 : 0;
+         vertexIndicesToPack[0] = getVertexOnLeft(0, 1, observer, polygon);
+         vertexIndicesToPack[1] = vertexIndicesToPack[0] == 0 ? 1 : 0;
          return true;
       }
 
@@ -347,12 +347,12 @@ public class ConvexPolygon2dCalculator
          boolean nextEdgeVisible = ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer, polygon);
          if (edgeVisible && !nextEdgeVisible)
          {
-            verticesIndices[0] = i;
+            vertexIndicesToPack[0] = i;
             foundCorners++;
          }
          if (!edgeVisible && nextEdgeVisible)
          {
-            verticesIndices[1] = i;
+            vertexIndicesToPack[1] = i;
             foundCorners++;
          }
 
@@ -390,10 +390,10 @@ public class ConvexPolygon2dCalculator
       return ret;
    }
 
-   public static int[] getLineOfSightVertexIndicesCopy(Point2d observerPoint2d, ConvexPolygon2d polygon)
+   public static int[] getLineOfSightVertexIndicesCopy(Point2d observer, ConvexPolygon2d polygon)
    {
       int[] ret = new int[2];
-      if (getLineOfSightVertexIndices(observerPoint2d, ret, polygon))
+      if (getLineOfSightVertexIndices(observer, ret, polygon))
          return ret;
       return null;
    }
