@@ -20,14 +20,14 @@ public class ConvexPolygon2dCalculatorTest
    private static final double epsilon = 1.0e-10;
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testConstruction()
    {
       new ConvexPolygon2dCalculator();
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testGetSignedDistance1()
    {
       // single point polygon
@@ -41,7 +41,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testGetSignedDistance2()
    {
       // line polygon
@@ -60,7 +60,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testGetSignedDistance3()
    {
       // triangle polygon
@@ -96,7 +96,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testGetClosestVertexPoint1()
    {
       Point2d vertex1 = new Point2d(0.0, 0.0);
@@ -129,7 +129,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testGetClosestVertexPoint2()
    {
       // make sure the method fails as expected with an empty polygon
@@ -142,7 +142,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testGetClosestVertexLine1()
    {
       Point2d vertex1 = new Point2d(0.0, 0.0);
@@ -169,7 +169,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testGetClosestVertexLine2()
    {
       // make sure the method fails as expected with an empty polygon
@@ -182,7 +182,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testIsPointInside1()
    {
       // single point polygon
@@ -212,7 +212,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testIsPointInside2()
    {
       // line polygon
@@ -244,7 +244,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testIsPointInside3()
    {
       // triangle polygon
@@ -286,7 +286,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testIsPointInside4()
    {
       // empty polygon
@@ -297,7 +297,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testIsPointInside5()
    {
       // foot polygon
@@ -316,7 +316,123 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
+   public void testIsPointInBoundingBox1()
+   {
+      // single point polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.update();
+
+      Point2d point1 = new Point2d(1.0, 1.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point1, epsilon, polygon));
+
+      Point2d point2 = new Point2d(0.8, 0.9);
+      assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point2, polygon));
+
+      Point2d point3 = new Point2d(0.8, 1.1);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point3, 0.3, polygon));
+
+      Point2d point4 = new Point2d(1.0, 0.9);
+      assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point4, polygon));
+
+      Point2d point5 = new Point2d(2.0, 1.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point5, polygon));
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point5, 1.0, polygon));
+
+      Point2d point6 = new Point2d(1.0, 2.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point6, polygon));
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point6, 1.0, polygon));
+
+      Point2d point7 = new Point2d(1.0 + epsilon, 1.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point7, epsilon, polygon));
+
+      Point2d point8 = new Point2d(1.0 - epsilon, 1.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point8, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testIsPointInBoundingBox2()
+   {
+      // line polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.update();
+
+      Point2d point1 = new Point2d(1.0, 0.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point1, epsilon, polygon));
+
+      Point2d point2 = new Point2d(0.0, 1.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point2, epsilon, polygon));
+
+      Point2d point3 = new Point2d(0.0, 0.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point3, -epsilon, polygon));
+
+      Point2d point4 = new Point2d(0.5, 0.5);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point4.x, point4.y, polygon));
+
+      Point2d point5 = new Point2d(1.0, -epsilon * 0.1);
+      assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point5.x, point5.y, polygon));
+
+      Point2d point6 = new Point2d(0.0, -epsilon * 0.1);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point6, epsilon, polygon));
+
+      Point2d point7 = new Point2d(0.7, -epsilon * 2.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point7, 2.0 * epsilon, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testIsPointInBoundingBox3()
+   {
+      // triangle polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.addVertex(new Point2d(5.0, 0.0));
+      polygon.addVertex(new Point2d(3.0, 5.0));
+      polygon.update();
+
+      Point2d point1 = new Point2d(0.3, 0.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point1, epsilon, polygon));
+
+      Point2d point2 = new Point2d(0.0, 0.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point2, epsilon, polygon));
+
+      Point2d point3 = new Point2d(2.0, 2.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point3, polygon));
+
+      Point2d point4 = new Point2d(1.0, 0.3);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point4, epsilon, polygon));
+
+      Point2d point5 = new Point2d(-1.0, 4.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point5.x, point5.y, epsilon, polygon));
+
+      Point2d point6 = new Point2d(6.0, 7.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point6, epsilon, polygon));
+
+      Point2d point7 = new Point2d(10.0, 0.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point7, epsilon, polygon));
+
+      Point2d point8 = new Point2d(0.1, 0.2);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point8, polygon));
+
+      Point2d point9 = new Point2d(3.5, 4.9);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point9.x, point9.y, epsilon, polygon));
+
+      Point2d point10 = new Point2d(3.5, -1.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point10, polygon));
+
+      Point2d point11 = new Point2d(-0.1, 1.0);
+      assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point11, polygon));
+
+      Point2d point12 = new Point2d(0.0, 1.0);
+      assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point12, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
    public void testIsPolygonInside1()
    {
       ConvexPolygon2d polygon = new ConvexPolygon2d();
@@ -353,7 +469,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testTranslatePolygon1()
    {
       ConvexPolygon2d polygon = new ConvexPolygon2d();
@@ -374,7 +490,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testTranslatePolygon2()
    {
       ConvexPolygon2d polygon = new ConvexPolygon2d();
@@ -387,7 +503,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testCanObserverSeeEdge1()
    {
       ConvexPolygon2d polygon = new ConvexPolygon2d();
@@ -426,7 +542,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testCanObserverSeeEdge2()
    {
       // line polygon
@@ -443,7 +559,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testCanObserverSeeEdge3()
    {
       // point polygon
@@ -456,7 +572,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testGetVertexOnSide1()
    {
       // add vertices in clockwise order so updating the polygon does not change indices
@@ -520,7 +636,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testGetVertexOnSide2()
    {
       // add vertices in clockwise order so updating the polygon does not change indices
@@ -543,7 +659,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testGetMiddleIndexCounterClockwise1()
    {
       // do not update polygon to keep number of vertices
@@ -603,22 +719,126 @@ public class ConvexPolygon2dCalculatorTest
       polygon.clear();
       polygon.addVertex(new Point2d());
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 0, polygon), 0);
+   }
 
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testgetLineOfSightVertexIndices1()
+   {
+      // add vertices in clockwise order so updating the polygon does not change indices
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 1.0));
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.addVertex(new Point2d(1.5, 0.5));
+      polygon.addVertex(new Point2d(1.0, 0.0));
+      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.update();
+
+      Point2d observer1 = new Point2d(-0.5, 0.5);
+      assertIndicesCorrect(new int[] {0, 4}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer1, polygon));
+
+      Point2d observer2 = new Point2d(1.0, -0.5);
+      assertIndicesCorrect(new int[] {4, 2}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer2, polygon));
+
+      Point2d observer3 = new Point2d(-1.0, -2.0 + epsilon);
+      assertIndicesCorrect(new int[] {0, 3}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer3, polygon));
+
+      Point2d observer4 = new Point2d(-1.0, -2.0 - epsilon);
+      assertIndicesCorrect(new int[] {0, 2}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer4, polygon));
+
+      Point2d observer5 = new Point2d(1.5 + epsilon, 0.5);
+      assertIndicesCorrect(new int[] {3, 1}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer5, polygon));
+
+      Point2d observer6 = new Point2d(1.5, 0.5);
+      assertIndicesCorrect(null, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer6, polygon));
+
+      Point2d observer7 = new Point2d(0.5, 0.5);
+      assertIndicesCorrect(null, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer7, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testgetLineOfSightVertexIndices2()
+   {
+      // empty polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+
+      Point2d observer1 = new Point2d(0.5, 0.5);
+      assertIndicesCorrect(null, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer1, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testgetLineOfSightVertexIndices3()
+   {
+      // point polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(-0.5, 0.5));
+      polygon.update();
+
+      Point2d observer1 = new Point2d(-0.5, 0.5);
+      assertIndicesCorrect(null, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer1, polygon));
+
+      Point2d observer2 = new Point2d(0.5, 0.5);
+      assertIndicesCorrect(new int[] {0, 0}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer2, polygon));
+
+      int[] result = new int[] {-1, 7};
+      ConvexPolygon2dCalculator.getLineOfSightVertexIndices(observer2, result, polygon);
+      assertIndicesCorrect(new int[] {0, 0}, result);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testgetLineOfSightVertexIndices4()
+   {
+      // add vertices in clockwise order so updating the polygon does not change indices
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 1.0));
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.update();
+
+      Point2d observer1 = new Point2d(-1.0, 1.0);
+      assertIndicesCorrect(new int[] {0, 1}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer1, polygon));
+
+      Point2d observer2 = new Point2d(0.5, 0.0);
+      assertIndicesCorrect(new int[] {0, 1}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer2, polygon));
+
+      Point2d observer3 = new Point2d(0.5, 1.5);
+      assertIndicesCorrect(new int[] {1, 0}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer3, polygon));
+
+      Point2d observer4 = new Point2d(0.5, 1.0);
+      assertIndicesCorrect(null, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer4, polygon));
+
+      Point2d observer5 = new Point2d(1.0, 1.0);
+      assertIndicesCorrect(null, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer5, polygon));
+   }
+
+   private static void assertIndicesCorrect(int[] expected, int[] actual)
+   {
+      if (expected == null || actual == null)
+      {
+         assertTrue("Expected did not equal actual. One of them was null.", expected == actual);
+         return;
+      }
+
+      assertEquals("Array lengths are not equal.", expected.length, actual.length);
+      for (int i = 0; i < expected.length; i++)
+         assertIndexCorrect(expected[i], actual[i]);
    }
 
    private static void assertIndexCorrect(int expected, int actual)
    {
-      assertEquals("Index did not equal expected.", expected, actual);
+      assertEquals("Index does not equal expected.", expected, actual);
    }
 
    private static void assertDistanceCorrect(double expected, double actual)
    {
-      assertEquals("Distance did not equal expected.", expected, actual, epsilon);
+      assertEquals("Distance does not equal expected.", expected, actual, epsilon);
    }
 
    private static void assertPointsEqual(Point2d expected, Point2d actual)
    {
-      assertTrue("Point did not match expected.", expected.epsilonEquals(actual, epsilon));
+      assertTrue("Point does not match expected.", expected.epsilonEquals(actual, epsilon));
    }
 
    public static void main(String[] args)

@@ -61,7 +61,7 @@ public class ConvexPolygonTools
       {
          verticesIndices[0][0] = 0;
          verticesIndices[0][1] = 0;
-         success = polygon2.getLineOfSightVerticesIndices(polygon1.getVertex(0), verticesIndices[1]);
+         success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon1.getVertex(0), verticesIndices[1], polygon2);
          return success;
       }
 
@@ -69,7 +69,7 @@ public class ConvexPolygonTools
       {
          verticesIndices[1][0] = 0;
          verticesIndices[1][1] = 0;
-         success = polygon1.getLineOfSightVerticesIndices(polygon2.getVertex(0), verticesIndices[0]);
+         success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon2.getVertex(0), verticesIndices[0], polygon1);
          return success;
       }
 
@@ -81,7 +81,7 @@ public class ConvexPolygonTools
       int L1, R1, L2, R2;
 
       // Then find its two line of sight points on polygon 2:
-      success = polygon2.getLineOfSightVerticesIndices(vertex, lineOfSight1);
+      success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(vertex, lineOfSight1, polygon2);
       if (!success)
          return false;
 
@@ -89,10 +89,10 @@ public class ConvexPolygonTools
       R2 = lineOfSight1[1];
 
       // Then find the line of sight vertices on polygon 1:
-      success = polygon1.getLineOfSightVerticesIndices(polygon2.getVertex(R2), lineOfSight1);
+      success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon2.getVertex(R2), lineOfSight1, polygon1);
       if (!success)
          return false;
-      success = polygon1.getLineOfSightVerticesIndices(polygon2.getVertex(L2), lineOfSight2);
+      success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon2.getVertex(L2), lineOfSight2, polygon1);
       if (!success)
          return false;
 
@@ -103,10 +103,10 @@ public class ConvexPolygonTools
       boolean done = false;
       while (!done)
       {
-         success = polygon2.getLineOfSightVerticesIndices(polygon1.getVertex(L1), lineOfSight1);
+         success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon1.getVertex(L1), lineOfSight1, polygon2);
          if (!success)
             return false;
-         success = polygon2.getLineOfSightVerticesIndices(polygon1.getVertex(R1), lineOfSight2);
+         success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon1.getVertex(R1), lineOfSight2, polygon2);
          if (!success)
             return false;
 
@@ -119,10 +119,10 @@ public class ConvexPolygonTools
          L2 = lineOfSight2[0];
          R2 = lineOfSight1[1];
 
-         success = polygon1.getLineOfSightVerticesIndices(polygon2.getVertex(L2), lineOfSight1);
+         success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon2.getVertex(L2), lineOfSight1, polygon1);
          if (!success)
             return false;
-         success = polygon1.getLineOfSightVerticesIndices(polygon2.getVertex(R2), lineOfSight2);
+         success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon2.getVertex(R2), lineOfSight2, polygon1);
          if (!success)
             return false;
 

@@ -78,7 +78,50 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines if the pointToTest is inside the convex polygon.
+    * Determines if the point is inside the bounding box of the convex polygon.
+    */
+   public static boolean isPointInBoundingBox(double pointX, double pointY, double epsilon, ConvexPolygon2d polygon)
+   {
+      BoundingBox2d boundingBox = polygon.getBoundingBox();
+
+      if (pointX < boundingBox.getMinPoint().getX() - epsilon)
+         return false;
+      if (pointY < boundingBox.getMinPoint().getY() - epsilon)
+         return false;
+      if (pointX > boundingBox.getMaxPoint().getX() + epsilon)
+         return false;
+      if (pointY > boundingBox.getMaxPoint().getY() + epsilon)
+         return false;
+
+      return true;
+   }
+
+   /**
+    * Determines if the point is inside the bounding box of the convex polygon.
+    */
+   public static boolean isPointInBoundingBox(double pointX, double pointY, ConvexPolygon2d polygon)
+   {
+      return isPointInBoundingBox(pointX, pointY, 0.0, polygon);
+   }
+
+   /**
+    * Determines if the pointToTest is inside the bounding box of the convex polygon.
+    */
+   public static boolean isPointInBoundingBox(Point2d pointToTest, double epsilon, ConvexPolygon2d polygon)
+   {
+      return isPointInBoundingBox(pointToTest.x, pointToTest.y, epsilon, polygon);
+   }
+
+   /**
+    * Determines if the point is inside the bounding box of the convex polygon.
+    */
+   public static boolean isPointInBoundingBox(Point2d pointToTest, ConvexPolygon2d polygon)
+   {
+      return isPointInBoundingBox(pointToTest, 0.0, polygon);
+   }
+
+   /**
+    * Determines if the point is inside the convex polygon.
     */
    public static boolean isPointInside(double pointX, double pointY, double epsilon, ConvexPolygon2d polygon)
    {
@@ -126,7 +169,7 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Determines if the pointToTest is inside the convex polygon.
+    * Determines if the point is inside the convex polygon.
     */
    public static boolean isPointInside(double pointX, double pointY, ConvexPolygon2d polygon)
    {
@@ -265,6 +308,64 @@ public class ConvexPolygon2dCalculator
          return (secondIndex + firstIndex + 1) / 2;
    }
 
+   /**
+    * An observer looking at the polygon from the outside will see two vertices at the outside edges of the
+    * polygon. This method packs the indices corresponding to this vertices. The vertex on the left from the
+    * observer point of view will be the first vertex packed. The argument verticesIndices is expected to
+    * have at least length two. If it is longer only the first two entries will be used.
+    */
+   public static boolean getLineOfSightVertexIndices(Point2d observer, int[] verticesIndices, ConvexPolygon2d polygon)
+   {
+      if (!polygon.hasAtLeastOneVertex())
+         return false;
+
+      if (polygon.hasExactlyOneVertex())
+      {
+         if (isPointInside(observer, polygon))
+            return false;
+
+         verticesIndices[0] = 0;
+         verticesIndices[1] = 0;
+         return true;
+      }
+
+      if (polygon.hasExactlyTwoVertices())
+      {
+         if (isPointInside(observer, polygon))
+            return false;
+
+         verticesIndices[0] = getVertexOnLeft(0, 1, observer, polygon);
+         verticesIndices[1] = verticesIndices[0] == 0 ? 1 : 0;
+         return true;
+      }
+
+      int numberOfVertices = polygon.getNumberOfVertices();
+      boolean edgeVisible = ConvexPolygon2dCalculator.canObserverSeeEdge(numberOfVertices-1, observer, polygon);
+      int foundCorners = 0;
+      for (int i = 0; i < numberOfVertices; i++)
+      {
+         boolean nextEdgeVisible = ConvexPolygon2dCalculator.canObserverSeeEdge(i, observer, polygon);
+         if (edgeVisible && !nextEdgeVisible)
+         {
+            verticesIndices[0] = i;
+            foundCorners++;
+         }
+         if (!edgeVisible && nextEdgeVisible)
+         {
+            verticesIndices[1] = i;
+            foundCorners++;
+         }
+
+         if (foundCorners == 2) break; // performance only
+         edgeVisible = nextEdgeVisible;
+      }
+
+      if (foundCorners != 2)
+         return false;
+
+      return true;
+   }
+
    // --- Methods that generate garbage ---
    public static Point2d getClosestVertexCopy(Line2d line, ConvexPolygon2d polygon)
    {
@@ -287,6 +388,14 @@ public class ConvexPolygon2dCalculator
       ConvexPolygon2d ret = new ConvexPolygon2d(polygon);
       translatePolygon(translation, ret);
       return ret;
+   }
+
+   public static int[] getLineOfSightVertexIndicesCopy(Point2d observerPoint2d, ConvexPolygon2d polygon)
+   {
+      int[] ret = new int[2];
+      if (getLineOfSightVertexIndices(observerPoint2d, ret, polygon))
+         return ret;
+      return null;
    }
 
 }
