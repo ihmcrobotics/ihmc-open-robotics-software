@@ -137,7 +137,6 @@ public class ConvexPolygon2dCalculatorTest
       Point2d closestVertex = new Point2d();
 
       assertFalse(ConvexPolygon2dCalculator.getClosestVertex(new Point2d(), polygon, closestVertex));
-      assertTrue(Double.isNaN(closestVertex.x) && Double.isNaN(closestVertex.y));
       assertTrue(ConvexPolygon2dCalculator.getClosestVertexCopy(new Point2d(), polygon) == null);
    }
 
@@ -166,6 +165,9 @@ public class ConvexPolygon2dCalculatorTest
 
       Line2d line4 = new Line2d(new Point2d(12.0, 0.0), new Point2d(0.0, 11.0));
       assertPointsEqual(vertex3, ConvexPolygon2dCalculator.getClosestVertexCopy(line4, polygon));
+
+      Line2d line5 = new Line2d(new Point2d(-1.0, 13.0), new Point2d(1.0, 14.0));
+      assertPointsEqual(vertex3, ConvexPolygon2dCalculator.getClosestVertexCopy(line5, polygon));
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -177,7 +179,6 @@ public class ConvexPolygon2dCalculatorTest
       Point2d closestVertex = new Point2d();
 
       assertFalse(ConvexPolygon2dCalculator.getClosestVertex(new Line2d(), polygon, closestVertex));
-      assertTrue(Double.isNaN(closestVertex.x) && Double.isNaN(closestVertex.y));
       assertTrue(ConvexPolygon2dCalculator.getClosestVertexCopy(new Line2d(), polygon) == null);
    }
 
