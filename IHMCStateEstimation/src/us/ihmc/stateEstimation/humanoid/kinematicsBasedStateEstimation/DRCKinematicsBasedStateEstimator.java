@@ -61,6 +61,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
    private final ForceSensorStateUpdater forceSensorStateUpdater;
    private final IMUBiasStateEstimator imuBiasStateEstimator;
+   private final IMUYawDriftCompensator imuYawDriftCompensator;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
@@ -132,6 +133,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       boolean isAccelerationIncludingGravity = stateEstimatorParameters.cancelGravityFromAccelerationMeasurement();
       imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), twistCalculator, gravitationalAcceleration, isAccelerationIncludingGravity, estimatorDT, registry);
       imuBiasStateEstimator.configureModuleParameters(stateEstimatorParameters);
+      imuYawDriftCompensator = new IMUYawDriftCompensator(inverseDynamicsStructure, footSwitches, feet, estimatorDT, registry);
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
       if (imusToUse.size() > 0)
@@ -257,6 +259,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
             {
                pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
             }
+
+            imuYawDriftCompensator.update();
             if(forceSensorStateUpdater != null)
             {
                forceSensorStateUpdater.updateForceSensorState();
