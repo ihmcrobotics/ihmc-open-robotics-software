@@ -770,22 +770,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return minDistance;
    }
 
-   public Line2d[] getLinesOfSight(Point2d observerPoint)
-   {
-      checkIfUpToDate();
-      Point2d[] lineOfSightVertices = getLineOfSightVerticesCopy(observerPoint);
-
-      if ((lineOfSightVertices == null) || (lineOfSightVertices.length < 1))
-         return null;
-
-      if (lineOfSightVertices.length == 1)
-      {
-         return new Line2d[] { new Line2d(observerPoint, lineOfSightVertices[0]) };
-      }
-
-      return new Line2d[] { new Line2d(observerPoint, lineOfSightVertices[0]), new Line2d(observerPoint, lineOfSightVertices[1]) };
-   }
-
    /**
     * Returns all of the vertices that are visible from the observerPoint2d, in left to right order.
     * If the observerPoint2d is inside the polygon, returns null.
@@ -807,7 +791,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          return points;
       }
 
-      int[] indices = getLineOfSightVerticesIndicesCopy(observerPoint2d);
+      int[] indices = ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observerPoint2d, this);
 
       if (indices == null)
          return null;
@@ -836,7 +820,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public Point2d[] getLineOfSightVerticesCopy(Point2d observerPoint2d)
    {
       checkIfUpToDate();
-      int[] indices = getLineOfSightVerticesIndicesCopy(observerPoint2d);
+      int[] indices = ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observerPoint2d, this);
 
       if (indices == null)
          return null;
@@ -868,7 +852,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public LineSegment2d[] getAroundTheCornerEdgesCopy(Point2d observerPoint2d)
    {
       checkIfUpToDate();
-      int[] indices = getLineOfSightVerticesIndicesCopy(observerPoint2d);
+      int[] indices = ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observerPoint2d, this);
 
       // TODO indices == null || indices.length == 1 is deprecated
       if (indices == null || indices.length == 1 || indices[0] == indices[1])
@@ -895,17 +879,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       LineSegment2d rightLineSegment = new LineSegment2d(rightPoint, rightPointAroundCorner);
 
       return new LineSegment2d[] { leftLineSegment, rightLineSegment };
-   }
-
-   protected int[] getLineOfSightVerticesIndicesCopy(Point2d observerPoint2d)
-   {
-      int[] verticesIndices = new int[2];
-      boolean succeeded = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(observerPoint2d, verticesIndices, this);
-
-      if (!succeeded)
-         return null;
-
-      return verticesIndices;
    }
 
    public LineSegment2d[] getNearestEdges(Point2d testPoint)

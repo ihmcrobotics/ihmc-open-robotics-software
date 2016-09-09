@@ -2053,7 +2053,6 @@ public class ConvexPolygon2dTest
          Line2d arbitraryLine = new Line2d(arbitraryPoint0, arbitraryPoint1);
          LineSegment2d arbitraryLineSegment = new LineSegment2d(arbitraryPoint0, arbitraryPoint1);
 
-//         assertFalse(polygonWithOnePoint.areAllPointsInside(new Point2d[] {arbitraryPoint0}));
          assertEquals(pointThatDefinesThePolygon.distance(arbitraryPoint0), polygonWithOnePoint.distanceToClosestVertex(arbitraryPoint0), epsilon);
          assertTrue(polygonWithOnePoint.getAllVisibleVerticesFromOutsideLeftToRightCopy(arbitraryPoint0).get(0).equals(pointThatDefinesThePolygon));
          assertEquals(0.0, polygonWithOnePoint.getArea(), epsilon);
@@ -2072,8 +2071,6 @@ public class ConvexPolygon2dTest
          assertTrue(polygonWithOnePoint.getIntersectingEdges(arbitraryLine) == null);
          assertEquals(1, polygonWithOnePoint.getLineOfSightVerticesCopy(arbitraryPoint0).length);
          assertTrue(polygonWithOnePoint.getLineOfSightVerticesCopy(arbitraryPoint0)[0].equals(pointThatDefinesThePolygon));
-         assertEquals(1, polygonWithOnePoint.getLinesOfSight(arbitraryPoint0).length);
-         assertTrue(polygonWithOnePoint.getLinesOfSight(arbitraryPoint0)[0].equals(new Line2d(arbitraryPoint0, pointThatDefinesThePolygon)));
          assertTrue(polygonWithOnePoint.getCentroid().equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getNearestEdges(arbitraryPoint0) == null);
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
@@ -2173,7 +2170,6 @@ public class ConvexPolygon2dTest
          LineSegment2d arbitraryLineSegment = new LineSegment2d(arbitraryPoint0, arbitraryPoint1);
 
          // one line tests
-//         assertFalse(polygonWithTwoPoints.areAllPointsInside(new Point2d[] { arbitraryPoint0 }));
          assertEquals(Math.min(pointThatDefinesThePolygon0.distance(arbitraryPoint0), pointThatDefinesThePolygon1.distance(arbitraryPoint0)),
                polygonWithTwoPoints.distanceToClosestVertex(arbitraryPoint0), epsilon);
          assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1,
@@ -2216,12 +2212,6 @@ public class ConvexPolygon2dTest
          // getCounterClockwiseOrderedListOfPointsCopy
          assertEqualsInEitherOrder(polygonWithTwoPoints.getVertexCCW(0), polygonWithTwoPoints.getVertexCCW(1), pointThatDefinesThePolygon0,
                pointThatDefinesThePolygon1);
-
-         // getLinesOfSight
-         Line2d[] linesOfSight = polygonWithTwoPoints.getLinesOfSight(arbitraryPoint0);
-         assertEquals(2, linesOfSight.length);
-         assertEqualsInEitherOrder(linesOfSight[0], linesOfSight[1], new Line2d(arbitraryPoint0, pointThatDefinesThePolygon0), new Line2d(arbitraryPoint0,
-               pointThatDefinesThePolygon1));
 
          // getLineOfSightVertices
          assertEquals(2, polygonWithTwoPoints.getLineOfSightVerticesCopy(arbitraryPoint0).length);

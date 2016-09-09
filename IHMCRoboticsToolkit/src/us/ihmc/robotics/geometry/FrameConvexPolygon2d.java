@@ -811,23 +811,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return ConvexPolygon2dCalculator.isPointInside(framePoint.tuple, epsilon, this.convexPolygon);
    }
 
-   public FrameLine2d[] getLinesOfSight(FramePoint2d observerFramePoint)
-   {
-      this.checkReferenceFrameMatch(observerFramePoint);
-      Line2d[] linesOfSight = this.convexPolygon.getLinesOfSight(observerFramePoint.getPointCopy());
-
-      if (linesOfSight == null)
-         return null;
-
-      FrameLine2d[] ret = new FrameLine2d[linesOfSight.length];
-      for (int i = 0; i < linesOfSight.length; i++)
-      {
-         ret[i] = new FrameLine2d(observerFramePoint.getReferenceFrame(), linesOfSight[i]);
-      }
-
-      return ret;
-   }
-
    /**
     * Returns all of the vertices that are visible from the observerPoint2d, in left to right order.
     * If the observerPoint2d is inside the polygon, returns null.
