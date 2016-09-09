@@ -9,7 +9,6 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
