@@ -12,7 +12,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.Flaky)
+@DeployableTestClass(targets = TestPlanTarget.Slow)
 public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
 {
    private final AtlasRobotModel robotModel;
