@@ -23,6 +23,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.tools.FormattingTools;
 
@@ -151,6 +152,19 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       estimatedYawDriftRate.update(0.0);
 
 //      configureModuleParameters(true, true, 0.5, 0.8, 0.04, 1.5e-3);
+   }
+
+   public void configureModuleParameters(StateEstimatorParameters stateEstimatorParameters)
+   {
+      this.enableCompensation.set(stateEstimatorParameters.enableIMUYawDriftCompensation());
+      this.integrateDriftRate.set(stateEstimatorParameters.integrateEstimatedIMUYawDriftRate());
+      this.delayBeforeTrustingFoot.set(stateEstimatorParameters.getIMUYawDriftEstimatorDelayBeforeTrustingFoot());
+      this.footLinearVelocityThreshold.set(stateEstimatorParameters.getIMUYawDriftFootLinearVelocityThreshold());
+
+      double driftFilterFrequency = stateEstimatorParameters.getIMUYawDriftFilterFreqInHertz();
+      double driftRateFilterFrequency = stateEstimatorParameters.getIMUYawDriftRateFilterFreqInHertz();
+      this.yawDriftAlphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(driftFilterFrequency, this.estimatorDT));
+      this.yawDriftRateAlphaFilter.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(driftRateFilterFrequency, this.estimatorDT));
    }
 
    public void configureModuleParameters(boolean enableCompensation, boolean integrateRate, double delayBeforeTrustingFoot, double footLinearVelocityThreshold, double driftFilterFrequency, double driftRateFilterFrequency)
