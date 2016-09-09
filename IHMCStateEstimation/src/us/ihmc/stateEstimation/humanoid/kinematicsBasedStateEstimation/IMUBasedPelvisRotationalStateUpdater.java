@@ -53,14 +53,22 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
    private final IMUSensorReadOnly imuProcessedOutput;
    private final IMUBiasProvider imuBiasProvider;
+   private final YawDriftProvider yawDriftProvider;
 
    private final ReferenceFrame measurementFrame;
    private final RigidBody measurementLink;
 
-   public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, IMUBiasProvider imuBiasProvider, double dt,
-         YoVariableRegistry parentRegistry)
+   public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+         double dt, YoVariableRegistry parentRegistry)
+   {
+      this(inverseDynamicsStructure, imuProcessedOutputs, null, null, dt, parentRegistry);
+   }
+
+   public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+         IMUBiasProvider imuBiasProvider, YawDriftProvider yawDriftProvider, double dt, YoVariableRegistry parentRegistry)
    {
       this.imuBiasProvider = imuBiasProvider;
+      this.yawDriftProvider = yawDriftProvider;
       checkNumberOfSensors(imuProcessedOutputs);
 
       imuProcessedOutput = imuProcessedOutputs.get(0);
@@ -213,7 +221,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
       if (imuBiasProvider != null)
       {
-         yawBiasMatrix.rotZ(imuBiasProvider.getYawBiasInWorldFrame(imuProcessedOutput));
+         yawBiasMatrix.rotZ(yawDriftProvider.getYawBiasInWorldFrame());
          yawBiasMatrix.transpose();
          rotationFromRootJointFrameToWorld.mul(yawBiasMatrix, rotationFromRootJointFrameToWorld);
       }

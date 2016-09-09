@@ -5,8 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Matrix3d;
-
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -22,14 +20,13 @@ import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.tools.FormattingTools;
 
-public class IMUYawDriftCompensator
+public class IMUYawDriftEstimator implements YawDriftProvider
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -69,7 +66,6 @@ public class IMUYawDriftCompensator
    private final BooleanYoVariable enableCompensation = new BooleanYoVariable("enableIMUDriftYawCompensation", registry);
    private final BooleanYoVariable integrateDriftRate = new BooleanYoVariable("integrateDriftRate", registry);
 
-   private final SixDoFJoint rootJoint;
    private final TwistCalculator twistCalculator;
 
    private final FramePoint footPosition = new FramePoint();
@@ -81,11 +77,10 @@ public class IMUYawDriftCompensator
 
    private final double estimatorDT;
 
-   public IMUYawDriftCompensator(FullInverseDynamicsStructure inverseDynamicsStructure, Map<RigidBody, FootSwitchInterface> footSwitches,
+   public IMUYawDriftEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, Map<RigidBody, FootSwitchInterface> footSwitches,
          Map<RigidBody, ? extends ContactablePlaneBody> feet, final double estimatorDT, YoVariableRegistry parentRegistry)
    {
       this.estimatorDT = estimatorDT;
-      this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       this.footSwitches = footSwitches;
       allFeet = new ArrayList<>(footSwitches.keySet());
@@ -168,9 +163,6 @@ public class IMUYawDriftCompensator
       this.footLinearVelocityThreshold.set(footLinearVelocityThreshold);
    }
 
-   private final Matrix3d yawDriftMatrix = new Matrix3d();
-   private final Matrix3d rootJointRotationMatrix = new Matrix3d();
-
    public void update()
    {
       updateFootLinearVelocities();
@@ -179,16 +171,8 @@ public class IMUYawDriftCompensator
       estimateYawDriftPerFoot();
       updateYawDrift();
 
-      totalEstimatedYawDrift.set(previouslyEstimatedYawDrift.getDoubleValue() + estimatedFilteredYawDrift.getDoubleValue());
-
       if (enableCompensation.getBooleanValue())
-      {
-         rootJoint.getRotation(rootJointRotationMatrix);
-         yawDriftMatrix.rotZ(totalEstimatedYawDrift.getDoubleValue());
-         rootJointRotationMatrix.mulTransposeLeft(yawDriftMatrix, rootJointRotationMatrix);
-         rootJoint.setRotation(rootJointRotationMatrix);
-         rootJoint.updateFramesRecursively();
-      }
+         totalEstimatedYawDrift.set(previouslyEstimatedYawDrift.getDoubleValue() + estimatedFilteredYawDrift.getDoubleValue());
    }
 
    private void updateFootLinearVelocities()
@@ -216,7 +200,7 @@ public class IMUYawDriftCompensator
          boolean hasFootHitGround = footSwitches.get(foot).hasFootHitGround();
          boolean isFootStatic = currentFootLinearVelocities.get(foot).getDoubleValue() < footLinearVelocityThreshold.getDoubleValue();
 
-         if (hasFootHitGround && isFootStatic)
+         if (enableCompensation.getBooleanValue() && hasFootHitGround && isFootStatic)
             isFootTrusted.update(true);
          else
             isFootTrusted.set(false);
@@ -353,5 +337,11 @@ public class IMUYawDriftCompensator
          estimatedYawDriftRate.update(rate);
       }
       estimatedYawDriftPrevious.set(estimatedYawDrift.getDoubleValue());
+   }
+
+   @Override
+   public double getYawBiasInWorldFrame()
+   {
+      return totalEstimatedYawDrift.getDoubleValue();
    }
 }
