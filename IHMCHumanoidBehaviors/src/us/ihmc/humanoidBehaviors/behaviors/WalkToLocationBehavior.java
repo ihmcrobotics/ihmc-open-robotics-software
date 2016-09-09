@@ -56,6 +56,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
    private final YoFramePose robotYoPose = new YoFramePose("robotYoPose", worldFrame, registry);
 
    private final BooleanYoVariable hasTargetBeenProvided = new BooleanYoVariable("hasTargetBeenProvided", registry);
+   private final BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
    private final BooleanYoVariable haveFootstepsBeenGenerated = new BooleanYoVariable("haveFootstepsBeenGenerated", registry);
 
    private final YoFramePoint targetLocation = new YoFramePoint(getName() + "TargetLocation", worldFrame, registry);
@@ -135,7 +136,8 @@ public class WalkToLocationBehavior extends AbstractBehavior
       }
 
       hasTargetBeenProvided.set(true);
-      generateFootsteps();
+      haveFootstepsBeenGenerated.set(false);
+      hasInputBeenSet.set(true);
    }
 
    private double computeFrameOrientationRelativeToWalkingPath(ReferenceFrame referenceFrame)
@@ -179,6 +181,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
    {
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
+      hasInputBeenSet.set(false);
       footstepListBehavior.initialize();
 
       robotPose.setToZero(fullRobotModel.getRootJoint().getFrameAfterJoint());
@@ -343,15 +346,14 @@ public class WalkToLocationBehavior extends AbstractBehavior
       isStopped.set(false);
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
+      hasInputBeenSet.set(false);
       footstepListBehavior.doPostBehaviorCleanup();
    }
 
+   @Override
    public boolean hasInputBeenSet()
    {
-      if (haveFootstepsBeenGenerated.getBooleanValue())
-         return true;
-      else
-         return false;
+      return (hasInputBeenSet.getBooleanValue());
    }
 
    public void setFootstepLength(double footstepLength)

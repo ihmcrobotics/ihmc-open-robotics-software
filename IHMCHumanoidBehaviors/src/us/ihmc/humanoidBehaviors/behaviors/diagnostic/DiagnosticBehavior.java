@@ -160,7 +160,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private final WalkingControllerParameters walkingControllerParameters;
 
-   private enum DiagnosticTask
+   public enum DiagnosticTask
    {
       CHEST_ROTATIONS,
       PELVIS_ROTATIONS,
@@ -1162,7 +1162,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       //      submitFootPose(parallelize, robotSide, ankleZUpFrame, -0.5, robotSide.negateIfRightSide(0.02), 0.30, 0.0, 2.4, 0.0);
       //      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
       //      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.3), 0.20, 0.0, 0.0, robotSide.negateIfRightSide(0.5));
-      //      
+      //
 
       //put the foot back on the ground
       submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
@@ -1769,7 +1769,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       SideDependentList<double[]> armsDown1 = computeSymmetricArmJointAngles(upperArmDown1, 0.0, null, true);
 
       int numberOfHandPoses = 10;
-      
+
       TrajectoryPoint1DCalculator calculator = new TrajectoryPoint1DCalculator();
 
       for (RobotSide flyingSide : RobotSide.values)
@@ -2493,6 +2493,11 @@ public class DiagnosticBehavior extends AbstractBehavior
          }
          requestedDiagnostic.set(null);
       }
+   }
+
+   public void requestDiagnosticBehavior(DiagnosticTask diagnosticTask)
+   {
+      requestedDiagnostic.set(diagnosticTask);
    }
 
    private void sequenceTurnInPlace()
