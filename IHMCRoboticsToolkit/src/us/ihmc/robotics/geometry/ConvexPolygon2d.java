@@ -897,193 +897,10 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return new LineSegment2d[] { leftLineSegment, rightLineSegment };
    }
 
-   protected boolean getLineOfSightVerticesIndices(Point2d observerPoint2d, int[] verticesIndices)
-   {
-      checkIfUpToDate();
-      if (hasExactlyOneVertex() && !getVertex(0).equals(observerPoint2d))
-      {
-         verticesIndices[0] = 0;
-         verticesIndices[0] = 0;
-         return true;
-      }
-
-      // At any time we'll hold onto 4 edge indices. -1 signifies not found yet:
-      int leavingRightEdge = -1, leavingLeftEdge = -1, enteringLeftEdge = -1, enteringRightEdge = -1;
-
-      // First choose an edge at random. An edge index will be signified by its first vertex in clockwise order.
-      int firstEdgeIndex = numberOfVertices / 2;
-
-      if (DEBUG) System.out.println("firstEdgeIndex = " + firstEdgeIndex);
-
-      if (ConvexPolygon2dCalculator.canObserverSeeEdge(firstEdgeIndex, observerPoint2d, this))
-      {
-         if (DEBUG) System.out.println("firstEdgeIndex is Entering");
-
-         enteringLeftEdge = firstEdgeIndex;
-         enteringRightEdge = firstEdgeIndex;
-      }
-      else
-      {
-         if (DEBUG) System.out.println("firstEdgeIndex is Leaving");
-
-         leavingLeftEdge = firstEdgeIndex;
-         leavingRightEdge = firstEdgeIndex;
-      }
-
-      // Now we need to search for the other two edges:
-      boolean foundLeavingEdges = (leavingRightEdge >= 0) && (leavingLeftEdge >= 0);
-      boolean foundEnteringEdges = (enteringRightEdge >= 0) && (enteringLeftEdge >= 0);
-
-      if (DEBUG)
-      {
-         System.out.println("foundLeavingEdges is " + foundLeavingEdges);
-         System.out.println("foundEnteringEdges is " + foundEnteringEdges);
-      }
-
-      while (!foundLeavingEdges)
-      {
-         int edgeToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(enteringRightEdge, enteringLeftEdge, this);
-
-         if (DEBUG)
-            System.out.println("edgeToTest is " + edgeToTest);
-
-         if ((edgeToTest == enteringLeftEdge) || (edgeToTest == enteringRightEdge))
-         {
-            throw new RuntimeException("Couldn't find a leaving edge! This should never happen!!");
-         }
-
-         if (ConvexPolygon2dCalculator.canObserverSeeEdge(edgeToTest, observerPoint2d, this))
-         {
-            if (DEBUG)
-               System.out.println("edgeToTest is entering ");
-
-            // Figure out if the edgeToTest should replace the leftEdge or the rightEdge:
-            enteringLeftEdge = ConvexPolygon2dCalculator.getVertexOnLeft(edgeToTest, enteringLeftEdge, observerPoint2d, this);
-            enteringRightEdge = ConvexPolygon2dCalculator.getVertexOnRight(edgeToTest, enteringRightEdge, observerPoint2d, this);
-         }
-
-         else
-         {
-            if (DEBUG)
-               System.out.println("edgeToTest is leaving ");
-
-            foundLeavingEdges = true;
-
-            leavingRightEdge = edgeToTest;
-            leavingLeftEdge = edgeToTest;
-         }
-      }
-
-      while (!foundEnteringEdges)
-      {
-         int edgeToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(leavingLeftEdge, leavingRightEdge, this);
-
-         if (DEBUG) System.out.println("edgeToTest is " + edgeToTest);
-
-         if ((edgeToTest == leavingLeftEdge) || (edgeToTest == leavingRightEdge))
-         {
-            if (DEBUG)
-               throw new RuntimeException("Couldn't find an entering edge! Must be inside!!");
-            else
-               return false;
-         }
-
-         if (ConvexPolygon2dCalculator.canObserverSeeEdge(edgeToTest, observerPoint2d, this))
-         {
-            if (DEBUG) System.out.println("edgeToTest is entering ");
-
-            foundEnteringEdges = true;
-
-            enteringRightEdge = edgeToTest;
-            enteringLeftEdge = edgeToTest;
-         }
-         else
-         {
-            if (DEBUG) System.out.println("edgeToTest is leaving ");
-
-            // Figure out if the edgeToTest should replace the leftEdge or the rightEdge:
-            int newLeavingLeftEdge = ConvexPolygon2dCalculator.getVertexOnLeft(edgeToTest, leavingLeftEdge, observerPoint2d, this);
-            int newLeavingRightEdge = ConvexPolygon2dCalculator.getVertexOnRight(edgeToTest, leavingRightEdge, observerPoint2d, this);
-
-            if ((newLeavingLeftEdge == leavingLeftEdge) && (newLeavingRightEdge == leavingRightEdge))
-            {
-               // Will loop forever if you don't do something about it!
-               throw new RuntimeException("Looping forever!");
-            }
-
-            leavingLeftEdge = newLeavingLeftEdge;
-            leavingRightEdge = newLeavingRightEdge;
-
-            if (leavingLeftEdge == leavingRightEdge)
-            {
-               if (DEBUG)
-                  throw new RuntimeException("Start Point must have been inside the polygon!!");
-               else
-                  return false;
-
-            }
-
-            if (DEBUG)
-            {
-               System.out.println("New leavingLeftEdge = " + leavingLeftEdge);
-               System.out.println("New leavingRightEdge = " + leavingLeftEdge);
-            }
-         }
-      }
-
-      // Now binary search till their are no gaps:
-      if (DEBUG) System.out.println("leavingLeftEdge = " + leavingLeftEdge + ", enteringLeftEdge = " + enteringLeftEdge + ". Binary search to reduce gaps.");
-
-      while (getNextVertexIndex(enteringLeftEdge) != leavingLeftEdge)
-      {
-         int edgeToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(leavingLeftEdge, enteringLeftEdge, this);
-         if (ConvexPolygon2dCalculator.canObserverSeeEdge(edgeToTest, observerPoint2d, this))
-         {
-            enteringLeftEdge = edgeToTest;
-         }
-         else
-         {
-            leavingLeftEdge = edgeToTest;
-         }
-
-         if (DEBUG)
-            System.out.println("leavingLeftEdge = " + leavingLeftEdge + ", enteringLeftEdge = " + enteringLeftEdge);
-
-      }
-
-      if (DEBUG)
-         System.out.println("leavingRightEdge = " + leavingRightEdge + ", enteringRightEdge = " + enteringRightEdge + ". Binary search to reduce gaps");
-
-      while (getNextVertexIndex(leavingRightEdge) != enteringRightEdge)
-      {
-         int edgeToTest = ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(enteringRightEdge, leavingRightEdge, this);
-         if (ConvexPolygon2dCalculator.canObserverSeeEdge(edgeToTest, observerPoint2d, this))
-         {
-            enteringRightEdge = edgeToTest;
-         }
-         else
-         {
-            leavingRightEdge = edgeToTest;
-         }
-
-         if (DEBUG)
-            System.out.println("leavingRightEdge = " + leavingRightEdge + ", enteringRightEdge = " + enteringRightEdge);
-
-      }
-
-      // Now the edges are adjacent. Want the common nodes:
-      if (DEBUG)
-         System.out.println("leftPoint = " + leavingLeftEdge + ", rightPoint = " + enteringRightEdge);
-
-      verticesIndices[0] = leavingLeftEdge;
-      verticesIndices[1] = enteringRightEdge;
-      return true;
-   }
-
    protected int[] getLineOfSightVerticesIndicesCopy(Point2d observerPoint2d)
    {
       int[] verticesIndices = new int[2];
-      boolean succeeded = getLineOfSightVerticesIndices(observerPoint2d, verticesIndices);
+      boolean succeeded = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(observerPoint2d, verticesIndices, this);
 
       if (!succeeded)
          return null;
@@ -1121,7 +938,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          throw new RuntimeException("Expected array of length two");
 
       // First find the line of sight vertices. If inside the Polygon, then return null.
-      if (!getLineOfSightVerticesIndices(pointToProject, tempTwoIndices))
+      if (!ConvexPolygon2dCalculator.getLineOfSightVertexIndices(pointToProject, tempTwoIndices, this))
       {
          indicesToPack[0] = -1;
          indicesToPack[1] = -1;
@@ -1638,7 +1455,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       line2d.getPoint(tempPoint); // line start
       line2d.getNormalizedVector(tempVector1); // line direction
 
-      boolean foundLineOfSightVertices = getLineOfSightVerticesIndices(tempPoint, tempTwoIndices);
+      boolean foundLineOfSightVertices = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(tempPoint, tempTwoIndices, this);
       int leftLineOfSightVertex = tempTwoIndices[0];
       int rightLineOfSightVertex = tempTwoIndices[1];
 
