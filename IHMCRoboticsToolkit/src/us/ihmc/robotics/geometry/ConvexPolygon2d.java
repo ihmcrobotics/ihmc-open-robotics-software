@@ -817,29 +817,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return ret;
    }
 
-   public Point2d[] getLineOfSightVerticesCopy(Point2d observerPoint2d)
-   {
-      checkIfUpToDate();
-      int[] indices = ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observerPoint2d, this);
-
-      if (indices == null)
-         return null;
-
-      // TODO indices.length == 1 is deprecated
-      if (indices.length == 1 || indices[0] == indices[1])
-      {
-         return new Point2d[]{new Point2d(getVertex(indices[0]))};
-      }
-
-      int leavingLeftEdge = indices[0];
-      int enteringRightEdge = indices[1];
-
-      Point2d leftPoint = new Point2d(getVertex(leavingLeftEdge));
-      Point2d rightPoint = new Point2d(getVertex(enteringRightEdge));
-
-      return new Point2d[] { leftPoint, rightPoint };
-   }
-
    /**
     * Returns the two LineSegment2ds that are the first segments around the corner that cannot be seen from the observerPoint2d.
     * If the observerPoint2d is null returns null. The line segments are returned in order of left, then right.
