@@ -724,53 +724,59 @@ public class ConvexPolygon2dCalculatorTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 3000)
-   public void testgetLineOfSightVertexIndices1()
+   public void testgetLineOfSightVertices1()
    {
-      // add vertices in clockwise order so updating the polygon does not change indices
+      Point2d vertex1 = new Point2d(0.0, 1.0);
+      Point2d vertex2 = new Point2d(1.0, 1.0);
+      Point2d vertex3 = new Point2d(1.5, 0.5);
+      Point2d vertex4 = new Point2d(1.0, 0.0);
+      Point2d vertex5 = new Point2d(0.0, 0.0);
+
       ConvexPolygon2d polygon = new ConvexPolygon2d();
-      polygon.addVertex(new Point2d(0.0, 1.0));
-      polygon.addVertex(new Point2d(1.0, 1.0));
-      polygon.addVertex(new Point2d(1.5, 0.5));
-      polygon.addVertex(new Point2d(1.0, 0.0));
-      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.addVertex(vertex1);
+      polygon.addVertex(vertex2);
+      polygon.addVertex(vertex3);
+      polygon.addVertex(vertex4);
+      polygon.addVertex(vertex5);
       polygon.update();
 
       Point2d observer1 = new Point2d(-0.5, 0.5);
-      assertIndicesCorrect(new int[] {0, 4}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer1, polygon));
+      assertPointsEqual(new Point2d[] {vertex1, vertex5}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer1, polygon));
 
       Point2d observer2 = new Point2d(1.0, -0.5);
-      assertIndicesCorrect(new int[] {4, 2}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer2, polygon));
+      assertPointsEqual(new Point2d[] {vertex5, vertex3}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer2, polygon));
 
       Point2d observer3 = new Point2d(-1.0, -2.0 + epsilon);
-      assertIndicesCorrect(new int[] {0, 3}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer3, polygon));
+      assertPointsEqual(new Point2d[] {vertex1, vertex4}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer3, polygon));
 
       Point2d observer4 = new Point2d(-1.0, -2.0 - epsilon);
-      assertIndicesCorrect(new int[] {0, 2}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer4, polygon));
+      assertPointsEqual(new Point2d[] {vertex1, vertex3}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer4, polygon));
 
       Point2d observer5 = new Point2d(1.5 + epsilon, 0.5);
-      assertIndicesCorrect(new int[] {3, 1}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer5, polygon));
+      assertPointsEqual(new Point2d[] {vertex4, vertex2}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer5, polygon));
 
-      Point2d observer6 = new Point2d(1.5, 0.5);
-      assertIndicesCorrect(null, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer6, polygon));
+      Point2d observer6 = vertex3;
+      assertPointsEqual(null, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer6, polygon));
 
       Point2d observer7 = new Point2d(0.5, 0.5);
-      assertIndicesCorrect(null, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer7, polygon));
+      assertPointsEqual(null, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer7, polygon));
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 3000)
-   public void testgetLineOfSightVertexIndices2()
+   public void testgetLineOfSightVertices2()
    {
       // empty polygon
       ConvexPolygon2d polygon = new ConvexPolygon2d();
 
       Point2d observer1 = new Point2d(0.5, 0.5);
       assertIndicesCorrect(null, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer1, polygon));
+      assertPointsEqual(null, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer1, polygon));
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 3000)
-   public void testgetLineOfSightVertexIndices3()
+   public void testgetLineOfSightVertexIndices1()
    {
       // point polygon
       ConvexPolygon2d polygon = new ConvexPolygon2d();
@@ -812,6 +818,19 @@ public class ConvexPolygon2dCalculatorTest
 
       Point2d observer5 = new Point2d(1.0, 1.0);
       assertIndicesCorrect(null, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer5, polygon));
+   }
+
+   private static void assertPointsEqual(Point2d[] expected, Point2d[] actual)
+   {
+      if (expected == null || actual == null)
+      {
+         assertTrue("Expected did not equal actual. One of them was null.", expected == actual);
+         return;
+      }
+
+      assertEquals("Array lengths are not equal.", expected.length, actual.length);
+      for (int i = 0; i < expected.length; i++)
+         assertPointsEqual(expected[i], actual[i]);
    }
 
    private static void assertIndicesCorrect(int[] expected, int[] actual)

@@ -420,4 +420,15 @@ public class ConvexPolygon2dCalculator
       return null;
    }
 
+   public static Point2d[] getLineOfSightVerticesCopy(Point2d observer, ConvexPolygon2d polygon)
+   {
+      int[] indices = getLineOfSightVertexIndicesCopy(observer, polygon);
+      if (indices == null)
+         return null;
+
+      Point2d point1 = new Point2d(polygon.getVertex(indices[0]));
+      Point2d point2 = new Point2d(polygon.getVertex(indices[1]));
+      return new Point2d[] {point1, point2};
+   }
+
 }

@@ -939,7 +939,7 @@ public class ConvexPolygon2dTest
          {
             randomOutsidePoints.add(randomPoint);
 
-            FramePoint2d[] lineOfSightVertices = polygon.getLineOfSightVertices(randomPoint);
+            FramePoint2d[] lineOfSightVertices = polygon.getLineOfSightVerticesCopy(randomPoint);
             FrameLineSegment2d[] aroundCornerEdges = polygon.getAroundTheCornerEdges(randomPoint);
 
             ConvexPolygon2dTestHelpers.verifyAroundTheCornerEdges(polygon, randomPoint, lineOfSightVertices, aroundCornerEdges);
@@ -1027,7 +1027,7 @@ public class ConvexPolygon2dTest
          {
             randomOutsidePoints.add(randomPoint);
 
-            FramePoint2d[] lineOfSightVertices = polygon.getLineOfSightVertices(randomPoint);
+            FramePoint2d[] lineOfSightVertices = polygon.getLineOfSightVerticesCopy(randomPoint);
             ConvexPolygon2dTestHelpers.verifyLineOfSightVertices(polygon, randomPoint, lineOfSightVertices);
 
             FrameLine2d frameLine1 = new FrameLine2d(randomPoint, lineOfSightVertices[0]);
@@ -1055,7 +1055,7 @@ public class ConvexPolygon2dTest
       long startTime = System.currentTimeMillis();
       for (FramePoint2d testPoint : randomOutsidePoints)
       {
-         polygon.getLineOfSightVertices(testPoint);
+         polygon.getLineOfSightVerticesCopy(testPoint);
       }
 
       long endTime = System.currentTimeMillis();
@@ -1329,7 +1329,7 @@ public class ConvexPolygon2dTest
 
    private void performLineOfSightTest(FrameConvexPolygon2d polygon, FramePoint2d pointToTest)
    {
-      FramePoint2d[] lineOfSightVertices = polygon.getLineOfSightVertices(pointToTest);
+      FramePoint2d[] lineOfSightVertices = polygon.getLineOfSightVerticesCopy(pointToTest);
       ConvexPolygon2dTestHelpers.verifyLineOfSightVertices(polygon, pointToTest, lineOfSightVertices);
    }
 
@@ -2069,8 +2069,8 @@ public class ConvexPolygon2dTest
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
          assertTrue(polygonWithOnePoint.getVertexCCW(0).equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getIntersectingEdges(arbitraryLine) == null);
-         assertEquals(1, polygonWithOnePoint.getLineOfSightVerticesCopy(arbitraryPoint0).length);
-         assertTrue(polygonWithOnePoint.getLineOfSightVerticesCopy(arbitraryPoint0)[0].equals(pointThatDefinesThePolygon));
+         assertEquals(1, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithOnePoint).length);
+         assertTrue(ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithOnePoint)[0].equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getCentroid().equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getNearestEdges(arbitraryPoint0) == null);
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
@@ -2214,8 +2214,8 @@ public class ConvexPolygon2dTest
                pointThatDefinesThePolygon1);
 
          // getLineOfSightVertices
-         assertEquals(2, polygonWithTwoPoints.getLineOfSightVerticesCopy(arbitraryPoint0).length);
-         Point2d[] lineOfSightPoints = polygonWithTwoPoints.getLineOfSightVerticesCopy(arbitraryPoint0);
+         assertEquals(2, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithTwoPoints).length);
+         Point2d[] lineOfSightPoints = ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithTwoPoints);
          assertEqualsInEitherOrder(lineOfSightPoints[0], lineOfSightPoints[1], pointThatDefinesThePolygon0, pointThatDefinesThePolygon1);
 
          // getNearestEdges
