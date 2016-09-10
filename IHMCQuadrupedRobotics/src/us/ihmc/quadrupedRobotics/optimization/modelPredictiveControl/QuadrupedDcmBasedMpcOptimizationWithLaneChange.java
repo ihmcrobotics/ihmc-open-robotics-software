@@ -64,7 +64,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       this.linearInvertedPendulumModel = dcmPositionEstimator.getLinearInvertedPendulumModel();
       this.dcmPositionEstimator = dcmPositionEstimator;
       this.currentDcmEstimate = new FramePoint();
-      this.timedContactSequence = new QuadrupedTimedContactSequence(4, 2 * maxPreviewSteps + 4);
+      this.timedContactSequence = new QuadrupedTimedContactSequence(0, 2 * maxPreviewSteps + 4);
       this.piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedContactSequence.capacity());
 
       if (graphicsListRegistry != null)

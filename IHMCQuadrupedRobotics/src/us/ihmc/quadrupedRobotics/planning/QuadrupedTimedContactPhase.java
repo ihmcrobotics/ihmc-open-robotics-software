@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.planning;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -58,6 +59,7 @@ public class QuadrupedTimedContactPhase implements TimeIntervalProvider
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          this.solePosition.get(robotQuadrant).setIncludingFrame(solePosition.get(robotQuadrant));
+         this.solePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
       }
    }
 }
