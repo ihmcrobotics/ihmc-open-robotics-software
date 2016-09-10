@@ -34,8 +34,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  */
 public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 {
-   private static final boolean DEBUG = false;
-
    private final ArrayList<Point2d> clockwiseOrderedListOfPoints = new ArrayList<Point2d>();
    private final BoundingBox2d boundingBox = new BoundingBox2d();
    private final Point2d centroid = new Point2d();
@@ -54,7 +52,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    private final int[] tempTwoIndices = new int[2];
    private final LineSegment2d tempSegment1 = new LineSegment2d();
    private final LineSegment2d tempSegment2 = new LineSegment2d();
-   private final LineSegment2d tempSegment3 = new LineSegment2d();
 
    /**
     * Creates an empty convex polygon.
@@ -1082,64 +1079,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return new Point2d[] {intersections[0]}; // Only return the entering point, if the segment has one point inside the polygon.
    }
 
-   //TODO: Clean this up and add a lot of test cases...
-   // ALesman: suggestion, move the origin out to edge of the capacity of double
-   // then project a single ray in from there
-   // seems to produce same point twice when intersecting a line
-
-   @Override
-   public Point2d[] intersectionWith(Line2d line)
-   {
-      checkIfUpToDate();
-      Point2d[] intersectionWithRay1 = intersectionWithRay(line);
-
-      if ((intersectionWithRay1 == null) || (intersectionWithRay1.length == 0))
-      {
-         Line2d oppositeDirection = new Line2d(line);
-         oppositeDirection.negateDirection();
-
-         return intersectionWithRay(oppositeDirection);
-      }
-
-      if (intersectionWithRay1.length == 2)
-      {
-         return intersectionWithRay1;
-      }
-
-      else if (intersectionWithRay1.length == 1) // Must have been inside or on the polygon. See what we get with the ray the other direction from the outside
-      {
-         Point2d newPoint = new Point2d();
-         line.getPoint(newPoint);
-         Vector2d vectorHeadingTheOtherWay = new Vector2d();
-         line.getNormalizedVector(vectorHeadingTheOtherWay);
-
-         newPoint.add(vectorHeadingTheOtherWay);
-         vectorHeadingTheOtherWay.negate();
-
-         Line2d backwardLineWithADifferentStartingPoint = new Line2d(newPoint, vectorHeadingTheOtherWay);
-
-         Point2d[] newIntersections = intersectionWithRay(backwardLineWithADifferentStartingPoint);
-         if ((newIntersections == null) || (!(newIntersections.length >= 1)))
-         {
-            return intersectionWithRay1; // Kindof a bug. Should fix this later, and then throw the exception as follows...
-
-            //          throw new RuntimeException("Bug. Should find at least one intersection if the ray the other way found one!");
-         }
-
-         if (newIntersections.length == 2)
-            return newIntersections;
-         else
-         {
-            return new Point2d[] {intersectionWithRay1[0], newIntersections[0]}; // definitely causes line intersections to be incorrect
-         }
-      }
-      else
-      {
-         throw new RuntimeException("Should never get here");
-      }
-
-   }
-
    /**
     * Computes the intersections of a ray with this polygon. Since the polygon is convex the maximum
     * number of intersections is two. Returns the number of intersections found. If there are less
@@ -1918,5 +1857,12 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    {
       // wherever this is used the method should be switched to intersection with ray once that is created.
       return ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line, this);
+   }
+
+   // --- implementations that make garbage ---
+   @Override
+   public Point2d[] intersectionWith(Line2d line)
+   {
+      return ConvexPolygon2dCalculator.intersectionWithLineCopy(line, this);
    }
 }

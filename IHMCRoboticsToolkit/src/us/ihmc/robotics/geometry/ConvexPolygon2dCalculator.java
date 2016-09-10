@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Tuple2d;
+import javax.vecmath.Vector2d;
 
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -389,6 +390,74 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
+    * Computed the points of intersection between the line and the polygon and packs them into pointToPack1 and
+    * pointToPack2. If there is only one intersection (line goes through a vertex) it will be stored in pointToPack1.
+    * Returns the number of intersections found.
+    */
+   public static int intersectionWithLine(Line2d line, Point2d pointToPack1, Point2d pointToPack2, ConvexPolygon2d polygon)
+   {
+      if (polygon.hasExactlyOneVertex())
+      {
+         Point2d vertex = polygon.getVertex(0);
+         if (line.isPointOnLine(vertex))
+         {
+            pointToPack1.set(vertex);
+            return 1;
+         }
+         return 0;
+      }
+
+      if (polygon.hasExactlyTwoVertices())
+      {
+         Point2d vertex0 = polygon.getVertex(0);
+         Point2d vertex1 = polygon.getVertex(1);
+         if (line.isPointOnLine(vertex0) && line.isPointOnLine(vertex1))
+         {
+            pointToPack1.set(vertex0);
+            pointToPack2.set(vertex1);
+            return 2;
+         }
+      }
+
+      int foundIntersections = 0;
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         if (doesLineIntersectEdge(line, i, polygon))
+         {
+            Point2d edgeStart = polygon.getVertex(i);
+            Point2d edgeEnd = polygon.getNextVertex(i);
+            double edgeVectorX = edgeEnd.x - edgeStart.x;
+            double edgeVectorY = edgeEnd.y - edgeStart.y;
+            Point2d lineStart = line.getPoint();
+            Vector2d lineDirection = line.getNormalizedVector();
+            double lambda = getIntersectionLambda(edgeStart.x, edgeStart.y, edgeVectorX, edgeVectorY, lineStart.x, lineStart.y, lineDirection.x,
+                  lineDirection.y);
+
+            if (foundIntersections == 0)
+            {
+               pointToPack1.set(edgeVectorX, edgeVectorY);
+               pointToPack1.scale(lambda);
+               pointToPack1.add(edgeStart);
+            }
+            else
+            {
+               pointToPack2.set(edgeVectorX, edgeVectorY);
+               pointToPack2.scale(lambda);
+               pointToPack2.add(edgeStart);
+            }
+
+            foundIntersections++;
+            if (foundIntersections == 2) break; // performance only
+         }
+      }
+
+      if (foundIntersections == 2 && pointToPack1.equals(pointToPack2))
+         foundIntersections--;
+
+      return foundIntersections;
+   }
+
+   /**
     * This finds the edges of the polygon that intersect the given line. Will pack the edges into edgeToPack1 and
     * edgeToPack2. Returns number of intersections found. The edged will be ordered according to their index.
     */
@@ -516,6 +585,19 @@ public class ConvexPolygon2dCalculator
       int edges = getIntersectingEdges(line, edge1, edge2, polygon);
       if (edges == 2)
          return new LineSegment2d[] {edge1, edge2};
+      return null;
+   }
+
+   public static Point2d[] intersectionWithLineCopy(Line2d line, ConvexPolygon2d polygon)
+   {
+      Point2d point1 = new Point2d();
+      Point2d point2 = new Point2d();
+
+      int intersections = intersectionWithLine(line, point1, point2, polygon);
+      if (intersections == 2)
+         return new Point2d[] {point1, point2};
+      if (intersections == 1)
+         return new Point2d[] {point1};
       return null;
    }
 
