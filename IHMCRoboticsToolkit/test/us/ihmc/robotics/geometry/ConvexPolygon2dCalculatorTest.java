@@ -743,25 +743,25 @@ public class ConvexPolygon2dCalculatorTest
       polygon.update();
 
       Point2d observer1 = new Point2d(-0.5, 0.5);
-      assertPointsEqual(new Point2d[] {vertex1, vertex5}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer1, polygon));
+      assertPointsEqual(new Point2d[] {vertex1, vertex5}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer1, polygon), true);
 
       Point2d observer2 = new Point2d(1.0, -0.5);
-      assertPointsEqual(new Point2d[] {vertex5, vertex3}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer2, polygon));
+      assertPointsEqual(new Point2d[] {vertex5, vertex3}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer2, polygon), true);
 
       Point2d observer3 = new Point2d(-1.0, -2.0 + epsilon);
-      assertPointsEqual(new Point2d[] {vertex1, vertex4}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer3, polygon));
+      assertPointsEqual(new Point2d[] {vertex1, vertex4}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer3, polygon), true);
 
       Point2d observer4 = new Point2d(-1.0, -2.0 - epsilon);
-      assertPointsEqual(new Point2d[] {vertex1, vertex3}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer4, polygon));
+      assertPointsEqual(new Point2d[] {vertex1, vertex3}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer4, polygon), true);
 
       Point2d observer5 = new Point2d(1.5 + epsilon, 0.5);
-      assertPointsEqual(new Point2d[] {vertex4, vertex2}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer5, polygon));
+      assertPointsEqual(new Point2d[] {vertex4, vertex2}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer5, polygon), true);
 
       Point2d observer6 = vertex3;
-      assertPointsEqual(null, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer6, polygon));
+      assertPointsEqual(null, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer6, polygon), true);
 
       Point2d observer7 = new Point2d(0.5, 0.5);
-      assertPointsEqual(null, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer7, polygon));
+      assertPointsEqual(null, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer7, polygon), true);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -773,7 +773,7 @@ public class ConvexPolygon2dCalculatorTest
 
       Point2d observer1 = new Point2d(0.5, 0.5);
       assertIndicesCorrect(null, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer1, polygon));
-      assertPointsEqual(null, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer1, polygon));
+      assertPointsEqual(null, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer1, polygon), true);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -792,7 +792,7 @@ public class ConvexPolygon2dCalculatorTest
 
       Point2d observer2 = new Point2d(0.5, 0.5);
       assertIndicesCorrect(new int[] {0, 0}, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer2, polygon));
-      assertPointsEqual(new Point2d[] {vertex}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer2, polygon));
+      assertPointsEqual(new Point2d[] {vertex}, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer2, polygon), true);
 
       int[] result = new int[] {-1, 7};
       ConvexPolygon2dCalculator.getLineOfSightVertexIndices(observer2, result, polygon);
@@ -1158,7 +1158,120 @@ public class ConvexPolygon2dCalculatorTest
       assertEquals(ConvexPolygon2dCalculator.getIntersectingEdges(line1, result1, result2, polygon), 0);
    }
 
-   private static void assertPointsEqual(Point2d[] expected, Point2d[] actual)
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testIntersectionWithLine1()
+   {
+      // add in order so vertices do not get changed when update is called.
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(0.0, 0.0));
+      polygon.addVertex(new Point2d(-1.0, 0.0));
+      polygon.addVertex(new Point2d(0.0, 1.0));
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.update();
+
+      Point2d result1 = new Point2d(0.6, 0.4);
+      Point2d result2 = new Point2d(0.1, 0.9);
+
+      Line2d line1 = new Line2d(new Point2d(0.0, 0.5), new Vector2d(0.1, 0.0));
+      Point2d[] expected1 = new Point2d[] {new Point2d(-0.5, 0.5), new Point2d(0.5, 0.5)};
+      assertPointsEqual(expected1, ConvexPolygon2dCalculator.intersectionWithLineCopy(line1, polygon), false);
+
+      Line2d line2 = new Line2d(new Point2d(1.0, 0.0), new Vector2d(0.0, -8.0));
+      Point2d[] expected2 = new Point2d[] {new Point2d(1.0, 1.0)};
+      assertPointsEqual(expected2, ConvexPolygon2dCalculator.intersectionWithLineCopy(line2, polygon), false);
+      assertTrue(ConvexPolygon2dCalculator.intersectionWithLine(line2, result1, result2, polygon) == 1);
+      assertPointsEqual(expected2[0], result1);
+
+      Line2d line3 = new Line2d(new Point2d(0.0, 1.0), new Vector2d(0.5, 0.0));
+      Point2d[] expected3 = new Point2d[] {new Point2d(0.0, 1.0), new Point2d(1.0, 1.0)};
+      assertPointsEqual(expected3, ConvexPolygon2dCalculator.intersectionWithLineCopy(line3, polygon), false);
+      assertTrue(ConvexPolygon2dCalculator.intersectionWithLine(line3, result1, result2, polygon) == 2);
+      assertPointsEqual(expected3[0], result1);
+      assertPointsEqual(expected3[1], result2);
+
+      Line2d line4 = new Line2d(new Point2d(0.5, 10.0), new Vector2d(0.0, 0.1));
+      Point2d[] expected4 = new Point2d[] {new Point2d(0.5, 1.0), new Point2d(0.5, 0.5)};
+      assertPointsEqual(expected4, ConvexPolygon2dCalculator.intersectionWithLineCopy(line4, polygon), false);
+
+      Line2d line5 = new Line2d(new Point2d(-1.0, -0.5), new Vector2d(1.0, 1.0));
+      Point2d[] expected5 = new Point2d[] {new Point2d(-0.5, 0.0), new Point2d(0.5, 1.0)};
+      assertPointsEqual(expected5, ConvexPolygon2dCalculator.intersectionWithLineCopy(line5, polygon), false);
+
+      Line2d line6 = new Line2d(new Point2d(0.0, -1.5), new Vector2d(1.0, 1.0));
+      Point2d[] expected6 = null;
+      result1.set(0.0, 0.0);
+      result2.set(0.0, 0.0);
+      assertPointsEqual(expected6, ConvexPolygon2dCalculator.intersectionWithLineCopy(line6, polygon), false);
+      assertTrue(ConvexPolygon2dCalculator.intersectionWithLine(line6, result1, result2, polygon) == 0);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testIntersectionWithLine2()
+   {
+      // line polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(1.0, 0.0));
+      polygon.addVertex(new Point2d(-1.0, 0.0));
+      polygon.update();
+
+      Line2d line1 = new Line2d(new Point2d(-1.0, 1.0), new Vector2d(0.0, -0.8));
+      Point2d[] expected1 = new Point2d[] {new Point2d(-1.0, 0.0)};
+      assertPointsEqual(expected1, ConvexPolygon2dCalculator.intersectionWithLineCopy(line1, polygon), false);
+
+      Line2d line2 = new Line2d(new Point2d(-0.5, 1.0), new Vector2d(0.0, -0.8));
+      Point2d[] expected2 = new Point2d[] {new Point2d(-0.5, 0.0)};
+      assertPointsEqual(expected2, ConvexPolygon2dCalculator.intersectionWithLineCopy(line2, polygon), false);
+
+      Line2d line3 = new Line2d(new Point2d(1.5, 1.0), new Vector2d(0.0, -0.8));
+      Point2d[] expected3 = null;
+      assertPointsEqual(expected3, ConvexPolygon2dCalculator.intersectionWithLineCopy(line3, polygon), false);
+
+      Line2d line4 = new Line2d(new Point2d(-0.8, 0.0), new Vector2d(0.1, 0.0));
+      Point2d[] expected4 = new Point2d[] {new Point2d(-1.0, 0.0), new Point2d(1.0, 0.0)};
+      assertPointsEqual(expected4, ConvexPolygon2dCalculator.intersectionWithLineCopy(line4, polygon), false);
+
+      Line2d line5 = new Line2d(new Point2d(1.0, 0.0), new Vector2d(0.0, -0.1));
+      Point2d[] expected5 = new Point2d[] {new Point2d(1.0, 0.0)};
+      assertPointsEqual(expected5, ConvexPolygon2dCalculator.intersectionWithLineCopy(line5, polygon), false);
+
+      Line2d line6 = new Line2d(new Point2d(-1.0, 0.0), new Vector2d(0.0, -0.1));
+      Point2d[] expected6 = new Point2d[] {new Point2d(-1.0, 0.0)};
+      assertPointsEqual(expected6, ConvexPolygon2dCalculator.intersectionWithLineCopy(line6, polygon), false);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testIntersectionWithLine3()
+   {
+      // point polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(1.0, 0.0));
+      polygon.update();
+
+      Line2d line1 = new Line2d(new Point2d(3.0, 1.0), new Vector2d(-2.0, -1.0));
+      Point2d[] expected1 = new Point2d[] {new Point2d(1.0, 0.0)};
+      assertPointsEqual(expected1, ConvexPolygon2dCalculator.intersectionWithLineCopy(line1, polygon), false);
+
+      Line2d line2 = new Line2d(new Point2d(2.0, 1.0), new Vector2d(-1.3, -0.8));
+      Point2d[] expected2 = null;
+      assertPointsEqual(expected2, ConvexPolygon2dCalculator.intersectionWithLineCopy(line2, polygon), false);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testIntersectionWithLine4()
+   {
+      // empty polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+
+      Line2d line1 = new Line2d(new Point2d(3.0, 1.0), new Vector2d(-1.6, -0.8));
+      Point2d[] expected1 = null;
+      assertPointsEqual(expected1, ConvexPolygon2dCalculator.intersectionWithLineCopy(line1, polygon), false);
+   }
+
+   private static void assertPointsEqual(Point2d[] expected, Point2d[] actual, boolean enforceOrder)
    {
       if (expected == null || actual == null)
       {
@@ -1167,8 +1280,23 @@ public class ConvexPolygon2dCalculatorTest
       }
 
       assertEquals("Array lengths are not equal.", expected.length, actual.length);
-      for (int i = 0; i < expected.length; i++)
-         assertPointsEqual(expected[i], actual[i]);
+      int points = expected.length;
+      for (int i = 0; i < points; i++)
+      {
+         if (enforceOrder)
+         {
+            assertPointsEqual(expected[i], actual[i]);
+            continue;
+         }
+
+         boolean foundPoint = false;
+         for (int j = 0; j < points; j++)
+         {
+            if (expected[i].epsilonEquals(actual[j], epsilon))
+               foundPoint = true;
+         }
+         assertTrue("Did not find point.", foundPoint);
+      }
    }
 
    private static void assertIndicesCorrect(int[] expected, int[] actual)
