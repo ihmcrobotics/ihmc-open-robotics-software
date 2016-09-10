@@ -59,7 +59,7 @@ public abstract class QuadrupedPositionCrawlTurningTest implements QuadrupedMult
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputZ().set(-0.2);
+      variables.getYoPlanarVelocityInputZ().set(-0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 35.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyYaw(), -Math.PI / 2.0));
@@ -74,7 +74,7 @@ public abstract class QuadrupedPositionCrawlTurningTest implements QuadrupedMult
    {
       QuadrupedTestBehaviors.standUp(conductor, variables);
       
-      variables.getYoPlanarVelocityInputZ().set(0.15);
+      variables.getYoPlanarVelocityInputZ().set(0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 40.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyYaw(), Math.PI / 2.0));

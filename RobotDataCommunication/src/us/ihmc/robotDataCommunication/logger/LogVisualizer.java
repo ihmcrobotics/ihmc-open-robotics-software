@@ -14,11 +14,12 @@ import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.plotting.Plotter;
+import us.ihmc.robotDataCommunication.ErrorPanel;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.logger.converters.LogFormatUpdater;
 import us.ihmc.robotDataCommunication.logger.util.FileSelectionDialog;
@@ -173,6 +174,9 @@ public class LogVisualizer
       scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
       YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, logProperties, players, parser, robot, scs);
       scs.getStandardSimulationGUI().addJComponentToMainPanel(gui, BorderLayout.SOUTH);
+      
+      ErrorPanel errorPanel = new ErrorPanel(scs.getRootRegistry());
+      scs.getStandardSimulationGUI().addJComponentToMainPanel(errorPanel,  BorderLayout.EAST);
 
       setupReadEveryNTicksTextField();
    }
