@@ -12,6 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Slow)
 @SuiteClasses
 ({
+   us.ihmc.atlas.behaviorTests.AtlasBehaviorDispatcherTest.class,
    us.ihmc.atlas.behaviorTests.AtlasHandDesiredConfigurationBehaviorTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasFinalsWorldStairsTest.class
 })

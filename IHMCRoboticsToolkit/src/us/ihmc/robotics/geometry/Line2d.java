@@ -509,13 +509,17 @@ public class Line2d implements Geometry2d<Line2d>
 
    public boolean isPointOnLine(Point2d point)
    {
+      double epsilon = 1e-8;
+      if (Math.abs(normalizedVector.getX()) < 10E-10)
+         return MathTools.epsilonEquals(point.x, this.point.getX(), epsilon);
+
       // y = A*x + b with point = (x,y)
       double A = normalizedVector.getY()/normalizedVector.getX();
       double b = this.point.getY()-A*this.point.getX();
 
       double value = point.getY() - A*point.getX() - b;
 
-      return 1e-8 > value;
+      return epsilon > Math.abs(value);
    }
 
    public boolean isPointOnLeftSideOfLine(Point2d point)

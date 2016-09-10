@@ -13,8 +13,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.atlas.AtlasFlatGroundRewindabilityTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasBehaviorDispatcherTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasChestTrajectoryBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasChestTrajectoryBehaviorTest.class,
+   us.ihmc.atlas.communication.producers.AtlasRobotConfigurationDataBufferTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCoursePlatformTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWobblyFootTest.class
 })
 
 public class AtlasAFlakyTestSuite

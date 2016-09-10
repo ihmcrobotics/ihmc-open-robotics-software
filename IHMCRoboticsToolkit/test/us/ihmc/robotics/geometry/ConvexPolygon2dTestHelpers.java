@@ -1,9 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 import java.util.ArrayList;
 import java.util.Random;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ConvexPolygon2dTestHelpers
 {
@@ -18,7 +18,7 @@ public class ConvexPolygon2dTestHelpers
    public static void verifyPointsAreClockwise(FrameConvexPolygon2d polygon)
    {
       // Make sure points are clockwise, by taking the cross of each edge and the next clockwise edge and making sure its negative:
-      
+
       int numPoints = polygon.getNumberOfVertices();
 
       for (int i = 0; i < numPoints; i++)
@@ -309,7 +309,7 @@ public class ConvexPolygon2dTestHelpers
    {
       FramePoint2d point = new FramePoint2d();
       frameLine2d.getFramePoint2d(point);
-      FramePoint2d[] lineOfSightVertices = polygon.getLineOfSightVertices(point);
+      FramePoint2d[] lineOfSightVertices = polygon.getLineOfSightVerticesCopy(point);
       if (lineOfSightVertices == null)
       {
          throw new RuntimeException();
@@ -340,7 +340,8 @@ public class ConvexPolygon2dTestHelpers
       {
          FramePoint2d[] enteringVertices = enteringEdge.getEndFramePointsCopy();
 
-         if (!isLineBetweenOrIntersectingVertices(frameLine2d, enteringVertices[1], enteringVertices[0]))
+         if (!isLineBetweenOrIntersectingVertices(frameLine2d, enteringVertices[1], enteringVertices[0])
+               && !isLineBetweenOrIntersectingVertices(frameLine2d, enteringVertices[0], enteringVertices[1]))
          {
             throw new RuntimeException();
          }
@@ -348,7 +349,8 @@ public class ConvexPolygon2dTestHelpers
 
       FramePoint2d[] leavingVertices = leavingEdge.getEndFramePointsCopy();
 
-      if (!isLineBetweenOrIntersectingVertices(frameLine2d, leavingVertices[0], leavingVertices[1]))
+      if (!isLineBetweenOrIntersectingVertices(frameLine2d, leavingVertices[0], leavingVertices[1])
+            && !isLineBetweenOrIntersectingVertices(frameLine2d, leavingVertices[1], leavingVertices[0]))
       {
          throw new RuntimeException();
       }
