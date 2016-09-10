@@ -22,7 +22,7 @@ import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.tools.compression.SnappyUtils;
 
-public class YoVariableSpecificLogVariableUpdater
+public class SpecificLogVariableUpdater
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("YoVariableSpecificLogVariablePlaybackRobot");
    private final LongYoVariable timestamp = new LongYoVariable("timestamp", registry);
@@ -45,7 +45,7 @@ public class YoVariableSpecificLogVariableUpdater
    private YoVariable<?>[] variablesToUpdate;
    private final HashMap<YoVariable<?>, AtomicInteger> indexes = new HashMap<>();
 
-   public YoVariableSpecificLogVariableUpdater(File selectedFile, RobotDescription robotDescription,
+   public SpecificLogVariableUpdater(File selectedFile, RobotDescription robotDescription,
          List<JointState<? extends Joint>> jointStates, List<YoVariable<?>> variables, LogPropertiesReader logProperties, YoVariable<?>... variablesToUpdate )
          throws IOException
    {
@@ -133,7 +133,6 @@ public class YoVariableSpecificLogVariableUpdater
       {
          if (!readLogLine())
          {
-            System.out.println("Reached end of file, stopping simulation thread");
             return true;
          }
 
