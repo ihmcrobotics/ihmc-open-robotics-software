@@ -51,12 +51,12 @@ public class JointLowLevelPositionControlSimulator implements RobotController
       }
       else if (isExoJoint)
       {
-         jointController.setProportionalGain(80000.0);
+         jointController.setProportionalGain(8000.0);
          jointController.setIntegralGain(1000.0 * 50.0);
          jointController.setMaxIntegralError(0.2);
          jointController.setIntegralLeakRatio(integralLeakRatio);
          jointController.setDerivativeGain(200.0);
-         jointController.setMaximumOutputLimit(4000.0);
+         jointController.setMaximumOutputLimit(400.0);
       }
       else
       {
