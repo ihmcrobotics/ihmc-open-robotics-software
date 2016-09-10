@@ -3,11 +3,10 @@ package us.ihmc.robotDataCommunication.logger.searcher;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
-public interface LogSearchListenerInterface
+public interface LogCrawlerListenerInterface
 {
 
-   YoVariable<?>[] getYovariablesToUpdate(YoVariableRegistry registry);
-
-   void update(LogSearcher logSearcher, double timestamp);
-
+   public abstract YoVariable<?>[] getYovariablesToUpdate(YoVariableRegistry registry);
+   public abstract void update(LogCrawler logSearcher, double timestamp);
+   public abstract void onFinish();
 }

@@ -16,14 +16,15 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.time.TimeTools;
 
-public class LogSearcher implements Runnable
+public class LogCrawler implements Runnable
 {
-   private YoVariableSpecificLogVariableUpdater robot;
+   private SpecificLogVariableUpdater robot;
    private String logFileName;
-   private LogSearchListenerInterface playbackListener;
+   private LogCrawlerListenerInterface playbackListener;
    private double dt;
+   
 
-   public LogSearcher(File logFile, LogSearchListenerInterface playbackListener) throws IOException
+   public LogCrawler(File logFile, LogCrawlerListenerInterface playbackListener) throws IOException
    {
       this.playbackListener = playbackListener;
       System.out.println("loading log from folder:" + logFile);
@@ -87,7 +88,7 @@ public class LogSearcher implements Runnable
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
       RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
-      robot = new YoVariableSpecificLogVariableUpdater(selectedFile, robotDescription, parser.getJointStates(), parser.getYoVariablesList(), logProperties ,yoVariablesToUpdate);
+      robot = new SpecificLogVariableUpdater(selectedFile, robotDescription, parser.getJointStates(), parser.getYoVariablesList(), logProperties ,yoVariablesToUpdate);
       dt = parser.getDt();
    }
    
@@ -100,7 +101,8 @@ public class LogSearcher implements Runnable
       }
       robot.close();
       long endTime = System.currentTimeMillis();
-      System.out.println("Finished, took " + TimeTools.milliSecondsToMinutes(endTime - startTime) + " minutes");
+      System.out.println("Finished searching " + logFileName + ", took " + TimeTools.milliSecondsToMinutes(endTime - startTime) + " minutes");
+      playbackListener.onFinish();
    }
 
    public String getLogFileName()
