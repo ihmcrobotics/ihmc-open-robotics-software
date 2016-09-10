@@ -35,7 +35,8 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    public DoubleYoVariable q, qd, qdd,  tau;
 
    public DoubleYoVariable tauJointLimit, tauVelocityLimit, tauDamping;
-   public double q_min = Double.NEGATIVE_INFINITY, q_max = Double.POSITIVE_INFINITY, k_limit, b_limit;
+   
+   public DoubleYoVariable qLowerLimit, qUpperLimit, kLimit, bLimit; //double q_min = Double.NEGATIVE_INFINITY, q_max = Double.POSITIVE_INFINITY, k_limit, b_limit;
 
    private DoubleYoVariable b_damp, f_stiction;
    public DoubleYoVariable qd_max, b_vel_limit;
@@ -108,9 +109,6 @@ public class PinJoint extends OneDegreeOfFreedomJoint
       physics.u_i.normalize();
       setPinTransform3D(this.jointTransform3D, physics.u_i);
    }
-
-
-
 
    /**
     * This function updates the transform, velocity, and joint axis.  If specified
@@ -264,16 +262,23 @@ public class PinJoint extends OneDegreeOfFreedomJoint
       if (tauJointLimit == null)
       {
          tauJointLimit = new DoubleYoVariable("tau_joint_limit_" + this.name, "PinJoint limit stop torque", registry);
+         
+         qLowerLimit = new DoubleYoVariable("qLowerLimit" + this.name, "Pin Joint minimum limit", registry);
+         qUpperLimit = new DoubleYoVariable("qUpperLimit" + this.name, "Pin Joint maximum limit", registry);
+         
+         kLimit = new DoubleYoVariable("kLimit_" + this.name, "Pin Joint limit spring constant", registry);
+         bLimit = new DoubleYoVariable("bLimit_" + this.name, "Pin Joint limit damping constant", registry);
       }
 
-      this.q_min = q_min;
-      this.q_max = q_max;
+      qLowerLimit.set(q_min);
+      qUpperLimit.set(q_max);
+      
+      kLimit.set(k_limit);
+      bLimit.set(b_limit);
 
       if (q_min >= q_max)
          throw new RuntimeException("q_min must be less than q_max. q_min=" + q_min + ", q_max=" + q_max);
 
-      this.k_limit = k_limit;
-      this.b_limit = b_limit;
    }
 
    /**
@@ -439,13 +444,27 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    @Override
    public double getJointUpperLimit()
    {
-      return q_max;
+      if (qUpperLimit == null) return Double.POSITIVE_INFINITY;
+      return qUpperLimit.getDoubleValue();
    }
 
    @Override
    public double getJointLowerLimit()
    {
-      return q_min;
+      if (qLowerLimit == null) return Double.NEGATIVE_INFINITY;
+      return qLowerLimit.getDoubleValue();   
+   }
+
+   private double getJointLimitStiffness()
+   {
+      if (kLimit == null) return 0.0;
+      return kLimit.getDoubleValue();
+   }
+
+   private double getJointLimitDamping()
+   {
+      if (bLimit == null) return 0.0;
+      return bLimit.getDoubleValue();
    }
 
    @Override
@@ -460,8 +479,8 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    {
       String string = super.toString();
 
-      string = string + "\n q_min = " + q_min + ", q_max = " + q_max;
-      string = string + "\n k_limit = " + k_limit + ", b_limit = " + b_limit;
+      string = string + "\n q_min = " + getJointLowerLimit() + ", q_max = " + getJointUpperLimit();
+      string = string + "\n k_limit = " + getJointLimitStiffness() + ", b_limit = " + getJointLimitDamping();
 
       if (b_damp != null)
       {
@@ -490,4 +509,5 @@ public class PinJoint extends OneDegreeOfFreedomJoint
 
       return string;
    }
+
 }

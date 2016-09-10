@@ -95,15 +95,15 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
       // Limit stops:
       if (owner.tauJointLimit != null)
       {
-         if (owner.q.getDoubleValue() < owner.q_min)
+         if (owner.q.getDoubleValue() < owner.qLowerLimit.getDoubleValue())
          {
-            double limitTorque = owner.k_limit * (owner.q_min - owner.q.getDoubleValue()) - owner.b_limit * owner.qd.getDoubleValue();
+            double limitTorque = owner.kLimit.getDoubleValue() * (owner.qLowerLimit.getDoubleValue() - owner.q.getDoubleValue()) - owner.bLimit.getDoubleValue() * owner.qd.getDoubleValue();
             if (limitTorque < 0.0) limitTorque = 0.0;
             owner.tauJointLimit.set(limitTorque);
          }
-         else if (owner.q.getDoubleValue() > owner.q_max)
+         else if (owner.q.getDoubleValue() > owner.qUpperLimit.getDoubleValue())
          {
-            double limitTorque = owner.k_limit * (owner.q_max - owner.q.getDoubleValue()) - owner.b_limit * owner.qd.getDoubleValue();
+            double limitTorque = owner.kLimit.getDoubleValue() * (owner.qUpperLimit.getDoubleValue() - owner.q.getDoubleValue()) - owner.bLimit.getDoubleValue() * owner.qd.getDoubleValue();
             if (limitTorque > 0.0) limitTorque = 0.0;
             owner.tauJointLimit.set(limitTorque);
          }
