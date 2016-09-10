@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -60,7 +61,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
 
    /**
     * compute piecewise constant center of pressure plan given the upcoming contact states
-    * @param timedContactSequence upcoming contact states (input)
+    * @param timedContactSequence contact sequence (input)
     */
    public void initializeTrajectory(QuadrupedTimedContactSequence timedContactSequence)
    {
@@ -81,8 +82,9 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          QuadrantDependentList<FramePoint> solePosition = timedContactSequence.get(interval).getSolePosition();
          QuadrantDependentList<ContactState> contactState = timedContactSequence.get(interval).getContactState();
 
-         computeNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState);
-         computeCenterOfPressure(copPositionAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
+         QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState);
+         QuadrupedCenterOfPressureTools
+               .computeCenterOfPressure(copPositionAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
          normalizedPressureContributedByQueuedSteps.get(interval).setValue(0.0);
          normalizedPressureContributedByInitialContacts.get(interval).setValue(0.0);
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -126,14 +128,14 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       copPositionAtCurrentTime.setIncludingFrame(copPositionAtStartOfInterval.get(0));
    }
 
-   public void getPosition(FramePoint copPosition)
+   public void getPosition(FramePoint copPositionAtCurrentTime)
    {
-      copPosition.setIncludingFrame(copPositionAtCurrentTime);
+      copPositionAtCurrentTime.setIncludingFrame(this.copPositionAtCurrentTime);
    }
 
-   public void getVelocity(FrameVector copVelocity)
+   public void getVelocity(FrameVector copVelocityAtCurrentTime)
    {
-      copVelocity.setToZero();
+      copVelocityAtCurrentTime.setToZero();
    }
 
    public int getNumberOfIntervals()
@@ -190,71 +192,4 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    {
       return normalizedPressureContributedByQueuedSteps;
    }
-
-
-   private void computeNormalizedContactPressure(QuadrantDependentList<MutableDouble> contactPressure, QuadrantDependentList<ContactState> contactState)
-   {
-      // Compute vertical force distribution assuming equal loading of hind and front ends.
-      int numberOfHindFeetInContact = 0;
-      int numberOfFrontFeetInContact = 0;
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         if (contactState.get(robotQuadrant) == ContactState.IN_CONTACT)
-         {
-            if (robotQuadrant.isQuadrantInFront())
-            {
-               numberOfFrontFeetInContact++;
-            }
-            else
-            {
-               numberOfHindFeetInContact++;
-            }
-            contactPressure.get(robotQuadrant).setValue(1.0);
-         }
-         else
-         {
-            contactPressure.get(robotQuadrant).setValue(0.0);
-         }
-      }
-
-      double numberOfEndsInContact = 0.0;
-      if ((numberOfHindFeetInContact > 0) ^ (numberOfFrontFeetInContact > 0))
-      {
-         numberOfEndsInContact = 1.0;
-      }
-      if ((numberOfHindFeetInContact > 0) && (numberOfFrontFeetInContact > 0))
-      {
-         numberOfEndsInContact = 2.0;
-      }
-
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         double pressure = contactPressure.get(robotQuadrant).doubleValue();
-         pressure /= Math.max(numberOfEndsInContact, 1.0);
-         pressure /= Math.max((robotQuadrant.isQuadrantInFront() ? numberOfFrontFeetInContact : numberOfHindFeetInContact), 1.0);
-         contactPressure.get(robotQuadrant).setValue(pressure);
-      }
-   }
-
-   private void computeCenterOfPressure(FramePoint copPosition, QuadrantDependentList<FramePoint> solePosition,
-         QuadrantDependentList<MutableDouble> contactPressure)
-   {
-      // Compute center of pressure given the vertical force at each contact.
-      double pressure = 1e-6;
-      copPosition.setToZero(ReferenceFrame.getWorldFrame());
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         pressure += contactPressure.get(robotQuadrant).doubleValue();
-         solePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-         addPointWithScaleFactor(copPosition, solePosition.get(robotQuadrant), contactPressure.get(robotQuadrant).doubleValue());
-      }
-      copPosition.scale(1.0 / pressure);
-   }
-
-   private void addPointWithScaleFactor(FramePoint point, FramePoint pointToAdd, double scaleFactor)
-   {
-      point.checkReferenceFrameMatch(pointToAdd);
-      point.add(scaleFactor * pointToAdd.getX(), scaleFactor * pointToAdd.getY(), scaleFactor * pointToAdd.getZ());
-   }
-
 }
