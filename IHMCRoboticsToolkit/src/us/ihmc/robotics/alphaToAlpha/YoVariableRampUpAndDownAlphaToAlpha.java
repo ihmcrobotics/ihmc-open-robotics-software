@@ -56,7 +56,7 @@ public class YoVariableRampUpAndDownAlphaToAlpha implements AlphaToAlphaFunction
          return 1.0 - (alpha - startOfRampDown.getDoubleValue())/(endOfRampDown.getDoubleValue() - startOfRampDown.getDoubleValue());
       }
       else
-         return 1.0;
+         return 0.0;
 
    }
 

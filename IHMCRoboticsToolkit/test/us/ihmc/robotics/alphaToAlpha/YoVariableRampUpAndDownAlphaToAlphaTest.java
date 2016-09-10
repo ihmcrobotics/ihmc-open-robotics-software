@@ -83,10 +83,10 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
       assertEquals(value, 0.5, EPSILON);
 
       value = yoVariableRampUpAndDownAlphaToAlpha.getAlphaPrime(0.7);
-      assertEquals(value, 1.0, EPSILON);
+      assertEquals(value, 0.0, EPSILON);
 
       value = yoVariableRampUpAndDownAlphaToAlpha.getAlphaPrime(0.8);
-      assertEquals(value, 1.0, EPSILON);
+      assertEquals(value, 0.0, EPSILON);
 
 
       startOfRampUp.set(0.8);
@@ -158,10 +158,10 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
       assertEquals(value, 0.25, EPSILON);
 
       value = yoVariableRampUpAndDownAlphaToAlpha.getAlphaPrime(0.7);
-      assertEquals(value, 1.0, EPSILON);
+      assertEquals(value, 0.0, EPSILON);
 
       value = yoVariableRampUpAndDownAlphaToAlpha.getAlphaPrime(0.8);
-      assertEquals(value, 1.0, EPSILON);
+      assertEquals(value, 0.0, EPSILON);
    }
 
 
@@ -200,11 +200,15 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
       assertEquals(value, 0.5, EPSILON);
 
       value = yoVariableRampUpAndDownAlphaToAlpha.getAlphaPrime(0.7);
-      assertEquals(value, 1.0, EPSILON);
+      assertEquals(value, 0.0, EPSILON);
 
       value = yoVariableRampUpAndDownAlphaToAlpha.getAlphaPrime(0.8);
-      assertEquals(value, 1.0, EPSILON);
+      assertEquals(value, 0.0, EPSILON);
    }
+
+
+
+
 
 
    private void testRangeOfAlphas(double expectedValue, YoVariableRampUpAndDownAlphaToAlpha yoVariableRampUpAndDownAlphaToAlpha)
