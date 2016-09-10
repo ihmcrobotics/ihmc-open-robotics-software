@@ -89,8 +89,8 @@ public class ExternalForcePoint extends KinematicPoint
    }
 
 
-   public void resolveCollision(ExternalForcePoint externalForcePoint, Vector3d normal_world, double epsilon, double mu, Vector3d p_world)
-   {
+   public boolean resolveCollision(ExternalForcePoint externalForcePoint, Vector3d normal_world, double epsilon, double mu, Vector3d p_world)
+   {      
       computeRotationFromNormalVector(R0_coll, normal_world);
       Rcoll_0.set(R0_coll);
       Rcoll_0.transpose();
@@ -105,7 +105,7 @@ public class ExternalForcePoint extends KinematicPoint
          impulse.setToZero();
          externalForcePoint.impulse.setToZero();
 
-         return;
+         return false;
       }
 
       Rk_coll.set(this.parentJoint.physics.Ri_0);
@@ -127,16 +127,16 @@ public class ExternalForcePoint extends KinematicPoint
       // Rotate into world coordinates:
       R0_coll.transform(p_world);
       impulse.set(-p_world.getX(), -p_world.getY(), -p_world.getZ());
-
       externalForcePoint.impulse.set(p_world);
 
       // +++JEP.  After collision, recalculate velocities in case another collision occurs before velocities are calculated:
       parentJoint.rob.updateVelocities();
       externalForcePoint.parentJoint.rob.updateVelocities();
-//      robot.updateVelocities();
+      
+      return true;
    }
 
-   public void resolveCollision(Vector3d vel_world, Vector3d normal_world, double epsilon, double mu, Vector3d p_world)
+   public boolean resolveCollision(Vector3d vel_world, Vector3d normal_world, double epsilon, double mu, Vector3d p_world)
    {
       computeRotationFromNormalVector(R0_coll, normal_world);
       Rcoll_0.set(R0_coll);
@@ -145,26 +145,15 @@ public class ExternalForcePoint extends KinematicPoint
       u_coll.set(getXVelocity() - vel_world.getX(), getYVelocity() - vel_world.getY(), getZVelocity() - vel_world.getZ());
       Rcoll_0.transform(u_coll);
 
-      // System.out.println("normal_world: " + normal_world);
-      // System.out.println("u_world: " + dx.val + ", " + dy.val + ", " + dz.val);
-      // System.out.println("Rcoll_0" + Rcoll_0);
-
       if (u_coll.getZ() > 0.0)    // -0.001) // Moving slowly together or moving apart...
       {
          p_world.set(0.0, 0.0, 0.0);
          impulse.setToZero();
 
-         return;
+         return false;
       }
 
-      // Rk_coll.set(Ri_0);
-
-      /*
-       * Rk_coll.set(R0_i);
-       * Rk_coll.transpose();
-       */
       Rk_coll.set(this.parentJoint.physics.Ri_0);
-
       Rk_coll.mul(R0_coll);
 
       parentJoint.physics.resolveCollision(offsetFromCOM, Rk_coll, u_coll, epsilon, mu, p_world);    // Returns the impulse in collision coordinates
@@ -174,8 +163,9 @@ public class ExternalForcePoint extends KinematicPoint
       impulse.set(p_world);
 
       // +++JEP.  After collision, recalculate velocities in case another collision occurs before velocities are calculated:
-    parentJoint.rob.updateVelocities();
-//      robot.updateVelocities();
+      parentJoint.rob.updateVelocities();
+      
+      return true;
    }
 
 

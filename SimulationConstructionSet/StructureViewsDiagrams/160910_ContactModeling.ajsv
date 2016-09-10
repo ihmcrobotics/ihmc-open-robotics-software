@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2016-Sep-10 14:12" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20151019-2113">
+        <filterScript>
+
+// no filter script yet defined for this class diagram
+// use CTRL+SPACE for completion suggestions
+hide all methods
+hide all fields
+
+</filterScript>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.SCSCollisionDetectorTest" project="SimulationConstructionSet" xLocation="1764" yLocation="-509"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector" project="SimulationConstructionSet" xLocation="-243" yLocation="-497"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler" project="SimulationConstructionSet" xLocation="307" yLocation="-131"/>
+        <class className="us.ihmc.simulationconstructionset.physics.CollisionHandler" project="SimulationConstructionSet" xLocation="930" yLocation="-317"/>
+        <class className="us.ihmc.simulationconstructionset.util.CollisionGroundContactModel" project="SimulationConstructionSet" xLocation="1411" yLocation="549"/>
+        <class className="us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize" project="SimulationConstructionSet" xLocation="1218" yLocation="-497"/>
+        <class className="us.ihmc.simulationconstructionset.physics.CollisionShapeFactory" project="SimulationConstructionSet" xLocation="279" yLocation="269"/>
+        <class className="us.ihmc.simulationconstructionset.physics.ScsCollisionDetector" project="SimulationConstructionSet" xLocation="284" yLocation="139"/>
+    </diagram>
+</ajsv>

@@ -6,7 +6,6 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 /**
  * Object containing collision data for a specific instance of a shape.
  *
- * @author Peter Abeles
  */
 public interface CollisionShape
 {

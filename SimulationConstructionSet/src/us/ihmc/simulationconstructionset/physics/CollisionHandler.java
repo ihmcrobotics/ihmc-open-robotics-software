@@ -6,7 +6,6 @@ import us.ihmc.simulationconstructionset.ExternalTorque;
 /**
  * Interface for the physics engine respond to a collision.  Collisions are modeled as a set of point collisions.
  *
- * @author Peter Abeles
  */
 public interface CollisionHandler
 {
@@ -31,7 +30,7 @@ public interface CollisionHandler
     *
     * @param listener The listener which is to be added
     */
-   public void addListener(Listener listener);
+   public void addListener(CollisionHandlerListener listener);
 
    /**
     * When two shapes collide this function is called.  The two shapes and which points on the shapes collide are passed in.
@@ -45,7 +44,7 @@ public interface CollisionHandler
    /**
     * Called whenever a collision happens
     */
-   public static interface Listener
+   public static interface CollisionHandlerListener
    {
       public void collision(CollisionShape shapeA, CollisionShape shapeB, ExternalForcePoint forceA, ExternalForcePoint forceB, ExternalTorque torqueA,
                             ExternalTorque torqueB);

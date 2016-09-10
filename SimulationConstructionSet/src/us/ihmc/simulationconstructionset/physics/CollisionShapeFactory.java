@@ -54,8 +54,4 @@ public interface CollisionShapeFactory
     */
    public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription description, boolean isGround, int collisionGroup, int collisionMask);
 
-   /**
-    * Adds a 3-DOF force sensor at the specified location
-    */
-   public ScsForceSensor addForceSensor(String name, CollisionShape shape, RigidBodyTransform sensorToShape);
-}
+ }

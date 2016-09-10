@@ -24,9 +24,9 @@ public class NewtonsCradleSimulation
 
 //      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
 //      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
-      CollisionHandler handler = new DefaultCollisionHandler(0.9, 0.3);
+      CollisionHandler handler = new DefaultCollisionHandler(0.99, 0.3);
 
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize();
+      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(4.0, 4.0, scs, 100);
 
       handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
@@ -52,7 +52,7 @@ public class NewtonsCradleSimulation
       CollisionHandler handler = new DefaultCollisionHandler(1.0, 0.0);
 //      CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7, robot);
 
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize();
+      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(0.1, 0.1, scs, 100);
 
       handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
@@ -78,7 +78,7 @@ public class NewtonsCradleSimulation
 //      CollisionHandler handler = new DefaultCollisionHandler(0.98, 0.1, robot);
       CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
 
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize();
+      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
 
       handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
@@ -109,7 +109,7 @@ public class NewtonsCradleSimulation
 
       CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
 
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize();
+      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
 
       handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = pileOfRandomObjectsRobot.getCollisionDetector();

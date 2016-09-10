@@ -17,7 +17,7 @@ public class Simulator implements java.io.Serializable
    private double DT;
    private ArrayList<Script> scripts = null;
 
-   private ScsCollisionDetector collisions;
+   private ScsCollisionDetector collisionDetector;
    private DefaultCollisionVisualize collisionVisualize;
    protected ArrayList<WrenchContactPoint> forceSensor = new ArrayList<WrenchContactPoint>();
 
@@ -99,12 +99,12 @@ public class Simulator implements java.io.Serializable
             }
          }
 
-         if (collisions != null)
+         if (collisionDetector != null)
          {
             if (collisionVisualize != null)
-               collisionVisualize.callBeforeCollision();
+               collisionVisualize.callBeforeCollisionDetection();
 
-            collisions.performCollisionDetection();
+            collisionDetector.performCollisionDetection();
          }
       }
 
@@ -147,7 +147,7 @@ public class Simulator implements java.io.Serializable
 
    public void setCollisions(ScsCollisionDetector collisions, DefaultCollisionVisualize visulize)
    {
-      this.collisions = collisions;
+      this.collisionDetector = collisions;
       this.collisionVisualize = visulize;
    }
 }

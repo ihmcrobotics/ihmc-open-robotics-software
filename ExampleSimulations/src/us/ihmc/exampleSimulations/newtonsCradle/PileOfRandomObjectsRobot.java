@@ -28,7 +28,7 @@ public class PileOfRandomObjectsRobot
 
    public PileOfRandomObjectsRobot()
    {
-      int numberOfObjects = 400;
+      int numberOfObjects = 40; //400;
 
       YoVariableRegistry registry = new YoVariableRegistry("Collision");
       collisionDetector = new GdxCollisionDetector(registry, 100.0);
@@ -77,21 +77,22 @@ public class PileOfRandomObjectsRobot
          this.robots.add(robot);
       }
 
+      double boardZ = 0.14;
 
       FloatingJoint board0 = createContainerBoard("board0", collisionShapeFactory, random);
-      board0.setPosition(0.45, 0.0, 0.06);
+      board0.setPosition(0.51, 0.0, boardZ);
       board0.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
       
       FloatingJoint board1 = createContainerBoard("board1", collisionShapeFactory, random);
-      board1.setPosition(0.0, 0.45, 0.06);
+      board1.setPosition(0.0, 0.35, boardZ);
       board1.setYawPitchRoll(0.0, 0.0, 0.0);
       
       FloatingJoint board2 = createContainerBoard("board2", collisionShapeFactory, random);
-      board2.setPosition(0.0, -0.45, 0.06);
+      board2.setPosition(0.0, -0.35, boardZ);
       board2.setYawPitchRoll(0.0, 0.0, 0.0);
       
       FloatingJoint board3 = createContainerBoard("board3", collisionShapeFactory, random);
-      board3.setPosition(-0.45, 0.0, 0.06);
+      board3.setPosition(-0.51, 0.0, boardZ);
       board3.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
 
       

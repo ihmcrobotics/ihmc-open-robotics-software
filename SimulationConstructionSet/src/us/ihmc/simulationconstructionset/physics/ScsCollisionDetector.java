@@ -5,7 +5,6 @@ import us.ihmc.simulationconstructionset.Link;
 /**
  * High level interface for collision detection
  *
- * @author Peter Abeles
  */
 public interface ScsCollisionDetector
 {
