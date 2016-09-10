@@ -8,15 +8,13 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 
-/**
- * @author Peter Abeles
- */
 public class DefaultCollisionHandler implements CollisionHandler
 {
    private Vector3d normal, negative_normal = new Vector3d();
@@ -24,7 +22,7 @@ public class DefaultCollisionHandler implements CollisionHandler
    private Point3d point1 = new Point3d();
    private Point3d point2 = new Point3d();
 
-   private List<Listener> listeners = new ArrayList<Listener>();
+   private List<CollisionHandlerListener> listeners = new ArrayList<CollisionHandlerListener>();
 
    // coefficent of restitution.
    private final double epsilon;
@@ -121,16 +119,19 @@ public class DefaultCollisionHandler implements CollisionHandler
          negative_normal.set(normal);
          negative_normal.scale(-1.0);
          
-         ExternalForcePoint externalForcePointOne = shape1.getLink().ef_collision;
-         ExternalForcePoint externalForcePointTwo = shape2.getLink().ef_collision;
+         Link linkOne = shape1.getLink();
+         Link linkTwo = shape2.getLink();
+
+         ExternalForcePoint externalForcePointOne = linkOne.ef_collision;
+         ExternalForcePoint externalForcePointTwo = linkTwo.ef_collision;
 
          // +++JEP: For now. Make more efficient later. Don't need an ef_point really...
          externalForcePointOne.setOffsetWorld(point1.getX(), point1.getY(), point1.getZ());    // Put the external force points in the right places.
          externalForcePointTwo.setOffsetWorld(point2.getX(), point2.getY(), point2.getZ());
 
          // Update the robot and its velocity:
-         Robot robot1 = shape1.getLink().getParentJoint().getRobot();
-         Robot robot2 = shape2.getLink().getParentJoint().getRobot();
+         Robot robot1 = linkOne.getParentJoint().getRobot();
+         Robot robot2 = linkTwo.getParentJoint().getRobot();
 
          robot1.updateVelocities();
          robot1.update();
@@ -146,30 +147,35 @@ public class DefaultCollisionHandler implements CollisionHandler
 
          // +++JEP: epsilon, mu hardcoded on construction right now. Need to change that!
          
+         boolean collisionOccurred;
+         
          if (shapeTwoIsGround)
          {
             Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
-            externalForcePointOne.resolveCollision(velocityWorld , negative_normal, epsilon, mu, p_world);    // link1.epsilon, link1.mu, p_world);
+            collisionOccurred = externalForcePointOne.resolveCollision(velocityWorld , negative_normal, epsilon, mu, p_world);    // link1.epsilon, link1.mu, p_world);
          }
          else if (shapeOneIsGround)
          {
             Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
-            externalForcePointTwo.resolveCollision(velocityWorld, normal, epsilon, mu, p_world);    // link1.epsilon, link1.mu, p_world);
+            collisionOccurred = externalForcePointTwo.resolveCollision(velocityWorld, normal, epsilon, mu, p_world);    // link1.epsilon, link1.mu, p_world);
          }
          else
          {
-            externalForcePointOne.resolveCollision(externalForcePointTwo, negative_normal, epsilon, mu, p_world);    // link1.epsilon, link1.mu, p_world);
+            collisionOccurred = externalForcePointOne.resolveCollision(externalForcePointTwo, negative_normal, epsilon, mu, p_world);    // link1.epsilon, link1.mu, p_world);
          }
          
-         for (Listener l : listeners)
+         if (collisionOccurred)
          {
-            l.collision(shape1, shape2, externalForcePointOne, externalForcePointTwo, null, null);
+            for (CollisionHandlerListener listener : listeners)
+            {
+               listener.collision(shape1, shape2, externalForcePointOne, externalForcePointTwo, null, null);
+            }
          }
 
       }
    }
 
-   public void addListener(Listener listener)
+   public void addListener(CollisionHandlerListener listener)
    {
       listeners.add(listener);
    }

@@ -247,7 +247,7 @@ public abstract class SCSCollisionDetectorTest
       {
       }
 
-      public void addListener(Listener listener)
+      public void addListener(CollisionHandlerListener listener)
       {
       }
 
@@ -278,7 +278,7 @@ public abstract class SCSCollisionDetectorTest
       {
       }
       
-      public void addListener(Listener listener)
+      public void addListener(CollisionHandlerListener listener)
       {
       }
 
@@ -310,7 +310,7 @@ public abstract class SCSCollisionDetectorTest
       {
       }
 
-      public void addListener(Listener listener)
+      public void addListener(CollisionHandlerListener listener)
       {
       }
 
@@ -337,7 +337,7 @@ public abstract class SCSCollisionDetectorTest
       {
       }
 
-      public void addListener(Listener listener)
+      public void addListener(CollisionHandlerListener listener)
       {
       }
 

@@ -4295,10 +4295,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void initPhysics(ScsPhysics physics)
    {
       this.physics = physics;
-      if (physics.visualize != null)
-      {
-         physics.visualize.init(this);
-      }
       mySimulation.initPhysics(physics);
    }
 

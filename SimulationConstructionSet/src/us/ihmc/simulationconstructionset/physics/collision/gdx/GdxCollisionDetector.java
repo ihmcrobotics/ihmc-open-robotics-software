@@ -31,11 +31,8 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.ScsForceSensor;
 
-/**
- * @author Peter Abeles
- */
+
 public class GdxCollisionDetector implements ScsCollisionDetector
 {
    private CollisionHandler handler;
@@ -204,11 +201,6 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
          return shape;
       }
-
-      public ScsForceSensor addForceSensor(String name, CollisionShape shape, RigidBodyTransform sensorToShape)
-      {
-         return null;
-      }
    }
 
 
@@ -303,20 +295,20 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    }
 
 
-   public class ContactWrapper implements Contacts
+   private class ContactWrapper implements Contacts
    {
-      btPersistentManifold pm;
+      private btPersistentManifold persistentManifold;
 
-      Vector3d normal = new Vector3d();
+      private final Vector3d normal = new Vector3d();
 
       public void setPersistentManifold(btPersistentManifold pm)
       {
-         this.pm = pm;
+         this.persistentManifold = pm;
       }
 
       public int getNumContacts()
       {
-         return pm.getNumContacts();
+         return persistentManifold.getNumContacts();
       }
 
       public Point3d getWorldA(int which, Point3d location)
@@ -324,7 +316,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          if (location == null)
             location = new Point3d();
 
-         btVector3 vectorA = pm.getContactPoint(which).getPositionWorldOnA();
+         btVector3 vectorA = persistentManifold.getContactPoint(which).getPositionWorldOnA();
          GdxUtil.convert(vectorA, location);
 
          return location;
@@ -335,7 +327,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          if (location == null)
             location = new Point3d();
 
-         btVector3 vectorB = pm.getContactPoint(which).getPositionWorldOnB();
+         btVector3 vectorB = persistentManifold.getContactPoint(which).getPositionWorldOnB();
          GdxUtil.convert(vectorB, location);
 
          return location;
@@ -343,12 +335,12 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
       public double getDistance(int which)
       {
-         return pm.getContactPoint(which).getDistance();
+         return persistentManifold.getContactPoint(which).getDistance();
       }
 
       public Vector3d getWorldNormal(int which)
       {
-         btVector3 v = pm.getContactPoint(which).getNormalWorldOnB();
+         btVector3 v = persistentManifold.getContactPoint(which).getNormalWorldOnB();
          normal.set(v.x(), v.y(), v.z());
 
          return normal;

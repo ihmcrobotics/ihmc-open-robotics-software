@@ -1253,7 +1253,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ScsCollisionConfigure collisionConfigure = createScsCollisionConfigure();
       ScsCollisionDetector collisionDetector = createScsCollisionDetector();
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize();
+      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(0.1, 0.1, scs, 100);
       ScsPhysics physics = new ScsPhysics(collisionConfigure, collisionDetector, visualize);
       
       return physics;
