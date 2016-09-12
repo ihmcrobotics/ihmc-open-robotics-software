@@ -300,7 +300,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private void init()
    {
-      for (NeckJointName jointName : NeckJointName.values())
+      for (NeckJointName jointName : NeckJointName.values)
       {
          OneDoFJoint neckJoint = fullRobotModel.getNeckJoint(jointName);
          if (neckJoint == null)
