@@ -40,7 +40,7 @@ public class MultisensePointCloudReceiver extends RosPointCloudSubscriber
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, null);
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       
-      this.headRootReferenceFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
+      this.headRootReferenceFrame = referenceFrames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
       setupReferenceFrames(referenceFrames);
    }
 
@@ -106,7 +106,7 @@ public class MultisensePointCloudReceiver extends RosPointCloudSubscriber
          }
          case HEAD_ROOT:
          {
-            this.pointCloudReferenceFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
+            this.pointCloudReferenceFrame = referenceFrames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
             break;
          }
          case U_TORSO:

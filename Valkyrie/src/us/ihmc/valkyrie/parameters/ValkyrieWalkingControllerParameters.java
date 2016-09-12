@@ -236,12 +236,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
          // On the real robot, return all 3 so it knows to use them all. The real robot will use position control.
 //         return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
          // For now the neck is not controllable
-         return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
+         return new String[] {jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW)};
       }
 
       // For sims using the QP and whole body controller, only allow one neck joint for now since the QP and inverse dynamics
       // don't do well with redundant joints yet. We'll have to fix that later some how.
-      else return new String[] {jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW)};
+      else return new String[] {jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW)};
    }
 
    @Override
