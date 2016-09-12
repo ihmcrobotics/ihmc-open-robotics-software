@@ -1224,23 +1224,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return new FramePoint2d(referenceFrame, convexPolygon.getMaxXMinYPointCopy());
    }
 
-   public double perimeter()
-   {
-      return convexPolygon.perimeter();
-   }
-
-   public FramePoint2d pointOnPerimeterGivenParameter(double parameter)
-   {
-      return new FramePoint2d(referenceFrame, convexPolygon.pointOnPerimeterGivenParameter(parameter));
-   }
-
-   public void pullPointTowardsCentroid(FramePoint2d point, double percent)
-   {
-      checkReferenceFrameMatch(point);
-      Point2d point2d = point.getPoint();
-      convexPolygon.pullPointTowardsCentroid(point2d, percent);
-   }
-
    public boolean isUpToDate()
    {
       return convexPolygon.isUpToDate();

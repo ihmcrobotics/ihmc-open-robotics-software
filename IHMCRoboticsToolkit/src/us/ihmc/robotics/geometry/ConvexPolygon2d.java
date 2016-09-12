@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple2d;
@@ -16,7 +15,6 @@ import us.ihmc.robotics.geometry.ConvexPolygonTools.EmptyPolygonException;
 import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * <p>Title: ConvexPolygon2d</p>
@@ -50,8 +48,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    private final Vector2d tempVector1 = new Vector2d();
    private final Vector2d tempVector2 = new Vector2d();
    private final int[] tempTwoIndices = new int[2];
-   private final LineSegment2d tempSegment1 = new LineSegment2d();
-   private final LineSegment2d tempSegment2 = new LineSegment2d();
 
    /**
     * Creates an empty convex polygon.
@@ -1205,8 +1201,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    @Override
    public void applyTransform(RigidBodyTransform transform)
    {
-      checkIsTransformationInPlane(transform);
-      applyTransformAndProjectToXYPlane(transform);
+      throw new RuntimeException("This is a 2d object use applyTransformAndProjectToXYPlane method instead.");
    }
 
    @Override
@@ -1306,85 +1301,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    {
       checkIfUpToDate();
       return new Point2d(getVertex(maxXminY_index));
-   }
-
-   public double perimeter()
-   {
-      checkIfUpToDate();
-
-      // Sum the lengths of each of the edges:
-      double perimeter = 0.0;
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         perimeter += getVertex(i).distance(getNextVertex(i));
-      }
-
-      return perimeter;
-   }
-
-   public Point2d pointOnPerimeterGivenParameter(double parameter)
-   {
-      checkIfUpToDate();
-      if (hasExactlyOneVertex())
-      {
-         return new Point2d(getVertex(0));
-      }
-
-      double perimeter = perimeter();
-      double adjustedParameter = (parameter % 1 >= 0.0) ? parameter % 1 : parameter % 1 + 1.0;
-      double desiredDistance = adjustedParameter * perimeter;
-
-      int i = 0;
-      double distance = 0.0;
-      double edgeLength = getVertex(0).distance(getNextVertex(0));
-      while (desiredDistance > distance + edgeLength)
-      {
-         distance += edgeLength;
-         i++;
-         edgeLength = getVertex(i).distance(getNextVertex(i));
-      }
-
-      LineSegment2d edge = new LineSegment2d(getVertex(i), getNextVertex(i));
-      double desiredDistanceAlongEdge = desiredDistance - distance;
-      double parameterAlongEdge = desiredDistanceAlongEdge / edge.length();
-
-      return edge.pointBetweenEndPointsGivenParameter(parameterAlongEdge);
-   }
-
-   public void pullPointTowardsCentroid(Point2d point, double percent)
-   {
-      checkIfUpToDate();
-      double x = centroid.getX() + (point.getX() - centroid.getX()) * (1.0 - percent);
-      double y = centroid.getY() + (point.getY() - centroid.getY()) * (1.0 - percent);
-
-      point.set(x, y);
-   }
-
-   public Point2d pullTowardsCentroidCopy(Point2d point, double percent)
-   {
-      checkIfUpToDate();
-      Point2d copy = new Point2d(point);
-      pullPointTowardsCentroid(copy, percent);
-
-      return copy;
-   }
-
-   private void checkIsTransformationInPlane(RigidBodyTransform transform)
-   {
-      if (!isTransformationInPlane(transform))
-      {
-         throw new RuntimeException("Cannot transform FrameConvexPolygon2d to a plane with a different surface normal");
-      }
-   }
-
-   private final Matrix3d tempRotation = new Matrix3d();
-
-   private boolean isTransformationInPlane(RigidBodyTransform transform)
-   {
-      // arguably not a sufficient condition. ReferenceFrame2d needed!
-      transform.getRotation(tempRotation);
-
-      return ReferenceFrame.isRotationInPlane(tempRotation);
    }
 
    protected void getPointsInClockwiseOrder(int startIndexInclusive, int endIndexInclusive, ArrayList<Point2d> pointList)
