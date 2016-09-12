@@ -22,17 +22,15 @@ public class LogCrawler implements Runnable
    private String logFileName;
    private LogCrawlerListenerInterface playbackListener;
    private double dt;
-   
+   private File logFile;
 
    public LogCrawler(File logFile, LogCrawlerListenerInterface playbackListener) throws IOException
    {
-      this.playbackListener = playbackListener;
-      System.out.println("loading log from folder:" + logFile);
-
-      readLogFile(logFile);
+      this.logFile = logFile;
       logFileName = logFile.getName();
+      this.playbackListener = playbackListener;
    }
-   
+
    private void readLogFile(File selectedFile) throws IOException
    {
       LogPropertiesReader logProperties = new LogPropertiesReader(new File(selectedFile, YoVariableLoggerListener.propertyFile));
@@ -86,23 +84,39 @@ public class LogCrawler implements Runnable
       boolean enableJointDamping = true;
 
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits,
+            enableJointDamping);
 
-      robot = new SpecificLogVariableUpdater(selectedFile, robotDescription, parser.getJointStates(), parser.getYoVariablesList(), logProperties ,yoVariablesToUpdate);
+      robot = new SpecificLogVariableUpdater(selectedFile, robotDescription, parser.getJointStates(), parser.getYoVariablesList(), logProperties,
+            yoVariablesToUpdate);
       dt = parser.getDt();
    }
-   
+
    public void run()
    {
+      System.out.println("loading log from folder:" + logFile);
       long startTime = System.currentTimeMillis();
-      while(!robot.readAndProcessALogLineReturnTrueIfDone(dt))
+
+      try
       {
-         playbackListener.update(this, robot.getTime());
+         readLogFile(logFile);
+
+         while (!robot.readAndProcessALogLineReturnTrueIfDone(dt))
+         {
+            playbackListener.update(this, robot.getTime());
+         }
       }
-      robot.close();
-      long endTime = System.currentTimeMillis();
-      System.out.println("Finished searching " + logFileName + ", took " + TimeTools.milliSecondsToMinutes(endTime - startTime) + " minutes");
-      playbackListener.onFinish();
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      } 
+      finally
+      {
+         robot.close();
+         long endTime = System.currentTimeMillis();
+         System.out.println("Finished searching " + logFileName + ", took " + TimeTools.milliSecondsToMinutes(endTime - startTime) + " minutes");
+         playbackListener.onFinish();
+      }
    }
 
    public String getLogFileName()
