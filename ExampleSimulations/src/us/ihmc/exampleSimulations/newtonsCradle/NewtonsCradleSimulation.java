@@ -36,7 +36,7 @@ public class NewtonsCradleSimulation
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
    }
-   
+
    public static void createSpinningCoinSimulation()
    {
       SpinningCoinRobot robot = new SpinningCoinRobot();
@@ -57,7 +57,7 @@ public class NewtonsCradleSimulation
       collisionDetector.initialize(handler);
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
-      
+
       scs.setSimulateDuration(0.19);
       scs.simulate();
    }

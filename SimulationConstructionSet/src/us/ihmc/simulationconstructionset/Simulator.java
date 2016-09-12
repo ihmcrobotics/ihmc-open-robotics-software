@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset;
 import java.util.ArrayList;
 
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
@@ -66,6 +67,8 @@ public class Simulator implements java.io.Serializable
       doDynamicsAndIntegrate();
    }
 
+   private final CollisionDetectionResult results = new CollisionDetectionResult();
+
    protected void updateState()
    {
       synchronized (simulationSynchronizer)
@@ -86,7 +89,7 @@ public class Simulator implements java.io.Serializable
                robot.getGroundContactModel().doGroundContact(); // Do the ground contact model
             }
 
-            // Needed to move this outside and do it even if no ground contact model, for 
+            // Needed to move this outside and do it even if no ground contact model, for
             // Contact models that are done outside of the robot.
             robot.decideGroundContactPointsInContact(); // +++JEP OPTIMIZE. This should be in a GroundContactDetector...
 
@@ -104,7 +107,7 @@ public class Simulator implements java.io.Serializable
             if (collisionVisualize != null)
                collisionVisualize.callBeforeCollisionDetection();
 
-            collisionDetector.performCollisionDetection();
+            collisionDetector.performCollisionDetection(results);
          }
       }
 
