@@ -603,6 +603,37 @@ public enum RobotQuadrant implements RobotSegment<RobotQuadrant>
       }
    }
    
+   public String getUnderBarName()
+   {
+      switch (this)
+      {
+         case FRONT_LEFT:
+         {
+            return "front_left";
+         }
+   
+         case FRONT_RIGHT:
+         {
+            return "front_right";
+         }
+   
+         case HIND_RIGHT:
+         {
+            return "hind_right";
+         }
+   
+         case HIND_LEFT:
+         {
+            return "hind_left";
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
+         }
+      }
+   }
+   
    /**
     * @deprecated Use getPascalCaseName() instead.
     */
