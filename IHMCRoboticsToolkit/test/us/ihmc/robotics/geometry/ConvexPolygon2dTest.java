@@ -472,37 +472,6 @@ public class ConvexPolygon2dTest
        test.distance(new Point2d());
     }
 
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testPerimeterSquare()
-   {
-      Random random = new Random(1001L);
-
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
-      double epsilon = 1E-12;
-
-      int numberOfTests = 100;
-      for (int i = 0; i < numberOfTests; i++)
-      {
-         double xMin = random.nextDouble();
-         double xMax = xMin + random.nextDouble();
-         double yMin = random.nextDouble();
-         double yMax = yMin + random.nextDouble();
-
-         ArrayList<FramePoint2d> squareList = new ArrayList<FramePoint2d>();
-         squareList.add(new FramePoint2d(zUpFrame, xMin, yMin));
-         squareList.add(new FramePoint2d(zUpFrame, xMax, yMax));
-         squareList.add(new FramePoint2d(zUpFrame, xMin, yMax));
-         squareList.add(new FramePoint2d(zUpFrame, xMax, yMin));
-         FrameConvexPolygon2d square = new FrameConvexPolygon2d(squareList);
-
-         double perimeter = square.perimeter();
-         double expectedPerimeter = 2.0 * (xMax - xMin) + 2.0 * (yMax - yMin);
-         assertEquals("Perimeter not calculated correctly for a square", expectedPerimeter, perimeter, epsilon);
-      }
-   }
-
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testExtremePointsSquare()
@@ -1335,63 +1304,6 @@ public class ConvexPolygon2dTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testPullTowardsCentroid()
-   {
-      Random random = new Random(2002L);
-
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
-      double xMin = -.1;
-      double xMax = 0.1;
-      double yMin = -0.1;
-      double yMax = 0.1;
-
-      ArrayList<FramePoint2d> randomPointList = ConvexPolygon2dTestHelpers.generateRandomRectangularFramePoints(random, zUpFrame, xMin, xMax, yMin, yMax, 10);
-      FrameConvexPolygon2d randomPolygon = new FrameConvexPolygon2d(randomPointList);
-      FramePoint2d centroid = randomPolygon.getCentroidCopy();
-
-      FrameGeometryTestFrame testFrame = null;
-      FrameGeometry2dPlotter plotter = null;
-      if (PLOT_RESULTS)
-      {
-         testFrame = new FrameGeometryTestFrame(xMin, xMax, yMin, yMax);
-         plotter = testFrame.getFrameGeometry2dPlotter();
-         plotter.addPolygon(randomPolygon);
-         plotter.addFramePoint2d(centroid, Color.blue);
-      }
-
-      int numberOfTestPoints = 100;
-      for (int i = 0; i < numberOfTestPoints; i++)
-      {
-         double percentToPull = 0.20;
-
-         FramePoint2d testPoint = FramePoint2d.generateRandomFramePoint2d(random, zUpFrame, xMin, xMax, yMin, yMax);
-         FramePoint2d pulledTestPoint = new FramePoint2d(testPoint);
-         randomPolygon.pullPointTowardsCentroid(pulledTestPoint, percentToPull);
-
-         double distanceFromCentroidToTestPoint = testPoint.distance(centroid);
-         double distanceFromCentroidToPulledPoint = pulledTestPoint.distance(centroid);
-         assertTrue(distanceFromCentroidToPulledPoint < distanceFromCentroidToTestPoint);
-         double measuredPercentPulled = 1.0 - distanceFromCentroidToPulledPoint / distanceFromCentroidToTestPoint;
-         assertEquals(percentToPull, measuredPercentPulled, 0.001);
-
-         assertTrue(GeometryTools.arePointsInOrderAndColinear(testPoint.getPoint(), pulledTestPoint.getPoint(), centroid.getPoint(), 1e-10));
-
-         if (PLOT_RESULTS)
-         {
-            plotter.addFramePoint2d(testPoint, Color.green);
-            plotter.addFramePoint2d(pulledTestPoint, Color.black);
-            plotter.addFrameLineSegment2d(new FrameLineSegment2d(testPoint, pulledTestPoint), Color.cyan);
-         }
-      }
-
-      if (PLOT_RESULTS)
-      {
-         waitForButtonOrPause(testFrame);
-      }
-   }
-
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testGetNearestVertex()
    {
       Random random = new Random(1776L);
@@ -1720,7 +1632,7 @@ public class ConvexPolygon2dTest
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d(pointList);
       ConvexPolygon2d returnPolygon = new ConvexPolygon2d(convexPolygon);
 
-      returnPolygon.applyTransform(transform);
+      returnPolygon.applyTransformAndProjectToXYPlane(transform);
 
       if (PLOT_RESULTS)
       {
@@ -1761,7 +1673,7 @@ public class ConvexPolygon2dTest
 
       ConvexPolygon2d convexPolygon = new ConvexPolygon2d(pointList);
       ConvexPolygon2d returnPolygon = new ConvexPolygon2d(convexPolygon);
-      returnPolygon.applyTransform(transform);
+      returnPolygon.applyTransformAndProjectToXYPlane(transform);
 
       if (PLOT_RESULTS)
       {
@@ -2086,16 +1998,8 @@ public class ConvexPolygon2dTest
          assertTrue(polygonWithOnePoint.getMinXMaxYPointCopy().equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getMinXMinYPointCopy().equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.orthogonalProjectionCopy(arbitraryPoint0).equals(pointThatDefinesThePolygon));
-         assertEquals(0.0, polygonWithOnePoint.perimeter(), epsilon);
          assertTrue(polygonWithOnePoint.pointIsOnPerimeter(pointThatDefinesThePolygon));
          assertFalse(polygonWithOnePoint.pointIsOnPerimeter(arbitraryPoint0));
-         assertTrue(polygonWithOnePoint.pointOnPerimeterGivenParameter(random.nextDouble()).equals(pointThatDefinesThePolygon));
-
-         double pullPercent = random.nextDouble();
-         Point2d polygonResult = polygonWithOnePoint.pullTowardsCentroidCopy(arbitraryPoint0, pullPercent);
-         Point2d pointResult = new Point2d(arbitraryPoint0);
-         pointResult.interpolate(pointThatDefinesThePolygon, pullPercent);
-         assertTrue(polygonResult.distance(pointResult) < epsilon);
 
          ConvexPolygon2d polygonTranslation = polygonWithOnePoint.translateCopy(arbitraryPoint0);
          assertEquals(1, polygonTranslation.getNumberOfVertices());
@@ -2199,7 +2103,6 @@ public class ConvexPolygon2dTest
          assertTrue(polygonWithTwoPoints.getCentroid().getX() == 0.5 * (pointThatDefinesThePolygon0.getX() + pointThatDefinesThePolygon1.getX()));
          assertTrue(polygonWithTwoPoints.getCentroid().getY() == 0.5 * (pointThatDefinesThePolygon0.getY() + pointThatDefinesThePolygon1.getY()));
          assertEquals(2, polygonWithTwoPoints.getNumberOfVertices());
-         assertEquals(2.0 * pointThatDefinesThePolygon0.distance(pointThatDefinesThePolygon1), polygonWithTwoPoints.perimeter(), epsilon);
 
          // getClosestEdge
          Point2d[] closestEdgeEndpoints = polygonWithTwoPoints.getClosestEdgeCopy(arbitraryPoint0).getEndpoints();
@@ -2250,13 +2153,6 @@ public class ConvexPolygon2dTest
          oneExpectedOrthoganol.normalize();
          assertEqualsInEitherOrder(oneExpectedOrthoganol.getX(), -oneExpectedOrthoganol.getX(), actualOrthoganolVectors.get(0).getX(), actualOrthoganolVectors.get(1).getX());
          assertEqualsInEitherOrder(oneExpectedOrthoganol.getY(), -oneExpectedOrthoganol.getY(), actualOrthoganolVectors.get(0).getY(), actualOrthoganolVectors.get(1).getY());
-
-         // pullTowardsCentroidCopy
-         double pullPercent = random.nextDouble();
-         Point2d polygonResult = polygonWithTwoPoints.pullTowardsCentroidCopy(arbitraryPoint0, pullPercent);
-         Point2d pointResult = new Point2d(arbitraryPoint0);
-         pointResult.interpolate(polygonWithTwoPoints.getCentroid(), pullPercent);
-         assertTrue(polygonResult.distance(pointResult) < epsilon);
 
          // getIntersectingEdges
          LineSegment2d[] intersectingEdges = ConvexPolygon2dCalculator.getIntersectingEdgesCopy(arbitraryLine, polygonWithTwoPoints);
@@ -2350,22 +2246,6 @@ public class ConvexPolygon2dTest
          randomLinearCombination.add(scaledPoint0, scaledPoint1);
          assertTrue(polygonWithTwoPoints.pointIsOnPerimeter(randomLinearCombination));
 
-         // pointOnPerimeterGivenParameter
-         Vector2d slightlyOffPerimeter = polygonWithTwoPoints.getOutSideFacingOrthoNormalVectorsCopy().get(0);
-         slightlyOffPerimeter.scale(0.01);
-         slightlyOffPerimeter.add(randomLinearCombination);
-         assertFalse(polygonWithTwoPoints.pointIsOnPerimeter(new Point2d(slightlyOffPerimeter.getX(), slightlyOffPerimeter.getY())));
-         double randomParameter = random.nextDouble();
-         double desiredFractionFrom0to1 = 2.0 * ((randomParameter > 0.5) ? 1.0 - randomParameter : randomParameter);
-         scaledPoint0 = new Point2d(polygonWithTwoPoints.getVertex(0));
-         scaledPoint1 = new Point2d(polygonWithTwoPoints.getVertex(1));
-         scaledPoint0.scale(1.0 - desiredFractionFrom0to1);
-         scaledPoint1.scale(desiredFractionFrom0to1);
-         Point2d expectedPointFromParameter = new Point2d();
-         expectedPointFromParameter.add(scaledPoint0, scaledPoint1);
-         Point2d actualPointFromParameter = polygonWithTwoPoints.pointOnPerimeterGivenParameter(randomParameter);
-         assertTrue(expectedPointFromParameter.epsilonEquals(actualPointFromParameter, epsilon));
-
          // STATIC METHODS
 
          // translateCopy
@@ -2423,9 +2303,6 @@ public class ConvexPolygon2dTest
          ConvexPolygon2d shrunkenPolygon = new ConvexPolygon2d();
 
          shrinker.shrinkConstantDistanceInto(polygonWithTwoPoints, shrinkDistance, shrunkenPolygon);
-
-         assertEquals(shrunkenPolygon.perimeter(), polygonWithTwoPoints.perimeter() - 4.0
-               * shrinkDistance, epsilon);
          shrinkDistance = lineSegmentThatDefinesThePolygon.length() / 2.0 + random.nextDouble();
 
          shrinker.shrinkConstantDistanceInto(polygonWithTwoPoints, shrinkDistance, shrunkenPolygon);
