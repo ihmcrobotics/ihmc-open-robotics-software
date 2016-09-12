@@ -36,6 +36,31 @@ public class NewtonsCradleSimulation
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
    }
+   
+   public static void createSpinningCoinSimulation()
+   {
+      SpinningCoinRobot robot = new SpinningCoinRobot();
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      scs.setDT(0.0000001, 100);
+      scs.startOnAThread();
+
+      double epsilon = 0.3;
+      double mu = 0.15;
+      CollisionHandler handler = new DefaultCollisionHandler(epsilon, mu);
+      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(10.0, 10.0, scs, 100);
+
+      handler.addListener(visualize);
+      ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
+
+      handler.initialize(collisionDetector);
+      collisionDetector.initialize(handler);
+
+      scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
+      
+      scs.setSimulateDuration(0.19);
+      scs.simulate();
+   }
 
    public static void createStackOfBouncyBallsSimulation()
    {
@@ -140,6 +165,7 @@ public class NewtonsCradleSimulation
 //      createNewtonsCradleSimulation();
 //      createStackOfBouncyBallsSimulation();
 //      createRowOfDominosSimulation();
-      createPileOfRandomObjectsSimulation();
+//      createPileOfRandomObjectsSimulation();
+      createSpinningCoinSimulation();
    }
 }
