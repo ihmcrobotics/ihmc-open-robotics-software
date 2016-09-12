@@ -227,6 +227,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       WalkToLocationBehavior walkToLocationBehavior = createNewWalkToLocationBehavior();
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose2d, WalkingOrientation.TARGET_ORIENTATION);
+      walkToLocationBehavior.doControl();
+
       ArrayList<Footstep> footsteps = walkToLocationBehavior.getFootSteps();
       int numberOfFootsteps = footsteps.size();
       FramePose2d currentFootstepPose = new FramePose2d();
@@ -266,6 +268,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       WalkToLocationBehavior walkToLocationBehavior = createNewWalkToLocationBehavior();
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose2d, WalkingOrientation.START_TARGET_ORIENTATION_MEAN);
+      walkToLocationBehavior.doControl();
+
       ArrayList<Footstep> footsteps = walkToLocationBehavior.getFootSteps();
       int numberOfFootsteps = footsteps.size();
       FramePose2d currentFootstepPose = new FramePose2d();
