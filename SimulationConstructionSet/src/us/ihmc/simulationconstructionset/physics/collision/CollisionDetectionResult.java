@@ -16,7 +16,18 @@ public class CollisionDetectionResult
       results.add(result);
    }
 
+   public int getNumberOfCollisions()
+   {
+      return results.size();
+   }
 
+   public void clear()
+   {
+      results.clear();
+   }
 
-
+   public DetectedCollision getCollision(int i)
+   {
+      return results.get(i);
+   }
 }

@@ -150,13 +150,13 @@ public class DefaultCollisionHandler implements CollisionHandler
          boolean collisionOccurred;
 
 
-         System.out.println("numberOfContacts = " + numberOfContacts);
-         System.out.println("normal = " + normal);
-         System.out.println("negative_normal = " + negative_normal);
-         System.out.println("point1 = " + point1);
-         System.out.println("point2 = " + point2);
-         System.out.println("externalForcePointOne = " + externalForcePointOne);
-         System.out.println("externalForcePointTwo = " + externalForcePointTwo);
+//         System.out.println("numberOfContacts = " + numberOfContacts);
+//         System.out.println("normal = " + normal);
+//         System.out.println("negative_normal = " + negative_normal);
+//         System.out.println("point1 = " + point1);
+//         System.out.println("point2 = " + point2);
+//         System.out.println("externalForcePointOne = " + externalForcePointOne);
+//         System.out.println("externalForcePointTwo = " + externalForcePointTwo);
 
          if (shapeTwoIsGround)
          {
@@ -172,7 +172,7 @@ public class DefaultCollisionHandler implements CollisionHandler
          }
          else
          {
-            System.out.println("Two ef points");
+//            System.out.println("Two ef points");
             collisionOccurred = externalForcePointOne.resolveCollision(externalForcePointTwo, negative_normal, epsilon, mu, p_world);    // link1.epsilon, link1.mu, p_world);
          }
 
@@ -180,9 +180,9 @@ public class DefaultCollisionHandler implements CollisionHandler
          {
             for (CollisionHandlerListener listener : listeners)
             {
-               System.out.println("collision occured. Visualizing it...");
-               System.out.println("externalForcePointOne = " + externalForcePointOne);
-               System.out.println("externalForcePointTwo = " + externalForcePointTwo);
+//               System.out.println("collision occured. Visualizing it...");
+//               System.out.println("externalForcePointOne = " + externalForcePointOne);
+//               System.out.println("externalForcePointTwo = " + externalForcePointTwo);
 
                listener.collision(shape1, shape2, externalForcePointOne, externalForcePointTwo, null, null);
             }

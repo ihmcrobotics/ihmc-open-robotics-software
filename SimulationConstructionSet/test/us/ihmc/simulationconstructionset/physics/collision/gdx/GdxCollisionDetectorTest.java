@@ -7,7 +7,7 @@ import us.ihmc.simulationconstructionset.physics.collision.SCSCollisionDetectorT
 public class GdxCollisionDetectorTest extends SCSCollisionDetectorTest
 {
    @Override
-   public ScsCollisionDetector createCollisionInterface()
+   public ScsCollisionDetector createCollisionDetector()
    {
       return new GdxCollisionDetector(new YoVariableRegistry("Dummy"), 1000);
    }

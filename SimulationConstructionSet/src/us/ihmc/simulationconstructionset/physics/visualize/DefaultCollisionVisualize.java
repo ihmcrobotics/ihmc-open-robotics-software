@@ -76,13 +76,13 @@ public class DefaultCollisionVisualize implements CollisionHandler.CollisionHand
 //      yoGraphicVectorA.set(forceA.getYoPosition(), forceA.getYoForce());
 //      yoGraphicVectorB.set(forceB.getYoPosition(), forceB.getYoForce());
 
-      System.out.println("Visualizing Collision. forceA = " + forceA);
-      System.out.println("Visualizing Collision. forceB = " + forceB);
-
-      System.out.println("Visualizing Collision. forceA.getYoPosition() = " + forceA.getYoPosition());
-      System.out.println("Visualizing Collision. forceA.getYoImpulse() = " + forceA.getYoImpulse());
-      System.out.println("Visualizing Collision. forceB.getYoPosition() = " + forceB.getYoPosition());
-      System.out.println("Visualizing Collision. forceB.getYoImpulse() = " + forceB.getYoImpulse());
+//      System.out.println("Visualizing Collision. forceA = " + forceA);
+//      System.out.println("Visualizing Collision. forceB = " + forceB);
+//
+//      System.out.println("Visualizing Collision. forceA.getYoPosition() = " + forceA.getYoPosition());
+//      System.out.println("Visualizing Collision. forceA.getYoImpulse() = " + forceA.getYoImpulse());
+//      System.out.println("Visualizing Collision. forceB.getYoPosition() = " + forceB.getYoPosition());
+//      System.out.println("Visualizing Collision. forceB.getYoImpulse() = " + forceB.getYoImpulse());
 
       yoGraphicVectorA.set(forceA.getYoPosition(), forceA.getYoImpulse());
       yoGraphicVectorB.set(forceB.getYoPosition(), forceB.getYoImpulse());
