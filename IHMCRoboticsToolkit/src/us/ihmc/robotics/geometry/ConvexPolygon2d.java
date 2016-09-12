@@ -1069,7 +1069,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
       // Line2d line2d = new Line2d(outsidePoint, otherPoint);
 
-      Point2d[] intersections = intersectionWithRay(line2d);
+      Point2d[] intersections = intersectionWithRayCopy(line2d);
       if (intersections == null)
          return null;
 
@@ -1077,129 +1077,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
          return intersections;
 
       return new Point2d[] {intersections[0]}; // Only return the entering point, if the segment has one point inside the polygon.
-   }
-
-   /**
-    * Computes the intersections of a ray with this polygon. Since the polygon is convex the maximum
-    * number of intersections is two. Returns the number of intersections found. If there are less
-    * then two intersections the Points are set to NaN.
-    *
-    * @param ray                  ray to intersect this polygon with
-    * @param intersectionToPack1  modified - is set to the first intersection.
-    *                             If the are no intersections this will be set to NaN.
-    * @param intersectionToPack2  modified - is set to the second intersection.
-    *                             If there is only one intersection this will be set to NaN.
-    * @return                     The number of intersections 0, 1, or 2
-    */
-   public int intersectionWithRay(Line2d ray, Point2d intersectionToPack1, Point2d intersectionToPack2)
-   {
-      checkIfUpToDate();
-
-      if (ray == null || ray.containsNaN())
-      {
-         intersectionToPack1.set(Double.NaN, Double.NaN);
-         intersectionToPack2.set(Double.NaN, Double.NaN);
-         return 0;
-      }
-
-      // --- hack to make this work for now: need to implement real intersection with ray method ---
-//      int intersectingEdges = getIntersectingEdges(ray, tempSegment1, tempSegment2);
-      int intersectingEdges = ConvexPolygon2dCalculator.getIntersectingEdges(ray, tempSegment1, tempSegment2, this);
-      if (intersectingEdges == 2)
-      {
-         Point2d rayStart = ray.getPoint();
-         Vector2d rayDirection = ray.getNormalizedVector();
-         boolean edgeOneValid = false;
-         boolean edgeTwoValid = false;
-
-         {
-            Point2d edgePoint = tempSegment1.getFirstEndpoint();
-            double edgeDirectionX = tempSegment1.getSecondEndpointX() - edgePoint.x;
-            double edgeDirectionY = tempSegment1.getSecondEndpointY() - edgePoint.y;
-            double lambda = ConvexPolygon2dCalculator.getIntersectionLambda(rayStart.x, rayStart.y, rayDirection.x, rayDirection.y, edgePoint.x, edgePoint.y,
-                  edgeDirectionX, edgeDirectionY);
-            edgeOneValid = lambda >= 0.0;
-         }
-
-         {
-            Point2d edgePoint = tempSegment2.getFirstEndpoint();
-            double edgeDirectionX = tempSegment2.getSecondEndpointX() - edgePoint.x;
-            double edgeDirectionY = tempSegment2.getSecondEndpointY() - edgePoint.y;
-            double lambda = ConvexPolygon2dCalculator.getIntersectionLambda(rayStart.x, rayStart.y, rayDirection.x, rayDirection.y, edgePoint.x, edgePoint.y,
-                  edgeDirectionX, edgeDirectionY);
-            edgeTwoValid = lambda >= 0.0;
-         }
-
-         if (!edgeOneValid && !edgeTwoValid)
-            intersectingEdges = 0;
-         if (!edgeOneValid && edgeTwoValid)
-         {
-            intersectingEdges = 1;
-            tempSegment1.set(tempSegment2);
-         }
-         if (edgeOneValid && !edgeTwoValid)
-            intersectingEdges = 1;
-      }
-      // --- end hack ---
-
-      if (intersectingEdges == 0)
-      {
-         intersectionToPack1.set(Double.NaN, Double.NaN);
-         intersectionToPack2.set(Double.NaN, Double.NaN);
-         return 0;
-      }
-      else if (intersectingEdges == 1)
-      {
-         // TODO: this duplicates the computation in intersectionWith(ray) - same below
-         if (tempSegment1.intersectionWith(ray) == null)
-            ConvexPolygon2dCalculator.getClosestVertex(ray, this, intersectionToPack1);
-         else
-            intersectionToPack1.set(tempSegment1.intersectionWith(ray));
-
-         intersectionToPack2.set(Double.NaN, Double.NaN);
-
-         return 1;
-      }
-      else if (intersectingEdges == 2)
-      {
-         if (tempSegment1.intersectionWith(ray) == null)
-            ConvexPolygon2dCalculator.getClosestVertex(ray, this, intersectionToPack1);
-         else
-            intersectionToPack1.set(tempSegment1.intersectionWith(ray));
-
-         if (tempSegment2.intersectionWith(ray) == null)
-            ConvexPolygon2dCalculator.getClosestVertex(ray, this, intersectionToPack2);
-         else
-            intersectionToPack2.set(tempSegment2.intersectionWith(ray));
-
-         if (hasExactlyTwoVertices() && intersectionToPack1.equals(intersectionToPack2))
-         {
-            intersectionToPack2.set(Double.NaN, Double.NaN);
-            return 1;
-         }
-
-         return 2;
-      }
-      else
-         throw new RuntimeException("This should never happen for a convex polygon.");
-   }
-
-   public Point2d[] intersectionWithRay(Line2d ray)
-   {
-      checkIfUpToDate();
-
-      Point2d intersection1 = new Point2d();
-      Point2d intersection2 = new Point2d();
-      int intersections = intersectionWithRay(ray, intersection1, intersection2);
-
-      if (intersections == 0)
-         return null;
-      if (intersections == 1)
-         return new Point2d[] {intersection1};
-      if (intersections == 2)
-         return new Point2d[] {intersection1, intersection2};
-
-      throw new RuntimeException("This should never happen for a convex polygon.");
    }
 
    @Override
@@ -1859,10 +1736,20 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line, this);
    }
 
+   public int intersectionWithRay(Line2d ray, Point2d intersectionToPack1, Point2d intersectionToPack2)
+   {
+      return ConvexPolygon2dCalculator.intersectionWithRay(ray, intersectionToPack1, intersectionToPack2, this);
+   }
+
    // --- implementations that make garbage ---
    @Override
    public Point2d[] intersectionWith(Line2d line)
    {
       return ConvexPolygon2dCalculator.intersectionWithLineCopy(line, this);
+   }
+
+   public Point2d[] intersectionWithRayCopy(Line2d ray)
+   {
+      return ConvexPolygon2dCalculator.intersectionWithRayCopy(ray, this);
    }
 }
