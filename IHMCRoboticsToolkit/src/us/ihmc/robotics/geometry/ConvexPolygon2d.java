@@ -1421,10 +1421,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public double distance(Point2d point)
    {
       checkIfUpToDate();
-      tempPoint.set(point);
-      orthogonalProjection(tempPoint);
 
-      return point.distance(tempPoint);
+      double signedDistance = ConvexPolygon2dCalculator.getSignedDistance(point, this);
+      if (signedDistance < 0.0)
+         return 0.0;
+      return signedDistance;
    }
 
    @Override
