@@ -102,7 +102,7 @@ public class ConvexPolygon2dTestHelpers
 
       // The projected point should be inside the polygon:
 
-      if (!polygon.isPointInside(projectionPoint))
+      if (!polygon.isPointInside(projectionPoint, 1.0E-10))
       {
          throw new RuntimeException("ProjectionPoint is not inside the polygon!");
       }
