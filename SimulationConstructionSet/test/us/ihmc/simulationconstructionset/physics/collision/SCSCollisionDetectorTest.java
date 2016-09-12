@@ -5,9 +5,9 @@ import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Vector3d;
 
-import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
@@ -17,38 +17,26 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 
 /**
  * Tests compliance to the {@link us.ihmc.simulationconstructionset.physics.ScsCollisionDetector}
  *
- * @author Peter Abeles
  */
 public abstract class SCSCollisionDetectorTest
 {
-   protected ScsCollisionDetector collisionDetector;
-
    public abstract ScsCollisionDetector createCollisionInterface();
-
-   double margin;
-
-   @Before
-   public void init()
-   {
-      margin = 0.02;
-   }
 
 	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void createBox_checkBounds_noHit()
    {
-      collisionDetector = createCollisionInterface();
+	   ScsCollisionDetector collisionDetector = createCollisionInterface();
 
       collisionDetector.initialize(new CheckNoCollision());
 
-      Link linkA = cube("A", 10, 0.5, 1, 1.5);
-      Link linkB = cube("B", 10, 0.75, 1.2, 1.7);
+      Link linkA = cube(collisionDetector, "A", 10, 0.5, 1, 1.5);
+      Link linkB = cube(collisionDetector, "B", 10, 0.75, 1.2, 1.7);
 
       double a[] = new double[] {0.5 + 0.75, 1 + 1.2, 1.5 + 1.7};
 
@@ -70,7 +58,8 @@ public abstract class SCSCollisionDetectorTest
          linkA.getParentJoint()._setTransformToWorld(translate(Tx, Ty, Tz));
          linkB.getParentJoint()._setTransformToWorld(translate(-Tx, -Ty, -Tz));
 
-         collisionDetector.performCollisionDetection();
+         CollisionDetectionResult result = new CollisionDetectionResult();
+         collisionDetector.performCollisionDetection(result);
       }
    }
 
@@ -78,14 +67,14 @@ public abstract class SCSCollisionDetectorTest
 	@Test(timeout=300000)
    public void createBox_checkBounds_hit()
    {
-      collisionDetector = createCollisionInterface();
+	   ScsCollisionDetector collisionDetector = createCollisionInterface();
 
       double tau = 0.001;
 
       collisionDetector.initialize(new CheckCollision(tau * 2));
 
-      Link linkA = cube("A", 10, 0.5, 1, 1.5);
-      Link linkB = cube("B", 10, 0.75, 1.2, 1.7);
+      Link linkA = cube(collisionDetector, "A", 10, 0.5, 1, 1.5);
+      Link linkB = cube(collisionDetector, "B", 10, 0.75, 1.2, 1.7);
 
       double a[] = new double[] {0.5 + 0.75, 1 + 1.2, 1.5 + 1.7};
 
@@ -104,7 +93,8 @@ public abstract class SCSCollisionDetectorTest
          linkA.getParentJoint()._setTransformToWorld(translate(Tx, Ty, Tz));
          linkB.getParentJoint()._setTransformToWorld(translate(-Tx, -Ty, -Tz));
 
-         collisionDetector.performCollisionDetection();
+         CollisionDetectionResult result = new CollisionDetectionResult();
+         collisionDetector.performCollisionDetection(result);
       }
    }
 
@@ -121,46 +111,49 @@ public abstract class SCSCollisionDetectorTest
 
 //    margin = tau/10;
 
-      collisionDetector = createCollisionInterface();
+      ScsCollisionDetector collisionDetector = createCollisionInterface();
       collisionDetector.initialize(new CheckCollision(tau * 2));
 
-      Link linkA = cube("A", 10, r, r, r);
-      Link linkB = cube("B", 10, r, r, r);
+      Link linkA = cube(collisionDetector, "A", 10, r, r, r);
+      Link linkB = cube(collisionDetector, "B", 10, r, r, r);
 
       // barely intersect
       linkA.getParentJoint()._setTransformToWorld(translate(2 * r - tau, 0, 0));
-      collisionDetector.performCollisionDetection();
+
+      CollisionDetectionResult result = new CollisionDetectionResult();
+      collisionDetector.performCollisionDetection(result);
 
       // barely miss
       collisionDetector = createCollisionInterface();
       collisionDetector.initialize(new CheckNoCollision());
 
-      linkA = cube("A", 10, r, r, r);
-      linkB = cube("B", 10, r, r, r);
+      linkA = cube(collisionDetector, "A", 10, r, r, r);
+      linkB = cube(collisionDetector, "B", 10, r, r, r);
 
       linkA.getParentJoint()._setTransformToWorld(translate(2 * r + tau, 0, 0));
-      collisionDetector.performCollisionDetection();
+      collisionDetector.performCollisionDetection(result);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void collisionMask_hit()
    {
-      collisionDetector = createCollisionInterface();
+	   ScsCollisionDetector collisionDetector = createCollisionInterface();
 
       CheckCollisionMasks check = new CheckCollisionMasks();
 
       collisionDetector.initialize(check);
 
       // all 3 shapes will overlap.  the mask determines what intersects
-      Link linkA = cube("A", 10, null, 0.5, 1, 1.5, 0x01, 0x02);
-      Link linkB = cube("A", 10, null, 0.75, 1.2, 1.7, 0x02, 0x01);
-      Link linkC = cube("A", 10, null, 10, 10, 10, 0x04, 0x04);
+      Link linkA = cube(collisionDetector, "A", 10, null, 0.5, 1, 1.5, 0x01, 0x02);
+      Link linkB = cube(collisionDetector, "A", 10, null, 0.75, 1.2, 1.7, 0x02, 0x01);
+      Link linkC = cube(collisionDetector, "A", 10, null, 10, 10, 10, 0x04, 0x04);
 
       // just do an offset so that not everything is at the origin
       linkB.getParentJoint()._setTransformToWorld(translate(0.4, 0, 0));
 
-      collisionDetector.performCollisionDetection();
+      CollisionDetectionResult result = new CollisionDetectionResult();
+      collisionDetector.performCollisionDetection(result);
 
       assertEquals(1, check.totalCollisions);
    }
@@ -173,7 +166,7 @@ public abstract class SCSCollisionDetectorTest
 	@Test(timeout=300000)
    public void checkCollisionShape_offset()
    {
-      collisionDetector = createCollisionInterface();
+	   ScsCollisionDetector collisionDetector = createCollisionInterface();
 
       CheckCollisionMasks check = new CheckCollisionMasks();
 
@@ -182,25 +175,26 @@ public abstract class SCSCollisionDetectorTest
       RigidBodyTransform offset = new RigidBodyTransform();
       offset.setTranslation(new Vector3d(0, 0, -1.7));
 
-      Link linkA = cube("A", 10, null, 1, 1, 1, 2, 2);
-      Link linkB = cube("B", 10, null, 1, 1, 1, 2, 2);
-      Link linkC = cube("C", 10, offset, 1, 1, 1, 2, 2);
+      Link linkA = cube(collisionDetector, "A", 10, null, 1, 1, 1, 2, 2);
+      Link linkB = cube(collisionDetector, "B", 10, null, 1, 1, 1, 2, 2);
+      Link linkC = cube(collisionDetector, "C", 10, offset, 1, 1, 1, 2, 2);
 
       linkA.getParentJoint()._setTransformToWorld(translate(0, 0, 0.5));
       linkB.getParentJoint()._setTransformToWorld(translate(0, 0, 0.5));
 
-      collisionDetector.performCollisionDetection();
+      CollisionDetectionResult result = new CollisionDetectionResult();
+      collisionDetector.performCollisionDetection(result);
 
       // only A and B should collide
       assertEquals(1, check.totalCollisions);
    }
 
-   public Link cube(String name, double mass, double radiusX, double radiusY, double radiusZ)
+   public Link cube(ScsCollisionDetector collisionDetector, String name, double mass, double radiusX, double radiusY, double radiusZ)
    {
-      return cube(name, mass, null, radiusX, radiusY, radiusZ, 0xFFFFFFFF, 0xFFFFFFFF);
+      return cube(collisionDetector, name, mass, null, radiusX, radiusY, radiusZ, 0xFFFFFFFF, 0xFFFFFFFF);
    }
 
-   public Link cube(String name, double mass, RigidBodyTransform shapeToLink, double radiusX, double radiusY, double radiusZ, int collisionGroup, int collisionMask)
+   public Link cube(ScsCollisionDetector collisionDetector, String name, double mass, RigidBodyTransform shapeToLink, double radiusX, double radiusY, double radiusZ, int collisionGroup, int collisionMask)
    {
       Link ret = new Link(name);
 
@@ -242,7 +236,7 @@ public abstract class SCSCollisionDetectorTest
       public void maintenanceBeforeCollisionDetection()
       {
       }
-      
+
       public void maintenanceAfterCollisionDetection()
       {
       }
@@ -273,11 +267,11 @@ public abstract class SCSCollisionDetectorTest
       public void maintenanceBeforeCollisionDetection()
       {
       }
-      
+
       public void maintenanceAfterCollisionDetection()
       {
       }
-      
+
       public void addListener(CollisionHandlerListener listener)
       {
       }
@@ -305,7 +299,7 @@ public abstract class SCSCollisionDetectorTest
       public void maintenanceBeforeCollisionDetection()
       {
       }
-      
+
       public void maintenanceAfterCollisionDetection()
       {
       }
@@ -332,7 +326,7 @@ public abstract class SCSCollisionDetectorTest
       public void maintenanceBeforeCollisionDetection()
       {
       }
-      
+
       public void maintenanceAfterCollisionDetection()
       {
       }
