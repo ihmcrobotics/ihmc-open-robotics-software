@@ -18,6 +18,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -85,6 +86,7 @@ public class PelvisLinearStateUpdater
    private final DoubleYoVariable alphaIMUAgainstKinematicsForPosition = new DoubleYoVariable("alphaIMUAgainstKinematicsForPosition", registry);
 
    private final BooleanYoVariable useGroundReactionForcesToComputeCenterOfMassVelocity = new BooleanYoVariable("useGRFToComputeCoMVelocity", registry);
+   private final IntegerYoVariable numberOfEndEffectorsTrusted = new IntegerYoVariable("numberOfEndEffectorsTrusted", registry);
 
    private final Map<RigidBody, DoubleYoVariable> footForcesZInPercentOfTotalForce = new LinkedHashMap<RigidBody, DoubleYoVariable>();
    private final DoubleYoVariable forceZInPercentThresholdToFilterFoot = new DoubleYoVariable("forceZInPercentThresholdToFilterFootUserParameter", registry);
@@ -338,14 +340,15 @@ public class PelvisLinearStateUpdater
 
       kinematicsBasedLinearStateCalculator.updateKinematics();
 
-      int numberOfEndEffectorsTrusted = setTrustedFeetUsingFootSwitches();
+      numberOfEndEffectorsTrusted.set(setTrustedFeetUsingFootSwitches());
 
-      if (numberOfEndEffectorsTrusted >= 2)
+      if (numberOfEndEffectorsTrusted.getIntegerValue() >= 2)
       {
          switch (slippageCompensatorMode.getEnumValue())
          {
          case LOAD_THRESHOLD:
-            numberOfEndEffectorsTrusted = filterTrustedFeetBasedOnContactForces(numberOfEndEffectorsTrusted);
+            int filteredNumberOfEndEffectorsTrusted = filterTrustedFeetBasedOnContactForces(numberOfEndEffectorsTrusted.getIntegerValue());
+            numberOfEndEffectorsTrusted.set(filteredNumberOfEndEffectorsTrusted);
             break;
          case MIN_PELVIS_ACCEL:
             throw new RuntimeException("Implement me if possible!");
@@ -354,7 +357,7 @@ public class PelvisLinearStateUpdater
          }
       }
 
-      if (numberOfEndEffectorsTrusted == 0)
+      if (numberOfEndEffectorsTrusted.getIntegerValue() == 0)
       {
          if (trustImuWhenNoFeetAreInContact.getBooleanValue())
          {
@@ -373,7 +376,7 @@ public class PelvisLinearStateUpdater
          else
             throw new RuntimeException("No foot trusted!");
       }
-      else if (numberOfEndEffectorsTrusted > 0)
+      else if (numberOfEndEffectorsTrusted.getIntegerValue() > 0)
       {
          updateTrustedFeetLists();
          yoRootJointPosition.getFrameTuple(rootJointPosition);
