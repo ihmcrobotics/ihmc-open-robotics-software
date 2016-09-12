@@ -33,7 +33,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private final String fullPelvisNameInSdf = pelvisName;
    private final String headName = "upperNeckPitchLink";
 
-   private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
+   private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
    private final ArmJointName[] armJoints;
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_YAW, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL };
    private final NeckJointName[] neckJoints = { NeckJointName.LOWER_NECK_PITCH, NeckJointName.NECK_YAW, NeckJointName.UPPER_NECK_PITCH };
@@ -76,7 +76,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipYaw], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipRoll], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipPitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftKneePitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
+         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftKneePitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE_PITCH));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnklePitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnkleRoll], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
 

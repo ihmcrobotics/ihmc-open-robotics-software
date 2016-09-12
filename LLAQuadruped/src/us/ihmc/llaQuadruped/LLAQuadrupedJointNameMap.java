@@ -22,7 +22,7 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
    private final String modelName = "llaQuadruped";
    private final String rootJoint = "body";
 
-   private final LegJointName[] legJointNames = {LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE};
+   private final LegJointName[] legJointNames = {LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH};
    private final String[] jointNamesBeforeFeet = new String[4];
 
    private final HashMap<String, QuadrupedJointName> quadrupedJointNameMap = new HashMap<>();
@@ -77,10 +77,10 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
          jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(getLegJointName(robotQuadrant, LegJointName.HIP_ROLL), shoulderContactOffset));
       }
 
-      jointNamesBeforeFeet[0] = getLegJointName(RobotQuadrant.FRONT_LEFT, LegJointName.KNEE);
-      jointNamesBeforeFeet[1] = getLegJointName(RobotQuadrant.FRONT_RIGHT, LegJointName.KNEE);
-      jointNamesBeforeFeet[2] = getLegJointName(RobotQuadrant.HIND_LEFT, LegJointName.KNEE);
-      jointNamesBeforeFeet[3] = getLegJointName(RobotQuadrant.HIND_RIGHT, LegJointName.KNEE);
+      jointNamesBeforeFeet[0] = getLegJointName(RobotQuadrant.FRONT_LEFT, LegJointName.KNEE_PITCH);
+      jointNamesBeforeFeet[1] = getLegJointName(RobotQuadrant.FRONT_RIGHT, LegJointName.KNEE_PITCH);
+      jointNamesBeforeFeet[2] = getLegJointName(RobotQuadrant.HIND_LEFT, LegJointName.KNEE_PITCH);
+      jointNamesBeforeFeet[3] = getLegJointName(RobotQuadrant.HIND_RIGHT, LegJointName.KNEE_PITCH);
    }
 
    public Collection<QuadrupedJointName> getQuadrupedJointNames()
@@ -201,7 +201,7 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
    public String getJointBeforeFootName(RobotQuadrant robotQuadrant)
    {
       HashMap<LegJointName, String> legJointMap = mapFromLegJointNameToJointId.get(robotQuadrant);
-      return legJointMap.get(LegJointName.KNEE);
+      return legJointMap.get(LegJointName.KNEE_PITCH);
    }
 
    @Override
