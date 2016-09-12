@@ -1361,6 +1361,112 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.intersectionWithRay(ray15, result1, result2, polygon) == 0);
    }
 
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testOrthogonalProjection1()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(-1.0, -1.0));
+      polygon.addVertex(new Point2d(1.0, -1.0));
+      polygon.addVertex(new Point2d(-1.0, 1.0));
+      polygon.update();
+
+      Point2d point1 = new Point2d(0.5, 0.5);
+      assertPointsEqual(new Point2d(0.0, 0.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point1, polygon));
+
+      Point2d point2 = new Point2d(-0.25, -0.25);
+      assertPointsEqual(point2, ConvexPolygon2dCalculator.orthogonalProjectionCopy(point2, polygon));
+
+      Point2d point3 = new Point2d(-2.0, -2.0);
+      assertPointsEqual(new Point2d(-1.0, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point3, polygon));
+
+      Point2d point4 = new Point2d(-0.9, -2.0);
+      assertPointsEqual(new Point2d(-0.9, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point4, polygon));
+
+      Point2d point5 = new Point2d(-1.1, -2.0);
+      assertPointsEqual(new Point2d(-1.0, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point5, polygon));
+
+      Point2d point6 = new Point2d(1.8, -1.0);
+      assertPointsEqual(new Point2d(1.0, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point6, polygon));
+
+      Point2d point7 = new Point2d(1.8, -0.8);
+      assertPointsEqual(new Point2d(1.0, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point7, polygon));
+
+      Point2d point8 = new Point2d(0.5, 0.0);
+      assertPointsEqual(new Point2d(0.25, -0.25), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point8, polygon));
+
+      Point2d point9 = new Point2d(0.0, 0.5);
+      assertPointsEqual(new Point2d(-0.25, 0.25), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point9, polygon));
+
+      Point2d point10 = new Point2d(0.0, 0.0);
+      assertPointsEqual(point10, ConvexPolygon2dCalculator.orthogonalProjectionCopy(point10, polygon));
+
+      Point2d point11 = new Point2d(1.0, -1.0);
+      assertPointsEqual(point11, ConvexPolygon2dCalculator.orthogonalProjectionCopy(point11, polygon));
+
+      Point2d point12 = new Point2d(-1.1, 0.0);
+      assertPointsEqual(new Point2d(-1.0, 0.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point12, polygon));
+
+      Point2d point13 = new Point2d(-1.5, 3.0);
+      assertPointsEqual(new Point2d(-1.0, 1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point13, polygon));
+
+      Point2d point14 = new Point2d(3.0, -1.5);
+      assertPointsEqual(new Point2d(1.0, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point14, polygon));
+
+      Point2d point15 = new Point2d(1.6, -1.5);
+      assertPointsEqual(new Point2d(1.0, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point15, polygon));
+
+      Point2d point16 = new Point2d(-2.0, 0.9);
+      assertPointsEqual(new Point2d(-1.0, 0.9), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point16, polygon));
+
+      Point2d point17 = new Point2d(-2.0, -0.9);
+      assertPointsEqual(new Point2d(-1.0, -0.9), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point17, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testOrthogonalProjection2()
+   {
+      // empty polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2dCalculator.orthogonalProjectionCopy(new Point2d(), polygon);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testOrthogonalProjection3()
+   {
+      // single point polygon
+      Point2d vertex = new Point2d(1.0, 2.0);
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(vertex);
+      polygon.update();
+
+      assertPointsEqual(vertex, ConvexPolygon2dCalculator.orthogonalProjectionCopy(new Point2d(0.0, 0.0), polygon));
+      assertPointsEqual(vertex, ConvexPolygon2dCalculator.orthogonalProjectionCopy(new Point2d(1.0, -0.2), polygon));
+      assertPointsEqual(vertex, ConvexPolygon2dCalculator.orthogonalProjectionCopy(new Point2d(1.0, 2.0), polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testOrthogonalProjection4()
+   {
+      // line polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(1.0, 2.0));
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.update();
+
+      Point2d point1 = new Point2d(1.0, -1.0);
+      assertPointsEqual(new Point2d(1.0, 1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point1, polygon));
+
+      Point2d point2 = new Point2d(3.0, 2.1);
+      assertPointsEqual(new Point2d(1.0, 2.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point2, polygon));
+
+      Point2d point3 = new Point2d(0.2, 1.2);
+      assertPointsEqual(new Point2d(1.0, 1.2), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point3, polygon));
+   }
+
    private static void assertPointsEqual(Point2d[] expected, Point2d[] actual, boolean enforceOrder)
    {
       if (expected == null || actual == null)

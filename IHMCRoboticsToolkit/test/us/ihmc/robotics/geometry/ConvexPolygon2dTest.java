@@ -824,7 +824,7 @@ public class ConvexPolygon2dTest
          FramePoint2d projectedPoint = polygon.orthogonalProjectionCopy(testPoint);
          ConvexPolygon2dTestHelpers.verifyOrthogonalProjection(polygon, testPoint, projectedPoint);
 
-         boolean isInside = polygon.isPointInside(projectedPoint);
+         boolean isInside = polygon.isPointInside(projectedPoint, 1.0E-10);
 
          if (isInside)
          {
@@ -1932,7 +1932,7 @@ public class ConvexPolygon2dTest
             Point2d projectedPoint = convexPolygon.orthogonalProjectionCopy(testPoint);
 
             assertTrue("Projected point was not inside the polygon for point\n" + projectedPoint + "\nand convex polygon \n" + convexPolygon,
-                  ConvexPolygon2dCalculator.isPointInside(projectedPoint, convexPolygon));
+                  ConvexPolygon2dCalculator.isPointInside(projectedPoint, 1.0E-10, convexPolygon));
          }
       }
    }

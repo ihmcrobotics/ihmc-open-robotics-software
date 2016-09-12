@@ -44,9 +44,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    private final int minXmaxY_index = 0;
 
    // some temporary objects to reduce garbage generation:
-   private final Point2d tempPoint = new Point2d();
-   private final Vector2d tempVector1 = new Vector2d();
-   private final Vector2d tempVector2 = new Vector2d();
    private final int[] tempTwoIndices = new int[2];
 
    /**
@@ -1432,81 +1429,14 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public Point2d orthogonalProjectionCopy(Point2d point)
    {
       checkIfUpToDate();
-      Point2d copy = new Point2d(point);
-      orthogonalProjection(copy);
-
-      return copy;
+      return ConvexPolygon2dCalculator.orthogonalProjectionCopy(point, this);
    }
 
-   /**
-    * Compute the orthogonal projection of the given point and modify it to store the result.
-    */
    @Override
    public void orthogonalProjection(Point2d point2d)
    {
       checkIfUpToDate();
-      if (hasExactlyOneVertex())
-      {
-         point2d.set(getVertex(0));
-         return;
-      }
-
-      tempPoint.set(point2d);
-      int numberOfEdges = getNearestEdgeIndices(tempPoint, tempTwoIndices);
-      if (numberOfEdges == 0)
-         return; // point2d must be inside polygon, so leave it as it is.
-
-      int leftEdge, rightEdge;
-      if (numberOfEdges == 1)
-      {
-         leftEdge = rightEdge = tempTwoIndices[0];
-      }
-      else
-      {
-         leftEdge = tempTwoIndices[0];
-         rightEdge = tempTwoIndices[1];
-      }
-
-      // Two adjacent edges. Return the left vertex:
-      if (leftEdge != rightEdge)
-         point2d.set(getVertex(leftEdge));
-
-      // Just one edge. Find the point on the edge:
-      Point2d firstEdgeVertex = getVertex(leftEdge);
-      Point2d secondEdgeVertex = getNextVertex(leftEdge);
-
-      tempVector1.set(point2d); // first vertex to point
-      tempVector1.sub(firstEdgeVertex);
-
-      tempVector2.set(secondEdgeVertex); // edge vector
-      tempVector2.sub(firstEdgeVertex);
-
-      if (tempVector2.lengthSquared() < 1e-10)
-      {
-         point2d.set(firstEdgeVertex);
-         return;
-      }
-
-      double dotProduct = tempVector2.dot(tempVector1);
-      double lengthSquared = tempVector2.lengthSquared();
-      double alpha = dotProduct / lengthSquared;
-
-      // Need to keep alpha between 0.0 and 1.0 since if only one edge is seen, the projection can be outside the edge.
-      if (alpha < 0.0)
-         alpha = 0.0;
-      if (alpha > 1.0)
-         alpha = 1.0;
-      tempVector2.scale(alpha);
-
-      point2d.set(firstEdgeVertex);
-      point2d.add(tempVector2);
-
-      // Make sure the returned point is inside the polygon by nudging it a little toward the centroid.
-      // This will all but guarantee that projections are then inside.
-      tempVector1.set(centroid);
-      tempVector1.sub(point2d);
-      tempVector1.scale(1.0e-12);
-      point2d.add(tempVector1);
+      ConvexPolygon2dCalculator.orthogonalProjection(point2d, this);
    }
 
    public boolean isEmpty()
