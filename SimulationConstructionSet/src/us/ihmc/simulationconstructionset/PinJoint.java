@@ -341,8 +341,8 @@ public class PinJoint extends OneDegreeOfFreedomJoint
       if (this.b_damp == null)
       {
          this.b_damp = new DoubleYoVariable("b_damp_" + this.name, "PinJoint damping parameter", registry);
-         this.b_damp.set(b_damp);
       }
+      this.b_damp.set(b_damp);
    }
 
    public void setStiction(double f_stiction)
@@ -354,8 +354,8 @@ public class PinJoint extends OneDegreeOfFreedomJoint
       if (this.f_stiction == null)
       {
          this.f_stiction = new DoubleYoVariable("f_stiction_" + this.name, "PinJoint stiction force", registry);
-         this.f_stiction.set(f_stiction);
       }
+      this.f_stiction.set(f_stiction);
    }
 
    /**

@@ -164,7 +164,7 @@ public class KinematicsToolboxController
       legJointLimitReductionFactors.put(LegJointName.HIP_PITCH, hipReductionFactor);
       legJointLimitReductionFactors.put(LegJointName.HIP_ROLL, hipReductionFactor);
       legJointLimitReductionFactors.put(LegJointName.HIP_YAW, hipReductionFactor);
-      legJointLimitReductionFactors.put(LegJointName.KNEE, kneeReductionFactor);
+      legJointLimitReductionFactors.put(LegJointName.KNEE_PITCH, kneeReductionFactor);
       legJointLimitReductionFactors.put(LegJointName.ANKLE_PITCH, ankleReductionFactor);
       legJointLimitReductionFactors.put(LegJointName.ANKLE_ROLL, ankleReductionFactor);
 

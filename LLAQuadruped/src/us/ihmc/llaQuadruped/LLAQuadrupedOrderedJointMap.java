@@ -80,7 +80,7 @@ public enum LLAQuadrupedOrderedJointMap
       case FRONT_RIGHT_KNEE_PITCH:
       case HIND_LEFT_KNEE_PITCH:
       case HIND_RIGHT_KNEE_PITCH:
-         return LegJointName.KNEE;
+         return LegJointName.KNEE_PITCH;
       default:
          return null;
       }

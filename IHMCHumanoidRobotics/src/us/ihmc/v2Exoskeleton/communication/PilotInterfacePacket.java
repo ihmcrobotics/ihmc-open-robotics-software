@@ -13,15 +13,14 @@ public class PilotInterfacePacket extends StatusPacket<PilotInterfacePacket>
    public int desiredStepLengthType;
    public int desiredStepStairsType;
    public boolean desiredStepContinousWalk;
-   public boolean requestStandUp;
    public int desiredStepsToTake;
-   public boolean desiredStepSend;
+   public boolean executeBehavior;
 
    public PilotInterfacePacket()
    {
    }
 
-   public PilotInterfacePacket(int behaviourState, int requestedBehaviorState, int desiredStepType, int desiredStepLengthType, int desiredStepStairsType, boolean desiredStepContinousWalk, boolean requestStandUp,
+   public PilotInterfacePacket(int behaviourState, int requestedBehaviorState, int desiredStepType, int desiredStepLengthType, int desiredStepStairsType, boolean desiredStepContinousWalk,
                                int desiredStepsToTake, boolean desiredStepSend)
    {
       this.behaviourState = behaviourState;
@@ -30,10 +29,8 @@ public class PilotInterfacePacket extends StatusPacket<PilotInterfacePacket>
       this.desiredStepLengthType = desiredStepLengthType;
       this.desiredStepStairsType = desiredStepStairsType;
       this.desiredStepContinousWalk = desiredStepContinousWalk;
-      this.requestStandUp = requestStandUp;
       this.desiredStepsToTake = desiredStepsToTake;
-      this.desiredStepSend = desiredStepSend;
-
+      this.executeBehavior = desiredStepSend;
    }
 
    public int getBehaviourState()
@@ -66,19 +63,14 @@ public class PilotInterfacePacket extends StatusPacket<PilotInterfacePacket>
       return desiredStepContinousWalk;
    }
 
-   public boolean getRequestStandUp()
-   {
-      return requestStandUp;
-   }
-
    public int getDesiredStepsToTake()
    {
       return desiredStepsToTake;
    }
 
-   public boolean getDesiredStepSend()
+   public boolean getExecuteBehavior()
    {
-      return desiredStepSend;
+      return executeBehavior;
    }
 
    @Override
@@ -90,16 +82,16 @@ public class PilotInterfacePacket extends StatusPacket<PilotInterfacePacket>
       this.desiredStepLengthType = other.desiredStepLengthType;
       this.desiredStepStairsType = other.desiredStepStairsType;
       this.desiredStepContinousWalk = other.desiredStepContinousWalk;
-      this.requestStandUp = other.requestStandUp;
       this.desiredStepsToTake = other.desiredStepsToTake;
-      this.desiredStepSend = other.desiredStepSend;
+      this.executeBehavior = other.executeBehavior;
    }
 
    public boolean arePacketsEqual(PilotInterfacePacket other)
    {
       return (this.behaviourState == other.getBehaviourState() && this.requestedBehaviorState == other.getRequestedBehaviourState() && this.desiredStepType == other.desiredStepType && this.desiredStepLengthType == other.desiredStepLengthType
             && this.desiredStepStairsType == other.desiredStepStairsType && this.desiredStepContinousWalk == other.desiredStepContinousWalk
-            && this.requestStandUp == other.requestStandUp && this.desiredStepsToTake == other.desiredStepsToTake && this.desiredStepSend == other.desiredStepSend && this.uniqueId == other.uniqueId && this.destination == other.destination
+            && this.desiredStepsToTake == other.desiredStepsToTake && this.executeBehavior
+            == other.executeBehavior && this.uniqueId == other.uniqueId && this.destination == other.destination
             && this.notes == other.notes);
    }
 
@@ -113,7 +105,7 @@ public class PilotInterfacePacket extends StatusPacket<PilotInterfacePacket>
    {
       String packetString = new String("behaviorstate: " +  behaviourState + "\n" + " requested behaviorstate: " + requestedBehaviorState + "\n" + "desired steptype: " + desiredStepType + "\n"
                                              + "desired step length type: " + desiredStepLengthType + "\n" + "desired stairs step type: "  + desiredStepStairsType + "\n" + "desiredStepContinuouswalk: " + desiredStepContinousWalk
-                                             + "\n" + "request stand up: "+ requestStandUp + "\n" + "desired steps to take: " + desiredStepsToTake + "\n" + "desired Step Send: " + desiredStepSend);
+                                             + "\n" + "desired steps to take: " + desiredStepsToTake + "\n" + "execute behavior: " + executeBehavior);
       return packetString;
    }
 }

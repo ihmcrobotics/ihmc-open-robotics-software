@@ -76,7 +76,14 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       variables.getYoPlanarVelocityInputX().set(directionX * 1.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), directionX * 2.0));
+      if(Math.signum(directionX) < 0)
+      {
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), directionX * 2.0));
+      }
+      else
+      {
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), directionX * 2.0));
+      }
       conductor.simulate();
       
       conductor.concludeTesting();
@@ -107,7 +114,16 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       variables.getYoPlanarVelocityInputX().set(directionX * 0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 6.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), directionX * 0.3));
+      
+      if(Math.signum(directionX) < 0)
+      {
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), directionX * 0.3));
+      }
+      else
+      {
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), directionX * 0.3));
+      }
+      
       conductor.simulate();
       
       conductor.concludeTesting();
@@ -138,7 +154,7 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
    @Test(timeout = 30000)
    public void testTrottingInABackwardRightCircle()
    {
-      trotInACircle(-1.0, -1.0);
+      trotInACircle(-0.6, -0.6); //reduced for beast, still looks rough
    }
 
    private void trotInACircle(double directionX, double directionZ) throws AssertionFailedError

@@ -13,6 +13,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.robotics.alphaToAlpha.StretchedSlowInMiddleAlphaToAlphaFunctionTest.class,
+   us.ihmc.robotics.alphaToAlpha.YoMiniJerkUpAndDownAlphaToAlphaTest.class,
+   us.ihmc.robotics.alphaToAlpha.YoVariableRampUpAndDownAlphaToAlphaTest.class,
    us.ihmc.robotics.controllers.CylindricalPDGainsTest.class,
    us.ihmc.robotics.controllers.GainCalculatorTest.class,
    us.ihmc.robotics.controllers.PDControllerTest.class,
