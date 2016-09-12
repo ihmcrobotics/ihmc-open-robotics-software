@@ -1,6 +1,12 @@
 package us.ihmc.llaQuadruped;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.vecmath.Vector3d;
 
@@ -15,7 +21,6 @@ import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
 {
@@ -34,18 +39,14 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
 
    public LLAQuadrupedJointNameMap(LLAQuadrupedPhysicalProperties physicalProperties)
    {
-      quadrupedJointNameMap.put("front_left_hip_roll", QuadrupedJointName.FRONT_LEFT_HIP_ROLL);
-      quadrupedJointNameMap.put("front_left_hip_pitch", QuadrupedJointName.FRONT_LEFT_HIP_PITCH);
-      quadrupedJointNameMap.put("front_left_knee_pitch", QuadrupedJointName.FRONT_LEFT_KNEE_PITCH);
-      quadrupedJointNameMap.put("front_right_hip_roll", QuadrupedJointName.FRONT_RIGHT_HIP_ROLL);
-      quadrupedJointNameMap.put("front_right_hip_pitch", QuadrupedJointName.FRONT_RIGHT_HIP_PITCH);
-      quadrupedJointNameMap.put("front_right_knee_pitch", QuadrupedJointName.FRONT_RIGHT_KNEE_PITCH);
-      quadrupedJointNameMap.put("hind_left_hip_roll", QuadrupedJointName.HIND_LEFT_HIP_ROLL);
-      quadrupedJointNameMap.put("hind_left_hip_pitch", QuadrupedJointName.HIND_LEFT_HIP_PITCH);
-      quadrupedJointNameMap.put("hind_left_knee_pitch", QuadrupedJointName.HIND_LEFT_KNEE_PITCH);
-      quadrupedJointNameMap.put("hind_right_hip_roll", QuadrupedJointName.HIND_RIGHT_HIP_ROLL);
-      quadrupedJointNameMap.put("hind_right_hip_pitch", QuadrupedJointName.HIND_RIGHT_HIP_PITCH);
-      quadrupedJointNameMap.put("hind_right_knee_pitch", QuadrupedJointName.HIND_RIGHT_KNEE_PITCH);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         for (LegJointName legJointName : legJointNames)
+         {
+            QuadrupedJointName quadrupedJointName = QuadrupedJointName.getName(robotQuadrant, legJointName);
+            quadrupedJointNameMap.put(quadrupedJointName.getUnderBarName(), quadrupedJointName);
+         }
+      }
 
       for (Map.Entry<String, QuadrupedJointName> entry : quadrupedJointNameMap.entrySet())
       {
