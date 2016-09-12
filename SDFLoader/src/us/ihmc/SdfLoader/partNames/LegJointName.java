@@ -30,8 +30,11 @@ public enum LegJointName
 
    FUTURE_EXPANSION_TEST1, HIP_PITCH, HIP_ROLL, FUTURE_EXPANSION_TEST2, HIP_YAW, KNEE, ANKLE_ROLL, ANKLE_PITCH, FUTURE_EXPANSION_TEST3;
    
+   /**
+    * @deprecated Do not use this!
+    */
    public static final LegJointName[] values = values();
-
+   
    public String getShortUnderBarName()
    {
       switch (this)
