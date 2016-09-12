@@ -39,7 +39,7 @@ public class ConvexPolygon2dCalculatorTest
 
       Point2d point = new Point2d(2.5, 1.0);
       double distance = ConvexPolygon2dCalculator.getSignedDistance(point, polygon);
-      assertDistanceCorrect(-Math.sqrt(2.5 * 2.5 + 1.0 * 1.0), distance);
+      assertDistanceCorrect(Math.sqrt(2.5 * 2.5 + 1.0 * 1.0), distance);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -54,11 +54,11 @@ public class ConvexPolygon2dCalculatorTest
 
       Point2d point1 = new Point2d(2.5, 1.0);
       double distance1 = ConvexPolygon2dCalculator.getSignedDistance(point1, polygon);
-      assertDistanceCorrect(-Math.sqrt(1.5 * 1.5 + 1.0 * 1.0), distance1);
+      assertDistanceCorrect(Math.sqrt(1.5 * 1.5 + 1.0 * 1.0), distance1);
 
       Point2d point2 = new Point2d(0.5, 1.0);
       double distance2 = ConvexPolygon2dCalculator.getSignedDistance(point2, polygon);
-      assertDistanceCorrect(-1.0, distance2);
+      assertDistanceCorrect(1.0, distance2);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -74,27 +74,27 @@ public class ConvexPolygon2dCalculatorTest
 
       Point2d point1 = new Point2d(10.0, 10.0);
       double distance1 = ConvexPolygon2dCalculator.getSignedDistance(point1, polygon);
-      assertDistanceCorrect(-5.0 * Math.sqrt(2.0), distance1);
+      assertDistanceCorrect(5.0 * Math.sqrt(2.0), distance1);
 
       Point2d point2 = new Point2d(1.2, 1.1);
       double distance2 = ConvexPolygon2dCalculator.getSignedDistance(point2, polygon);
-      assertDistanceCorrect(1.1, distance2);
+      assertDistanceCorrect(-1.1, distance2);
 
       Point2d point3 = new Point2d(0.05, 9.8);
       double distance3 = ConvexPolygon2dCalculator.getSignedDistance(point3, polygon);
-      assertDistanceCorrect(0.05, distance3);
+      assertDistanceCorrect(-0.05, distance3);
 
       Point2d point4 = new Point2d(9.8, 0.15);
       double distance4 = ConvexPolygon2dCalculator.getSignedDistance(point4, polygon);
-      assertDistanceCorrect(0.5 * Math.sqrt(0.05 * 0.05 * 2.0), distance4);
+      assertDistanceCorrect(-0.5 * Math.sqrt(0.05 * 0.05 * 2.0), distance4);
 
       Point2d point5 = new Point2d(5.0, -0.15);
       double distance5 = ConvexPolygon2dCalculator.getSignedDistance(point5, polygon);
-      assertDistanceCorrect(-0.15, distance5);
+      assertDistanceCorrect(0.15, distance5);
 
       Point2d point6 = new Point2d(15.0, -0.15);
       double distance6 = ConvexPolygon2dCalculator.getSignedDistance(point6, polygon);
-      assertDistanceCorrect(-Math.sqrt(5.0 * 5.0 + 0.15 * 0.15), distance6);
+      assertDistanceCorrect(Math.sqrt(5.0 * 5.0 + 0.15 * 0.15), distance6);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)

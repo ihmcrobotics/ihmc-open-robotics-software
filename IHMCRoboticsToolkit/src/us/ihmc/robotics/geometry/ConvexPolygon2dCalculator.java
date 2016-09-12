@@ -14,7 +14,7 @@ public class ConvexPolygon2dCalculator
 {
    /**
     * Returns distance from the point to the boundary of this polygon. The return value
-    * is positive if the point is inside and negative if it is outside.
+    * is negative if the point is inside the polygon.
     */
    public static double getSignedDistance(Point2d point, ConvexPolygon2d polygon)
    {
@@ -30,8 +30,8 @@ public class ConvexPolygon2dCalculator
       }
 
       if (isPointInside(point, polygon))
-         return closestDistance;
-      return -closestDistance;
+         return -closestDistance;
+      return closestDistance;
    }
 
    /**

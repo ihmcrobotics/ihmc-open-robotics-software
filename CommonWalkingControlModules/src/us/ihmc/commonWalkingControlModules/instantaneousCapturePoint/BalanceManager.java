@@ -443,7 +443,9 @@ public class BalanceManager
    {
       FrameConvexPolygon2d supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
       momentumBasedController.getCapturePoint(capturePoint2d);
-      return supportPolygonInWorld.getSignedDistance(capturePoint2d) > safeDistanceFromSupportEdgesToStopCancelICPPlan.getDoubleValue();
+
+      // signed distance returns a negative number if the point is inside the polygon.
+      return supportPolygonInWorld.getSignedDistance(capturePoint2d) < -safeDistanceFromSupportEdgesToStopCancelICPPlan.getDoubleValue();
    }
 
    public double getICPErrorMagnitude()
