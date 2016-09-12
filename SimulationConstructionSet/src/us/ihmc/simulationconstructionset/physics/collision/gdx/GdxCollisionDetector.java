@@ -18,6 +18,7 @@ import com.badlogic.gdx.physics.bullet.collision.btCollisionWorld;
 import com.badlogic.gdx.physics.bullet.collision.btCylinderShape;
 import com.badlogic.gdx.physics.bullet.collision.btCylinderShapeZ;
 import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
+import com.badlogic.gdx.physics.bullet.collision.btManifoldPoint;
 import com.badlogic.gdx.physics.bullet.collision.btPersistentManifold;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 import com.badlogic.gdx.physics.bullet.linearmath.btVector3;
@@ -31,6 +32,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 
 
 public class GdxCollisionDetector implements ScsCollisionDetector
@@ -105,21 +107,14 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       throw new RuntimeException("Can't find matching shape");
    }
 
-   public void performCollisionDetection()
+   @Override
+   public void performCollisionDetection(CollisionDetectionResult result)
    {
-//    for( int i = 0; i < allSensors.size(); i++ ) {
-//            allSensors.get(i).reset();
-//    }
-
       Vector3d world = new Vector3d();
 
       for (int i = 0; i < allShapes.size(); i++)
       {
          ShapeInfo info = allShapes.get(i);
-
-//       Joint joint = info.link.getParentJoint();
-
-
          info.getTransformToWorldForPhysics(transformScs, workSpace);
 
          transformScs.getTranslation(world);
@@ -141,6 +136,24 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          btPersistentManifold contactManifold = collisionWorld.getDispatcher().getManifoldByIndexInternal(i);
          ShapeInfo obA = (ShapeInfo) contactManifold.getBody0();
          ShapeInfo obB = (ShapeInfo) contactManifold.getBody1();
+
+         int numContacts = contactManifold.getNumContacts();
+         for (int j=0; j<numContacts; j++)
+         {
+            btManifoldPoint contactPoint = contactManifold.getContactPoint(j);
+
+            Point3d pointOnA = new Point3d();
+            Point3d pointOnB = new Point3d();
+
+            GdxUtil.convert(contactPoint.getPositionWorldOnA(), pointOnA);
+            GdxUtil.convert(contactPoint.getPositionWorldOnB(), pointOnB);
+
+            System.out.println("contactPointOnA = " + pointOnA);
+            System.out.println("contactPointOnB = " + pointOnB);
+
+            result.addContact(obA, obB, pointOnA, pointOnB);
+         }
+
 
          ContactWrapper contact = new ContactWrapper();
 

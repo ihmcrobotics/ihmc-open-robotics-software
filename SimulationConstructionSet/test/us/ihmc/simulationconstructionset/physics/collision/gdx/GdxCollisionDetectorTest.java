@@ -4,9 +4,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.SCSCollisionDetectorTest;
 
-/**
- * @author Peter Abeles
- */
 public class GdxCollisionDetectorTest extends SCSCollisionDetectorTest
 {
    @Override
