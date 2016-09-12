@@ -68,7 +68,7 @@ public class MocapToStateEstimatorFrameConverter
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, null);
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
-      robotHeadFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
+      robotHeadFrame = referenceFrames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
       
 
       mocapHeadFrame = new ReferenceFrame("headInMocapFrame", mocapOrigin)

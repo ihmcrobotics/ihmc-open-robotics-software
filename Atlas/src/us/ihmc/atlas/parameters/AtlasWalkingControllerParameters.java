@@ -208,7 +208,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-         return new String[] {jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)};
+         return new String[] {jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH)};
    }
 
    @Override
