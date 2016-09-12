@@ -98,7 +98,7 @@ public class StepprControllerFactory
       if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
          DRCOutputWriterWithAccelerationIntegration stepprOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(
-               drcOutputWriter, new LegJointName[] { LegJointName.KNEE, LegJointName.ANKLE_PITCH }, null, null, robotModel.getControllerDT(), true);
+               drcOutputWriter, new LegJointName[] { LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH }, null, null, robotModel.getControllerDT(), true);
          stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0, 0.0);
          stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
          stepprOutputWriterWithAccelerationIntegration.setVelocityGains(0.0, 0.0);

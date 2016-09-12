@@ -69,11 +69,11 @@ public class CenterOfMassCalibrationTool implements Updatable
       rightHipPitchCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(rightHipPitchBody, true);
       rightHipPitchCoMInZUpFrame = new YoFramePoint("rightHipPitchCoMInZUpFrame", rightHipPitchCenterOfMassCalculator.getDesiredFrame(), registry);
 
-      RigidBody leftKneeBody = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE).getSuccessor();
+      RigidBody leftKneeBody = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH).getSuccessor();
       leftKneeCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(leftKneeBody, true);
       leftKneeCoMInZUpFrame = new YoFramePoint("leftKneeCoMInZUpFrame", leftKneeCenterOfMassCalculator.getDesiredFrame(), registry);
 
-      RigidBody rightKneeBody = fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE).getSuccessor();
+      RigidBody rightKneeBody = fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH).getSuccessor();
       rightKneeCenterOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(rightKneeBody, true);
       rightKneeCoMInZUpFrame = new YoFramePoint("rightKneeCoMInZUpFrame", rightKneeCenterOfMassCalculator.getDesiredFrame(), registry);
 
@@ -135,7 +135,7 @@ public class CenterOfMassCalibrationTool implements Updatable
          FrameVector footForce = footWrench.getLinearPartAsFrameVectorCopy();
          FrameVector footTorque = footWrench.getAngularPartAsFrameVectorCopy();
          
-         ReferenceFrame jointFrame = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getFrameAfterJoint();
+         ReferenceFrame jointFrame = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getFrameAfterJoint();
          
          FramePoint forceSensorLocation = new FramePoint(measurementFrame);
          forceSensorLocation.changeFrame(jointFrame);

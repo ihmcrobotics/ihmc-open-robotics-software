@@ -99,7 +99,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
             framesAfterLegJoint.put(legJointName, frameAfterJoint);
          }
 
-         QuadrupedJointName kneeJointName = QuadrupedJointName.getName(robotQuadrant, LegJointName.KNEE);
+         QuadrupedJointName kneeJointName = QuadrupedJointName.getName(robotQuadrant, LegJointName.KNEE_PITCH);
          ReferenceFrame frameAfterKnee = framesAfterLegJoint.get(kneeJointName);
 
          TranslationReferenceFrame soleFrame = new TranslationReferenceFrame(robotQuadrant.toString() + "SoleFrame", frameAfterKnee);
@@ -340,7 +340,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    @Override
    public ReferenceFrame getKneeFrame(RobotQuadrant robotQuadrant)
    {
-      return getLegJointFrame(robotQuadrant, LegJointName.KNEE);
+      return getLegJointFrame(robotQuadrant, LegJointName.KNEE_PITCH);
    }
 
    @Override

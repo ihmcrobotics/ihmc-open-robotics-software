@@ -390,7 +390,45 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Computed the points of intersection between the line and the polygon and packs them into pointToPack1 and
+    * Computes the points of intersection between the ray and the polygon and packs them into pointToPack1 and
+    * pointToPack2. If there is only one intersection it will be stored in pointToPack1. Returns the number of
+    * intersections found. The ray is given as a Line2d, where the start point of the ray is the point used to
+    * specify the line and the direction of the ray is given by the direction of the line.
+    */
+   public static int intersectionWithRay(Line2d ray, Point2d pointToPack1, Point2d pointToPack2, ConvexPolygon2d polygon)
+   {
+      int intersections = intersectionWithLine(ray, pointToPack1, pointToPack2, polygon);
+      Point2d rayStart = ray.getPoint();
+      Vector2d rayDirection = ray.getNormalizedVector();
+
+      if (intersections == 2)
+      {
+         // check line intersection 2:
+         double rayStartToPointX = pointToPack2.x - rayStart.x;
+         double rayStartToPointY = pointToPack2.y - rayStart.y;
+         double dotProduct = rayStartToPointX * rayDirection.x + rayStartToPointY * rayDirection.y;
+         if (Math.signum(dotProduct) == -1.0)
+            intersections--;
+      }
+
+      if (intersections >= 1)
+      {
+         // check line intersection 1:
+         double rayStartToPointX = pointToPack1.x - rayStart.x;
+         double rayStartToPointY = pointToPack1.y - rayStart.y;
+         double dotProduct = rayStartToPointX * rayDirection.x + rayStartToPointY * rayDirection.y;
+         if (Math.signum(dotProduct) == -1.0)
+         {
+            pointToPack1.set(pointToPack2);
+            intersections--;
+         }
+      }
+
+      return intersections;
+   }
+
+   /**
+    * Computes the points of intersection between the line and the polygon and packs them into pointToPack1 and
     * pointToPack2. If there is only one intersection (line goes through a vertex) it will be stored in pointToPack1.
     * Returns the number of intersections found.
     */
@@ -601,4 +639,16 @@ public class ConvexPolygon2dCalculator
       return null;
    }
 
+   public static Point2d[] intersectionWithRayCopy(Line2d ray, ConvexPolygon2d polygon)
+   {
+      Point2d point1 = new Point2d();
+      Point2d point2 = new Point2d();
+
+      int intersections = intersectionWithRay(ray, point1, point2, polygon);
+      if (intersections == 2)
+         return new Point2d[] {point1, point2};
+      if (intersections == 1)
+         return new Point2d[] {point1};
+      return null;
+   }
 }

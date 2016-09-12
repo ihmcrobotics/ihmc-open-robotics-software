@@ -48,7 +48,7 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<HumanoidF
 
          for (RobotSide robotSide : RobotSide.values())
          {
-            for (LegJointName jointName : LegJointName.values())
+            for (LegJointName jointName : LegJointName.values)
             {
                String key = jointMap.getLegJointName(robotSide, jointName);
                setRobotAngle(key, properties, robot);

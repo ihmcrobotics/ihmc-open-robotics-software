@@ -1086,11 +1086,10 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return convexPolygon.intersectionWithRay(ray.getLine2d(), intersectionToPack1.getPoint(), intersectionToPack2.getPoint());
    }
 
-   @Deprecated // creates garbage - use intersectionWithRay method instead.
-   public FramePoint2d[] intersectionWithRay(FrameLine2d ray)
+   public FramePoint2d[] intersectionWithRayCopy(FrameLine2d ray)
    {
       checkReferenceFrameMatch(ray);
-      Point2d[] intersections = convexPolygon.intersectionWithRay(ray.getLine2dCopy());
+      Point2d[] intersections = convexPolygon.intersectionWithRayCopy(ray.getLine2dCopy());
       if (intersections == null)
          return null;
 

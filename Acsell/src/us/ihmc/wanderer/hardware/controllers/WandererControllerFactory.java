@@ -106,7 +106,7 @@ public class WandererControllerFactory
       if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
          DRCOutputWriterWithAccelerationIntegration wandererOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(
-               drcOutputWriter, new LegJointName[] { LegJointName.KNEE, LegJointName.ANKLE_PITCH }, null, null, robotModel.getControllerDT(), true);
+               drcOutputWriter, new LegJointName[] { LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH }, null, null, robotModel.getControllerDT(), true);
          wandererOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0, 0.0);
          wandererOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
          wandererOutputWriterWithAccelerationIntegration.setVelocityGains(0.0, 0.0);
