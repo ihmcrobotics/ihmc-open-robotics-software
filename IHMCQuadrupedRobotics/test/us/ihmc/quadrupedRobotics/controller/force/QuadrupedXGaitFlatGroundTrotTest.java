@@ -154,7 +154,7 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
    @Test(timeout = 30000)
    public void testTrottingInABackwardRightCircle()
    {
-      trotInACircle(-1.0, -1.0);
+      trotInACircle(-0.6, -0.6); //reduced for beast, still looks rough
    }
 
    private void trotInACircle(double directionX, double directionZ) throws AssertionFailedError
