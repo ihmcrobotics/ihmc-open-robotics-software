@@ -223,7 +223,7 @@ public class PileOfRandomObjectsRobot
       double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
 
       Link link = new Link("object" + i);
-      link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectRadius / 2.0);
+      link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectHeight / 2.0);
       link.setComOffset(0.0, 0.0, 0.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
