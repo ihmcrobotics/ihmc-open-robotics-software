@@ -322,7 +322,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         for (LegJointName jointName : LegJointName.values())
+         for (LegJointName jointName : LegJointName.values)
          {
             OneDoFJoint legJoint = fullRobotModel.getLegJoint(robotSide, jointName);
             if (legJoint == null)
