@@ -438,7 +438,7 @@ public class ConvexPolygon2dTest
       Vector2d vector2d = new Vector2d(Double.NaN, Double.NaN);
       Line2d line2d = new Line2d(pont2d, vector2d);
 
-      convexPolygon2d.intersectionWithRay(line2d);
+      convexPolygon2d.intersectionWithRayCopy(line2d);
       System.out.println("done");
    }
 
