@@ -45,7 +45,7 @@ public class WandererJointMap implements DRCRobotJointMap
    public static final String headName = null;
 
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_ROLL, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_YAW };
-   private final LegJointName[] legJoints = { LegJointName.HIP_ROLL, LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_ROLL, LegJointName.ANKLE_PITCH };
+   private final LegJointName[] legJoints = { LegJointName.HIP_ROLL, LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_ROLL, LegJointName.ANKLE_PITCH };
    private final NeckJointName[] neckJoints = {};
    private final ArmJointName[] armJoints = {};
 
@@ -76,7 +76,7 @@ public class WandererJointMap implements DRCRobotJointMap
          legJointNames.put(forcedSideJointNames[l_leg_mhx], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
          legJointNames.put(forcedSideJointNames[l_leg_uhz], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
          legJointNames.put(forcedSideJointNames[l_leg_lhy], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
-         legJointNames.put(forcedSideJointNames[l_leg_kny], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
+         legJointNames.put(forcedSideJointNames[l_leg_kny], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE_PITCH));
          legJointNames.put(forcedSideJointNames[l_leg_lax], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
          legJointNames.put(forcedSideJointNames[l_leg_uay], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
 

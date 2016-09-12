@@ -289,7 +289,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
          makeLegJointHelper(robotSide, false, LegJointName.HIP_YAW);
          makeLegJointHelper(robotSide, true, LegJointName.HIP_PITCH);
          makeLegJointHelper(robotSide, false, LegJointName.HIP_ROLL);
-         makeLegJointHelper(robotSide, true, LegJointName.KNEE);
+         makeLegJointHelper(robotSide, true, LegJointName.KNEE_PITCH);
          makeLegJointHelper(robotSide, true, LegJointName.ANKLE_PITCH);
          makeLegJointHelper(robotSide, false, LegJointName.ANKLE_ROLL);
       }
@@ -347,8 +347,8 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setProportionalGain(165);
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setDerivativeGain(6.0);
 
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE)).setProportionalGain(80.0);
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE)).setDerivativeGain(3.0);
+         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH)).setProportionalGain(80.0);
+         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH)).setDerivativeGain(3.0);
 
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setProportionalGain(20.0);
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setDerivativeGain(2.0);

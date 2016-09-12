@@ -12,7 +12,7 @@ import static us.ihmc.SdfLoader.partNames.LegJointName.ANKLE_ROLL;
 import static us.ihmc.SdfLoader.partNames.LegJointName.HIP_PITCH;
 import static us.ihmc.SdfLoader.partNames.LegJointName.HIP_ROLL;
 import static us.ihmc.SdfLoader.partNames.LegJointName.HIP_YAW;
-import static us.ihmc.SdfLoader.partNames.LegJointName.KNEE;
+import static us.ihmc.SdfLoader.partNames.LegJointName.KNEE_PITCH;
 import static us.ihmc.SdfLoader.partNames.NeckJointName.LOWER_NECK_PITCH;
 import static us.ihmc.SdfLoader.partNames.SpineJointName.SPINE_PITCH;
 import static us.ihmc.SdfLoader.partNames.SpineJointName.SPINE_ROLL;
@@ -82,7 +82,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
 
-   private final LegJointName[] legJoints = { HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL };
+   private final LegJointName[] legJoints = { HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE_PITCH, ANKLE_PITCH, ANKLE_ROLL };
    private final ArmJointName[] armJoints = { SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, FIRST_WRIST_PITCH, WRIST_ROLL, SECOND_WRIST_PITCH };
    private final SpineJointName[] spineJoints = { SPINE_PITCH, SPINE_ROLL, SPINE_YAW };
    private final NeckJointName[] neckJoints = { LOWER_NECK_PITCH };
@@ -118,7 +118,7 @@ public class AtlasJointMap implements DRCRobotJointMap
          legJointNames.put(forcedSideJointNames[l_leg_hpz], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_YAW));
          legJointNames.put(forcedSideJointNames[l_leg_hpx], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_ROLL));
          legJointNames.put(forcedSideJointNames[l_leg_hpy], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_PITCH));
-         legJointNames.put(forcedSideJointNames[l_leg_kny], new ImmutablePair<RobotSide, LegJointName>(robotSide, KNEE));
+         legJointNames.put(forcedSideJointNames[l_leg_kny], new ImmutablePair<RobotSide, LegJointName>(robotSide, KNEE_PITCH));
          legJointNames.put(forcedSideJointNames[l_leg_aky], new ImmutablePair<RobotSide, LegJointName>(robotSide, ANKLE_PITCH));
          legJointNames.put(forcedSideJointNames[l_leg_akx], new ImmutablePair<RobotSide, LegJointName>(robotSide, ANKLE_ROLL));
 

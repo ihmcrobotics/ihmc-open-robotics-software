@@ -115,7 +115,7 @@ public enum QuadrupedJointName
             return FRONT_LEFT_HIP_ROLL;
          case HIP_PITCH:
             return FRONT_LEFT_HIP_PITCH;
-         case KNEE:
+         case KNEE_PITCH:
             return FRONT_LEFT_KNEE_PITCH;
          case ANKLE_PITCH:
             return FRONT_LEFT_ANKLE_PITCH;
@@ -128,7 +128,7 @@ public enum QuadrupedJointName
             return FRONT_RIGHT_HIP_ROLL;
          case HIP_PITCH:
             return FRONT_RIGHT_HIP_PITCH;
-         case KNEE:
+         case KNEE_PITCH:
             return FRONT_RIGHT_KNEE_PITCH;
          case ANKLE_PITCH:
             return FRONT_RIGHT_ANKLE_PITCH;
@@ -141,7 +141,7 @@ public enum QuadrupedJointName
             return HIND_RIGHT_HIP_ROLL;
          case HIP_PITCH:
             return HIND_RIGHT_HIP_PITCH;
-         case KNEE:
+         case KNEE_PITCH:
             return HIND_RIGHT_KNEE_PITCH;
          case ANKLE_PITCH:
             return HIND_RIGHT_ANKLE_PITCH;
@@ -154,7 +154,7 @@ public enum QuadrupedJointName
             return HIND_LEFT_HIP_ROLL;
          case HIP_PITCH:
             return HIND_LEFT_HIP_PITCH;
-         case KNEE:
+         case KNEE_PITCH:
             return HIND_LEFT_KNEE_PITCH;
          case ANKLE_PITCH:
             return HIND_LEFT_ANKLE_PITCH;

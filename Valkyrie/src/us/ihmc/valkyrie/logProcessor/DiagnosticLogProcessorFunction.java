@@ -40,7 +40,7 @@ public class DiagnosticLogProcessorFunction implements LogDataProcessorFunction
          makeLegJointHelper(robotSide, false, LegJointName.HIP_YAW);
          makeLegJointHelper(robotSide, true, LegJointName.HIP_PITCH);
          makeLegJointHelper(robotSide, false, LegJointName.HIP_ROLL);
-         makeLegJointHelper(robotSide, true, LegJointName.KNEE);
+         makeLegJointHelper(robotSide, true, LegJointName.KNEE_PITCH);
          makeLegJointHelper(robotSide, true, LegJointName.ANKLE_PITCH);
          makeLegJointHelper(robotSide, false, LegJointName.ANKLE_ROLL);
 
