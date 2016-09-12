@@ -6,6 +6,11 @@ public enum NeckJointName
 {
    LOWER_NECK_PITCH, NECK_YAW, UPPER_NECK_PITCH, NECK_ROLL;
 
+   /**
+    * @deprecated Do not iterate over these values!
+    */
+   public static final NeckJointName[] values = values();
+   
    public String getCamelCaseNameForStartOfExpression()
    {
       switch (this)
@@ -42,6 +47,7 @@ public enum NeckJointName
       return StringUtils.capitalize(getCamelCaseNameForStartOfExpression());
    }
 
+   @Override
    public String toString()
    {
       return getCamelCaseNameForMiddleOfExpression();
