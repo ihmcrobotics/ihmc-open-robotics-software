@@ -56,7 +56,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       
       pelvisFrame = referenceFrames.getPelvisFrame();
-      headFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
+      headFrame = referenceFrames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
       
       forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       
