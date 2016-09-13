@@ -5,7 +5,6 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -25,13 +24,12 @@ public class SpinningCoinRobot extends Robot
    private double spinningAngularVelocity = 30.0 * 2.0 * Math.PI;
 
    private final double margin = 0.0002;
-   
+
    public SpinningCoinRobot()
    {
       super("SpinningCoin");
- 
-      YoVariableRegistry registry = new YoVariableRegistry("Collision");
-      collisionDetector = new GdxCollisionDetector(registry, 100.0);
+
+      collisionDetector = new GdxCollisionDetector(100.0);
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(margin);
 
@@ -57,8 +55,6 @@ public class SpinningCoinRobot extends Robot
 //      floatingJoint.setVelocity(new Vector3d(1.0, 0.0, 0.0));
       floatingJoint.setAngularVelocityInBody(new Vector3d(0.0, spinningAngularVelocity, 0.0));
       createGroundAsPartOfRobot(collisionShapeFactory);
-
-      this.addYoVariableRegistry(registry);
    }
 
    private void createGroundAsPartOfRobot(CollisionShapeFactory collisionShapeFactory)
@@ -78,7 +74,7 @@ public class SpinningCoinRobot extends Robot
       RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
       shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
       collisionShapeFactory.addShape(baseLink, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
-     
+
       baseJoint.setLink(baseLink);
       this.addRootJoint(baseJoint);
    }
@@ -101,7 +97,7 @@ public class SpinningCoinRobot extends Robot
       linkGraphics.addCube(coinRadius/3.0, coinRadius/3.0, coinWidth/4.0, YoAppearance.AliceBlue());
       linkGraphics.translate(0.0, 0.0, -coinWidth - coinWidth/4.0 );
       linkGraphics.addCube(coinRadius/3.0, coinRadius/3.0, coinWidth/4.0, YoAppearance.Gold());
-      
+
       link.addEllipsoidFromMassProperties(YoAppearance.DarkGreen());
       CollisionShapeDescription shapeDesc = collisionShapeFactory.createCylinder(coinRadius, coinWidth);
 

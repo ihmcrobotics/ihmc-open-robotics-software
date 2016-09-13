@@ -10,6 +10,7 @@ public class SimpleCollisionShapeWithLink extends SimpleCollisionShape implement
 
    private final RigidBodyTransform shapeToLink = new RigidBodyTransform();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    public SimpleCollisionShapeWithLink(Link link, CollisionShapeDescription collisionShapeDescription, RigidBodyTransform shapeToLink)
    {
@@ -33,14 +34,28 @@ public class SimpleCollisionShapeWithLink extends SimpleCollisionShape implement
    @Override
    public void getTransformToWorld(RigidBodyTransform transformToWorldToPack)
    {
-      link.getParentJoint().getTransformToWorld(tempTransform);
-      transformToWorldToPack.multiply(tempTransform, shapeToLink);
+      if (link != null)
+      {
+         link.getParentJoint().getTransformToWorld(tempTransform);
+         transformToWorldToPack.multiply(tempTransform, shapeToLink);
+      }
+      else
+      {
+         super.getTransformToWorld(transformToWorldToPack);
+      }
    }
 
    @Override
    public void setTransformToWorld(RigidBodyTransform transformToWorld)
    {
-      throw new RuntimeException("Shouldn't call this!");
+      if (link != null)
+      {
+         throw new RuntimeException("Shouldn't call this!");
+      }
+      else
+      {
+         super.setTransformToWorld(transformToWorld);
+      }
    }
 
 }

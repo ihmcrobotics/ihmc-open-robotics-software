@@ -40,8 +40,6 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
    private final GdxCollisionFactory factory = new GdxCollisionFactory();
 
-   private YoVariableRegistry registry;
-
    private RigidBodyTransform transformScs = new RigidBodyTransform();
    private Matrix4 transformGdx = new Matrix4();
 
@@ -54,11 +52,8 @@ public class GdxCollisionDetector implements ScsCollisionDetector
     *
     * @param worldRadius Sets the size of the world for broadphase collision detection.  Should be large enough to contain all the objects
     */
-   public GdxCollisionDetector(YoVariableRegistry registryParent, double worldRadius)
+   public GdxCollisionDetector(double worldRadius)
    {
-      registry = new YoVariableRegistry("GDX");
-      registryParent.addChild(registry);
-
       btDefaultCollisionConfiguration collisionConfiguration = new btDefaultCollisionConfiguration();
       btCollisionDispatcher dispatcher = new btCollisionDispatcher(collisionConfiguration);
 
@@ -197,6 +192,22 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          return new ShapeDescription(shape);
       }
 
+      @Override
+      public CollisionShape addShape(CollisionShapeDescription description)
+      {
+         RigidBodyTransform shapeToLink = new RigidBodyTransform();
+         Link link = null;
+         boolean isGround = false;
+
+         BulletCollisionShapeWithLink shape = new BulletCollisionShapeWithLink("shape" + allShapes.size(), (ShapeDescription) description, link, isGround, shapeToLink);
+         collisionWorld.addCollisionObject(shape, (short) 0xFFFF, (short) 0xFFFF);
+
+         allShapes.add(shape);
+
+         return shape;
+      }
+
+      @Override
       public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription description, boolean isGround, int collisionGroup, int collisionMask)
       {
          if (shapeToLink == null)
@@ -237,6 +248,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
       // transform from shapeToLink coordinate system
       private final RigidBodyTransform shapeToLink = new RigidBodyTransform();
+      private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
       public BulletCollisionShapeWithLink(String name, ShapeDescription description, Link link, boolean isGround, RigidBodyTransform shapeToLink)
       {
@@ -290,14 +302,28 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       @Override
       public void getTransformToWorld(RigidBodyTransform transformToWorldToPack)
       {
-         link.getParentJoint().getTransformToWorld(tempTransform);
-         transformToWorldToPack.multiply(tempTransform, shapeToLink);
+         if (link != null)
+         {
+            link.getParentJoint().getTransformToWorld(tempTransform);
+            transformToWorldToPack.multiply(tempTransform, shapeToLink);
+         }
+         else
+         {
+            transformToWorldToPack.set(transformToWorld);
+         }
       }
 
       @Override
       public void setTransformToWorld(RigidBodyTransform transformToWorld)
       {
-         throw new RuntimeException("Shouldn't call this!");
+         if (link != null)
+         {
+            throw new RuntimeException("Shouldn't call this! Transform will be computed from the link location....");
+         }
+         else
+         {
+            this.transformToWorld.set(transformToWorld);
+         }
       }
    }
 

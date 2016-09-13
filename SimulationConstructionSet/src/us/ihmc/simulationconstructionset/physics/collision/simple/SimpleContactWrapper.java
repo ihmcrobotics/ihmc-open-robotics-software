@@ -56,7 +56,7 @@ public class SimpleContactWrapper implements Contacts
    }
 
    @Override
-   public int getNumContacts()
+   public int getNumberOfContacts()
    {
       return worldA.size();
    }
