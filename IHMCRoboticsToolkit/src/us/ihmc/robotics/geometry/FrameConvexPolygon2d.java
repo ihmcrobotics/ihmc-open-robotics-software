@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
 
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -26,11 +25,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, ConvexPolygon2d>
 {
    protected final ConvexPolygon2d convexPolygon;
-   private final ConvexPolygon2dCalculator calculator = new ConvexPolygon2dCalculator();
 
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
-
-   private Vector2d[] temporaryVectorArray;
 
    private final FramePoint tempPoint = new FramePoint();
    private final FramePoint2d tempPoint2d = new FramePoint2d();
@@ -896,18 +892,11 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return new FramePoint2d(referenceFrame, ConvexPolygon2dCalculator.getClosestVertexCopy(point.getPoint(), convexPolygon));
    }
 
-   public FramePoint2d getClosestVertexWithRayCopy(FrameLine2d ray, boolean throwAwayVerticesOutsideRay)
-   {
-      ray.checkReferenceFrameMatch(referenceFrame);
-
-      return new FramePoint2d(referenceFrame, convexPolygon.getClosestVertexWithRayCopy(ray.getLine2d(), throwAwayVerticesOutsideRay));
-   }
-
-   public boolean getClosestVertexWithRay(FramePoint2d closestVertexToPack, FrameLine2d ray, boolean throwAwayVerticesOutsideRay)
+   public boolean getClosestPointWithRay(FramePoint2d closestVertexToPack, FrameLine2d ray)
    {
       ray.checkReferenceFrameMatch(referenceFrame);
       closestVertexToPack.setToZero(referenceFrame);
-      boolean success = convexPolygon.getClosestVertexWithRay(closestVertexToPack.getPoint(), ray.getLine2d(), throwAwayVerticesOutsideRay);
+      boolean success = convexPolygon.getClosestPointWithRay(closestVertexToPack.getPoint(), ray.getLine2d());
 
       return success;
    }
@@ -988,22 +977,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return ret;
    }
 
-   public FrameLineSegment2d[] getNearestEdges(FramePoint2d testPoint)
-   {
-      checkReferenceFrameMatch(testPoint);
-
-      LineSegment2d[] edges = convexPolygon.getNearestEdges(testPoint.getPoint());
-
-      FrameLineSegment2d[] ret = new FrameLineSegment2d[edges.length];
-
-      for (int i = 0; i < edges.length; i++)
-      {
-         ret[i] = new FrameLineSegment2d(referenceFrame, edges[i]);
-      }
-
-      return ret;
-   }
-
    @Override
    public void orthogonalProjection(FramePoint2d point)
    {
@@ -1022,31 +995,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       }
 
       return new FramePoint2d(point.getReferenceFrame(), projected);
-   }
-
-   public void getOutwardEdgeNormals(FrameVector2d[] normalsToPack)
-   {
-      renewTemporaryVectorArray();
-
-      convexPolygon.getOutSideFacingOrthoNormalVectors(temporaryVectorArray);
-
-      for (int i = 0; i < normalsToPack.length; i++)
-      {
-         checkReferenceFrameMatch(normalsToPack[i]);
-         normalsToPack[i].set(temporaryVectorArray[i]);
-      }
-   }
-
-   private void renewTemporaryVectorArray()
-   {
-      if (temporaryVectorArray == null || temporaryVectorArray.length != getNumberOfVertices())
-      {
-         temporaryVectorArray = new Vector2d[getNumberOfVertices()];
-         for (int i = 0; i < temporaryVectorArray.length; i++)
-         {
-            temporaryVectorArray[i] = new Vector2d();
-         }
-      }
    }
 
    @Override
@@ -1222,23 +1170,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    public FramePoint2d getMaxXMinYPointCopy()
    {
       return new FramePoint2d(referenceFrame, convexPolygon.getMaxXMinYPointCopy());
-   }
-
-   public double perimeter()
-   {
-      return convexPolygon.perimeter();
-   }
-
-   public FramePoint2d pointOnPerimeterGivenParameter(double parameter)
-   {
-      return new FramePoint2d(referenceFrame, convexPolygon.pointOnPerimeterGivenParameter(parameter));
-   }
-
-   public void pullPointTowardsCentroid(FramePoint2d point, double percent)
-   {
-      checkReferenceFrameMatch(point);
-      Point2d point2d = point.getPoint();
-      convexPolygon.pullPointTowardsCentroid(point2d, percent);
    }
 
    public boolean isUpToDate()

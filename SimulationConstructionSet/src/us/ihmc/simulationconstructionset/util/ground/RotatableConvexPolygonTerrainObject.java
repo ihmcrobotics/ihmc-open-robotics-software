@@ -15,6 +15,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 
@@ -102,7 +103,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       if(VISUALIZE_SURFACE_NORMALS)
       {
          visualizeNormalVector(topPlane);
-   
+
          for (Plane3d sidePlane : sidePlanes)
          {
             visualizeNormalVector(sidePlane);
@@ -115,7 +116,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       this.linkGraphics.identity();
       linkGraphics.translate(new Vector3d(plane.getPointCopy()));
       linkGraphics.addSphere(0.005, YoAppearance.Black());
-      
+
       Vector3d normalCopy = plane.getNormalCopy();
       normalCopy.scale(0.01);
       linkGraphics.translate(normalCopy);
@@ -124,12 +125,12 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
 
    private void initSidePlanes()
    {
-      List<Vector2d> listOfNormals = convexPolygon.getOutSideFacingOrthoNormalVectorsCopy();
+      Vector2d normal2d = new Vector2d();
 
       for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
       {
-         Vector2d outsideFacingNormal = listOfNormals.get(i);
-         Vector3d normal = new Vector3d(outsideFacingNormal.getX(), outsideFacingNormal.getY(), 0.0);
+         ConvexPolygon2dCalculator.getEdgeNormal(i, normal2d, convexPolygon);
+         Vector3d normal = new Vector3d(normal2d.getX(), normal2d.getY(), 0.0);
 
          int secondIndex = (i + 1 < convexPolygon.getNumberOfVertices()) ? i + 1 : 0;
          int[] indices = {i, secondIndex};
@@ -153,7 +154,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
          sidePlanes.add(sidePlane);
       }
    }
-   
+
    private final Point3d intersectionToIgnore = new Point3d();
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
@@ -161,7 +162,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       checkIfInside(x, y, heightAt, intersectionToIgnore, normalToPack);
       return heightAt;
    }
-   
+
    private final Point3d tempPlaneCentroid = new Point3d();
    private final Vector3d tempPlaneNormal = new Vector3d();
    public double heightAt(double x, double y, double z)
@@ -237,7 +238,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
 //   }
 
 //   private void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
-   
+
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
    // FIXME It doesn't work if one of the face have Area = 0
@@ -305,7 +306,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
 
       if(smallestEdgeDistance < Double.MAX_VALUE)
          return true;
-      
+
       // Check edges
       for (i = 0; i < lateralFacesLookingThePoint.size(); i++)
       {
@@ -341,17 +342,17 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
 
       if(intersectionToPack != null)
          intersectionToPack.set(projectionOnEdge);
-      
+
       if(normalToPack != null)
       {
          normalToPack.set(pointToCheck);
          normalToPack.sub(projectionOnEdge);
          normalToPack.normalize();
       }
-      
+
       if(smallestEdgeDistance < Double.MAX_VALUE)
          return true;
-      
+
       return false;
    }
 
@@ -369,6 +370,6 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
    {
       return this;
    }
-   
+
 }
 

@@ -39,7 +39,7 @@ public class ConvexPolygon2dCalculatorTest
 
       Point2d point = new Point2d(2.5, 1.0);
       double distance = ConvexPolygon2dCalculator.getSignedDistance(point, polygon);
-      assertDistanceCorrect(-Math.sqrt(2.5 * 2.5 + 1.0 * 1.0), distance);
+      assertDistanceCorrect(Math.sqrt(2.5 * 2.5 + 1.0 * 1.0), distance);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -54,11 +54,11 @@ public class ConvexPolygon2dCalculatorTest
 
       Point2d point1 = new Point2d(2.5, 1.0);
       double distance1 = ConvexPolygon2dCalculator.getSignedDistance(point1, polygon);
-      assertDistanceCorrect(-Math.sqrt(1.5 * 1.5 + 1.0 * 1.0), distance1);
+      assertDistanceCorrect(Math.sqrt(1.5 * 1.5 + 1.0 * 1.0), distance1);
 
       Point2d point2 = new Point2d(0.5, 1.0);
       double distance2 = ConvexPolygon2dCalculator.getSignedDistance(point2, polygon);
-      assertDistanceCorrect(-1.0, distance2);
+      assertDistanceCorrect(1.0, distance2);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -74,27 +74,27 @@ public class ConvexPolygon2dCalculatorTest
 
       Point2d point1 = new Point2d(10.0, 10.0);
       double distance1 = ConvexPolygon2dCalculator.getSignedDistance(point1, polygon);
-      assertDistanceCorrect(-5.0 * Math.sqrt(2.0), distance1);
+      assertDistanceCorrect(5.0 * Math.sqrt(2.0), distance1);
 
       Point2d point2 = new Point2d(1.2, 1.1);
       double distance2 = ConvexPolygon2dCalculator.getSignedDistance(point2, polygon);
-      assertDistanceCorrect(1.1, distance2);
+      assertDistanceCorrect(-1.1, distance2);
 
       Point2d point3 = new Point2d(0.05, 9.8);
       double distance3 = ConvexPolygon2dCalculator.getSignedDistance(point3, polygon);
-      assertDistanceCorrect(0.05, distance3);
+      assertDistanceCorrect(-0.05, distance3);
 
       Point2d point4 = new Point2d(9.8, 0.15);
       double distance4 = ConvexPolygon2dCalculator.getSignedDistance(point4, polygon);
-      assertDistanceCorrect(0.5 * Math.sqrt(0.05 * 0.05 * 2.0), distance4);
+      assertDistanceCorrect(-0.5 * Math.sqrt(0.05 * 0.05 * 2.0), distance4);
 
       Point2d point5 = new Point2d(5.0, -0.15);
       double distance5 = ConvexPolygon2dCalculator.getSignedDistance(point5, polygon);
-      assertDistanceCorrect(-0.15, distance5);
+      assertDistanceCorrect(0.15, distance5);
 
       Point2d point6 = new Point2d(15.0, -0.15);
       double distance6 = ConvexPolygon2dCalculator.getSignedDistance(point6, polygon);
-      assertDistanceCorrect(-Math.sqrt(5.0 * 5.0 + 0.15 * 0.15), distance6);
+      assertDistanceCorrect(Math.sqrt(5.0 * 5.0 + 0.15 * 0.15), distance6);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -1359,6 +1359,247 @@ public class ConvexPolygon2dCalculatorTest
       Point2d[] expected15 = null;
       assertPointsEqual(expected15, ConvexPolygon2dCalculator.intersectionWithRayCopy(ray15, polygon), false);
       assertTrue(ConvexPolygon2dCalculator.intersectionWithRay(ray15, result1, result2, polygon) == 0);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testOrthogonalProjection1()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(-1.0, -1.0));
+      polygon.addVertex(new Point2d(1.0, -1.0));
+      polygon.addVertex(new Point2d(-1.0, 1.0));
+      polygon.update();
+
+      Point2d point1 = new Point2d(0.5, 0.5);
+      assertPointsEqual(new Point2d(0.0, 0.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point1, polygon));
+
+      Point2d point2 = new Point2d(-0.25, -0.25);
+      assertPointsEqual(point2, ConvexPolygon2dCalculator.orthogonalProjectionCopy(point2, polygon));
+
+      Point2d point3 = new Point2d(-2.0, -2.0);
+      assertPointsEqual(new Point2d(-1.0, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point3, polygon));
+
+      Point2d point4 = new Point2d(-0.9, -2.0);
+      assertPointsEqual(new Point2d(-0.9, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point4, polygon));
+
+      Point2d point5 = new Point2d(-1.1, -2.0);
+      assertPointsEqual(new Point2d(-1.0, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point5, polygon));
+
+      Point2d point6 = new Point2d(1.8, -1.0);
+      assertPointsEqual(new Point2d(1.0, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point6, polygon));
+
+      Point2d point7 = new Point2d(1.8, -0.8);
+      assertPointsEqual(new Point2d(1.0, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point7, polygon));
+
+      Point2d point8 = new Point2d(0.5, 0.0);
+      assertPointsEqual(new Point2d(0.25, -0.25), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point8, polygon));
+
+      Point2d point9 = new Point2d(0.0, 0.5);
+      assertPointsEqual(new Point2d(-0.25, 0.25), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point9, polygon));
+
+      Point2d point10 = new Point2d(0.0, 0.0);
+      assertPointsEqual(point10, ConvexPolygon2dCalculator.orthogonalProjectionCopy(point10, polygon));
+
+      Point2d point11 = new Point2d(1.0, -1.0);
+      assertPointsEqual(point11, ConvexPolygon2dCalculator.orthogonalProjectionCopy(point11, polygon));
+
+      Point2d point12 = new Point2d(-1.1, 0.0);
+      assertPointsEqual(new Point2d(-1.0, 0.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point12, polygon));
+
+      Point2d point13 = new Point2d(-1.5, 3.0);
+      assertPointsEqual(new Point2d(-1.0, 1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point13, polygon));
+
+      Point2d point14 = new Point2d(3.0, -1.5);
+      assertPointsEqual(new Point2d(1.0, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point14, polygon));
+
+      Point2d point15 = new Point2d(1.6, -1.5);
+      assertPointsEqual(new Point2d(1.0, -1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point15, polygon));
+
+      Point2d point16 = new Point2d(-2.0, 0.9);
+      assertPointsEqual(new Point2d(-1.0, 0.9), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point16, polygon));
+
+      Point2d point17 = new Point2d(-2.0, -0.9);
+      assertPointsEqual(new Point2d(-1.0, -0.9), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point17, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testOrthogonalProjection2()
+   {
+      // empty polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      ConvexPolygon2dCalculator.orthogonalProjectionCopy(new Point2d(), polygon);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testOrthogonalProjection3()
+   {
+      // single point polygon
+      Point2d vertex = new Point2d(1.0, 2.0);
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(vertex);
+      polygon.update();
+
+      assertPointsEqual(vertex, ConvexPolygon2dCalculator.orthogonalProjectionCopy(new Point2d(0.0, 0.0), polygon));
+      assertPointsEqual(vertex, ConvexPolygon2dCalculator.orthogonalProjectionCopy(new Point2d(1.0, -0.2), polygon));
+      assertPointsEqual(vertex, ConvexPolygon2dCalculator.orthogonalProjectionCopy(new Point2d(1.0, 2.0), polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testOrthogonalProjection4()
+   {
+      // line polygon
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(1.0, 2.0));
+      polygon.addVertex(new Point2d(1.0, 1.0));
+      polygon.update();
+
+      Point2d point1 = new Point2d(1.0, -1.0);
+      assertPointsEqual(new Point2d(1.0, 1.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point1, polygon));
+
+      Point2d point2 = new Point2d(3.0, 2.1);
+      assertPointsEqual(new Point2d(1.0, 2.0), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point2, polygon));
+
+      Point2d point3 = new Point2d(0.2, 1.2);
+      assertPointsEqual(new Point2d(1.0, 1.2), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point3, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestPointToRay1()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(-1.0, 0.0));
+      polygon.addVertex(new Point2d(0.0, 1.0));
+      polygon.addVertex(new Point2d(2.0, 0.0));
+      polygon.addVertex(new Point2d(1.0, -1.0));
+      polygon.update();
+
+      Line2d ray1 = new Line2d(new Point2d(5.0, -3.0), new Vector2d(0.0, 1.0));
+      assertPointsEqual(new Point2d(2.0, 0.0), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray1, polygon));
+
+      Line2d ray2 = new Line2d(new Point2d(1.0, 1.0), new Vector2d(0.5, 0.5));
+      assertPointsEqual(new Point2d(4.0/5.0, 3.0/5.0), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray2, polygon));
+
+      Line2d ray3 = new Line2d(new Point2d(1.0, 1.0), new Vector2d(-0.5, 0.1));
+      assertPointsEqual(new Point2d(0.0, 1.0), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray3, polygon));
+
+      Line2d ray4 = new Line2d(new Point2d(-0.75, 0.75), new Vector2d(0.0, 0.1));
+      assertPointsEqual(new Point2d(-0.5, 0.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray4, polygon));
+
+      Line2d ray5 = new Line2d(new Point2d(-0.75, 0.75), new Vector2d(0.3, 0.3));
+      assertPointsEqual(new Point2d(-0.5, 0.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray5, polygon));
+
+      Line2d ray6 = new Line2d(new Point2d(-0.75, 0.75), new Vector2d(-0.3, -0.3));
+      assertPointsEqual(new Point2d(-0.5, 0.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray6, polygon));
+
+      Line2d ray7 = new Line2d(new Point2d(-0.75, 0.75), new Vector2d(0.3, 0.31));
+      assertPointsEqual(new Point2d(-0.5, 0.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray7, polygon));
+
+      Line2d ray8 = new Line2d(new Point2d(-0.75, 0.75), new Vector2d(0.3, 0.29));
+      assertPointsEqual(new Point2d(0.0, 1.0), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray8, polygon));
+
+      Line2d ray9 = new Line2d(new Point2d(1.75, -0.75), new Vector2d(1.0, 1.0));
+      assertPointsEqual(new Point2d(1.5, -0.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray9, polygon));
+
+      Line2d ray10 = new Line2d(new Point2d(1.75, -0.75), new Vector2d(-0.3, -0.3));
+      assertPointsEqual(new Point2d(1.5, -0.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray10, polygon));
+
+      Line2d ray11 = new Line2d(new Point2d(1.0, -1.2), new Vector2d(-2.0, 1.0));
+      assertPointsEqual(new Point2d(1.0, -1.0), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray11, polygon));
+
+      Line2d ray12 = new Line2d(new Point2d(1.0, -1.2), new Vector2d(2.0, -1.0));
+      assertPointsEqual(new Point2d(1.0, -1.0), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray12, polygon));
+
+      Line2d ray13 = new Line2d(new Point2d(-0.1, -0.7), new Vector2d(-2.0, 1.0));
+      assertPointsEqual(new Point2d(0.0, -0.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray13, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestPointToRay2()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      assertTrue(ConvexPolygon2dCalculator.getClosestPointToRayCopy(new Line2d(), polygon) == null);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestPointToRay3()
+   {
+      Point2d vertex = new Point2d(1.0, -1.0);
+
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(vertex);
+      polygon.update();
+
+      Line2d ray1 = new Line2d(new Point2d(5.0, -3.0), new Vector2d(0.0, 1.0));
+      assertPointsEqual(vertex, ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray1, polygon));
+
+      Line2d ray2 = new Line2d(new Point2d(0.0, 0.0), new Vector2d(1.0, 0.0));
+      assertPointsEqual(vertex, ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray2, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestPointToRay4()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(2.0, -5.0));
+      polygon.addVertex(new Point2d(1.0, -6.0));
+      polygon.update();
+
+      Line2d ray1 = new Line2d(new Point2d(1.0, -5.0), new Vector2d(1.0, 0.1));
+      assertPointsEqual(new Point2d(2.0, -5.0), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray1, polygon));
+
+      Line2d ray2 = new Line2d(new Point2d(1.25, -5.25), new Vector2d(0.75, 0.3));
+      assertPointsEqual(new Point2d(2.0, -5.0), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray2, polygon));
+
+      Line2d ray3 = new Line2d(new Point2d(1.25, -5.25), new Vector2d(0.75, 0.8));
+      assertPointsEqual(new Point2d(1.5, -5.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray3, polygon));
+
+      Line2d ray4 = new Line2d(new Point2d(1.25, -5.25), new Vector2d(1.0, 1.0));
+      assertPointsEqual(new Point2d(1.5, -5.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray4, polygon));
+
+      Line2d ray5 = new Line2d(new Point2d(1.25, -5.25), new Vector2d(-1.0, -1.0));
+      assertPointsEqual(new Point2d(1.5, -5.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray5, polygon));
+
+      Line2d ray6 = new Line2d(new Point2d(1.75, -5.75), new Vector2d(1.0, 1.0));
+      assertPointsEqual(new Point2d(1.5, -5.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray6, polygon));
+
+      Line2d ray7 = new Line2d(new Point2d(1.75, -5.75), new Vector2d(-1.0, -1.0));
+      assertPointsEqual(new Point2d(1.5, -5.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray7, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetEdgeNormal()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(-1.0, 0.0));
+      polygon.addVertex(new Point2d(0.0, 1.0));
+      polygon.addVertex(new Point2d(2.0, 0.0));
+      polygon.addVertex(new Point2d(1.0, -1.0));
+      polygon.update();
+
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         Vector2d normal = new Vector2d();
+         ConvexPolygon2dCalculator.getEdgeNormal(i, normal, polygon);
+
+         Vector2d expected = new Vector2d();
+         Point2d edgeStart = polygon.getVertex(i);
+         Point2d edgeEnd = polygon.getNextVertex(i);
+         Vector2d edgeVector = new Vector2d();
+         edgeVector.sub(edgeEnd, edgeStart);
+         GeometryTools.getPerpendicularVector(expected, edgeVector);
+         expected.normalize();
+
+         assertTrue("Expected normal Vector did not match computed one.", expected.epsilonEquals(normal, epsilon));
+      }
    }
 
    private static void assertPointsEqual(Point2d[] expected, Point2d[] actual, boolean enforceOrder)
