@@ -981,22 +981,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return ret;
    }
 
-   public FrameLineSegment2d[] getNearestEdges(FramePoint2d testPoint)
-   {
-      checkReferenceFrameMatch(testPoint);
-
-      LineSegment2d[] edges = convexPolygon.getNearestEdges(testPoint.getPoint());
-
-      FrameLineSegment2d[] ret = new FrameLineSegment2d[edges.length];
-
-      for (int i = 0; i < edges.length; i++)
-      {
-         ret[i] = new FrameLineSegment2d(referenceFrame, edges[i]);
-      }
-
-      return ret;
-   }
-
    @Override
    public void orthogonalProjection(FramePoint2d point)
    {
