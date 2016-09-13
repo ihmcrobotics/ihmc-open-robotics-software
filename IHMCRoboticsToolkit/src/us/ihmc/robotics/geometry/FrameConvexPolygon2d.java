@@ -814,19 +814,20 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
     * @param observerFramePoint Point2d
     * @return Point2d[]
     */
-   public ArrayList<FramePoint2d> getAllVisibleVerticesFromOutsideLeftToRight(FramePoint2d observerFramePoint)
+   public ArrayList<FramePoint2d> getAllVisibleVerticesFromOutsideLeftToRightCopy(FramePoint2d observerFramePoint)
    {
       this.checkReferenceFrameMatch(observerFramePoint);
+      int[] lineOfSightIndeces = ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observerFramePoint.getPoint(), convexPolygon);
 
       ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>();
+      int index = lineOfSightIndeces[0];
 
-      ArrayList<Point2d> vertices = this.convexPolygon.getAllVisibleVerticesFromOutsideLeftToRightCopy(observerFramePoint.getPointCopy());
-      if (vertices == null)
-         return null;
-
-      for (Point2d vertex : vertices)
+      while (true)
       {
-         ret.add(new FramePoint2d(referenceFrame, vertex));
+         ret.add(getFrameVertexCopy(index));
+         index = convexPolygon.getPreviousVertexIndex(index);
+         if (index == lineOfSightIndeces[1])
+            break;
       }
 
       return ret;
@@ -1187,6 +1188,12 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    {
       convexPolygon.set(other.convexPolygon);
       update();
+   }
+
+   public boolean getLineOfSightVertexIndices(FramePoint2d observer, int[] idicesToPack)
+   {
+      checkReferenceFrameMatch(observer);
+      return ConvexPolygon2dCalculator.getLineOfSightVertexIndices(observer.getPoint(), idicesToPack, convexPolygon);
    }
 
    // --- methods that generate garbage ---

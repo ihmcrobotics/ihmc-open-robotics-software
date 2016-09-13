@@ -129,7 +129,7 @@ public class OneStepCaptureRegionCalculator
       captureRegionPolygon.clear(supportAnkleZUp);
 
       // 2. Get extreme CoP positions
-      ArrayList<FramePoint2d> extremesOfFeasibleCOP = supportFootPolygon.getAllVisibleVerticesFromOutsideLeftToRight(capturePoint);
+      ArrayList<FramePoint2d> extremesOfFeasibleCOP = supportFootPolygon.getAllVisibleVerticesFromOutsideLeftToRightCopy(capturePoint);
       if (extremesOfFeasibleCOP == null)
       {
          // If the ICP is in the support polygon return the whole reachable region.

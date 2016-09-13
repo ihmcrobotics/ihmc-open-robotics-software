@@ -664,53 +664,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
    // here ---------------------
    /**
-    * Returns all of the vertices that are visible from the observerPoint2d, in left to right order.
-    * If the observerPoint2d is inside the polygon, returns null.
-    *
-    * @param observerPoint2d Point2d
-    * @return ArrayList<Point2d>
-    */
-   public ArrayList<Point2d> getAllVisibleVerticesFromOutsideLeftToRightCopy(Point2d observerPoint2d)
-   {
-      checkIfUpToDate();
-      if (!hasAtLeastTwoVertices())
-      {
-         ArrayList<Point2d> points = new ArrayList<Point2d>();
-         for (int i = 0; i < numberOfVertices; i++)
-         {
-            points.add(new Point2d(getVertex(i)));
-         }
-
-         return points;
-      }
-
-      int[] indices = ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observerPoint2d, this);
-
-      if (indices == null)
-         return null;
-
-      ArrayList<Point2d> ret = new ArrayList<Point2d>();
-
-      int leavingLeftEdge = indices[0];
-      int enteringRightEdge = indices[1];
-
-      int edgeToAdd = leavingLeftEdge;
-
-      while (edgeToAdd != enteringRightEdge)
-      {
-         Point2d point = new Point2d(getVertex(edgeToAdd));
-         ret.add(point);
-
-         edgeToAdd = getPreviousVertexIndex(edgeToAdd);
-      }
-
-      Point2d point = new Point2d(getVertex(edgeToAdd));
-      ret.add(point);
-
-      return ret;
-   }
-
-   /**
     * Returns the two LineSegment2ds that are the first segments around the corner that cannot be seen from the observerPoint2d.
     * If the observerPoint2d is null returns null. The line segments are returned in order of left, then right.
     * The line segments go from the line of sight points to the points that are not in view, but are around the corner.
