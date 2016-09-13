@@ -6,6 +6,7 @@ import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.Quadruped
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
+import us.ihmc.quadrupedRobotics.params.IntegerParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
@@ -16,11 +17,11 @@ import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
 import us.ihmc.quadrupedRobotics.util.*;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineStateChangedListener;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -40,9 +41,9 @@ public class QuadrupedTimedStepController
    private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
    private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
    private final DoubleParameter touchdownPressureLimitParameter = parameterFactory.createDouble("touchdownPressureLimit", 50);
+   private final IntegerParameter touchdownTriggerWindowParameter = parameterFactory.createInteger("touchdownTriggerWindow", 1);
    private final DoubleParameter contactPressureLowerLimitParameter = parameterFactory.createDouble("contactPressureLowerLimit", 50);
    private final DoubleParameter contactPressureUpperLimitParameter = parameterFactory.createDouble("contactPressureUpperLimit", 1000);
-   private final DoubleParameter soleCoefficientOfFrictionParameter = parameterFactory.createDouble("soleCoefficientOfFriction", 75);
    private final DoubleParameter minimumStepAdjustmentTimeParameter = parameterFactory.createDouble("minimumStepAdjustmentTime", 0.1);
    private final DoubleParameter stepGoalOffsetZParameter = parameterFactory.createDouble("stepGoalOffsetZ", 0.0);
 
@@ -295,7 +296,7 @@ public class QuadrupedTimedStepController
             double liftOffTime = timedStep.getTimeInterval().getStartTime();
             double touchDownTime = timedStep.getTimeInterval().getEndTime();
 
-            // trigger lift-off
+            // trigger swing phase
             if (currentTime >= liftOffTime && currentTime < touchDownTime)
             {
                if (stepTransitionCallback != null)
@@ -321,12 +322,15 @@ public class QuadrupedTimedStepController
       private RobotQuadrant robotQuadrant;
       private final ThreeDoFSwingFootTrajectory swingTrajectory;
       private final FramePoint goalPosition;
+      private final GlitchFilteredBooleanYoVariable touchdownTrigger;
 
       public SwingState(RobotQuadrant robotQuadrant)
       {
          this.robotQuadrant = robotQuadrant;
          this.goalPosition = new FramePoint();
          this.swingTrajectory = new ThreeDoFSwingFootTrajectory();
+         this.touchdownTrigger = new GlitchFilteredBooleanYoVariable(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
+               touchdownTriggerWindowParameter.get());
       }
 
       @Override
@@ -350,6 +354,8 @@ public class QuadrupedTimedStepController
          solePositionController.get(robotQuadrant).getGains()
                .setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
          solePositionControllerSetpoints.get(robotQuadrant).initialize(taskSpaceEstimates);
+
+         touchdownTrigger.set(false);
       }
 
       @Override
@@ -372,26 +378,33 @@ public class QuadrupedTimedStepController
          swingTrajectory.computeTrajectory(currentTime);
          swingTrajectory.getPosition(solePositionControllerSetpoints.get(robotQuadrant).getSolePosition());
 
-         // compute sole force
-         solePositionController.get(robotQuadrant)
-               .compute(soleForceCommand.get(robotQuadrant), solePositionControllerSetpoints.get(robotQuadrant), taskSpaceEstimates);
-         soleForceCommand.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
 
-         // limit sole forces
-         double coefficientOfFriction = soleCoefficientOfFrictionParameter.get();
-         double pressureLimit = touchdownPressureLimitParameter.get();
-         FrameVector soleForce = soleForceCommand.get(robotQuadrant);
-         if (soleForce.getZ() < -pressureLimit)
+         // detect early touch-down
+         FrameVector soleForceEstimate = taskSpaceEstimates.getSoleVirtualForce(robotQuadrant);
+         soleForceEstimate.changeFrame(ReferenceFrame.getWorldFrame());
+         double pressureEstimate = -soleForceEstimate.getZ();
+         double relativeTimeInSwing = currentTime - timedStep.getTimeInterval().getStartTime();
+         double normalizedTimeInSwing = relativeTimeInSwing / timedStep.getTimeInterval().getDuration();
+         if (normalizedTimeInSwing > 0.5)
          {
-            // limit vertical force and project horizontal forces into friction pyramid
-            soleForce.setX(Math.min(soleForce.getX(), coefficientOfFriction * pressureLimit));
-            soleForce.setX(Math.max(soleForce.getX(), -coefficientOfFriction * pressureLimit));
-            soleForce.setY(Math.min(soleForce.getY(), coefficientOfFriction * pressureLimit));
-            soleForce.setY(Math.max(soleForce.getY(), -coefficientOfFriction * pressureLimit));
-            soleForce.setZ(-pressureLimit);
+            touchdownTrigger.update(pressureEstimate > touchdownPressureLimitParameter.get());
          }
 
-         // trigger touch down event
+         // compute sole force
+         if (touchdownTrigger.getBooleanValue())
+         {
+            double pressureLimit = touchdownPressureLimitParameter.get();
+            soleForceCommand.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+            soleForceCommand.get(robotQuadrant).set(0, 0, -pressureLimit);
+         }
+         else
+         {
+            solePositionController.get(robotQuadrant)
+                  .compute(soleForceCommand.get(robotQuadrant), solePositionControllerSetpoints.get(robotQuadrant), taskSpaceEstimates);
+            soleForceCommand.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+         }
+
+         // trigger support phase
          if (currentTime >= touchDownTime)
          {
             if (stepTransitionCallback != null)
