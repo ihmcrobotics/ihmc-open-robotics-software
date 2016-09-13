@@ -1,0 +1,47 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath group: 'gradle.plugin.us.ihmc.gradle', name: 'ihmc-build', version: '0.0.17'
+    }
+}
+
+apply plugin: "us.ihmc.gradle.ihmc-build"
+
+sourceCompatibility = 1.8
+version = "${getOpenRoboticsSoftwareProject().version}"
+project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
+project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+project.ext.licenseName = "Apache License, Version 2.0"
+project.ext.bintrayLicenseName = "Apache-2.0"
+
+
+repositories ihmc.ihmcDefaultArtifactProxies()
+
+repositories {
+    maven {
+        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+    }
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+}
+
+
+
+dependencies {
+    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    compile "net.sf.trove4j:trove4j:3.0.3"
+
+//    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+}
