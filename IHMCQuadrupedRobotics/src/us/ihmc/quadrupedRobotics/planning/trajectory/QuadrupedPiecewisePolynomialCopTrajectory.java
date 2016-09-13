@@ -19,7 +19,7 @@ import us.ihmc.robotics.robotSide.*;
 
 import java.util.ArrayList;
 
-public class QuadrupedPiecewiseCubicCopTrajectory
+public class QuadrupedPiecewisePolynomialCopTrajectory
 {
    private class YoTimedPolynomial extends YoPolynomial
    {
@@ -57,7 +57,7 @@ public class QuadrupedPiecewiseCubicCopTrajectory
    private final EndDependentList<ArrayList<YoTimedPolynomial>> pressurePolynomialsPerEnd;
    private final DoubleYoVariable copShiftDuration;
 
-   public QuadrupedPiecewiseCubicCopTrajectory(int maximumNumberOfContactPhases, double copShiftDuration, YoVariableRegistry parentRegistry)
+   public QuadrupedPiecewisePolynomialCopTrajectory(int maximumNumberOfContactPhases, double copShiftDuration, YoVariableRegistry parentRegistry)
    {
       int maximumNumberOfTrajectorySegments = 3 * maximumNumberOfContactPhases;
       trajectoryInitialized = new BooleanYoVariable("copTrajectoryInitialized", registry);
