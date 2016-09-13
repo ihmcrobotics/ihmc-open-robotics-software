@@ -12,9 +12,8 @@ public interface ScsCollisionDetector
    /**
     * Call to initialize collision detection.
     *
-    * @param handler Function used to handle collisions
     */
-   public void initialize(CollisionHandler handler);
+   public void initialize();
 
    /**
     * Returns a factory for creating collision shapes that are attached to Links.

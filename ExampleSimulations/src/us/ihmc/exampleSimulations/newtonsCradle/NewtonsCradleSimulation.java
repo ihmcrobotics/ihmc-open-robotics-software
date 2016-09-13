@@ -32,9 +32,9 @@ public class NewtonsCradleSimulation
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
 
       handler.initialize(collisionDetector);
-      collisionDetector.initialize(handler);
+      collisionDetector.initialize();
 
-      scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
+      scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
    }
 
    public static void createSpinningCoinSimulation()
@@ -54,9 +54,9 @@ public class NewtonsCradleSimulation
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
 
       handler.initialize(collisionDetector);
-      collisionDetector.initialize(handler);
+      collisionDetector.initialize();
 
-      scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
+      scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
 
       scs.setSimulateDuration(0.19);
       scs.simulate();
@@ -83,9 +83,9 @@ public class NewtonsCradleSimulation
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
 
       handler.initialize(collisionDetector);
-      collisionDetector.initialize(handler);
+      collisionDetector.initialize();
 
-      scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
+      scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
    }
 
    public static void createRowOfDominosSimulation()
@@ -109,9 +109,9 @@ public class NewtonsCradleSimulation
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
 
       handler.initialize(collisionDetector);
-      collisionDetector.initialize(handler);
+      collisionDetector.initialize();
 
-      scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
+      scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
    }
 
    public static void createPileOfRandomObjectsSimulation()
@@ -140,9 +140,9 @@ public class NewtonsCradleSimulation
       ScsCollisionDetector collisionDetector = pileOfRandomObjectsRobot.getCollisionDetector();
 
       handler.initialize(collisionDetector);
-      collisionDetector.initialize(handler);
+      collisionDetector.initialize();
 
-      scs.initPhysics(new ScsPhysics(null, collisionDetector, visualize));
+      scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
 
       scs.simulate();
 

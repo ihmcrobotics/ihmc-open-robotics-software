@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 
 public class NewtonsCradleRobot extends Robot
 {
@@ -25,8 +25,8 @@ public class NewtonsCradleRobot extends Robot
 
       int numberOfBalls = 6;
 
-      collisionDetector = new GdxCollisionDetector(this.getRobotsYoVariableRegistry(), 10000);
-//      collisionDetector = new SimpleCollisionDetector();
+//      collisionDetector = new GdxCollisionDetector(this.getRobotsYoVariableRegistry(), 10000);
+      collisionDetector = new SimpleCollisionDetector();
 
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(0.02);

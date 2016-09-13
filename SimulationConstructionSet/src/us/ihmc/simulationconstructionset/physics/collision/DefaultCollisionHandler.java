@@ -18,7 +18,8 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 
 public class DefaultCollisionHandler implements CollisionHandler
 {
-   private Vector3d normal, negative_normal = new Vector3d();
+   private final Vector3d normal = new Vector3d();
+   private final Vector3d negative_normal = new Vector3d();
 
    private Point3d point1 = new Point3d();
    private Point3d point2 = new Point3d();
@@ -107,7 +108,7 @@ public class DefaultCollisionHandler implements CollisionHandler
          contacts.getWorldA(i, point1);
          contacts.getWorldB(i, point2);
 
-         normal = contacts.getWorldNormal(i);
+         contacts.getWorldNormal(i, normal);
 
          if (!contacts.isNormalOnA())
          {
@@ -224,5 +225,23 @@ public class DefaultCollisionHandler implements CollisionHandler
       {
          return contacts;
       }
+   }
+
+   @Override
+   public void handleCollisions(CollisionDetectionResult results)
+   {
+      this.maintenanceBeforeCollisionDetection();
+
+      for (int i=0; i<results.getNumberOfCollisions(); i++)
+      {
+         Contacts collision = results.getCollision(i);
+
+         CollisionShape shape1 = collision.getShapeA();
+         CollisionShape shape2 = collision.getShapeB();
+
+         handle(shape1, shape2, collision);
+      }
+
+      this.maintenanceAfterCollisionDetection();
    }
 }

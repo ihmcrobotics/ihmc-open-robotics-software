@@ -1,10 +1,3 @@
 root*false*false
 root.NewtonsCradle*false*false
-root.NewtonsCradle.GDX*false*false
-root.NewtonsCradle.GDX.shape0*false*false
-root.NewtonsCradle.GDX.shape1*false*false
-root.NewtonsCradle.GDX.shape2*false*false
-root.NewtonsCradle.GDX.shape3*false*false
-root.NewtonsCradle.GDX.shape4*false*false
-root.NewtonsCradle.GDX.shape5*false*false
 root.DefaultCollisionVisualize*false*false

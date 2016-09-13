@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
@@ -8,8 +8,8 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
+import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
-import us.ihmc.simulationconstructionset.physics.collision.DetectedCollision;
 
 public class SimpleCollisionDetectorTest
 {
@@ -57,7 +57,7 @@ public class SimpleCollisionDetectorTest
       detector.performCollisionDetection(result);
 
       assertEquals(1, result.getNumberOfCollisions());
-      DetectedCollision collision = result.getCollision(0);
+      Contacts collision = result.getCollision(0);
       CollisionShape shapeA = collision.getShapeA();
       CollisionShape shapeB = collision.getShapeB();
 

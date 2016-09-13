@@ -222,12 +222,12 @@ public abstract class SCSCollisionDetectorTest
 
          assertTrue(result.getNumberOfCollisions() > 0);
 
-         DetectedCollision collision = result.getCollision(0);
+         Contacts collision = result.getCollision(0);
 
          Point3d pointOnA = new Point3d();
          Point3d pointOnB = new Point3d();
-         collision.getPointOnA(pointOnA);
-         collision.getPointOnB(pointOnB);
+         collision.getWorldA(0, pointOnA);
+         collision.getWorldB(0, pointOnB);
 
          System.out.println("Contacted A at " + pointOnA);
          System.out.println("Contacted B at " + pointOnB);
@@ -272,7 +272,7 @@ public abstract class SCSCollisionDetectorTest
 
       CheckCollisionMasks check = new CheckCollisionMasks();
 
-      collisionDetector.initialize(check);
+      collisionDetector.initialize();
 
       RigidBodyTransform offset = new RigidBodyTransform();
       offset.setTranslation(new Vector3d(0, 0, -1.7));
@@ -325,27 +325,37 @@ public abstract class SCSCollisionDetectorTest
    {
       int totalCollisions = 0;
 
+      @Override
       public void initialize(ScsCollisionDetector collision)
       {
       }
 
+      @Override
       public void maintenanceBeforeCollisionDetection()
       {
       }
 
+      @Override
       public void maintenanceAfterCollisionDetection()
       {
       }
 
+      @Override
       public void addListener(CollisionHandlerListener listener)
       {
       }
 
+      @Override
       public void handle(CollisionShape shapeA, CollisionShape shapeB, Contacts contacts)
       {
          totalCollisions++;
 
          assertTrue((shapeA.getCollisionMask() & shapeB.getGroupMask()) != 0 || (shapeB.getCollisionMask() & shapeA.getGroupMask()) != 0);
+      }
+
+      @Override
+      public void handleCollisions(CollisionDetectionResult results)
+      {
       }
    }
 
