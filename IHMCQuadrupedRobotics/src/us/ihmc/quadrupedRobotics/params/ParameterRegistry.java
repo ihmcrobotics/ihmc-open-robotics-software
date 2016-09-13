@@ -29,7 +29,7 @@ public class ParameterRegistry
    private static final class AtomicInstanceHolder
    {
       // Creation of INSTANCE is guaranteed to be thread-safe by the class loader.
-      static final ParameterRegistry INSTANCE = new ParameterRegistry();
+      static ParameterRegistry INSTANCE = new ParameterRegistry();
    }
 
    /**
@@ -38,6 +38,12 @@ public class ParameterRegistry
    public static ParameterRegistry getInstance()
    {
       return AtomicInstanceHolder.INSTANCE;
+   }
+   
+   public static void destroyAndRecreateInstance()
+   {
+      AtomicInstanceHolder.INSTANCE = null;
+      AtomicInstanceHolder.INSTANCE = new ParameterRegistry();
    }
 
    // Disallow construction to enforce singleton.
@@ -148,4 +154,5 @@ public class ParameterRegistry
 
       return null;
    }
+   
 }

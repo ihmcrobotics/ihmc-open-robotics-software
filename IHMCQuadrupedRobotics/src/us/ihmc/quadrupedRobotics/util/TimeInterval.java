@@ -43,11 +43,6 @@ public class TimeInterval
       this.endTime = endTime;
    }
 
-   public double getDuration()
-   {
-      return endTime - startTime;
-   }
-
    public double getStartTime()
    {
       return startTime;
@@ -64,21 +59,19 @@ public class TimeInterval
    }
 
    public void setEndTime(double endTime)
-
    {
       this.endTime = endTime;
+   }
+
+   public double getDuration()
+   {
+      return endTime - startTime;
    }
 
    public TimeInterval shiftInterval(double shiftTime)
    {
       this.startTime = this.startTime + shiftTime;
       this.endTime = this.endTime + shiftTime;
-      return this;
-   }
-
-   public TimeInterval scaleDuration(double scalar)
-   {
-      this.endTime = this.startTime + scalar * (this.endTime - this.startTime);
       return this;
    }
 

@@ -14,7 +14,7 @@ public class ConvexPolygon2dCalculator
 {
    /**
     * Returns distance from the point to the boundary of this polygon. The return value
-    * is positive if the point is inside and negative if it is outside.
+    * is negative if the point is inside the polygon.
     */
    public static double getSignedDistance(Point2d point, ConvexPolygon2d polygon)
    {
@@ -30,12 +30,65 @@ public class ConvexPolygon2dCalculator
       }
 
       if (isPointInside(point, polygon))
-         return closestDistance;
-      return -closestDistance;
+         return -closestDistance;
+      return closestDistance;
    }
 
    /**
-    * Returns the index of the closest vertex of the polygon to the given line.
+    * Moves the given point onto the boundary of the polygon if the point lies outside the
+    * polygon. If the point is inside the polygon it is not modified.
+    */
+   public static void orthogonalProjection(Point2d pointToProject, ConvexPolygon2d polygon)
+   {
+      if (!polygon.hasAtLeastOneVertex())
+         return;
+
+      if (polygon.hasExactlyOneVertex())
+      {
+         pointToProject.set(polygon.getVertex(0));
+         return;
+      }
+
+      if (isPointInside(pointToProject, polygon))
+         return;
+
+      int closestVertexIndex = getClosestVertexIndex(pointToProject, polygon);
+
+      // the orthogonal projection is either on the edge from point 1 to 2 or on the edge from 2 to 3.
+      Point2d point1 = polygon.getPreviousVertex(closestVertexIndex);
+      Point2d point2 = polygon.getVertex(closestVertexIndex);
+      Point2d point3 = polygon.getNextVertex(closestVertexIndex);
+
+      // check first edge from point 2 to 3
+      double edgeVector1X = point3.x - point2.x;
+      double edgeVector1Y = point3.y - point2.y;
+      double lambda1 = getIntersectionLambda(point2.x, point2.y, edgeVector1X, edgeVector1Y, pointToProject.x, pointToProject.y, -edgeVector1Y, edgeVector1X);
+      lambda1 = Math.max(lambda1, 0.0);
+      double candidate1X = point2.x + lambda1 * edgeVector1X;
+      double candidate1Y = point2.y + lambda1 * edgeVector1Y;
+
+      // check second edge from point 1 to 2
+      double edgeVector2X = point2.x - point1.x;
+      double edgeVector2Y = point2.y - point1.y;
+      double lambda2 = getIntersectionLambda(point1.x, point1.y, edgeVector2X, edgeVector2Y, pointToProject.x, pointToProject.y, -edgeVector2Y, edgeVector2X);
+      lambda2 = Math.min(lambda2, 1.0);
+      double candidate2X = point1.x + lambda2 * edgeVector2X;
+      double candidate2Y = point1.y + lambda2 * edgeVector2Y;
+
+      double distanceSquared1 = (pointToProject.x - candidate1X) * (pointToProject.x - candidate1X) + (pointToProject.y - candidate1Y) * (pointToProject.y - candidate1Y);
+      double distanceSquared2 = (pointToProject.x - candidate2X) * (pointToProject.x - candidate2X) + (pointToProject.y - candidate2Y) * (pointToProject.y - candidate2Y);
+
+      if (distanceSquared1 < distanceSquared2)
+         pointToProject.set(candidate1X, candidate1Y);
+      else
+         pointToProject.set(candidate2X, candidate2Y);
+
+   }
+
+   /**
+    * Returns the index of the closest vertex of the polygon to the given line. If there
+    * are multiple closest vertices (line parallel to an edge) this will return the smaller
+    * index.
     */
    public static int getClosestVertexIndex(Line2d line, ConvexPolygon2d polygon)
    {
@@ -97,6 +150,41 @@ public class ConvexPolygon2dCalculator
       if (index < 0)
          return false;
       pointToPack.set(polygon.getVertex(index));
+      return true;
+   }
+
+   /**
+    * Packs the point on the polygon that is closest to the given ray. If the ray is parallel to the
+    * closest edge this will return the point on that edge closest to the ray origin. If the ray
+    * intersects the polygon the result of this method will be wrong. If unsure check first using the
+    * intersectionWithRay method.
+    */
+   public static boolean getClosestPointToRay(Line2d ray, Point2d pointToPack, ConvexPolygon2d polygon)
+   {
+      if (!polygon.hasAtLeastOneVertex())
+         return false;
+
+      Point2d rayStart = ray.getPoint();
+      Vector2d rayDirection = ray.getNormalizedVector();
+      int closestVertexIndex = getClosestVertexIndex(ray, polygon);
+      Point2d closestVertexToLine = polygon.getVertex(closestVertexIndex);
+
+      // validate the closest vertex is in front of the ray:
+      boolean vertexValid = isPointInFrontOfRay(rayStart, rayDirection, closestVertexToLine);
+
+      // check edges adjacent to the closest vertex to determine if they are parallel to the ray:
+      boolean edge1Parallel = isEdgeParallel(closestVertexIndex, rayDirection, polygon);
+      boolean edge2Parallel = isEdgeParallel(polygon.getNextVertexIndex(closestVertexIndex), rayDirection, polygon);
+      boolean rayParallelToEdge = edge1Parallel || edge2Parallel;
+
+      if (vertexValid && !rayParallelToEdge)
+         pointToPack.set(closestVertexToLine);
+      else
+      {
+         pointToPack.set(rayStart);
+         orthogonalProjection(pointToPack, polygon);
+      }
+
       return true;
    }
 
@@ -332,6 +420,21 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
+    * Packs a vector that is orthogonal to the given edge, facing towards the outside of the polygon
+    */
+   public static void getEdgeNormal(int edgeIndex, Vector2d normalToPack, ConvexPolygon2d polygon)
+   {
+      Point2d edgeStart = polygon.getVertex(edgeIndex);
+      Point2d edgeEnd = polygon.getNextVertex(edgeIndex);
+
+      double edgeVectorX = edgeEnd.x - edgeStart.x;
+      double edgeVectorY = edgeEnd.y - edgeStart.y;
+
+      normalToPack.set(-edgeVectorY, edgeVectorX);
+      normalToPack.normalize();
+   }
+
+   /**
     * An observer looking at the polygon from the outside will see two vertices at the outside edges of the
     * polygon. This method packs the indices corresponding to these vertices. The vertex on the left from the
     * observer point of view will be the first vertex packed. The argument vertexIndices is expected to
@@ -404,20 +507,14 @@ public class ConvexPolygon2dCalculator
       if (intersections == 2)
       {
          // check line intersection 2:
-         double rayStartToPointX = pointToPack2.x - rayStart.x;
-         double rayStartToPointY = pointToPack2.y - rayStart.y;
-         double dotProduct = rayStartToPointX * rayDirection.x + rayStartToPointY * rayDirection.y;
-         if (Math.signum(dotProduct) == -1.0)
+         if (!isPointInFrontOfRay(rayStart, rayDirection, pointToPack2))
             intersections--;
       }
 
       if (intersections >= 1)
       {
          // check line intersection 1:
-         double rayStartToPointX = pointToPack1.x - rayStart.x;
-         double rayStartToPointY = pointToPack1.y - rayStart.y;
-         double dotProduct = rayStartToPointX * rayDirection.x + rayStartToPointY * rayDirection.y;
-         if (Math.signum(dotProduct) == -1.0)
+         if (!isPointInFrontOfRay(rayStart, rayDirection, pointToPack1))
          {
             pointToPack1.set(pointToPack2);
             intersections--;
@@ -569,6 +666,48 @@ public class ConvexPolygon2dCalculator
       return numerator / denumerator;
    }
 
+   /**
+    * Determines if a point is laying in front of a ray. This means that an observer standing at the
+    * start point looking in the direction of the ray will see the point in front of him. If the point
+    * is on the line orthogonal to the ray through the ray start (perfectly left or right of the
+    * observer) the method will return false.
+    */
+   public static boolean isPointInFrontOfRay(Point2d rayStart, Vector2d rayDirection, Point2d pointToTest)
+   {
+      return isPointInFrontOfRay(rayStart.x, rayStart.y, rayDirection.x, rayDirection.y, pointToTest.x, pointToTest.y);
+   }
+
+   /**
+    * Determines if a point is laying in front of a ray. This means that an observer standing at the
+    * start point looking in the direction of the ray will see the point in front of him. If the point
+    * is on the line orthogonal to the ray through the ray start (perfectly left or right of the
+    * observer) the method will return true.
+    */
+   public static boolean isPointInFrontOfRay(double rayStartX, double rayStartY, double rayDirectionX, double rayDirectionY, double pointToTestX,
+         double pointToTestY)
+   {
+      double rayStartToVertexX = pointToTestX - rayStartX;
+      double rayStartToVertexY = pointToTestY - rayStartY;
+      double dotProduct = rayStartToVertexX * rayDirectionX + rayStartToVertexY * rayDirectionY;
+      return Math.signum(dotProduct) != -1;
+   }
+
+   /**
+    * Determines if edge i of the polygon is parallel to the given direction. If the edge is too
+    * short to determine its direction this method will return false.
+    */
+   public static boolean isEdgeParallel(int edgeIndex, Vector2d direction, ConvexPolygon2d polygon)
+   {
+      Point2d edgeStart = polygon.getVertex(edgeIndex);
+      Point2d edgeEnd = polygon.getNextVertex(edgeIndex);
+
+      double edgeDirectionX = edgeEnd.x - edgeStart.x;
+      double edgeDirectionY = edgeEnd.y - edgeStart.y;
+
+      double crossProduct = -edgeDirectionY * direction.x + edgeDirectionX * direction.y;
+      return Math.abs(crossProduct) < 1.0E-10;
+   }
+
    // --- Methods that generate garbage ---
    public static Point2d getClosestVertexCopy(Line2d line, ConvexPolygon2d polygon)
    {
@@ -649,6 +788,21 @@ public class ConvexPolygon2dCalculator
          return new Point2d[] {point1, point2};
       if (intersections == 1)
          return new Point2d[] {point1};
+      return null;
+   }
+
+   public static Point2d orthogonalProjectionCopy(Point2d pointToProject, ConvexPolygon2d polygon)
+   {
+      Point2d ret = new Point2d(pointToProject);
+      orthogonalProjection(ret, polygon);
+      return ret;
+   }
+
+   public static Point2d getClosestPointToRayCopy(Line2d ray, ConvexPolygon2d polygon)
+   {
+      Point2d ret = new Point2d();
+      if (getClosestPointToRay(ray, ret, polygon))
+         return ret;
       return null;
    }
 }

@@ -180,7 +180,7 @@ public class BipedSupportPolygons
       }
 
       supportPolygonInWorld.setIncludingFrameAndUpdate(supportPolygonInMidFeetZUp);
-      supportPolygonInWorld.changeFrame(worldFrame);
+      supportPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
    }
 
    private void visualize()
