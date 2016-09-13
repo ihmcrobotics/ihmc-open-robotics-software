@@ -97,7 +97,7 @@ public interface Tree<T extends Tree> {
     }
 
     class CachedMapper<Source extends Tree<Source>, Target> {
-        private final Cache<Source, Target> cache = new Cache<>(Integer.MAX_VALUE, WeakHashMap<Source, Cache<Source, Target>.CachedItem>::new);
+        private final Cache<Source, Target> cache = new Cache<Source, Target>(Integer.MAX_VALUE, WeakHashMap<Source, Cache<Source, Target>.CachedItem>::new);
         private final TreeNodeMapper<? super Source, Target> mapper;
 
         private CachedMapper(TreeNodeMapper<? super Source, Target> mapper) {
