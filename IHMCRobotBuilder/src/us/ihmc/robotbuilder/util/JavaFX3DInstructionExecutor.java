@@ -128,9 +128,13 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
 
         TriangleMesh mesh = new TriangleMesh(VertexFormat.POINT_TEXCOORD);
         mesh.getFaces().addAll(indices);
-        float[] vertexBuffer = Arrays.stream(vertices).flatMap(v -> Stream.of(v.x, v.y, v.z)).collect(new FloatArrayCollector<>());
+
+        FloatArrayCollector<Float> collector = new FloatArrayCollector<>();
+        float[] vertexBuffer = Arrays.stream(vertices).flatMap(v -> Stream.of(v.x, v.y, v.z)).collect(collector);
         mesh.getPoints().addAll(vertexBuffer);
-        float[] texCoordBuffer = Arrays.stream(textureCoords).flatMap(v -> Stream.of(v.x, v.y)).collect(new FloatArrayCollector<>());
+
+        FloatArrayCollector<Float> collectorTwo = new FloatArrayCollector<>();
+        float[] texCoordBuffer = Arrays.stream(textureCoords).flatMap(v -> Stream.of(v.x, v.y)).collect(collectorTwo);
         mesh.getTexCoords().addAll(texCoordBuffer);
 
         return mesh;
