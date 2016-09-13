@@ -88,7 +88,7 @@ public class DefaultCollisionHandler implements CollisionHandler
       boolean shapeTwoIsGround = shape2.isGround();
       if (shapeOneIsGround && shapeTwoIsGround) throw new RuntimeException("Both shapes are ground. Shouldn't be contacting!!");
 
-      int numberOfContacts = contacts.getNumContacts();
+      int numberOfContacts = contacts.getNumberOfContacts();
       indices.clear();
 
       for (int i=0; i<numberOfContacts; i++)

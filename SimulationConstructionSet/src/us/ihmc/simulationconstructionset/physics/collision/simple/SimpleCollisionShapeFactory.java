@@ -10,6 +10,7 @@ import us.ihmc.simulationconstructionset.physics.SimpleCollisionShapeWithLink;
 public class SimpleCollisionShapeFactory implements CollisionShapeFactory
 {
    private final SimpleCollisionDetector detector;
+   private double margin;
 
    public SimpleCollisionShapeFactory(SimpleCollisionDetector detector)
    {
@@ -19,18 +20,19 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    @Override
    public void setMargin(double margin)
    {
+      this.margin = margin;
    }
 
    @Override
-   public CollisionShapeDescription createBox(double radiusX, double radiusY, double radiusZ)
+   public CollisionShapeDescription createBox(double halfLengthX, double halfWidthY, double halfHeightZ)
    {
-      return null;
+      return new BoxShapeDescription(halfLengthX, halfWidthY, halfHeightZ);
    }
 
    @Override
    public CollisionShapeDescription createCylinder(double radius, double height)
    {
-      return null;
+      return new CylinderShapeDescription(radius, height);
    }
 
    @Override
@@ -47,6 +49,18 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
       detector.addShape(collisionShape);
 
       return collisionShape;
+   }
+
+   @Override
+   public CollisionShape addShape(CollisionShapeDescription description)
+   {
+      Link link = null;
+      RigidBodyTransform shapeToLink = new RigidBodyTransform();
+      boolean isGround = false;
+      int collisionGroup = 0xFFFF;
+      int collisionMask = 0xFFFF;
+
+      return addShape(link, shapeToLink, description, isGround, collisionGroup, collisionMask);
    }
 
 }

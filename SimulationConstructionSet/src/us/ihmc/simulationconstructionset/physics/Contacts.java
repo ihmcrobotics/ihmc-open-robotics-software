@@ -14,7 +14,7 @@ public interface Contacts
    /**
     * Total number of contacts found between the two shapes.
     */
-   public int getNumContacts();
+   public int getNumberOfContacts();
 
    /**
     * Location on shapeA that the contact occurred.  World coordinates.

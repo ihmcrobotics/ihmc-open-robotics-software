@@ -33,7 +33,7 @@ public class CollisionExampleFixedArm
       private final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", getRobotsYoVariableRegistry());
 
       //      ScsCollisionDetector collisionDetector = new JBulletCollisionDetector(getRobotsYoVariableRegistry(), 10000);
-      private final ScsCollisionDetector collisionDetector = new GdxCollisionDetector(getRobotsYoVariableRegistry(), 10000);
+      private final ScsCollisionDetector collisionDetector = new GdxCollisionDetector(10000.0);
       private final CollisionHandler collisionHandler;
 
       /*

@@ -72,12 +72,16 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             {
                doSphereSphereCollisionDetection(objectOne, (SphereShapeDescription) descriptionOne, objectTwo, (SphereShapeDescription) descriptionTwo, result);
             }
-            else
+            else if ((descriptionOne instanceof BoxShapeDescription) && (descriptionTwo instanceof BoxShapeDescription))
             {
-               throw new RuntimeException("Not implemented yet!");
+               doBoxBoxCollisionDetection(objectOne, (BoxShapeDescription) descriptionOne, objectTwo, (BoxShapeDescription) descriptionTwo, result);
             }
          }
       }
+   }
+
+   private void doBoxBoxCollisionDetection(CollisionShape objectOne, BoxShapeDescription descriptionOne, CollisionShape objectTwo, BoxShapeDescription descriptionTwo, CollisionDetectionResult result)
+   {
    }
 
    private void doSphereSphereCollisionDetection(CollisionShape objectOne, SphereShapeDescription descriptionOne, CollisionShape objectTwo, SphereShapeDescription descriptionTwo, CollisionDetectionResult result)

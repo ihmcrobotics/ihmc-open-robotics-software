@@ -8,7 +8,6 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -30,8 +29,7 @@ public class PileOfRandomObjectsRobot
    {
       int numberOfObjects = 40; //400;
 
-      YoVariableRegistry registry = new YoVariableRegistry("Collision");
-      collisionDetector = new GdxCollisionDetector(registry, 100.0);
+      collisionDetector = new GdxCollisionDetector(100.0);
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(0.002);
 
@@ -82,20 +80,20 @@ public class PileOfRandomObjectsRobot
       FloatingJoint board0 = createContainerBoard("board0", collisionShapeFactory, random);
       board0.setPosition(0.51, 0.0, boardZ);
       board0.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
-      
+
       FloatingJoint board1 = createContainerBoard("board1", collisionShapeFactory, random);
       board1.setPosition(0.0, 0.35, boardZ);
       board1.setYawPitchRoll(0.0, 0.0, 0.0);
-      
+
       FloatingJoint board2 = createContainerBoard("board2", collisionShapeFactory, random);
       board2.setPosition(0.0, -0.35, boardZ);
       board2.setYawPitchRoll(0.0, 0.0, 0.0);
-      
+
       FloatingJoint board3 = createContainerBoard("board3", collisionShapeFactory, random);
       board3.setPosition(-0.51, 0.0, boardZ);
       board3.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
 
-      
+
       Robot baseRobot = new Robot("BaseRobot");
       NullJoint baseJoint = new NullJoint("base", new Vector3d(), baseRobot);
 
@@ -121,8 +119,6 @@ public class PileOfRandomObjectsRobot
 
       baseRobot.addStaticLink(baseLink);
       this.robots.add(baseRobot);
-
-      baseRobot.getRobotsYoVariableRegistry().addChild(registry);
    }
 
    private FloatingJoint createContainerBoard(String name, CollisionShapeFactory collisionShapeFactory, Random random)
@@ -136,10 +132,10 @@ public class PileOfRandomObjectsRobot
       floatingJoint.setLink(link);
       robot.addRootJoint(floatingJoint);
       this.robots.add(robot);
-      
+
       return floatingJoint;
    }
-   
+
    private Link createContainerBoardLink(String name, CollisionShapeFactory collisionShapeFactory, Random random, Robot robot)
    {
       double objectWidth = 0.2;
@@ -154,7 +150,7 @@ public class PileOfRandomObjectsRobot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -objectHeight / 2.0);
       AppearanceDefinition randomColor = YoAppearance.Aquamarine();
-      
+
       linkGraphics.addCube(objectLength, objectWidth, objectHeight, randomColor);
       link.setLinkGraphics(linkGraphics);
 

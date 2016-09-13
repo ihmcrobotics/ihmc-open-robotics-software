@@ -86,7 +86,7 @@ public class SCSCollisionDetectorEvaluator
 
       // Collison Detector
       double worldRadius = 100.0;
-      ScsCollisionDetector collisionDetector = new GdxCollisionDetector(robot.getRobotsYoVariableRegistry(), worldRadius);
+      ScsCollisionDetector collisionDetector = new GdxCollisionDetector(worldRadius);
 
       CollisionShapeFactory factory = collisionDetector.getShapeFactory();
       factory.setMargin(0.002);
@@ -147,7 +147,7 @@ public class SCSCollisionDetectorEvaluator
          {
             Contacts collision = result.getCollision(j);
 
-            int numberOfContacts = collision.getNumContacts();
+            int numberOfContacts = collision.getNumberOfContacts();
 
             for (int k=0; k<numberOfContacts; k++)
             {
