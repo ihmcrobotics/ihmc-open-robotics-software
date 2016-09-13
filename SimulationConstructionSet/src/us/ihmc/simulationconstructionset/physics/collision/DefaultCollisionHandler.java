@@ -12,6 +12,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
+import us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 
@@ -59,8 +60,9 @@ public class DefaultCollisionHandler implements CollisionHandler
       {
          ShapesInContact shapesInContact = shapesInContactList.get(i);
 
-         CollisionShape shape1 = shapesInContact.getShape1();
-         CollisionShape shape2 = shapesInContact.getShape2();
+         //TODO: Get rid of Type cast here...
+         CollisionShapeWithLink shape1 = (CollisionShapeWithLink) shapesInContact.getShape1();
+         CollisionShapeWithLink shape2 = (CollisionShapeWithLink) shapesInContact.getShape2();
          Contacts contacts = shapesInContact.getContacts();
          handleLocal(shape1, shape2, contacts);
       }
@@ -77,7 +79,7 @@ public class DefaultCollisionHandler implements CollisionHandler
 
    private final ArrayList<Integer> indices = new ArrayList<Integer>();
 
-   private void handleLocal(CollisionShape shape1, CollisionShape shape2, Contacts contacts)
+   private void handleLocal(CollisionShapeWithLink shape1, CollisionShapeWithLink shape2, Contacts contacts)
    {
       boolean shapeOneIsGround = shape1.isGround();
       boolean shapeTwoIsGround = shape2.isGround();

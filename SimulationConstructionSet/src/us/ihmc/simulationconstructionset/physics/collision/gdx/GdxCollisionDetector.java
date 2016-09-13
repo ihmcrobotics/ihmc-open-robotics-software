@@ -21,7 +21,6 @@ import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration
 import com.badlogic.gdx.physics.bullet.collision.btManifoldPoint;
 import com.badlogic.gdx.physics.bullet.collision.btPersistentManifold;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
-import com.badlogic.gdx.physics.bullet.linearmath.btVector3;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -30,6 +29,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
+import us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
@@ -122,6 +122,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 //       System.out.println("Collision shape translation "+world.x+" "+world.y+" "+world.z);
 
          GdxUtil.convert(transformScs, transformGdx);
+         info.setTransformToWorld(transformScs);
          info.setWorldTransform(transformGdx);
       }
 
@@ -240,16 +241,18 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    /**
     * Reference to the shape's description and its link.
     */
-   public static class ShapeInfo extends btCollisionObject implements CollisionShape
+   public static class ShapeInfo extends btCollisionObject implements CollisionShapeWithLink
    {
       private final ShapeDescription description;
       private final Link link;
       private final boolean isGround;
 
       // transform from shapeToLink coordinate system
-      RigidBodyTransform shapeToLink = new RigidBodyTransform();
+      private final RigidBodyTransform shapeToLink = new RigidBodyTransform();
 
-      YoVariableRegistry registry;
+      private final YoVariableRegistry registry;
+
+      private RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
       public ShapeInfo(String name, ShapeDescription description, Link link, boolean isGround, RigidBodyTransform shapeToLink, YoVariableRegistry registryParent)
       {
@@ -310,6 +313,18 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       public double distance(double x, double y, double z)
       {
          return 0;
+      }
+
+      @Override
+      public void getTransformToWorld(RigidBodyTransform transformToWorldToPack)
+      {
+         transformToWorldToPack.set(transformToWorld);
+      }
+
+      @Override
+      public void setTransformToWorld(RigidBodyTransform transformToWorld)
+      {
+         this.transformToWorld.set(transformToWorld);
       }
    }
 
