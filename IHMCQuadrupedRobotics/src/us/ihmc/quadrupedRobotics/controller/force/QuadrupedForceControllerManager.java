@@ -9,7 +9,14 @@ import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerE
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
-import us.ihmc.quadrupedRobotics.controller.force.states.*;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedDcmBasedStandController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedDcmBasedStepController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedDoNothingController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFallController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedJointInitializationController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedSoleWaypointController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
@@ -21,8 +28,17 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPreplannedStepStream;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStreamMultiplexer;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
-import us.ihmc.quadrupedRobotics.providers.*;
-import us.ihmc.quadrupedRobotics.state.*;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedTimedStepInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineStateChangedListener;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -269,6 +285,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       // Manually triggered events to transition to main controllers.
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND,
             QuadrupedForceControllerState.STAND_READY, QuadrupedForceControllerState.STAND);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND,
+            QuadrupedForceControllerState.DO_NOTHING, QuadrupedForceControllerState.STAND);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND,
             QuadrupedForceControllerState.FREEZE, QuadrupedForceControllerState.STAND);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND,
