@@ -1,6 +1,9 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
+import static org.junit.Assert.*;
+
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -8,6 +11,7 @@ import us.ihmc.convexOptimization.quadraticProgram.CompositeActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ConstrainedQPSolverTest
@@ -48,10 +52,10 @@ public class ConstrainedQPSolverTest
       registry = new YoVariableRegistry("root");
 
       //TODO: Need more test cases. Can't trust these QP solvers without them...
-      optimizers = new ConstrainedQPSolver[]{ //new JOptimizerConstrainedQPSolver(),
-            new OASESConstrainedQPSolver(registry),
+      optimizers = new ConstrainedQPSolver[]{ //new JOptimizerConstrainedQPSolver(), new CompositeActiveSetQPSolver(registry)
+//            new OASESConstrainedQPSolver(registry),
 //            new QuadProgSolver(registry),
-//            new CompositeActiveSetQPSolver(registry)
+
             };
 
       numberOfInequalityConstraints = 1;
@@ -72,6 +76,21 @@ public class ConstrainedQPSolverTest
             DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
             optimizers[i].solve(Q, f, Aeq, beq, Ain, bin, x, false);
             Assert.assertArrayEquals("repeat = " + repeat + ", optimizer = " + i, x.getData(), new double[] { -7.75, 8.5, -0.75 }, 1e-10);
+
+            DenseMatrix64F bEqualityVerify = new DenseMatrix64F(numberOfEqualityConstraints, 1);
+            CommonOps.mult(Aeq, x, bEqualityVerify);
+
+            // Verify Ax=b Equality constraints hold:
+            JUnitTools.assertMatrixEquals(bEqualityVerify, beq, 1e-7);
+
+            // Verify Ax<b Inequality constraints hold:
+            DenseMatrix64F bInequalityVerify = new DenseMatrix64F(numberOfInequalityConstraints, 1);
+            CommonOps.mult(Ain, x, bInequalityVerify);
+
+            for (int j=0; j<bInequalityVerify.getNumRows(); j++)
+            {
+               assertTrue(bInequalityVerify.get(j, 0) < beq.get(j, 0));
+            }
          }
       }
    }
