@@ -1574,6 +1574,34 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(new Point2d(1.5, -5.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray7, polygon));
    }
 
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetEdgeNormal()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d(-1.0, 0.0));
+      polygon.addVertex(new Point2d(0.0, 1.0));
+      polygon.addVertex(new Point2d(2.0, 0.0));
+      polygon.addVertex(new Point2d(1.0, -1.0));
+      polygon.update();
+
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         Vector2d normal = new Vector2d();
+         ConvexPolygon2dCalculator.getEdgeNormal(i, normal, polygon);
+
+         Vector2d expected = new Vector2d();
+         Point2d edgeStart = polygon.getVertex(i);
+         Point2d edgeEnd = polygon.getNextVertex(i);
+         Vector2d edgeVector = new Vector2d();
+         edgeVector.sub(edgeEnd, edgeStart);
+         GeometryTools.getPerpendicularVector(expected, edgeVector);
+         expected.normalize();
+
+         assertTrue("Expected normal Vector did not match computed one.", expected.epsilonEquals(normal, epsilon));
+      }
+   }
+
    private static void assertPointsEqual(Point2d[] expected, Point2d[] actual, boolean enforceOrder)
    {
       if (expected == null || actual == null)
