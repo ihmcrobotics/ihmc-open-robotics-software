@@ -30,8 +30,6 @@ public class NewtonsCradleSimulation
 
       handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
-
-      handler.initialize(collisionDetector);
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
@@ -52,8 +50,6 @@ public class NewtonsCradleSimulation
 
       handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
-
-      handler.initialize(collisionDetector);
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
@@ -81,8 +77,6 @@ public class NewtonsCradleSimulation
 
       handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
-
-      handler.initialize(collisionDetector);
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
@@ -107,8 +101,6 @@ public class NewtonsCradleSimulation
 
       handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
-
-      handler.initialize(collisionDetector);
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
@@ -138,8 +130,6 @@ public class NewtonsCradleSimulation
 
       handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = pileOfRandomObjectsRobot.getCollisionDetector();
-
-      handler.initialize(collisionDetector);
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));

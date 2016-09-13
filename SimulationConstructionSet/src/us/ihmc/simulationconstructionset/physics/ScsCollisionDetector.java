@@ -31,11 +31,7 @@ public interface ScsCollisionDetector
    public CollisionShape lookupCollisionShape(Link link);
 
    /**
-    * Call after each simulation step to check for collisions. This function must call
-    * {@link us.ihmc.simulationconstructionset.physics.CollisionHandler#maintenance()}
-    * after all collision detection has been performed
-    *
-    * Put the results of the collision detection process into result
+    * Checks for collisions. Puts the results of the collision detection process into result
     */
    public void performCollisionDetection(CollisionDetectionResult result);
 }

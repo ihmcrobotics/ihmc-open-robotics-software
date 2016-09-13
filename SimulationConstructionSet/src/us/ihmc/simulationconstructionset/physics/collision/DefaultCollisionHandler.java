@@ -8,17 +8,13 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.lists.GenericTypeBuilder;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
-import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleContactWrapper;
 
 public class DefaultCollisionHandler implements CollisionHandler
 {
@@ -32,10 +28,10 @@ public class DefaultCollisionHandler implements CollisionHandler
 
    private List<CollisionHandlerListener> listeners = new ArrayList<CollisionHandlerListener>();
 
-   // coefficent of restitution.
+   // Coefficent of restitution.
    private final double epsilon;
 
-   // coefficient of friction
+   // Coefficient of friction
    private final double mu;
 
    public DefaultCollisionHandler(double epsilon, double mu)
@@ -54,10 +50,6 @@ public class DefaultCollisionHandler implements CollisionHandler
       this.random = random;
       this.epsilon = epsilon;
       this.mu = mu;
-   }
-
-   public void initialize(ScsCollisionDetector collision)
-   {
    }
 
    public void maintenanceBeforeCollisionDetection()
