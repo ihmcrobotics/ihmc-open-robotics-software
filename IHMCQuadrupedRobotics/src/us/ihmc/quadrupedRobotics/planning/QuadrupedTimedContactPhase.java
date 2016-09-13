@@ -25,6 +25,13 @@ public class QuadrupedTimedContactPhase implements TimeIntervalProvider
       }
    }
 
+   public void set(QuadrupedTimedContactPhase other)
+   {
+      setTimeInterval(other.getTimeInterval());
+      setContactState(other.getContactState());
+      setSolePosition(other.getSolePosition());
+   }
+
    @Override
    public TimeInterval getTimeInterval()
    {
