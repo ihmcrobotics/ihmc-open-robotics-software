@@ -40,7 +40,7 @@ public interface CollisionHandler
     * @param shapeB One of the shapes which is colliding
     * @param contacts Which points on the two shapes are involved in the collision
     */
-   public abstract void handle(CollisionShape shapeA, CollisionShape shapeB, Contacts contacts);
+   public abstract void handle(Contacts contacts);
 
    public abstract void handleCollisions(CollisionDetectionResult results);
 

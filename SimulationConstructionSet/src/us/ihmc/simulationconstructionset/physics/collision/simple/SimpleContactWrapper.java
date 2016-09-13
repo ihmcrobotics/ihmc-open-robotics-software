@@ -10,15 +10,38 @@ import us.ihmc.simulationconstructionset.physics.Contacts;
 
 public class SimpleContactWrapper implements Contacts
 {
-   private final CollisionShape shapeA;
-   private final CollisionShape shapeB;
+   private CollisionShape shapeA;
+   private CollisionShape shapeB;
 
    private final ArrayList<Point3d> worldA = new ArrayList<Point3d>();
    private final ArrayList<Point3d> worldB = new ArrayList<Point3d>();
    private final ArrayList<Vector3d> normalA = new ArrayList<Vector3d>();
    private final ArrayList<Double> distances = new ArrayList<Double>();
 
+   public SimpleContactWrapper()
+   {
+   }
+
    public SimpleContactWrapper(CollisionShape shapeA, CollisionShape shapeB)
+   {
+      this.shapeA = shapeA;
+      this.shapeB = shapeB;
+   }
+
+   public void clear()
+   {
+      worldA.clear();
+      worldB.clear();
+      normalA.clear();
+      distances.clear();
+   }
+
+   public void set(CollisionShape shapeA, CollisionShape shapeB, SimpleContactWrapper contacts)
+   {
+
+   }
+
+   public void setShapes(CollisionShape shapeA, CollisionShape shapeB)
    {
       this.shapeA = shapeA;
       this.shapeB = shapeB;

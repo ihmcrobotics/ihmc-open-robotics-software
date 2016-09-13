@@ -109,6 +109,7 @@ public class Simulator implements java.io.Serializable
             if (collisionVisualize != null)
                collisionVisualize.callBeforeCollisionDetection();
 
+            results.clear();
             collisionDetector.performCollisionDetection(results);
             collisionHandler.handleCollisions(results);
          }

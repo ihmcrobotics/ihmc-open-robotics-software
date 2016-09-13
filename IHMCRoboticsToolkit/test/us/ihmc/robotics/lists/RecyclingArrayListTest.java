@@ -1,8 +1,6 @@
 package us.ihmc.robotics.lists;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +28,7 @@ public class RecyclingArrayListTest
       assertFalse(list.isEmpty());
       assertTrue(list.size() == expectedSize);
       assertTrue(list.getLast() != null);
-      
+
       list.clear();
       assertTrue(list.isEmpty());
       assertTrue(list.size() == 0);
@@ -43,7 +41,7 @@ public class RecyclingArrayListTest
    {
       RecyclingArrayList<Object> list = new RecyclingArrayList<>(Object.class);
       ArrayList<Object> expectedList = new ArrayList<>();
-      
+
       int finalSize = 10;
       for (int i = 0; i < finalSize; i++)
       {
@@ -53,7 +51,7 @@ public class RecyclingArrayListTest
 
       assertFalse(list.isEmpty());
       assertTrue(list.size() == finalSize);
-      for (int i = 0; i < finalSize ; i++)
+      for (int i = 0; i < finalSize; i++)
       {
          assertTrue(list.get(i) == expectedList.get(i));
       }
@@ -83,7 +81,7 @@ public class RecyclingArrayListTest
 
       assertFalse(list.isEmpty());
       assertTrue(list.size() == finalSize);
-      for (int i = 0; i < finalSize ; i++)
+      for (int i = 0; i < finalSize; i++)
       {
          assertTrue(list.get(i) == expectedList.get(i));
       }
@@ -103,7 +101,7 @@ public class RecyclingArrayListTest
 
       assertFalse(list.isEmpty());
       assertTrue(list.size() == finalSize);
-      for (int i = 0; i < finalSize ; i++)
+      for (int i = 0; i < finalSize; i++)
       {
          assertTrue(list.get(i) == expectedList.get(i));
       }
@@ -131,7 +129,7 @@ public class RecyclingArrayListTest
          assertTrue(list.get(i) != null);
          assertTrue(list.get(i) instanceof Object);
       }
-      
+
       assertTrue(list.get(newSize - 1) == lastObject);
       assertTrue(list.getLast() == lastObject);
 
@@ -147,7 +145,7 @@ public class RecyclingArrayListTest
          assertTrue(list.get(i) != null);
          assertTrue(list.get(i) instanceof Object);
       }
-      
+
       assertTrue(list.get(newSize - 1) == lastObject);
       assertTrue(list.getLast() == list.get(previousSize - 1));
 
@@ -162,7 +160,7 @@ public class RecyclingArrayListTest
          assertTrue(list.get(i) != null);
          assertTrue(list.get(i) instanceof Object);
       }
-      
+
       assertTrue(list.get(newSize - 1) == lastObject);
       assertTrue(list.getLast() == lastObject);
    }
@@ -378,7 +376,8 @@ public class RecyclingArrayListTest
       for (int k = 0; k < 20; k++)
       {
          int randomIndex = RandomTools.generateRandomInt(rand, 0, currentSize);
-         if (k == 5) randomIndex = currentSize;
+         if (k == 5)
+            randomIndex = currentSize;
          int newRandomValue = RandomTools.generateRandomInt(rand, 0, 52161);
          MutableInt newObject = list.insertAtIndex(randomIndex);
          newObject.setValue(newRandomValue);
@@ -399,5 +398,42 @@ public class RecyclingArrayListTest
       {
          // Good
       }
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testShuffle()
+   {
+      Random random = new Random(541964L);
+      int currentSize = 100;
+      RecyclingArrayList<MutableInt> list = new RecyclingArrayList<>(currentSize, MutableInt.class);
+
+      for (int i = 0; i < currentSize; i++)
+      {
+         list.get(i).setValue(10 + i);
+      }
+
+      assertTrue(list.size() == currentSize);
+
+      int sumBefore = 0;
+      for (int i = 0; i < list.size; i++)
+      {
+         MutableInt value = list.get(i);
+         sumBefore = sumBefore + value.intValue();
+      }
+      assertTrue(sumBefore > 0);
+
+      list.shuffle(random);
+      assertTrue(list.size() == currentSize);
+
+      int sumAfter = 0;
+      for (int i = 0; i < list.size; i++)
+      {
+         MutableInt value = list.get(i);
+         sumAfter = sumAfter + value.intValue();
+      }
+
+      assertEquals(sumBefore, sumAfter);
+
    }
 }
