@@ -1340,7 +1340,7 @@ public class ConvexPolygon2dTest
          {
             // Test: Orthogonal point should be closer to the nearestVertex, then to the two connected vertices:
             // But only do it for points that are outside the Polygon. Otherwise, there are no nearest edges to a point inside.
-            FrameLineSegment2d[] nearestEdges = polygon.getNearestEdges(orthogonalPoint);
+            FrameLineSegment2d[] nearestEdges = ConvexPolygon2dTestHelpers.getNearestEdges(orthogonalPoint, polygon);
             double minimumDistanceToEdgeVertices = Double.POSITIVE_INFINITY;
 
             for (FrameLineSegment2d nearEdge : nearestEdges)
@@ -1984,7 +1984,7 @@ public class ConvexPolygon2dTest
          assertEquals(1, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithOnePoint).length);
          assertTrue(ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(arbitraryPoint0, polygonWithOnePoint)[0].equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getCentroid().equals(pointThatDefinesThePolygon));
-         assertTrue(polygonWithOnePoint.getNearestEdges(arbitraryPoint0) == null);
+         assertTrue(ConvexPolygon2dTestHelpers.getNearestEdges(arbitraryPoint0, polygonWithOnePoint) == null);
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
          assertTrue(polygonWithOnePoint.getOutSideFacingOrthoNormalVectorsCopy() == null);
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
@@ -2122,7 +2122,7 @@ public class ConvexPolygon2dTest
          assertEqualsInEitherOrder(lineOfSightPoints[0], lineOfSightPoints[1], pointThatDefinesThePolygon0, pointThatDefinesThePolygon1);
 
          // getNearestEdges
-         LineSegment2d[] nearestEdges = polygonWithTwoPoints.getNearestEdges(arbitraryPoint0);
+         LineSegment2d[] nearestEdges = ConvexPolygon2dTestHelpers.getNearestEdges(arbitraryPoint0, polygonWithTwoPoints);
          assertTrue(nearestEdges.length == 1);
          assertEqualsInEitherOrder(nearestEdges[0].getEndpoints()[0], nearestEdges[0].getEndpoints()[1], pointThatDefinesThePolygon0,
                pointThatDefinesThePolygon1);
