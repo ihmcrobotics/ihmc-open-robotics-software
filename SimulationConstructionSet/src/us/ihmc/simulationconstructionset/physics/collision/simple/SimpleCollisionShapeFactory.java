@@ -5,6 +5,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
+import us.ihmc.simulationconstructionset.physics.SimpleCollisionShapeWithLink;
 
 public class SimpleCollisionShapeFactory implements CollisionShapeFactory
 {
@@ -41,7 +42,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    @Override
    public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription description, boolean isGround, int collisionGroup, int collisionMask)
    {
-      CollisionObject collisionShape = new CollisionObject(description);
+      SimpleCollisionShapeWithLink collisionShape = new SimpleCollisionShapeWithLink(link, description, shapeToLink);
 
       detector.addShape(collisionShape);
 

@@ -35,7 +35,7 @@ import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleContactW
 
 public class GdxCollisionDetector implements ScsCollisionDetector
 {
-   private List<ShapeInfo> allShapes = new ArrayList<ShapeInfo>();
+   private List<BulletCollisionShapeWithLink> allShapes = new ArrayList<BulletCollisionShapeWithLink>();
    private final btCollisionWorld collisionWorld;
 
    private final GdxCollisionFactory factory = new GdxCollisionFactory();
@@ -44,8 +44,6 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
    private RigidBodyTransform transformScs = new RigidBodyTransform();
    private Matrix4 transformGdx = new Matrix4();
-
-//   private RigidBodyTransform workSpace = new RigidBodyTransform();
 
    static
    {
@@ -85,7 +83,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
    public void removeShape(Link link)
    {
-      ShapeInfo info = (ShapeInfo) link.getCollisionShape();
+      BulletCollisionShapeWithLink info = (BulletCollisionShapeWithLink) link.getCollisionShape();
       collisionWorld.removeCollisionObject(info);
       allShapes.remove(info);
    }
@@ -94,7 +92,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    {
       for (int i = 0; i < allShapes.size(); i++)
       {
-         ShapeInfo info = allShapes.get(i);
+         BulletCollisionShapeWithLink info = allShapes.get(i);
          if (info.link == link)
             return info;
       }
@@ -109,12 +107,10 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
       for (int i = 0; i < allShapes.size(); i++)
       {
-         ShapeInfo info = allShapes.get(i);
+         BulletCollisionShapeWithLink info = allShapes.get(i);
          info.getTransformToWorld(transformScs);
 
          transformScs.getTranslation(world);
-
-         //       System.out.println("Collision shape translation "+world.x+" "+world.y+" "+world.z);
 
          GdxUtil.convert(transformScs, transformGdx);
 //         info.setTransformToWorld(transformScs);
@@ -122,14 +118,13 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       }
 
       collisionWorld.performDiscreteCollisionDetection();
-      //      ContactWrapper contact = new ContactWrapper();
 
       int numManifolds = collisionWorld.getDispatcher().getNumManifolds();
       for (int i = 0; i < numManifolds; i++)
       {
          btPersistentManifold contactManifold = collisionWorld.getDispatcher().getManifoldByIndexInternal(i);
-         ShapeInfo obA = (ShapeInfo) contactManifold.getBody0();
-         ShapeInfo obB = (ShapeInfo) contactManifold.getBody1();
+         BulletCollisionShapeWithLink obA = (BulletCollisionShapeWithLink) contactManifold.getBody0();
+         BulletCollisionShapeWithLink obB = (BulletCollisionShapeWithLink) contactManifold.getBody1();
 
          SimpleContactWrapper simpleContact = new SimpleContactWrapper(obA, obB);
 
@@ -150,9 +145,6 @@ public class GdxCollisionDetector implements ScsCollisionDetector
             GdxUtil.convert(a, pointOnA);
             GdxUtil.convert(b, pointOnB);
 
-            //            System.out.println("contactPointOnA = " + pointOnA);
-            //            System.out.println("contactPointOnB = " + pointOnB);
-
             float distance = contactPoint.getDistance();
 
             Vector3 v = new Vector3();
@@ -167,12 +159,8 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
          result.addContact(simpleContact);
 
-         //         ContactWrapper contact = new ContactWrapper();
-         //
-         //         contact.setPersistentManifold(contactManifold);
-
          // you can un-comment out this line, and then all points are removed
-         // contactManifold->clearManifold();
+//         contactManifold.clearManifold();
       }
    }
 
@@ -216,7 +204,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
             shapeToLink = new RigidBodyTransform();
          }
 
-         ShapeInfo shape = new ShapeInfo("shape" + allShapes.size(), (ShapeDescription) description, link, isGround, shapeToLink, registry);
+         BulletCollisionShapeWithLink shape = new BulletCollisionShapeWithLink("shape" + allShapes.size(), (ShapeDescription) description, link, isGround, shapeToLink);
          collisionWorld.addCollisionObject(shape, (short) collisionGroup, (short) collisionMask);
 
          allShapes.add(shape);
@@ -241,7 +229,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    /**
     * Reference to the shape's description and its link.
     */
-   public static class ShapeInfo extends btCollisionObject implements CollisionShapeWithLink
+   private static class BulletCollisionShapeWithLink extends btCollisionObject implements CollisionShapeWithLink
    {
       private final ShapeDescription description;
       private final Link link;
@@ -250,11 +238,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       // transform from shapeToLink coordinate system
       private final RigidBodyTransform shapeToLink = new RigidBodyTransform();
 
-      private final YoVariableRegistry registry;
-
-      private RigidBodyTransform transformToWorld = new RigidBodyTransform();
-
-      public ShapeInfo(String name, ShapeDescription description, Link link, boolean isGround, RigidBodyTransform shapeToLink, YoVariableRegistry registryParent)
+      public BulletCollisionShapeWithLink(String name, ShapeDescription description, Link link, boolean isGround, RigidBodyTransform shapeToLink)
       {
          this.description = description;
          this.link = link;
@@ -263,24 +247,9 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          this.shapeToLink.set(shapeToLink);
          setCollisionFlags(CollisionFlags.CF_KINEMATIC_OBJECT);
          setCollisionShape(description.shape);
-
-         registry = new YoVariableRegistry(name);
-         registryParent.addChild(registry);
       }
 
-      RigidBodyTransform tempTransform = new RigidBodyTransform();
-
-//      /**
-//       * Returns the transform from shape to world coordinates.  Used for physics simulation
-//       *
-//       * @param shapeToWorld The transform from shape reference frame to the world.
-//       */
-//      public void getTransformToWorldForPhysics(RigidBodyTransform shapeToWorld)
-//      {
-//         link.getParentJoint().getTransformToWorld(tempTransform);
-//
-//         shapeToWorld.multiply(tempTransform, shapeToLink);
-//      }
+      private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
       @Override
       public CollisionShapeDescription getDescription()
@@ -301,9 +270,9 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       }
 
       @Override
-      public RigidBodyTransform getShapeToLink()
+      public void getShapeToLink(RigidBodyTransform shapeToLinkToPack)
       {
-         return shapeToLink;
+         shapeToLinkToPack.set(shapeToLink);
       }
 
       @Override
@@ -318,16 +287,10 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          return getBroadphaseHandle().getCollisionFilterMask() & 0xFFFF;
       }
 
-//      public double distance(double x, double y, double z)
-//      {
-//         return 0;
-//      }
-
       @Override
       public void getTransformToWorld(RigidBodyTransform transformToWorldToPack)
       {
          link.getParentJoint().getTransformToWorld(tempTransform);
-
          transformToWorldToPack.multiply(tempTransform, shapeToLink);
       }
 
