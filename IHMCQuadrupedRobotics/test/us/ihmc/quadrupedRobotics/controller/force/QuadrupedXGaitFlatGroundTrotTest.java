@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
@@ -31,6 +32,7 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
 
       try
       {
+         ParameterRegistry.destroyAndRecreateInstance();
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
@@ -73,7 +75,7 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       
       variables.getXGaitEndPhaseShiftInput().set(180.0);
       
-      variables.getYoPlanarVelocityInputX().set(directionX * 1.0);
+      variables.getYoPlanarVelocityInputX().set(directionX * 0.6);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
       if(Math.signum(directionX) < 0)
@@ -109,7 +111,7 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
       variables.getXGaitEndPhaseShiftInput().set(180.0);
-      variables.getXGaitEndDoubleSupportDurationInput().set(0.3);
+//      variables.getXGaitEndDoubleSupportDurationInput().set(0.3);
       
       variables.getYoPlanarVelocityInputX().set(directionX * 0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
@@ -154,7 +156,7 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
    @Test(timeout = 30000)
    public void testTrottingInABackwardRightCircle()
    {
-      trotInACircle(-0.6, -0.6); //reduced for beast, still looks rough
+      trotInACircle(-1.0, -1.0);
    }
 
    private void trotInACircle(double directionX, double directionZ) throws AssertionFailedError
@@ -168,11 +170,19 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      variables.getYoPlanarVelocityInputX().set(directionX * 1.0);
-      variables.getYoPlanarVelocityInputZ().set(directionZ * 0.5);
+      variables.getYoPlanarVelocityInputX().set(directionX * 0.5);//reduced for real robot gains
+      variables.getYoPlanarVelocityInputZ().set(directionZ * 0.25);//reduced for real robot gains
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTimeLimit(variables.getYoTime(), 10.0);
-      conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), directionX * 0.5));
+      conductor.addTimeLimit(variables.getYoTime(), 20.0);
+      if(Math.signum(directionX) > 0)
+      {
+         conductor.addWaypointGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), directionX * 0.25));
+      }
+      else
+      {
+         conductor.addWaypointGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), directionX * 0.25));
+      }
+      
       conductor.addWaypointGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), directionZ * Math.PI / 2, 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyYaw(), directionZ * Math.PI, 0.1));
       conductor.simulate();
