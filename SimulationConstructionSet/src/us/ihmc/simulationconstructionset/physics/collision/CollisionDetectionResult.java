@@ -5,16 +5,11 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
+import us.ihmc.simulationconstructionset.physics.Contacts;
 
 public class CollisionDetectionResult
 {
-   private final ArrayList<DetectedCollision> results = new ArrayList<>();
-
-   public void addContact(CollisionShape shapeA, CollisionShape shapeB, Point3d pointOnA, Point3d pointOnB)
-   {
-      DetectedCollision result = new DetectedCollision(shapeA, shapeB, pointOnA, pointOnB);
-      results.add(result);
-   }
+   private final ArrayList<Contacts> results = new ArrayList<>();
 
    public int getNumberOfCollisions()
    {
@@ -26,8 +21,13 @@ public class CollisionDetectionResult
       results.clear();
    }
 
-   public DetectedCollision getCollision(int i)
+   public Contacts getCollision(int i)
    {
       return results.get(i);
+   }
+
+   public void addContact(Contacts contacts)
+   {
+      this.results.add(contacts);
    }
 }

@@ -29,12 +29,9 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    private final Vector3d normalVector = new Vector3d();
    private final Vector3d tempVector = new Vector3d();
 
-   private CollisionHandler handler;
-
    @Override
-   public void initialize(CollisionHandler handler)
+   public void initialize()
    {
-      this.handler = handler;
    }
 
    @Override
@@ -57,8 +54,6 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    @Override
    public void performCollisionDetection(CollisionDetectionResult result)
    {
-      if (handler != null) handler.maintenanceBeforeCollisionDetection();
-
       int numberOfObjects = collisionObjects.size();
 
       for (int i = 0; i < numberOfObjects; i++)
@@ -85,8 +80,6 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             }
          }
       }
-
-      if (handler != null) handler.maintenanceAfterCollisionDetection();
    }
 
    private void doSphereSphereCollisionDetection(CollisionShape objectOne, SphereShapeDescription descriptionOne, CollisionShape objectTwo, SphereShapeDescription descriptionTwo, CollisionDetectionResult result)
@@ -119,13 +112,11 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
 
          double distance = Math.sqrt(distanceSquared) - radiusOne - radiusTwo;
 
-         SimpleContactWrapper contacts = new SimpleContactWrapper();
+         SimpleContactWrapper contacts = new SimpleContactWrapper(objectOne, objectTwo);
          contacts.addContact(pointOnOne, pointOnTwo, normalVector, distance);
-         if (handler != null) handler.handle(objectOne, objectTwo, contacts);
 
-         result.addContact(objectOne, objectTwo, pointOnOne, pointOnTwo);
+         result.addContact(contacts);
       }
-
    }
 
    public void addShape(CollisionShape collisionShape)

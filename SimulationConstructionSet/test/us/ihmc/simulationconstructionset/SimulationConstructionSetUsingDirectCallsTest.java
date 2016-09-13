@@ -63,6 +63,7 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
+import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
@@ -1254,8 +1255,9 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ScsCollisionConfigure collisionConfigure = createScsCollisionConfigure();
       ScsCollisionDetector collisionDetector = createScsCollisionDetector();
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.3, 0.3);
       DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(0.1, 0.1, scs, 100);
-      ScsPhysics physics = new ScsPhysics(collisionConfigure, collisionDetector, visualize);
+      ScsPhysics physics = new ScsPhysics(collisionConfigure, collisionDetector, collisionHandler, visualize);
 
       return physics;
    }
@@ -1275,7 +1277,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
             return null;
          }
 
-         public void initialize(CollisionHandler handler)
+         public void initialize()
          {
 
          }
@@ -1298,9 +1300,9 @@ public class SimulationConstructionSetUsingDirectCallsTest
    {
       ScsCollisionConfigure scsCollisionConfigure = new ScsCollisionConfigure()
       {
-         public void setup(Robot robot, ScsCollisionDetector collisionDetector)
+         @Override
+         public void setup(Robot robot, ScsCollisionDetector collisionDetector, CollisionHandler collisionHandler)
          {
-
          }
       };
 

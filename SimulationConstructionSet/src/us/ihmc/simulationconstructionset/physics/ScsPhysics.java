@@ -13,14 +13,17 @@ public class ScsPhysics
    //      at the same time by the simulation
    public ScsCollisionConfigure collisionConfigure;
    public ScsCollisionDetector collisionDetector;
+   public CollisionHandler collisionHandler;
    public DefaultCollisionVisualize visualize;
 
    public ScsPhysics(ScsCollisionConfigure collisionConfigure,
                      ScsCollisionDetector collisionDetector,
+                     CollisionHandler collisionHandler,
                      DefaultCollisionVisualize visualize )
    {
       this.collisionConfigure = collisionConfigure;
       this.collisionDetector = collisionDetector;
+      this.collisionHandler = collisionHandler;
       this.visualize = visualize;
    }
 }

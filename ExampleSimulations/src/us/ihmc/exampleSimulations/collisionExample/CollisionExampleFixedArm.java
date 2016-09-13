@@ -31,7 +31,7 @@ public class CollisionExampleFixedArm
       private final DoubleYoVariable linearKineticEnergy = new DoubleYoVariable("linearKineticEnergy", getRobotsYoVariableRegistry());
       private final DoubleYoVariable rotationalKineticEnergy = new DoubleYoVariable("rotationalKineticEnergy", getRobotsYoVariableRegistry());
       private final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", getRobotsYoVariableRegistry());
-      
+
       //      ScsCollisionDetector collisionDetector = new JBulletCollisionDetector(getRobotsYoVariableRegistry(), 10000);
       private final ScsCollisionDetector collisionDetector = new GdxCollisionDetector(getRobotsYoVariableRegistry(), 10000);
       private final CollisionHandler collisionHandler;
@@ -45,7 +45,7 @@ public class CollisionExampleFixedArm
       private static final double L1 = 1.0, L2 = 2.0, M1 = 1.0, M2 = 1.0, M3 = 1, R1 = 0.1, R2 = 0.05, Iyy1 = 0.083, Iyy2 = 0.33;
 
       private final PinJoint pin1, pin2;
-      
+
       public DoublePendulumRobot()
       {
          super("DoublePendulum"); // create and instance of Robot
@@ -77,7 +77,7 @@ public class CollisionExampleFixedArm
          // add the ground
          addRootJoint(groundPlane());
 
-         
+
          FunctionToIntegrate functionToIntegrate = new FunctionToIntegrate()
          {
             @Override
@@ -85,37 +85,37 @@ public class CollisionExampleFixedArm
             {
                return 0;
             }
-            
+
             @Override
             public DoubleYoVariable[] getOutputVariables()
             {
                return null;
             }
-            
+
             @Override
             public double[] computeDerivativeVector()
             {
                potentialEnergy.set(computeGravitationalPotentialEnergy(pin1));
                linearKineticEnergy.set(computeTranslationalKineticEnergy(pin1));
                rotationalKineticEnergy.set(computeRotationalKineticEnergy(pin1));
-               
+
                totalEnergy.set(potentialEnergy.getDoubleValue());
                totalEnergy.add(linearKineticEnergy);
                totalEnergy.add(rotationalKineticEnergy);
-               
+
                return null;
             }
          };
-         
+
          this.addFunctionToIntegrate(functionToIntegrate);
-         
+
          //         collisionHandler = new SpringCollisionHandler(1, 1000, 3, this.getRobotsYoVariableRegistry());
 
          double epsilon = 0.9;
          double mu = 0.5;
          collisionHandler = new DefaultCollisionHandler(epsilon, mu);
          collisionHandler.initialize(collisionDetector);
-         collisionDetector.initialize(collisionHandler);
+         collisionDetector.initialize();
       }
 
       /**
@@ -230,7 +230,7 @@ public class CollisionExampleFixedArm
       CollisionHandler collisionHandler = doublePendulum.getCollisionHandler();
       collisionHandler.addListener(visualize);
 
-      sim.initPhysics(new ScsPhysics(null, doublePendulum.getCollisionDetector(), visualize));
+      sim.initPhysics(new ScsPhysics(null, doublePendulum.getCollisionDetector(), collisionHandler, visualize));
 
       Thread myThread = new Thread(sim);
       myThread.start();

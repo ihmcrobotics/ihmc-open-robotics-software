@@ -15,6 +15,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
+import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
@@ -139,17 +140,25 @@ public class SCSCollisionDetectorEvaluator
             pointsOnB.get(j).setPosition(Double.NaN, Double.NaN, Double.NaN);
          }
 
+         int vizIndex = 0;
          for (int j=0; j<numberOfCollisions.getIntegerValue(); j++)
          {
-            DetectedCollision collision = result.getCollision(j);
+            Contacts collision = result.getCollision(j);
 
-            Point3d pointOnA = new Point3d();
-            collision.getPointOnA(pointOnA);
-            pointsOnA.get(j).setPosition(pointOnA);
+            int numberOfContacts = collision.getNumContacts();
 
-            Point3d pointOnB = new Point3d();
-            collision.getPointOnB(pointOnB);
-            pointsOnB.get(j).setPosition(pointOnB);
+            for (int k=0; k<numberOfContacts; k++)
+            {
+               Point3d pointOnA = new Point3d();
+               collision.getWorldA(k, pointOnA);
+               pointsOnA.get(vizIndex).setPosition(pointOnA);
+
+               Point3d pointOnB = new Point3d();
+               collision.getWorldB(k, pointOnB);
+               pointsOnB.get(vizIndex).setPosition(pointOnB);
+
+               vizIndex++;
+            }
          }
 
          scs.tickAndUpdate();

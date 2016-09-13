@@ -25,19 +25,16 @@ import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink;
-import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
-
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleContactWrapper;
 
 public class GdxCollisionDetector implements ScsCollisionDetector
 {
-   private CollisionHandler handler;
    private List<ShapeInfo> allShapes = new ArrayList<ShapeInfo>();
    private final btCollisionWorld collisionWorld;
 
@@ -71,16 +68,14 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       Vector3 worldAabbMin = new Vector3(-r, -r, -r);
       Vector3 worldAabbMax = new Vector3(r, r, r);
 
-
       btAxisSweep3 broadphase = new btAxisSweep3(worldAabbMin, worldAabbMax);
 
       collisionWorld = new btCollisionWorld(dispatcher, broadphase, collisionConfiguration);
    }
 
-
-   public void initialize(CollisionHandler handler)
+   @Override
+   public void initialize()
    {
-      this.handler = handler;
    }
 
    public CollisionShapeFactory getShapeFactory()
@@ -119,17 +114,15 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
          transformScs.getTranslation(world);
 
-//       System.out.println("Collision shape translation "+world.x+" "+world.y+" "+world.z);
+         //       System.out.println("Collision shape translation "+world.x+" "+world.y+" "+world.z);
 
          GdxUtil.convert(transformScs, transformGdx);
          info.setTransformToWorld(transformScs);
          info.setWorldTransform(transformGdx);
       }
 
-      if (handler != null) handler.maintenanceBeforeCollisionDetection();
-
       collisionWorld.performDiscreteCollisionDetection();
-//      ContactWrapper contact = new ContactWrapper();
+      //      ContactWrapper contact = new ContactWrapper();
 
       int numManifolds = collisionWorld.getDispatcher().getNumManifolds();
       for (int i = 0; i < numManifolds; i++)
@@ -138,8 +131,10 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          ShapeInfo obA = (ShapeInfo) contactManifold.getBody0();
          ShapeInfo obB = (ShapeInfo) contactManifold.getBody1();
 
+         SimpleContactWrapper simpleContact = new SimpleContactWrapper(obA, obB);
+
          int numContacts = contactManifold.getNumContacts();
-         for (int j=0; j<numContacts; j++)
+         for (int j = 0; j < numContacts; j++)
          {
             btManifoldPoint contactPoint = contactManifold.getContactPoint(j);
 
@@ -155,23 +150,30 @@ public class GdxCollisionDetector implements ScsCollisionDetector
             GdxUtil.convert(a, pointOnA);
             GdxUtil.convert(b, pointOnB);
 
-//            System.out.println("contactPointOnA = " + pointOnA);
-//            System.out.println("contactPointOnB = " + pointOnB);
+            //            System.out.println("contactPointOnA = " + pointOnA);
+            //            System.out.println("contactPointOnB = " + pointOnB);
 
-            result.addContact(obA, obB, pointOnA, pointOnB);
+            float distance = contactPoint.getDistance();
+
+            Vector3 v = new Vector3();
+
+            contactPoint.getNormalWorldOnB(v);
+
+            Vector3d normalA = new Vector3d();
+            normalA.set(-v.x, -v.y, -v.z);
+
+            simpleContact.addContact(pointOnA, pointOnB, normalA, distance);
          }
 
+         result.addContact(simpleContact);
 
-         ContactWrapper contact = new ContactWrapper();
-
-         contact.setPersistentManifold(contactManifold);
-         if (handler != null) handler.handle(obA, obB, contact);
+         //         ContactWrapper contact = new ContactWrapper();
+         //
+         //         contact.setPersistentManifold(contactManifold);
 
          // you can un-comment out this line, and then all points are removed
          // contactManifold->clearManifold();
       }
-
-      if (handler != null) handler.maintenanceAfterCollisionDetection();
    }
 
    public class GdxCollisionFactory implements CollisionShapeFactory
@@ -223,7 +225,6 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       }
    }
 
-
    /**
     * Just a wrapper around {@link com.bulletphysics.collision.shapes.CollisionShape}.
     */
@@ -236,7 +237,6 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          this.shape = shape;
       }
    }
-
 
    /**
     * Reference to the shape's description and its link.
@@ -328,65 +328,4 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       }
    }
 
-
-   private class ContactWrapper implements Contacts
-   {
-      private btPersistentManifold persistentManifold;
-
-      private final Vector3d normal = new Vector3d();
-
-      public void setPersistentManifold(btPersistentManifold pm)
-      {
-         this.persistentManifold = pm;
-      }
-
-      public int getNumContacts()
-      {
-         return persistentManifold.getNumContacts();
-      }
-
-      public Point3d getWorldA(int which, Point3d location)
-      {
-         if (location == null)
-            location = new Point3d();
-
-         Vector3 vectorA = new Vector3();
-         persistentManifold.getContactPoint(which).getPositionWorldOnA(vectorA);
-         GdxUtil.convert(vectorA, location);
-
-         return location;
-      }
-
-      public Point3d getWorldB(int which, Point3d location)
-      {
-         if (location == null)
-            location = new Point3d();
-
-         Vector3 vectorB = new Vector3();
-         persistentManifold.getContactPoint(which).getPositionWorldOnB(vectorB);
-         GdxUtil.convert(vectorB, location);
-
-         return location;
-      }
-
-      public double getDistance(int which)
-      {
-         return persistentManifold.getContactPoint(which).getDistance();
-      }
-
-      public Vector3d getWorldNormal(int which)
-      {
-         Vector3 v = new Vector3();
-
-         persistentManifold.getContactPoint(which).getNormalWorldOnB(v);
-         normal.set(v.x, v.y, v.z);
-
-         return normal;
-      }
-
-      public boolean isNormalOnA()
-      {
-         return false;
-      }
-   }
 }
