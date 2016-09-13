@@ -14,7 +14,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 ({
    us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolverTest.class,
-   us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolverTest.class,
+   us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolverTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataTansformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootTrajectoryMessageTransformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.TorusPosePacketTransformerTest.class,
