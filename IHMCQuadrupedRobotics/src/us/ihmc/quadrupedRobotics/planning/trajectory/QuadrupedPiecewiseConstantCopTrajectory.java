@@ -117,7 +117,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          throw new RuntimeException("trajectory must be initialized before calling computeTrajectory");
       }
 
-      for (int interval = numberOfIntervals - 1; interval >= 0; interval++)
+      for (int interval = numberOfIntervals - 1; interval >= 0; interval--)
       {
          if (currentTime >= timeAtStartOfInterval.get(interval).doubleValue())
          {
@@ -131,11 +131,6 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    public void getPosition(FramePoint copPositionAtCurrentTime)
    {
       copPositionAtCurrentTime.setIncludingFrame(this.copPositionAtCurrentTime);
-   }
-
-   public void getVelocity(FrameVector copVelocityAtCurrentTime)
-   {
-      copVelocityAtCurrentTime.setToZero();
    }
 
    public int getNumberOfIntervals()
