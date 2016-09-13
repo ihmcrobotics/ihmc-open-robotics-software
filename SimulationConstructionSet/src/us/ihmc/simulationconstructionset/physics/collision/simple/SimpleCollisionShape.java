@@ -5,39 +5,38 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
-public class CollisionObject implements CollisionShape
+public class SimpleCollisionShape implements CollisionShape
 {
-   private final CollisionShapeDescription description;
+   private final CollisionShapeDescription collisionShapeDescription;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-   public CollisionObject(CollisionShapeDescription collisionShape)
+   public SimpleCollisionShape(CollisionShapeDescription collisionShapeDescription)
    {
-      this.description = collisionShape;
+      this.collisionShapeDescription = collisionShapeDescription;
    }
 
    @Override
    public boolean isGround()
    {
-      // TODO Auto-generated method stub
       return false;
    }
 
    @Override
    public CollisionShapeDescription getDescription()
    {
-      return description;
+      return collisionShapeDescription;
    }
 
    @Override
    public int getGroupMask()
    {
-      return 0;
+      return 0xFFFF;
    }
 
    @Override
    public int getCollisionMask()
    {
-      return 0;
+      return 0xFFFF;
    }
 
    @Override

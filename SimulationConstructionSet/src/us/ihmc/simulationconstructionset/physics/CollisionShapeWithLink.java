@@ -13,5 +13,5 @@ public interface CollisionShapeWithLink extends CollisionShape
    /**
     * Transform from shape to link coordinates.
     */
-   public RigidBodyTransform getShapeToLink();
+   public void getShapeToLink(RigidBodyTransform shapeToLinkToPack);
 }

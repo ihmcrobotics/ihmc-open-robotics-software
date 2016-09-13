@@ -7,7 +7,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
@@ -87,7 +86,6 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       double radiusOne = descriptionOne.getRadius();
       double radiusTwo = descriptionTwo.getRadius();
 
-      System.out.println(radiusOne);
       transformOne.getTranslation(centerOne);
       transformTwo.getTranslation(centerTwo);
 

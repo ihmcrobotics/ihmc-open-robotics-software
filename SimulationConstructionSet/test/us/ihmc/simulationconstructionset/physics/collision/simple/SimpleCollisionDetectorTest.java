@@ -25,8 +25,8 @@ public class SimpleCollisionDetectorTest
       CollisionShapeDescription sphereOne = shapeFactory.createSphere(radiusOne);
       CollisionShapeDescription sphereTwo = shapeFactory.createSphere(radiusOne);
 
-      CollisionObject collideableObjectOne = new CollisionObject(sphereOne);
-      CollisionObject collideableObjectTwo = new CollisionObject(sphereTwo);
+      SimpleCollisionShape collideableObjectOne = new SimpleCollisionShape(sphereOne);
+      SimpleCollisionShape collideableObjectTwo = new SimpleCollisionShape(sphereTwo);
 
       detector.addShape(collideableObjectOne);
       detector.addShape(collideableObjectTwo);
@@ -60,9 +60,6 @@ public class SimpleCollisionDetectorTest
       Contacts collision = result.getCollision(0);
       CollisionShape shapeA = collision.getShapeA();
       CollisionShape shapeB = collision.getShapeB();
-
-
-
    }
 
 }
