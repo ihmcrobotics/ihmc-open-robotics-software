@@ -112,7 +112,7 @@ public class OneStepCaptureRegionCalculator
       {
          // change the support foot polygon only if the swing side changed to avoid garbage every tick.
          this.supportFootPolygon.setIncludingFrameAndUpdate(footPolygon);
-         this.supportFootPolygon.changeFrame(supportAnkleZUp);
+         this.supportFootPolygon.changeFrameAndProjectToXYPlane(supportAnkleZUp);
          previousSwingSide = swingSide;
       }
       capturePoint.setIncludingFrame(icp);
