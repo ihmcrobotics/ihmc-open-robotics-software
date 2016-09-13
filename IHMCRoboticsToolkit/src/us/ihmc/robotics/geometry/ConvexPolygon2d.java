@@ -913,6 +913,8 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return closestEdgeVertexIndicesInClockwiseOrderedList;
    }
 
+   // to here ---------------------
+
    @Override
    public double distance(Line2d line)
    {
@@ -1266,7 +1268,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return Math.abs(ConvexPolygon2dCalculator.getSignedDistance(point, this)) < 1.0E-10;
    }
 
-   // --- methods that make garbage ---
    @Override
    public Point2d[] intersectionWith(Line2d line)
    {
