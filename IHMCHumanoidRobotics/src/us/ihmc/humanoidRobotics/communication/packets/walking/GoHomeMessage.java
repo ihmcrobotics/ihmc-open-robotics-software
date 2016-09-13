@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.random.RandomTools;
@@ -108,5 +109,12 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
       if (robotSide != other.robotSide)
          return false;
       return true;
+   }
+   
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validateGoHomeMessage(this);
    }
 }
