@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPStandaloneSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;

@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
 
+import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;

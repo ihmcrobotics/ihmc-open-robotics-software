@@ -2,8 +2,9 @@ package us.ihmc.quadrupedRobotics.optimization.modelPredictiveControl;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolver;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
+
+import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionEstimator;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;

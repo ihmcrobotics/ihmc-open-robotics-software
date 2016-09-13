@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization;
+package us.ihmc.convexOptimization.quadraticProgram;
 
 import org.ejml.data.DenseMatrix64F;
 
