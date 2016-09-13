@@ -77,7 +77,7 @@ public class PiecewisePeriodicDcmTrajectory
       // compute initial dcm position assuming a periodic gait
       for (int i = 0; i < numSteps; i++)
       {
-         this.timeAtSoS[i] = timeAtSoS.get(i).getValue();
+         this.timeAtSoS[i] = timeAtSoS.get(i).doubleValue();
          this.vrpPositionAtSoS[i].setIncludingFrame(cmpPositionAtSoS.get(i));
          this.vrpPositionAtSoS[i].changeFrame(ReferenceFrame.getWorldFrame());
          this.vrpPositionAtSoS[i].add(0, 0, comHeight);
@@ -207,7 +207,7 @@ public class PiecewisePeriodicDcmTrajectory
       dcmTrajectory.initializeTrajectory(2, timeAtSoS, cmpPositionAtSoS, timeAtEoS, cmpPositionAtEoS, 0.0);
 
       FramePoint dcmPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-      dcmTrajectory.computeTrajectory(timeAtSoS.get(0).getValue());
+      dcmTrajectory.computeTrajectory(timeAtSoS.get(0).doubleValue());
       dcmTrajectory.getPosition(dcmPosition);
       dcmPosition.sub(cmpPositionAtSoS.get(0));
       System.out.println("dcm-cmp offset at start of first step : " + dcmPosition);

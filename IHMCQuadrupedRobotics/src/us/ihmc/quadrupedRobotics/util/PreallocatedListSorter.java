@@ -2,12 +2,12 @@ package us.ihmc.quadrupedRobotics.util;
 
 import java.util.Comparator;
 
-public class PreallocatedDequeSorter
+public class PreallocatedListSorter
 {
    /**
     * Sort an array in place without allocating any memory.
     */
-   public static <T> void sort(PreallocatedDeque<T> ts, Comparator<T> comparator)
+   public static <T> void sort(PreallocatedList<T> ts, Comparator<T> comparator)
    {
       boolean ordered = false;
 

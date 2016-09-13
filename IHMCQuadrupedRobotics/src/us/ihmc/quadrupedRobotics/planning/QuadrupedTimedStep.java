@@ -3,10 +3,11 @@ package us.ihmc.quadrupedRobotics.planning;
 import javax.vecmath.Point3d;
 
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
+import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedTimedStep extends QuadrupedStep
+public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalProvider
 {
    /**
     * The relative time interval of the swing phase (with respect to the start of the previous swing phase).
