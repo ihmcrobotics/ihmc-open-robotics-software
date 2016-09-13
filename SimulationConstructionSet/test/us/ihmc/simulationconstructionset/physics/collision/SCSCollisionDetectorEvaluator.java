@@ -121,6 +121,8 @@ public class SCSCollisionDetectorEvaluator
       double y = 0.0;
       double z = 0.0;
 
+      CollisionDetectionResult result = new CollisionDetectionResult();
+
       for (int i=0; i<4000; i++)
       {
          jointOne.setPosition(x, y, z);
@@ -129,7 +131,7 @@ public class SCSCollisionDetectorEvaluator
          x = x + 0.001;
          robot.setTime(robot.getTime() + 0.001);
 
-         CollisionDetectionResult result = new CollisionDetectionResult();
+         result.clear();
          collisionDetector.performCollisionDetection(result);
 
          numberOfCollisions.set(result.getNumberOfCollisions());

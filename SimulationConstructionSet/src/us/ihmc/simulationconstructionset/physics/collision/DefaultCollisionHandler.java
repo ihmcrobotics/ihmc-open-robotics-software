@@ -3,10 +3,13 @@ package us.ihmc.simulationconstructionset.physics.collision;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.lists.GenericTypeBuilder;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -15,9 +18,12 @@ import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleContactWrapper;
 
 public class DefaultCollisionHandler implements CollisionHandler
 {
+   private final Random random;
+
    private final Vector3d normal = new Vector3d();
    private final Vector3d negative_normal = new Vector3d();
 
@@ -32,14 +38,20 @@ public class DefaultCollisionHandler implements CollisionHandler
    // coefficient of friction
    private final double mu;
 
+   public DefaultCollisionHandler(double epsilon, double mu)
+   {
+      this(new Random(), epsilon, mu);
+   }
+
    /**
     *
     * @param epsilon coefficent of restitution.
     * @param mu coefficient of friction
     * @param robot Robot model
     */
-   public DefaultCollisionHandler(double epsilon, double mu)
+   public DefaultCollisionHandler(Random random, double epsilon, double mu)
    {
+      this.random = random;
       this.epsilon = epsilon;
       this.mu = mu;
    }
@@ -55,26 +67,24 @@ public class DefaultCollisionHandler implements CollisionHandler
 
    public void maintenanceAfterCollisionDetection()
    {
-      Collections.shuffle(shapesInContactList);
+      Collections.shuffle(shapesInContactList, random);
 
       for (int i=0; i<shapesInContactList.size(); i++)
       {
-         ShapesInContact shapesInContact = shapesInContactList.get(i);
+         Contacts shapesInContact = shapesInContactList.get(i);
 
          //TODO: Get rid of Type cast here...
-         CollisionShapeWithLink shape1 = (CollisionShapeWithLink) shapesInContact.getShape1();
-         CollisionShapeWithLink shape2 = (CollisionShapeWithLink) shapesInContact.getShape2();
-         Contacts contacts = shapesInContact.getContacts();
-         handleLocal(shape1, shape2, contacts);
+         CollisionShapeWithLink shape1 = (CollisionShapeWithLink) shapesInContact.getShapeA();
+         CollisionShapeWithLink shape2 = (CollisionShapeWithLink) shapesInContact.getShapeB();
+         handleLocal(shape1, shape2, shapesInContact);
       }
    }
 
+   private final ArrayList<Contacts> shapesInContactList = new ArrayList<Contacts>();
 
-   private final ArrayList<ShapesInContact> shapesInContactList = new ArrayList<DefaultCollisionHandler.ShapesInContact>();
-
-   public void handle(CollisionShape shape1, CollisionShape shape2, Contacts contacts)
+   public void handle(Contacts contacts)
    {
-      shapesInContactList.add(new ShapesInContact(shape1, shape2, contacts));
+      shapesInContactList.add(contacts);
 //      handleLocal(shape1, shape2, contacts);
    }
 
@@ -199,34 +209,6 @@ public class DefaultCollisionHandler implements CollisionHandler
       listeners.add(listener);
    }
 
-   private class ShapesInContact
-   {
-      private final CollisionShape shape1, shape2;
-      private final Contacts contacts;
-
-      public ShapesInContact(CollisionShape shape1, CollisionShape shape2, Contacts contacts)
-      {
-         this.shape1 = shape1;
-         this.shape2 = shape2;
-         this.contacts = contacts;
-      }
-
-      public CollisionShape getShape1()
-      {
-         return shape1;
-      }
-
-      public CollisionShape getShape2()
-      {
-         return shape2;
-      }
-
-      public Contacts getContacts()
-      {
-         return contacts;
-      }
-   }
-
    @Override
    public void handleCollisions(CollisionDetectionResult results)
    {
@@ -235,11 +217,7 @@ public class DefaultCollisionHandler implements CollisionHandler
       for (int i=0; i<results.getNumberOfCollisions(); i++)
       {
          Contacts collision = results.getCollision(i);
-
-         CollisionShape shape1 = collision.getShapeA();
-         CollisionShape shape2 = collision.getShapeB();
-
-         handle(shape1, shape2, collision);
+         handle(collision);
       }
 
       this.maintenanceAfterCollisionDetection();

@@ -45,7 +45,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    private RigidBodyTransform transformScs = new RigidBodyTransform();
    private Matrix4 transformGdx = new Matrix4();
 
-   private RigidBodyTransform workSpace = new RigidBodyTransform();
+//   private RigidBodyTransform workSpace = new RigidBodyTransform();
 
    static
    {
@@ -110,14 +110,14 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       for (int i = 0; i < allShapes.size(); i++)
       {
          ShapeInfo info = allShapes.get(i);
-         info.getTransformToWorldForPhysics(transformScs, workSpace);
+         info.getTransformToWorld(transformScs);
 
          transformScs.getTranslation(world);
 
          //       System.out.println("Collision shape translation "+world.x+" "+world.y+" "+world.z);
 
          GdxUtil.convert(transformScs, transformGdx);
-         info.setTransformToWorld(transformScs);
+//         info.setTransformToWorld(transformScs);
          info.setWorldTransform(transformGdx);
       }
 
@@ -268,63 +268,73 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          registryParent.addChild(registry);
       }
 
-      /**
-       * Returns the transform from shape to world coordinates.  Used for physics simulation
-       *
-       * @param shapeToWorld The transform from shape reference frame to the world.
-       */
-      public void getTransformToWorldForPhysics(RigidBodyTransform shapeToWorld, RigidBodyTransform workSpace)
-      {
-         link.getParentJoint().getTransformToWorld(workSpace);
+      RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-         shapeToWorld.multiply(workSpace, shapeToLink);
-      }
+//      /**
+//       * Returns the transform from shape to world coordinates.  Used for physics simulation
+//       *
+//       * @param shapeToWorld The transform from shape reference frame to the world.
+//       */
+//      public void getTransformToWorldForPhysics(RigidBodyTransform shapeToWorld)
+//      {
+//         link.getParentJoint().getTransformToWorld(tempTransform);
+//
+//         shapeToWorld.multiply(tempTransform, shapeToLink);
+//      }
 
+      @Override
       public CollisionShapeDescription getDescription()
       {
          return description;
       }
 
+      @Override
       public Link getLink()
       {
          return link;
       }
 
+      @Override
       public boolean isGround()
       {
          return isGround;
       }
 
+      @Override
       public RigidBodyTransform getShapeToLink()
       {
          return shapeToLink;
       }
 
+      @Override
       public int getGroupMask()
       {
          return getBroadphaseHandle().getCollisionFilterGroup() & 0xFFFF;
       }
 
+      @Override
       public int getCollisionMask()
       {
          return getBroadphaseHandle().getCollisionFilterMask() & 0xFFFF;
       }
 
-      public double distance(double x, double y, double z)
-      {
-         return 0;
-      }
+//      public double distance(double x, double y, double z)
+//      {
+//         return 0;
+//      }
 
       @Override
       public void getTransformToWorld(RigidBodyTransform transformToWorldToPack)
       {
-         transformToWorldToPack.set(transformToWorld);
+         link.getParentJoint().getTransformToWorld(tempTransform);
+
+         transformToWorldToPack.multiply(tempTransform, shapeToLink);
       }
 
       @Override
       public void setTransformToWorld(RigidBodyTransform transformToWorld)
       {
-         this.transformToWorld.set(transformToWorld);
+         throw new RuntimeException("Shouldn't call this!");
       }
    }
 

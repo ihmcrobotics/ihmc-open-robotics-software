@@ -2,9 +2,6 @@ package us.ihmc.simulationconstructionset.physics.collision;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
-import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 
 public class CollisionDetectionResult

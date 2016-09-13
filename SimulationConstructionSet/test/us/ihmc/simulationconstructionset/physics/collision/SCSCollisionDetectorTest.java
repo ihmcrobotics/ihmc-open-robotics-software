@@ -346,10 +346,12 @@ public abstract class SCSCollisionDetectorTest
       }
 
       @Override
-      public void handle(CollisionShape shapeA, CollisionShape shapeB, Contacts contacts)
+      public void handle(Contacts contacts)
       {
          totalCollisions++;
 
+         CollisionShape shapeA = contacts.getShapeA();
+         CollisionShape shapeB = contacts.getShapeB();
          assertTrue((shapeA.getCollisionMask() & shapeB.getGroupMask()) != 0 || (shapeB.getCollisionMask() & shapeA.getGroupMask()) != 0);
       }
 
