@@ -18,25 +18,62 @@ public class ConstrainedQPSolverTest
    public void testSolveContrainedQP() throws NoConvergenceException
    {
       YoVariableRegistry registry = new YoVariableRegistry("root");
-      int nin = 1, neq = 1, nv = 2;
-      DenseMatrix64F Q = new DenseMatrix64F(nv, nv, true, 1, 0, 0, 1);
-      DenseMatrix64F f = new DenseMatrix64F(nv, 1, true, 1, 0);
-      DenseMatrix64F Aeq = new DenseMatrix64F(neq, nv, true, 1, 1);
-      DenseMatrix64F beq = new DenseMatrix64F(neq, 1, true, 0);
-      DenseMatrix64F Ain = new DenseMatrix64F(nin, nv, true, 2, 1);
-      DenseMatrix64F bin = new DenseMatrix64F(nin, 1, true, 0);
+      int numberOfInequalityConstraints = 1;
+      int numberOfEqualityConstraints = 1;
+      int numberOfVariables = 2;
 
-      ConstrainedQPSolver[] optimizers = { //new JOptimizerConstrainedQPSolver(), new OASESConstrainedQPSolver(registry), new QuadProgSolver(registry),
-            new CompositeActiveSetQPSolver(registry)};
+      DenseMatrix64F Q = new DenseMatrix64F(numberOfVariables, numberOfVariables, true, 1, 0, 0, 1);
+      DenseMatrix64F f = new DenseMatrix64F(numberOfVariables, 1, true, 1, 0);
+      DenseMatrix64F Aeq = new DenseMatrix64F(numberOfEqualityConstraints, numberOfVariables, true, 1, 1);
+      DenseMatrix64F beq = new DenseMatrix64F(numberOfEqualityConstraints, 1, true, 0);
+      DenseMatrix64F Ain = new DenseMatrix64F(numberOfInequalityConstraints, numberOfVariables, true, 2, 1);
+      DenseMatrix64F bin = new DenseMatrix64F(numberOfInequalityConstraints, 1, true, 0);
+
+      ConstrainedQPSolver[] optimizers = { //new JOptimizerConstrainedQPSolver(),
+            new OASESConstrainedQPSolver(registry),
+            new QuadProgSolver(registry),
+            new CompositeActiveSetQPSolver(registry)
+            };
+
       for (int repeat = 0; repeat < 10000; repeat++)
+      {
          for (int i = 0; i < optimizers.length; i++)
          {
-            DenseMatrix64F x = new DenseMatrix64F(nv, 1, true, -1, 1);
+            DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1);
             optimizers[i].solve(Q, f, Aeq, beq, Ain, bin, x, false);
-            Assert.assertArrayEquals(x.getData(), new double[] {-.5, .5}, 1e-10);
-            //            System.out.println("i=" + i);
-            //            System.out.println("xopt=" + x);
+            Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
          }
+      }
+
+      registry = new YoVariableRegistry("root");
+
+      //TODO: Need more test cases. Can't trust these QP solvers without them...
+      optimizers = new ConstrainedQPSolver[]{ //new JOptimizerConstrainedQPSolver(),
+            new OASESConstrainedQPSolver(registry),
+//            new QuadProgSolver(registry),
+//            new CompositeActiveSetQPSolver(registry)
+            };
+
+      numberOfInequalityConstraints = 1;
+      numberOfEqualityConstraints = 2;
+      numberOfVariables = 3;
+
+      Q = new DenseMatrix64F(numberOfVariables, numberOfVariables, true, 1, 0, 1, 0, 1, 2, 1, 3, 7);
+      f = new DenseMatrix64F(numberOfVariables, 1, true, 1, 0, 9);
+      Aeq = new DenseMatrix64F(numberOfEqualityConstraints, numberOfVariables, true, 1, 1, 1, 2, 3, 4);
+      beq = new DenseMatrix64F(numberOfEqualityConstraints, 1, true, 0, 7);
+      Ain = new DenseMatrix64F(numberOfInequalityConstraints, numberOfVariables, true, 2, 1, 3);
+      bin = new DenseMatrix64F(numberOfInequalityConstraints, 1, true, 0);
+
+      for (int repeat = 0; repeat < 10000; repeat++)
+      {
+         for (int i = 0; i < optimizers.length; i++)
+         {
+            DenseMatrix64F x = new DenseMatrix64F(numberOfVariables, 1, true, -1, 1, 3);
+            optimizers[i].solve(Q, f, Aeq, beq, Ain, bin, x, false);
+            Assert.assertArrayEquals("repeat = " + repeat + ", optimizer = " + i, x.getData(), new double[] { -7.75, 8.5, -0.75 }, 1e-10);
+         }
+      }
    }
 
 }
