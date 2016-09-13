@@ -86,7 +86,9 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
-    * Returns the index of the closest vertex of the polygon to the given line.
+    * Returns the index of the closest vertex of the polygon to the given line. If there
+    * are multiple closest vertices (line parallel to an edge) this will return the smaller
+    * index.
     */
    public static int getClosestVertexIndex(Line2d line, ConvexPolygon2d polygon)
    {
@@ -148,6 +150,41 @@ public class ConvexPolygon2dCalculator
       if (index < 0)
          return false;
       pointToPack.set(polygon.getVertex(index));
+      return true;
+   }
+
+   /**
+    * Packs the point on the polygon that is closest to the given ray. If the ray is parallel to the
+    * closest edge this will return the point on that edge closest to the ray origin. If the ray
+    * intersects the polygon the result of this method will be wrong. If unsure check first using the
+    * intersectionWithRay method.
+    */
+   public static boolean getClosestPointToRay(Line2d ray, Point2d pointToPack, ConvexPolygon2d polygon)
+   {
+      if (!polygon.hasAtLeastOneVertex())
+         return false;
+
+      Point2d rayStart = ray.getPoint();
+      Vector2d rayDirection = ray.getNormalizedVector();
+      int closestVertexIndex = getClosestVertexIndex(ray, polygon);
+      Point2d closestVertexToLine = polygon.getVertex(closestVertexIndex);
+
+      // validate the closest vertex is in front of the ray:
+      boolean vertexValid = isPointInFrontOfRay(rayStart, rayDirection, closestVertexToLine);
+
+      // check edges adjacent to the closest vertex to determine if they are parallel to the ray:
+      boolean edge1Parallel = isEdgeParallel(closestVertexIndex, rayDirection, polygon);
+      boolean edge2Parallel = isEdgeParallel(polygon.getNextVertexIndex(closestVertexIndex), rayDirection, polygon);
+      boolean rayParallelToEdge = edge1Parallel || edge2Parallel;
+
+      if (vertexValid && !rayParallelToEdge)
+         pointToPack.set(closestVertexToLine);
+      else
+      {
+         pointToPack.set(rayStart);
+         orthogonalProjection(pointToPack, polygon);
+      }
+
       return true;
    }
 
@@ -455,20 +492,14 @@ public class ConvexPolygon2dCalculator
       if (intersections == 2)
       {
          // check line intersection 2:
-         double rayStartToPointX = pointToPack2.x - rayStart.x;
-         double rayStartToPointY = pointToPack2.y - rayStart.y;
-         double dotProduct = rayStartToPointX * rayDirection.x + rayStartToPointY * rayDirection.y;
-         if (Math.signum(dotProduct) == -1.0)
+         if (!isPointInFrontOfRay(rayStart, rayDirection, pointToPack2))
             intersections--;
       }
 
       if (intersections >= 1)
       {
          // check line intersection 1:
-         double rayStartToPointX = pointToPack1.x - rayStart.x;
-         double rayStartToPointY = pointToPack1.y - rayStart.y;
-         double dotProduct = rayStartToPointX * rayDirection.x + rayStartToPointY * rayDirection.y;
-         if (Math.signum(dotProduct) == -1.0)
+         if (!isPointInFrontOfRay(rayStart, rayDirection, pointToPack1))
          {
             pointToPack1.set(pointToPack2);
             intersections--;
@@ -620,6 +651,48 @@ public class ConvexPolygon2dCalculator
       return numerator / denumerator;
    }
 
+   /**
+    * Determines if a point is laying in front of a ray. This means that an observer standing at the
+    * start point looking in the direction of the ray will see the point in front of him. If the point
+    * is on the line orthogonal to the ray through the ray start (perfectly left or right of the
+    * observer) the method will return false.
+    */
+   public static boolean isPointInFrontOfRay(Point2d rayStart, Vector2d rayDirection, Point2d pointToTest)
+   {
+      return isPointInFrontOfRay(rayStart.x, rayStart.y, rayDirection.x, rayDirection.y, pointToTest.x, pointToTest.y);
+   }
+
+   /**
+    * Determines if a point is laying in front of a ray. This means that an observer standing at the
+    * start point looking in the direction of the ray will see the point in front of him. If the point
+    * is on the line orthogonal to the ray through the ray start (perfectly left or right of the
+    * observer) the method will return true.
+    */
+   public static boolean isPointInFrontOfRay(double rayStartX, double rayStartY, double rayDirectionX, double rayDirectionY, double pointToTestX,
+         double pointToTestY)
+   {
+      double rayStartToVertexX = pointToTestX - rayStartX;
+      double rayStartToVertexY = pointToTestY - rayStartY;
+      double dotProduct = rayStartToVertexX * rayDirectionX + rayStartToVertexY * rayDirectionY;
+      return Math.signum(dotProduct) != -1;
+   }
+
+   /**
+    * Determines if edge i of the polygon is parallel to the given direction. If the edge is too
+    * short to determine its direction this method will return false.
+    */
+   public static boolean isEdgeParallel(int edgeIndex, Vector2d direction, ConvexPolygon2d polygon)
+   {
+      Point2d edgeStart = polygon.getVertex(edgeIndex);
+      Point2d edgeEnd = polygon.getNextVertex(edgeIndex);
+
+      double edgeDirectionX = edgeEnd.x - edgeStart.x;
+      double edgeDirectionY = edgeEnd.y - edgeStart.y;
+
+      double crossProduct = -edgeDirectionY * direction.x + edgeDirectionX * direction.y;
+      return Math.abs(crossProduct) < 1.0E-10;
+   }
+
    // --- Methods that generate garbage ---
    public static Point2d getClosestVertexCopy(Line2d line, ConvexPolygon2d polygon)
    {
@@ -708,5 +781,13 @@ public class ConvexPolygon2dCalculator
       Point2d ret = new Point2d(pointToProject);
       orthogonalProjection(ret, polygon);
       return ret;
+   }
+
+   public static Point2d getClosestPointToRayCopy(Line2d ray, ConvexPolygon2d polygon)
+   {
+      Point2d ret = new Point2d();
+      if (getClosestPointToRay(ray, ret, polygon))
+         return ret;
+      return null;
    }
 }

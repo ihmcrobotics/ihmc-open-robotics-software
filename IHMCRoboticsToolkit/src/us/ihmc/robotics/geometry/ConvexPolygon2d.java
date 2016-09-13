@@ -669,79 +669,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    }
 
    // here ---------------------
-   // nuke this
-   public Point2d getClosestVertexWithRayCopy(Line2d ray, boolean throwAwayVerticesOutsideRay)
-   {
-      checkIfUpToDate();
-      // O(n) for now, maybe there's a faster way?
-
-      Point2d ret = null;
-      double minDistanceSquared = Double.POSITIVE_INFINITY;
-
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         Point2d vertex = getVertex(i);
-         double distanceSquared;
-         Point2d rayOrigin = ray.getPoint();
-         Vector2d rayDirection = ray.getNormalizedVector();
-         double dotProductOfRayDirectionAndRayOriginToVertex = rayDirection.getX() * (vertex.getX() - rayOrigin.getX())
-               + rayDirection.getY() * (vertex.getY() - rayOrigin.getY());
-         // The sign of this dot product indicates if the point is "outside" the ray, meaning the closest point of the ray to the vertex is the ray origin.
-         if (dotProductOfRayDirectionAndRayOriginToVertex >= 0.0)
-            distanceSquared = ray.distanceSquared(vertex);
-         else if (!throwAwayVerticesOutsideRay)
-            distanceSquared = vertex.distanceSquared(rayOrigin);
-         else // Throw away that vertex
-            continue;
-
-         if (distanceSquared < minDistanceSquared)
-         {
-            ret = vertex;
-            minDistanceSquared = distanceSquared;
-         }
-      }
-
-      if (ret == null)
-         return null;
-      else
-         return new Point2d(ret);
-   }
-
-   // nuke this
-   public boolean getClosestVertexWithRay(Point2d closestVertexToPack, Line2d ray, boolean throwAwayVerticesOutsideRay)
-   {
-      checkIfUpToDate();
-      // O(n) for now, maybe there's a faster way?
-
-      double minDistanceSquared = Double.POSITIVE_INFINITY;
-      boolean success = false;
-
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         Point2d vertex = getVertex(i);
-         double distanceSquared;
-         Point2d rayOrigin = ray.getPoint();
-         Vector2d rayDirection = ray.getNormalizedVector();
-         double dotProductOfRayDirectionAndRayOriginToVertex = rayDirection.getX() * (vertex.getX() - rayOrigin.getX())
-               + rayDirection.getY() * (vertex.getY() - rayOrigin.getY());
-         // The sign of this dot product indicates if the point is "outside" the ray, meaning the closest point of the ray to the vertex is the ray origin.
-         if (dotProductOfRayDirectionAndRayOriginToVertex >= 0.0)
-            distanceSquared = ray.distanceSquared(vertex);
-         else if (!throwAwayVerticesOutsideRay)
-            distanceSquared = vertex.distanceSquared(rayOrigin);
-         else // Throw away that vertex
-            continue;
-
-         if (distanceSquared < minDistanceSquared)
-         {
-            closestVertexToPack.set(vertex);
-            minDistanceSquared = distanceSquared;
-            success = true;
-         }
-      }
-
-      return success;
-   }
 
    // nuke this
    public double distanceToClosestVertex(Point2d point)
@@ -1414,31 +1341,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       }
    }
 
-   @Override
-   public double distance(Point2d point)
-   {
-      checkIfUpToDate();
-
-      double signedDistance = ConvexPolygon2dCalculator.getSignedDistance(point, this);
-      if (signedDistance < 0.0)
-         return 0.0;
-      return signedDistance;
-   }
-
-   @Override
-   public Point2d orthogonalProjectionCopy(Point2d point)
-   {
-      checkIfUpToDate();
-      return ConvexPolygon2dCalculator.orthogonalProjectionCopy(point, this);
-   }
-
-   @Override
-   public void orthogonalProjection(Point2d point2d)
-   {
-      checkIfUpToDate();
-      ConvexPolygon2dCalculator.orthogonalProjection(point2d, this);
-   }
-
    public boolean isEmpty()
    {
       return numberOfVertices == 0;
@@ -1551,7 +1453,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return false;
    }
 
-   // --- remove these eventually ---
    public boolean isPointInside(double x, double y)
    {
       return ConvexPolygon2dCalculator.isPointInside(x, y, this);
@@ -1579,7 +1480,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
 
    public LineSegment2d[] getIntersectingEdgesCopy(Line2d line)
    {
-      // wherever this is used the method should be switched to intersection with ray once that is created.
       return ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line, this);
    }
 
@@ -1588,7 +1488,27 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return ConvexPolygon2dCalculator.intersectionWithRay(ray, intersectionToPack1, intersectionToPack2, this);
    }
 
-   // --- implementations that make garbage ---
+   public boolean getClosestPointWithRay(Point2d pointToPack, Line2d ray)
+   {
+      return ConvexPolygon2dCalculator.getClosestPointToRay(ray, pointToPack, this);
+   }
+
+   @Override
+   public double distance(Point2d point)
+   {
+      double signedDistance = ConvexPolygon2dCalculator.getSignedDistance(point, this);
+      if (signedDistance < 0.0)
+         return 0.0;
+      return signedDistance;
+   }
+
+   @Override
+   public void orthogonalProjection(Point2d point2d)
+   {
+      ConvexPolygon2dCalculator.orthogonalProjection(point2d, this);
+   }
+
+   // --- methods that make garbage ---
    @Override
    public Point2d[] intersectionWith(Line2d line)
    {
@@ -1598,5 +1518,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public Point2d[] intersectionWithRayCopy(Line2d ray)
    {
       return ConvexPolygon2dCalculator.intersectionWithRayCopy(ray, this);
+   }
+
+   @Override
+   public Point2d orthogonalProjectionCopy(Point2d point)
+   {
+      return ConvexPolygon2dCalculator.orthogonalProjectionCopy(point, this);
    }
 }

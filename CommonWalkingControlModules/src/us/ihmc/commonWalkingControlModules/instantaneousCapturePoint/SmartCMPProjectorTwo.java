@@ -118,7 +118,7 @@ public class SmartCMPProjectorTwo extends CMPProjector
          }
 
          cmpProjectedToVertex.set(true);
-         boolean success = supportPolygon.getClosestVertexWithRay(desiredCMP, rayFromICPAwayFromFinalDesiredICP, true);
+         boolean success = supportPolygon.getClosestPointWithRay(desiredCMP, rayFromICPAwayFromFinalDesiredICP);
          if (!success)
             supportPolygon.getClosestVertex(desiredCMP, capturePoint);
          return;
