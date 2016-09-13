@@ -896,18 +896,11 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return new FramePoint2d(referenceFrame, ConvexPolygon2dCalculator.getClosestVertexCopy(point.getPoint(), convexPolygon));
    }
 
-   public FramePoint2d getClosestVertexWithRayCopy(FrameLine2d ray, boolean throwAwayVerticesOutsideRay)
-   {
-      ray.checkReferenceFrameMatch(referenceFrame);
-
-      return new FramePoint2d(referenceFrame, convexPolygon.getClosestVertexWithRayCopy(ray.getLine2d(), throwAwayVerticesOutsideRay));
-   }
-
-   public boolean getClosestVertexWithRay(FramePoint2d closestVertexToPack, FrameLine2d ray, boolean throwAwayVerticesOutsideRay)
+   public boolean getClosestPointWithRay(FramePoint2d closestVertexToPack, FrameLine2d ray)
    {
       ray.checkReferenceFrameMatch(referenceFrame);
       closestVertexToPack.setToZero(referenceFrame);
-      boolean success = convexPolygon.getClosestVertexWithRay(closestVertexToPack.getPoint(), ray.getLine2d(), throwAwayVerticesOutsideRay);
+      boolean success = convexPolygon.getClosestPointWithRay(closestVertexToPack.getPoint(), ray.getLine2d());
 
       return success;
    }
