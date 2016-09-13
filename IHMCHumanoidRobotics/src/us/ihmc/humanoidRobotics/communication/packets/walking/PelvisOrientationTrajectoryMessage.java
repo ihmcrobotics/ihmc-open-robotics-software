@@ -7,6 +7,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 import java.util.Random;
@@ -99,5 +100,12 @@ public class PelvisOrientationTrajectoryMessage extends AbstractSO3TrajectoryMes
          return "Pelvis SO3 trajectory: number of SO3 trajectory points = " + getNumberOfTrajectoryPoints();
       else
          return "Pelvis SO3 trajectory: no SO3 trajectory points";
+   }
+   
+   /** {@inheritDoc} */
+   @Override
+   public String validateMessage()
+   {
+      return PacketValidityChecker.validatePelvisOrientationTrajectoryMessage(this);
    }
 }
