@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -9,11 +8,9 @@ import java.util.Random;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple2d;
-import javax.vecmath.Vector2d;
 
 import us.ihmc.robotics.geometry.ConvexPolygonTools.EmptyPolygonException;
 import us.ihmc.robotics.geometry.ConvexPolygonTools.OutdatedPolygonException;
-import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.random.RandomTools;
 
 /**
@@ -1084,31 +1081,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       }
    }
 
-   public boolean pointIsOnPerimeter(Point2d point)
-   {
-      checkIfUpToDate();
-      if (hasExactlyOneVertex())
-      {
-         return getVertex(0).equals(point);
-      }
-
-      Point2d vertex0;
-      Point2d vertex1 = getVertex(0);
-      LineSegment2d edge;
-
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         vertex0 = vertex1;
-         vertex1 = getNextVertex(i);
-         edge = new LineSegment2d(vertex0, vertex1);
-
-         if (edge.isPointOnLineSegment(point))
-            return true;
-      }
-
-      return false;
-   }
-
    @Override
    public boolean epsilonEquals(ConvexPolygon2d convexPolygon, double threshold)
    {
@@ -1123,49 +1095,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       }
 
       return true;
-   }
-
-   public List<Vector2d> getOutSideFacingOrthoNormalVectorsCopy()
-   {
-      checkIfUpToDate();
-
-      if (numberOfVertices == 1)
-         return null;
-
-      Vector2d[] outsideFacingOrthogonalVectors = new Vector2d[numberOfVertices];
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         outsideFacingOrthogonalVectors[i] = new Vector2d();
-      }
-
-      getOutSideFacingOrthoNormalVectors(outsideFacingOrthogonalVectors);
-
-      return Arrays.asList(outsideFacingOrthogonalVectors);
-   }
-
-   public void getOutSideFacingOrthoNormalVectors(Vector2d[] orthoNormalVectorsToPack)
-   {
-      checkIfUpToDate();
-
-      if (orthoNormalVectorsToPack == null || orthoNormalVectorsToPack.length != numberOfVertices)
-      {
-         throw new RuntimeException("orthogonalVectorsToPack is null or wrong length");
-      }
-
-      if (numberOfVertices == 1)
-      {
-         throw new UndefinedOperationException("orthoNormal vectors undefined for a point");
-      }
-
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         orthoNormalVectorsToPack[i].set(getNextVertex(i));
-         orthoNormalVectorsToPack[i].sub(getVertex(i));
-
-         GeometryTools.getPerpendicularVector(orthoNormalVectorsToPack[i], orthoNormalVectorsToPack[i]);
-
-         orthoNormalVectorsToPack[i].normalize();
-      }
    }
 
    public boolean isEmpty()
@@ -1323,16 +1252,18 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    @Override
    public double distance(Point2d point)
    {
-      double signedDistance = ConvexPolygon2dCalculator.getSignedDistance(point, this);
-      if (signedDistance < 0.0)
-         return 0.0;
-      return signedDistance;
+      return Math.max(0.0, ConvexPolygon2dCalculator.getSignedDistance(point, this));
    }
 
    @Override
    public void orthogonalProjection(Point2d point2d)
    {
       ConvexPolygon2dCalculator.orthogonalProjection(point2d, this);
+   }
+
+   public boolean pointIsOnPerimeter(Point2d point)
+   {
+      return Math.abs(ConvexPolygon2dCalculator.getSignedDistance(point, this)) < 1.0E-10;
    }
 
    // --- methods that make garbage ---

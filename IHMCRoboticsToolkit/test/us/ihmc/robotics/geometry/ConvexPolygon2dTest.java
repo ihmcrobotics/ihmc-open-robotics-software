@@ -8,7 +8,6 @@ import static org.junit.Assert.fail;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import javax.vecmath.Point2d;
@@ -1573,19 +1572,12 @@ public class ConvexPolygon2dTest
    {
       ConvexPolygon2d polygon = createSomeValidPolygon();
 
-      List<Vector2d> normalVectors = polygon.getOutSideFacingOrthoNormalVectorsCopy();
-
-      for (Vector2d normalVector : normalVectors)
-      {
-         assertEquals(1.0, normalVector.length(), 1e-9);
-      }
-
-      assertEquals(polygon.getNumberOfVertices(), normalVectors.size());
-
       double delta = 5e-3;
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
-         Vector2d normalVector = normalVectors.get(i);
+         Vector2d normalVector = new Vector2d();
+         ConvexPolygon2dCalculator.getEdgeNormal(i, normalVector, polygon);
+         assertEquals(1.0, normalVector.length(), 1e-9);
 
          Point2d startPoint = polygon.getVertex(i);
          Point2d endPoint = polygon.getNextVertex(i);
@@ -1986,7 +1978,6 @@ public class ConvexPolygon2dTest
          assertTrue(polygonWithOnePoint.getCentroid().equals(pointThatDefinesThePolygon));
          assertTrue(ConvexPolygon2dTestHelpers.getNearestEdges(arbitraryPoint0, polygonWithOnePoint) == null);
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
-         assertTrue(polygonWithOnePoint.getOutSideFacingOrthoNormalVectorsCopy() == null);
          assertEquals(1, polygonWithOnePoint.getNumberOfVertices());
          assertTrue(polygonWithOnePoint.getVertex(0).equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.intersectionWith(sparePolygon) == null);
@@ -2144,15 +2135,6 @@ public class ConvexPolygon2dTest
             assertEquals(closestVertexToPoint, pointThatDefinesThePolygon0);
          else
             assertEquals(closestVertexToPoint, pointThatDefinesThePolygon1);
-
-         // getOutSideFacingOrthoNormalVectors
-         List<Vector2d> actualOrthoganolVectors = polygonWithTwoPoints.getOutSideFacingOrthoNormalVectorsCopy();
-         assertTrue(actualOrthoganolVectors.size() == 2);
-         Vector2d oneExpectedOrthoganol = new Vector2d(pointThatDefinesThePolygon1.getY() - pointThatDefinesThePolygon0.getY(), pointThatDefinesThePolygon0.getX()
-               - pointThatDefinesThePolygon1.getX());
-         oneExpectedOrthoganol.normalize();
-         assertEqualsInEitherOrder(oneExpectedOrthoganol.getX(), -oneExpectedOrthoganol.getX(), actualOrthoganolVectors.get(0).getX(), actualOrthoganolVectors.get(1).getX());
-         assertEqualsInEitherOrder(oneExpectedOrthoganol.getY(), -oneExpectedOrthoganol.getY(), actualOrthoganolVectors.get(0).getY(), actualOrthoganolVectors.get(1).getY());
 
          // getIntersectingEdges
          LineSegment2d[] intersectingEdges = ConvexPolygon2dCalculator.getIntersectingEdgesCopy(arbitraryLine, polygonWithTwoPoints);

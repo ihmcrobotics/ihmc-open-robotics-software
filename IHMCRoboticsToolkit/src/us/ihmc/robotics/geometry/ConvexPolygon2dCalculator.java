@@ -420,6 +420,21 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
+    * Packs a vector that is orthogonal to the given edge, facing towards the outside of the polygon
+    */
+   public static void getEdgeNormal(int edgeIndex, Vector2d normalToPack, ConvexPolygon2d polygon)
+   {
+      Point2d edgeStart = polygon.getVertex(edgeIndex);
+      Point2d edgeEnd = polygon.getNextVertex(edgeIndex);
+
+      double edgeVectorX = edgeEnd.x - edgeStart.x;
+      double edgeVectorY = edgeEnd.y - edgeStart.y;
+
+      normalToPack.set(-edgeVectorY, edgeVectorX);
+      normalToPack.normalize();
+   }
+
+   /**
     * An observer looking at the polygon from the outside will see two vertices at the outside edges of the
     * polygon. This method packs the indices corresponding to these vertices. The vertex on the left from the
     * observer point of view will be the first vertex packed. The argument vertexIndices is expected to
