@@ -956,6 +956,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       throw new RuntimeException("This is a 2d object use applyTransformAndProjectToXYPlane method instead.");
    }
 
+   private final Point3d tempVertex3d = new Point3d();
    @Override
    public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform)
    {
@@ -971,8 +972,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       }
       update();
    }
-
-   private final Point3d tempVertex3d = new Point3d();
 
    @Override
    public ConvexPolygon2d applyTransformCopy(RigidBodyTransform transform)
