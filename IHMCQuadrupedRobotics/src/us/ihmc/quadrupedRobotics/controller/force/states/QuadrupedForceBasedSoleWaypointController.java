@@ -51,7 +51,6 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    private final QuadrupedSoleWaypointController quadrupedSoleWaypointController;
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
-   private final QuadrupedSoleForceEstimator soleForceEstimator;
 
    private FullQuadrupedRobotModel fullRobotModel;
 
@@ -62,7 +61,6 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
       quadrupedSoleWaypointController = controllerToolbox.getSoleWaypointController();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
-      soleForceEstimator = controllerToolbox.getSoleForceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
@@ -88,16 +86,9 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
       }
       taskSpaceController.reset();
-      // Initialize sole force estimator
-      soleForceEstimator.reset();
-      soleForceEstimator.compute();
 
-      if(useInitialSoleForces.get()){
-         quadrupedSoleWaypointController.initialize(soleWaypointInputProvider.get(), yoPositionControllerGains, taskSpaceEstimates, soleForceEstimator);
-      }
-      else{
-         quadrupedSoleWaypointController.initialize(soleWaypointInputProvider.get(), yoPositionControllerGains, taskSpaceEstimates);
-      }
+      quadrupedSoleWaypointController.initialize(soleWaypointInputProvider.get(), yoPositionControllerGains, taskSpaceEstimates, useInitialSoleForces.get());
+
       yoUseForceFeedbackControl.set(useForceFeedbackControlParameter.get());
       // Initialize force feedback
       for (QuadrupedJointName jointName : QuadrupedJointName.values())
