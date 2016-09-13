@@ -1965,7 +1965,7 @@ public class ConvexPolygon2dTest
          Line2d arbitraryLine = new Line2d(arbitraryPoint0, arbitraryPoint1);
          LineSegment2d arbitraryLineSegment = new LineSegment2d(arbitraryPoint0, arbitraryPoint1);
 
-         assertEquals(pointThatDefinesThePolygon.distance(arbitraryPoint0), polygonWithOnePoint.distanceToClosestVertex(arbitraryPoint0), epsilon);
+         assertEquals(pointThatDefinesThePolygon.distance(arbitraryPoint0), ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithOnePoint).distance(arbitraryPoint0), epsilon);
          assertTrue(polygonWithOnePoint.getAllVisibleVerticesFromOutsideLeftToRightCopy(arbitraryPoint0).get(0).equals(pointThatDefinesThePolygon));
          assertEquals(0.0, polygonWithOnePoint.getArea(), epsilon);
          assertTrue(polygonWithOnePoint.getAroundTheCornerEdgesCopy(arbitraryPoint0) == null);
@@ -2075,7 +2075,7 @@ public class ConvexPolygon2dTest
 
          // one line tests
          assertEquals(Math.min(pointThatDefinesThePolygon0.distance(arbitraryPoint0), pointThatDefinesThePolygon1.distance(arbitraryPoint0)),
-               polygonWithTwoPoints.distanceToClosestVertex(arbitraryPoint0), epsilon);
+               ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithTwoPoints).distance(arbitraryPoint0), epsilon);
          assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1,
                polygonWithTwoPoints
                .getAllVisibleVerticesFromOutsideLeftToRightCopy(arbitraryPoint0).get(0),
