@@ -753,78 +753,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return ConvexPolygonTools.computeIntersectionOfPolygons(this, convexPolygon, intersectionToPack);
    }
 
-   public LineSegment2d getClosestEdgeCopy(Point2d point)
-   {
-      checkIfUpToDate();
-      if (!hasAtLeastTwoVertices())
-      {
-         return null;
-      }
-
-      int[] closestEdgeVertices = getClosestEdgeVertexIndicesInClockwiseOrderedList(point);
-
-      Point2d prevP = getVertex(closestEdgeVertices[0]);
-      Point2d p = getVertex(closestEdgeVertices[1]);
-      LineSegment2d closestEdge = new LineSegment2d(prevP, p);
-
-      return closestEdge;
-   }
-
-   public boolean getClosestEdge(LineSegment2d closestEdgeToPack, Point2d point)
-   {
-      checkIfUpToDate();
-      if (!hasAtLeastTwoVertices())
-      {
-         return false;
-      }
-
-      int[] closestEdgeVertices = getClosestEdgeVertexIndicesInClockwiseOrderedList(point);
-
-      Point2d prevP = getVertex(closestEdgeVertices[0]);
-      Point2d p = getVertex(closestEdgeVertices[1]);
-      closestEdgeToPack.set(prevP, p);
-
-      return true;
-   }
-
-   private final LineSegment2d tempEdge = new LineSegment2d();
-
-   protected int[] getClosestEdgeVertexIndicesInClockwiseOrderedList(Point2d point)
-   {
-      checkIfUpToDate();
-      if (!hasAtLeastTwoVertices())
-      {
-         return null;
-      }
-
-      // TODO: Create a more efficient algorithm to find this distance
-      double smallestDistance = Double.POSITIVE_INFINITY;
-
-      int prevIndex = getNumberOfVertices() - 1;
-
-      int[] closestEdgeVertexIndicesInClockwiseOrderedList = new int[2];
-      closestEdgeVertexIndicesInClockwiseOrderedList[0] = prevIndex;
-      closestEdgeVertexIndicesInClockwiseOrderedList[1] = 0;
-
-      for (int index = 0; index < getNumberOfVertices(); index++)
-      {
-         Point2d currentVertex = getVertex(index);
-         Point2d prevVertex = getVertex(prevIndex);
-         tempEdge.set(prevVertex, currentVertex);
-         double dist = tempEdge.distance(point);
-         if (dist < smallestDistance)
-         {
-            closestEdgeVertexIndicesInClockwiseOrderedList[0] = prevIndex;
-            closestEdgeVertexIndicesInClockwiseOrderedList[1] = index;
-            smallestDistance = dist;
-         }
-
-         prevIndex = index;
-      }
-
-      return closestEdgeVertexIndicesInClockwiseOrderedList;
-   }
-
    // to here ---------------------
 
    @Override
@@ -1184,6 +1112,16 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public Point2d[] intersectionWith(Line2d line)
    {
       return ConvexPolygon2dCalculator.intersectionWithLineCopy(line, this);
+   }
+
+   public boolean getClosestEdge(LineSegment2d closestEdgeToPack, Point2d point)
+   {
+      return ConvexPolygon2dCalculator.getClosestEdge(point, this, closestEdgeToPack);
+   }
+
+   public LineSegment2d getClosestEdgeCopy(Point2d point)
+   {
+      return ConvexPolygon2dCalculator.getClosestEdgeCopy(point, this);
    }
 
    public Point2d[] intersectionWithRayCopy(Line2d ray)
