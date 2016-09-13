@@ -326,11 +326,6 @@ public abstract class SCSCollisionDetectorTest
       int totalCollisions = 0;
 
       @Override
-      public void initialize(ScsCollisionDetector collision)
-      {
-      }
-
-      @Override
       public void maintenanceBeforeCollisionDetection()
       {
       }

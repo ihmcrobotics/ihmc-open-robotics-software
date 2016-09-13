@@ -114,7 +114,6 @@ public class CollisionExampleFixedArm
          double epsilon = 0.9;
          double mu = 0.5;
          collisionHandler = new DefaultCollisionHandler(epsilon, mu);
-         collisionHandler.initialize(collisionDetector);
          collisionDetector.initialize();
       }
 

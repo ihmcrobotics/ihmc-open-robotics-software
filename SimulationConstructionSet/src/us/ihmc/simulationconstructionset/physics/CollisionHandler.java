@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset.physics;
 
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.ExternalTorque;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
+import us.ihmc.simulationconstructionset.physics.collision.CollisionHandlerListener;
 
 /**
  * Interface for the physics engine respond to a collision.  Collisions are modeled as a set of point collisions.
@@ -10,11 +9,6 @@ import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionRes
  */
 public interface CollisionHandler
 {
-   /**
-    * Implementation should do any initialization in here that must be done before it can start.
-    * @param collision Reference to collision detector
-    */
-   public abstract void initialize(ScsCollisionDetector collision);
 
    /**
     * Invoked each simulation cycle before collision detection has started.
@@ -43,14 +37,5 @@ public interface CollisionHandler
    public abstract void handle(Contacts contacts);
 
    public abstract void handleCollisions(CollisionDetectionResult results);
-
-   /**
-    * Called whenever a collision happens
-    */
-   public static interface CollisionHandlerListener
-   {
-      public abstract void collision(CollisionShape shapeA, CollisionShape shapeB, ExternalForcePoint forceA, ExternalForcePoint forceB, ExternalTorque torqueA,
-                            ExternalTorque torqueB);
-   }
 
 }

@@ -10,11 +10,11 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.ExternalTorque;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
+import us.ihmc.simulationconstructionset.physics.collision.CollisionHandlerListener;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 
-public class DefaultCollisionVisualize implements CollisionHandler.CollisionHandlerListener
+public class DefaultCollisionVisualize implements CollisionHandlerListener
 {
    private SimulationConstructionSet scs;
 

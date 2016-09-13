@@ -15,7 +15,6 @@ import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionRes
 
 public class SimpleCollisionDetector implements ScsCollisionDetector
 {
-
    private final ArrayList<CollisionShape> collisionObjects = new ArrayList<CollisionShape>();
 
    // Temporary variables for computation:
