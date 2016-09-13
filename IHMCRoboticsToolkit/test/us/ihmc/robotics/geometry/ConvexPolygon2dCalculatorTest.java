@@ -1602,6 +1602,97 @@ public class ConvexPolygon2dCalculatorTest
       }
    }
 
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestEdge1()
+   {
+      Point2d vertex1 = new Point2d(0.0, 0.0);
+      Point2d vertex2 = new Point2d(-1.0, 0.0);
+      Point2d vertex3 = new Point2d(0.0, 1.0);
+      Point2d vertex4 = new Point2d(1.0, 1.0);
+
+      // add in order so vertices do not get changed when update is called.
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(vertex1);
+      polygon.addVertex(vertex2);
+      polygon.addVertex(vertex3);
+      polygon.addVertex(vertex4);
+      polygon.update();
+
+      LineSegment2d edge1 = new LineSegment2d(vertex1, vertex2);
+      LineSegment2d edge2 = new LineSegment2d(vertex2, vertex3);
+      LineSegment2d edge3 = new LineSegment2d(vertex3, vertex4);
+      LineSegment2d edge4 = new LineSegment2d(vertex4, vertex1);
+
+      Point2d point1 = new Point2d(0.5, 0.1);
+      assertEdgesEqual(edge4, ConvexPolygon2dCalculator.getClosestEdgeCopy(point1, polygon));
+
+      Point2d point2 = new Point2d(-0.5, -0.5);
+      assertEdgesEqual(edge1, ConvexPolygon2dCalculator.getClosestEdgeCopy(point2, polygon));
+
+      Point2d point3 = new Point2d(-0.5, 0.5);
+      assertEdgesEqual(edge2, ConvexPolygon2dCalculator.getClosestEdgeCopy(point3, polygon));
+
+      Point2d point4 = new Point2d(-0.5, 0.25);
+      assertEdgesEqual(edge2, ConvexPolygon2dCalculator.getClosestEdgeCopy(point4, polygon));
+
+      Point2d point5 = new Point2d(-0.1, 3.0);
+      assertEdgesEqual(edge2, ConvexPolygon2dCalculator.getClosestEdgeCopy(point5, polygon));
+
+      Point2d point6 = new Point2d(0.1, 0.8);
+      assertEdgesEqual(edge3, ConvexPolygon2dCalculator.getClosestEdgeCopy(point6, polygon));
+
+      Point2d point7 = new Point2d(-0.11, 0.2);
+      assertEdgesEqual(edge1, ConvexPolygon2dCalculator.getClosestEdgeCopy(point7, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestEdge2()
+   {
+      Point2d vertex1 = new Point2d(2.0, 2.0);
+      Point2d vertex2 = new Point2d(3.0, 3.0);
+
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(vertex1);
+      polygon.addVertex(vertex2);
+      polygon.update();
+
+      LineSegment2d edge1 = new LineSegment2d(vertex1, vertex2);
+
+      Point2d point1 = new Point2d(0.5, 0.1);
+      assertEdgesEqual(edge1, ConvexPolygon2dCalculator.getClosestEdgeCopy(point1, polygon));
+
+      Point2d point2 = new Point2d(4.0, 4.0);
+      assertEdgesEqual(edge1, ConvexPolygon2dCalculator.getClosestEdgeCopy(point2, polygon));
+
+      Point2d point3 = new Point2d(1.0, 1.0);
+      assertEdgesEqual(edge1, ConvexPolygon2dCalculator.getClosestEdgeCopy(point3, polygon));
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestEdge3()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      polygon.addVertex(new Point2d());
+      polygon.update();
+      assertTrue(ConvexPolygon2dCalculator.getClosestEdgeCopy(new Point2d(), polygon) == null);
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 3000)
+   public void testGetClosestEdge4()
+   {
+      ConvexPolygon2d polygon = new ConvexPolygon2d();
+      assertTrue(ConvexPolygon2dCalculator.getClosestEdgeCopy(new Point2d(), polygon) == null);
+   }
+
+   private static void assertEdgesEqual(LineSegment2d expected, LineSegment2d actual)
+   {
+      assertTrue("Edge did not match expected.", expected.epsilonEquals(actual, epsilon));
+   }
+
    private static void assertPointsEqual(Point2d[] expected, Point2d[] actual, boolean enforceOrder)
    {
       if (expected == null || actual == null)

@@ -154,6 +154,44 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
+    * Packs the index of the closest edge to the given point. The index corresponds to the index
+    * of the vertex at the start of the edge.
+    */
+   public static int getClosestEdgeIndex(Point2d point, ConvexPolygon2d polygon)
+   {
+      int index = -1;
+      if (!polygon.hasAtLeastTwoVertices())
+         return index;
+
+      double minDistance = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         Point2d start = polygon.getVertex(i);
+         Point2d end = polygon.getNextVertex(i);
+         double distance = GeometryTools.distanceFromPointToLineSegment(point, start, end);
+         if (distance < minDistance)
+         {
+            index = i;
+            minDistance = distance;
+         }
+      }
+
+      return index;
+   }
+
+   /**
+    * Packs the closest edge to the given point.
+    */
+   public static boolean getClosestEdge(Point2d point, ConvexPolygon2d polygon, LineSegment2d edgeToPack)
+   {
+      int edgeIndex = getClosestEdgeIndex(point, polygon);
+      if (edgeIndex == -1)
+         return false;
+      edgeToPack.set(polygon.getVertex(edgeIndex), polygon.getNextVertex(edgeIndex));
+      return true;
+   }
+
+   /**
     * Packs the point on the polygon that is closest to the given ray. If the ray is parallel to the
     * closest edge this will return the point on that edge closest to the ray origin. If the ray
     * intersects the polygon the result of this method will be wrong. If unsure check first using the
@@ -802,6 +840,14 @@ public class ConvexPolygon2dCalculator
    {
       Point2d ret = new Point2d();
       if (getClosestPointToRay(ray, ret, polygon))
+         return ret;
+      return null;
+   }
+
+   public static LineSegment2d getClosestEdgeCopy(Point2d point, ConvexPolygon2d polygon)
+   {
+      LineSegment2d ret = new LineSegment2d();
+      if (getClosestEdge(point, polygon, ret))
          return ret;
       return null;
    }
