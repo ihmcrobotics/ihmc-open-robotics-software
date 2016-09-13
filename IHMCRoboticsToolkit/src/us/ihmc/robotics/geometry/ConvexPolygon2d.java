@@ -663,47 +663,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    }
 
    // here ---------------------
-   /**
-    * Returns the two LineSegment2ds that are the first segments around the corner that cannot be seen from the observerPoint2d.
-    * If the observerPoint2d is null returns null. The line segments are returned in order of left, then right.
-    * The line segments go from the line of sight points to the points that are not in view, but are around the corner.
-    *
-    * @param observerPoint2d Point2d marking the point of observation of this ConvexPolygon2d.
-    * @return LineSegment2d[] Two line segments going from the line of sight points to the first points around the corners that are out of sight.
-    * null if the observerPoint2d is inside this ConvexPolygon2d.
-    */
-   public LineSegment2d[] getAroundTheCornerEdgesCopy(Point2d observerPoint2d)
-   {
-      checkIfUpToDate();
-      int[] indices = ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observerPoint2d, this);
-
-      // TODO indices == null || indices.length == 1 is deprecated
-      if (indices == null || indices.length == 1 || indices[0] == indices[1])
-         return null;
-
-      int leavingLeftEdge = indices[0];
-      int enteringRightEdge = indices[1];
-
-      int aroundCornerOfLeftEdge = leavingLeftEdge + 1;
-      if (aroundCornerOfLeftEdge == numberOfVertices)
-         aroundCornerOfLeftEdge = 0;
-
-      int aroundCornerRightEdge = enteringRightEdge - 1;
-      if (aroundCornerRightEdge < 0)
-         aroundCornerRightEdge = numberOfVertices - 1;
-
-      Point2d leftPoint = new Point2d(getVertex(leavingLeftEdge));
-      Point2d leftPointAroundCorner = new Point2d(getVertex(aroundCornerOfLeftEdge));
-
-      Point2d rightPoint = new Point2d(getVertex(enteringRightEdge));
-      Point2d rightPointAroundCorner = new Point2d(getVertex(aroundCornerRightEdge));
-
-      LineSegment2d leftLineSegment = new LineSegment2d(leftPoint, leftPointAroundCorner);
-      LineSegment2d rightLineSegment = new LineSegment2d(rightPoint, rightPointAroundCorner);
-
-      return new LineSegment2d[] {leftLineSegment, rightLineSegment};
-   }
-
    @Override
    public Point2d[] intersectionWith(LineSegment2d lineSegment2d)
    {
