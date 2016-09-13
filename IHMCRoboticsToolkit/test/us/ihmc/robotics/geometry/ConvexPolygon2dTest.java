@@ -870,73 +870,6 @@ public class ConvexPolygon2dTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
-   public void testGetAroundCornerEdgesOne()
-   {
-      Random random = new Random(1999L);
-
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame", true, false, true);
-      double xMin = -100.0, xMax = 100.0, yMin = -100.0, yMax = 100.0;
-
-      ArrayList<FramePoint2d> points = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin, xMax, yMin, yMax, 30);
-
-      FrameConvexPolygon2d polygon = new FrameConvexPolygon2d(points);
-      ConvexPolygon2dTestHelpers.verifyPointsAreClockwise(polygon);
-
-      FrameGeometry2dPlotter plotter = null;
-      FrameGeometryTestFrame testFrame = null;
-      if (PLOT_RESULTS)
-      {
-         testFrame = new FrameGeometryTestFrame(xMin, xMax, yMin, yMax);
-
-         plotter = testFrame.getFrameGeometry2dPlotter();
-         plotter.setPolygonToCheckInside(polygon);
-
-         testFrame.addTestPoints(points);
-      }
-
-      int numAroundCornerTests = 100000;
-
-      ArrayList<FramePoint2d> randomOutsidePoints = new ArrayList<FramePoint2d>();
-
-      for (int i = 0; i < numAroundCornerTests; i++)
-      {
-         FramePoint2d randomPoint = FramePoint2d.generateRandomFramePoint2d(random, zUpFrame, 2.0 * xMin, 2.0 * xMax, 2.0 * yMin, 2.0 * yMax);
-         if (!polygon.isPointInside(randomPoint))
-         {
-            randomOutsidePoints.add(randomPoint);
-
-            FramePoint2d[] lineOfSightVertices = polygon.getLineOfSightVerticesCopy(randomPoint);
-            FrameLineSegment2d[] aroundCornerEdges = polygon.getAroundTheCornerEdges(randomPoint);
-
-            ConvexPolygon2dTestHelpers.verifyAroundTheCornerEdges(polygon, randomPoint, lineOfSightVertices, aroundCornerEdges);
-
-            if (PLOT_RESULTS)
-            {
-               FrameLineSegment2d frameLine1 = new FrameLineSegment2d(randomPoint, lineOfSightVertices[0]);
-               FrameLineSegment2d frameLine2 = new FrameLineSegment2d(randomPoint, lineOfSightVertices[1]);
-
-               plotter.addFrameLineSegment2d(frameLine1, Color.cyan);
-               plotter.addFrameLineSegment2d(aroundCornerEdges[0], Color.cyan);
-
-               plotter.addFrameLineSegment2d(frameLine2, Color.magenta);
-               plotter.addFrameLineSegment2d(aroundCornerEdges[1], Color.magenta);
-            }
-
-         }
-         else
-         {
-         }
-      }
-
-      if (PLOT_RESULTS)
-      {
-         waitForButtonOrPause(testFrame);
-      }
-
-   }
-
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetLineOfSightVerticesOne()
@@ -1959,7 +1892,6 @@ public class ConvexPolygon2dTest
 
          assertEquals(pointThatDefinesThePolygon.distance(arbitraryPoint0), ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithOnePoint).distance(arbitraryPoint0), epsilon);
          assertEquals(0.0, polygonWithOnePoint.getArea(), epsilon);
-         assertTrue(polygonWithOnePoint.getAroundTheCornerEdgesCopy(arbitraryPoint0) == null);
          assertTrue(polygonWithOnePoint.getBoundingBoxCopy().getMaxPoint().equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getBoundingBoxCopy().getMinPoint().equals(pointThatDefinesThePolygon));
          assertTrue(polygonWithOnePoint.getCentroid().equals(pointThatDefinesThePolygon));
@@ -2067,12 +1999,6 @@ public class ConvexPolygon2dTest
          assertEquals(Math.min(pointThatDefinesThePolygon0.distance(arbitraryPoint0), pointThatDefinesThePolygon1.distance(arbitraryPoint0)),
                ConvexPolygon2dCalculator.getClosestVertexCopy(arbitraryPoint0, polygonWithTwoPoints).distance(arbitraryPoint0), epsilon);
          assertEquals(0.0, polygonWithTwoPoints.getArea(), epsilon);
-         LineSegment2d aroundTheCornerEdge0 = polygonWithTwoPoints.getAroundTheCornerEdgesCopy(arbitraryPoint0)[0];
-         LineSegment2d aroundTheCornerEdge1 = polygonWithTwoPoints.getAroundTheCornerEdgesCopy(arbitraryPoint0)[1];
-         assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1, aroundTheCornerEdge0.getFirstEndpointCopy(),
-               aroundTheCornerEdge0.getSecondEndpointCopy());
-         assertEqualsInEitherOrder(pointThatDefinesThePolygon0, pointThatDefinesThePolygon1, aroundTheCornerEdge1.getFirstEndpointCopy(),
-               aroundTheCornerEdge1.getSecondEndpointCopy());
          Point2d minPoint = new Point2d(Math.min(pointThatDefinesThePolygon0.getX(), pointThatDefinesThePolygon1.getX()), Math.min(
                pointThatDefinesThePolygon0.getY(), pointThatDefinesThePolygon1.getY()));
          Point2d maxPoint = new Point2d(Math.max(pointThatDefinesThePolygon0.getX(), pointThatDefinesThePolygon1.getX()), Math.max(

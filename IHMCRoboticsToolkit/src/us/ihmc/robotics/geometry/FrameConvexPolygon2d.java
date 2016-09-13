@@ -834,30 +834,6 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    }
 
    /**
-    * Returns the two FrameLineSegment2ds that are the first segments around the corner that cannot be seen from the observer FramePoint2d.
-    * If the observer FramePoint2d is null returns null. The line segments are returned in order of left, then right.
-    * The line segments go from the line of sight points to the points that are not in view, but are around the corner.
-    *
-    * @param observerFramePoint FramePoint2d marking the point of observation of this ConvexPolygon2d.
-    * @return FrameLineSegment2d[] Two line segments going from the line of sight points to the first points around the corners that are out of sight.
-    * null if the observer FramePoint2d is inside this FrameConvexPolygon2d.
-    */
-   public FrameLineSegment2d[] getAroundTheCornerEdges(FramePoint2d observerFramePoint)
-   {
-      this.checkReferenceFrameMatch(observerFramePoint);
-
-      LineSegment2d[] aroundTheCornerLineSegments2d = this.convexPolygon.getAroundTheCornerEdgesCopy(observerFramePoint.getPointCopy());
-
-      if (aroundTheCornerLineSegments2d == null)
-         return null;
-
-      FrameLineSegment2d[] ret = new FrameLineSegment2d[] { new FrameLineSegment2d(observerFramePoint.getReferenceFrame(), aroundTheCornerLineSegments2d[0]),
-            new FrameLineSegment2d(observerFramePoint.getReferenceFrame(), aroundTheCornerLineSegments2d[1]) };
-
-      return ret;
-   }
-
-   /**
     * Returns the intersecting edges between this polygon and the given FrameLine2d.
     * The FrameLine2d is treated as a ray. This method returns null if:
     * - The start point of the ray starts inside the Polygon,
