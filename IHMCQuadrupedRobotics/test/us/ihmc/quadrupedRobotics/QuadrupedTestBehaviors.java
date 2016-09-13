@@ -12,13 +12,12 @@ public class QuadrupedTestBehaviors
 {
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
    {
-      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.STAND_READY));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
       conductor.simulate();
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
-      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTimeLimit(variables.getYoTime(), 3.0);
+      conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTimeLimit(variables.getYoTime(), 2.0);
 //      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getComPositionEstimateZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.05)); // doesn't work well when not flat ground - BS
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.STAND));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
@@ -47,6 +46,22 @@ public class QuadrupedTestBehaviors
    {
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.XGAIT));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
+   }
+
+   public static void squareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables)
+   {
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
+      conductor.simulate();
+
+      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();      
+      
+      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();      
    }
 }
