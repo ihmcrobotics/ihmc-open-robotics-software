@@ -34,7 +34,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    private final QuadrupedTimedContactSequence timedContactSequence;
    private final QuadrupedPiecewiseConstantCopTrajectory piecewiseConstantCopTrajectory;
 
-   private final ConstrainedQPSolver qpSolver = new QuadProgSolver(null);
+   private final ConstrainedQPSolver qpSolver = new QuadProgSolver();
    private final DenseMatrix64F qpSolutionVector = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F qpCostVector = new DenseMatrix64F(100, 1);
    private final DenseMatrix64F qpCostMatrix = new DenseMatrix64F(100, 100);

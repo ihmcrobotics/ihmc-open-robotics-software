@@ -35,7 +35,7 @@ public class ConstrainedQPSolverTest
 
       ConstrainedQPSolver[] optimizers = { //new JOptimizerConstrainedQPSolver(),
             new OASESConstrainedQPSolver(registry),
-            new QuadProgSolver(registry),
+            new QuadProgSolver(),
             new CompositeActiveSetQPSolver(registry)
             };
 

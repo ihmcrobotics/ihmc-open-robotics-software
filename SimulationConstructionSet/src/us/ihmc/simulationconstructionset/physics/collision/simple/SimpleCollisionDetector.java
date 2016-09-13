@@ -8,7 +8,8 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPStandaloneSolver;
+import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
@@ -16,6 +17,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class SimpleCollisionDetector implements ScsCollisionDetector
 {
@@ -84,8 +86,10 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       }
    }
 
-   private final SimpleActiveSetQPStandaloneSolver solver = new SimpleActiveSetQPStandaloneSolver();
-//   private final QuadProgSolver solver = new QuadProgSolver();
+//   private final SimpleActiveSetQPStandaloneSolver solver = new SimpleActiveSetQPStandaloneSolver();
+//   private final QuadProgSolver solver = new QuadProgSolver(16, 2, 16);
+   private final OASESConstrainedQPSolver solver = new OASESConstrainedQPSolver(null);
+
 
    private final DenseMatrix64F GMatrix = new DenseMatrix64F(3, 8);
    private final DenseMatrix64F HMatrix = new DenseMatrix64F(3, 8);
@@ -155,9 +159,18 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       linearEqualityConstraintB.set(0, 0, 1.0);
       linearEqualityConstraintB.set(1, 0, 1.0);
 
-      solver.solve(quadraticCostGMatrix, quadraticCostFVector, linearEqualityConstraintA, linearEqualityConstraintB, linearInequalityConstraintA, linearInequalityConstraintB, linearInequalityActiveSet, solutionVector);
+      boolean initialize = false;
+      try
+      {
+         solver.solve(quadraticCostGMatrix, quadraticCostFVector, linearEqualityConstraintA, linearEqualityConstraintB, linearInequalityConstraintA, linearInequalityConstraintB, solutionVector, initialize);
+         System.out.println("solutionVector = " + solutionVector);
 
-      System.out.println("solutionVector = " + solutionVector);
+
+      }
+      catch(NoConvergenceException exception)
+      {
+
+      }
    }
 
    private void populateMatrixWithBoxVertices(DenseMatrix64F matrix, BoxShapeDescription descriptionOne)
