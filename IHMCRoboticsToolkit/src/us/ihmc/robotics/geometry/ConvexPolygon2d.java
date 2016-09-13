@@ -666,26 +666,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    }
 
    // here ---------------------
-
-   // nuke this
-   public double distanceToClosestVertex(Point2d point)
-   {
-      checkIfUpToDate();
-      // O(n) for now, maybe there's a faster way?
-
-      double minDistance = Double.POSITIVE_INFINITY;
-
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         Point2d vertex = getVertex(i);
-         double distance = vertex.distance(point);
-         if (distance < minDistance)
-            minDistance = distance;
-      }
-
-      return minDistance;
-   }
-
    /**
     * Returns all of the vertices that are visible from the observerPoint2d, in left to right order.
     * If the observerPoint2d is inside the polygon, returns null.
