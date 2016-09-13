@@ -22,12 +22,12 @@ public class QuadProgSolver extends ConstrainedQPSolver
    QuadProgWrapper qpWrapper;
    DenseMatrix64F negAin = new DenseMatrix64F(0), negAeq = new DenseMatrix64F(0);
 
-   public QuadProgSolver(YoVariableRegistry parentRegistry)
+   public QuadProgSolver()
    {
-      this(1, 0, 0, parentRegistry);
+      this(1, 0, 0);
    }
 
-   public QuadProgSolver(int nvar, int neq, int nin, YoVariableRegistry parentRegistry)
+   public QuadProgSolver(int nvar, int neq, int nin)
    {
       qpWrapper = new QuadProgWrapper(nvar, neq, nin);
       allocateTempraryMatrixOnDemand(nvar, neq, nin);

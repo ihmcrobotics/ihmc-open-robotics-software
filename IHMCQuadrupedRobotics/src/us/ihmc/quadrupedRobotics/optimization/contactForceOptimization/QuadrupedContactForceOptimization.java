@@ -23,7 +23,7 @@ public class QuadrupedContactForceOptimization
    private final ReferenceFrame comFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
    private final ReferenceFrame worldFrame;
-   private static final ConstrainedQPSolver qpSolver = new QuadProgSolver(null);
+   private static final ConstrainedQPSolver qpSolver = new QuadProgSolver();
 
    private final FrameVector comTorqueCommand;
    private final FrameVector comTorqueSolution;

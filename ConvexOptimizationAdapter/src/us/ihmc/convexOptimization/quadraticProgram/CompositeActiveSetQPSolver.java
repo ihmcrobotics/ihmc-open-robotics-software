@@ -13,7 +13,7 @@ public class CompositeActiveSetQPSolver extends ConstrainedQPSolver
 
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    SimpleActiveSetQPStandaloneSolver solver = new SimpleActiveSetQPStandaloneSolver(10);
-   ConstrainedQPSolver fullSolver = new QuadProgSolver(registry);
+   ConstrainedQPSolver fullSolver = new QuadProgSolver();
    //   ConstrainedQPSolver fullSolver = new OASESConstrainedQPSolver(registry);
    boolean[] linearInequalityActiveSet;
 
