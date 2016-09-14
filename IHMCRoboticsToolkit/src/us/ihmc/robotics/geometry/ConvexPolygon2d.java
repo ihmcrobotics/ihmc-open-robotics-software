@@ -40,6 +40,9 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    private int minXminY_index = 0, maxXminY_index = 0, maxXmaxY_index = 0;
    private final int minXmaxY_index = 0;
 
+   // temporary object to avoid garbage generation
+   private final Point3d tempVertex3d = new Point3d();
+
    /**
     * Creates an empty convex polygon.
     */
@@ -663,44 +666,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    }
 
    @Override
-   public ConvexPolygon2d intersectionWith(ConvexPolygon2d convexPolygon)
-   {
-      checkIfUpToDate();
-      ConvexPolygon2d ret = new ConvexPolygon2d();
-      boolean success = ConvexPolygonTools.computeIntersectionOfPolygons(this, convexPolygon, ret);
-      if (!success)
-         ret = null;
-      return ret;
-   }
-
-   public boolean intersectionWith(ConvexPolygon2d convexPolygon, ConvexPolygon2d intersectionToPack)
-   {
-      checkIfUpToDate();
-      return ConvexPolygonTools.computeIntersectionOfPolygons(this, convexPolygon, intersectionToPack);
-   }
-
-   @Override
-   public double distance(Line2d line)
-   {
-      checkIfUpToDate();
-      throw new RuntimeException("Not yet implemented");
-   }
-
-   @Override
-   public double distance(LineSegment2d lineSegment)
-   {
-      checkIfUpToDate();
-      throw new RuntimeException("Not yet implemented");
-   }
-
-   @Override
-   public double distance(ConvexPolygon2d convexPolygon)
-   {
-      checkIfUpToDate();
-      throw new RuntimeException("Not yet implemented");
-   }
-
-   @Override
    public String toString()
    {
       String ret = "";
@@ -719,7 +684,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       throw new RuntimeException("This is a 2d object use applyTransformAndProjectToXYPlane method instead.");
    }
 
-   private final Point3d tempVertex3d = new Point3d();
    @Override
    public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform)
    {
@@ -1063,5 +1027,44 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public Point2d[] intersectionWith(LineSegment2d lineSegment2d)
    {
       return ConvexPolygon2dCalculator.intersectionWithLineSegmentCopy(lineSegment2d, this);
+   }
+
+   // TODO: clean up garbage in / implement the following methods
+   @Override
+   public ConvexPolygon2d intersectionWith(ConvexPolygon2d convexPolygon)
+   {
+      checkIfUpToDate();
+      ConvexPolygon2d ret = new ConvexPolygon2d();
+      boolean success = ConvexPolygonTools.computeIntersectionOfPolygons(this, convexPolygon, ret);
+      if (!success)
+         ret = null;
+      return ret;
+   }
+
+   public boolean intersectionWith(ConvexPolygon2d convexPolygon, ConvexPolygon2d intersectionToPack)
+   {
+      checkIfUpToDate();
+      return ConvexPolygonTools.computeIntersectionOfPolygons(this, convexPolygon, intersectionToPack);
+   }
+
+   @Override
+   public double distance(Line2d line)
+   {
+      checkIfUpToDate();
+      throw new RuntimeException("Not yet implemented");
+   }
+
+   @Override
+   public double distance(LineSegment2d lineSegment)
+   {
+      checkIfUpToDate();
+      throw new RuntimeException("Not yet implemented");
+   }
+
+   @Override
+   public double distance(ConvexPolygon2d convexPolygon)
+   {
+      checkIfUpToDate();
+      throw new RuntimeException("Not yet implemented");
    }
 }
