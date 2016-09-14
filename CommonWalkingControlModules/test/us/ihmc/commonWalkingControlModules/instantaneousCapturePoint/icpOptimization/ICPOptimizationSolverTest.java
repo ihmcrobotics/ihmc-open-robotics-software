@@ -348,7 +348,12 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          return 0.0001;
       }
 
-      @Override public double getFeedbackGain()
+      @Override public double getFeedbackParallelGain()
+      {
+         return 2.0;
+      }
+
+      @Override public double getFeedbackOrthogonalGain()
       {
          return 2.0;
       }
