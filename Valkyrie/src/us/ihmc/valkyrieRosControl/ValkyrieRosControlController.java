@@ -154,10 +154,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    @Override
    protected void init()
    {
-      long maxMemory = Runtime.getRuntime().maxMemory();
-
-      System.out.println("Partying hard with max memory of: " + maxMemory);
-
       /*
        * Create joints
        */
