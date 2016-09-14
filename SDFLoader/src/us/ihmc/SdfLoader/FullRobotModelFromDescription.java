@@ -371,7 +371,9 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    protected void addJointsRecursively(OneDoFJointDescription joint, RigidBody parentBody)
    {
-      Vector3d jointAxis = new Vector3d(joint.getJointAxis());
+      Vector3d jointAxis = new Vector3d();
+      joint.getJointAxis(jointAxis);
+
       Vector3d offset = new Vector3d();
       joint.getOffsetFromParentJoint(offset);
 

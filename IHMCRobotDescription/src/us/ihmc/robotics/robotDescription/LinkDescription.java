@@ -20,10 +20,11 @@ public class LinkDescription
    private final Vector3d centerOfMassOffset = new Vector3d();
    private final DenseMatrix64F momentOfInertia = new DenseMatrix64F(3, 3);
 
-   public Vector3d principalMomentsOfInertia = new Vector3d();
-   public Matrix3d principalAxesRotation = new Matrix3d();
+   private final Vector3d principalMomentsOfInertia = new Vector3d();
+   private final Matrix3d principalAxesRotation = new Matrix3d();
 
    private LinkGraphicsDescription linkGraphics;
+   private CollisionMeshDescription collisionMesh;
 
    public LinkDescription(String name)
    {
@@ -43,6 +44,16 @@ public class LinkDescription
    public void setLinkGraphics(LinkGraphicsDescription linkGraphics)
    {
       this.linkGraphics = linkGraphics;
+   }
+
+   public CollisionMeshDescription getCollisionMesh()
+   {
+      return collisionMesh;
+   }
+
+   public void setCollisionMesh(CollisionMeshDescription collisionMesh)
+   {
+      this.collisionMesh = collisionMesh;
    }
 
    public double getMass()
