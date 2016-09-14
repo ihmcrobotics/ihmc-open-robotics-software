@@ -358,7 +358,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          return 1000.0;
       }
 
-      @Override public boolean scaleFirstStepWeightWithTime()
+      @Override public boolean scaleStepRegularizationWeightWithTime()
       {
          return false;
       }

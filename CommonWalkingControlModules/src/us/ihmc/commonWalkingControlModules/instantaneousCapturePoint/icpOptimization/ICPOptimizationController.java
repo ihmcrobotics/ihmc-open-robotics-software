@@ -44,7 +44,7 @@ public class ICPOptimizationController
    private final BooleanYoVariable useFeedbackRegularization = new BooleanYoVariable("useFeedbackRegularization", registry);
    private final BooleanYoVariable useFeedbackWeightHardening = new BooleanYoVariable("useFeedbackWeightHardening", registry);
 
-   private final BooleanYoVariable scaleFirstStepWeightWithTime = new BooleanYoVariable("scaleFirstStepWeightWithTime", registry);
+   private final BooleanYoVariable scaleStepRegularizationWeightWithTime = new BooleanYoVariable("scaleStepRegularizationWeightWithTime", registry);
    private final BooleanYoVariable scaleFeedbackWeightWithGain = new BooleanYoVariable("scaleFeedbackWeightWithGain", registry);
    private final BooleanYoVariable scaleUpcomingStepWeights = new BooleanYoVariable("scaleUpcomingStepWeights", registry);
 
@@ -113,9 +113,9 @@ public class ICPOptimizationController
 
    private final DoubleYoVariable footstepWeight = new DoubleYoVariable("footstepWeight", registry);
    private final DoubleYoVariable footstepRegularizationWeight = new DoubleYoVariable("footstepRegularizationWeight", registry);
-   private final DoubleYoVariable firstStepWeight = new DoubleYoVariable("firstStepWeight", registry);
    private final DoubleYoVariable feedbackWeight = new DoubleYoVariable("feedbackWeight", registry);
    private final DoubleYoVariable feedbackRegularizationWeight = new DoubleYoVariable("feedbackRegularizationWeight", registry);
+   private final DoubleYoVariable scaledFootstepRegularizationWeight = new DoubleYoVariable("scaledFootstepRegularizationWeight", registry);
    private final DoubleYoVariable scaledFeedbackWeight = new DoubleYoVariable("scaledFeedbackWeight", registry);
    private final DoubleYoVariable feedbackGain = new DoubleYoVariable("feedbackGain", registry);
    private final DoubleYoVariable dynamicRelaxationWeight = new DoubleYoVariable("dynamicRelaxationWeight", registry);
@@ -174,7 +174,7 @@ public class ICPOptimizationController
       useFeedbackRegularization.set(icpOptimizationParameters.useFeedbackRegularization());
       useFeedbackWeightHardening.set(icpOptimizationParameters.useFeedbackWeightHardening());
 
-      scaleFirstStepWeightWithTime.set(icpOptimizationParameters.scaleFirstStepWeightWithTime());
+      scaleStepRegularizationWeightWithTime.set(icpOptimizationParameters.scaleStepRegularizationWeightWithTime());
       scaleFeedbackWeightWithGain.set(icpOptimizationParameters.scaleFeedbackWeightWithGain());
       scaleUpcomingStepWeights.set(icpOptimizationParameters.scaleUpcomingStepWeights());
 
@@ -415,7 +415,7 @@ public class ICPOptimizationController
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
 
-      scaleFirstStepWeightWithTime();
+      scaleStepRegularizationWeightWithTime();
       scaleFeedbackWeightWithGain();
 
       if (isStanding.getBooleanValue())
@@ -475,7 +475,7 @@ public class ICPOptimizationController
             submitFootstepConditionsToSolver(footstepIndex);
 
          if (localUseFootstepRegularization)
-            solver.setFootstepRegularizationWeight(footstepRegularizationWeight.getDoubleValue());
+            solver.setFootstepRegularizationWeight(scaledFootstepRegularizationWeight.getDoubleValue());
       }
 
       computeFinalICPRecursion();
@@ -579,11 +579,7 @@ public class ICPOptimizationController
 
    private void submitFootstepConditionsToSolver(int footstepIndex)
    {
-      double footstepWeight;
-      if (footstepIndex == 0)
-         footstepWeight = firstStepWeight.getDoubleValue();
-      else
-         footstepWeight = this.footstepWeight.getDoubleValue();
+      double footstepWeight = this.footstepWeight.getDoubleValue();
 
       if (localScaleUpcomingStepWeights)
          footstepWeight = footstepWeight / (footstepIndex + 1);
@@ -786,16 +782,16 @@ public class ICPOptimizationController
       }
    }
 
-   private void scaleFirstStepWeightWithTime()
+   private void scaleStepRegularizationWeightWithTime()
    {
-      if (scaleFirstStepWeightWithTime.getBooleanValue())
+      if (scaleStepRegularizationWeightWithTime.getBooleanValue())
       {
          double alpha = timeRemainingInState.getDoubleValue() / singleSupportDuration.getDoubleValue();
-         firstStepWeight.set(footstepWeight.getDoubleValue() / alpha);
+         scaledFootstepRegularizationWeight.set(footstepRegularizationWeight.getDoubleValue() / alpha);
       }
       else
       {
-         firstStepWeight.set(footstepWeight.getDoubleValue());
+         scaledFootstepRegularizationWeight.set(footstepRegularizationWeight.getDoubleValue());
       }
    }
 
