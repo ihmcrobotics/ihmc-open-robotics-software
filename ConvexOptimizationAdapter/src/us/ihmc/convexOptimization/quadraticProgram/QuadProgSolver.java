@@ -1,15 +1,10 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
-//~--- non-JDK imports --------------------------------------------------------
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.QuadProgWrapper;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
-
-//~--- JDK imports ------------------------------------------------------------
 
 public class QuadProgSolver extends ConstrainedQPSolver
 {
@@ -47,15 +42,14 @@ public class QuadProgSolver extends ConstrainedQPSolver
    }
 
    @Override
-   public int solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain, DenseMatrix64F bin, DenseMatrix64F x,
-         boolean initialize) throws NoConvergenceException
+   public int solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain, DenseMatrix64F bin, DenseMatrix64F x, boolean initialize) throws NoConvergenceException
    {
       return solve(Q, f, Aeq, beq, Ain, bin, null, null, x, initialize);
    }
 
    @Override
-   public int solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain, DenseMatrix64F bin, DenseMatrix64F lb,
-         DenseMatrix64F ub, DenseMatrix64F x, boolean initialize) throws NoConvergenceException
+   public int solve(DenseMatrix64F Q, DenseMatrix64F f, DenseMatrix64F Aeq, DenseMatrix64F beq, DenseMatrix64F Ain, DenseMatrix64F bin, DenseMatrix64F lb, DenseMatrix64F ub, DenseMatrix64F x, boolean initialize)
+         throws NoConvergenceException
    {
 
       allocateTempraryMatrixOnDemand(Aeq.numCols, Aeq.numRows, Ain.numRows);
