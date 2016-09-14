@@ -12,6 +12,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
  */
 public class ConvexPolygon2dCalculator
 {
+   private static final double epsilon = 1.0E-10;
+
    /**
     * Returns distance from the point to the boundary of this polygon. The return value
     * is negative if the point is inside the polygon.
@@ -542,9 +544,7 @@ public class ConvexPolygon2dCalculator
       double segmentVectorX = segmentEnd.x - segmentStart.x;
       double segmentVectorY = segmentEnd.y - segmentStart.y;
 
-      double epsilon = 1.0E-10;
       int foundIntersections = 0;
-
       if (polygon.hasExactlyTwoVertices())
       {
          Point2d vertex0 = polygon.getVertex(0);
@@ -581,7 +581,7 @@ public class ConvexPolygon2dCalculator
                pointToPack2.set(segmentStart);
 
             foundIntersections++;
-            if (foundIntersections == 2 && pointToPack1.epsilonEquals(pointToPack2, 1.0E-10))
+            if (foundIntersections == 2 && pointToPack1.epsilonEquals(pointToPack2, epsilon))
                foundIntersections--;
             if (foundIntersections == 2) break;
          }
@@ -593,7 +593,7 @@ public class ConvexPolygon2dCalculator
                pointToPack2.set(segmentEnd);
 
             foundIntersections++;
-            if (foundIntersections == 2 && pointToPack1.epsilonEquals(pointToPack2, 1.0E-10))
+            if (foundIntersections == 2 && pointToPack1.epsilonEquals(pointToPack2, epsilon))
                foundIntersections--;
             if (foundIntersections == 2) break;
          }
@@ -624,7 +624,7 @@ public class ConvexPolygon2dCalculator
             pointToPack2.set(candidateX, candidateY);
 
          foundIntersections++;
-         if (foundIntersections == 2 && pointToPack1.epsilonEquals(pointToPack2, 1.0E-10))
+         if (foundIntersections == 2 && pointToPack1.epsilonEquals(pointToPack2, epsilon))
             foundIntersections--;
          if (foundIntersections == 2) break; // performance only
       }
@@ -726,7 +726,7 @@ public class ConvexPolygon2dCalculator
          }
       }
 
-      if (foundIntersections == 2 && pointToPack1.epsilonEquals(pointToPack2, 1.0E-10))
+      if (foundIntersections == 2 && pointToPack1.epsilonEquals(pointToPack2, epsilon))
          foundIntersections--;
 
       return foundIntersections;
@@ -734,23 +734,44 @@ public class ConvexPolygon2dCalculator
 
    /**
     * This finds the edges of the polygon that intersect the given line. Will pack the edges into edgeToPack1 and
-    * edgeToPack2. Returns number of intersections found. The edges will be ordered according to their index.
+    * edgeToPack2. Returns number of intersections found. An edge parallel to the line can not intersect the edge.
+    * If the line goes through a vertex but is not parallel to an edge adjacent to that vertex this method will
+    * only pack the edge before the vertex, not both edges.
     */
    public static int getIntersectingEdges(Line2d line, LineSegment2d edgeToPack1, LineSegment2d edgeToPack2, ConvexPolygon2d polygon)
    {
+      if (polygon.hasExactlyOneVertex())
+         return 0;
+
       int foundEdges = 0;
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
-         if (doesLineIntersectEdge(line, i, polygon))
+         Point2d startVertex = polygon.getVertex(i);
+         Point2d endVertex = polygon.getNextVertex(i);
+
+         // edge is on the line
+         if (line.isPointOnLine(startVertex) && line.isPointOnLine(endVertex))
+         {
+            if (polygon.hasExactlyTwoVertices())
+               return 0;
+            // set the edges to be the previous and the next edge
+            edgeToPack1.set(polygon.getPreviousVertex(i), startVertex);
+            edgeToPack2.set(endVertex, polygon.getNextVertex(polygon.getNextVertexIndex(i)));
+            return 2;
+         }
+
+         if (line.isPointOnLine(startVertex))
+            continue;
+
+         if (doesLineIntersectEdge(line, i, polygon) || line.isPointOnLine(endVertex))
          {
             if (foundEdges == 0)
-               edgeToPack1.set(polygon.getVertex(i), polygon.getNextVertex(i));
+               edgeToPack1.set(startVertex, endVertex);
             else
-               edgeToPack2.set(polygon.getVertex(i), polygon.getNextVertex(i));
+               edgeToPack2.set(startVertex, endVertex);
             foundEdges++;
          }
 
-         // bug: if the line goes through two vertices we get up to four intersecting edges.
          if (foundEdges == 2) break; // performance only
       }
 
@@ -793,7 +814,7 @@ public class ConvexPolygon2dCalculator
       double denumerator = direction1X / direction2X - direction1Y / direction2Y;
 
       // check if lines parallel:
-      if (Math.abs(denumerator) < 10E-10)
+      if (Math.abs(denumerator) < epsilon)
          return Double.NaN;
 
       double numerator = (point1Y - point2Y) / direction2Y - (point1X - point2X) / direction2X;
@@ -839,7 +860,7 @@ public class ConvexPolygon2dCalculator
       double edgeDirectionY = edgeEnd.y - edgeStart.y;
 
       double crossProduct = -edgeDirectionY * direction.x + edgeDirectionX * direction.y;
-      return Math.abs(crossProduct) < 1.0E-10;
+      return Math.abs(crossProduct) < epsilon;
    }
 
    // --- Methods that generate garbage ---
@@ -896,6 +917,8 @@ public class ConvexPolygon2dCalculator
       int edges = getIntersectingEdges(line, edge1, edge2, polygon);
       if (edges == 2)
          return new LineSegment2d[] {edge1, edge2};
+      if (edges == 1)
+         return new LineSegment2d[] {edge1};
       return null;
    }
 

@@ -1072,6 +1072,11 @@ public class ConvexPolygon2dCalculatorTest
       Point2d vertex3 = new Point2d(1.0, 0.0);
       Point2d vertex4 = new Point2d(0.0, 0.0);
 
+      LineSegment2d edge1 = new LineSegment2d(vertex1, vertex2);
+      LineSegment2d edge2 = new LineSegment2d(vertex2, vertex3);
+      LineSegment2d edge3 = new LineSegment2d(vertex3, vertex4);
+      LineSegment2d edge4 = new LineSegment2d(vertex4, vertex1);
+
       // add in order so update does not change indices:
       ConvexPolygon2d polygon = new ConvexPolygon2d();
       polygon.addVertex(vertex1);
@@ -1084,23 +1089,57 @@ public class ConvexPolygon2dCalculatorTest
       LineSegment2d result2 = new LineSegment2d();
 
       Line2d line1 = new Line2d(new Point2d(0.5, 0.5), new Vector2d(-1.0, 0.0));
-      assertEquals(ConvexPolygon2dCalculator.getIntersectingEdges(line1, result1, result2, polygon), 2);
-      assertTrue(result1.epsilonEquals(new LineSegment2d(vertex2, vertex3), epsilon));
-      assertTrue(result2.epsilonEquals(new LineSegment2d(vertex4, vertex1), epsilon));
-      LineSegment2d[] edgesFound1 = ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line1, polygon);
-      assertTrue(edgesFound1.length == 2);
-      assertTrue(edgesFound1[0].epsilonEquals(new LineSegment2d(vertex2, vertex3), epsilon));
-      assertTrue(edgesFound1[1].epsilonEquals(new LineSegment2d(vertex4, vertex1), epsilon));
+      LineSegment2d[] expected1 = new LineSegment2d[] {edge4, edge2};
+      assertEdgesEqual(expected1, ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line1, polygon), false);
+      assertEquals(2, ConvexPolygon2dCalculator.getIntersectingEdges(line1, result1, result2, polygon));
+      assertEdgesEqual(expected1, new LineSegment2d[] {result1, result2}, false);
 
       Line2d line2 = new Line2d(new Point2d(0.5, 1.5), new Vector2d(1.0, 0.0));
-      assertEquals(ConvexPolygon2dCalculator.getIntersectingEdges(line2, result1, result2, polygon), 0);
-      LineSegment2d[] edgesFound2 = ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line2, polygon);
-      assertTrue(edgesFound2 == null);
+      LineSegment2d[] expected2 = null;
+      assertEdgesEqual(expected2, ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line2, polygon), false);
+      assertEquals(0, ConvexPolygon2dCalculator.getIntersectingEdges(line2, result1, result2, polygon));
 
       Line2d line3 = new Line2d(new Point2d(0.0, 2.0), new Vector2d(1.0, -1.0));
-      assertEquals(ConvexPolygon2dCalculator.getIntersectingEdges(line3, result1, result2, polygon), 2);
-      assertTrue(result1.epsilonEquals(new LineSegment2d(vertex1, vertex2), epsilon));
-      assertTrue(result2.epsilonEquals(new LineSegment2d(vertex2, vertex3), epsilon));
+      LineSegment2d[] expected3 = new LineSegment2d[] {edge1};
+      assertEdgesEqual(expected3, ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line3, polygon), false);
+      assertEquals(1, ConvexPolygon2dCalculator.getIntersectingEdges(line3, result1, result2, polygon));
+      assertEdgesEqual(expected3, new LineSegment2d[] {result1}, false);
+
+      Line2d line4 = new Line2d(new Point2d(0.0, 0.0), new Vector2d(1.0, 1.0));
+      LineSegment2d[] expected4 = new LineSegment2d[] {edge1, edge3};
+      assertEdgesEqual(expected4, ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line4, polygon), false);
+      assertEquals(2, ConvexPolygon2dCalculator.getIntersectingEdges(line4, result1, result2, polygon));
+      assertEdgesEqual(expected4, new LineSegment2d[] {result1, result2}, false);
+
+      Line2d line5 = new Line2d(new Point2d(-0.5, -0.5), new Vector2d(0.7, 0.7));
+      LineSegment2d[] expected5 = new LineSegment2d[] {edge1, edge3};
+      assertEdgesEqual(expected5, ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line5, polygon), false);
+      assertEquals(2, ConvexPolygon2dCalculator.getIntersectingEdges(line5, result1, result2, polygon));
+      assertEdgesEqual(expected5, new LineSegment2d[] {result1, result2}, false);
+
+      Line2d line6 = new Line2d(new Point2d(0.0, -0.5), new Vector2d(0.0, 0.7));
+      LineSegment2d[] expected6 = new LineSegment2d[] {edge1, edge3};
+      assertEdgesEqual(expected6, ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line6, polygon), false);
+      assertEquals(2, ConvexPolygon2dCalculator.getIntersectingEdges(line6, result1, result2, polygon));
+      assertEdgesEqual(expected6, new LineSegment2d[] {result1, result2}, false);
+
+      Line2d line7 = new Line2d(new Point2d(-0.5, 1.5), new Vector2d(1.0, -1.0));
+      LineSegment2d[] expected7 = new LineSegment2d[] {edge2, edge4};
+      assertEdgesEqual(expected7, ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line7, polygon), false);
+      assertEquals(2, ConvexPolygon2dCalculator.getIntersectingEdges(line7, result1, result2, polygon));
+      assertEdgesEqual(expected7, new LineSegment2d[] {result1, result2}, false);
+
+      Line2d line8 = new Line2d(new Point2d(1.0, 0.5), new Vector2d(0.0, -0.2));
+      LineSegment2d[] expected8 = new LineSegment2d[] {edge1, edge3};
+      assertEdgesEqual(expected8, ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line8, polygon), false);
+      assertEquals(2, ConvexPolygon2dCalculator.getIntersectingEdges(line8, result1, result2, polygon));
+      assertEdgesEqual(expected8, new LineSegment2d[] {result1, result2}, false);
+
+      Line2d line9 = new Line2d(new Point2d(-0.3, 1.0), new Vector2d(0.2, 0.0));
+      LineSegment2d[] expected9 = new LineSegment2d[] {edge4, edge2};
+      assertEdgesEqual(expected9, ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line9, polygon), false);
+      assertEquals(2, ConvexPolygon2dCalculator.getIntersectingEdges(line9, result1, result2, polygon));
+      assertEdgesEqual(expected9, new LineSegment2d[] {result1, result2}, false);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -1110,6 +1149,9 @@ public class ConvexPolygon2dCalculatorTest
       // line polygon
       Point2d vertex1 = new Point2d(1.0, 1.0);
       Point2d vertex2 = new Point2d(1.0, 0.0);
+
+      LineSegment2d edge1 = new LineSegment2d(vertex1, vertex2);
+      LineSegment2d edge2 = new LineSegment2d(vertex2, vertex1);
 
       // add in order so update does not change indices:
       ConvexPolygon2d polygon = new ConvexPolygon2d();
@@ -1121,12 +1163,20 @@ public class ConvexPolygon2dCalculatorTest
       LineSegment2d result2 = new LineSegment2d();
 
       Line2d line1 = new Line2d(new Point2d(0.5, 1.5), new Vector2d(0.0, 0.1));
-      assertEquals(ConvexPolygon2dCalculator.getIntersectingEdges(line1, result1, result2, polygon), 0);
+      LineSegment2d[] expected1 = null;
+      assertEdgesEqual(expected1, ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line1, polygon), false);
+      assertEquals(0, ConvexPolygon2dCalculator.getIntersectingEdges(line1, result1, result2, polygon));
 
       Line2d line2 = new Line2d(new Point2d(-0.5, 0.0), new Vector2d(0.75, 0.25));
-      assertEquals(ConvexPolygon2dCalculator.getIntersectingEdges(line2, result1, result2, polygon), 2);
-      assertTrue(result1.epsilonEquals(new LineSegment2d(vertex1, vertex2), epsilon));
-      assertTrue(result2.epsilonEquals(new LineSegment2d(vertex2, vertex1), epsilon));
+      LineSegment2d[] expected2 = new LineSegment2d[] {edge1, edge2};
+      assertEdgesEqual(expected2, ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line2, polygon), false);
+      assertEquals(2, ConvexPolygon2dCalculator.getIntersectingEdges(line2, result1, result2, polygon));
+      assertEdgesEqual(expected2, new LineSegment2d[] {result1, result2}, false);
+
+      Line2d line3 = new Line2d(new Point2d(1.0, -0.5), new Vector2d(0.0, 0.1));
+      LineSegment2d[] expected3 = null;
+      assertEdgesEqual(expected3, ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line3, polygon), false);
+      assertEquals(0, ConvexPolygon2dCalculator.getIntersectingEdges(line3, result1, result2, polygon));
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -1143,12 +1193,15 @@ public class ConvexPolygon2dCalculatorTest
 
       Line2d line1 = new Line2d(new Point2d(0.0, 0.0), new Vector2d(-0.5, -0.25));
       assertEquals(ConvexPolygon2dCalculator.getIntersectingEdges(line1, result1, result2, polygon), 0);
+      assertTrue(ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line1, polygon) == null);
 
       Line2d line2 = new Line2d(new Point2d(0.5, 1.5), new Vector2d(0.0, 0.1));
       assertEquals(ConvexPolygon2dCalculator.getIntersectingEdges(line2, result1, result2, polygon), 0);
+      assertTrue(ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line2, polygon) == null);
 
       Line2d line3 = new Line2d(new Point2d(-1.0, -0.5), new Vector2d(1.0, 0.1));
       assertEquals(ConvexPolygon2dCalculator.getIntersectingEdges(line3, result1, result2, polygon), 0);
+      assertTrue(ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line3, polygon) == null);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -1163,6 +1216,7 @@ public class ConvexPolygon2dCalculatorTest
 
       Line2d line1 = new Line2d(new Point2d(0.5, 1.5), new Vector2d(0.0, 0.1));
       assertEquals(ConvexPolygon2dCalculator.getIntersectingEdges(line1, result1, result2, polygon), 0);
+      assertTrue(ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line1, polygon) == null);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -1211,6 +1265,10 @@ public class ConvexPolygon2dCalculatorTest
       result2.set(0.0, 0.0);
       assertPointsEqual(expected6, ConvexPolygon2dCalculator.intersectionWithLineCopy(line6, polygon), false);
       assertTrue(ConvexPolygon2dCalculator.intersectionWithLine(line6, result1, result2, polygon) == 0);
+
+      Line2d line7 = new Line2d(new Point2d(0.0, -1.5), new Vector2d(0.0, 2.0));
+      Point2d[] expected7 = new Point2d[] {new Point2d(0.0, 0.0), new Point2d(0.0, 1.0)};
+      assertPointsEqual(expected7, ConvexPolygon2dCalculator.intersectionWithLineCopy(line7, polygon), false);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -1696,7 +1754,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 3000)
    public void testIntersectionWithLineSegment1()
    {
       ConvexPolygon2d polygon = new ConvexPolygon2d();
@@ -1988,6 +2046,34 @@ public class ConvexPolygon2dCalculatorTest
       Point2d[] expected9 = new Point2d[] {new Point2d(3.0, 3.0), new Point2d(2.0, 2.0)};
       assertPointsEqual(expected9, ConvexPolygon2dCalculator.intersectionWithLineSegmentCopy(segment9, polygon), false);
       assertTrue(ConvexPolygon2dCalculator.intersectionWithLineSegment(segment9, result1, result2, polygon) == 2);
+   }
+
+   private static void assertEdgesEqual(LineSegment2d[] expected, LineSegment2d[] actual, boolean enforceOrder)
+   {
+      if (expected == null || actual == null)
+      {
+         assertTrue("Expected did not equal actual. One of them was null.", expected == actual);
+         return;
+      }
+
+      assertEquals("Array lengths are not equal.", expected.length, actual.length);
+      int points = expected.length;
+      for (int i = 0; i < points; i++)
+      {
+         if (enforceOrder)
+         {
+            assertEdgesEqual(expected[i], actual[i]);
+            continue;
+         }
+
+         boolean foundPoint = false;
+         for (int j = 0; j < points; j++)
+         {
+            if (expected[i].epsilonEquals(actual[j], epsilon))
+               foundPoint = true;
+         }
+         assertTrue("Did not find edge.", foundPoint);
+      }
    }
 
    private static void assertEdgesEqual(LineSegment2d expected, LineSegment2d actual)
