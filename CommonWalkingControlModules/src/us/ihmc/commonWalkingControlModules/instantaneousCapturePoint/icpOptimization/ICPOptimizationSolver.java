@@ -54,6 +54,10 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F feedbackCost_h;
    protected final DenseMatrix64F feedbackResidualCost;
 
+   protected final DenseMatrix64F dynamicRelaxationCost_H;
+   protected final DenseMatrix64F dynamicRelaxationCost_h;
+   protected final DenseMatrix64F dynamicRelaxationResidualCost;
+
    protected final DenseMatrix64F feedbackRegularizationCost_H;
    protected final DenseMatrix64F feedbackRegularizationCost_h;
    protected final DenseMatrix64F feedbackRegularizationResidualCost;
@@ -98,6 +102,7 @@ public class ICPOptimizationSolver
    protected final ArrayList<DenseMatrix64F> footstepWeights = new ArrayList<>();
    protected final DenseMatrix64F footstepRegularizationWeight = new DenseMatrix64F(2, 2);
    protected final DenseMatrix64F feedbackWeight = new DenseMatrix64F(2, 2);
+   protected final DenseMatrix64F dynamicRelaxationWeight = new DenseMatrix64F(2, 2);
    protected final DenseMatrix64F feedbackRegularizationWeight = new DenseMatrix64F(2, 2);
    protected final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
@@ -108,6 +113,7 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F lagrangeMultiplierSolution;
    protected final DenseMatrix64F footstepLocationSolution;
    protected final DenseMatrix64F feedbackDeltaSolution;
+   protected final DenseMatrix64F dynamicRelaxationSolution;
    protected final DenseMatrix64F feedbackLocation;
    protected final DenseMatrix64F previousFeedbackDeltaSolution;
 
@@ -119,6 +125,7 @@ public class ICPOptimizationSolver
    private final DenseMatrix64F footstepRegularizationCostToGo;
    private final DenseMatrix64F feedbackCostToGo;
    private final DenseMatrix64F feedbackRegularizationCostToGo;
+   private final DenseMatrix64F dynamicRelaxationCostToGo;
 
    protected final int maximumNumberOfFootstepsToConsider;
    private final int maximumNumberOfVertices;
@@ -131,6 +138,7 @@ public class ICPOptimizationSolver
    protected int numberOfLagrangeMultipliers = 2;
 
    private int feedbackCMPIndex;
+   private int dynamicRelaxtionIndex;
    private int cmpConstraintIndex;
    private int lagrangeMultiplierIndex;
 
@@ -180,6 +188,10 @@ public class ICPOptimizationSolver
       feedbackCost_h = new DenseMatrix64F(2, 1);
       feedbackResidualCost = new DenseMatrix64F(1, 1);
 
+      dynamicRelaxationCost_H = new DenseMatrix64F(2, 2);
+      dynamicRelaxationCost_h = new DenseMatrix64F(2, 1);
+      dynamicRelaxationResidualCost = new DenseMatrix64F(1, 1);
+
       feedbackRegularizationCost_H = new DenseMatrix64F(2, 2);
       feedbackRegularizationCost_h = new DenseMatrix64F(2, 1);
       feedbackRegularizationResidualCost = new DenseMatrix64F(1, 1);
@@ -227,6 +239,7 @@ public class ICPOptimizationSolver
       freeVariableSolution = new DenseMatrix64F(maximumNumberOfFreeVariables, 1);
       footstepLocationSolution = new DenseMatrix64F(2 * maximumNumberOfFootstepsToConsider, 1);
       feedbackDeltaSolution = new DenseMatrix64F(2, 1);
+      dynamicRelaxationSolution = new DenseMatrix64F(2, 1);
       feedbackLocation = new DenseMatrix64F(2, 1);
       previousFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
 
@@ -238,6 +251,7 @@ public class ICPOptimizationSolver
       footstepRegularizationCostToGo = new DenseMatrix64F(1, 1);
       feedbackCostToGo = new DenseMatrix64F(1, 1);
       feedbackRegularizationCostToGo = new DenseMatrix64F(1, 1);
+      dynamicRelaxationCostToGo = new DenseMatrix64F(1, 1);
 
       activeSetSolver = new SimpleEfficientActiveSetQPSolver();
 
@@ -344,14 +358,15 @@ public class ICPOptimizationSolver
          numberOfLagrangeMultipliers = 2;
 
          feedbackCMPIndex = 2 * numberOfFootstepsToConsider;
+         dynamicRelaxtionIndex = feedbackCMPIndex + 2;
 
          if (numberOfVertices > 0)
          {
             numberOfLagrangeMultipliers += 4;
-            cmpConstraintIndex = feedbackCMPIndex + 2;
+            cmpConstraintIndex = dynamicRelaxtionIndex + 2;
          }
 
-         numberOfFreeVariables = numberOfFootstepVariables + 2;
+         numberOfFreeVariables = numberOfFootstepVariables + 4;
 
          lagrangeMultiplierIndex = cmpConstraintIndex + numberOfVertexVariables;
       }
@@ -388,6 +403,10 @@ public class ICPOptimizationSolver
       feedbackCost_h.zero();
       feedbackResidualCost.zero();
 
+      dynamicRelaxationCost_H.zero();
+      dynamicRelaxationCost_h.zero();
+      dynamicRelaxationResidualCost.zero();
+
       feedbackRegularizationCost_H.zero();
       feedbackRegularizationCost_h.zero();
       feedbackRegularizationResidualCost.zero();
@@ -419,12 +438,14 @@ public class ICPOptimizationSolver
       footstepRegularizationWeight.zero();
       feedbackWeight.zero();
       feedbackGain.zero();
+      dynamicRelaxationWeight.zero();
 
       solution.zero();
       lagrangeMultiplierSolution.zero();
       freeVariableSolution.zero();
       footstepLocationSolution.zero();
       feedbackDeltaSolution.zero();
+      dynamicRelaxationSolution.zero();
       feedbackLocation.zero();
 
       hasFootstepRegularizationTerm = false;
@@ -495,12 +516,13 @@ public class ICPOptimizationSolver
       referenceFootstepLocations.get(footstepIndex).set(1, 0, referenceFootstepLocation.getY());
    }
 
-   public void setFeedbackConditions(double feedbackWeight, double feedbackGain, double omega)
+   public void setFeedbackConditions(double feedbackWeight, double feedbackGain, double dynamicRelaxationWeight, double omega)
    {
-      this.setFeedbackConditions(feedbackWeight, feedbackWeight, feedbackGain, feedbackGain, omega);
+      this.setFeedbackConditions(feedbackWeight, feedbackWeight, feedbackGain, feedbackGain, dynamicRelaxationWeight,omega);
    }
 
-   public void setFeedbackConditions(double feedbackXWeight, double feedbackYWeight, double feedbackXGain, double feedbackYGain, double omega)
+   public void setFeedbackConditions(double feedbackXWeight, double feedbackYWeight, double feedbackXGain, double feedbackYGain, double dynamicRelaxationWeight,
+         double omega)
    {
       feedbackXGain = feedbackXGain / omega;
       feedbackYGain = feedbackYGain / omega;
@@ -515,6 +537,9 @@ public class ICPOptimizationSolver
       this.feedbackGain.zero();
       this.feedbackGain.set(0, 0, feedbackXGain);
       this.feedbackGain.set(1, 1, feedbackYGain);
+
+      CommonOps.setIdentity(this.dynamicRelaxationWeight);
+      CommonOps.scale(dynamicRelaxationWeight, this.dynamicRelaxationWeight);
    }
 
    public void setFeedbackRegularizationWeight(double regularizationWeight)
@@ -613,11 +638,7 @@ public class ICPOptimizationSolver
       if (useFeedback)
       {
          addFeedbackTask();
-
-         /*
-         if (allowActiveCMPOptimization)
-            addActiveCMPOptimizationTask();
-            */
+         addDynamicRelaxationTask();
 
          if (hasFeedbackRegularizationTerm)
             addFeedbackRegularizationTask();
@@ -650,14 +671,9 @@ public class ICPOptimizationSolver
       if (useFeedback)
       {
          extractFeedbackDeltaSolution(feedbackDeltaSolution);
+         extractDynamicRelaxationSolution(dynamicRelaxationSolution);
          setPreviousFeedbackDeltaSolution(feedbackDeltaSolution);
       }
-      /*
-      if (allowActiveCMPOptimization)
-      {
-         extractActiveCMPSolution(activeCMPSolution);
-      }
-      */
 
       computeFeedbackLocation();
 
@@ -669,8 +685,17 @@ public class ICPOptimizationSolver
       MatrixTools.setMatrixBlock(feedbackCost_H, 0, 0, feedbackWeight, 0, 0, 2, 2, 1.0);
       feedbackCost_h.zero();
 
-      MatrixTools.addMatrixBlock(solverInput_H, numberOfFootstepVariables, numberOfFootstepVariables, feedbackCost_H, 0, 0, 2, 2, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h, numberOfFootstepVariables, 0, feedbackCost_h, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_H, feedbackCMPIndex, feedbackCMPIndex, feedbackCost_H, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h, feedbackCMPIndex, 0, feedbackCost_h, 0, 0, 2, 1, 1.0);
+   }
+
+   protected void addDynamicRelaxationTask()
+   {
+      MatrixTools.setMatrixBlock(dynamicRelaxationCost_H, 0, 0, dynamicRelaxationWeight, 0, 0, 2, 2, 1.0);
+      dynamicRelaxationCost_h.zero();
+
+      MatrixTools.addMatrixBlock(solverInput_H, dynamicRelaxtionIndex, dynamicRelaxtionIndex, dynamicRelaxationCost_H, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_h, dynamicRelaxtionIndex, 0, dynamicRelaxationCost_h, 0, 0, 2, 1, 1.0);
    }
 
    private final DenseMatrix64F tmpFootstepObjective = new DenseMatrix64F(2, 1);
@@ -739,19 +764,6 @@ public class ICPOptimizationSolver
       MatrixTools.addMatrixBlock(solverInput_h, 0, 0, footstepRegularizationCost_h, 0, 0, numberOfFootstepVariables, 1, 1.0);
    }
 
-   /*
-   private void addActiveCMPOptimizationTask()
-   {
-      MatrixTools.setMatrixBlock(activeCMP_H, 0, 0, activeCMPWeight, 0, 0, 2, 2, 1.0);
-
-      activeCMP_h.set(activeCMP);
-      CommonOps.mult(activeCMPWeight, activeCMP, activeCMP_h);
-
-      MatrixTools.addMatrixBlock(solverInput_H, activeCMPIndex, activeCMPIndex, activeCMP_H, 0, 0, 2, 2, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h, activeCMPIndex, 0, activeCMP_h, 0, 0, 2, 1, 1.0);
-   }
-   */
-
    private void addCMPLocationConstraint()
    {
       computeCMPLocationConstraint();
@@ -792,7 +804,7 @@ public class ICPOptimizationSolver
       stanceCMPSum_beq.set(0, 0, 1.0);
       stanceCMPSum_beq.set(1, 0, 1.0);
 
-      MatrixTools.setMatrixBlock(stanceCMP_Aeq, 0, 0, stanceCMPDynamics_Aeq, 0, 0, (cmpConstraintIndex - feedbackCMPIndex) + numberOfVertexVariables, 2, 1.0);
+      MatrixTools.setMatrixBlock(stanceCMP_Aeq, 0, 0, stanceCMPDynamics_Aeq, 0, 0, (cmpConstraintIndex - dynamicRelaxtionIndex) + numberOfVertexVariables, 2, 1.0);
       MatrixTools.setMatrixBlock(stanceCMP_Aeq, 2, 2, stanceCMPSum_Aeq, 0, 0, numberOfVertexVariables, 2, 1.0);
 
       MatrixTools.setMatrixBlock(stanceCMP_beq, 0, 0, stanceCMPDynamics_beq, 0, 0, 2, 1, 1.0);
@@ -813,10 +825,6 @@ public class ICPOptimizationSolver
          addFeedbackToDynamicConstraint(currentStateProjection);
       if (useStepAdjustment)
          addFootstepRecursionsToDynamicConstraint();
-      /*
-      if (allowActiveCMPOptimization)
-         addActiveCMPToDynamicConstraint();
-         */
 
       CommonOps.scale(currentStateProjection, currentICP);
 
@@ -831,10 +839,13 @@ public class ICPOptimizationSolver
 
    private void addFeedbackToDynamicConstraint(double currentStateProjection)
    {
+      CommonOps.setIdentity(identity);
+
       CommonOps.invert(feedbackGain);
       CommonOps.scale(currentStateProjection, feedbackGain);
 
       MatrixTools.addMatrixBlock(dynamics_Aeq, feedbackCMPIndex, 0, feedbackGain, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(dynamics_Aeq, dynamicRelaxtionIndex, 0, identity, 0, 0, 2, 2, 1.0);
    }
 
    private void addFootstepRecursionsToDynamicConstraint()
@@ -844,14 +855,6 @@ public class ICPOptimizationSolver
          MatrixTools.addMatrixBlock(dynamics_Aeq, 2 * i, 0, footstepRecursionMutlipliers.get(i), 0, 0, 2, 2, 1.0);
       }
    }
-
-   /*
-   private void addActiveCMPToDynamicConstraint()
-   {
-      CommonOps.setIdentity(identity);
-      MatrixTools.addMatrixBlock(dynamics_Aeq, activeCMPIndex, 0, identity, 0, 0, 2, 2, activeCMPProjection);
-   }
-   */
 
    private void assembleTotalProblem()
    {
@@ -904,12 +907,10 @@ public class ICPOptimizationSolver
       MatrixTools.setMatrixBlock(feedbackSolutionToPack, 0, 0, solution, feedbackCMPIndex, 0, 2, 1, 1.0);
    }
 
-   /*
-   private void extractActiveCMPSolution(DenseMatrix64F activeCMPSolutionToPack)
+   private void extractDynamicRelaxationSolution(DenseMatrix64F dynamicRelaxationSolutionToPack)
    {
-      MatrixTools.setMatrixBlock(activeCMPSolutionToPack, 0, 0, solution, activeCMPIndex, 0, 2, 1, 1.0);
+      MatrixTools.setMatrixBlock(dynamicRelaxationSolutionToPack, 0, 0, solution, dynamicRelaxtionIndex, 0, 2, 1, 1.0);
    }
-   */
 
    private void extractLagrangeMultiplierSolution(DenseMatrix64F lagrangeMultiplierSolutionToPack)
    {
@@ -946,6 +947,7 @@ public class ICPOptimizationSolver
       footstepRegularizationCostToGo.zero();
       feedbackCostToGo.zero();
       feedbackRegularizationCostToGo.zero();
+      dynamicRelaxationCostToGo.zero();
 
       tmpCost.zero();
       tmpFootstepCost.zero();
@@ -967,6 +969,9 @@ public class ICPOptimizationSolver
 
       CommonOps.mult(feedbackCost_H, feedbackDeltaSolution, tmpFeedbackCost);
       CommonOps.multTransA(feedbackDeltaSolution, tmpFeedbackCost, feedbackCostToGo);
+
+      CommonOps.mult(dynamicRelaxationCost_H, dynamicRelaxationSolution, tmpFeedbackCost);
+      CommonOps.multTransA(dynamicRelaxationSolution, tmpFeedbackCost, dynamicRelaxationCostToGo);
 
       CommonOps.mult(feedbackRegularizationCost_H, feedbackDeltaSolution, tmpFeedbackCost);
       CommonOps.multTransA(feedbackDeltaSolution, tmpFeedbackCost, feedbackRegularizationCostToGo);
@@ -992,7 +997,8 @@ public class ICPOptimizationSolver
       CommonOps.addEquals(footstepCostToGo, footstepResidualCost);
       CommonOps.addEquals(footstepRegularizationCostToGo, footstepRegularizationResidualCost);
       CommonOps.addEquals(feedbackCostToGo, feedbackResidualCost);
-      CommonOps.addEquals(feedbackResidualCost, feedbackRegularizationResidualCost);
+      CommonOps.addEquals(feedbackRegularizationCostToGo, feedbackRegularizationResidualCost);
+      CommonOps.addEquals(dynamicRelaxationCostToGo, dynamicRelaxationResidualCost);
    }
 
    public void getFootstepSolutionLocation(int footstepIndex, FramePoint2d footstepLocationToPack)
@@ -1015,15 +1021,6 @@ public class ICPOptimizationSolver
       cmpFeedbackToPack.setX(feedbackLocation.get(0, 0));
       cmpFeedbackToPack.setY(feedbackLocation.get(1, 0));
    }
-
-   /*
-   public void getActiveCMP(FramePoint2d activeCMPToPack)
-   {
-      activeCMPToPack.setToZero();
-      activeCMPToPack.setX(activeCMPSolution.get(0, 0));
-      activeCMPToPack.setY(activeCMPSolution.get(1, 0));
-   }
-   */
 
    public double getCostToGo()
    {
@@ -1048,5 +1045,10 @@ public class ICPOptimizationSolver
    public double getFeedbackRegularizationCostToGo()
    {
       return feedbackRegularizationCostToGo.get(0, 0);
+   }
+
+   public double getDynamicRelaxationCostToGo()
+   {
+      return dynamicRelaxationCostToGo.get(0, 0);
    }
 }

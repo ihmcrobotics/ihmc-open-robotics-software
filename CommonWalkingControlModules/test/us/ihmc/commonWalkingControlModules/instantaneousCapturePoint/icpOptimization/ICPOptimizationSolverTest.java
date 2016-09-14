@@ -43,7 +43,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          double feedbackWeight = 10.0 * random.nextDouble();
          double feedbackGain = 10.0 * random.nextDouble();
 
-         super.setFeedbackConditions(feedbackWeight, feedbackGain, 3.5);
+         super.setFeedbackConditions(feedbackWeight, feedbackGain, 1000.0, 3.5);
 
          checkFeedbackMatrices(feedbackWeight, feedbackGain);
       }
@@ -159,7 +159,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
       int numberOffootstepsToConsider = 0;
       super.submitProblemConditions(numberOffootstepsToConsider, true, true, false); //, false);
-      super.setFeedbackConditions(2.0, 0.001, omega);
+      super.setFeedbackConditions(2.0, 0.001, 1000.0, omega);
 
       double finalICPRecursionMultiplier = Math.exp(-omega * initialDoubleSupportDuration);
       FramePoint2d finalICP = new FramePoint2d(worldFrame, 0.2, 0.115);
@@ -205,7 +205,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          int feedbackIndex = 2 * numberOfFootstepsToConsider;
 
          super.submitProblemConditions(numberOfFootstepsToConsider, true, true, false); //, false);
-         super.setFeedbackConditions(feedbackWeight, feedbackGain, omega);
+         super.setFeedbackConditions(feedbackWeight, feedbackGain, 1000.0, omega);
 
          checkFeedbackMatrices(feedbackWeight, feedbackGain);
          testDimension(numberOfFootstepsToConsider, numberOfVertices, true, true, false, false);
@@ -353,9 +353,9 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          return 2.0;
       }
 
-      @Override public double getActiveCMPWeight()
+      @Override public double getDynamicRelaxationWeight()
       {
-         return 2.0;
+         return 1000.0;
       }
 
       @Override public boolean scaleFirstStepWeightWithTime()
@@ -394,11 +394,6 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       }
 
       @Override public boolean useFeedbackWeightHardening()
-      {
-         return false;
-      }
-
-      @Override public boolean useActiveCMPOptimization()
       {
          return false;
       }
