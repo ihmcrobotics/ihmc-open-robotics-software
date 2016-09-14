@@ -17,6 +17,7 @@ import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionRes
 import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanTarget;
 
 public class SimpleCollisionDetectorTest
 {
@@ -145,12 +146,12 @@ public class SimpleCollisionDetectorTest
       assertEquals(-0.013845853834199007, distance, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
    @Test(timeout = 30000)
    public void testBoxToBoxCollisions()
    {
-      SimpleCollisionDetector detector = new SimpleCollisionDetector();
-//      GdxCollisionDetector detector = new GdxCollisionDetector(10.0);
+//      SimpleCollisionDetector detector = new SimpleCollisionDetector();
+      GdxCollisionDetector detector = new GdxCollisionDetector(10.0);
 
       CollisionShapeFactory shapeFactory = detector.getShapeFactory();
 

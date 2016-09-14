@@ -12,7 +12,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetectorTest.class
+   us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetectorTest.class,
+   us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetectorTest.class
 })
 
 public class SimulationConstructionSetAInDevelopmentTestSuite
