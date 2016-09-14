@@ -165,13 +165,13 @@ public class DefaultCollisionHandler implements CollisionHandler
 
          if (shapeTwoIsGround)
          {
-            System.out.println("shapeTwoIsGround");
+//            System.out.println("shapeTwoIsGround");
             Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
             collisionOccurred = externalForcePointOne.resolveCollision(velocityWorld , negative_normal, epsilon, mu, p_world);    // link1.epsilon, link1.mu, p_world);
          }
          else if (shapeOneIsGround)
          {
-            System.out.println("shapeOneIsGround");
+//            System.out.println("shapeOneIsGround");
             Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
             collisionOccurred = externalForcePointTwo.resolveCollision(velocityWorld, normal, epsilon, mu, p_world);    // link1.epsilon, link1.mu, p_world);
          }
