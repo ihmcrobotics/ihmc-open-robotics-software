@@ -18,13 +18,13 @@ public class FloatArrayCollector<From extends Number> implements Collector<From,
         float[] curr = new float[64];
         int size;
 
-        public void add(From d) {
+        void add(From d) {
             if (curr.length == size)
                 curr = Arrays.copyOf(curr, size * 2);
             curr[size++] = d.floatValue();
         }
 
-        public Buffer join(Buffer other) {
+        Buffer join(Buffer other) {
             Buffer res = new Buffer();
             res.curr = Arrays.copyOf(curr, size + other.size);
             System.arraycopy(other.curr, 0, res.curr, size, other.size);
@@ -32,11 +32,15 @@ public class FloatArrayCollector<From extends Number> implements Collector<From,
             return res;
         }
 
-        public float[] toArray() {
+        float[] toArray() {
             if (size != curr.length)
                 curr = Arrays.copyOf(curr, size);
             return curr;
         }
+    }
+
+    private FloatArrayCollector() {
+
     }
 
     @Override
@@ -62,5 +66,9 @@ public class FloatArrayCollector<From extends Number> implements Collector<From,
     @Override
     public Set<Characteristics> characteristics() {
         return Collections.emptySet();
+    }
+
+    public static <T extends Number> Collector<T, ?, float[]> create() {
+        return new FloatArrayCollector<>();
     }
 }

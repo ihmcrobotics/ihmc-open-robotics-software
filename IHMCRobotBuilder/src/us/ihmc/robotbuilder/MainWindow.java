@@ -21,7 +21,6 @@ import us.ihmc.javaFXToolkit.cameraControllers.SimpleCameraMouseEventHandler;
 import us.ihmc.robotbuilder.model.Loader;
 import us.ihmc.robotbuilder.util.JavaFX3DInstructionExecutor;
 import us.ihmc.robotbuilder.util.Tree;
-import us.ihmc.robotbuilder.util.Tree.TreeNodeMapper;
 import us.ihmc.robotbuilder.util.TreeAdapter;
 import us.ihmc.robotbuilder.util.Util;
 import us.ihmc.robotics.robotDescription.JointDescription;
@@ -30,7 +29,6 @@ import us.ihmc.robotics.robotDescription.RobotDescriptionNode;
 
 import javax.vecmath.Vector3d;
 import java.io.File;
-import java.util.List;
 
 /**
  *

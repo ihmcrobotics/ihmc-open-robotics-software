@@ -17,7 +17,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.quadrupedRobotics.gait.QuadrupedGaitTypeTest.class,
    us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygonTest.class,
    us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlannerTest.class,
-   us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderTest.class
+   us.ihmc.quadrupedRobotics.providers.QuadrupedControllerInputProviderTest.class,
+   us.ihmc.quadrupedRobotics.util.PreallocatedListTest.class,
+   us.ihmc.quadrupedRobotics.util.TimeIntervalTest.class,
+   us.ihmc.quadrupedRobotics.util.TimeIntervalToolsTest.class
 })
 
 public class IHMCQuadrupedRoboticsAFastTestSuite

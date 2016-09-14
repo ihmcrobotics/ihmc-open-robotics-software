@@ -12,6 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
+   us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolverTest.class,
    us.ihmc.convexOptimization.quadraticProgram.GenericActiveSetQPSolverTest.class,
    us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverTest.class,
    us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverTest.class,

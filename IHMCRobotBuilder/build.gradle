@@ -47,6 +47,8 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCJavaFXToolkit")
 	compile ihmc.getProjectDependency(":IHMCRobotDescription")
 	compile ihmc.getProjectDependency(":SDFLoader")
+	compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+	compile ihmc.getProjectDependency(":Graphics3DAdapter")
 
 
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
