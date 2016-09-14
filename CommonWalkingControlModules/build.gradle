@@ -43,7 +43,6 @@ dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
     compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
-    compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.26'
     compile group: 'org.ejml', name: 'dense64', version: '0.28'
     compile group: 'org.ejml', name: 'core', version: '0.28'
     compile group: 'us.ihmc', name: 'IHMCNativeLibraryLoader', version: '1.0'
@@ -64,6 +63,7 @@ dependencies {
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
     testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+    testCompile ihmc.getProjectTestDependency(":ConvexOptimizationAdapter")
 }
 
 jar {

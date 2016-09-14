@@ -7,15 +7,17 @@ import us.ihmc.robotics.Axis;
 public class OneDoFJointDescription extends JointDescription
 {
    private boolean containsLimitStops;
-   private double qMin, qMax, kLimit, bLimit;
+   private double qMin = Double.NEGATIVE_INFINITY;
+   private double qMax = Double.POSITIVE_INFINITY;
+   private double kLimit, bLimit;
 
    private double effortLimit = Double.POSITIVE_INFINITY;
 
    private double velocityLimit = Double.POSITIVE_INFINITY;
-   private double velocityDamping = 0.0;
+   private double velocityDamping;
 
-   private double damping = 0.0;
-   private double stiction = 0.0;
+   private double damping;
+   private double stiction;
 
    private final Vector3d jointAxis = new Vector3d();
 
@@ -94,9 +96,9 @@ public class OneDoFJointDescription extends JointDescription
       this.bLimit = bLimit;
    }
 
-   public Vector3d getJointAxis()
+   public void getJointAxis(Vector3d jointAxisToPack)
    {
-      return jointAxis;
+      jointAxisToPack.set(jointAxis);
    }
 
    public boolean containsLimitStops()

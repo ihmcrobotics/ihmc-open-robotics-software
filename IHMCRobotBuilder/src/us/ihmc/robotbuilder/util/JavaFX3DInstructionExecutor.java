@@ -4,7 +4,9 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.*;
+import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
+import javafx.scene.shape.VertexFormat;
 import javafx.scene.transform.*;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DInstructionExecutor;
 import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
@@ -14,8 +16,12 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DRota
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTranslateInstruction;
 
-import javax.vecmath.*;
-import java.util.*;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3f;
+import javax.vecmath.TexCoord2f;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -129,12 +135,10 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
         TriangleMesh mesh = new TriangleMesh(VertexFormat.POINT_TEXCOORD);
         mesh.getFaces().addAll(indices);
 
-        FloatArrayCollector<Float> collector = new FloatArrayCollector<>();
-        float[] vertexBuffer = Arrays.stream(vertices).flatMap(v -> Stream.of(v.x, v.y, v.z)).collect(collector);
+        float[] vertexBuffer = Arrays.stream(vertices).flatMap(v -> Stream.of(v.x, v.y, v.z)).collect(FloatArrayCollector.create());
         mesh.getPoints().addAll(vertexBuffer);
 
-        FloatArrayCollector<Float> collectorTwo = new FloatArrayCollector<>();
-        float[] texCoordBuffer = Arrays.stream(textureCoords).flatMap(v -> Stream.of(v.x, v.y)).collect(collectorTwo);
+        float[] texCoordBuffer = Arrays.stream(textureCoords).flatMap(v -> Stream.of(v.x, v.y)).collect(FloatArrayCollector.create());
         mesh.getTexCoords().addAll(texCoordBuffer);
 
         return mesh;
