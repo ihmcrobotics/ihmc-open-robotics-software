@@ -531,6 +531,108 @@ public class ConvexPolygon2dCalculator
    }
 
    /**
+    * Computes the points of intersection between the line segment and the polygon and packs them into pointToPack1
+    * and pointToPack2. If there is only one intersection it will be stored in pointToPack1. Returns the number of
+    * intersections found.
+    */
+   public static int intersectionWithLineSegment(LineSegment2d lineSegment, Point2d pointToPack1, Point2d pointToPack2, ConvexPolygon2d polygon)
+   {
+      Point2d segmentStart = lineSegment.getFirstEndpoint();
+      Point2d segmentEnd = lineSegment.getSecondEndpoint();
+      double segmentVectorX = segmentEnd.x - segmentStart.x;
+      double segmentVectorY = segmentEnd.y - segmentStart.y;
+
+      double epsilon = 1.0E-10;
+      int foundIntersections = 0;
+
+      if (polygon.hasExactlyTwoVertices())
+      {
+         Point2d vertex0 = polygon.getVertex(0);
+         Point2d vertex1 = polygon.getVertex(1);
+         if (GeometryTools.distanceFromPointToLineSegment(vertex0, segmentStart, segmentEnd) < epsilon)
+         {
+            pointToPack1.set(vertex0);
+            foundIntersections++;
+         }
+         if (GeometryTools.distanceFromPointToLineSegment(vertex1, segmentStart, segmentEnd) < epsilon)
+         {
+            if (foundIntersections == 0)
+               pointToPack1.set(vertex1);
+            else
+               pointToPack2.set(vertex1);
+            foundIntersections++;
+         }
+
+         if (foundIntersections == 2)
+            return 2;
+      }
+
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         Point2d edgeStart = polygon.getVertex(i);
+         Point2d edgeEnd = polygon.getNextVertex(i);
+
+         // check if the end points of the line segments are on this edge
+         if (GeometryTools.distanceFromPointToLineSegment(segmentStart, edgeStart, edgeEnd) < epsilon)
+         {
+            if (foundIntersections == 0)
+               pointToPack1.set(segmentStart);
+            else
+               pointToPack2.set(segmentStart);
+
+            foundIntersections++;
+            if (foundIntersections == 2 && pointToPack1.epsilonEquals(pointToPack2, 1.0E-10))
+               foundIntersections--;
+            if (foundIntersections == 2) break;
+         }
+         if (GeometryTools.distanceFromPointToLineSegment(segmentEnd, edgeStart, edgeEnd) < epsilon)
+         {
+            if (foundIntersections == 0)
+               pointToPack1.set(segmentEnd);
+            else
+               pointToPack2.set(segmentEnd);
+
+            foundIntersections++;
+            if (foundIntersections == 2 && pointToPack1.epsilonEquals(pointToPack2, 1.0E-10))
+               foundIntersections--;
+            if (foundIntersections == 2) break;
+         }
+
+         double edgeVectorX = edgeEnd.x - edgeStart.x;
+         double edgeVectorY = edgeEnd.y - edgeStart.y;
+         double lambda = getIntersectionLambda(edgeStart.x, edgeStart.y, edgeVectorX, edgeVectorY, segmentStart.x, segmentStart.y, segmentVectorX,
+               segmentVectorY);
+         if (Double.isNaN(lambda))
+            continue;
+
+         // check if within edge bounds:
+         if (lambda < 0.0 || lambda > 1.0)
+            continue;
+
+         double candidateX = edgeStart.x + lambda * edgeVectorX;
+         double candidateY = edgeStart.y + lambda * edgeVectorY;
+
+         // check if within segment bounds:
+         if (!isPointInFrontOfRay(segmentStart.x, segmentStart.y, segmentVectorX, segmentVectorY, candidateX, candidateY))
+            continue;
+         if (!isPointInFrontOfRay(segmentEnd.x, segmentEnd.y, -segmentVectorX, -segmentVectorY, candidateX, candidateY))
+            continue;
+
+         if (foundIntersections == 0)
+            pointToPack1.set(candidateX, candidateY);
+         else
+            pointToPack2.set(candidateX, candidateY);
+
+         foundIntersections++;
+         if (foundIntersections == 2 && pointToPack1.epsilonEquals(pointToPack2, 1.0E-10))
+            foundIntersections--;
+         if (foundIntersections == 2) break; // performance only
+      }
+
+      return foundIntersections;
+   }
+
+   /**
     * Computes the points of intersection between the ray and the polygon and packs them into pointToPack1 and
     * pointToPack2. If there is only one intersection it will be stored in pointToPack1. Returns the number of
     * intersections found. The ray is given as a Line2d, where the start point of the ray is the point used to
@@ -624,7 +726,7 @@ public class ConvexPolygon2dCalculator
          }
       }
 
-      if (foundIntersections == 2 && pointToPack1.equals(pointToPack2))
+      if (foundIntersections == 2 && pointToPack1.epsilonEquals(pointToPack2, 1.0E-10))
          foundIntersections--;
 
       return foundIntersections;
@@ -632,7 +734,7 @@ public class ConvexPolygon2dCalculator
 
    /**
     * This finds the edges of the polygon that intersect the given line. Will pack the edges into edgeToPack1 and
-    * edgeToPack2. Returns number of intersections found. The edged will be ordered according to their index.
+    * edgeToPack2. Returns number of intersections found. The edges will be ordered according to their index.
     */
    public static int getIntersectingEdges(Line2d line, LineSegment2d edgeToPack1, LineSegment2d edgeToPack2, ConvexPolygon2d polygon)
    {
@@ -648,6 +750,7 @@ public class ConvexPolygon2dCalculator
             foundEdges++;
          }
 
+         // bug: if the line goes through two vertices we get up to four intersecting edges.
          if (foundEdges == 2) break; // performance only
       }
 
@@ -708,7 +811,7 @@ public class ConvexPolygon2dCalculator
     * Determines if a point is laying in front of a ray. This means that an observer standing at the
     * start point looking in the direction of the ray will see the point in front of him. If the point
     * is on the line orthogonal to the ray through the ray start (perfectly left or right of the
-    * observer) the method will return false.
+    * observer) the method will return true.
     */
    public static boolean isPointInFrontOfRay(Point2d rayStart, Vector2d rayDirection, Point2d pointToTest)
    {
@@ -822,6 +925,19 @@ public class ConvexPolygon2dCalculator
       Point2d point2 = new Point2d();
 
       int intersections = intersectionWithRay(ray, point1, point2, polygon);
+      if (intersections == 2)
+         return new Point2d[] {point1, point2};
+      if (intersections == 1)
+         return new Point2d[] {point1};
+      return null;
+   }
+
+   public static Point2d[] intersectionWithLineSegmentCopy(LineSegment2d lineSegment, ConvexPolygon2d polygon)
+   {
+      Point2d point1 = new Point2d();
+      Point2d point2 = new Point2d();
+
+      int intersections = intersectionWithLineSegment(lineSegment, point1, point2, polygon);
       if (intersections == 2)
          return new Point2d[] {point1, point2};
       if (intersections == 1)

@@ -662,80 +662,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       update();
    }
 
-   // here ---------------------
-   @Override
-   public Point2d[] intersectionWith(LineSegment2d lineSegment2d)
-   {
-      checkIfUpToDate();
-      if (hasExactlyOneVertex())
-      {
-         if (lineSegment2d.isPointOnLineSegment(getVertex(0)))
-            return new Point2d[] {new Point2d(getVertex(0))};
-         else
-            return null;
-      }
-
-      if (hasExactlyTwoVertices())
-      {
-         LineSegment2d polygonAsSegment = new LineSegment2d(getVertex(0), getVertex(1));
-         Point2d intersection = polygonAsSegment.intersectionWith(lineSegment2d);
-         if (intersection != null)
-            return new Point2d[] {intersection};
-         else
-            return null;
-      }
-
-      Point2d[] endPoints = lineSegment2d.endpoints;
-
-      Point2d outsidePoint, otherPoint;
-      boolean onePointIsInside;
-
-      // First make sure that the ray goes from an outside point...
-      if (ConvexPolygon2dCalculator.isPointInside(endPoints[0], this))
-      {
-         if (ConvexPolygon2dCalculator.isPointInside(endPoints[1], this))
-            return null; // Both Points are inside!
-
-         outsidePoint = endPoints[1];
-         otherPoint = endPoints[0];
-         onePointIsInside = true;
-      }
-      else if (ConvexPolygon2dCalculator.isPointInside(endPoints[1], this))
-      {
-         outsidePoint = endPoints[0];
-         otherPoint = endPoints[1];
-         onePointIsInside = true;
-      }
-      else
-      {
-         outsidePoint = endPoints[0];
-         otherPoint = endPoints[1];
-         onePointIsInside = false;
-      }
-
-      // +++ jjc 090625 swap the line points to set the first point as the closest point to the polygon so that line segment intersections are properly found.
-      Line2d line2d;
-      if (distance(outsidePoint) > distance(otherPoint))
-      {
-         line2d = new Line2d(otherPoint, outsidePoint);
-      }
-      else
-      {
-         line2d = new Line2d(outsidePoint, otherPoint);
-      }
-
-      // Line2d line2d = new Line2d(outsidePoint, otherPoint);
-
-      Point2d[] intersections = intersectionWithRayCopy(line2d);
-      if (intersections == null)
-         return null;
-
-      if (!onePointIsInside)
-         return intersections;
-
-      return new Point2d[] {intersections[0]}; // Only return the entering point, if the segment has one point inside the polygon.
-   }
-
    @Override
    public ConvexPolygon2d intersectionWith(ConvexPolygon2d convexPolygon)
    {
@@ -752,8 +678,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       checkIfUpToDate();
       return ConvexPolygonTools.computeIntersectionOfPolygons(this, convexPolygon, intersectionToPack);
    }
-
-   // to here ---------------------
 
    @Override
    public double distance(Line2d line)
@@ -1133,5 +1057,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
    public Point2d orthogonalProjectionCopy(Point2d point)
    {
       return ConvexPolygon2dCalculator.orthogonalProjectionCopy(point, this);
+   }
+
+   @Override
+   public Point2d[] intersectionWith(LineSegment2d lineSegment2d)
+   {
+      return ConvexPolygon2dCalculator.intersectionWithLineSegmentCopy(lineSegment2d, this);
    }
 }
