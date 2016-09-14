@@ -59,6 +59,7 @@ dependencies {
 	compile group: 'com.badlogicgames.gdx', name: 'gdx-bullet', version: '1.9.4'
 	compile group: 'com.badlogicgames.gdx', name: 'gdx', version: '1.9.4'
 	compile group: 'com.google.guava', name: 'guava', version: '18.0'
+	compile group: 'org.ejml', name: 'dense64', version: '0.28'
 
 	compile group: 'org.easytesting', name: 'fest', version: '1.0.3'
 	compile('org.easytesting:fest-swing:1.2.1' )
