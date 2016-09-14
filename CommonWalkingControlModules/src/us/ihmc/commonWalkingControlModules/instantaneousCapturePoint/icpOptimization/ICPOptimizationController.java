@@ -257,12 +257,15 @@ public class ICPOptimizationController
    private final FramePoint2d tmpFramePoint2d = new FramePoint2d();
    public void addFootstepToPlan(Footstep footstep)
    {
-      upcomingFootsteps.add(footstep);
-      footstep.getPosition2d(tmpFramePoint2d);
-      upcomingFootstepLocations.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
-      referenceCMPsCalculator.addUpcomingFootstep(footstep);
+      if (footstep != null)
+      {
+         upcomingFootsteps.add(footstep);
+         footstep.getPosition2d(tmpFramePoint2d);
+         upcomingFootstepLocations.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+         referenceCMPsCalculator.addUpcomingFootstep(footstep);
 
-      footstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+         footstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+      }
    }
 
    public void initializeForStanding(double initialTime)
