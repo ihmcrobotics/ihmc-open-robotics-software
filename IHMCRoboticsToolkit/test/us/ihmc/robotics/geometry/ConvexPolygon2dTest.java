@@ -1371,7 +1371,6 @@ public class ConvexPolygon2dTest
             nonIntersectingLines.add(frameLine2d);
             ConvexPolygon2dTestHelpers.verifyLineDoesNotIntersectPolygon(frameLine2d, polygon);
          }
-
          else
          {
             intersectingLines.add(frameLine2d);
@@ -2126,7 +2125,7 @@ public class ConvexPolygon2dTest
          else if (expectedIntersectionWithSparePolygon.length == 1)
          {
             assertTrue(actualIntersectionWithSparePolygon.getNumberOfVertices() == 1);
-            assertTrue(expectedIntersectionWithSparePolygon[0].equals(actualIntersectionWithSparePolygon.getVertex(0)));
+            assertTrue(expectedIntersectionWithSparePolygon[0].epsilonEquals(actualIntersectionWithSparePolygon.getVertex(0), epsilon));
          }
          else if (expectedIntersectionWithSparePolygon.length == 2)
          {
@@ -2182,7 +2181,7 @@ public class ConvexPolygon2dTest
          if (!success)
             assertTrue(sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon) == null);
          else if (polygonIntersection.getNumberOfVertices() == 1)
-            assertTrue(sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[0].equals(polygonIntersection.getVertex(0)));
+            assertTrue(sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[0].epsilonEquals(polygonIntersection.getVertex(0), epsilon));
          else if (polygonIntersection.getNumberOfVertices() == 2)
             assertEqualsInEitherOrder(sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[0],
                   sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon)[1], polygonIntersection.getVertex(0), polygonIntersection.getVertex(1));
@@ -2195,6 +2194,12 @@ public class ConvexPolygon2dTest
             assertTrue(arbitraryLineSegment.intersectionWith(lineSegmentThatDefinesThePolygon) == null);
          else if (intersection.length == 1)
             assertTrue(intersection[0].distance(arbitraryLineSegment.intersectionWith(lineSegmentThatDefinesThePolygon)) < epsilon);
+         else if (intersection.length == 2)
+         {
+            assertTrue(intersection[0].distance(arbitraryLineSegment.intersectionWith(lineSegmentThatDefinesThePolygon)) < epsilon);
+            assertTrue(intersection[1].distance(arbitraryLineSegment.intersectionWith(lineSegmentThatDefinesThePolygon)) < epsilon);
+            assertFalse(intersection[0].epsilonEquals(intersection[1], epsilon));
+         }
          else
             fail();
 
@@ -2220,10 +2225,10 @@ public class ConvexPolygon2dTest
 
    private void assertEqualsInEitherOrder(Point2d expected0, Point2d expected1, Point2d actual0, Point2d actual1)
    {
-      if (expected0.equals(actual0))
-         assertTrue(expected1.equals(actual1));
-      else if (expected0.equals(actual1))
-         assertTrue(expected1.equals(actual0));
+      if (expected0.epsilonEquals(actual0, epsilon))
+         assertTrue(expected1.epsilonEquals(actual1, epsilon));
+      else if (expected0.epsilonEquals(actual1, epsilon))
+         assertTrue(expected1.epsilonEquals(actual0, epsilon));
       else
       {
          fail("Points are not equal in either order.");
