@@ -187,9 +187,14 @@ public class ICPOptimizationControllerTest
          return 0.0001;
       }
 
-      @Override public double getFeedbackGain()
+      @Override public double getFeedbackParallelGain()
       {
          return 2.0;
+      }
+
+      @Override public double getFeedbackOrthogonalGain()
+      {
+         return 3.0;
       }
 
       @Override public double getDynamicRelaxationWeight()

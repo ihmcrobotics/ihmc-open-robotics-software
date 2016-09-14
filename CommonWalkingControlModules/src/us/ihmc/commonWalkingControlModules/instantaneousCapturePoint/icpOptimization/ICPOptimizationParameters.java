@@ -14,7 +14,9 @@ public interface ICPOptimizationParameters
 
    public double getFeedbackRegularizationWeight();
 
-   public double getFeedbackGain();
+   public double getFeedbackParallelGain();
+
+   public double getFeedbackOrthogonalGain();
 
    public double getDynamicRelaxationWeight();
 

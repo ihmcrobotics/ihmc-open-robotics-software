@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -22,6 +23,8 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 
 public class ICPOptimizationController
@@ -116,9 +119,11 @@ public class ICPOptimizationController
    private final DoubleYoVariable feedbackWeight = new DoubleYoVariable("feedbackWeight", registry);
    private final DoubleYoVariable feedbackRegularizationWeight = new DoubleYoVariable("feedbackRegularizationWeight", registry);
    private final DoubleYoVariable scaledFootstepRegularizationWeight = new DoubleYoVariable("scaledFootstepRegularizationWeight", registry);
-   private final DoubleYoVariable scaledFeedbackWeight = new DoubleYoVariable("scaledFeedbackWeight", registry);
-   private final DoubleYoVariable feedbackGain = new DoubleYoVariable("feedbackGain", registry);
+   private final YoFramePoint2d scaledFeedbackWeight = new YoFramePoint2d("scaledFeedbackWeight", worldFrame, registry);
    private final DoubleYoVariable dynamicRelaxationWeight = new DoubleYoVariable("dynamicRelaxationWeight", registry);
+
+   private final DoubleYoVariable feedbackOrthogonalGain = new DoubleYoVariable("feedbackOrthogonalGain", registry);
+   private final DoubleYoVariable feedbackParallelGain = new DoubleYoVariable("feedbackParallelGain", registry);
 
    private final DoubleYoVariable maxCMPExitForward = new DoubleYoVariable("maxCMPExitForward", registry);
    private final DoubleYoVariable maxCMPExitSideways = new DoubleYoVariable("maxCMPExitSideways", registry);
@@ -143,6 +148,8 @@ public class ICPOptimizationController
    private boolean localUseFootstepRegularization;
 
    private boolean localScaleUpcomingStepWeights;
+
+   private final Vector2dZUpFrame icpVelocityDirectionFrame;
 
    public ICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
                                     BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, DoubleYoVariable omega,
@@ -183,7 +190,8 @@ public class ICPOptimizationController
       footstepRegularizationWeight.set(icpOptimizationParameters.getFootstepRegularizationWeight());
       feedbackWeight.set(icpOptimizationParameters.getFeedbackWeight());
       feedbackRegularizationWeight.set(icpOptimizationParameters.getFeedbackRegularizationWeight());
-      feedbackGain.set(icpOptimizationParameters.getFeedbackGain());
+      feedbackOrthogonalGain.set(icpOptimizationParameters.getFeedbackOrthogonalGain());
+      feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
       dynamicRelaxationWeight.set(icpOptimizationParameters.getDynamicRelaxationWeight());
 
       maxCMPExitForward.set(icpOptimizationParameters.getMaxCMPExitForward());
@@ -204,6 +212,8 @@ public class ICPOptimizationController
          upcomingFootstepLocations.add(new YoFramePoint2d("upcomingFootstepLocation" + i, worldFrame, registry));
          footstepSolutions.add(new YoFramePoint2d("footstepSolutionLocation" + i, worldFrame, registry));
       }
+
+      icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
 
       if (yoGraphicsListRegistry != null && VISUALIZE)
       {
@@ -446,11 +456,6 @@ public class ICPOptimizationController
       controllerDynamicRelaxationCostToGo.set(solver.getDynamicRelaxationCostToGo());
    }
 
-   private void doControlForStanding()
-   {
-      doFeedbackOnlyControl();
-   }
-
    private final FramePoint2d locationSolution = new FramePoint2d();
    private final FramePoint2d tempVertex = new FramePoint2d();
 
@@ -462,8 +467,7 @@ public class ICPOptimizationController
 
       if (localUseFeedback)
       {
-         solver.setFeedbackConditions(scaledFeedbackWeight.getDoubleValue(), feedbackGain.getDoubleValue(), dynamicRelaxationWeight.getDoubleValue(),
-               omega.getDoubleValue());
+         setFeedbackConditions();
 
          if (localUseFeedbackWeightHardening)
             solver.setUseFeedbackWeightHardening();
@@ -504,8 +508,38 @@ public class ICPOptimizationController
       computeNominalValues(numberOfFootstepsToConsider);
    }
 
+   private final FramePoint2d feedbackGains = new FramePoint2d();
+   private void setFeedbackConditions()
+   {
+      getTransformedFeedbackGains(feedbackGains);
+      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(),
+            dynamicRelaxationWeight.getDoubleValue(), omega.getDoubleValue());
+   }
+
+   private void getTransformedFeedbackGains(FramePoint2d feedbackGainsToPack)
+   {
+      FrameVector2d desiredICPVelocity = controllerDesiredICPVelocity.getFrameTuple2d();
+      double epsilonZeroICPVelocity = 1e-5;
+
+      if (desiredICPVelocity.lengthSquared() > MathTools.square(epsilonZeroICPVelocity))
+      {
+         icpVelocityDirectionFrame.setXAxis(controllerDesiredICPVelocity.getFrameTuple2d());
+         feedbackGainsToPack.setToZero(icpVelocityDirectionFrame);
+
+         feedbackGainsToPack.setX(feedbackParallelGain.getDoubleValue());
+         feedbackGainsToPack.setY(feedbackOrthogonalGain.getDoubleValue());
+
+         feedbackGainsToPack.changeFrame(worldFrame);
+         feedbackGainsToPack.set(Math.abs(feedbackGainsToPack.getX()), Math.abs(feedbackGainsToPack.getY()));
+      }
+      else
+      {
+         feedbackGainsToPack.setToZero(worldFrame);
+         feedbackGainsToPack.set(feedbackOrthogonalGain.getDoubleValue(), feedbackOrthogonalGain.getDoubleValue());
+      }
+   }
+
    private final FramePoint2d tmpEndPoint = new FramePoint2d();
-   //private final FramePoint2d tmpBeginningPoint = new FramePoint2d();
    private final FramePoint2d tmpReferencePoint = new FramePoint2d();
    private final FrameVector2d tmpReferenceVelocity = new FrameVector2d();
    private final FramePoint2d tmpCMP = new FramePoint2d();
@@ -547,7 +581,9 @@ public class ICPOptimizationController
    {
       // fixme include vertices
       solver.submitProblemConditions(0, false, true, false); //, false);
-      solver.setFeedbackConditions(scaledFeedbackWeight.getDoubleValue(), feedbackGain.getDoubleValue(), dynamicRelaxationWeight.getDoubleValue(), omega.getDoubleValue());
+      getTransformedFeedbackGains(feedbackGains);
+      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(),
+            dynamicRelaxationWeight.getDoubleValue(), omega.getDoubleValue());
 
       solver.compute(controllerDesiredICP.getFrameTuple2d(), null, controllerCurrentICP.getFrameTuple2d(), controllerPerfectCMP.getFrameTuple2d(), blankFramePoint, 1.0);
 
@@ -802,12 +838,14 @@ public class ICPOptimizationController
    {
       if (scaleFeedbackWeightWithGain.getBooleanValue())
       {
-         double alpha = Math.pow(feedbackGain.getDoubleValue(), 2);
-         scaledFeedbackWeight.set(feedbackWeight.getDoubleValue() / alpha);
+         getTransformedFeedbackGains(feedbackGains);
+         double alphaX = Math.pow(feedbackGains.getX(), 2);
+         double alphaY = Math.pow(feedbackGains.getY(), 2);
+         scaledFeedbackWeight.set(feedbackWeight.getDoubleValue() / alphaX, feedbackWeight.getDoubleValue() / alphaY);
       }
       else
       {
-         scaledFeedbackWeight.set(feedbackWeight.getDoubleValue());
+         scaledFeedbackWeight.set(feedbackWeight.getDoubleValue(), feedbackWeight.getDoubleValue());
       }
    }
 
@@ -824,5 +862,43 @@ public class ICPOptimizationController
    public void getFootstepSolution(int footstepIndex, FramePoint2d footstepSolutionToPack)
    {
       footstepSolutions.get(footstepIndex).getFrameTuple2d(footstepSolutionToPack);
+   }
+
+   private class Vector2dZUpFrame extends ReferenceFrame
+   {
+      private static final long serialVersionUID = -1810366869361449743L;
+      private final FrameVector2d xAxis;
+      private final Vector3d x = new Vector3d();
+      private final Vector3d y = new Vector3d();
+      private final Vector3d z = new Vector3d();
+      private final Matrix3d rotation = new Matrix3d();
+
+      public Vector2dZUpFrame(String string, ReferenceFrame parentFrame)
+      {
+         super(string, parentFrame);
+         xAxis = new FrameVector2d(parentFrame);
+      }
+
+      public void setXAxis(FrameVector2d xAxis)
+      {
+         this.xAxis.setIncludingFrame(xAxis);
+         this.xAxis.changeFrame(parentFrame);
+         this.xAxis.normalize();
+         update();
+      }
+
+      @Override
+      protected void updateTransformToParent(RigidBodyTransform transformToParent)
+      {
+         x.set(xAxis.getX(), xAxis.getY(), 0.0);
+         z.set(0.0, 0.0, 1.0);
+         y.cross(z, x);
+
+         rotation.setColumn(0, x);
+         rotation.setColumn(1, y);
+         rotation.setColumn(2, z);
+
+         transformToParent.setRotationAndZeroTranslation(rotation);
+      }
    }
 }
