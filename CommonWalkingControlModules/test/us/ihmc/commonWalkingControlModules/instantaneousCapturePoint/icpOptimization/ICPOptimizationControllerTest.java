@@ -192,9 +192,9 @@ public class ICPOptimizationControllerTest
          return 2.0;
       }
 
-      @Override public double getActiveCMPWeight()
+      @Override public double getDynamicRelaxationWeight()
       {
-         return 2.0;
+         return 1000.0;
       }
 
       @Override public boolean scaleFirstStepWeightWithTime()
@@ -233,11 +233,6 @@ public class ICPOptimizationControllerTest
       }
 
       @Override public boolean useFeedbackWeightHardening()
-      {
-         return false;
-      }
-
-      @Override public boolean useActiveCMPOptimization()
       {
          return false;
       }

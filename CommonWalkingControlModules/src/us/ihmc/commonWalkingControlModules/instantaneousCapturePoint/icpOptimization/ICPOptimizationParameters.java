@@ -16,7 +16,7 @@ public interface ICPOptimizationParameters
 
    public double getFeedbackGain();
 
-   public double getActiveCMPWeight();
+   public double getDynamicRelaxationWeight();
 
    public boolean scaleFirstStepWeightWithTime();
 
@@ -33,8 +33,6 @@ public interface ICPOptimizationParameters
    public boolean useFootstepRegularization();
 
    public boolean useFeedbackWeightHardening();
-
-   public boolean useActiveCMPOptimization();
 
    public double getMinimumFootstepWeight();
 

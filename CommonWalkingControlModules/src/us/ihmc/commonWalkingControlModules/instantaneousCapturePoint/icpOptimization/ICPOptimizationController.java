@@ -80,6 +80,7 @@ public class ICPOptimizationController
    private final DoubleYoVariable controllerFootstepRegularizationCostToGo = new DoubleYoVariable("footstepRegularizationCostToGo", registry);
    private final DoubleYoVariable controllerFeedbackCostToGo = new DoubleYoVariable("feedbackCostToGo", registry);
    private final DoubleYoVariable controllerFeedbackRegularizationCostToGo = new DoubleYoVariable("feedbackRegularizationCostToGo", registry);
+   private final DoubleYoVariable controllerDynamicRelaxationCostToGo = new DoubleYoVariable("dynamicRelaxationCostToGo", registry);
 
    private final YoFramePoint2d stanceEntryCMP = new YoFramePoint2d("stanceEntryCMP", worldFrame, registry);
    private final YoFramePoint2d stanceExitCMP = new YoFramePoint2d("stanceExitCMP", worldFrame, registry);
@@ -117,6 +118,7 @@ public class ICPOptimizationController
    private final DoubleYoVariable feedbackRegularizationWeight = new DoubleYoVariable("feedbackRegularizationWeight", registry);
    private final DoubleYoVariable scaledFeedbackWeight = new DoubleYoVariable("scaledFeedbackWeight", registry);
    private final DoubleYoVariable feedbackGain = new DoubleYoVariable("feedbackGain", registry);
+   private final DoubleYoVariable dynamicRelaxationWeight = new DoubleYoVariable("dynamicRelaxationWeight", registry);
 
    private final DoubleYoVariable maxCMPExitForward = new DoubleYoVariable("maxCMPExitForward", registry);
    private final DoubleYoVariable maxCMPExitSideways = new DoubleYoVariable("maxCMPExitSideways", registry);
@@ -182,6 +184,7 @@ public class ICPOptimizationController
       feedbackWeight.set(icpOptimizationParameters.getFeedbackWeight());
       feedbackRegularizationWeight.set(icpOptimizationParameters.getFeedbackRegularizationWeight());
       feedbackGain.set(icpOptimizationParameters.getFeedbackGain());
+      dynamicRelaxationWeight.set(icpOptimizationParameters.getDynamicRelaxationWeight());
 
       maxCMPExitForward.set(icpOptimizationParameters.getMaxCMPExitForward());
       maxCMPExitSideways.set(icpOptimizationParameters.getMaxCMPExitSideways());
@@ -437,6 +440,7 @@ public class ICPOptimizationController
       controllerFootstepRegularizationCostToGo.set(solver.getFootstepRegularizationCostToGo());
       controllerFeedbackCostToGo.set(solver.getFeedbackCostToGo());
       controllerFeedbackRegularizationCostToGo.set(solver.getFeedbackRegularizationCostToGo());
+      controllerDynamicRelaxationCostToGo.set(solver.getDynamicRelaxationCostToGo());
    }
 
    private void doControlForStanding()
@@ -455,7 +459,8 @@ public class ICPOptimizationController
 
       if (localUseFeedback)
       {
-         solver.setFeedbackConditions(scaledFeedbackWeight.getDoubleValue(), feedbackGain.getDoubleValue(), omega.getDoubleValue());
+         solver.setFeedbackConditions(scaledFeedbackWeight.getDoubleValue(), feedbackGain.getDoubleValue(), dynamicRelaxationWeight.getDoubleValue(),
+               omega.getDoubleValue());
 
          if (localUseFeedbackWeightHardening)
             solver.setUseFeedbackWeightHardening();
@@ -539,7 +544,7 @@ public class ICPOptimizationController
    {
       // fixme include vertices
       solver.submitProblemConditions(0, false, true, false); //, false);
-      solver.setFeedbackConditions(scaledFeedbackWeight.getDoubleValue(), feedbackGain.getDoubleValue(), omega.getDoubleValue());
+      solver.setFeedbackConditions(scaledFeedbackWeight.getDoubleValue(), feedbackGain.getDoubleValue(), dynamicRelaxationWeight.getDoubleValue(), omega.getDoubleValue());
 
       solver.compute(controllerDesiredICP.getFrameTuple2d(), null, controllerCurrentICP.getFrameTuple2d(), controllerPerfectCMP.getFrameTuple2d(), blankFramePoint, 1.0);
 
