@@ -818,6 +818,8 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
    {
       this.checkReferenceFrameMatch(observerFramePoint);
       int[] lineOfSightIndeces = ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observerFramePoint.getPoint(), convexPolygon);
+      if (lineOfSightIndeces == null)
+         return null;
 
       ArrayList<FramePoint2d> ret = new ArrayList<FramePoint2d>();
       int index = lineOfSightIndeces[0];
@@ -827,7 +829,10 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
          ret.add(getFrameVertexCopy(index));
          index = convexPolygon.getPreviousVertexIndex(index);
          if (index == lineOfSightIndeces[1])
+         {
+            ret.add(getFrameVertexCopy(index));
             break;
+         }
       }
 
       return ret;
