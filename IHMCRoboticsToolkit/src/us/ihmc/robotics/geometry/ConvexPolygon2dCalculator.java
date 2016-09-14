@@ -772,14 +772,7 @@ public class ConvexPolygon2dCalculator
       double edgeVectorY = edgePointTwo.y - edgePointOne.y;
       double lambdaOne = getIntersectionLambda(edgePointOne.x, edgePointOne.y, edgeVectorX, edgeVectorY, line.getPoint().x, line.getPoint().y,
             line.getNormalizedVector().x, line.getNormalizedVector().y);
-      if (Double.isNaN(lambdaOne) || lambdaOne < 0.0)
-         return false;
-
-      double edgeVectorInvX = edgePointOne.x - edgePointTwo.x;
-      double edgeVectorInvY = edgePointOne.y - edgePointTwo.y;
-      double lambdaTwo = getIntersectionLambda(edgePointTwo.x, edgePointTwo.y, edgeVectorInvX, edgeVectorInvY, line.getPoint().x, line.getPoint().y,
-            line.getNormalizedVector().x, line.getNormalizedVector().y);
-      if (lambdaTwo < 0.0)
+      if (Double.isNaN(lambdaOne) || lambdaOne < 0.0 || lambdaOne > 1.0)
          return false;
 
       return true;
