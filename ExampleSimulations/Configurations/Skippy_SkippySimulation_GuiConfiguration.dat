@@ -101,7 +101,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.theCMPFromIcpX,root.Skippy.SkippyController.theCMPFromIcpY</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
