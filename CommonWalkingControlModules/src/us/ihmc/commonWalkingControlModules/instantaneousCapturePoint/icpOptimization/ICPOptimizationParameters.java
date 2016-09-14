@@ -18,7 +18,7 @@ public interface ICPOptimizationParameters
 
    public double getDynamicRelaxationWeight();
 
-   public boolean scaleFirstStepWeightWithTime();
+   public boolean scaleStepRegularizationWeightWithTime();
 
    public boolean scaleFeedbackWeightWithGain();
 
