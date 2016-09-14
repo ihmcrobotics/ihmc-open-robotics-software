@@ -14,6 +14,7 @@ public class OJAlgoConstrainedQPSolver extends ConstrainedQPSolver
    {
 
       ExpressionsBasedModel foo;
+      throw new RuntimeException("In Development... Coming soon...");
    }
 
    @Override
