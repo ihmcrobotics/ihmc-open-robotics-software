@@ -58,7 +58,6 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
-   private final QuadrupedSoleForceEstimator soleForceEstimator;
    private final DoubleYoVariable robotTimestamp;
    private double initialTime;
 
@@ -87,7 +86,6 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       // Task space controller
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
-      soleForceEstimator = controllerToolbox.getSoleForceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       taskSpaceController = controllerToolbox.getTaskSpaceController();
@@ -116,18 +114,15 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       }
       taskSpaceController.reset();
 
-      // Initialize sole force estimator
-      soleForceEstimator.reset();
-
       // Initial sole position setpoints
-      soleForceEstimator.compute();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          solePositionControllerSetpoints.get(quadrant).getSolePosition().setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
          solePositionControllerSetpoints.get(quadrant).getSolePosition().changeFrame(bodyFrame);
-         initialSoleForces.get(quadrant)[0] = soleForceEstimator.getSoleForce(quadrant).getX();
-         initialSoleForces.get(quadrant)[1] = soleForceEstimator.getSoleForce(quadrant).getY();
-         initialSoleForces.get(quadrant)[2] = soleForceEstimator.getSoleForce(quadrant).getZ();
+         taskSpaceEstimates.getSoleVirtualForce(quadrant).changeFrame(bodyFrame);
+         initialSoleForces.get(quadrant)[0] = taskSpaceEstimates.getSoleVirtualForce(quadrant).getX();
+         initialSoleForces.get(quadrant)[1] = taskSpaceEstimates.getSoleVirtualForce(quadrant).getY();
+         initialSoleForces.get(quadrant)[2] = taskSpaceEstimates.getSoleVirtualForce(quadrant).getZ();
       }
       yoUseForceFeedbackControl.set(useForceFeedbackControlParameter.get());
       // Initialize force feedback
