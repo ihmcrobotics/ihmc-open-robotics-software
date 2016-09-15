@@ -34,6 +34,8 @@ public class ICPOptimizationSolver
    private final YoMatrix yoSolver_Aeq;
    private final YoMatrix yoSolver_beq;
 
+   private final YoMatrix yoStanceCMP_Aeq;
+   private final YoMatrix yoStanceCMP_beq;
    private final YoMatrix yoStanceCMPDynamics_Aeq;
    private final YoMatrix yoStanceCMPDynamics_beq;
    private final YoMatrix yoStanceCMPSum_Aeq;
@@ -142,6 +144,8 @@ public class ICPOptimizationSolver
    private int dynamicRelaxtionIndex;
    private int cmpConstraintIndex;
    private int lagrangeMultiplierIndex;
+
+   private int numberOfIterations;
 
    private boolean useFeedback = false;
    private boolean useStepAdjustment = true;
@@ -272,6 +276,8 @@ public class ICPOptimizationSolver
          yoSolver_Aeq = new YoMatrix("solver_Aeq", maximumNumberOfFreeVariables, maximumNumberOfLagrangeMultipliers, registry);
          yoSolver_beq = new YoMatrix("solver_beq", maximumNumberOfLagrangeMultipliers, 1, registry);
 
+         yoStanceCMP_Aeq = new YoMatrix("stanceCMP_Aeq", 4 + 2 * maximumNumberOfVertices, 4, registry);
+         yoStanceCMP_beq = new YoMatrix("stanceCMP_beq", 4, 1, registry);
          yoStanceCMPDynamics_Aeq = new YoMatrix("stanceCMPDynamics_Aeq", 4 + 2 * maximumNumberOfVertices, 2, registry);
          yoStanceCMPDynamics_beq = new YoMatrix("stanceCMPDynamics_beq", 2, 1, registry);
          yoStanceCMPSum_Aeq = new YoMatrix("stanceCMPSum_Aeq", 2 * maximumNumberOfVertices, 2, registry);
@@ -297,6 +303,8 @@ public class ICPOptimizationSolver
          yoSolver_Aeq = null;
          yoSolver_beq = null;
 
+         yoStanceCMP_Aeq = null;
+         yoStanceCMP_beq = null;
          yoStanceCMPDynamics_Aeq = null;
          yoStanceCMPDynamics_beq = null;
          yoStanceCMPSum_Aeq = null;
@@ -323,8 +331,8 @@ public class ICPOptimizationSolver
       stanceCMP_bineq.zero();
 
       stanceCMPCost_G.reshape(numberOfVertexVariables, numberOfVertexVariables);
-      stanceCMP_Aeq.reshape(2 + numberOfVertexVariables, 4);
-      stanceCMPDynamics_Aeq.reshape(2 + numberOfVertexVariables, 2);
+      stanceCMP_Aeq.reshape(4 + numberOfVertexVariables, 4);
+      stanceCMPDynamics_Aeq.reshape(4 + numberOfVertexVariables, 2);
       stanceCMPSum_Aeq.reshape(numberOfVertexVariables, 2);
 
       stanceCMP_Aineq.reshape(numberOfVertexVariables, numberOfVertexVariables);
@@ -774,7 +782,7 @@ public class ICPOptimizationSolver
 
       MatrixTools.addMatrixBlock(solverInput_H, numberOfFreeVariables, numberOfFreeVariables, stanceCMPCost_G, 0, 0, numberOfVertexVariables, numberOfVertexVariables, 1.0);
 
-      MatrixTools.addMatrixBlock(solverInput_Aeq, feedbackCMPIndex, 2, stanceCMP_Aeq, 0, 0, 2 + numberOfVertexVariables, 4, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_Aeq, feedbackCMPIndex, 2, stanceCMP_Aeq, 0, 0, 4 + numberOfVertexVariables, 4, 1.0);
       MatrixTools.addMatrixBlock(solverInput_beq, 2, 0, stanceCMP_beq, 0, 0, 4, 1, 1.0);
 
       MatrixTools.setMatrixBlock(solverInput_Aineq, cmpConstraintIndex, 0, stanceCMP_Aineq, 0, 0, numberOfVertexVariables, numberOfVertexVariables, 1.0);
@@ -787,7 +795,7 @@ public class ICPOptimizationSolver
       stanceCMPDynamics_Aeq.set(0, 0, -1.0);
       stanceCMPDynamics_Aeq.set(1, 1, -1.0);
 
-      int offset = 2;
+      int offset = cmpConstraintIndex - feedbackCMPIndex;
       for (int i = 0; i < numberOfVertices; i++)
       {
          stanceCMPDynamics_Aeq.set(offset + i, 0, vertexLocations.get(i).get(0, 0));
@@ -805,8 +813,8 @@ public class ICPOptimizationSolver
       stanceCMPSum_beq.set(0, 0, 1.0);
       stanceCMPSum_beq.set(1, 0, 1.0);
 
-      MatrixTools.setMatrixBlock(stanceCMP_Aeq, 0, 0, stanceCMPDynamics_Aeq, 0, 0, (cmpConstraintIndex - dynamicRelaxtionIndex) + numberOfVertexVariables, 2, 1.0);
-      MatrixTools.setMatrixBlock(stanceCMP_Aeq, 2, 2, stanceCMPSum_Aeq, 0, 0, numberOfVertexVariables, 2, 1.0);
+      MatrixTools.setMatrixBlock(stanceCMP_Aeq, 0, 0, stanceCMPDynamics_Aeq, 0, 0, 4 + numberOfVertexVariables, 2, 1.0);
+      MatrixTools.setMatrixBlock(stanceCMP_Aeq, offset, 2, stanceCMPSum_Aeq, 0, 0, numberOfVertexVariables, 2, 1.0);
 
       MatrixTools.setMatrixBlock(stanceCMP_beq, 0, 0, stanceCMPDynamics_beq, 0, 0, 2, 1, 1.0);
       MatrixTools.setMatrixBlock(stanceCMP_beq, 2, 0, stanceCMPSum_beq, 0, 0, 2, 1, 1.0);
@@ -877,6 +885,8 @@ public class ICPOptimizationSolver
          yoDynamics_beq.set(dynamics_beq);
          yoSolver_Aeq.set(solverInput_Aeq);
          yoSolver_beq.set(solverInput_beq);
+         yoStanceCMP_Aeq.set(stanceCMP_Aeq);
+         yoStanceCMP_beq.set(stanceCMP_beq);
          yoStanceCMPDynamics_Aeq.set(stanceCMPDynamics_Aeq);
          yoStanceCMPDynamics_beq.set(stanceCMPDynamics_beq);
          yoStanceCMPSum_Aeq.set(stanceCMPSum_Aeq);
@@ -887,13 +897,17 @@ public class ICPOptimizationSolver
       activeSetSolver.setLinearEqualityConstraints(solverInput_AeqTrans, solverInput_beq);
       activeSetSolver.setLinearInequalityConstraints(solverInput_AineqTrans, solverInput_bineq);
 
-      activeSetSolver.solve(solutionToPack);
+      numberOfIterations = activeSetSolver.solve(solutionToPack);
 
       if (MatrixTools.containsNaN(solutionToPack))
       {
          PrintTools.debug("number of steps = " + numberOfFootstepsToConsider);
          PrintTools.debug("solverInput_H = " + solverInput_H);
          PrintTools.debug("solverInput_h = " + solverInput_h);
+         PrintTools.debug("solver_Aeq = " + solverInput_Aeq);
+         PrintTools.debug("solver_beq = " + solverInput_beq);
+         PrintTools.debug("solver_Aineq = " + solverInput_Aineq);
+         PrintTools.debug("solver_bineq = " + solverInput_bineq);
          throw new RuntimeException("had a NaN");
       }
    }
@@ -1051,5 +1065,10 @@ public class ICPOptimizationSolver
    public double getDynamicRelaxationCostToGo()
    {
       return dynamicRelaxationCostToGo.get(0, 0);
+   }
+
+   public int getNumberOfIterations()
+   {
+      return numberOfIterations;
    }
 }

@@ -37,23 +37,28 @@ public class StanceCMPProjectionMultipliers
    }
 
    public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, boolean useTwoCMPs,
-         boolean isInTransfer, double omega0)
+         boolean isInTransfer, double omega0, int numberOfStepsToConsider)
    {
       double upcomingDoubleSupportDuration = doubleSupportDurations.get(1).getDoubleValue();
       double currentDoubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
       double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
 
-      compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, useTwoCMPs, isInTransfer, omega0);
+      compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, useTwoCMPs, isInTransfer, omega0, numberOfStepsToConsider);
    }
 
    public void compute(double upcomingDoubleSupportDuration, double currentDoubleSupportDuration, double singleSupportDuration, boolean useTwoCMPs,
-         boolean isInTransfer, double omega0)
+         boolean isInTransfer, double omega0, int numberOfStepsToConsider)
    {
       double firstStepTime = currentDoubleSupportDuration + singleSupportDuration;
       double timeSpentOnInitialDoubleSupportUpcoming = doubleSupportSplitFraction.getDoubleValue() * upcomingDoubleSupportDuration;
       double timeSpentOnEndDoubleSupportCurrent = (1.0 - doubleSupportSplitFraction.getDoubleValue()) * currentDoubleSupportDuration;
 
-      if (useTwoCMPs)
+      if (numberOfStepsToConsider == 0)
+      {
+         entryMultiplier.set(0.0);
+         exitMultiplier.set(0.0);
+      }
+      else if (useTwoCMPs)
       {
 
          if (isInTransfer)

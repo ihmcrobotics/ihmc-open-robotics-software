@@ -36,12 +36,12 @@ public class AtlasICPOptimizationParameters implements ICPOptimizationParameters
 
    @Override public double getFeedbackParallelGain()
    {
-      return 2.0;
+      return 6.0;
    }
 
    @Override public double getFeedbackOrthogonalGain()
    {
-      return 3.0;
+      return 6.0;
    }
 
    @Override public double getDynamicRelaxationWeight()

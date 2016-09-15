@@ -54,7 +54,7 @@ public class StanceCMPProjectionMultipliersTest
          double exitMultiplier = (1.0 - Math.exp(-omega0 * upcomingInitialDoubleSupportDuration));
          double entryMultiplier = 0.0;
 
-         stanceCMPProjectionMultipliers.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, useTwoCMPs, isInTransfer, omega0);
+         stanceCMPProjectionMultipliers.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, useTwoCMPs, isInTransfer, omega0, 1);
          Assert.assertEquals("", exitMultiplier, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
          Assert.assertEquals("", entryMultiplier, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
 
@@ -63,7 +63,7 @@ public class StanceCMPProjectionMultipliersTest
          exitMultiplier = Math.exp(-omega0 * (timeOnEntry - endOfDoubleSupport)) * (1.0 - Math.exp(-omega0 * timeOnExit));
          entryMultiplier = 1.0 - Math.exp(-omega0 * (timeOnEntry - endOfDoubleSupport));
 
-         stanceCMPProjectionMultipliers.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, useTwoCMPs, isInTransfer, omega0);
+         stanceCMPProjectionMultipliers.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, useTwoCMPs, isInTransfer, omega0, 1);
 
          Assert.assertEquals("", exitMultiplier, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
          Assert.assertEquals("", entryMultiplier, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
@@ -74,7 +74,7 @@ public class StanceCMPProjectionMultipliersTest
          exitMultiplier = (1.0 - Math.exp(-omega0 * upcomingInitialDoubleSupportDuration));
          entryMultiplier = 0.0;
 
-         stanceCMPProjectionMultipliers.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, useTwoCMPs, isInTransfer, omega0);
+         stanceCMPProjectionMultipliers.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, useTwoCMPs, isInTransfer, omega0, 1);
 
          Assert.assertEquals("", exitMultiplier, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
          Assert.assertEquals("", entryMultiplier, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
@@ -85,7 +85,7 @@ public class StanceCMPProjectionMultipliersTest
          exitMultiplier = (1.0 - Math.exp(-omega0 * (upcomingInitialDoubleSupportDuration + singleSupportDuration)));
          entryMultiplier = 0.0;
 
-         stanceCMPProjectionMultipliers.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, useTwoCMPs, isInTransfer, omega0);
+         stanceCMPProjectionMultipliers.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, useTwoCMPs, isInTransfer, omega0, 1);
 
          Assert.assertEquals("", exitMultiplier, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
          Assert.assertEquals("", entryMultiplier, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
