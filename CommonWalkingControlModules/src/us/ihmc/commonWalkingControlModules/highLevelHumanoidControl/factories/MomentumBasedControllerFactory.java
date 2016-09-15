@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHum
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -106,7 +107,17 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
          SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters,
-         ArmControllerParameters armControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters, HighLevelState initialBehavior)
+         ArmControllerParameters armControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
+         HighLevelState initialBehavior)
+   {
+      this(contactableBodiesFactory, footForceSensorNames, footContactSensorNames, wristSensorNames, walkingControllerParameters, armControllerParameters,
+            capturePointPlannerParameters, null, initialBehavior);
+   }
+
+   public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
+         SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters,
+         ArmControllerParameters armControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
+         ICPOptimizationParameters icpOptimizationParameters, HighLevelState initialBehavior)
    {
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
@@ -122,6 +133,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       managerFactory = new HighLevelControlManagerFactory(statusOutputManager, registry);
       managerFactory.setArmControlParameters(armControllerParameters);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
+      managerFactory.setICPOptimizationParameters(icpOptimizationParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
    }
 
