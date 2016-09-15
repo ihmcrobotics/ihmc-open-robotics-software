@@ -24,7 +24,7 @@ public class TransferExitCMPProjectionMatrixTest
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
 
-      TransferExitCMPProjectionMatrix transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(omega, doubleSupportSplitRatio);
+      TransferExitCMPProjectionMatrix transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(doubleSupportSplitRatio);
 
       Assert.assertEquals("", 4, transferExitCMPProjectionMatrix.numRows);
       Assert.assertEquals("", 1, transferExitCMPProjectionMatrix.numCols);
@@ -44,7 +44,7 @@ public class TransferExitCMPProjectionMatrixTest
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
 
-      TransferExitCMPProjectionMatrix transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(omega, doubleSupportSplitRatio);
+      TransferExitCMPProjectionMatrix transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(doubleSupportSplitRatio);
 
       for (int i = 0; i < iters; i++)
       {
@@ -65,7 +65,7 @@ public class TransferExitCMPProjectionMatrixTest
          double initialDoubleSupport = splitRatio * doubleSupportDuration;
          double endOfDoubleSupport = (1.0 - splitRatio) * doubleSupportDuration;
 
-         transferExitCMPProjectionMatrix.compute(doubleSupportDuration, useTwoCMPs);
+         transferExitCMPProjectionMatrix.compute(doubleSupportDuration, useTwoCMPs, omega0);
          shouldBe.zero();
          shouldBe.set(0, 0, Math.exp(-omega0 * initialDoubleSupport) * (1.0 - Math.exp(-omega0 * endOfDoubleSupport)));
          shouldBe.set(1, 0, omega0 * Math.exp(-omega0 * initialDoubleSupport) * (1.0 - Math.exp(-omega0 * endOfDoubleSupport)));
@@ -74,7 +74,7 @@ public class TransferExitCMPProjectionMatrixTest
 
          useTwoCMPs = true;
 
-         transferExitCMPProjectionMatrix.compute(doubleSupportDuration, useTwoCMPs);
+         transferExitCMPProjectionMatrix.compute(doubleSupportDuration, useTwoCMPs, omega0);
          shouldBe.zero();
          JUnitTools.assertMatrixEquals(name, shouldBe, transferExitCMPProjectionMatrix, epsilon);
       }

@@ -26,8 +26,8 @@ public class SwingEntryCMPProjectionMatrixTest
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
 
-      SwingEntryCMPProjectionMatrix swingEntryCMPProjectionMatrix = new SwingEntryCMPProjectionMatrix(omega, doubleSupportSplitRatio,
-                                                                                                      exitCMPDurationInPercentOfSteptime, startOfSplineTime);
+      SwingEntryCMPProjectionMatrix swingEntryCMPProjectionMatrix = new SwingEntryCMPProjectionMatrix(doubleSupportSplitRatio,
+            exitCMPDurationInPercentOfSteptime, startOfSplineTime);
 
       Assert.assertEquals("", 4, swingEntryCMPProjectionMatrix.numRows);
       Assert.assertEquals("", 1, swingEntryCMPProjectionMatrix.numCols);
@@ -48,8 +48,8 @@ public class SwingEntryCMPProjectionMatrixTest
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
 
-      SwingEntryCMPProjectionMatrix swingEntryCMPProjectionMatrix = new SwingEntryCMPProjectionMatrix(omega, doubleSupportSplitRatio,
-                                                                                                      exitCMPDurationInPercentOfSteptime, startOfSplineTime);
+      SwingEntryCMPProjectionMatrix swingEntryCMPProjectionMatrix = new SwingEntryCMPProjectionMatrix(doubleSupportSplitRatio,
+            exitCMPDurationInPercentOfSteptime, startOfSplineTime);
 
       for (int i = 0; i < iters; i++)
       {
@@ -74,7 +74,7 @@ public class SwingEntryCMPProjectionMatrixTest
          double projectionTime = startOfSpline + endOfDoubleSupport - timeSpentOnEntry;
          double projection = Math.exp(omega0 * projectionTime);
 
-         swingEntryCMPProjectionMatrix.compute(doubleSupportDuration, singleSupportDuration);
+         swingEntryCMPProjectionMatrix.compute(doubleSupportDuration, singleSupportDuration, omega0);
 
 
          shouldBe.zero();

@@ -7,13 +7,9 @@ import java.util.ArrayList;
 
 public class TransferStateEndRecursionMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable omega;
-
-   public TransferStateEndRecursionMatrix(DoubleYoVariable omega)
+   public TransferStateEndRecursionMatrix()
    {
       super(4, 1);
-
-      this.omega = omega;
    }
 
    public void reset()
@@ -21,19 +17,19 @@ public class TransferStateEndRecursionMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double omega0)
    {
-      compute(doubleSupportDurations.get(0).getDoubleValue());
+      compute(doubleSupportDurations.get(0).getDoubleValue(), omega0);
    }
 
-   public void compute(double doubleSupportDuration)
+   public void compute(double doubleSupportDuration, double omega0)
    {
-      double stateRecursion = Math.exp(-omega.getDoubleValue() * doubleSupportDuration);
+      double stateRecursion = Math.exp(-omega0 * doubleSupportDuration);
 
       set(0, 0, stateRecursion);
-      set(1, 0, omega.getDoubleValue() * stateRecursion);
+      set(1, 0, omega0 * stateRecursion);
       set(2, 0, 1.0);
-      set(3, 0, omega.getDoubleValue());
+      set(3, 0, omega0);
    }
 
 }

@@ -41,8 +41,7 @@ public class FootstepRecursionMultiplierCalculator
    private final int maxNumberOfFootstepsToConsider;
 
    public FootstepRecursionMultiplierCalculator(CapturePointPlannerParameters icpPlannerParameters, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
-                                                DoubleYoVariable doubleSupportSplitFraction, DoubleYoVariable omega, int maxNumberOfFootstepsToConsider,
-                                                YoVariableRegistry parentRegistry)
+         DoubleYoVariable doubleSupportSplitFraction, int maxNumberOfFootstepsToConsider, YoVariableRegistry parentRegistry)
    {
       this.maxNumberOfFootstepsToConsider = maxNumberOfFootstepsToConsider;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
@@ -54,9 +53,9 @@ public class FootstepRecursionMultiplierCalculator
          singleSupportDurations.add(new DoubleYoVariable("recursionCalculatorSingleSupportDuration" + i, registry));
       }
 
-      cmpRecursionMultipliers = new CMPRecursionMultipliers("", maxNumberOfFootstepsToConsider, omega, doubleSupportSplitFraction,
+      cmpRecursionMultipliers = new CMPRecursionMultipliers("", maxNumberOfFootstepsToConsider, doubleSupportSplitFraction,
             exitCMPDurationInPercentOfStepTime, registry);
-      stanceCMPProjectionMultipliers = new StanceCMPProjectionMultipliers("", omega, doubleSupportSplitFraction, exitCMPDurationInPercentOfStepTime, registry);
+      stanceCMPProjectionMultipliers = new StanceCMPProjectionMultipliers("", doubleSupportSplitFraction, exitCMPDurationInPercentOfStepTime, registry);
 
       maximumSplineDuration = new DoubleYoVariable(namePrefix + "MaximumSplineDuration", registry);
       minimumSplineDuration = new DoubleYoVariable(namePrefix + "MinimumSplineDuration", registry);
@@ -72,12 +71,12 @@ public class FootstepRecursionMultiplierCalculator
       startOfSplineTime = new DoubleYoVariable(namePrefix + "StartOfSplineTime", registry);
       endOfSplineTime = new DoubleYoVariable(namePrefix + "EndOfSplineTime", registry);
 
-      remainingStanceCMPProjectionMultipliers = new RemainingStanceCMPProjectionMultipliers(omega, doubleSupportSplitFraction,
+      remainingStanceCMPProjectionMultipliers = new RemainingStanceCMPProjectionMultipliers(doubleSupportSplitFraction,
                exitCMPDurationInPercentOfStepTime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, registry);
-      currentStateProjectionMultiplier = new CurrentStateProjectionMultiplier(registry, omega, doubleSupportSplitFraction, startOfSplineTime, endOfSplineTime,
+      currentStateProjectionMultiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitFraction, startOfSplineTime, endOfSplineTime,
             totalTrajectoryTime);
 
-      finalICPRecursionMultiplier = new FinalICPRecursionMultiplier(registry, omega, doubleSupportSplitFraction);
+      finalICPRecursionMultiplier = new FinalICPRecursionMultiplier(registry, doubleSupportSplitFraction);
 
       parentRegistry.addChild(registry);
    }
@@ -106,27 +105,27 @@ public class FootstepRecursionMultiplierCalculator
       currentStateProjectionMultiplier.reset();
    }
 
-   public void computeRecursionMultipliers(int numberOfStepsToConsider, boolean isInTransfer, boolean useTwoCMPs)
+   public void computeRecursionMultipliers(int numberOfStepsToConsider, boolean isInTransfer, boolean useTwoCMPs, double omega0)
    {
       reset();
 
       if (numberOfStepsToConsider > maxNumberOfFootstepsToConsider)
          throw new RuntimeException("Requesting too many steps.");
 
-      finalICPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer);
-      stanceCMPProjectionMultipliers.compute(doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer);
-      cmpRecursionMultipliers.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer);
+      finalICPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
+      stanceCMPProjectionMultipliers.compute(doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
+      cmpRecursionMultipliers.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
    }
 
-   public void computeRemainingProjectionMultipliers(double timeRemaining, boolean useTwoCMPs, boolean isInTransfer)
+   public void computeRemainingProjectionMultipliers(double timeRemaining, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (useTwoCMPs)
       {
          updateSegmentedSingleSupportTrajectory(isInTransfer);
       }
 
-      currentStateProjectionMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer);
-      remainingStanceCMPProjectionMultipliers.compute(timeRemaining, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer);
+      currentStateProjectionMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0);
+      remainingStanceCMPProjectionMultipliers.compute(timeRemaining, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
    }
 
    private void updateSegmentedSingleSupportTrajectory(boolean isInTransfer)

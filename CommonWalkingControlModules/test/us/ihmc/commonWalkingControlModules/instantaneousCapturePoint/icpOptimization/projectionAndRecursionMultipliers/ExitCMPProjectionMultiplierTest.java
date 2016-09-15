@@ -45,8 +45,8 @@ public class ExitCMPProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      ExitCMPProjectionMultiplier multiplier = new ExitCMPProjectionMultiplier(registry, omega, doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
-                                                                                 startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
+      ExitCMPProjectionMultiplier multiplier = new ExitCMPProjectionMultiplier(registry, doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -81,7 +81,7 @@ public class ExitCMPProjectionMultiplierTest
          double projection = 1.0 - Math.exp(-omega0 * timeRemaining);
          double velocityProjection = -omega0 * Math.exp(-omega0 * timeRemaining);
 
-         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, false, false);
+         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, false, false, omega0);
 
          Assert.assertEquals("", projection, multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityProjection, multiplier.getVelocityMultiplier(), epsilon);
@@ -112,9 +112,9 @@ public class ExitCMPProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      ExitCMPProjectionMultiplier multiplier = new ExitCMPProjectionMultiplier(registry, omega, doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
-                                                                                 startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
-      TransferExitCMPProjectionMatrix transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(omega, doubleSupportSplitRatio);
+      ExitCMPProjectionMultiplier multiplier = new ExitCMPProjectionMultiplier(registry, doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
+      TransferExitCMPProjectionMatrix transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(doubleSupportSplitRatio);
 
       CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
       CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
@@ -149,7 +149,7 @@ public class ExitCMPProjectionMultiplierTest
          endOfSplineTime.set(endOfSpline);
          totalTrajectoryTime.set(singleSupport);
 
-         transferExitCMPProjectionMatrix.compute(currentDoubleSupport, false);
+         transferExitCMPProjectionMatrix.compute(currentDoubleSupport, false, omega0);
 
          cubicProjectionDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
          cubicProjectionDerivativeMatrix.update(timeRemaining);
@@ -163,7 +163,7 @@ public class ExitCMPProjectionMultiplierTest
          CommonOps.mult(cubicProjectionDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
          CommonOps.mult(cubicProjectionDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
 
-         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, false, true);
+         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, false, true, omega0);
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
@@ -194,8 +194,8 @@ public class ExitCMPProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      ExitCMPProjectionMultiplier multiplier = new ExitCMPProjectionMultiplier(registry, omega, doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
-                                                                                 startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
+      ExitCMPProjectionMultiplier multiplier = new ExitCMPProjectionMultiplier(registry, doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -244,7 +244,7 @@ public class ExitCMPProjectionMultiplierTest
          double recursionMultiplier = entryRecursion * (1.0 - exitRecursion);
          double velocityRecursionMultiplier = omega0 * entryRecursion * (1.0 - exitRecursion);
 
-         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false);
+         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false, omega0);
 
          Assert.assertEquals("", recursionMultiplier, multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityRecursionMultiplier, multiplier.getVelocityMultiplier(), epsilon);
@@ -275,8 +275,8 @@ public class ExitCMPProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      ExitCMPProjectionMultiplier multiplier = new ExitCMPProjectionMultiplier(registry, omega, doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
-                                                                                 startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
+      ExitCMPProjectionMultiplier multiplier = new ExitCMPProjectionMultiplier(registry, doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -311,7 +311,7 @@ public class ExitCMPProjectionMultiplierTest
          endOfSplineTime.set(endOfSpline);
          totalTrajectoryTime.set(singleSupport);
 
-         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false);
+         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false, omega0);
 
          double recursionMultiplier = 1.0 - Math.exp(-omega0 * timeRemaining);
          double velocityRecursionMultiplier = -omega0 * Math.exp(-omega0 * timeRemaining);
@@ -344,11 +344,10 @@ public class ExitCMPProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      ExitCMPProjectionMultiplier multiplier = new ExitCMPProjectionMultiplier(registry, omega, doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
-                                                                                 startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
-      SwingExitCMPProjectionMatrix swingExitCMPProjectionMatrix = new SwingExitCMPProjectionMatrix(omega, doubleSupportSplitRatio,
-                                                                                                      exitCMPDurationInPercentOfSteptime, startOfSplineTime,
-                                                                                                   endOfSplineTime, totalTrajectoryTime);
+      ExitCMPProjectionMultiplier multiplier = new ExitCMPProjectionMultiplier(registry, doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
+      SwingExitCMPProjectionMatrix swingExitCMPProjectionMatrix = new SwingExitCMPProjectionMatrix(doubleSupportSplitRatio,
+            exitCMPDurationInPercentOfSteptime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
       CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
       CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
 
@@ -387,7 +386,7 @@ public class ExitCMPProjectionMultiplierTest
          endOfSplineTime.set(endOfSpline);
          totalTrajectoryTime.set(singleSupport);
 
-         swingExitCMPProjectionMatrix.compute(upcomingDoubleSupport, currentDoubleSupport, singleSupport);
+         swingExitCMPProjectionMatrix.compute(upcomingDoubleSupport, currentDoubleSupport, singleSupport, omega0);
 
          cubicProjectionDerivativeMatrix.setSegmentDuration(segmentLength);
          cubicProjectionDerivativeMatrix.update(timeRemainingInSegment);
@@ -399,7 +398,7 @@ public class ExitCMPProjectionMultiplierTest
          CommonOps.mult(cubicProjectionMatrix, swingExitCMPProjectionMatrix, positionMatrixOut);
          CommonOps.mult(cubicProjectionDerivativeMatrix, swingExitCMPProjectionMatrix, velocityMatrixOut);
 
-         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false);
+         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false, omega0);
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
@@ -430,9 +429,9 @@ public class ExitCMPProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      ExitCMPProjectionMultiplier multiplier = new ExitCMPProjectionMultiplier(registry, omega, doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
-                                                                                 startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
-      TransferExitCMPProjectionMatrix transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(omega, doubleSupportSplitRatio);
+      ExitCMPProjectionMultiplier multiplier = new ExitCMPProjectionMultiplier(registry, doubleSupportSplitRatio, exitCMPDurationInPercentOfSteptime,
+            startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
+      TransferExitCMPProjectionMatrix transferExitCMPProjectionMatrix = new TransferExitCMPProjectionMatrix(doubleSupportSplitRatio);
 
       CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
       CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
@@ -467,7 +466,7 @@ public class ExitCMPProjectionMultiplierTest
          endOfSplineTime.set(endOfSpline);
          totalTrajectoryTime.set(singleSupport);
 
-         transferExitCMPProjectionMatrix.compute(currentDoubleSupport, true);
+         transferExitCMPProjectionMatrix.compute(currentDoubleSupport, true, omega0);
 
          cubicProjectionDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
          cubicProjectionDerivativeMatrix.update(timeRemaining);
@@ -479,7 +478,7 @@ public class ExitCMPProjectionMultiplierTest
          CommonOps.mult(cubicProjectionMatrix, transferExitCMPProjectionMatrix, positionMatrixOut);
          CommonOps.mult(cubicProjectionDerivativeMatrix, transferExitCMPProjectionMatrix, velocityMatrixOut);
 
-         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, true);
+         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, true, omega0);
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);

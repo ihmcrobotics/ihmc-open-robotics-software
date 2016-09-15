@@ -13,15 +13,15 @@ public class RemainingStanceCMPProjectionMultipliers
    private final EntryCMPProjectionMultiplier entryMultiplier;
    private final PreviousExitCMPProjectionMultiplier previousExitMultiplier;
 
-   public RemainingStanceCMPProjectionMultipliers(DoubleYoVariable omega, DoubleYoVariable doubleSupportSplitRatio,
+   public RemainingStanceCMPProjectionMultipliers(DoubleYoVariable doubleSupportSplitRatio,
          DoubleYoVariable exitCMPDurationInPercentOfStepTime, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime,
          DoubleYoVariable totalTrajectoryTime, YoVariableRegistry parentRegistry)
    {
-      exitMultiplier = new ExitCMPProjectionMultiplier(registry, omega, doubleSupportSplitRatio, exitCMPDurationInPercentOfStepTime, startOfSplineTime,
+      exitMultiplier = new ExitCMPProjectionMultiplier(registry, doubleSupportSplitRatio, exitCMPDurationInPercentOfStepTime, startOfSplineTime,
             endOfSplineTime, totalTrajectoryTime);
-      entryMultiplier = new EntryCMPProjectionMultiplier(registry, omega, doubleSupportSplitRatio, exitCMPDurationInPercentOfStepTime, startOfSplineTime,
+      entryMultiplier = new EntryCMPProjectionMultiplier(registry, doubleSupportSplitRatio, exitCMPDurationInPercentOfStepTime, startOfSplineTime,
             endOfSplineTime, totalTrajectoryTime);
-      previousExitMultiplier = new PreviousExitCMPProjectionMultiplier(registry, omega, doubleSupportSplitRatio);
+      previousExitMultiplier = new PreviousExitCMPProjectionMultiplier(registry, doubleSupportSplitRatio);
 
       parentRegistry.addChild(registry);
    }
@@ -34,11 +34,11 @@ public class RemainingStanceCMPProjectionMultipliers
    }
 
    public void compute(double timeRemaining, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-                       boolean useTwoCMPs, boolean isInTransfer)
+         boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
-      exitMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer);
-      entryMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer);
-      previousExitMultiplier.compute(doubleSupportDurations, timeRemaining, isInTransfer);
+      exitMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0);
+      entryMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0);
+      previousExitMultiplier.compute(doubleSupportDurations, timeRemaining, isInTransfer, omega0);
    }
 
    public double getRemainingExitMultiplier()

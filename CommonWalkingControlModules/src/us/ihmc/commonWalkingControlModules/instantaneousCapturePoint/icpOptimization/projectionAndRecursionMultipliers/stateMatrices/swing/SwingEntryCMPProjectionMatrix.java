@@ -7,18 +7,16 @@ import java.util.ArrayList;
 
 public class SwingEntryCMPProjectionMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable omega;
    private final DoubleYoVariable doubleSupportSplitRatio;
    private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
 
    private final DoubleYoVariable startOfSplineTime;
 
-   public SwingEntryCMPProjectionMatrix(DoubleYoVariable omega, DoubleYoVariable doubleSupportSplitRatio, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
+   public SwingEntryCMPProjectionMatrix(DoubleYoVariable doubleSupportSplitRatio, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
          DoubleYoVariable startOfSplineTime)
    {
       super(4, 1);
 
-      this.omega = omega;
       this.doubleSupportSplitRatio = doubleSupportSplitRatio;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
 
@@ -30,12 +28,12 @@ public class SwingEntryCMPProjectionMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0)
    {
-      this.compute(doubleSupportDurations.get(0).getDoubleValue(), singleSupportDurations.get(0).getDoubleValue());
+      this.compute(doubleSupportDurations.get(0).getDoubleValue(), singleSupportDurations.get(0).getDoubleValue(), omega0);
    }
 
-   public void compute(double doubleSupportDuration, double singleSupportDuration)
+   public void compute(double doubleSupportDuration, double singleSupportDuration, double omega0)
    {
       zero();
 
@@ -46,10 +44,10 @@ public class SwingEntryCMPProjectionMatrix extends DenseMatrix64F
 
       double projectionDuration = startOfSplineTime.getDoubleValue() + endOfDoubleSupportDuration - timeSpentOnEntryCMP;
 
-      double projection = Math.exp(omega.getDoubleValue() * projectionDuration);
+      double projection = Math.exp(omega0 * projectionDuration);
 
       set(0, 0, 1.0 - projection);
-      set(1, 0, -omega.getDoubleValue() * projection);
+      set(1, 0, -omega0 * projection);
    }
 
 }

@@ -39,7 +39,7 @@ public class CMPRecursionMultipliersTest
          singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
       }
 
-      CMPRecursionMultipliers cmpRecursionMultipliers = new CMPRecursionMultipliers("", maxSteps, yoOmega, doubleSupportSplitRatio, exitCMPRatio, registry);
+      CMPRecursionMultipliers cmpRecursionMultipliers = new CMPRecursionMultipliers("", maxSteps, doubleSupportSplitRatio, exitCMPRatio, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -59,7 +59,7 @@ public class CMPRecursionMultipliersTest
             boolean useTwoCMPs = false;
             boolean isInTransfer = true;
 
-            cmpRecursionMultipliers.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer);
+            cmpRecursionMultipliers.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             double upcomingInitialDoubleSupport = splitFraction * doubleSupportDurations.get(1).getDoubleValue();
             double totalTime = singleSupportDurations.get(0).getDoubleValue() + upcomingInitialDoubleSupport;
@@ -78,7 +78,7 @@ public class CMPRecursionMultipliersTest
 
             isInTransfer = false;
 
-            cmpRecursionMultipliers.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer);
+            cmpRecursionMultipliers.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             totalTime = upcomingInitialDoubleSupport;
 
@@ -97,7 +97,7 @@ public class CMPRecursionMultipliersTest
             useTwoCMPs = true;
             isInTransfer = true;
 
-            cmpRecursionMultipliers.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer);
+            cmpRecursionMultipliers.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             double startStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
             double endOfDoubleSupport = (1.0 - splitFraction) * doubleSupportDurations.get(0).getDoubleValue();
@@ -123,7 +123,7 @@ public class CMPRecursionMultipliersTest
 
             isInTransfer = false;
 
-            cmpRecursionMultipliers.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer);
+            cmpRecursionMultipliers.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             totalTime = upcomingInitialDoubleSupport;
 

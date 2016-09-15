@@ -14,17 +14,15 @@ public class CMPRecursionMultipliers
    private final ArrayList<DoubleYoVariable> exitMultipliers = new ArrayList<>();
    private final ArrayList<DoubleYoVariable> entryMultipliers = new ArrayList<>();
 
-   private final DoubleYoVariable omega;
    private final DoubleYoVariable doubleSupportSplitFraction;
    private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
 
    private final int maximumNumberOfFootstepsToConsider;
 
-   public CMPRecursionMultipliers(String namePrefix, int maximumNumberOfFootstepsToConsider, DoubleYoVariable omega,
-         DoubleYoVariable doubleSupportSplitFraction, DoubleYoVariable exitCMPDurationInPercentOfStepTime, YoVariableRegistry parentRegistry)
+   public CMPRecursionMultipliers(String namePrefix, int maximumNumberOfFootstepsToConsider, DoubleYoVariable doubleSupportSplitFraction,
+         DoubleYoVariable exitCMPDurationInPercentOfStepTime, YoVariableRegistry parentRegistry)
    {
       this.maximumNumberOfFootstepsToConsider = maximumNumberOfFootstepsToConsider;
-      this.omega = omega;
       this.doubleSupportSplitFraction = doubleSupportSplitFraction;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
 
@@ -47,7 +45,7 @@ public class CMPRecursionMultipliers
    }
 
    public void compute(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         boolean useTwoCMPs, boolean isInTransfer)
+         boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (numberOfStepsToConsider > doubleSupportDurations.size())
          throw new RuntimeException("Double Support Durations list is not long enough");
@@ -55,13 +53,13 @@ public class CMPRecursionMultipliers
          throw new RuntimeException("Single Support Durations list is not long enough");
 
       if (useTwoCMPs)
-         computeWithTwoCMPs(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, isInTransfer);
+         computeWithTwoCMPs(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
       else
-         computeWithOneCMP(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, isInTransfer);
+         computeWithOneCMP(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
    }
 
    private void computeWithOneCMP(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         boolean isInTransfer)
+         boolean isInTransfer, double omega0)
    {
       double timeToFinish = doubleSupportSplitFraction.getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
@@ -72,20 +70,20 @@ public class CMPRecursionMultipliers
       for (int i = 0; i < numberOfStepsToConsider; i++)
       {
          double steppingDuration = doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
-         double stepRecursion = 1.0 - Math.exp(-omega.getDoubleValue() * steppingDuration);
+         double stepRecursion = 1.0 - Math.exp(-omega0 * steppingDuration);
 
          double previousStepDuration = 0.0;
          if (i > 0)
             previousStepDuration = doubleSupportDurations.get(i).getDoubleValue() + singleSupportDurations.get(i).getDoubleValue();
 
          recursionTime += previousStepDuration;
-         exitMultipliers.get(i).set(Math.exp(-omega.getDoubleValue() * recursionTime) * stepRecursion);
+         exitMultipliers.get(i).set(Math.exp(-omega0 * recursionTime) * stepRecursion);
          entryMultipliers.get(i).set(0.0);
       }
    }
 
    private void computeWithTwoCMPs(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         boolean isInTransfer)
+         boolean isInTransfer, double omega0)
    {
       double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
       double timeSpentOnInitialDoubleSupportUpcoming = doubleSupportSplitFraction.getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
@@ -114,8 +112,8 @@ public class CMPRecursionMultipliers
          double exitMultiplierTime = recursionTime + totalTimeSpentOnEntryCMP;
          double entryMultiplierTime = recursionTime;
 
-         double exitRecursion = Math.exp(-omega.getDoubleValue() * exitMultiplierTime) * (1.0 - Math.exp(-omega.getDoubleValue() * totalTimeSpentOnExitCMP));
-         double entryRecursion = Math.exp(-omega.getDoubleValue() * entryMultiplierTime) * (1.0 - Math.exp(-omega.getDoubleValue() * totalTimeSpentOnEntryCMP));
+         double exitRecursion = Math.exp(-omega0 * exitMultiplierTime) * (1.0 - Math.exp(-omega0 * totalTimeSpentOnExitCMP));
+         double entryRecursion = Math.exp(-omega0 * entryMultiplierTime) * (1.0 - Math.exp(-omega0 * totalTimeSpentOnEntryCMP));
 
          entryMultipliers.get(i).set(entryRecursion);
          exitMultipliers.get(i).set(exitRecursion);

@@ -23,7 +23,7 @@ public class TransferStateEndRecursionMatrixTest
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
 
-      TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix(omega);
+      TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
 
       Assert.assertEquals("", 4, transferStateEndRecursionMatrix.numRows);
       Assert.assertEquals("", 1, transferStateEndRecursionMatrix.numCols);
@@ -44,7 +44,7 @@ public class TransferStateEndRecursionMatrixTest
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
 
-      TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix(omega);
+      TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
 
       for (int i = 0; i < iters; i++)
       {
@@ -59,7 +59,7 @@ public class TransferStateEndRecursionMatrixTest
 
          String name = "splitRatio = " + splitRatio + ",\n doubleSupportDuration = " + currentDoubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
 
-         transferStateEndRecursionMatrix.compute(currentDoubleSupportDuration);
+         transferStateEndRecursionMatrix.compute(currentDoubleSupportDuration, omega0);
          shouldBe.zero();
          shouldBe.set(0, 0, Math.exp(-omega0 * currentDoubleSupportDuration));
          shouldBe.set(1, 0, omega0 * Math.exp(-omega0 * currentDoubleSupportDuration));

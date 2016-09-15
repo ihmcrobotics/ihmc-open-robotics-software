@@ -57,11 +57,12 @@ public class ICPOptimizationControllerTest
       setupContactableFeet();
       setupBipedSupportPolygons();
 
-      omega.set(0.3);
+      double omega0 = 0.3;
+      omega.set(omega0);
 
       ICPPlanner icpPlanner = new ICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters, registry, null);
-      ICPOptimizationController icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, bipedSupportPolygons, contactableFeet,
-                                                                                          omega, registry, null);
+      ICPOptimizationController icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, bipedSupportPolygons,
+            contactableFeet, registry, null);
       icpOptimizationController.setStepDurations(doubleSupportDuration, singleSupportDuration);
       icpPlanner.setSingleSupportTime(singleSupportDuration);
       icpPlanner.setDoubleSupportTime(doubleSupportDuration);
@@ -85,7 +86,7 @@ public class ICPOptimizationControllerTest
 
       icpPlanner.setSupportLeg(supportSide);
       icpPlanner.initializeForSingleSupport(0.0);
-      icpOptimizationController.initializeForSingleSupport(0.0, supportSide);
+      icpOptimizationController.initializeForSingleSupport(0.0, supportSide, omega0);
 
       icpPlanner.updateCurrentPlan();
       double currentTime = 0.5;
@@ -94,7 +95,7 @@ public class ICPOptimizationControllerTest
       FramePoint2d perfectCMP = new FramePoint2d();
       icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, currentTime);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
-      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, desiredICP);
+      icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, desiredICP, omega0);
 
       FramePoint2d desiredCMP = new FramePoint2d();
       icpOptimizationController.getDesiredCMP(desiredCMP);

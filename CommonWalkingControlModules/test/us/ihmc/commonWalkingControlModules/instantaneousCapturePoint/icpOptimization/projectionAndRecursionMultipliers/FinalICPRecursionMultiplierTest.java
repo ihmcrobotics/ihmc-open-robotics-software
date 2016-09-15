@@ -24,7 +24,7 @@ public class FinalICPRecursionMultiplierTest
       double omega = 3.0;
       yoOmega.set(omega);
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier(registry, yoOmega, doubleSupportSplitFraction);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier(registry, doubleSupportSplitFraction);
       Random random = new Random();
 
       int maxSteps = 5;
@@ -59,7 +59,7 @@ public class FinalICPRecursionMultiplierTest
             useTwoCMPs = false;
             isInTransfer = true;
 
-            finalICPRecursionMultiplier.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer);
+            finalICPRecursionMultiplier.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             double upcomingInitialDoubleSupport = splitFraction * doubleSupportDurations.get(1).getDoubleValue();
             double totalTime = singleSupportDurations.get(0).getDoubleValue() + upcomingInitialDoubleSupport;
@@ -74,7 +74,7 @@ public class FinalICPRecursionMultiplierTest
 
             isInTransfer = false;
 
-            finalICPRecursionMultiplier.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer);
+            finalICPRecursionMultiplier.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             totalTime = upcomingInitialDoubleSupport;
             for (int step = 0; step < i; step++)
@@ -90,7 +90,7 @@ public class FinalICPRecursionMultiplierTest
             useTwoCMPs = true;
             isInTransfer = true;
 
-            finalICPRecursionMultiplier.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer);
+            finalICPRecursionMultiplier.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             double endOfDoubleSupportTime = splitFraction * doubleSupportDurations.get(0).getDoubleValue();
             totalTime = endOfDoubleSupportTime + doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
@@ -105,7 +105,7 @@ public class FinalICPRecursionMultiplierTest
 
             isInTransfer = false;
 
-            finalICPRecursionMultiplier.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer);
+            finalICPRecursionMultiplier.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             totalTime = upcomingInitialDoubleSupport;
             for (int step = 0; step < i; step++)
