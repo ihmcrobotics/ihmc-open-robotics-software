@@ -45,8 +45,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, omega, doubleSupportSplitRatio, startOfSplineTime,
-                                                                                         endOfSplineTime, totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
+            totalTrajectoryTime);
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -83,7 +83,7 @@ public class CurrentStateProjectionMultiplierTest
 
          double velocityMultiplier = omega0 * recursionMultiplier;
 
-         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, false, false);
+         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, false, false, omega0);
 
          Assert.assertEquals("", projectionMultiplier, multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMultiplier, multiplier.getVelocityMultiplier(), epsilon);
@@ -114,9 +114,9 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, omega, doubleSupportSplitRatio, startOfSplineTime,
-                                                                                         endOfSplineTime, totalTrajectoryTime);
-      TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix(omega);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
+            totalTrajectoryTime);
+      TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
 
       CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
       CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
@@ -151,7 +151,7 @@ public class CurrentStateProjectionMultiplierTest
          endOfSplineTime.set(endOfSpline);
          totalTrajectoryTime.set(singleSupport);
 
-         transferStateEndRecursionMatrix.compute(currentDoubleSupport);
+         transferStateEndRecursionMatrix.compute(currentDoubleSupport, omega0);
 
          cubicProjectionDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
          cubicProjectionDerivativeMatrix.update(timeRemaining);
@@ -163,7 +163,7 @@ public class CurrentStateProjectionMultiplierTest
          CommonOps.mult(cubicProjectionMatrix, transferStateEndRecursionMatrix, positionMatrixOut);
          CommonOps.mult(cubicProjectionDerivativeMatrix, transferStateEndRecursionMatrix, velocityMatrixOut);
 
-         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, false, true);
+         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, false, true, omega0);
 
          Assert.assertEquals("", 1.0 / positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
@@ -194,8 +194,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, omega, doubleSupportSplitRatio, startOfSplineTime,
-                                                                                         endOfSplineTime, totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
+            totalTrajectoryTime);
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -233,7 +233,7 @@ public class CurrentStateProjectionMultiplierTest
          endOfSplineTime.set(endOfSpline);
          totalTrajectoryTime.set(singleSupport);
 
-         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false);
+         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false, omega0);
 
          double recursionTime = timeInCurrentState + upcomingInitialDoubleSupport + endOfDoubleSupport - stepDuration;
          double recursion = Math.exp(omega0 * recursionTime);
@@ -268,8 +268,8 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, omega, doubleSupportSplitRatio, startOfSplineTime,
-                                                                                         endOfSplineTime, totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
+            totalTrajectoryTime);
 
       int iters = 100;
       for (int i = 0; i < iters; i++)
@@ -304,7 +304,7 @@ public class CurrentStateProjectionMultiplierTest
          endOfSplineTime.set(endOfSpline);
          totalTrajectoryTime.set(singleSupport);
 
-         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false);
+         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false, omega0);
 
          double recursion = Math.exp(-omega0 * timeRemaining);
          double velocityRecursion = omega0 * Math.exp(-omega0 * timeRemaining);
@@ -338,10 +338,11 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, omega, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
+            totalTrajectoryTime);
 
-      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(omega, doubleSupportSplitRatio, startOfSplineTime,
-                                                                                                    endOfSplineTime, totalTrajectoryTime);
+      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
+            totalTrajectoryTime);
       CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
       CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
       int iters = 100;
@@ -379,7 +380,7 @@ public class CurrentStateProjectionMultiplierTest
          endOfSplineTime.set(endOfSpline);
          totalTrajectoryTime.set(singleSupport);
 
-         swingStateEndRecursionMatrix.compute(doubleSupportDurations, singleSupportDurations);
+         swingStateEndRecursionMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0);
 
          cubicProjectionDerivativeMatrix.setSegmentDuration(segmentLength);
          cubicProjectionDerivativeMatrix.update(timeRemainingInSegment);
@@ -391,7 +392,7 @@ public class CurrentStateProjectionMultiplierTest
          CommonOps.mult(cubicProjectionMatrix, swingStateEndRecursionMatrix, positionMatrixOut);
          CommonOps.mult(cubicProjectionDerivativeMatrix, swingStateEndRecursionMatrix, velocityMatrixOut);
 
-         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false);
+         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false, omega0);
 
          Assert.assertEquals("", 1.0 / positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
@@ -422,8 +423,9 @@ public class CurrentStateProjectionMultiplierTest
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       singleSupportDurations.add(singleSupportDuration);
 
-      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, omega, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
-      TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix(omega);
+      CurrentStateProjectionMultiplier multiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
+            totalTrajectoryTime);
+      TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
 
       CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
       CubicProjectionDerivativeMatrix cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
@@ -458,7 +460,7 @@ public class CurrentStateProjectionMultiplierTest
          endOfSplineTime.set(endOfSpline);
          totalTrajectoryTime.set(singleSupport);
 
-         transferStateEndRecursionMatrix.compute(currentDoubleSupport);
+         transferStateEndRecursionMatrix.compute(currentDoubleSupport, omega0);
 
          cubicProjectionDerivativeMatrix.setSegmentDuration(currentDoubleSupport);
          cubicProjectionDerivativeMatrix.update(timeRemaining);
@@ -470,7 +472,7 @@ public class CurrentStateProjectionMultiplierTest
          CommonOps.mult(cubicProjectionMatrix, transferStateEndRecursionMatrix, positionMatrixOut);
          CommonOps.mult(cubicProjectionDerivativeMatrix, transferStateEndRecursionMatrix, velocityMatrixOut);
 
-         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, true);
+         multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, true, omega0);
 
          Assert.assertEquals("", 1.0 / positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);

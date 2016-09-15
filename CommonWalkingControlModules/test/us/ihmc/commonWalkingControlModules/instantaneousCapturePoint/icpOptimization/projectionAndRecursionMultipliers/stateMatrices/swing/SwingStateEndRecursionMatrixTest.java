@@ -27,8 +27,8 @@ public class SwingStateEndRecursionMatrixTest
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
 
-      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(omega, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-                                                                                                   totalTrajectoryTime);
+      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
+            totalTrajectoryTime);
 
       Assert.assertEquals("", 4, swingStateEndRecursionMatrix.numRows);
       Assert.assertEquals("", 1, swingStateEndRecursionMatrix.numCols);
@@ -52,8 +52,8 @@ public class SwingStateEndRecursionMatrixTest
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
 
-      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(omega, doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
-                                                                                                   totalTrajectoryTime);
+      SwingStateEndRecursionMatrix swingStateEndRecursionMatrix = new SwingStateEndRecursionMatrix(doubleSupportSplitRatio, startOfSplineTime, endOfSplineTime,
+            totalTrajectoryTime);
 
       for (int i = 0; i < iters; i++)
       {
@@ -91,7 +91,7 @@ public class SwingStateEndRecursionMatrixTest
          shouldBe.set(2, 0, Math.exp(-omega0 * lastSegmentDuration));
          shouldBe.set(3, 0, omega0 * Math.exp(-omega0 * lastSegmentDuration));
 
-         swingStateEndRecursionMatrix.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration);
+         swingStateEndRecursionMatrix.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, omega0);
 
          JUnitTools.assertMatrixEquals(name, shouldBe, swingStateEndRecursionMatrix, epsilon);
       }

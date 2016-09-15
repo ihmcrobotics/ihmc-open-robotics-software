@@ -24,7 +24,7 @@ public class TransferEntryCMPProjectionMatrixTest
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
 
-      TransferEntryCMPProjectionMatrix transferEntryCMPProjectionMatrix = new TransferEntryCMPProjectionMatrix(omega, doubleSupportSplitRatio);
+      TransferEntryCMPProjectionMatrix transferEntryCMPProjectionMatrix = new TransferEntryCMPProjectionMatrix(doubleSupportSplitRatio);
 
       Assert.assertEquals("", 4, transferEntryCMPProjectionMatrix.numRows);
       Assert.assertEquals("", 1, transferEntryCMPProjectionMatrix.numCols);
@@ -45,7 +45,7 @@ public class TransferEntryCMPProjectionMatrixTest
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
 
-      TransferEntryCMPProjectionMatrix transferEntryCMPProjectionMatrix = new TransferEntryCMPProjectionMatrix(omega, doubleSupportSplitRatio);
+      TransferEntryCMPProjectionMatrix transferEntryCMPProjectionMatrix = new TransferEntryCMPProjectionMatrix(doubleSupportSplitRatio);
 
       for (int i = 0; i < iters; i++)
       {
@@ -66,13 +66,13 @@ public class TransferEntryCMPProjectionMatrixTest
          double initialDoubleSupport = splitRatio * doubleSupportDuration;
          double endOfDoubleSupport = (1.0 - splitRatio) * doubleSupportDuration;
 
-         transferEntryCMPProjectionMatrix.compute(doubleSupportDuration, useTwoCMPs);
+         transferEntryCMPProjectionMatrix.compute(doubleSupportDuration, useTwoCMPs, omega0);
          shouldBe.zero();
          JUnitTools.assertMatrixEquals(name, shouldBe, transferEntryCMPProjectionMatrix, epsilon);
 
          useTwoCMPs = true;
 
-         transferEntryCMPProjectionMatrix.compute(doubleSupportDuration, useTwoCMPs);
+         transferEntryCMPProjectionMatrix.compute(doubleSupportDuration, useTwoCMPs, omega0);
          shouldBe.zero();
          shouldBe.set(0, 0, Math.exp(-omega0 * initialDoubleSupport) * (1.0 - Math.exp(-omega0 * endOfDoubleSupport)));
          shouldBe.set(1, 0, omega0 * Math.exp(-omega0 * initialDoubleSupport) * (1.0 - Math.exp(-omega0 * endOfDoubleSupport)));

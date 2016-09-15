@@ -10,20 +10,16 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
 {
    private static final String namePrefix = "finalICPRecursionMultiplier";
 
-   private final DoubleYoVariable omega;
-
    private final DoubleYoVariable doubleSupportSplitFraction;
 
-   public FinalICPRecursionMultiplier(YoVariableRegistry registry, DoubleYoVariable omega, DoubleYoVariable doubleSupportSplitFraction)
+   public FinalICPRecursionMultiplier(YoVariableRegistry registry, DoubleYoVariable doubleSupportSplitFraction)
    {
-      this(namePrefix, registry, omega, doubleSupportSplitFraction);
+      this(namePrefix, registry, doubleSupportSplitFraction);
    }
 
-   public FinalICPRecursionMultiplier(String name, YoVariableRegistry registry, DoubleYoVariable omega, DoubleYoVariable doubleSupportSplitFraction)
+   public FinalICPRecursionMultiplier(String name, YoVariableRegistry registry, DoubleYoVariable doubleSupportSplitFraction)
    {
       super(name, registry);
-
-      this.omega = omega;
 
       if (doubleSupportSplitFraction == null)
          this.doubleSupportSplitFraction = new DoubleYoVariable(namePrefix + "_DoubleSupportSplitFraction", registry);
@@ -32,7 +28,7 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
    }
 
    public void compute(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         boolean useTwoCMPs, boolean isInTransfer)
+         boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (numberOfStepsToConsider > doubleSupportDurations.size())
          throw new RuntimeException("Double Support Durations list is not long enough");
@@ -60,7 +56,7 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
          totalTimeForFinalICPRecursion += stepDuration;
       }
 
-      this.set(Math.exp(-omega.getDoubleValue() * totalTimeForFinalICPRecursion));
+      this.set(Math.exp(-omega0 * totalTimeForFinalICPRecursion));
    }
 
    public void reset()

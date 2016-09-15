@@ -7,14 +7,12 @@ import java.util.ArrayList;
 
 public class TransferExitCMPProjectionMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable omega;
    private final DoubleYoVariable doubleSupportSplitRatio;
 
-   public TransferExitCMPProjectionMatrix(DoubleYoVariable omega, DoubleYoVariable doubleSupportSplitRatio)
+   public TransferExitCMPProjectionMatrix(DoubleYoVariable doubleSupportSplitRatio)
    {
       super(4, 1);
 
-      this.omega = omega;
       this.doubleSupportSplitRatio = doubleSupportSplitRatio;
    }
 
@@ -23,18 +21,18 @@ public class TransferExitCMPProjectionMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, boolean useTwoCMPs)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, boolean useTwoCMPs, double omega0)
    {
-      compute(doubleSupportDurations.get(0).getDoubleValue(), useTwoCMPs);
+      compute(doubleSupportDurations.get(0).getDoubleValue(), useTwoCMPs, omega0);
    }
 
-   public void compute(double doubleSupportDuration, boolean useTwoCMPs)
+   public void compute(double doubleSupportDuration, boolean useTwoCMPs, double omega0)
    {
       double initialDoubleSupportDuration = doubleSupportSplitRatio.getDoubleValue() * doubleSupportDuration;
       double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
 
-      double initialDoubleSupportProjection = Math.exp(-omega.getDoubleValue() * initialDoubleSupportDuration);
-      double endOfDoubleSupportProjection = Math.exp(-omega.getDoubleValue() * endOfDoubleSupportDuration);
+      double initialDoubleSupportProjection = Math.exp(-omega0 * initialDoubleSupportDuration);
+      double endOfDoubleSupportProjection = Math.exp(-omega0 * endOfDoubleSupportDuration);
 
       zero();
 
@@ -43,9 +41,9 @@ public class TransferExitCMPProjectionMatrix extends DenseMatrix64F
          double totalProjection = initialDoubleSupportProjection * (1.0 - endOfDoubleSupportProjection);
 
          set(0, 0, totalProjection);
-         set(1, 0, omega.getDoubleValue() * totalProjection);
+         set(1, 0, omega0 * totalProjection);
 
-         set(3, 0, -omega.getDoubleValue());
+         set(3, 0, -omega0);
       }
    }
 }

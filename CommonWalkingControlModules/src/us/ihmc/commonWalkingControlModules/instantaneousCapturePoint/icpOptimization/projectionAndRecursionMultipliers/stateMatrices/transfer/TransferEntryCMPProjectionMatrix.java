@@ -7,14 +7,12 @@ import java.util.ArrayList;
 
 public class TransferEntryCMPProjectionMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable omega;
    private final DoubleYoVariable doubleSupportSplitRatio;
 
-   public TransferEntryCMPProjectionMatrix(DoubleYoVariable omega, DoubleYoVariable doubleSupportSplitRatio)
+   public TransferEntryCMPProjectionMatrix(DoubleYoVariable doubleSupportSplitRatio)
    {
       super(4, 1);
 
-      this.omega = omega;
       this.doubleSupportSplitRatio = doubleSupportSplitRatio;
    }
 
@@ -23,12 +21,12 @@ public class TransferEntryCMPProjectionMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, boolean useTwoCMPs)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, boolean useTwoCMPs, double omega0)
    {
-      this.compute(doubleSupportDurations.get(0).getDoubleValue(), useTwoCMPs);
+      this.compute(doubleSupportDurations.get(0).getDoubleValue(), useTwoCMPs, omega0);
    }
 
-   public void compute(double doubleSupportDuration, boolean useTwoCMPs)
+   public void compute(double doubleSupportDuration, boolean useTwoCMPs, double omega0)
    {
       zero();
 
@@ -37,14 +35,14 @@ public class TransferEntryCMPProjectionMatrix extends DenseMatrix64F
          double initialDoubleSupportDuration = doubleSupportSplitRatio.getDoubleValue() * doubleSupportDuration;
          double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
 
-         double initialDoubleSupportProjection = Math.exp(-omega.getDoubleValue() * initialDoubleSupportDuration);
-         double endOfDoubleSupportProjection = Math.exp(-omega.getDoubleValue() * endOfDoubleSupportDuration);
+         double initialDoubleSupportProjection = Math.exp(-omega0 * initialDoubleSupportDuration);
+         double endOfDoubleSupportProjection = Math.exp(-omega0 * endOfDoubleSupportDuration);
 
          double stepProjection = initialDoubleSupportProjection * (1.0 - endOfDoubleSupportProjection);
 
          set(0, 0, stepProjection);
-         set(1, 0, omega.getDoubleValue() * stepProjection);
-         set(3, 0, -omega.getDoubleValue());
+         set(1, 0, omega0 * stepProjection);
+         set(3, 0, -omega0);
       }
    }
 

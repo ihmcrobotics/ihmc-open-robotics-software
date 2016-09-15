@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -40,6 +41,7 @@ public class HighLevelControlManagerFactory
    private HighLevelHumanoidControllerToolbox momentumBasedController;
    private WalkingControllerParameters walkingControllerParameters;
    private CapturePointPlannerParameters capturePointPlannerParameters;
+   private ICPOptimizationParameters icpOptimizationParameters;
    private ArmControllerParameters armControllerParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
@@ -65,6 +67,11 @@ public class HighLevelControlManagerFactory
       this.capturePointPlannerParameters = capturePointPlannerParameters;
    }
 
+   public void setICPOptimizationParameters(ICPOptimizationParameters icpOptimizationParameters)
+   {
+      this.icpOptimizationParameters = icpOptimizationParameters;
+   }
+
    public void setArmControlParameters(ArmControllerParameters armControllerParameters)
    {
       this.armControllerParameters = armControllerParameters;
@@ -84,7 +91,7 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new BalanceManager(momentumBasedController, walkingControllerParameters, capturePointPlannerParameters, registry);
+      balanceManager = new BalanceManager(momentumBasedController, walkingControllerParameters, capturePointPlannerParameters, icpOptimizationParameters, registry);
       Vector3d linearMomentumWeight = momentumOptimizationSettings.getLinearMomentumWeight();
       Vector3d angularMomentumWeight = momentumOptimizationSettings.getAngularMomentumWeight();
       balanceManager.setMomentumWeight(angularMomentumWeight, linearMomentumWeight);

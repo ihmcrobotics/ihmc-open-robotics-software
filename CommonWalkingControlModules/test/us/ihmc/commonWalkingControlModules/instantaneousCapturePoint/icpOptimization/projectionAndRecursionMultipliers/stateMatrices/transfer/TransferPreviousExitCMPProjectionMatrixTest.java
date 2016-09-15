@@ -23,7 +23,7 @@ public class TransferPreviousExitCMPProjectionMatrixTest
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
-      TransferPreviousExitCMPProjectionMatrix entryCMPProjectionMatrix = new TransferPreviousExitCMPProjectionMatrix(omega, doubleSupportSplitRatio);
+      TransferPreviousExitCMPProjectionMatrix entryCMPProjectionMatrix = new TransferPreviousExitCMPProjectionMatrix(doubleSupportSplitRatio);
 
       Assert.assertEquals("", 4, entryCMPProjectionMatrix.numRows);
       Assert.assertEquals("", 1, entryCMPProjectionMatrix.numCols);
@@ -43,7 +43,7 @@ public class TransferPreviousExitCMPProjectionMatrixTest
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
 
-      TransferPreviousExitCMPProjectionMatrix entryCMPProjectionMatrix = new TransferPreviousExitCMPProjectionMatrix(omega, doubleSupportSplitRatio);
+      TransferPreviousExitCMPProjectionMatrix entryCMPProjectionMatrix = new TransferPreviousExitCMPProjectionMatrix(doubleSupportSplitRatio);
 
       for (int i = 0; i < iters; i++)
       {
@@ -59,7 +59,7 @@ public class TransferPreviousExitCMPProjectionMatrixTest
 
          double initialDoubleSupport = splitRatio * doubleSupportDuration;
 
-         entryCMPProjectionMatrix.compute(doubleSupportDuration);
+         entryCMPProjectionMatrix.compute(doubleSupportDuration, omega0);
          shouldBe.zero();
          shouldBe.set(0, 0, 1.0 - Math.exp(-omega0 * initialDoubleSupport));
          shouldBe.set(1, 0, -omega0 * Math.exp(-omega0 * initialDoubleSupport));

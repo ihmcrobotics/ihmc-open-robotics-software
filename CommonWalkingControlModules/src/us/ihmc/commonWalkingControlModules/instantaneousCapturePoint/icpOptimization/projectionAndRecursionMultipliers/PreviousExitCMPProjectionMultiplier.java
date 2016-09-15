@@ -21,14 +21,14 @@ public class PreviousExitCMPProjectionMultiplier
    private final DoubleYoVariable positionMultiplier;
    private final DoubleYoVariable velocityMultiplier;
 
-   public PreviousExitCMPProjectionMultiplier(YoVariableRegistry registry, DoubleYoVariable omega, DoubleYoVariable doubleSupportSplitRatio)
+   public PreviousExitCMPProjectionMultiplier(YoVariableRegistry registry, DoubleYoVariable doubleSupportSplitRatio)
    {
       positionMultiplier = new DoubleYoVariable("PreviousExitCMPProjectionMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("PreviousExitCMPProjectionVelocityMultiplier", registry);
 
       cubicProjectionMatrix = new CubicProjectionMatrix();
       cubicProjectionDerivativeMatrix = new CubicProjectionDerivativeMatrix();
-      transferPreviousExitCMPProjectionMatrix = new TransferPreviousExitCMPProjectionMatrix(omega, doubleSupportSplitRatio);
+      transferPreviousExitCMPProjectionMatrix = new TransferPreviousExitCMPProjectionMatrix(doubleSupportSplitRatio);
    }
 
    public void reset()
@@ -47,12 +47,12 @@ public class PreviousExitCMPProjectionMultiplier
       return velocityMultiplier.getDoubleValue();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining, boolean isInTransfer)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining, boolean isInTransfer, double omega0)
    {
       double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
       {
-         positionMultiplier = computeInTransfer(doubleSupportDurations, timeRemaining);
+         positionMultiplier = computeInTransfer(doubleSupportDurations, timeRemaining, omega0);
          velocityMultiplier = computeInTransferVelocity();
       }
       else
@@ -65,9 +65,9 @@ public class PreviousExitCMPProjectionMultiplier
       this.velocityMultiplier.set(velocityMultiplier);
    }
 
-   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining)
+   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining, double omega0)
    {
-      transferPreviousExitCMPProjectionMatrix.compute(doubleSupportDurations);
+      transferPreviousExitCMPProjectionMatrix.compute(doubleSupportDurations, omega0);
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
