@@ -139,6 +139,7 @@ public class BalanceManager
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       double minimumSwingTimeForDisturbanceRecovery = walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery();
 
+      useICPOptimizationModule.set(true);
       this.momentumBasedController = momentumBasedController;
       yoTime = momentumBasedController.getYoTime();
 
@@ -277,7 +278,7 @@ public class BalanceManager
    {
       icpPlanner.setTransferFromSide(robotSide);
       if (icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setTransferToSide(robotSide.getOppositeSide());
+         icpOptimizationLinearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
    }
 
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon)
@@ -416,7 +417,10 @@ public class BalanceManager
 
    public MomentumRateCommand getInverseDynamicsCommand()
    {
-      return icpBasedLinearMomentumRateOfChangeControlModule.getMomentumRateCommand();
+      if (!useICPOptimizationModule.getBooleanValue())
+         return icpBasedLinearMomentumRateOfChangeControlModule.getMomentumRateCommand();
+      else
+         return icpOptimizationLinearMomentumRateOfChangeControlModule.getMomentumRateCommand();
    }
 
    public void getNextExitCMP(FramePoint entryCMPToPack)
@@ -454,7 +458,8 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), tempCapturePoint);
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
 
-      icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForStanding();
+      if (useICPOptimizationModule.getBooleanValue())
+         icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
    public void prepareForDoubleSupportPushRecovery()
@@ -465,7 +470,9 @@ public class BalanceManager
    public void initializeICPPlanForSingleSupport()
    {
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
-      icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForSingleSupport();
+
+      if (useICPOptimizationModule.getBooleanValue())
+         icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForSingleSupport();
    }
 
    public void initializeICPPlanForStanding()
@@ -476,7 +483,9 @@ public class BalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
-      icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForStanding();
+
+      if (useICPOptimizationModule.getBooleanValue())
+         icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
    public void initializeICPPlanForTransfer()
@@ -487,7 +496,9 @@ public class BalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
-      icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForTransfer();
+
+      if (useICPOptimizationModule.getBooleanValue())
+         icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForTransfer();
    }
 
    public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)
@@ -593,13 +604,17 @@ public class BalanceManager
    public void setDoubleSupportTime(double newDoubleSupportTime)
    {
       icpPlanner.setDoubleSupportTime(newDoubleSupportTime);
-      icpOptimizationLinearMomentumRateOfChangeControlModule.setDoubleSupportDuration(newDoubleSupportTime);
+
+      if (useICPOptimizationModule.getBooleanValue())
+         icpOptimizationLinearMomentumRateOfChangeControlModule.setDoubleSupportDuration(newDoubleSupportTime);
    }
 
    public void setSingleSupportTime(double newSingleSupportTime)
    {
       icpPlanner.setSingleSupportTime(newSingleSupportTime);
-      icpOptimizationLinearMomentumRateOfChangeControlModule.setSingleSupportDuration(newSingleSupportTime);
+
+      if (useICPOptimizationModule.getBooleanValue())
+         icpOptimizationLinearMomentumRateOfChangeControlModule.setSingleSupportDuration(newSingleSupportTime);
    }
 
    /**

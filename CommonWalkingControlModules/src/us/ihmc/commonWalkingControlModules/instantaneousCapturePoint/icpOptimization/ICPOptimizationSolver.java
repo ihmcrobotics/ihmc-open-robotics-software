@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -582,11 +583,11 @@ public class ICPOptimizationSolver
       previousFeedbackDeltaSolution.zero();
    }
 
-   private final FramePoint2d tmpPoint = new FramePoint2d();
+   private final FramePoint tmpPoint = new FramePoint();
    public void setSupportPolygonVertex(int vertexIndex, FramePoint2d vertexLocation, ReferenceFrame frame, double xBuffer, double yBuffer)
    {
       tmpPoint.setToZero(frame);
-      tmpPoint.set(vertexLocation);
+      tmpPoint.setXY(vertexLocation);
 
       if (tmpPoint.getX() > 0.0)
          tmpPoint.setX(tmpPoint.getX() + xBuffer);

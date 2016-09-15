@@ -145,6 +145,12 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       this.transferToSide = transferToSide;
    }
 
+   public void setTransferFromSide(RobotSide robotSide)
+   {
+      if (robotSide != null)
+         this.transferToSide = robotSide.getOppositeSide();
+   }
+
    public void clearPlan()
    {
       icpOptimizationController.clearPlan();
