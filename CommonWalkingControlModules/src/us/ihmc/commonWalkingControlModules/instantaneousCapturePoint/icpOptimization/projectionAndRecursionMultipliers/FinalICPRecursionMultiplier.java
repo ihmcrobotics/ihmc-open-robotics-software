@@ -49,6 +49,9 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
             timeToFinish += singleSupportDurations.get(0).getDoubleValue();
       }
 
+      if (numberOfStepsToConsider == 0)
+         timeToFinish = 0.0;
+
       double totalTimeForFinalICPRecursion = timeToFinish;
       for (int i = 0; i < numberOfStepsToConsider; i++)
       {
