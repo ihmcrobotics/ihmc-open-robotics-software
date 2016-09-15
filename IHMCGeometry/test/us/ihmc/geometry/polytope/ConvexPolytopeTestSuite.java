@@ -10,7 +10,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 @RunWith(TestPlanSuite.class)
 @TestSuiteTarget(TestPlanTarget.Fast)
-@SuiteClasses({ ConvexPolytopeTest.class, GilbertJohnsonKeerthiCollisionDetectorTest.class })
+@SuiteClasses({ ConvexPolytopeTest.class, SimplexPolytopeTest.class, GilbertJohnsonKeerthiCollisionDetectorTest.class })
 
 public class ConvexPolytopeTestSuite
 {
