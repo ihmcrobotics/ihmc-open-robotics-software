@@ -78,8 +78,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, CapturePointPlannerParameters icpPlannerParameters,
-         ICPOptimizationParameters icpOptimizationParameters, DoubleYoVariable yoTime, double totalMass, double gravityZ, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+         ICPOptimizationParameters icpOptimizationParameters, DoubleYoVariable yoTime, double totalMass, double gravityZ, double controlDT,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.totalMass = totalMass;
       this.gravityZ = gravityZ;
@@ -90,7 +90,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, bipedSupportPolygons, contactableFeet,
-            registry, yoGraphicsListRegistry);
+            controlDT, registry, yoGraphicsListRegistry);
 
       centerOfMass = new FramePoint(centerOfMassFrame);
       parentRegistry.addChild(registry);
