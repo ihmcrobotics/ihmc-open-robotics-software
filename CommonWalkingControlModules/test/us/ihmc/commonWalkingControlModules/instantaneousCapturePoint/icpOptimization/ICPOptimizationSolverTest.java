@@ -123,7 +123,6 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       assertEquals(name, numberOfFootstepVariables, this.numberOfFootstepVariables, epsilon);
       assertEquals(name, numberOfLagrangeMultipliers, this.numberOfLagrangeMultipliers, epsilon);
       assertEquals(name, totalNumberOfFreeVariables, this.numberOfFreeVariables, epsilon);
-      assertEquals(name, numberOfVertexVariables, this.numberOfVertexVariables, epsilon);
       assertEquals(name, numberOfVertices, this.numberOfVertices, epsilon);
 
       assertEquals(name, feedbackTaskIndex, this.feedbackCMPIndex, epsilon);
@@ -148,8 +147,8 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
       if (useFeedback)
       {
-         assertEquals(name, this.numberOfVertexVariables, stanceCMPCost_G.numRows, epsilon);
-         assertEquals(name, this.numberOfVertexVariables, stanceCMPCost_G.numCols, epsilon);
+         assertEquals(name, this.numberOfVertices, stanceCMPCost_G.numRows, epsilon);
+         assertEquals(name, this.numberOfVertices, stanceCMPCost_G.numCols, epsilon);
       }
 
       assertEquals(name, 2, feedbackCost_H.numRows, epsilon);
@@ -354,23 +353,23 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
       this.compute(finalICPRecursion, null, currentICP, perfectCMP, cmpProjection, initialICPProjection);
 
-      DenseMatrix64F extractedDynamics_Aeq = new DenseMatrix64F(4 + 2 * numberOffootstepsToConsider + 2 * numberOfVertices, 2);
+      DenseMatrix64F extractedDynamics_Aeq = new DenseMatrix64F(4 + 2 * numberOffootstepsToConsider + numberOfVertices, 2);
       DenseMatrix64F extractedDynamics_beq = new DenseMatrix64F(2, 1);
 
-      DenseMatrix64F extractedCMPDynamics_Aeq = new DenseMatrix64F(4 + 2 * numberOfVertices, 2);
+      DenseMatrix64F extractedCMPDynamics_Aeq = new DenseMatrix64F(4 + numberOfVertices, 2);
       DenseMatrix64F extractedCMPDynamics_beq = new DenseMatrix64F(2, 1);
 
-      DenseMatrix64F extractedCMPSum_Aeq = new DenseMatrix64F(2 * numberOfVertices, 2);
-      DenseMatrix64F extractedCMPSum_beq = new DenseMatrix64F(2, 1);
+      DenseMatrix64F extractedCMPSum_Aeq = new DenseMatrix64F(numberOfVertices, 1);
+      DenseMatrix64F extractedCMPSum_beq = new DenseMatrix64F(1, 1);
 
-      CommonOps.extract(solverInput_Aeq, 0, 4 + 2 * numberOffootstepsToConsider + 2 * numberOfVertices, 0, 2, extractedDynamics_Aeq, 0, 0);
+      CommonOps.extract(solverInput_Aeq, 0, 4 + 2 * numberOffootstepsToConsider + numberOfVertices, 0, 2, extractedDynamics_Aeq, 0, 0);
       CommonOps.extract(solverInput_beq, 0, 2, 0, 1, extractedDynamics_beq, 0, 0);
 
-      CommonOps.extract(solverInput_Aeq, 2 * numberOffootstepsToConsider, 2 * numberOffootstepsToConsider + 2 * numberOfVertices + 4, 2, 4, extractedCMPDynamics_Aeq, 0, 0);
+      CommonOps.extract(solverInput_Aeq, 2 * numberOffootstepsToConsider, 2 * numberOffootstepsToConsider + numberOfVertices + 4, 2, 4, extractedCMPDynamics_Aeq, 0, 0);
       CommonOps.extract(solverInput_beq, 2, 4, 0, 1, extractedCMPDynamics_beq, 0, 0);
 
-      CommonOps.extract(solverInput_Aeq, 2 * numberOffootstepsToConsider + 4, 2 * numberOffootstepsToConsider + 2 * numberOfVertices + 4, 4, 6, extractedCMPSum_Aeq, 0, 0);
-      CommonOps.extract(solverInput_beq, 4, 6, 0, 1, extractedCMPSum_beq, 0, 0);
+      CommonOps.extract(solverInput_Aeq, 2 * numberOffootstepsToConsider + 4, 2 * numberOffootstepsToConsider + numberOfVertices + 4, 4, 5, extractedCMPSum_Aeq, 0, 0);
+      CommonOps.extract(solverInput_beq, 4, 5, 0, 1, extractedCMPSum_beq, 0, 0);
 
       JUnitTools.assertMatrixEquals(dynamics_Aeq, extractedDynamics_Aeq, epsilon);
       JUnitTools.assertMatrixEquals(dynamics_beq, extractedDynamics_beq, epsilon);
@@ -752,6 +751,11 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          return false;
       }
 
+      @Override public boolean useICPFromBeginningOfState()
+      {
+         return true;
+      }
+
       @Override public double getMinimumFootstepWeight()
       {
          return 0.0001;
@@ -772,14 +776,24 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          return 1.0;
       }
 
-      @Override public double getMaxCMPExitForward()
+      @Override public double getMaxCMPForwardExit()
       {
          return 0.05;
       }
 
-      @Override public double getMaxCMPExitSideways()
+      @Override public double getMaxCMPLateralExit()
       {
          return 0.03;
+      }
+
+      @Override public double getForwardAdjustmentDeadband()
+      {
+         return 0.0;
+      }
+
+      @Override public double getLateralAdjustmentDeadband()
+      {
+         return 0.0;
       }
    };
 

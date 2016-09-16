@@ -17,11 +17,11 @@ public class ICPOptimizationCMPConstraintHandler
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      maxCMPExitForward = new DoubleYoVariable("maxCMPExitForward", registry);
-      maxCMPExitSideways = new DoubleYoVariable("maxCMPExitSideways", registry);
+      maxCMPExitForward = new DoubleYoVariable("maxCMPForwardExit", registry);
+      maxCMPExitSideways = new DoubleYoVariable("maxCMPLateralExit", registry);
 
-      maxCMPExitForward.set(icpOptimizationParameters.getMaxCMPExitForward());
-      maxCMPExitSideways.set(icpOptimizationParameters.getMaxCMPExitSideways());
+      maxCMPExitForward.set(icpOptimizationParameters.getMaxCMPForwardExit());
+      maxCMPExitSideways.set(icpOptimizationParameters.getMaxCMPLateralExit());
    }
 
    private final FramePoint2d tempVertex = new FramePoint2d();

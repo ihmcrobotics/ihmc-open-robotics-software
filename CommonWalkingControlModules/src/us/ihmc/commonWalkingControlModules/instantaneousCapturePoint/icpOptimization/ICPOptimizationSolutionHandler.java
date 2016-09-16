@@ -8,8 +8,8 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -73,8 +73,8 @@ public class ICPOptimizationSolutionHandler
       footstepLateralDeadband = new DoubleYoVariable("footstepLateralDeadband", registry);
       footstepWasAdjusted = new BooleanYoVariable("footstepWasAdjusted", registry);
 
-      footstepForwardDeadband.set(0.02); // todo
-      footstepLateralDeadband.set(0.02); // todo
+      footstepForwardDeadband.set(icpOptimizationParameters.getForwardAdjustmentDeadband());
+      footstepLateralDeadband.set(icpOptimizationParameters.getLateralAdjustmentDeadband());
 
       if (yoGraphicsListRegistry != null)
       {
@@ -131,6 +131,8 @@ public class ICPOptimizationSolutionHandler
 
    private final FramePoint solutionLocation = new FramePoint();
    private final FramePoint referenceLocation = new FramePoint();
+   private final FrameVector solutionAdjustment = new FrameVector();
+
    private boolean applyLocationDeadband(FramePoint2d solutionLocationToPack, FramePoint2d referenceLocation2d, ReferenceFrame deadbandFrame, double forwardDeadband,
          double lateralDeadband)
    {
@@ -139,18 +141,38 @@ public class ICPOptimizationSolutionHandler
 
       solutionLocation.changeFrame(deadbandFrame);
       referenceLocation.changeFrame(deadbandFrame);
+      solutionAdjustment.setToZero(deadbandFrame);
+
+      solutionAdjustment.set(solutionLocation);
+      solutionAdjustment.sub(referenceLocation);
 
       boolean wasAdjusted = false;
 
-      if (Math.abs(solutionLocation.getX() - referenceLocation.getX()) < forwardDeadband)
+      if (Math.abs(solutionAdjustment.getX()) < forwardDeadband)
+      {
          solutionLocation.setX(referenceLocation.getX());
+      }
       else
-         wasAdjusted = true;
+      {
+         if (solutionAdjustment.getX() > 0.0)
+            solutionLocation.setX(solutionLocation.getX() - forwardDeadband);
+         else
+            solutionLocation.setX(solutionLocation.getX() + forwardDeadband);
 
-      if (Math.abs(solutionLocation.getY() - referenceLocation.getY()) < lateralDeadband)
+         wasAdjusted = true;
+      }
+
+      if (Math.abs(solutionAdjustment.getY()) < lateralDeadband)
          solutionLocation.setY(referenceLocation.getY());
       else
+      {
+         if (solutionAdjustment.getY() > 0.0)
+            solutionLocation.setY(solutionLocation.getY() - lateralDeadband);
+         else
+            solutionLocation.setY(solutionLocation.getY() + lateralDeadband);
+
          wasAdjusted = true;
+      }
 
       solutionLocation.changeFrame(solutionLocationToPack.getReferenceFrame());
       solutionLocationToPack.setByProjectionOntoXYPlane(solutionLocation);

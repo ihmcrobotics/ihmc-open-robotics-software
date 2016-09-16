@@ -137,7 +137,8 @@ public class ICPOptimizationController
       solver = new ICPOptimizationSolver(icpOptimizationParameters, totalVertices, registry);
 
       useTwoCMPsInControl.set(icpPlannerParameters.useTwoCMPsPerSupport());
-      useInitialICP.set(true); // todo
+
+      useInitialICP.set(icpOptimizationParameters.useICPFromBeginningOfState());
       useFeedback.set(icpOptimizationParameters.useFeedback());
       useStepAdjustment.set(icpOptimizationParameters.useStepAdjustment());
       useFootstepRegularization.set(icpOptimizationParameters.useFootstepRegularization());
@@ -404,7 +405,6 @@ public class ICPOptimizationController
       numberOfIterations.set(solver.getNumberOfIterations());
 
       solutionHandler.extractFootstepSolutions(footstepSolutions, upcomingFootsteps, numberOfFootstepsToConsider,solver);
-
       solutionHandler.computeReferenceFromSolutions(footstepSolutions, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
       solutionHandler.computeNominalValues(upcomingFootstepLocations, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
    }
@@ -425,6 +425,7 @@ public class ICPOptimizationController
          icpVelocityDirectionFrame.setXAxis(desiredICPVelocity);
          feedbackGainsToPack.setToZero(icpVelocityDirectionFrame);
 
+         //adding 1 to have it have be equivalent to the feedback controller
          feedbackGainsToPack.setX(1.0 + feedbackParallelGain.getDoubleValue());
          feedbackGainsToPack.setY(1.0 + feedbackOrthogonalGain.getDoubleValue());
 

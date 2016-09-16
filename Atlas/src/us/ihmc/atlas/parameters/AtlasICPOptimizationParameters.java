@@ -36,17 +36,17 @@ public class AtlasICPOptimizationParameters implements ICPOptimizationParameters
 
    @Override public double getFeedbackParallelGain()
    {
-      return 20.0;
+      return 6.0;
    }
 
    @Override public double getFeedbackOrthogonalGain()
    {
-      return 20.0;
+      return 6.0;
    }
 
    @Override public double getDynamicRelaxationWeight()
    {
-      return 100000.0;
+      return 500.0;
    }
 
    @Override public boolean scaleStepRegularizationWeightWithTime()
@@ -89,6 +89,10 @@ public class AtlasICPOptimizationParameters implements ICPOptimizationParameters
       return false;
    }
 
+   @Override public boolean useICPFromBeginningOfState()
+   {
+      return true;
+   }
    @Override public double getMinimumFootstepWeight()
    {
       return 0.0001;
@@ -109,13 +113,23 @@ public class AtlasICPOptimizationParameters implements ICPOptimizationParameters
       return 20.0;
    }
 
-   @Override public double getMaxCMPExitForward()
+   @Override public double getMaxCMPForwardExit()
    {
-      return 0.05;
+      return 0.0;
    }
 
-   @Override public double getMaxCMPExitSideways()
+   @Override public double getMaxCMPLateralExit()
    {
-      return 0.01;
+      return 0.0;
+   }
+
+   @Override public double getForwardAdjustmentDeadband()
+   {
+      return 0.02;
+   }
+
+   @Override public double getLateralAdjustmentDeadband()
+   {
+      return 0.02;
    }
 }

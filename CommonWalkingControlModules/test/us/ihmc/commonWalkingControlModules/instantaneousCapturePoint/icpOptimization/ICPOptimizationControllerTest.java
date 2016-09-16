@@ -243,6 +243,11 @@ public class ICPOptimizationControllerTest
          return false;
       }
 
+      @Override public boolean useICPFromBeginningOfState()
+      {
+         return true;
+      }
+
       @Override public double getMinimumFootstepWeight()
       {
          return 0.0001;
@@ -264,14 +269,24 @@ public class ICPOptimizationControllerTest
          return 1.0;
       }
 
-      @Override public double getMaxCMPExitForward()
+      @Override public double getMaxCMPForwardExit()
       {
          return 0.05;
       }
 
-      @Override public double getMaxCMPExitSideways()
+      @Override public double getMaxCMPLateralExit()
       {
          return 0.03;
+      }
+
+      @Override public double getForwardAdjustmentDeadband()
+      {
+         return 0.0;
+      }
+
+      @Override public double getLateralAdjustmentDeadband()
+      {
+         return 0.0;
       }
    };
 
