@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior.WalkingOrientation;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior.WalkingOrientation;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose2d;
 

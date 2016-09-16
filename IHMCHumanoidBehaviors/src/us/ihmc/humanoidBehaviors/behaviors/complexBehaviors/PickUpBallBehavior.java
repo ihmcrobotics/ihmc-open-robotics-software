@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors;
+package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import java.util.ArrayList;
 
@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.BehaviorState;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
@@ -19,6 +20,11 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.SetLidarParametersBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDetectionBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
@@ -639,7 +645,7 @@ public class PickUpBallBehavior extends AbstractBehavior
    @Override
    public void initialize()
    {
-      defaultInitialize();
+      super.initialize();
       setupPipelineForKick();
 
    }
@@ -647,9 +653,10 @@ public class PickUpBallBehavior extends AbstractBehavior
    @Override
    public void doPostBehaviorCleanup()
    {
+      super.doPostBehaviorCleanup();
       TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
       sendPacketToNetworkProcessor(p1);
-      defaultPostBehaviorCleanup();
+
       coactiveElement.currentState.set(BehaviorState.STOPPED);
 
       coactiveElement.searchingForBall.set(false);
@@ -665,19 +672,23 @@ public class PickUpBallBehavior extends AbstractBehavior
    }
 
    @Override
-   public void stop()
+   public void abort()
    {
-      defaultStop();
+      super.abort();
+      
+      doPostBehaviorCleanup();
+      this.pipeLine.clearAll();
+      
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.stop();
+         behavior.abort();
       }
    }
 
    @Override
    public void pause()
    {
-      defaultPause();
+      super.pause();
       for (AbstractBehavior behavior : behaviors)
       {
          behavior.pause();
@@ -690,16 +701,6 @@ public class PickUpBallBehavior extends AbstractBehavior
       return pipeLine.isDone();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   public void resume()
-   {
-      defaultResume();
-   }
 
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
@@ -725,13 +726,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       return true;
    }
 
-   public void abort()
-   {
-      doPostBehaviorCleanup();
-      this.stop();
-      this.pipeLine.clearAll();
-   }
-
+  
 //   public void setHSVRange(HSVRange hsvRange)
 //   {
 //      if (initialSphereDetectionBehavior instanceof BlobFilteredSphereDetectionBehavior)

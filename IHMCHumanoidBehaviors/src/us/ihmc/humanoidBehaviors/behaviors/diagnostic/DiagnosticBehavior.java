@@ -15,8 +15,6 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.TurnInPlaceBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
@@ -26,6 +24,8 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.TurnInPlaceBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
@@ -2705,15 +2705,12 @@ public class DiagnosticBehavior extends AbstractBehavior
    }
 
    @Override
-   public void stop()
+   public void abort()
    {
       pipeLine.clearAll();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
+
 
    @Override
    public void pause()

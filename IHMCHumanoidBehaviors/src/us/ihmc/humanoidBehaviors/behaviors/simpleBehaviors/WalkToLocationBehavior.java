@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors;
+package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +9,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -297,19 +298,13 @@ public class WalkToLocationBehavior extends AbstractBehavior
    }
 
    @Override
-   public void stop()
+   public void abort()
    {
-      footstepListBehavior.stop();
-      isStopped.set(true);
+      footstepListBehavior.abort();
+      isAborted.set(true);
    }
 
-   @Override
-   public void enableActions()
-   {
-      // TODO Auto-generated method stub
-
-   }
-
+   
    @Override
    public void pause()
    {
@@ -343,7 +338,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
    public void doPostBehaviorCleanup()
    {
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
       hasInputBeenSet.set(false);
