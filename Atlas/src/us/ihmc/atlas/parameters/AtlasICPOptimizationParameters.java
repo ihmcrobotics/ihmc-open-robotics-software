@@ -56,7 +56,7 @@ public class AtlasICPOptimizationParameters implements ICPOptimizationParameters
 
    @Override public boolean scaleFeedbackWeightWithGain()
    {
-      return false;
+      return true;
    }
 
    @Override public boolean scaleUpcomingStepWeights()
@@ -76,7 +76,7 @@ public class AtlasICPOptimizationParameters implements ICPOptimizationParameters
 
    @Override public boolean useStepAdjustment()
    {
-      return false;
+      return true;
    }
 
    @Override public boolean useFootstepRegularization()

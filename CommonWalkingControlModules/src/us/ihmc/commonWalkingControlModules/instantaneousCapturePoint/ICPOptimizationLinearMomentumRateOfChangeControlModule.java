@@ -299,7 +299,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
    private final FramePose footstepPose = new FramePose();
    private final FramePoint2d footstepPositionSolution = new FramePoint2d();
 
-   public void getUpcomingFootstepSolution(Footstep footstepToPack)
+   public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
    {
       if (icpOptimizationController.getNumberOfFootstepsToConsider() > 0)
       {
@@ -308,5 +308,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
          footstepPose.setXYFromPosition2d(footstepPositionSolution);
          footstepPose.setPose(footstepPose);
       }
+
+      return icpOptimizationController.wasFootstepAdjusted();
    }
 }

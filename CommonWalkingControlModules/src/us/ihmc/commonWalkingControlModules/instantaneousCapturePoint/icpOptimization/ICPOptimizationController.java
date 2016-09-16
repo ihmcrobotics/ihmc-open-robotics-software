@@ -62,6 +62,8 @@ public class ICPOptimizationController
    private final BooleanYoVariable isInTransfer = new BooleanYoVariable(yoNamePrefix + "IsInTransfer", registry);
    private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable(yoNamePrefix + "IsInitialTransfer", registry);
 
+   private final BooleanYoVariable footstepWasAdjusted = new BooleanYoVariable("footstepWasAdjusted", registry);
+
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable(yoNamePrefix + "DoubleSupportDuration", registry);
    private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable(yoNamePrefix + "SingleSupportDuration", registry);
    private final DoubleYoVariable initialDoubleSupportDuration = new DoubleYoVariable(yoNamePrefix + "InitialTransferDuration", registry);
@@ -138,6 +140,9 @@ public class ICPOptimizationController
    private final DoubleYoVariable maxCMPExitForward = new DoubleYoVariable("maxCMPExitForward", registry);
    private final DoubleYoVariable maxCMPExitSideways = new DoubleYoVariable("maxCMPExitSideways", registry);
 
+   private final DoubleYoVariable footstepForwardDeadband = new DoubleYoVariable("footstepForwardDeadband", registry);
+   private final DoubleYoVariable footstepLateralDeadband = new DoubleYoVariable("footstepLateralDeadband", registry);
+
    private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("icpOptimizationNumberOfIterations", registry);
 
    private final ICPOptimizationSolver solver;
@@ -186,7 +191,7 @@ public class ICPOptimizationController
       referenceCMPsCalculator.initializeParameters(icpPlannerParameters);
 
       useTwoCMPsInControl.set(icpPlannerParameters.useTwoCMPsPerSupport());
-      useInitialICP.set(true);
+      useInitialICP.set(true); // todo
       useFeedback.set(icpOptimizationParameters.useFeedback());
       useStepAdjustment.set(icpOptimizationParameters.useStepAdjustment());
       useFootstepRegularization.set(icpOptimizationParameters.useFootstepRegularization());
@@ -208,6 +213,9 @@ public class ICPOptimizationController
 
       maxCMPExitForward.set(icpOptimizationParameters.getMaxCMPExitForward());
       maxCMPExitSideways.set(icpOptimizationParameters.getMaxCMPExitSideways());
+
+      footstepForwardDeadband.set(0.02); // todo
+      footstepLateralDeadband.set(0.02); // todo
 
       exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getTimeSpentOnExitCMPInPercentOfStepTime());
       doubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
@@ -531,7 +539,7 @@ public class ICPOptimizationController
             solver.setFeedbackRegularizationWeight(feedbackRegularizationWeight.getDoubleValue());
       }
 
-      if (localUseStepAdjustment)
+      if (localUseStepAdjustment && !isInTransfer.getBooleanValue())
       {
          for (int footstepIndex = 0; footstepIndex < numberOfFootstepsToConsider; footstepIndex++)
             submitFootstepConditionsToSolver(footstepIndex);
@@ -558,6 +566,12 @@ public class ICPOptimizationController
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
          solver.getFootstepSolutionLocation(i, locationSolution);
+
+         boolean footstepWasAdjusted = applyLocationDeadband(locationSolution, upcomingFootstepLocations.get(i).getFrameTuple2d(), upcomingFootsteps.get(0).getSoleReferenceFrame(),
+               footstepForwardDeadband.getDoubleValue(), footstepLateralDeadband.getDoubleValue());
+
+         this.footstepWasAdjusted.set(footstepWasAdjusted);
+
          footstepSolutions.get(i).set(locationSolution);
       }
 
@@ -594,6 +608,36 @@ public class ICPOptimizationController
          feedbackGainsToPack.setToZero(worldFrame);
          feedbackGainsToPack.set(feedbackOrthogonalGain.getDoubleValue(), feedbackOrthogonalGain.getDoubleValue());
       }
+   }
+
+   private final FramePoint solutionLocation = new FramePoint();
+   private final FramePoint referenceLocation = new FramePoint();
+
+   private boolean applyLocationDeadband(FramePoint2d solutionLocationToPack, FramePoint2d referenceLocation2d, ReferenceFrame deadbandFrame, double forwardDeadband,
+         double lateralDeadband)
+   {
+      solutionLocation.setXYIncludingFrame(solutionLocationToPack);
+      referenceLocation.setXYIncludingFrame(referenceLocation2d);
+
+      solutionLocation.changeFrame(deadbandFrame);
+      referenceLocation.changeFrame(deadbandFrame);
+
+      boolean wasAdjusted = false;
+
+      if (Math.abs(solutionLocation.getX() - referenceLocation.getX()) < forwardDeadband)
+         solutionLocation.setX(referenceLocation.getX());
+      else
+         wasAdjusted = true;
+
+      if (Math.abs(solutionLocation.getY() - referenceLocation.getY()) < lateralDeadband)
+         solutionLocation.setY(referenceLocation.getY());
+      else
+         wasAdjusted = true;
+
+      solutionLocation.changeFrame(solutionLocationToPack.getReferenceFrame());
+      solutionLocationToPack.setByProjectionOntoXYPlane(solutionLocation);
+
+      return wasAdjusted;
    }
 
    private final FramePoint2d finalICP2d = new FramePoint2d();
@@ -667,7 +711,7 @@ public class ICPOptimizationController
       numberOfFootstepsToConsider = Math.min(numberOfFootstepsToConsider, upcomingFootsteps.size());
       numberOfFootstepsToConsider = Math.min(numberOfFootstepsToConsider, maximumNumberOfFootstepsToConsider);
 
-      if (!localUseStepAdjustment)
+      if (!localUseStepAdjustment || isInTransfer.getBooleanValue())
          numberOfFootstepsToConsider = 0;
 
       return numberOfFootstepsToConsider;
@@ -968,6 +1012,11 @@ public class ICPOptimizationController
    public void getFootstepSolution(int footstepIndex, FramePoint2d footstepSolutionToPack)
    {
       footstepSolutions.get(footstepIndex).getFrameTuple2d(footstepSolutionToPack);
+   }
+
+   public boolean wasFootstepAdjusted()
+   {
+      return footstepWasAdjusted.getBooleanValue();
    }
 
    private class Vector2dZUpFrame extends ReferenceFrame
