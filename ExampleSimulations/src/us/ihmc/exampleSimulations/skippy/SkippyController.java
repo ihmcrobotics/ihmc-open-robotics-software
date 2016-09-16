@@ -1,9 +1,15 @@
 
 package us.ihmc.exampleSimulations.skippy;
 
+import java.io.*;
+
 import java.awt.Container;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -14,6 +20,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import cern.colt.matrix.doublealgo.Formatter;
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -142,6 +149,14 @@ public class SkippyController implements RobotController {
 	private final YoFrameVector footToCoMInBodyFrame;
 
 	private final YoFramePoint actualICP = new YoFramePoint("actualICP", ReferenceFrame.getWorldFrame(), registry);
+	private final YoFramePoint previousICP = new YoFramePoint("formerICP", ReferenceFrame.getWorldFrame(), registry);
+	private final YoFramePoint actualIcpKPError = new YoFramePoint("actualIcpKPError", ReferenceFrame.getWorldFrame(), registry);
+	private final YoFramePoint previousIcpKPError = new YoFramePoint("previousIcpKPError", ReferenceFrame.getWorldFrame(), registry);
+	private final YoFramePoint actualIcpKDError = new YoFramePoint("actualIcpKDError", ReferenceFrame.getWorldFrame(), registry);
+	private final YoFramePoint previousIcpKDError = new YoFramePoint("previousIcpKDError", ReferenceFrame.getWorldFrame(), registry);
+	private final YoFramePoint actualIcpKIError = new YoFramePoint("actualIcpKIError", ReferenceFrame.getWorldFrame(), registry);
+	private final YoFramePoint previousIcpKIError = new YoFramePoint("previousIcpKIError", ReferenceFrame.getWorldFrame(), registry);
+	
 	private final YoFramePoint actualCMPFromDefinition = new YoFramePoint("actualCMPFromDefinition",
 			ReferenceFrame.getWorldFrame(), registry);
 	private final YoFramePoint actualCMPFromICP = new YoFramePoint("actualCMPFromICP", ReferenceFrame.getWorldFrame(),
@@ -171,7 +186,7 @@ public class SkippyController implements RobotController {
 	private final DoubleYoVariable z0 = new DoubleYoVariable("z0", registry);
 	private final DoubleYoVariable averageZ0 = new DoubleYoVariable("averageZ0", registry);
 	private final BooleanYoVariable useICPController = new BooleanYoVariable("useICPController", registry);
-	private final DoubleYoVariable actualKCapture = new DoubleYoVariable("actualKCapture", registry);
+	private final DoubleYoVariable kCapture = new DoubleYoVariable("kCapture", registry);
 	private final DoubleYoVariable lastKCapture = new DoubleYoVariable("lastKCapture", registry);
 
 	private final EnumYoVariable<SkippyToDo> skippyToDo = new EnumYoVariable<SkippyToDo>("SkippyToDo", registry,
@@ -208,23 +223,21 @@ public class SkippyController implements RobotController {
 		 */
 		z0.set(1.216); // got from averaged CoM_Z during simulation
 		averageZ0.set(0.0);
-		actualKCapture.set(0.9);
-		lastKCapture.set(actualKCapture.getDoubleValue());
+		kCapture.set(0.9);
+		lastKCapture.set(kCapture.getDoubleValue());
 		robotMass.set(robot.getMass());
 		robotWeight.set(robotMass.getDoubleValue() * Math.abs(robot.getGravityZ()));
+		/*
+		 * Set up a file for output method 1
+		 */
 		try {
 			writer = new PrintWriter("Output.txt", "UTF-8");
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		// writer.println("The first line");
-		// writer.println("The second line");
-		// writer.close();
-		// actualGroundReactionForce.set(0.0,0.0,0.0);
-		// lastGroundReactionForce.set(0.0,0.0,0.0);
-
+		writer.println("actualCMPFromDefinition" + "\t" + "\t" + "actualCMPFromICP");
+//
 		footToCoMInBodyFrame = new YoFrameVector("footToCoMInBody", robot.updateAndGetBodyFrame(), registry);
 		forceToCOM = new ExternalForcePoint("FORCETOCOM", robot);
 
@@ -274,37 +287,37 @@ public class SkippyController implements RobotController {
 		YoGraphicPosition comPositionYoGraphic = new YoGraphicPosition("CenterOfMass", centerOfMass, 0.006,
 				YoAppearance.Black(), GraphicType.CROSS);
 
-		yoGraphicsListRegistries.registerYoGraphic("trueICP", comPositionYoGraphic);
-		yoGraphicsListRegistries.registerArtifact("trueICP", comPositionYoGraphic.createArtifact());
+		yoGraphicsListRegistries.registerYoGraphic("actualICP", comPositionYoGraphic);
+		yoGraphicsListRegistries.registerArtifact("actualICP", comPositionYoGraphic.createArtifact());
 		/*
 		 * New variables for ICP and CMP graphing
 		 */
 		YoGraphicPosition icpPositionYoGraphic = new YoGraphicPosition("InstantaneousCapturePoint", actualICP, 0.01,
 				YoAppearance.Blue(), GraphicType.ROTATED_CROSS);
-		yoGraphicsListRegistries.registerYoGraphic("trueICP", icpPositionYoGraphic);
-		yoGraphicsListRegistries.registerArtifact("trueICP", icpPositionYoGraphic.createArtifact());
+		yoGraphicsListRegistries.registerYoGraphic("actualICP", icpPositionYoGraphic);
+		yoGraphicsListRegistries.registerArtifact("actualICP", icpPositionYoGraphic.createArtifact());
 
 		YoGraphicPosition footPositionYoGraphic = new YoGraphicPosition("Foot", footLocation, 0.006,
 				YoAppearance.DarkBlue(), GraphicType.BALL);
-		yoGraphicsListRegistries.registerYoGraphic("trueICP", footPositionYoGraphic);
-		yoGraphicsListRegistries.registerArtifact("trueICP", footPositionYoGraphic.createArtifact());
+		yoGraphicsListRegistries.registerYoGraphic("actualICP", footPositionYoGraphic);
+		yoGraphicsListRegistries.registerArtifact("actualICP", footPositionYoGraphic.createArtifact());
 
 		YoGraphicPosition cmpPositionYoGraphic = new YoGraphicPosition("CentroidalMomentPoint", actualCMPFromDefinition,
 				0.01, YoAppearance.Red(), GraphicType.CROSS);
-		yoGraphicsListRegistries.registerYoGraphic("trueICP", cmpPositionYoGraphic);
-		yoGraphicsListRegistries.registerArtifact("trueICP", cmpPositionYoGraphic.createArtifact());
+		yoGraphicsListRegistries.registerYoGraphic("actualICP", cmpPositionYoGraphic);
+		yoGraphicsListRegistries.registerArtifact("actualICP", cmpPositionYoGraphic.createArtifact());
 
 		YoGraphicPosition cmpFromIcpPositionYoGraphic = new YoGraphicPosition("CentroidalMomentPivotFromICP",
 				actualCMPFromICP, 0.0125, YoAppearance.DarkMagenta(), GraphicType.CROSS);
-		yoGraphicsListRegistries.registerYoGraphic("trueICP", cmpFromIcpPositionYoGraphic);
-		yoGraphicsListRegistries.registerArtifact("trueICP", cmpFromIcpPositionYoGraphic.createArtifact());
+		yoGraphicsListRegistries.registerYoGraphic("actualICP", cmpFromIcpPositionYoGraphic);
+		yoGraphicsListRegistries.registerArtifact("actualICP", cmpFromIcpPositionYoGraphic.createArtifact());
 	}
 
 	public void doControl() {
 		computeCMPController();
 		computeFootToCenterOfMassLocation();
 		setParametersForControlModes();
-		computeInstantaneousCapturePoint();
+		computeICP();
 		computeFootToCenterOfMassLocation();
 		/*
 		 * useICPController default value false
@@ -354,22 +367,63 @@ public class SkippyController implements RobotController {
 	}
 
 	private void computeCMPController() {
-		actualCoMAndCoMVelocity();
 		actualGroundReactionForce();
-		linearAndAngularMomentumRateOfChange();
-		cmpFromDefinition();
+		actualCoMAndCoMVelocity();
+//		linearAndAngularMomentumRateOfChange();
+//		cmpFromDefinition();
 		cmpFromIcpDynamics();
+		computeIcpErrors();
 		cmpToJointPositionVectors(actualCMPFromICP);
 		hipAndShoulderUnitVectors();
 		tauOnHipAndShoulderJoints();
-		actualReactionForceAndKcapture();
-		writer.println(actualCMPFromDefinition + "=========" + actualCMPFromICP);
-		// writer.println("The second line");
-		// writer.close();
+//		actualReactionForceAndKcapture();
+	}
+	/*
+	 * Compute ICP errors
+	 */
+	public void computeIcpErrors(){
+		/*
+		 * Sets previous ICP and ICP error
+		 */
+		previousICP.set(actualICP);
+		previousIcpKPError.set(actualIcpKPError);
+		previousIcpKDError.set(actualIcpKDError);
+		previousIcpKIError.set(actualIcpKIError);
+		/*
+		 * Compute actual ICP
+		 */
+		computeICP();
+		/*
+		 * Proportional error
+		 */
+		 actualIcpKPError.set(actualICP);
+		 actualIcpKPError.sub(previousICP);
+		 /*
+		  * Derivative error: [Xicp(ti)-Xicp(ti-1)]/deltaT
+		  */
+		 actualIcpKDError.set(actualICP);
+		 actualIcpKDError.sub(previousICP);
+		 actualIcpKDError.scale(1/SkippySimulation.DT);
+		 actualIcpKDError.sub(previousIcpKDError);
+		 /*
+		  * Integral error: [Xicp(ti)+Xicp(ti-1)]*deltaT/2
+		  */
+		 actualIcpKIError.set(actualICP);
+		 actualIcpKIError.add(previousICP);
+		 actualIcpKIError.scale(SkippySimulation.DT/2);
+		 actualIcpKIError.add(previousIcpKIError);
+		 /*
+		  * Apply torques to the joints
+		  */
+			double kp = 100;// 0000.0;
+			double kd = 10;// 0000.0;
+			double ki = 10000.0;
+//		 robot.getHipJointTippy()
+//			.setTau(kp *  + k2.getDoubleValue() * (0.0 - angularVelocityForControl)
+//					+ k3.getDoubleValue() * (hipDesired - hipAngle) + k4.getDoubleValue() * (0.0 - hipAngleVel));
 
 	}
-
-	/**
+	/*
 	 * Compute actual reaction force and kCapture
 	 */
 	public void actualReactionForceAndKcapture() {
@@ -394,13 +448,13 @@ public class SkippyController implements RobotController {
 				+ ki * angularMomentumIntegralError) * lastGroundReactionForce.getZ();
 		lastGroundReactionForce.scale(reactionForceFactor);
 		actualGroundReactionForce.set(lastGroundReactionForce);
-		actualKCapture.set((kp * angularMomentumError - kd * rateOfChangeOfAMModulus.getDoubleValue()
+		kCapture.set((kp * angularMomentumError - kd * rateOfChangeOfAMModulus.getDoubleValue()
 				+ ki * angularMomentumIntegralError));
 		/*
 		 * Actualize last reaction and kCapture
 		 */
 		lastGroundReactionForce.set(actualGroundReactionForce);
-		lastKCapture.set(actualKCapture.getDoubleValue());
+		lastKCapture.set(kCapture.getDoubleValue());
 	}
 
 	/**
@@ -435,6 +489,10 @@ public class SkippyController implements RobotController {
 		 */
 		tauOnShoulderJointAxis.set(shoulderJointUnitVector);
 		tauOnShoulderJointAxis.scale(tempTauShoulderJointProjectionModulus);
+		/*
+		 * Apply torque to the joints
+		 */
+		
 	}
 
 	/**
@@ -548,7 +606,7 @@ public class SkippyController implements RobotController {
 		actualICP.get(tempCMP);
 		tempFootLocation = robot.computeFootLocation();
 		tempCMP.sub(tempFootLocation);
-		tempCMP.scale(actualKCapture.getDoubleValue());
+		tempCMP.scale(kCapture.getDoubleValue());
 		tempCMP.add(actualICP.getPoint3dCopy());
 		tempCMP.setZ(0.0);
 		actualCMPFromICP.set(tempCMP);
@@ -601,7 +659,7 @@ public class SkippyController implements RobotController {
 		lastAngularMomentum.set(angularMomentum);
 	}
 
-	private void computeInstantaneousCapturePoint() {
+	private void computeICP() {
 		double w0 = Math.sqrt(z0.getDoubleValue() / Math.abs(robot.getGravityt()));
 
 		actualICP.set(centerOfMassVelocity);

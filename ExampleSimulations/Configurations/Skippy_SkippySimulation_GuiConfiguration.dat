@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.tauShoulderJointX,root.Skippy.SkippyController.tauShoulderJointY,root.Skippy.SkippyController.tauShoulderJointZ</Variables>
+		<Variables>root.Skippy.SkippyController.actualIcpKPErrorX,root.Skippy.SkippyController.actualIcpKPErrorY</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.tauOnShoulderJointAxisX,root.Skippy.SkippyController.tauOnShoulderJointAxisY,root.Skippy.SkippyController.tauOnShoulderJointAxisZ</Variables>
+		<Variables>root.Skippy.SkippyController.actualIcpKDErrorX,root.Skippy.SkippyController.actualIcpKDErrorY</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -89,7 +89,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.lastGroundReactionForceZ,root.Skippy.SkippyController.actualGroundReactionForceZ,root.Skippy.SkippyController.robotWeight</Variables>
+		<Variables>root.Skippy.SkippyController.actualCMPFromICPX,root.Skippy.SkippyController.actualCMPFromICPY</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -101,7 +101,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.Skippy.SkippyController.actualICPX,root.Skippy.SkippyController.actualICPY</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -125,21 +125,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.rateOfChangeOfAngularMomentumX,root.Skippy.SkippyController.rateOfChangeOfAngularMomentumY,root.Skippy.SkippyController.rateOfChangeOfAngularMomentumZ,root.Skippy.SkippyController.rateOfChangeOfAMModulus</Variables>
+		<Variables>root.Skippy.SkippyController.actualIcpKIErrorX,root.Skippy.SkippyController.actualIcpKIErrorY</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.rateOfChangeOfAMModulus</Variables>
-		<GraphConfiguration>
-			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
