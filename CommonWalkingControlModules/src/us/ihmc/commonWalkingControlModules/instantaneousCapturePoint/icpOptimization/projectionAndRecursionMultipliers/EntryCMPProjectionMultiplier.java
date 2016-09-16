@@ -68,17 +68,17 @@ public class EntryCMPProjectionMultiplier
    }
 
    public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double timeRemaining,
-         boolean useTwoCMPs, boolean isInTransfer, double omega0)
+         boolean useTwoCMPs, boolean isInTransfer, double omega0, boolean useInitialICP)
    {
       double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
       {
-         positionMultiplier = computeInTransfer(doubleSupportDurations, timeRemaining, useTwoCMPs, omega0);
+         positionMultiplier = computeInTransfer(doubleSupportDurations, timeRemaining, useTwoCMPs, omega0, useInitialICP);
       }
       else
       {
          if (useTwoCMPs)
-            positionMultiplier = computeSegmentedProjection(doubleSupportDurations, singleSupportDurations, timeRemaining, omega0);
+            positionMultiplier = computeSegmentedProjection(doubleSupportDurations, singleSupportDurations, timeRemaining, omega0, useInitialICP);
          else
             positionMultiplier = computeInSwingOneCMP();
       }
@@ -99,9 +99,9 @@ public class EntryCMPProjectionMultiplier
       this.velocityMultiplier.set(velocityMultiplier);
    }
 
-   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining, boolean useTwoCMPs, double omega0)
+   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining, boolean useTwoCMPs, double omega0, boolean useInitialICP)
    {
-      transferEntryCMPProjectionMatrix.compute(doubleSupportDurations, useTwoCMPs, omega0);
+      transferEntryCMPProjectionMatrix.compute(doubleSupportDurations, useTwoCMPs, omega0, useInitialICP);
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
@@ -133,42 +133,49 @@ public class EntryCMPProjectionMultiplier
    }
 
    private double computeSegmentedProjection(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         double timeRemaining, double omega0)
+         double timeRemaining, double omega0, boolean useInitialICP)
    {
       double timeInState = totalTrajectoryTime.getDoubleValue() - timeRemaining;
 
       if (timeInState < startOfSplineTime.getDoubleValue())
-         return computeFirstSegmentProjection(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+         return computeFirstSegmentProjection(doubleSupportDurations, singleSupportDurations, timeInState, omega0, useInitialICP);
       else if (timeInState >= endOfSplineTime.getDoubleValue())
          return computeThirdSegmentProjection();
       else
-         return computeSecondSegmentProjection(doubleSupportDurations, singleSupportDurations, timeRemaining, omega0);
+         return computeSecondSegmentProjection(doubleSupportDurations, singleSupportDurations, timeRemaining, omega0, useInitialICP);
    }
 
    private double computeFirstSegmentProjection(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         double timeInState, double omega0)
+         double timeInState, double omega0, boolean useInitialICP)
    {
-      double currentDoubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
-      double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
+      if (!useInitialICP)
+      {
+         double currentDoubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
+         double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
 
-      double stepDuration = currentDoubleSupportDuration + singleSupportDuration;
+         double stepDuration = currentDoubleSupportDuration + singleSupportDuration;
 
-      double timeSpentOnEntryCMP = (1.0 - exitCMPRatio.getDoubleValue()) * stepDuration;
+         double timeSpentOnEntryCMP = (1.0 - exitCMPRatio.getDoubleValue()) * stepDuration;
 
-      double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
+         double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
 
-      double entryRecursionTime = timeInState + endOfDoubleSupportDuration - timeSpentOnEntryCMP;
-      double entryRecursion = Math.exp(omega0 * entryRecursionTime);
+         double entryRecursionTime = timeInState + endOfDoubleSupportDuration - timeSpentOnEntryCMP;
+         double entryRecursion = Math.exp(omega0 * entryRecursionTime);
 
-      double recursion = 1.0 - entryRecursion;
+         double recursion = 1.0 - entryRecursion;
 
-      return recursion;
+         return recursion;
+      }
+      else
+      {
+         return 1.0 - Math.exp(omega0 * timeInState);
+      }
    }
 
    private double computeSecondSegmentProjection(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         double timeRemaining, double omega0)
+         double timeRemaining, double omega0, boolean useInitialICP)
    {
-      swingEntryCMPProjectionMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0);
+      swingEntryCMPProjectionMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0, useInitialICP);
 
       double lastSegmentDuration = totalTrajectoryTime.getDoubleValue() - endOfSplineTime.getDoubleValue();
       double timeRemainingInSpline = timeRemaining - lastSegmentDuration;

@@ -28,21 +28,29 @@ public class SwingEntryCMPProjectionMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0, boolean useInitialICP)
    {
-      this.compute(doubleSupportDurations.get(0).getDoubleValue(), singleSupportDurations.get(0).getDoubleValue(), omega0);
+      this.compute(doubleSupportDurations.get(0).getDoubleValue(), singleSupportDurations.get(0).getDoubleValue(), omega0, useInitialICP);
    }
 
-   public void compute(double doubleSupportDuration, double singleSupportDuration, double omega0)
+   public void compute(double doubleSupportDuration, double singleSupportDuration, double omega0, boolean useInitialICP)
    {
       zero();
 
-      double stepDuration = doubleSupportDuration + singleSupportDuration;
+      double projectionDuration;
+      if (!useInitialICP)
+      {
+         double stepDuration = doubleSupportDuration + singleSupportDuration;
 
-      double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
-      double timeSpentOnEntryCMP = (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue()) * stepDuration;
+         double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
+         double timeSpentOnEntryCMP = (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue()) * stepDuration;
 
-      double projectionDuration = startOfSplineTime.getDoubleValue() + endOfDoubleSupportDuration - timeSpentOnEntryCMP;
+         projectionDuration = startOfSplineTime.getDoubleValue() + endOfDoubleSupportDuration - timeSpentOnEntryCMP;
+      }
+      else
+      {
+         projectionDuration = startOfSplineTime.getDoubleValue();
+      }
 
       double projection = Math.exp(omega0 * projectionDuration);
 

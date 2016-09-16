@@ -919,13 +919,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxICPErrorBeforeSingleSupportX()
    {
-      return 0.08;
+      return 0.03;
    }
 
    @Override
    public double getMaxICPErrorBeforeSingleSupportY()
    {
-      return 0.05;
+      return 0.015;
    }
 
    @Override

@@ -21,12 +21,12 @@ public class TransferEntryCMPProjectionMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, boolean useTwoCMPs, double omega0)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, boolean useTwoCMPs, double omega0, boolean useInitialICP)
    {
-      this.compute(doubleSupportDurations.get(0).getDoubleValue(), useTwoCMPs, omega0);
+      this.compute(doubleSupportDurations.get(0).getDoubleValue(), useTwoCMPs, omega0, useInitialICP);
    }
 
-   public void compute(double doubleSupportDuration, boolean useTwoCMPs, double omega0)
+   public void compute(double doubleSupportDuration, boolean useTwoCMPs, double omega0, boolean useInitialICP)
    {
       zero();
 
@@ -40,8 +40,11 @@ public class TransferEntryCMPProjectionMatrix extends DenseMatrix64F
 
          double stepProjection = initialDoubleSupportProjection * (1.0 - endOfDoubleSupportProjection);
 
-         set(0, 0, stepProjection);
-         set(1, 0, omega0 * stepProjection);
+         if (!useInitialICP)
+         {
+            set(0, 0, stepProjection);
+            set(1, 0, omega0 * stepProjection);
+         }
          set(3, 0, -omega0);
       }
    }

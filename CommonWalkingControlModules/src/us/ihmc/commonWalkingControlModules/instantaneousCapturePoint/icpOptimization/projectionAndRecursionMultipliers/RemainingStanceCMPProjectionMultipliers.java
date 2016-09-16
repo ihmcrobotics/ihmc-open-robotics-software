@@ -34,11 +34,12 @@ public class RemainingStanceCMPProjectionMultipliers
    }
 
    public void compute(double timeRemaining, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         boolean useTwoCMPs, boolean isInTransfer, double omega0)
+         boolean useTwoCMPs, boolean isInTransfer, double omega0, boolean useInitialICP)
    {
-      exitMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0);
-      entryMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0);
-      previousExitMultiplier.compute(doubleSupportDurations, timeRemaining, isInTransfer, omega0);
+      timeRemaining = Math.max(timeRemaining, 0.0);
+      exitMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0, useInitialICP);
+      entryMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0, useInitialICP);
+      previousExitMultiplier.compute(doubleSupportDurations, timeRemaining, isInTransfer, omega0, useInitialICP);
    }
 
    public double getRemainingExitMultiplier()

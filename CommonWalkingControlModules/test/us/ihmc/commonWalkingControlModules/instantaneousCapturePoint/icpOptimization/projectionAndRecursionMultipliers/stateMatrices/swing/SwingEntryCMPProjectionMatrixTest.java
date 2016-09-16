@@ -74,7 +74,7 @@ public class SwingEntryCMPProjectionMatrixTest
          double projectionTime = startOfSpline + endOfDoubleSupport - timeSpentOnEntry;
          double projection = Math.exp(omega0 * projectionTime);
 
-         swingEntryCMPProjectionMatrix.compute(doubleSupportDuration, singleSupportDuration, omega0);
+         swingEntryCMPProjectionMatrix.compute(doubleSupportDuration, singleSupportDuration, omega0, false);
 
 
          shouldBe.zero();

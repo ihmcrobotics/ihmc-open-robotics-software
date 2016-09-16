@@ -59,7 +59,7 @@ public class TransferStateEndRecursionMatrixTest
 
          String name = "splitRatio = " + splitRatio + ",\n doubleSupportDuration = " + currentDoubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
 
-         transferStateEndRecursionMatrix.compute(currentDoubleSupportDuration, omega0);
+         transferStateEndRecursionMatrix.compute(currentDoubleSupportDuration, omega0, false);
          shouldBe.zero();
          shouldBe.set(0, 0, Math.exp(-omega0 * currentDoubleSupportDuration));
          shouldBe.set(1, 0, omega0 * Math.exp(-omega0 * currentDoubleSupportDuration));

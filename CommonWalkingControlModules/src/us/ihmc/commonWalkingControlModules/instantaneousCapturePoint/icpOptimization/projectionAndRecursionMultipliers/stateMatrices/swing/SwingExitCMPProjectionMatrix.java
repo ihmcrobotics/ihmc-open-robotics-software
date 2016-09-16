@@ -32,12 +32,12 @@ public class SwingExitCMPProjectionMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0, boolean useInitialICP)
    {
-      compute(doubleSupportDurations.get(1).getDoubleValue(),doubleSupportDurations.get(0).getDoubleValue(), singleSupportDurations.get(0).getDoubleValue(), omega0);
+      compute(doubleSupportDurations.get(1).getDoubleValue(),doubleSupportDurations.get(0).getDoubleValue(), singleSupportDurations.get(0).getDoubleValue(), omega0, useInitialICP);
    }
 
-   public void compute(double upcomingDoubleSupportDuration, double currentDoubleSupportDuration, double singleSupportDuration, double omega0)
+   public void compute(double upcomingDoubleSupportDuration, double currentDoubleSupportDuration, double singleSupportDuration, double omega0, boolean useInitialICP)
    {
       double stepDuration = currentDoubleSupportDuration + singleSupportDuration;
 
@@ -58,8 +58,11 @@ public class SwingExitCMPProjectionMatrix extends DenseMatrix64F
 
       zero();
 
-      set(0, 0, entryRecursion * (1.0 - exitRecursion));
-      set(1, 0, omega0 * entryRecursion * (1.0 - exitRecursion));
+      if (!useInitialICP)
+      {
+         set(0, 0, entryRecursion * (1.0 - exitRecursion));
+         set(1, 0, omega0 * entryRecursion * (1.0 - exitRecursion));
+      }
       set(2, 0, 1.0 - lastSegmentProjection);
       set(3, 0, -omega0 * lastSegmentProjection);
    }

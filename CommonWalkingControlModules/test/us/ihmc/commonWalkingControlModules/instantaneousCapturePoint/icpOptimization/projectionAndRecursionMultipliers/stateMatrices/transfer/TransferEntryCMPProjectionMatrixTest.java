@@ -66,13 +66,13 @@ public class TransferEntryCMPProjectionMatrixTest
          double initialDoubleSupport = splitRatio * doubleSupportDuration;
          double endOfDoubleSupport = (1.0 - splitRatio) * doubleSupportDuration;
 
-         transferEntryCMPProjectionMatrix.compute(doubleSupportDuration, useTwoCMPs, omega0);
+         transferEntryCMPProjectionMatrix.compute(doubleSupportDuration, useTwoCMPs, omega0, false);
          shouldBe.zero();
          JUnitTools.assertMatrixEquals(name, shouldBe, transferEntryCMPProjectionMatrix, epsilon);
 
          useTwoCMPs = true;
 
-         transferEntryCMPProjectionMatrix.compute(doubleSupportDuration, useTwoCMPs, omega0);
+         transferEntryCMPProjectionMatrix.compute(doubleSupportDuration, useTwoCMPs, omega0, false);
          shouldBe.zero();
          shouldBe.set(0, 0, Math.exp(-omega0 * initialDoubleSupport) * (1.0 - Math.exp(-omega0 * endOfDoubleSupport)));
          shouldBe.set(1, 0, omega0 * Math.exp(-omega0 * initialDoubleSupport) * (1.0 - Math.exp(-omega0 * endOfDoubleSupport)));
