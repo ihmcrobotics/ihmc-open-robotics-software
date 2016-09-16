@@ -11,6 +11,18 @@ public class ConvexPolytope
 {
    private final ArrayList<PolytopeVertex> vertices = new ArrayList<>();
 
+   public ConvexPolytope()
+   {
+   }
+
+   public ConvexPolytope(ConvexPolytope polytope)
+   {
+      for (PolytopeVertex vertex : polytope.vertices)
+      {
+         this.vertices.add(new PolytopeVertex(vertex));
+      }
+   }
+
    public PolytopeVertex addVertex(Point3d position)
    {
       PolytopeVertex vertex = new PolytopeVertex(position);
@@ -35,7 +47,7 @@ public class ConvexPolytope
    {
       return vertices.size();
    }
-   
+
    public PolytopeVertex getVertex(int index)
    {
       return vertices.get(index);
@@ -57,7 +69,7 @@ public class ConvexPolytope
 
    public void applyTransform(RigidBodyTransform transform)
    {
-      for (int i=0; i<vertices.size(); i++)
+      for (int i = 0; i < vertices.size(); i++)
       {
          PolytopeVertex polytopeVertex = vertices.get(i);
          polytopeVertex.applyTransform(transform);
@@ -72,7 +84,7 @@ public class ConvexPolytope
       PolytopeVertex bestVertex = null;
 
       int numberOfVertices = vertices.size();
-      for (int i=0; i<numberOfVertices ; i++)
+      for (int i = 0; i < numberOfVertices; i++)
       {
          PolytopeVertex vertex = vertices.get(i);
          double dotProduct = vertex.dot(supportDirection);

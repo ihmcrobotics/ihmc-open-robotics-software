@@ -1,5 +1,7 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
+import us.ihmc.geometry.polytope.ConvexPolytope;
+import us.ihmc.geometry.polytope.ConvexPolytopeConstructor;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
@@ -26,7 +28,9 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    @Override
    public CollisionShapeDescription createBox(double halfLengthX, double halfWidthY, double halfHeightZ)
    {
-      return new BoxShapeDescription(halfLengthX, halfWidthY, halfHeightZ);
+      ConvexPolytope polytope = ConvexPolytopeConstructor.constructBoxWithCenterAtZero(halfLengthX, halfWidthY, halfHeightZ);
+      return new PolytopeShapeDescription(polytope);
+//      return new BoxShapeDescription(halfLengthX, halfWidthY, halfHeightZ);
    }
 
    @Override
