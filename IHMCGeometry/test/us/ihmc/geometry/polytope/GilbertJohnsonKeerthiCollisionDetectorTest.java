@@ -42,7 +42,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testIsIntersecting()
    {
       ConvexPolytope cubeOne = ConvexPolytopeConstructor.constructUnitCube();
@@ -50,26 +50,35 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       RigidBodyTransform transformOne = new RigidBodyTransform();
       RigidBodyTransform transformTwo = new RigidBodyTransform();
-      
+
       transformOne.setTranslation(1.0, 2.0, 3.0);
       transformTwo.setTranslation(9.0, 6.0, 7.0);
 
       cubeOne.applyTransform(transformOne);
       cubeTwo.applyTransform(transformTwo);
-      
+
       GilbertJohnsonKeerthiCollisionDetector detector = new GilbertJohnsonKeerthiCollisionDetector();
-      assertFalse(detector.arePolytopesColliding(cubeOne, cubeTwo));
-      
+
+      Point3d closestPointOnA = new Point3d();
+      Point3d closestPointOnB = new Point3d();
+      boolean areColliding = detector.arePolytopesColliding(cubeOne, cubeTwo, closestPointOnA, closestPointOnB);
+      assertFalse(areColliding);
+
+      JUnitTools.assertPoint3dEquals("", new Point3d(2.0, 3.0, 4.0), closestPointOnA, 1e-7);
+      JUnitTools.assertPoint3dEquals("", new Point3d(9.0, 6.0, 7.0), closestPointOnB, 1e-7);
+
       cubeOne = ConvexPolytopeConstructor.constructUnitCube();
       cubeTwo = ConvexPolytopeConstructor.constructUnitCube();
-      
+
       transformOne.setTranslation(1.4, 2.5, 3.8);
       transformTwo.setTranslation(1.0, 2.0, 3.0);
 
       cubeOne.applyTransform(transformOne);
       cubeTwo.applyTransform(transformTwo);
-      
-      detector = new GilbertJohnsonKeerthiCollisionDetector();
-      assertTrue(detector.arePolytopesColliding(cubeOne, cubeTwo));
+
+      areColliding = detector.arePolytopesColliding(cubeOne, cubeTwo, closestPointOnA, closestPointOnB);
+      assertTrue(areColliding);
+      //TODO: Test for closestPoints. Where should they be?
+
    }
 }

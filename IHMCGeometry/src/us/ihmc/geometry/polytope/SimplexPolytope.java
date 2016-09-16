@@ -1,11 +1,17 @@
 package us.ihmc.geometry.polytope;
 
+import java.util.LinkedHashMap;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 public class SimplexPolytope
 {
    private Point3d pointOne, pointTwo, pointThree, pointFour;
+
+   private LinkedHashMap<Point3d, Point3d> simplexPointToPolytopePointA = new LinkedHashMap<>();
+   private LinkedHashMap<Point3d, Point3d> simplexPointToPolytopePointB = new LinkedHashMap<>();
+   private LinkedHashMap<Point3d, Double> lambdas = new LinkedHashMap<>();
 
    public int getNumberOfPoints()
    {
@@ -18,6 +24,42 @@ public class SimplexPolytope
       if (pointFour == null)
          return 3;
       return 4;
+   }
+
+   public void getClosestPointsOnAAndB(Point3d pointOnAToPack, Point3d pointOnBToPack)
+   {
+      pointOnAToPack.set(0.0, 0.0, 0.0);
+      pointOnBToPack.set(0.0, 0.0, 0.0);
+
+      if (pointOne != null)
+      {
+         addPointsContribution(pointOne, pointOnAToPack, pointOnBToPack);
+      }
+      if (pointTwo != null)
+      {
+         addPointsContribution(pointTwo, pointOnAToPack, pointOnBToPack);
+      }
+      if (pointThree != null)
+      {
+         addPointsContribution(pointThree, pointOnAToPack, pointOnBToPack);
+      }
+      if (pointFour != null)
+      {
+         addPointsContribution(pointFour, pointOnAToPack, pointOnBToPack);
+      }
+   }
+
+   private void addPointsContribution(Point3d pointToContribute, Point3d pointOnAToPack, Point3d pointOnBToPack)
+   {
+      double lambda = lambdas.get(pointToContribute);
+
+      tempVector1.set(simplexPointToPolytopePointA.get(pointToContribute));
+      tempVector1.scale(lambda);
+      pointOnAToPack.add(tempVector1);
+
+      tempVector1.set(simplexPointToPolytopePointB.get(pointToContribute));
+      tempVector1.scale(lambda);
+      pointOnBToPack.add(tempVector1);
    }
 
    public void clearPoints()
@@ -39,26 +81,29 @@ public class SimplexPolytope
          pointFour = points[3];
    }
 
-   public void addPoint(Point3d point)
+   public void addPoint(Point3d simplexPointToAdd, Point3d correspondingPointOnA, Point3d correspondingPointOnB)
    {
       if (pointOne == null)
       {
-         pointOne = point;
+         pointOne = simplexPointToAdd;
       }
       else if (pointTwo == null)
       {
-         pointTwo = point;
+         pointTwo = simplexPointToAdd;
       }
       else if (pointThree == null)
       {
-         pointThree = point;
+         pointThree = simplexPointToAdd;
       }
       else if (pointFour == null)
       {
-         pointFour = point;
+         pointFour = simplexPointToAdd;
       }
       else
          throw new RuntimeException("Only support SimplexPolytopes with at most 4 vertices");
+
+      simplexPointToPolytopePointA.put(simplexPointToAdd, correspondingPointOnA);
+      simplexPointToPolytopePointB.put(simplexPointToAdd, correspondingPointOnB);
    }
 
    public boolean containsPoint(Point3d pointToCheck)
@@ -117,6 +162,7 @@ public class SimplexPolytope
       else if (pointTwo == null)
       {
          closestPointToOrigin.set(pointOne);
+         retainPoints(pointOne);
       }
 
       else if (pointThree == null)
@@ -124,13 +170,12 @@ public class SimplexPolytope
          if (isInVoronoiRegionOfVertex(pointOne, pointTwo))
          {
             closestPointToOrigin.set(pointOne);
-            pointTwo = null;
+            retainPoints(pointOne);
          }
          else if (isInVoronoiRegionOfVertex(pointTwo, pointOne))
          {
             closestPointToOrigin.set(pointTwo);
-            pointOne = pointTwo;
-            pointTwo = null;
+            retainPoints(pointTwo);
          }
          else
          {
@@ -143,42 +188,43 @@ public class SimplexPolytope
          if (isInVoronoiRegionOfVertex(pointOne, pointTwo, pointThree))
          {
             closestPointToOrigin.set(pointOne);
-            pointTwo = pointThree = null;
+            retainPoints(pointOne);
          }
          else if (isInVoronoiRegionOfVertex(pointTwo, pointOne, pointThree))
          {
             closestPointToOrigin.set(pointTwo);
-            pointOne = pointTwo;
-            pointTwo = pointThree = null;
+            retainPoints(pointTwo);
          }
          else if (isInVoronoiRegionOfVertex(pointThree, pointOne, pointTwo))
          {
             closestPointToOrigin.set(pointThree);
-            pointOne = pointThree;
-            pointTwo = pointThree = null;
+            retainPoints(pointThree);
          }
 
          else if (isInVornoiRegionOfEdge(pointOne, pointTwo, pointThree))
          {
             projectOriginOntoEdge(pointOne, pointTwo, closestPointToOrigin);
-            pointThree = null;
+            retainPoints(pointOne, pointTwo);
          }
          else if (isInVornoiRegionOfEdge(pointOne, pointThree, pointTwo))
          {
             projectOriginOntoEdge(pointOne, pointThree, closestPointToOrigin);
-            pointTwo = pointThree;
-            pointThree = null;
+            retainPoints(pointOne, pointThree);
          }
          else if (isInVornoiRegionOfEdge(pointTwo, pointThree, pointOne))
          {
             projectOriginOntoEdge(pointTwo, pointThree, closestPointToOrigin);
-            pointOne = pointTwo;
-            pointTwo = pointThree;
-            pointThree = null;
+            retainPoints(pointTwo, pointThree);
          }
          else
          {
+            //TODO: Compute lambdas for the case of intersection
             closestPointToOrigin.set(0.0, 0.0, 0.0);
+
+            lambdas.clear();
+            lambdas.put(pointOne, 0.0);
+            lambdas.put(pointTwo, 0.0);
+            lambdas.put(pointThree, 0.0);
          }
       }
 
@@ -187,97 +233,162 @@ public class SimplexPolytope
          if (isInVoronoiRegionOfVertex(pointOne, pointTwo, pointThree, pointFour))
          {
             closestPointToOrigin.set(pointOne);
-            pointTwo = pointThree = pointFour = null;
+            retainPoints(pointOne);
          }
          else if (isInVoronoiRegionOfVertex(pointTwo, pointOne, pointThree, pointFour))
          {
             closestPointToOrigin.set(pointTwo);
-            pointOne = pointTwo;
-            pointTwo = pointThree = pointFour = null;
+            retainPoints(pointTwo);
          }
          else if (isInVoronoiRegionOfVertex(pointThree, pointOne, pointTwo, pointFour))
          {
             closestPointToOrigin.set(pointThree);
-            pointOne = pointThree;
-            pointTwo = pointThree = pointFour = null;
+            retainPoints(pointThree);
          }
          else if (isInVoronoiRegionOfVertex(pointFour, pointOne, pointTwo, pointThree))
          {
             closestPointToOrigin.set(pointFour);
-            pointOne = pointFour;
-            pointTwo = pointThree = pointFour = null;
+            retainPoints(pointFour);
          }
 
          else if (isInVornoiRegionOfEdge(pointOne, pointTwo, pointThree, pointFour))
          {
             projectOriginOntoEdge(pointOne, pointTwo, closestPointToOrigin);
-            pointThree = pointFour = null;
+            retainPoints(pointOne, pointTwo);
          }
          else if (isInVornoiRegionOfEdge(pointOne, pointThree, pointTwo, pointFour))
          {
             projectOriginOntoEdge(pointOne, pointThree, closestPointToOrigin);
-            pointTwo = pointThree;
-            pointThree = pointFour = null;
+            retainPoints(pointOne, pointThree);
          }
          else if (isInVornoiRegionOfEdge(pointOne, pointFour, pointTwo, pointThree))
          {
             projectOriginOntoEdge(pointOne, pointFour, closestPointToOrigin);
-            pointTwo = pointFour;
-            pointThree = pointFour = null;
+            retainPoints(pointOne, pointFour);
          }
          else if (isInVornoiRegionOfEdge(pointTwo, pointThree, pointOne, pointFour))
          {
             projectOriginOntoEdge(pointTwo, pointThree, closestPointToOrigin);
-            pointOne = pointTwo;
-            pointTwo = pointThree;
-            pointThree = pointFour = null;
+            retainPoints(pointTwo, pointThree);
          }
          else if (isInVornoiRegionOfEdge(pointTwo, pointFour, pointOne, pointThree))
          {
             projectOriginOntoEdge(pointTwo, pointFour, closestPointToOrigin);
-            pointOne = pointTwo;
-            pointTwo = pointFour;
-            pointThree = pointFour = null;
+            retainPoints(pointTwo, pointFour);
          }
          else if (isInVornoiRegionOfEdge(pointThree, pointFour, pointOne, pointTwo))
          {
             projectOriginOntoEdge(pointThree, pointFour, closestPointToOrigin);
-            pointOne = pointThree;
-            pointTwo = pointFour;
-            pointThree = pointFour = null;
+            retainPoints(pointThree, pointFour);
          }
 
          else if (isInVornoiRegionOfFace(pointOne, pointTwo, pointThree, pointFour))
          {
-            pointFour = null;
             projectOriginOntoFace(pointOne, pointTwo, pointThree, closestPointToOrigin);
+            retainPoints(pointOne, pointTwo, pointThree);
          }
          else if (isInVornoiRegionOfFace(pointOne, pointTwo, pointFour, pointThree))
          {
             projectOriginOntoFace(pointOne, pointTwo, pointFour, closestPointToOrigin);
-            pointThree = pointFour;
-            pointFour = null;
+            retainPoints(pointOne, pointTwo, pointFour);
          }
          else if (isInVornoiRegionOfFace(pointOne, pointThree, pointFour, pointTwo))
          {
             projectOriginOntoFace(pointOne, pointThree, pointFour, closestPointToOrigin);
-            pointTwo = pointThree;
-            pointThree = pointFour;
-            pointFour = null;
+            retainPoints(pointOne, pointThree, pointFour);
          }
          else if (isInVornoiRegionOfFace(pointTwo, pointThree, pointFour, pointOne))
          {
             projectOriginOntoFace(pointTwo, pointThree, pointFour, closestPointToOrigin);
-            pointOne = pointTwo;
-            pointTwo = pointThree;
-            pointThree = pointFour;
-            pointFour = null;
+            retainPoints(pointTwo, pointThree, pointFour);
          }
          else
          {
             closestPointToOrigin.set(0.0, 0.0, 0.0);
+            //TODO: Compute lambdas for the case of intersection
+
+            lambdas.clear();
+            lambdas.put(pointOne, 0.0);
+            lambdas.put(pointTwo, 0.0);
+            lambdas.put(pointThree, 0.0);
+            lambdas.put(pointFour, 0.0);
          }
       }
+   }
+
+   private void retainPoints(Point3d pointToKeep)
+   {
+      Point3d point3dOnA = simplexPointToPolytopePointA.get(pointToKeep);
+      Point3d point3dOnB = simplexPointToPolytopePointB.get(pointToKeep);
+
+      pointOne = null;
+      pointTwo = null;
+      pointThree = null;
+      pointFour = null;
+
+      pointOne = pointToKeep;
+
+      simplexPointToPolytopePointA.clear();
+      simplexPointToPolytopePointB.clear();
+
+      simplexPointToPolytopePointA.put(pointToKeep, point3dOnA);
+      simplexPointToPolytopePointB.put(pointToKeep, point3dOnB);
+
+      lambdas.clear();
+      lambdas.put(pointToKeep, 1.0);
+   }
+
+   private void retainPoints(Point3d pointToKeep1, Point3d pointToKeep2)
+   {
+      Point3d point3dOnA1 = simplexPointToPolytopePointA.get(pointToKeep1);
+      Point3d point3dOnA2 = simplexPointToPolytopePointA.get(pointToKeep2);
+      Point3d point3dOnB1 = simplexPointToPolytopePointB.get(pointToKeep1);
+      Point3d point3dOnB2 = simplexPointToPolytopePointB.get(pointToKeep2);
+
+      pointOne = null;
+      pointTwo = null;
+      pointThree = null;
+      pointFour = null;
+
+      pointOne = pointToKeep1;
+      pointTwo = pointToKeep2;
+
+      simplexPointToPolytopePointA.clear();
+      simplexPointToPolytopePointB.clear();
+
+      simplexPointToPolytopePointA.put(pointToKeep1, point3dOnA1);
+      simplexPointToPolytopePointA.put(pointToKeep2, point3dOnA2);
+      simplexPointToPolytopePointB.put(pointToKeep1, point3dOnB1);
+      simplexPointToPolytopePointB.put(pointToKeep2, point3dOnB2);
+   }
+
+   private void retainPoints(Point3d pointToKeep1, Point3d pointToKeep2, Point3d pointToKeep3)
+   {
+      Point3d point3dOnA1 = simplexPointToPolytopePointA.get(pointToKeep1);
+      Point3d point3dOnA2 = simplexPointToPolytopePointA.get(pointToKeep2);
+      Point3d point3dOnA3 = simplexPointToPolytopePointA.get(pointToKeep3);
+      Point3d point3dOnB1 = simplexPointToPolytopePointB.get(pointToKeep1);
+      Point3d point3dOnB2 = simplexPointToPolytopePointB.get(pointToKeep2);
+      Point3d point3dOnB3 = simplexPointToPolytopePointB.get(pointToKeep3);
+
+      pointOne = null;
+      pointTwo = null;
+      pointThree = null;
+      pointFour = null;
+
+      pointOne = pointToKeep1;
+      pointTwo = pointToKeep2;
+      pointThree = pointToKeep3;
+
+      simplexPointToPolytopePointA.clear();
+      simplexPointToPolytopePointB.clear();
+
+      simplexPointToPolytopePointA.put(pointToKeep1, point3dOnA1);
+      simplexPointToPolytopePointA.put(pointToKeep2, point3dOnA2);
+      simplexPointToPolytopePointA.put(pointToKeep3, point3dOnA3);
+      simplexPointToPolytopePointB.put(pointToKeep1, point3dOnB1);
+      simplexPointToPolytopePointB.put(pointToKeep2, point3dOnB2);
+      simplexPointToPolytopePointB.put(pointToKeep3, point3dOnB3);
    }
 
    private boolean isInVoronoiRegionOfVertex(Point3d pointToCheck, Point3d otherPoint)
@@ -328,6 +439,7 @@ public class SimplexPolytope
    private final Vector3d tempVector1 = new Vector3d();
    private final Vector3d tempVector2 = new Vector3d();
    private final Vector3d tempVector3 = new Vector3d();
+   private final Vector3d tempVector4 = new Vector3d();
    private final Vector3d tempNormalVector1 = new Vector3d();
 
    private boolean isInVornoiRegionOfEdge(Point3d edgePointOne, Point3d edgePointTwo, Point3d otherPoint)
@@ -392,28 +504,76 @@ public class SimplexPolytope
       tempVector1.scale(-1.0);
       tempVector2.sub(vertexTwo, vertexOne);
 
-      tempVector2.normalize();
-      double dot = tempVector1.dot(tempVector2);
-      tempVector2.scale(dot);
+      double lambda = tempVector1.dot(tempVector2) / (tempVector2.dot(tempVector2));
+      tempVector2.scale(lambda);
 
       projectionToPack.set(vertexOne);
       projectionToPack.add(tempVector2);
+
+      double oneMinusLambda = 1.0 - lambda;
+
+      lambdas.clear();
+      lambdas.put(vertexOne, lambda);
+      lambdas.put(vertexTwo, oneMinusLambda);
+
    }
+
+   //   private void projectOriginOntoFace(Point3d vertexOne, Point3d vertexTwo, Point3d vertexThree, Point3d closestPointToOrigin)
+   //   {
+   //      tempVector1.sub(vertexTwo, vertexOne);
+   //      tempVector2.sub(vertexThree, vertexOne);
+   //
+   //      tempNormalVector1.cross(tempVector1, tempVector2);
+   //      tempNormalVector1.normalize();
+   //
+   //      tempVector3.set(vertexOne);
+   //      tempVector3.scale(-1.0);
+   //
+   //      double dot = tempVector3.dot(tempNormalVector1);
+   //      closestPointToOrigin.set(tempNormalVector1);
+   //      closestPointToOrigin.scale(-dot);
+   //
+   //
+   //   }
 
    private void projectOriginOntoFace(Point3d vertexOne, Point3d vertexTwo, Point3d vertexThree, Point3d closestPointToOrigin)
    {
+      // Using barycentric coordinates as described in https://www.cs.ubc.ca/~heidrich/Papers/JGT.05.pdf
       tempVector1.sub(vertexTwo, vertexOne);
       tempVector2.sub(vertexThree, vertexOne);
 
-      tempNormalVector1.cross(tempVector1, tempVector2);
-      tempNormalVector1.normalize();
+      tempNormalVector1.cross(tempVector1, tempVector2); //n
+      double oneOver4ASquared = 1.0 / (tempNormalVector1.dot(tempNormalVector1));
 
       tempVector3.set(vertexOne);
-      tempVector3.scale(-1.0);
+      tempVector3.scale(-1.0); //w
 
-      double dot = tempVector3.dot(tempNormalVector1);
-      closestPointToOrigin.set(tempNormalVector1);
-      closestPointToOrigin.scale(-dot);
+      tempVector4.cross(tempVector1, tempVector3);
+      double lambdaThree = tempVector4.dot(tempNormalVector1) * oneOver4ASquared;
+
+      tempVector4.cross(tempVector3, tempVector2);
+      double lambdaTwo = tempVector4.dot(tempNormalVector1) * oneOver4ASquared;
+
+      double lambdaOne = 1.0 - lambdaTwo - lambdaThree;
+
+      lambdas.clear();
+      lambdas.put(vertexOne, lambdaOne);
+      lambdas.put(vertexTwo, lambdaTwo);
+      lambdas.put(vertexThree, lambdaThree);
+
+      closestPointToOrigin.set(0.0, 0.0, 0.0);
+
+      tempVector1.set(vertexOne);
+      tempVector1.scale(lambdaOne);
+      closestPointToOrigin.add(tempVector1);
+
+      tempVector1.set(vertexTwo);
+      tempVector1.scale(lambdaTwo);
+      closestPointToOrigin.add(tempVector1);
+
+      tempVector1.set(vertexThree);
+      tempVector1.scale(lambdaThree);
+      closestPointToOrigin.add(tempVector1);
    }
 
 }
