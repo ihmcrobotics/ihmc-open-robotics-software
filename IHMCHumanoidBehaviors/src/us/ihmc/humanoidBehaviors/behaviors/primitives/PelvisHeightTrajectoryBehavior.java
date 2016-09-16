@@ -46,7 +46,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
 
    private void sendMessageToController()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {      
          outgoingPelvisHeightTrajectoryMessage.setDestination(PacketDestination.UI);  
          sendPacketToController(outgoingPelvisHeightTrajectoryMessage);
@@ -63,7 +63,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
       packetHasBeenSent.set(false);
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
       
       hasInputBeenSet.set(false);
       trajectoryTimeElapsed.set(false);
@@ -83,26 +83,10 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
       
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
    }
 
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
 
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
-   }
 
    @Override
    public boolean isDone()
@@ -115,20 +99,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
       return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
+   
 
    @Override
    public boolean hasInputBeenSet()

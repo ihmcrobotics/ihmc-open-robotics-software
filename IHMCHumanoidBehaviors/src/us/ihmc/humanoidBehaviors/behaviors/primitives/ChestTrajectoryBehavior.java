@@ -52,7 +52,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
 
    private void sendChestPoseToController()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          outgoingChestTrajectoryMessage.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(outgoingChestTrajectoryMessage);
@@ -71,7 +71,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
       hasBeenInitialized.set(true);
       
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
    }
 
    @Override
@@ -81,29 +81,14 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
       outgoingChestTrajectoryMessage = null;
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
 
       startTime.set(Double.NaN);
       trajectoryTime.set(Double.NaN);
    }
 
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
 
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
 
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
-   }
 
    @Override
    public boolean isDone()
@@ -126,20 +111,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
       return trajectoryTimeHasElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
+  
 
    @Override
    public boolean hasInputBeenSet()

@@ -38,41 +38,7 @@ public class ObjectWeightBehavior extends AbstractBehavior
       hasInputBeenSet.set(true);
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-      
-   }
 
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      
-   }
-
-   @Override
-   public void stop()
-   {
-      defaultStop();
-   }
-
-   @Override
-   public void enableActions()
-   {
-      
-   }
-
-   @Override
-   public void pause()
-   {
-      defaultPause();
-   }
-
-   @Override
-   public void resume()
-   {
-      defaultResume();
-   }
 
    @Override
    public boolean isDone()
@@ -83,14 +49,14 @@ public class ObjectWeightBehavior extends AbstractBehavior
    @Override
    public void doPostBehaviorCleanup()
    {
-      defaultPostBehaviorCleanup();
+      super.doPostBehaviorCleanup();
       hasInputBeenSet.set(false);
    }
 
    @Override
    public void initialize()
    {
-      defaultInitialize();
+      super.initialize();
       hasInputBeenSet.set(false);
       packetAvailable.set(false);
    }

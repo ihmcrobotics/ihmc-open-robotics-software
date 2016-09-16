@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors;
+package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -169,9 +169,9 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       coloredCircularBlobDetectorBehaviorService.pause();
    }
 
-   @Override public void stop()
+   @Override public void abort()
    {
-      super.stop();
+      super.abort();
       coloredCircularBlobDetectorBehaviorService.stop();
    }
 
