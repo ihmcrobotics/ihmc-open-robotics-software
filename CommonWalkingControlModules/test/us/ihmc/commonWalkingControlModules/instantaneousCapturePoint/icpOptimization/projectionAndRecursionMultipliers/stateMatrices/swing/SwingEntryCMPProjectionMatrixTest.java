@@ -82,6 +82,17 @@ public class SwingEntryCMPProjectionMatrixTest
          shouldBe.set(1, 0, -omega0 * projection);
 
          JUnitTools.assertMatrixEquals(name, shouldBe, swingEntryCMPProjectionMatrix, epsilon);
+
+         projectionTime = startOfSpline;
+         projection = Math.exp(omega0 * projectionTime);
+
+         swingEntryCMPProjectionMatrix.compute(doubleSupportDuration, singleSupportDuration, omega0, true);
+
+         shouldBe.zero();
+         shouldBe.set(0, 0, 1.0 - projection);
+         shouldBe.set(1, 0, -omega0 * projection);
+
+         JUnitTools.assertMatrixEquals(name, shouldBe, swingEntryCMPProjectionMatrix, epsilon);
       }
    }
 }

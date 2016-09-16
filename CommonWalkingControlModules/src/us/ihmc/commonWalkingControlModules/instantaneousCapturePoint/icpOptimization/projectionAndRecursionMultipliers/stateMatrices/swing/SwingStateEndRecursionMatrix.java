@@ -49,6 +49,7 @@ public class SwingStateEndRecursionMatrix extends DenseMatrix64F
       double recursionTimeToInitial = upcomingInitialDoubleSupportDuration + endOfCurrentDoubleSupportDuration + startOfSplineTime.getDoubleValue() - stepDuration;
       double stateRecursionToStart = Math.exp(omega0 * recursionTimeToInitial);
 
+      zero();
       if (!useInitialICP)
       {
          set(0, 0, stateRecursionToStart);
