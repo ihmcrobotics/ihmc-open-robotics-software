@@ -20,6 +20,11 @@ public class SimplexPolytope
       return 4;
    }
 
+   public void clearPoints()
+   {
+      pointOne = pointTwo = pointThree = pointFour;
+   }
+
    public void setPoints(Point3d... points)
    {
       pointOne = pointTwo = pointThree = pointFour = null;
@@ -323,7 +328,6 @@ public class SimplexPolytope
    private final Vector3d tempVector1 = new Vector3d();
    private final Vector3d tempVector2 = new Vector3d();
    private final Vector3d tempVector3 = new Vector3d();
-   private final Vector3d tempVector4 = new Vector3d();
    private final Vector3d tempNormalVector1 = new Vector3d();
 
    private boolean isInVornoiRegionOfEdge(Point3d edgePointOne, Point3d edgePointTwo, Point3d otherPoint)
