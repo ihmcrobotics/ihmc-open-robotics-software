@@ -126,15 +126,15 @@ public class NewtonsCradleSimulation
 
       CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
 
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
+      DefaultCollisionVisualize visualize = null; //new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
+//      handler.addListener(visualize);
 
-      handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = pileOfRandomObjectsRobot.getCollisionDetector();
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
 
-      scs.simulate();
+//      scs.simulate();
 
       long wallStartTime = System.currentTimeMillis();
       while(true)
@@ -152,10 +152,10 @@ public class NewtonsCradleSimulation
 
    public static void main(String[] args)
    {
-      createNewtonsCradleSimulation();
+//      createNewtonsCradleSimulation();
 //      createStackOfBouncyBallsSimulation();
 //      createRowOfDominosSimulation();
-//      createPileOfRandomObjectsSimulation();
+      createPileOfRandomObjectsSimulation();
 //      createSpinningCoinSimulation();
    }
 }

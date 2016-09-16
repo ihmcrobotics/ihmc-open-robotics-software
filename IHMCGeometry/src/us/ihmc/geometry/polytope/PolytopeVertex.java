@@ -22,6 +22,12 @@ public class PolytopeVertex
       this.position.set(position);
    }
 
+   public PolytopeVertex(PolytopeVertex vertex)
+   {
+      this.position.set(vertex.position);
+//      TODO: Copy connecting vertices..getClass().
+   }
+
    public void addConnectingVertex(PolytopeVertex vertex)
    {
       if (!connectingVertices.contains(vertex))

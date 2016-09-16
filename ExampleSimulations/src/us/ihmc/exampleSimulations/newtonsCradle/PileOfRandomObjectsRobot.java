@@ -17,7 +17,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 
 public class PileOfRandomObjectsRobot
 {
@@ -27,9 +27,11 @@ public class PileOfRandomObjectsRobot
 
    public PileOfRandomObjectsRobot()
    {
-      int numberOfObjects = 40; //400;
+      int numberOfObjects = 0; //40; //400;
 
-      collisionDetector = new GdxCollisionDetector(100.0);
+//      collisionDetector = new GdxCollisionDetector(100.0);
+      collisionDetector = new SimpleCollisionDetector();
+
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(0.002);
 
@@ -81,17 +83,17 @@ public class PileOfRandomObjectsRobot
       board0.setPosition(0.51, 0.0, boardZ);
       board0.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
 
-      FloatingJoint board1 = createContainerBoard("board1", collisionShapeFactory, random);
-      board1.setPosition(0.0, 0.35, boardZ);
-      board1.setYawPitchRoll(0.0, 0.0, 0.0);
-
-      FloatingJoint board2 = createContainerBoard("board2", collisionShapeFactory, random);
-      board2.setPosition(0.0, -0.35, boardZ);
-      board2.setYawPitchRoll(0.0, 0.0, 0.0);
-
-      FloatingJoint board3 = createContainerBoard("board3", collisionShapeFactory, random);
-      board3.setPosition(-0.51, 0.0, boardZ);
-      board3.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
+//      FloatingJoint board1 = createContainerBoard("board1", collisionShapeFactory, random);
+//      board1.setPosition(0.0, 0.35, boardZ);
+//      board1.setYawPitchRoll(0.0, 0.0, 0.0);
+//
+//      FloatingJoint board2 = createContainerBoard("board2", collisionShapeFactory, random);
+//      board2.setPosition(0.0, -0.35, boardZ);
+//      board2.setYawPitchRoll(0.0, 0.0, 0.0);
+//
+//      FloatingJoint board3 = createContainerBoard("board3", collisionShapeFactory, random);
+//      board3.setPosition(-0.51, 0.0, boardZ);
+//      board3.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
 
 
       Robot baseRobot = new Robot("BaseRobot");

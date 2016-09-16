@@ -9,7 +9,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
+import us.ihmc.geometry.polytope.ConvexPolytope;
+import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
@@ -78,6 +79,10 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             {
                doSphereSphereCollisionDetection(objectOne, (SphereShapeDescription) descriptionOne, objectTwo, (SphereShapeDescription) descriptionTwo, result);
             }
+            else if ((descriptionOne instanceof PolytopeShapeDescription) && (descriptionTwo instanceof PolytopeShapeDescription))
+            {
+               doPolytopePolytopeCollisionDetection(objectOne, (PolytopeShapeDescription) descriptionOne, objectTwo, (PolytopeShapeDescription) descriptionTwo, result);
+            }
             else if ((descriptionOne instanceof BoxShapeDescription) && (descriptionTwo instanceof BoxShapeDescription))
             {
                doBoxBoxCollisionDetection(objectOne, (BoxShapeDescription) descriptionOne, objectTwo, (BoxShapeDescription) descriptionTwo, result);
@@ -86,10 +91,9 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       }
    }
 
-//   private final SimpleActiveSetQPStandaloneSolver solver = new SimpleActiveSetQPStandaloneSolver();
-//   private final QuadProgSolver solver = new QuadProgSolver(16, 2, 16);
+   //   private final SimpleActiveSetQPStandaloneSolver solver = new SimpleActiveSetQPStandaloneSolver();
+   //   private final QuadProgSolver solver = new QuadProgSolver(16, 2, 16);
    private final OASESConstrainedQPSolver solver = new OASESConstrainedQPSolver(null);
-
 
    private final DenseMatrix64F GMatrix = new DenseMatrix64F(3, 8);
    private final DenseMatrix64F HMatrix = new DenseMatrix64F(3, 8);
@@ -165,9 +169,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
          solver.solve(quadraticCostGMatrix, quadraticCostFVector, linearEqualityConstraintA, linearEqualityConstraintB, linearInequalityConstraintA, linearInequalityConstraintB, solutionVector, initialize);
          System.out.println("solutionVector = " + solutionVector);
 
-
       }
-      catch(NoConvergenceException exception)
+      catch (NoConvergenceException exception)
       {
 
       }
@@ -233,6 +236,41 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
 
          result.addContact(contacts);
       }
+   }
+
+   private final GilbertJohnsonKeerthiCollisionDetector gjkCollisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
+   private final Point3d pointOnAToPack = new Point3d();
+   private final Point3d pointOnBToPack = new Point3d();
+
+   private void doPolytopePolytopeCollisionDetection(CollisionShape objectOne, PolytopeShapeDescription descriptionOne, CollisionShape objectTwo, PolytopeShapeDescription descriptionTwo, CollisionDetectionResult result)
+   {
+      ConvexPolytope polytopeOneCopy = new ConvexPolytope(descriptionOne.getPolytope());
+      ConvexPolytope polytopeTwoCopy = new ConvexPolytope(descriptionTwo.getPolytope());
+
+      polytopeOneCopy.applyTransform(transformOne);
+      polytopeTwoCopy.applyTransform(transformTwo);
+
+      boolean areColliding = gjkCollisionDetector.arePolytopesColliding(polytopeOneCopy, polytopeTwoCopy, pointOnAToPack, pointOnBToPack);
+
+      if (!areColliding)
+      {
+         double distanceSquared = pointOnAToPack.distanceSquared(pointOnBToPack);
+         System.out.println(distanceSquared);
+         if (distanceSquared < 0.01 * 0.01) //TODO: User Setable:
+         {
+            SimpleContactWrapper contacts = new SimpleContactWrapper(objectOne, objectTwo);
+            normalVector.sub(pointOnBToPack, pointOnAToPack);
+
+            double distanceToReport = -0.001; //TODO: Do we even need this?
+            contacts.addContact(new Point3d(pointOnAToPack), new Point3d(pointOnBToPack), normalVector, distanceToReport);
+            result.addContact(contacts);
+         }
+      }
+      else
+      {
+         //TODO: Deal with collision of the sharp objects...
+      }
+
    }
 
    public void addShape(CollisionShape collisionShape)
