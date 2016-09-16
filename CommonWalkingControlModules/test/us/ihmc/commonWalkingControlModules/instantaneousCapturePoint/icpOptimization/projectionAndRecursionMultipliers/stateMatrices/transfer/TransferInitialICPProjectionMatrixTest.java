@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferStateEndRecursionMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.testing.JUnitTools;
@@ -11,7 +10,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;
 
-public class TransferStateEndRecursionMatrixTest
+public class TransferInitialICPProjectionMatrixTest
 {
    private static final double epsilon = 0.00001;
 
@@ -23,10 +22,10 @@ public class TransferStateEndRecursionMatrixTest
 
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
 
-      TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
+      TransferInitialICPProjectionMatrix transferInitialICPProjectionMatrix = new TransferInitialICPProjectionMatrix();
 
-      Assert.assertEquals("", 4, transferStateEndRecursionMatrix.numRows);
-      Assert.assertEquals("", 1, transferStateEndRecursionMatrix.numCols);
+      Assert.assertEquals("", 4, transferInitialICPProjectionMatrix.numRows);
+      Assert.assertEquals("", 1, transferInitialICPProjectionMatrix.numCols);
    }
 
    @DeployableTestMethod(estimatedDuration = 1.0)
@@ -44,7 +43,7 @@ public class TransferStateEndRecursionMatrixTest
       DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
 
-      TransferStateEndRecursionMatrix transferStateEndRecursionMatrix = new TransferStateEndRecursionMatrix();
+      TransferInitialICPProjectionMatrix transferInitialICPProjectionMatrix = new TransferInitialICPProjectionMatrix();
 
       for (int i = 0; i < iters; i++)
       {
@@ -59,23 +58,12 @@ public class TransferStateEndRecursionMatrixTest
 
          String name = "splitRatio = " + splitRatio + ",\n doubleSupportDuration = " + currentDoubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
 
-         boolean useInitialICP = false;
 
-         transferStateEndRecursionMatrix.compute(currentDoubleSupportDuration, omega0, useInitialICP);
+         transferInitialICPProjectionMatrix.compute(omega0);
          shouldBe.zero();
-         shouldBe.set(0, 0, Math.exp(-omega0 * currentDoubleSupportDuration));
-         shouldBe.set(1, 0, omega0 * Math.exp(-omega0 * currentDoubleSupportDuration));
-         shouldBe.set(2, 0, 1.0);
-         shouldBe.set(3, 0, omega0);
-         JUnitTools.assertMatrixEquals(name, shouldBe, transferStateEndRecursionMatrix, epsilon);
-
-         useInitialICP = true;
-
-         transferStateEndRecursionMatrix.compute(currentDoubleSupportDuration, omega0, useInitialICP);
-         shouldBe.zero();
-         shouldBe.set(2, 0, 1.0);
-         shouldBe.set(3, 0, omega0);
-         JUnitTools.assertMatrixEquals(name, shouldBe, transferStateEndRecursionMatrix, epsilon);
+         shouldBe.set(0, 0, 1.0);
+         shouldBe.set(1, 0, omega0);
+         JUnitTools.assertMatrixEquals(name, shouldBe, transferInitialICPProjectionMatrix, epsilon);
       }
    }
 }

@@ -59,10 +59,21 @@ public class TransferPreviousExitCMPProjectionMatrixTest
 
          double initialDoubleSupport = splitRatio * doubleSupportDuration;
 
-         entryCMPProjectionMatrix.compute(doubleSupportDuration, omega0, false);
+         boolean useInitialICP = false;
+
+         entryCMPProjectionMatrix.compute(doubleSupportDuration, omega0, useInitialICP);
          shouldBe.zero();
          shouldBe.set(0, 0, 1.0 - Math.exp(-omega0 * initialDoubleSupport));
          shouldBe.set(1, 0, -omega0 * Math.exp(-omega0 * initialDoubleSupport));
+
+         JUnitTools.assertMatrixEquals(name, shouldBe, entryCMPProjectionMatrix, epsilon);
+
+         useInitialICP = true;
+
+         entryCMPProjectionMatrix.compute(doubleSupportDuration, omega0, useInitialICP);
+         shouldBe.zero();
+         shouldBe.set(1, 0, -omega0);
+
          JUnitTools.assertMatrixEquals(name, shouldBe, entryCMPProjectionMatrix, epsilon);
       }
    }
