@@ -252,6 +252,11 @@ public class BalanceManager
       return pushRecoveryControlModule.checkAndUpdateFootstep(getTimeRemainingInCurrentState(), footstep);
    }
 
+   public boolean checkAndUpdateFootstepFromICPOptimization(Footstep footstep)
+   {
+      return icpOptimizationLinearMomentumRateOfChangeControlModule.getUpcomingFootstepSolution(footstep);
+   }
+
    public void clearICPPlan()
    {
       icpPlanner.clearPlan();
@@ -549,6 +554,11 @@ public class BalanceManager
       return pushRecoveryControlModule.isEnabled();
    }
 
+   public boolean useICPOptimization()
+   {
+      return useICPOptimizationModule.getBooleanValue();
+   }
+
    public boolean isRecovering()
    {
       return pushRecoveryControlModule.isRecovering();
@@ -630,7 +640,10 @@ public class BalanceManager
 
    public void computeAchievedCMP(FrameVector achievedLinearMomentumRate)
    {
-      icpBasedLinearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate, achievedCMP);
+      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
+         icpOptimizationLinearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate, achievedCMP);
+      else
+         icpBasedLinearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate, achievedCMP);
       yoAchievedCMP.setAndMatchFrame(achievedCMP);
    }
 
