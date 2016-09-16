@@ -139,7 +139,6 @@ public class BalanceManager
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       double minimumSwingTimeForDisturbanceRecovery = walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery();
 
-      useICPOptimizationModule.set(true);
       this.momentumBasedController = momentumBasedController;
       yoTime = momentumBasedController.getYoTime();
 
@@ -333,7 +332,7 @@ public class BalanceManager
             icpOptimizationLinearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
       }
 
-      if (!useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
+      if (!useICPOptimizationModule.getBooleanValue() || icpOptimizationLinearMomentumRateOfChangeControlModule == null)
       {
          icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
          icpBasedLinearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
@@ -417,7 +416,7 @@ public class BalanceManager
 
    public MomentumRateCommand getInverseDynamicsCommand()
    {
-      if (!useICPOptimizationModule.getBooleanValue())
+      if (!useICPOptimizationModule.getBooleanValue() || icpOptimizationLinearMomentumRateOfChangeControlModule == null)
          return icpBasedLinearMomentumRateOfChangeControlModule.getMomentumRateCommand();
       else
          return icpOptimizationLinearMomentumRateOfChangeControlModule.getMomentumRateCommand();
@@ -458,7 +457,7 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), tempCapturePoint);
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
 
-      if (useICPOptimizationModule.getBooleanValue())
+      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
          icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
@@ -471,7 +470,7 @@ public class BalanceManager
    {
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
 
-      if (useICPOptimizationModule.getBooleanValue())
+      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
          icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForSingleSupport();
    }
 
@@ -484,7 +483,7 @@ public class BalanceManager
       }
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
 
-      if (useICPOptimizationModule.getBooleanValue())
+      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
          icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
@@ -497,7 +496,7 @@ public class BalanceManager
       }
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
 
-      if (useICPOptimizationModule.getBooleanValue())
+      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
          icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForTransfer();
    }
 
@@ -605,7 +604,7 @@ public class BalanceManager
    {
       icpPlanner.setDoubleSupportTime(newDoubleSupportTime);
 
-      if (useICPOptimizationModule.getBooleanValue())
+      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
          icpOptimizationLinearMomentumRateOfChangeControlModule.setDoubleSupportDuration(newDoubleSupportTime);
    }
 
@@ -613,7 +612,7 @@ public class BalanceManager
    {
       icpPlanner.setSingleSupportTime(newSingleSupportTime);
 
-      if (useICPOptimizationModule.getBooleanValue())
+      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
          icpOptimizationLinearMomentumRateOfChangeControlModule.setSingleSupportDuration(newSingleSupportTime);
    }
 

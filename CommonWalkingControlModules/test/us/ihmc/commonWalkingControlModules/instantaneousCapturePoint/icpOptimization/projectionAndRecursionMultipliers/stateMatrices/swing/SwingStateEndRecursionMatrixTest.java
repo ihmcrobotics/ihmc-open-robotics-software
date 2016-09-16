@@ -91,7 +91,7 @@ public class SwingStateEndRecursionMatrixTest
          shouldBe.set(2, 0, Math.exp(-omega0 * lastSegmentDuration));
          shouldBe.set(3, 0, omega0 * Math.exp(-omega0 * lastSegmentDuration));
 
-         swingStateEndRecursionMatrix.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, omega0);
+         swingStateEndRecursionMatrix.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, omega0, false);
 
          JUnitTools.assertMatrixEquals(name, shouldBe, swingStateEndRecursionMatrix, epsilon);
       }

@@ -105,7 +105,7 @@ public class SwingExitCMPProjectionMatrixTest
          shouldBe.set(2, 0, (1.0 - Math.exp(-omega0 * thirdSegmentTime)));
          shouldBe.set(3, 0, -omega0 * Math.exp(-omega0 * thirdSegmentTime));
 
-         swingExitCMPProjectionMatrix.compute(upcomingDoubleSupportDuration, doubleSupportDuration, singleSupportDuration, omega0);
+         swingExitCMPProjectionMatrix.compute(upcomingDoubleSupportDuration, doubleSupportDuration, singleSupportDuration, omega0, false);
 
          JUnitTools.assertMatrixEquals(name, shouldBe, swingExitCMPProjectionMatrix, epsilon);
       }

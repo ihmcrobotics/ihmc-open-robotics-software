@@ -28,15 +28,15 @@ public class SwingStateEndRecursionMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0, boolean useInitialICP)
    {
       double upcomingDoubleSupportDuration = doubleSupportDurations.get(1).getDoubleValue();
       double currentDoubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
 
-      compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDurations.get(0).getDoubleValue(), omega0);
+      compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDurations.get(0).getDoubleValue(), omega0, useInitialICP);
    }
 
-   public void compute(double upcomingDoubleSupportDuration, double currentDoubleSupportDuration, double singleSupportDuration, double omega0)
+   public void compute(double upcomingDoubleSupportDuration, double currentDoubleSupportDuration, double singleSupportDuration, double omega0, boolean useInitialICP)
    {
       double stepDuration = currentDoubleSupportDuration + singleSupportDuration;
 
@@ -49,8 +49,11 @@ public class SwingStateEndRecursionMatrix extends DenseMatrix64F
       double recursionTimeToInitial = upcomingInitialDoubleSupportDuration + endOfCurrentDoubleSupportDuration + startOfSplineTime.getDoubleValue() - stepDuration;
       double stateRecursionToStart = Math.exp(omega0 * recursionTimeToInitial);
 
-      set(0, 0, stateRecursionToStart);
-      set(1, 0, omega0 * stateRecursionToStart);
+      if (!useInitialICP)
+      {
+         set(0, 0, stateRecursionToStart);
+         set(1, 0, omega0 * stateRecursionToStart);
+      }
       set(2, 0, stateRecursionToEnd);
       set(3, 0, omega0 * stateRecursionToEnd);
    }

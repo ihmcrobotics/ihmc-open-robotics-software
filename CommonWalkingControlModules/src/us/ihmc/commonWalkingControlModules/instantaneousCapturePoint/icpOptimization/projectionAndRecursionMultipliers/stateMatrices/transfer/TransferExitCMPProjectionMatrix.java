@@ -21,12 +21,12 @@ public class TransferExitCMPProjectionMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, boolean useTwoCMPs, double omega0)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, boolean useTwoCMPs, double omega0, boolean useInitialICP)
    {
-      compute(doubleSupportDurations.get(0).getDoubleValue(), useTwoCMPs, omega0);
+      compute(doubleSupportDurations.get(0).getDoubleValue(), useTwoCMPs, omega0, useInitialICP);
    }
 
-   public void compute(double doubleSupportDuration, boolean useTwoCMPs, double omega0)
+   public void compute(double doubleSupportDuration, boolean useTwoCMPs, double omega0, boolean useInitialICP)
    {
       double initialDoubleSupportDuration = doubleSupportSplitRatio.getDoubleValue() * doubleSupportDuration;
       double endOfDoubleSupportDuration = (1.0 - doubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
@@ -36,7 +36,7 @@ public class TransferExitCMPProjectionMatrix extends DenseMatrix64F
 
       zero();
 
-      if (!useTwoCMPs)
+      if (!useTwoCMPs && !useInitialICP)
       {
          double totalProjection = initialDoubleSupportProjection * (1.0 - endOfDoubleSupportProjection);
 

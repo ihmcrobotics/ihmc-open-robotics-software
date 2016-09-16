@@ -96,11 +96,10 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F finalICPRecursion = new DenseMatrix64F(2, 1);
    protected final DenseMatrix64F cmpOffsetRecursionEffect = new DenseMatrix64F(2, 1);
    protected final DenseMatrix64F stanceCMPProjection = new DenseMatrix64F(2, 1);
+   protected final DenseMatrix64F initialICPProjection = new DenseMatrix64F(2, 1);
    protected final DenseMatrix64F currentICP = new DenseMatrix64F(2, 1);
    protected final DenseMatrix64F referenceICP = new DenseMatrix64F(2, 1);
    protected final DenseMatrix64F perfectCMP = new DenseMatrix64F(2, 1);
-
-   protected double currentStateProjection;
 
    protected final ArrayList<DenseMatrix64F> footstepWeights = new ArrayList<>();
    protected final DenseMatrix64F footstepRegularizationWeight = new DenseMatrix64F(2, 2);
@@ -439,6 +438,7 @@ public class ICPOptimizationSolver
       }
 
       finalICPRecursion.zero();
+      initialICPProjection.zero();
       cmpOffsetRecursionEffect.zero();
       currentICP.zero();
       referenceICP.zero();
@@ -614,7 +614,7 @@ public class ICPOptimizationSolver
    }
 
    public void compute(FramePoint2d finalICPRecursion, FramePoint2d cmpOffsetRecursionEffect, FramePoint2d currentICP, FramePoint2d perfectCMP,
-                       FramePoint2d stanceCMPProjection, double currentStateProjection)
+         FramePoint2d stanceCMPProjection, FramePoint2d initialICPProjection)
    {
       finalICPRecursion.changeFrame(worldFrame);
       currentICP.changeFrame(worldFrame);
@@ -636,7 +636,8 @@ public class ICPOptimizationSolver
       this.stanceCMPProjection.set(0, 0, stanceCMPProjection.getX());
       this.stanceCMPProjection.set(1, 0, stanceCMPProjection.getY());
 
-      this.currentStateProjection = currentStateProjection;
+      this.initialICPProjection.set(0, 0, initialICPProjection.getX());
+      this.initialICPProjection.set(1, 0, initialICPProjection.getY());
 
       if (useTwoCMPs)
       {
@@ -831,14 +832,13 @@ public class ICPOptimizationSolver
    private void computeDynamicConstraint()
    {
       if (useFeedback)
-         addFeedbackToDynamicConstraint(currentStateProjection);
+         addFeedbackToDynamicConstraint();
       if (useStepAdjustment)
          addFootstepRecursionsToDynamicConstraint();
 
-      CommonOps.scale(currentStateProjection, currentICP);
-
       CommonOps.subtractEquals(currentICP, finalICPRecursion);
       CommonOps.subtractEquals(currentICP, stanceCMPProjection);
+      CommonOps.subtractEquals(currentICP, initialICPProjection);
 
       if (useTwoCMPs)
          CommonOps.subtractEquals(currentICP, cmpOffsetRecursionEffect);
@@ -846,12 +846,11 @@ public class ICPOptimizationSolver
       MatrixTools.setMatrixBlock(dynamics_beq, 0, 0, currentICP, 0, 0, 2, 1, 1.0);
    }
 
-   private void addFeedbackToDynamicConstraint(double currentStateProjection)
+   private void addFeedbackToDynamicConstraint()
    {
       CommonOps.setIdentity(identity);
 
       CommonOps.invert(feedbackGain);
-      CommonOps.scale(currentStateProjection, feedbackGain);
 
       MatrixTools.addMatrixBlock(dynamics_Aeq, feedbackCMPIndex, 0, feedbackGain, 0, 0, 2, 2, 1.0);
       MatrixTools.addMatrixBlock(dynamics_Aeq, dynamicRelaxtionIndex, 0, identity, 0, 0, 2, 2, 1.0);

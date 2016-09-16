@@ -171,12 +171,13 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       double cmpProjectionMultiplier = currentStateProjection - Math.exp(-omega * initialDoubleSupportDuration);
       FramePoint2d perfectCMP = new FramePoint2d(worldFrame, 0.0, -0.155);
       FramePoint2d cmpProjection = new FramePoint2d();
+      FramePoint2d initialICPProjection = new FramePoint2d();
       cmpProjection.set(perfectCMP);
       cmpProjection.scale(cmpProjectionMultiplier);
 
       FramePoint2d currentICP = new FramePoint2d(worldFrame, 0.1, 0.06);
 
-      compute(finalICPRecursion, null, currentICP, perfectCMP, cmpProjection, currentStateProjection);
+      compute(finalICPRecursion, null, currentICP, perfectCMP, cmpProjection, initialICPProjection);
 
       FramePoint2d rightHandSide = new FramePoint2d();
       rightHandSide.set(currentICP);

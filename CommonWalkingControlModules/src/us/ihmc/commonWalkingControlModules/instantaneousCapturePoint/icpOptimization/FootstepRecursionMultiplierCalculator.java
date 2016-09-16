@@ -25,6 +25,7 @@ public class FootstepRecursionMultiplierCalculator
    private final StanceCMPProjectionMultipliers stanceCMPProjectionMultipliers;
    private final RemainingStanceCMPProjectionMultipliers remainingStanceCMPProjectionMultipliers;
    private final CurrentStateProjectionMultiplier currentStateProjectionMultiplier;
+   private final InitialICPProjectionMultiplier initialICPProjectionMultiplier;
 
    private final DoubleYoVariable doubleSupportSplitFraction;
    private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
@@ -75,6 +76,7 @@ public class FootstepRecursionMultiplierCalculator
                exitCMPDurationInPercentOfStepTime, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, registry);
       currentStateProjectionMultiplier = new CurrentStateProjectionMultiplier(registry, doubleSupportSplitFraction, startOfSplineTime, endOfSplineTime,
             totalTrajectoryTime);
+      initialICPProjectionMultiplier = new InitialICPProjectionMultiplier(registry, startOfSplineTime, endOfSplineTime, totalTrajectoryTime);
 
       finalICPRecursionMultiplier = new FinalICPRecursionMultiplier(registry, doubleSupportSplitFraction);
 
@@ -103,6 +105,7 @@ public class FootstepRecursionMultiplierCalculator
       finalICPRecursionMultiplier.reset();
       remainingStanceCMPProjectionMultipliers.reset();
       currentStateProjectionMultiplier.reset();
+      initialICPProjectionMultiplier.reset();
    }
 
    public void computeRecursionMultipliers(int numberOfStepsToConsider, boolean isInTransfer, boolean useTwoCMPs, double omega0)
@@ -117,15 +120,18 @@ public class FootstepRecursionMultiplierCalculator
       cmpRecursionMultipliers.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
    }
 
-   public void computeRemainingProjectionMultipliers(double timeRemaining, boolean useTwoCMPs, boolean isInTransfer, double omega0)
+   public void computeRemainingProjectionMultipliers(double timeRemaining, boolean useTwoCMPs, boolean isInTransfer, double omega0, boolean useInitialICP)
    {
       if (useTwoCMPs)
       {
          updateSegmentedSingleSupportTrajectory(isInTransfer);
       }
 
-      currentStateProjectionMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0);
-      remainingStanceCMPProjectionMultipliers.compute(timeRemaining, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
+      Math.max(timeRemaining, 0.0);
+
+      currentStateProjectionMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0, useInitialICP);
+      initialICPProjectionMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, useTwoCMPs, isInTransfer, omega0, useInitialICP);
+      remainingStanceCMPProjectionMultipliers.compute(timeRemaining, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0, useInitialICP);
    }
 
    private void updateSegmentedSingleSupportTrajectory(boolean isInTransfer)
@@ -221,14 +227,17 @@ public class FootstepRecursionMultiplierCalculator
       return currentStateProjectionMultiplier.getPositionMultiplier();
    }
 
+   public double getInitialICPProjectionMultiplier()
+   {
+      return initialICPProjectionMultiplier.getPositionMultiplier();
+   }
+
    private final FramePoint2d tmpPoint = new FramePoint2d();
    private final FramePoint2d tmpEntry = new FramePoint2d();
    private final FramePoint2d tmpExit = new FramePoint2d();
 
-   private final DenseMatrix64F referenceICPVelocityMatrix = new DenseMatrix64F(1, 2);
-
    public void computeICPPoints(FramePoint2d finalICP, ArrayList<YoFramePoint2d> footstepLocations, ArrayList<FrameVector2d> entryOffsets,
-         ArrayList<FrameVector2d> exitOffsets, FramePoint2d previousExitCMP, FramePoint2d entryCMP, FramePoint2d exitCMP, int numberOfFootstepsToConsider,
+         ArrayList<FrameVector2d> exitOffsets, FramePoint2d previousExitCMP, FramePoint2d entryCMP, FramePoint2d exitCMP, FramePoint2d initialICP, int numberOfFootstepsToConsider,
          FramePoint2d predictedEndOfStateICP, FramePoint2d referenceICPToPack, FrameVector2d referenceICPVelocityToPack)
    {
       predictedEndOfStateICP.set(finalICP);
@@ -260,7 +269,7 @@ public class FootstepRecursionMultiplierCalculator
       }
 
       referenceICPToPack.set(predictedEndOfStateICP);
-      referenceICPToPack.scale(1.0 / currentStateProjectionMultiplier.getPositionMultiplier());
+      referenceICPToPack.scale(currentStateProjectionMultiplier.getPositionMultiplier());
 
       if (!entryCMP.containsNaN())
       {
@@ -280,6 +289,13 @@ public class FootstepRecursionMultiplierCalculator
       {
          tmpPoint.set(previousExitCMP);
          tmpPoint.scale(getRemainingPreviousStanceExitCMPProjectionMultiplier());
+         referenceICPToPack.add(tmpPoint);
+      }
+
+      if (!initialICP.containsNaN())
+      {
+         tmpPoint.set(initialICP);
+         tmpPoint.scale(getInitialICPProjectionMultiplier());
          referenceICPToPack.add(tmpPoint);
       }
 
@@ -304,6 +320,13 @@ public class FootstepRecursionMultiplierCalculator
       {
          tmpPoint.set(previousExitCMP);
          tmpPoint.scale(remainingStanceCMPProjectionMultipliers.getRemainingPreviousExitVelocityMultiplier());
+         referenceICPVelocityToPack.add(tmpPoint);
+      }
+
+      if (!initialICP.containsNaN())
+      {
+         tmpPoint.set(initialICP);
+         tmpPoint.scale(initialICPProjectionMultiplier.getVelocityMultiplier());
          referenceICPVelocityToPack.add(tmpPoint);
       }
    }

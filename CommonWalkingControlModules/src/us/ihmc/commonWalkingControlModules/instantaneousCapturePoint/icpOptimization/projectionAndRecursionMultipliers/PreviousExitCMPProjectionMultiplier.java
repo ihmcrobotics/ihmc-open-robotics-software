@@ -47,12 +47,12 @@ public class PreviousExitCMPProjectionMultiplier
       return velocityMultiplier.getDoubleValue();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining, boolean isInTransfer, double omega0)
+   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining, boolean isInTransfer, double omega0, boolean useInitialICP)
    {
       double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
       {
-         positionMultiplier = computeInTransfer(doubleSupportDurations, timeRemaining, omega0);
+         positionMultiplier = computeInTransfer(doubleSupportDurations, timeRemaining, omega0, useInitialICP);
          velocityMultiplier = computeInTransferVelocity();
       }
       else
@@ -65,9 +65,9 @@ public class PreviousExitCMPProjectionMultiplier
       this.velocityMultiplier.set(velocityMultiplier);
    }
 
-   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining, double omega0)
+   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeRemaining, double omega0, boolean useInitialICP)
    {
-      transferPreviousExitCMPProjectionMatrix.compute(doubleSupportDurations, omega0);
+      transferPreviousExitCMPProjectionMatrix.compute(doubleSupportDurations, omega0, useInitialICP);
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
