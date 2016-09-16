@@ -306,7 +306,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule
          footstepToPack.getPose(footstepPose);
          icpOptimizationController.getFootstepSolution(0, footstepPositionSolution);
          footstepPose.setXYFromPosition2d(footstepPositionSolution);
-         footstepPose.setPose(footstepPose);
+         footstepToPack.setPose(footstepPose);
       }
 
       return icpOptimizationController.wasFootstepAdjusted();

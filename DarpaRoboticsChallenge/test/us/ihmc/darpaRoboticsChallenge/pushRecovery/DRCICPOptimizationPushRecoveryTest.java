@@ -101,6 +101,24 @@ public abstract class DRCICPOptimizationPushRecoveryTest
       //assertTrue(success);
    }
 
+   public void testPushICPOptimizationPushInSwing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(script);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * swingTime;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      double magnitude = 200.0;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      //assertTrue(success);
+   }
+
    private void setupTest(String scriptName) throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();

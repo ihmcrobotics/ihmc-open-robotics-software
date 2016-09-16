@@ -639,6 +639,7 @@ public class ICPOptimizationSolver
       this.initialICPProjection.set(0, 0, initialICPProjection.getX());
       this.initialICPProjection.set(1, 0, initialICPProjection.getY());
 
+
       if (useTwoCMPs)
       {
          this.cmpOffsetRecursionEffect.set(0, 0, cmpOffsetRecursionEffect.getX());
@@ -994,16 +995,16 @@ public class ICPOptimizationSolver
       CommonOps.multTransA(solverInput_h, freeVariableSolution, tmpCostScalar);
       CommonOps.addEquals(costToGo, tmpCostScalar);
 
-      CommonOps.multTransA(footstepCost_h, footstepLocationSolution, tmpCostScalar);
+      CommonOps.multTransA(-1.0, footstepCost_h, footstepLocationSolution, tmpCostScalar);
       CommonOps.addEquals(footstepCostToGo, tmpCostScalar);
 
-      CommonOps.multTransA(footstepRegularizationCost_h, footstepLocationSolution, tmpCostScalar);
+      CommonOps.multTransA(-1.0, footstepRegularizationCost_h, footstepLocationSolution, tmpCostScalar);
       CommonOps.addEquals(footstepRegularizationCostToGo, tmpCostScalar);
 
-      CommonOps.multTransA(feedbackCost_h, feedbackDeltaSolution, tmpCostScalar);
+      CommonOps.multTransA(-1.0, feedbackCost_h, feedbackDeltaSolution, tmpCostScalar);
       CommonOps.addEquals(feedbackCostToGo, tmpCostScalar);
 
-      CommonOps.multTransA(feedbackRegularizationCost_h, feedbackDeltaSolution, tmpCostScalar);
+      CommonOps.multTransA(-1.0, feedbackRegularizationCost_h, feedbackDeltaSolution, tmpCostScalar);
       CommonOps.addEquals(feedbackRegularizationCostToGo, tmpCostScalar);
 
       // residual cost
