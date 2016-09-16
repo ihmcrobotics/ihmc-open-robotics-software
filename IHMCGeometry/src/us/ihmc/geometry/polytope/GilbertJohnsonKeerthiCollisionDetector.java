@@ -3,6 +3,11 @@ package us.ihmc.geometry.polytope;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+/**
+ * GilbertJohnsonKeerthi (GJK) algorithm for doing collision detection
+ * 
+ * For more information see book, papers, and presentations at http://realtimecollisiondetection.net/pubs/
+ */
 public class GilbertJohnsonKeerthiCollisionDetector
 {
 
@@ -21,6 +26,11 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
       supportPoint.set(supportingVertexOne.getPosition());
       supportPoint.sub(supportingVertexTwo.getPosition());
+   }
+
+   public boolean arePolytopesColliding(ConvexPolytope cubeOne, ConvexPolytope cubeTwo)
+   {
+      return false;
    }
 
 }
