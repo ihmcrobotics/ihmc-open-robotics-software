@@ -164,14 +164,20 @@ public class ICPOptimizationSolutionHandler
    private final FrameVector2d tmpReferenceVelocity = new FrameVector2d();
    private final FramePoint2d finalICP2d = new FramePoint2d();
 
+   public void computeReferenceFromSolutions(ArrayList<YoFramePoint2d> footstepSolutions, ICPOptimizationInputHandler inputHandler,
+         YoFramePoint2d beginningOfStateICP, double omega0, int numberOfFootstepsToConsider)
+   {
+      computeReferenceFromSolutions(footstepSolutions, inputHandler.getEntryOffsets(), inputHandler.getExitOffsets(), inputHandler.getPreviousStanceExitCMP(),
+            inputHandler.getStanceEntryCMP(), inputHandler.getStanceExitCMP(), inputHandler.getFinalICP(), beginningOfStateICP, omega0, numberOfFootstepsToConsider);
+   }
+
    public void computeReferenceFromSolutions(ArrayList<YoFramePoint2d> footstepSolutions, ArrayList<FrameVector2d> entryOffsets, ArrayList<FrameVector2d> exitOffsets,
-         YoFramePoint2d previousStanceExitCMP, YoFramePoint2d stanceEntryCMP, YoFramePoint2d stanceExitCMP, YoFramePoint finalICP, YoFramePoint2d beginningOfStateICP,
+         FramePoint2d previousStanceExitCMP, FramePoint2d stanceEntryCMP, FramePoint2d stanceExitCMP, FramePoint finalICP, YoFramePoint2d beginningOfStateICP,
          double omega0, int numberOfFootstepsToConsider)
    {
       finalICP.getFrameTuple2d(finalICP2d);
-      footstepRecursionMultiplierCalculator.computeICPPoints(finalICP2d, footstepSolutions, entryOffsets, exitOffsets, previousStanceExitCMP.getFrameTuple2d(),
-            stanceEntryCMP.getFrameTuple2d(), stanceExitCMP.getFrameTuple2d(), beginningOfStateICP.getFrameTuple2d(), numberOfFootstepsToConsider,
-            tmpEndPoint, tmpReferencePoint, tmpReferenceVelocity);
+      footstepRecursionMultiplierCalculator.computeICPPoints(finalICP2d, footstepSolutions, entryOffsets, exitOffsets, previousStanceExitCMP, stanceEntryCMP,
+            stanceExitCMP, beginningOfStateICP.getFrameTuple2d(), numberOfFootstepsToConsider, tmpEndPoint, tmpReferencePoint, tmpReferenceVelocity);
 
       CapturePointTools.computeDesiredCentroidalMomentumPivot(tmpReferencePoint, tmpReferenceVelocity, omega0, tmpCMP);
 
@@ -181,14 +187,21 @@ public class ICPOptimizationSolutionHandler
       controllerReferenceCMP.set(tmpCMP);
    }
 
+   public void computeNominalValues(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ICPOptimizationInputHandler inputHandler,
+         YoFramePoint2d beginningOfStateICP, double omega0, int numberOfFootstepsToConsider)
+   {
+      computeNominalValues(upcomingFootstepLocations, inputHandler.getEntryOffsets(), inputHandler.getExitOffsets(), inputHandler.getPreviousStanceExitCMP(),
+            inputHandler.getStanceEntryCMP(), inputHandler.getStanceExitCMP(), inputHandler.getFinalICP(), beginningOfStateICP, omega0, numberOfFootstepsToConsider);
+   }
+
    public void computeNominalValues(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ArrayList<FrameVector2d> entryOffsets, ArrayList<FrameVector2d> exitOffsets,
-         YoFramePoint2d previousStanceExitCMP, YoFramePoint2d stanceEntryCMP, YoFramePoint2d stanceExitCMP, YoFramePoint finalICP, YoFramePoint2d beginningOfStateICP,
+         FramePoint2d previousStanceExitCMP, FramePoint2d stanceEntryCMP, FramePoint2d stanceExitCMP, FramePoint finalICP, YoFramePoint2d beginningOfStateICP,
          double omega0, int numberOfFootstepsToConsider)
    {
       finalICP.getFrameTuple2d(finalICP2d);
       footstepRecursionMultiplierCalculator.computeICPPoints(finalICP2d, upcomingFootstepLocations, entryOffsets, exitOffsets,
-            previousStanceExitCMP.getFrameTuple2d(), stanceEntryCMP.getFrameTuple2d(), stanceExitCMP.getFrameTuple2d(), beginningOfStateICP.getFrameTuple2d(),
-            numberOfFootstepsToConsider, tmpEndPoint, tmpReferencePoint, tmpReferenceVelocity);
+            previousStanceExitCMP, stanceEntryCMP, stanceExitCMP, beginningOfStateICP.getFrameTuple2d(), numberOfFootstepsToConsider, tmpEndPoint,
+            tmpReferencePoint, tmpReferenceVelocity);
 
       CapturePointTools.computeDesiredCentroidalMomentumPivot(tmpReferencePoint, tmpReferenceVelocity, omega0, tmpCMP);
 
