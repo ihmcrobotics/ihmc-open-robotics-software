@@ -125,6 +125,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    
    double[] stateEstimatorYawPitchRoll = new double[3];
    double[] temporaryYawPitchRoll = new double[3];
+   double[] updatedGoalOffset_Rotation_YawPitchRoll = new double[3];
    private final DoubleYoVariable startYaw;
    private final DoubleYoVariable goalYaw;
    private final DoubleYoVariable interpolatedYaw;
@@ -381,12 +382,13 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalOffsetErrorPose.getOrientationIncludingFrame(updatedGoalOffset_Rotation);
       
       startOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedStartOffset_Rotation_quat);
+      updatedGoalOffset_Rotation.getYawPitchRoll(updatedGoalOffset_Rotation_YawPitchRoll);
       
       offsetBetweenStartAndGoal_Rotation.setOrientationFromOneToTwo(updatedGoalOffset_Rotation, updatedStartOffset_Rotation);
       offsetBetweenStartAndGoal_Rotation.getYawPitchRoll(temporaryYawPitchRoll);
       goalYawRaw.set(temporaryYawPitchRoll[0]);
       goalYawWithDeadZone.update();
-      RotationTools.convertYawPitchRollToQuaternion(goalYawWithDeadZone.getDoubleValue(), temporaryYawPitchRoll[1], temporaryYawPitchRoll[2], updatedGoalOffsetWithDeadZone_Rotation_quat);
+      RotationTools.convertYawPitchRollToQuaternion(updatedGoalOffset_Rotation_YawPitchRoll[0], temporaryYawPitchRoll[1], temporaryYawPitchRoll[2], updatedGoalOffsetWithDeadZone_Rotation_quat);
       updatedGoalOffsetWithDeadZone_Rotation.set(updatedGoalOffsetWithDeadZone_Rotation_quat);
       
       goalOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedGoalOffsetWithDeadZone_Rotation_quat);
