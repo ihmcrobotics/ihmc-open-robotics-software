@@ -42,7 +42,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test//(timeout = 30000)
    public void testIsIntersecting()
    {
       ConvexPolytope cubeOne = ConvexPolytopeConstructor.constructUnitCube();
@@ -52,12 +52,24 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       RigidBodyTransform transformTwo = new RigidBodyTransform();
       
       transformOne.setTranslation(1.0, 2.0, 3.0);
-      transformOne.setTranslation(9.0, 6.0, 7.0);
+      transformTwo.setTranslation(9.0, 6.0, 7.0);
 
       cubeOne.applyTransform(transformOne);
       cubeTwo.applyTransform(transformTwo);
       
       GilbertJohnsonKeerthiCollisionDetector detector = new GilbertJohnsonKeerthiCollisionDetector();
       assertFalse(detector.arePolytopesColliding(cubeOne, cubeTwo));
+      
+      cubeOne = ConvexPolytopeConstructor.constructUnitCube();
+      cubeTwo = ConvexPolytopeConstructor.constructUnitCube();
+      
+      transformOne.setTranslation(1.4, 2.5, 3.8);
+      transformTwo.setTranslation(1.0, 2.0, 3.0);
+
+      cubeOne.applyTransform(transformOne);
+      cubeTwo.applyTransform(transformTwo);
+      
+      detector = new GilbertJohnsonKeerthiCollisionDetector();
+      assertTrue(detector.arePolytopesColliding(cubeOne, cubeTwo));
    }
 }

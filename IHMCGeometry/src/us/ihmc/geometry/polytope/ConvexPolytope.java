@@ -35,6 +35,11 @@ public class ConvexPolytope
    {
       return vertices.size();
    }
+   
+   public PolytopeVertex getVertex(int index)
+   {
+      return vertices.get(index);
+   }
 
    public int getNumberOfEdges()
    {
