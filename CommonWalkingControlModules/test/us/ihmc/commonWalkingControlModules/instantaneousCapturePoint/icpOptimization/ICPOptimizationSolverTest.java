@@ -90,8 +90,6 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       int feedbackTaskIndex = 0;
       int dynamicRelaxationIndex = 0;
 
-      int numberOfVertexVariables = 2 * numberOfVertices;
-
       if (useStepAdjustment)
       {
          numberOfFootstepVariables = 2 * numberOfFootstepsToConsider;
@@ -107,16 +105,15 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          dynamicRelaxationIndex += 2;
 
          if (numberOfVertices > 0)
-            numberOfLagrangeMultipliers += 4;
+            numberOfLagrangeMultipliers += 3;
       }
       else
       {
          numberOfVertices = 0;
-         numberOfVertexVariables = 0;
       }
 
       int cmpConstraintIndex = dynamicRelaxationIndex + 2;
-      int lagrangeMultiplierIndex = cmpConstraintIndex + numberOfVertexVariables;
+      int lagrangeMultiplierIndex = cmpConstraintIndex + numberOfVertices;
 
       String name = "Number of Steps: " + numberOfFootstepsToConsider + ". Use step adjustment: " + useStepAdjustment + ". Use Feedback: " + useFeedback;
 
@@ -130,9 +127,9 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       assertEquals(name, cmpConstraintIndex, this.cmpConstraintIndex, epsilon);
       assertEquals(name, lagrangeMultiplierIndex, this.lagrangeMultiplierIndex, epsilon);
 
-      assertEquals(name, totalNumberOfFreeVariables + numberOfVertexVariables, solverInput_H.numRows, epsilon);
-      assertEquals(name, totalNumberOfFreeVariables + numberOfVertexVariables, solverInput_H.numCols, epsilon);
-      assertEquals(name, totalNumberOfFreeVariables + numberOfVertexVariables, solverInput_h.numRows, epsilon);
+      assertEquals(name, totalNumberOfFreeVariables + numberOfVertices, solverInput_H.numRows, epsilon);
+      assertEquals(name, totalNumberOfFreeVariables + numberOfVertices, solverInput_H.numCols, epsilon);
+      assertEquals(name, totalNumberOfFreeVariables + numberOfVertices, solverInput_h.numRows, epsilon);
       assertEquals(name, 1, solverInput_h.numCols, epsilon);
 
       assertEquals(name, numberOfFootstepVariables, footstepCost_H.numRows, epsilon);
@@ -166,45 +163,45 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       assertEquals(name, 2, dynamicRelaxationCost_h.numRows, epsilon);
       assertEquals(name, 1, dynamicRelaxationCost_h.numCols, epsilon);
 
-      assertEquals(name, totalNumberOfFreeVariables + numberOfVertexVariables, solverInput_Aeq.numRows, epsilon);
+      assertEquals(name, totalNumberOfFreeVariables + numberOfVertices, solverInput_Aeq.numRows, epsilon);
       assertEquals(name, numberOfLagrangeMultipliers, solverInput_Aeq.numCols, epsilon);
       assertEquals(name, numberOfLagrangeMultipliers, solverInput_AeqTrans.numRows, epsilon);
-      assertEquals(name, totalNumberOfFreeVariables + numberOfVertexVariables, solverInput_AeqTrans.numCols, epsilon);
+      assertEquals(name, totalNumberOfFreeVariables + numberOfVertices, solverInput_AeqTrans.numCols, epsilon);
       assertEquals(name, numberOfLagrangeMultipliers, solverInput_beq.numRows, epsilon);
       assertEquals(name, 1, solverInput_beq.numCols, epsilon);
 
-      assertEquals(name, totalNumberOfFreeVariables + numberOfVertexVariables, solverInput_Aineq.numRows, epsilon);
-      assertEquals(name, numberOfVertexVariables, solverInput_Aineq.numCols, epsilon);
-      assertEquals(name, numberOfVertexVariables, solverInput_AineqTrans.numRows, epsilon);
-      assertEquals(name, totalNumberOfFreeVariables + numberOfVertexVariables, solverInput_AineqTrans.numCols, epsilon);
-      assertEquals(name, numberOfVertexVariables, solverInput_bineq.numRows, epsilon);
+      assertEquals(name, totalNumberOfFreeVariables + numberOfVertices, solverInput_Aineq.numRows, epsilon);
+      assertEquals(name, numberOfVertices, solverInput_Aineq.numCols, epsilon);
+      assertEquals(name, numberOfVertices, solverInput_AineqTrans.numRows, epsilon);
+      assertEquals(name, totalNumberOfFreeVariables + numberOfVertices, solverInput_AineqTrans.numCols, epsilon);
+      assertEquals(name, numberOfVertices, solverInput_bineq.numRows, epsilon);
       assertEquals(name, 1, solverInput_bineq.numCols, epsilon);
 
-      assertEquals(name, totalNumberOfFreeVariables + numberOfVertexVariables, dynamics_Aeq.numRows, epsilon);
+      assertEquals(name, totalNumberOfFreeVariables + numberOfVertices, dynamics_Aeq.numRows, epsilon);
       assertEquals(name, 2, dynamics_Aeq.numCols, epsilon);
       assertEquals(name, 2, dynamics_beq.numRows, epsilon);
       assertEquals(name, 1, dynamics_beq.numCols, epsilon);
 
       if (useFeedback)
       {
-         assertEquals(name, 4 + numberOfVertexVariables, stanceCMP_Aeq.numRows, epsilon);
-         assertEquals(name, 4, stanceCMP_Aeq.numCols, epsilon);
-         assertEquals(name, 4, stanceCMP_beq.numRows, epsilon);
+         assertEquals(name, 4 + numberOfVertices, stanceCMP_Aeq.numRows, epsilon);
+         assertEquals(name, 3, stanceCMP_Aeq.numCols, epsilon);
+         assertEquals(name, 3, stanceCMP_beq.numRows, epsilon);
          assertEquals(name, 1, stanceCMP_beq.numCols, epsilon);
 
-         assertEquals(name, 4 + numberOfVertexVariables, stanceCMPDynamics_Aeq.numRows, epsilon);
+         assertEquals(name, 4 + numberOfVertices, stanceCMPDynamics_Aeq.numRows, epsilon);
          assertEquals(name, 2, stanceCMPDynamics_Aeq.numCols, epsilon);
          assertEquals(name, 2, stanceCMPDynamics_beq.numRows, epsilon);
          assertEquals(name, 1, stanceCMPDynamics_beq.numCols, epsilon);
 
-         assertEquals(name, numberOfVertexVariables, stanceCMPSum_Aeq.numRows, epsilon);
-         assertEquals(name, 2, stanceCMPSum_Aeq.numCols, epsilon);
-         assertEquals(name, 2, stanceCMPSum_beq.numRows, epsilon);
+         assertEquals(name, numberOfVertices, stanceCMPSum_Aeq.numRows, epsilon);
+         assertEquals(name, 1, stanceCMPSum_Aeq.numCols, epsilon);
+         assertEquals(name, 1, stanceCMPSum_beq.numRows, epsilon);
          assertEquals(name, 1, stanceCMPSum_beq.numCols, epsilon);
 
-         assertEquals(name, numberOfVertexVariables, stanceCMP_Aineq.numRows, epsilon);
-         assertEquals(name, numberOfVertexVariables, stanceCMP_Aineq.numCols, epsilon);
-         assertEquals(name, numberOfVertexVariables, stanceCMP_bineq.numRows, epsilon);
+         assertEquals(name, numberOfVertices, stanceCMP_Aineq.numRows, epsilon);
+         assertEquals(name, numberOfVertices, stanceCMP_Aineq.numCols, epsilon);
+         assertEquals(name, numberOfVertices, stanceCMP_bineq.numRows, epsilon);
          assertEquals(name, 1, stanceCMP_bineq.numCols, epsilon);
       }
    }
