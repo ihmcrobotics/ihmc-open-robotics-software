@@ -65,6 +65,8 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F feedbackRegularizationCost_h;
    protected final DenseMatrix64F feedbackRegularizationResidualCost;
 
+   protected final DenseMatrix64F stanceCMPCost_G;
+
    protected final DenseMatrix64F solverInput_Aeq;
    protected final DenseMatrix64F solverInput_AeqTrans;
    protected final DenseMatrix64F solverInput_beq;
@@ -76,7 +78,6 @@ public class ICPOptimizationSolver
    protected final DenseMatrix64F dynamics_Aeq;
    protected final DenseMatrix64F dynamics_beq;
 
-   protected final DenseMatrix64F stanceCMPCost_G;
    protected final DenseMatrix64F stanceCMP_Aeq;
    protected final DenseMatrix64F stanceCMP_beq;
    protected final DenseMatrix64F stanceCMPDynamics_Aeq;
@@ -139,10 +140,10 @@ public class ICPOptimizationSolver
    protected int numberOfVertexVariables = 0;
    protected int numberOfLagrangeMultipliers = 2;
 
-   private int feedbackCMPIndex;
-   private int dynamicRelaxtionIndex;
-   private int cmpConstraintIndex;
-   private int lagrangeMultiplierIndex;
+   protected int feedbackCMPIndex;
+   protected int dynamicRelaxtionIndex;
+   protected int cmpConstraintIndex;
+   protected int lagrangeMultiplierIndex;
 
    private int numberOfIterations;
 
@@ -361,33 +362,29 @@ public class ICPOptimizationSolver
 
       numberOfFootstepVariables = 2 * this.numberOfFootstepsToConsider;
 
+      numberOfLagrangeMultipliers = 2;
+      numberOfFreeVariables = numberOfFootstepVariables + 2;
       if (useFeedback)
       {
-         numberOfLagrangeMultipliers = 2;
-
-         feedbackCMPIndex = 2 * numberOfFootstepsToConsider;
+         feedbackCMPIndex = numberOfFootstepVariables;
          dynamicRelaxtionIndex = feedbackCMPIndex + 2;
 
          if (numberOfVertices > 0)
-         {
             numberOfLagrangeMultipliers += 4;
-            cmpConstraintIndex = dynamicRelaxtionIndex + 2;
-         }
 
-         numberOfFreeVariables = numberOfFootstepVariables + 4;
-
-         lagrangeMultiplierIndex = cmpConstraintIndex + numberOfVertexVariables;
+         numberOfFreeVariables += 2;
       }
       else
       {
-         numberOfFreeVariables = numberOfFootstepVariables;
-         numberOfLagrangeMultipliers = 0;
          this.numberOfVertices = 0;
          numberOfVertexVariables = 0;
 
          feedbackCMPIndex = 0;
-         lagrangeMultiplierIndex = numberOfFootstepVariables;
+         dynamicRelaxtionIndex = numberOfFootstepVariables;
       }
+
+      cmpConstraintIndex = dynamicRelaxtionIndex + 2;
+      lagrangeMultiplierIndex = cmpConstraintIndex + numberOfVertexVariables;
 
       reset();
       reshape();
@@ -507,7 +504,7 @@ public class ICPOptimizationSolver
       MatrixTools.setMatrixBlock(footstepRecursionMutlipliers.get(footstepIndex), 0, 0, identity, 0, 0, 2, 2, recursionMultiplier);
    }
 
-   private void setFootstepWeight(int footstepIndex, double xWeight, double yWeight)
+   protected void setFootstepWeight(int footstepIndex, double xWeight, double yWeight)
    {
       xWeight = Math.max(minimumFootstepWeight, xWeight);
       yWeight = Math.max(minimumFootstepWeight, yWeight);
@@ -525,17 +522,13 @@ public class ICPOptimizationSolver
       referenceFootstepLocations.get(footstepIndex).set(1, 0, referenceFootstepLocation.getY());
    }
 
-   public void setFeedbackConditions(double feedbackWeight, double feedbackGain, double dynamicRelaxationWeight, double omega)
+   public void setFeedbackConditions(double feedbackWeight, double feedbackGain, double dynamicRelaxationWeight)
    {
-      this.setFeedbackConditions(feedbackWeight, feedbackWeight, feedbackGain, feedbackGain, dynamicRelaxationWeight,omega);
+      this.setFeedbackConditions(feedbackWeight, feedbackWeight, feedbackGain, feedbackGain, dynamicRelaxationWeight);
    }
 
-   public void setFeedbackConditions(double feedbackXWeight, double feedbackYWeight, double feedbackXGain, double feedbackYGain, double dynamicRelaxationWeight,
-         double omega)
+   public void setFeedbackConditions(double feedbackXWeight, double feedbackYWeight, double feedbackXGain, double feedbackYGain, double dynamicRelaxationWeight)
    {
-      feedbackXGain = feedbackXGain / omega;
-      feedbackYGain = feedbackYGain / omega;
-
       feedbackXWeight = Math.max(feedbackXWeight, minimumFeedbackWeight);
       feedbackYWeight = Math.max(feedbackYWeight, minimumFeedbackWeight);
 
@@ -832,6 +825,8 @@ public class ICPOptimizationSolver
 
    private void computeDynamicConstraint()
    {
+      addDynamicRelaxationToDynamicConstraint();
+
       if (useFeedback)
          addFeedbackToDynamicConstraint();
       if (useStepAdjustment)
@@ -849,11 +844,14 @@ public class ICPOptimizationSolver
 
    private void addFeedbackToDynamicConstraint()
    {
-      CommonOps.setIdentity(identity);
-
       CommonOps.invert(feedbackGain);
 
       MatrixTools.addMatrixBlock(dynamics_Aeq, feedbackCMPIndex, 0, feedbackGain, 0, 0, 2, 2, 1.0);
+   }
+
+   private void addDynamicRelaxationToDynamicConstraint()
+   {
+      CommonOps.setIdentity(identity);
       MatrixTools.addMatrixBlock(dynamics_Aeq, dynamicRelaxtionIndex, 0, identity, 0, 0, 2, 2, 1.0);
    }
 
@@ -937,7 +935,7 @@ public class ICPOptimizationSolver
       MatrixTools.setMatrixBlock(freeVariableSolution, 0, 0, solution, 0, 0, numberOfFreeVariables, 1, 1.0);
    }
 
-   private void setPreviousFootstepSolution(DenseMatrix64F footstepLocationSolution)
+   protected void setPreviousFootstepSolution(DenseMatrix64F footstepLocationSolution)
    {
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
          MatrixTools.setMatrixBlock(previousFootstepLocations.get(i), 0, 0, footstepLocationSolution, 2 * i, 0, 2, 1, 1.0);

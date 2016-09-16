@@ -440,7 +440,7 @@ public class ICPOptimizationController
 
       if (localUseFeedback)
       {
-         setFeedbackConditions(omega0);
+         setFeedbackConditions();
 
          if (localUseFeedbackWeightHardening)
             solver.setUseFeedbackWeightHardening();
@@ -482,11 +482,10 @@ public class ICPOptimizationController
    }
 
    private final FramePoint2d feedbackGains = new FramePoint2d();
-   private void setFeedbackConditions(double omega0)
+   private void setFeedbackConditions()
    {
       getTransformedFeedbackGains(feedbackGains);
-      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(),
-            dynamicRelaxationWeight.getDoubleValue(), omega0);
+      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(), dynamicRelaxationWeight.getDoubleValue());
    }
 
    private void getTransformedFeedbackGains(FramePoint2d feedbackGainsToPack)
@@ -520,7 +519,7 @@ public class ICPOptimizationController
       getTransformedFeedbackGains(feedbackGains);
 
       solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(),
-            dynamicRelaxationWeight.getDoubleValue(), omega0);
+            dynamicRelaxationWeight.getDoubleValue());
 
       solver.compute(desiredICP, null, currentICP, perfectCMP, blankFramePoint, blankFramePoint);
 
