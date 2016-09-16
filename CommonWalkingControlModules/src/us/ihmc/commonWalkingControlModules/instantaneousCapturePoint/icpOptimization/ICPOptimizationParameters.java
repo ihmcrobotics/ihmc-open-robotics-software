@@ -36,6 +36,8 @@ public interface ICPOptimizationParameters
 
    public boolean useFeedbackWeightHardening();
 
+   public boolean useICPFromBeginningOfState();
+
    public double getMinimumFootstepWeight();
 
    public double getMinimumFeedbackWeight();
@@ -44,7 +46,11 @@ public interface ICPOptimizationParameters
 
    public double getFeedbackWeightHardeningMultiplier();
 
-   public double getMaxCMPExitForward();
+   public double getMaxCMPForwardExit();
 
-   public double getMaxCMPExitSideways();
+   public double getMaxCMPLateralExit();
+
+   public double getForwardAdjustmentDeadband();
+
+   public double getLateralAdjustmentDeadband();
 }
