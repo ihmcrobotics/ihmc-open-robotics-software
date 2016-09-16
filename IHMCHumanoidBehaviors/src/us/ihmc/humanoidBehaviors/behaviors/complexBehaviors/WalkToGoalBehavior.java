@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors;
+package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
@@ -391,31 +392,17 @@ public class WalkToGoalBehavior extends AbstractBehavior {
       requestQuickSearch.set(false);
 	}
 
-	@Override
-	protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-	{
-	}
+
 
 	@Override
-	protected void passReceivedControllerObjectToChildBehaviors(Object object)
-	{
-	}
-
-	@Override
-	public void stop()
+	public void abort()
 	{
 		requestSearchStop();
       sendPacketToController(new PauseWalkingMessage(true));
 		waitingForValidPlan.set(false);
-		isStopped.set(true);
+		isAborted.set(true);
 	}
 
-	@Override
-	public void enableActions()
-	{
-		// TODO Auto-generated method stub
-
-	}
 
 	@Override
 	public void pause()
@@ -442,7 +429,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 	public void doPostBehaviorCleanup()
 	{
 		isPaused.set(false);
-		isStopped.set(false);
+		isAborted.set(false);
 		stepCompleted.set(true);
 		hasNewPlan.set(false);
 		waitingForValidPlan.set(false);

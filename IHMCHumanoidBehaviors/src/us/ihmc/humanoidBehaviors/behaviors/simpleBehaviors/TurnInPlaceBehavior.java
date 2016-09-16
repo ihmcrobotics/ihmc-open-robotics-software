@@ -1,10 +1,11 @@
-package us.ihmc.humanoidBehaviors.behaviors;
+package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -149,32 +150,26 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    }
 
    @Override
-   public void stop()
+   public void abort()
    {
-      footstepListBehavior.stop();
-      isStopped.set(true);
+      footstepListBehavior.abort();
+      super.abort();
    }
 
-   @Override
-   public void enableActions()
-   {
-      // TODO Auto-generated method stub
-
-   }
+  
 
    @Override
    public void pause()
    {
       footstepListBehavior.pause();
-      isPaused.set(true);
+      super.pause();
    }
 
    @Override
    public void resume()
    {
       footstepListBehavior.resume();
-      isPaused.set(false);
-
+      super.resume();
    }
 
    @Override
@@ -191,7 +186,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    public void doPostBehaviorCleanup()
    {
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
       footstepListBehavior.doPostBehaviorCleanup();

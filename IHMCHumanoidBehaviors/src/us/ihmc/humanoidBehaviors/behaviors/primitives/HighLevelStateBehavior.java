@@ -31,7 +31,7 @@ public class HighLevelStateBehavior extends AbstractBehavior
 
    private void sendPacketToController()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          sendPacketToController(outgoingHighLevelStatePacket);
          packetHasBeenSent.set(true);
@@ -44,7 +44,7 @@ public class HighLevelStateBehavior extends AbstractBehavior
       packetHasBeenSent.set(false);
       
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
    }
 
    @Override
@@ -54,26 +54,9 @@ public class HighLevelStateBehavior extends AbstractBehavior
       outgoingHighLevelStatePacket = null;
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
    }
 
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
-
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
-   }
 
    @Override
    public boolean isDone()
@@ -81,20 +64,6 @@ public class HighLevelStateBehavior extends AbstractBehavior
       return packetHasBeenSent.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
 
    public boolean hasInputBeenSet()
    {

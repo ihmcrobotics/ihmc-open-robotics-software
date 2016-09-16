@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors;
+package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import java.util.ArrayList;
 
@@ -6,6 +6,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -56,7 +57,8 @@ public class KickBehavior extends AbstractBehavior
       registry.addChild(footTrajectoryBehavior.getYoVariableRegistry());
    }
 
-   @Override public void doControl()
+   @Override
+   public void doControl()
    {
       if (!hasInputBeenSet.getBooleanValue())
       {
@@ -120,7 +122,8 @@ public class KickBehavior extends AbstractBehavior
       pipeLine.submitSingleTaskStage(new BehaviorTask(footStateBehavior, yoTime)
       {
 
-         @Override protected void setBehaviorInput()
+         @Override
+         protected void setBehaviorInput()
          {
             EndEffectorLoadBearingMessage message = new EndEffectorLoadBearingMessage(kickFoot, EndEffector.FOOT, LoadBearingRequest.LOAD);
             footStateBehavior.setInput(message);
@@ -147,67 +150,65 @@ public class KickBehavior extends AbstractBehavior
       pipeLine.submitSingleTaskStage(task);
    }
 
-   @Override public void initialize()
+   @Override
+   public void initialize()
    {
-      defaultInitialize();
-
+      super.initialize();
       for (AbstractBehavior behavior : behaviors)
       {
          behavior.initialize();
       }
    }
 
-   @Override public void doPostBehaviorCleanup()
+   @Override
+   public void doPostBehaviorCleanup()
    {
       hasInputBeenSet.set(false);
-      defaultPostBehaviorCleanup();
-
+      super.doPostBehaviorCleanup();
       for (AbstractBehavior behavior : behaviors)
       {
          behavior.doPostBehaviorCleanup();
       }
    }
 
-   @Override public void stop()
+   @Override
+   public void abort()
    {
-      defaultStop();
-
+      super.abort();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.stop();
+         behavior.abort();
       }
    }
 
-   @Override public void pause()
+   @Override
+   public void pause()
    {
-      defaultPause();
-
+      super.pause();
       for (AbstractBehavior behavior : behaviors)
       {
          behavior.pause();
       }
    }
 
-   @Override public boolean isDone()
+   @Override
+   public boolean isDone()
    {
-      return hasInputBeenSet() && defaultIsDone() && pipeLine.isDone();
+      return hasInputBeenSet() && pipeLine.isDone();
    }
 
-   @Override public void enableActions()
+   @Override
+   public void resume()
    {
-   }
-
-   @Override public void resume()
-   {
-      defaultResume();
-
+      super.resume();
       for (AbstractBehavior behavior : behaviors)
       {
          behavior.resume();
       }
    }
 
-   @Override protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+   @Override
+   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
       for (AbstractBehavior behavior : behaviors)
       {
@@ -215,7 +216,8 @@ public class KickBehavior extends AbstractBehavior
       }
    }
 
-   @Override protected void passReceivedControllerObjectToChildBehaviors(Object object)
+   @Override
+   protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
       for (AbstractBehavior behavior : behaviors)
       {
