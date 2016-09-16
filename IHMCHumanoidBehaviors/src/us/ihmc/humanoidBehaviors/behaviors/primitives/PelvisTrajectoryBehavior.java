@@ -49,7 +49,7 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
 
    private void sendPelvisPosePacketToController()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          outgoingPelvisTrajectoryMessage.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(outgoingPelvisTrajectoryMessage);
@@ -66,7 +66,7 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
       hasPacketBeenSent.set(false);
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
       
       hasBeenInitialized.set(true);
    }
@@ -78,23 +78,13 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
       outgoingPelvisTrajectoryMessage = null;
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
 
       startTime.set(Double.NaN);
       trajectoryTime.set(Double.NaN);
    }
 
-   @Override //TODO: Not currently implemented for this behavior
-   public void stop()
-   {
-      isStopped.set(true);
-   }
 
-   @Override //TODO: Not currently implemented for this behavior
-   public void pause()
-   {
-      isPaused.set(true);
-   }
 
    @Override //TODO: Not currently implemented for this behavior
    public void resume()
@@ -114,21 +104,7 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
       return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
-
+  
    @Override
    public boolean hasInputBeenSet()
    {

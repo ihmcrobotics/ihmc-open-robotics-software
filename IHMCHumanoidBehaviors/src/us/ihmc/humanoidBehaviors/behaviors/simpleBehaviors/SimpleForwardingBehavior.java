@@ -35,17 +35,6 @@ public class SimpleForwardingBehavior extends AbstractBehavior
          communicationBridge.setPacketPassThrough(false);
    }
 
-   @Override
-   public void stop()
-   {
-
-   }
-
-   @Override
-   public void pause()
-   {
-
-   }
 
    @Override
    public boolean isDone()
@@ -53,11 +42,7 @@ public class SimpleForwardingBehavior extends AbstractBehavior
       return false;
    }
 
-   @Override
-   public void enableActions()
-   {
-
-   }
+   
 
    @Override
    public void resume()
@@ -66,17 +51,7 @@ public class SimpleForwardingBehavior extends AbstractBehavior
          communicationBridge.setPacketPassThrough(true);
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-
-   }
+  
    
    public boolean hasInputBeenSet() {
 		   return false;

@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import us.ihmc.humanoidBehaviors.behaviors.TurnInPlaceBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.TurnInPlaceBehavior;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class TurnInPlaceTask extends BehaviorTask

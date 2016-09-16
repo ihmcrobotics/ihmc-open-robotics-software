@@ -23,41 +23,8 @@ public class SimpleVideoForwardingBehavior extends ImageProcessingBehavior
    {
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
 
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-
-   }
-
-   @Override
-   public void stop()
-   {
-
-   }
-
-   @Override
-   public void enableActions()
-   {
-
-   }
-
-   @Override
-   public void pause()
-   {
-
-   }
-
-   @Override
-   public void resume()
-   {
-
-   }
+   
 
    @Override
    public boolean isDone()
@@ -65,11 +32,7 @@ public class SimpleVideoForwardingBehavior extends ImageProcessingBehavior
       return false;
    }
 
-   @Override
-   public void doPostBehaviorCleanup()
-   {
 
-   }
 
    @Override
    public void initialize()
