@@ -113,6 +113,7 @@ public class ICPOptimizationSolutionHandler
    public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider,
          ICPOptimizationSolver solver)
    {
+      boolean firstStepAdjusted = false;
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
          solver.getFootstepSolutionLocation(i, locationSolution);
@@ -123,10 +124,14 @@ public class ICPOptimizationSolutionHandler
          boolean footstepWasAdjusted = applyLocationDeadband(locationSolution, upcomingFootstepLocation, deadbandFrame, footstepForwardDeadband.getDoubleValue(),
                footstepLateralDeadband.getDoubleValue());
 
-         this.footstepWasAdjusted.set(footstepWasAdjusted);
+         if (i == 0)
+            firstStepAdjusted = footstepWasAdjusted;
 
          footstepSolutionsToPack.get(i).set(locationSolution);
       }
+
+      this.footstepWasAdjusted.set(firstStepAdjusted);
+
    }
 
    private final FramePoint solutionLocation = new FramePoint();
@@ -163,7 +168,9 @@ public class ICPOptimizationSolutionHandler
       }
 
       if (Math.abs(solutionAdjustment.getY()) < lateralDeadband)
+      {
          solutionLocation.setY(referenceLocation.getY());
+      }
       else
       {
          if (solutionAdjustment.getY() > 0.0)

@@ -18,7 +18,7 @@ public class AtlasICPOptimizationPushRecoveryTest extends DRCICPOptimizationPush
       AtlasICPOptimizationPushRecoveryTest test = new AtlasICPOptimizationPushRecoveryTest();
       try
       {
-         test.testPushICPOptimizationPushInSwing();
+         test.testPushICPOptimizationBackwardPushInSwing();
       }
       catch(SimulationExceededMaximumTimeException e)
       {

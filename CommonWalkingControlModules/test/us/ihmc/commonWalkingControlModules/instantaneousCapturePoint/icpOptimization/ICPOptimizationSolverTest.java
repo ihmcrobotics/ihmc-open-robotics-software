@@ -675,7 +675,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
       @Override public double getFootstepWeight()
       {
-         return 5.0;
+         return 10.0;
       }
 
       @Override public double getFootstepRegularizationWeight()
@@ -706,6 +706,11 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       @Override public double getDynamicRelaxationWeight()
       {
          return 1000.0;
+      }
+
+      @Override public double getDynamicRelaxationDoubleSupportWeightModifier()
+      {
+         return 1.0;
       }
 
       @Override public boolean scaleStepRegularizationWeightWithTime()
@@ -789,6 +794,11 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       }
 
       @Override public double getLateralAdjustmentDeadband()
+      {
+         return 0.0;
+      }
+
+      @Override public double getRemainingTimeToStopAdjusting()
       {
          return 0.0;
       }
