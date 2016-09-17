@@ -102,7 +102,10 @@ public abstract class DRCICPOptimizationPushRecoveryTest
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
       assertTrue(success);
+      assertTrue(noExceptions);
    }
 
    @DeployableTestMethod(estimatedDuration =  20.0)
@@ -122,7 +125,10 @@ public abstract class DRCICPOptimizationPushRecoveryTest
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
       assertTrue(success);
+      assertTrue(noExceptions);
    }
 
    @DeployableTestMethod(estimatedDuration =  20.0)
@@ -142,7 +148,10 @@ public abstract class DRCICPOptimizationPushRecoveryTest
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
       assertTrue(success);
+      assertTrue(noExceptions);
    }
 
    @DeployableTestMethod(estimatedDuration =  20.0)
@@ -162,7 +171,10 @@ public abstract class DRCICPOptimizationPushRecoveryTest
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
       assertTrue(success);
+      assertTrue(noExceptions);
    }
 
    @DeployableTestMethod(estimatedDuration =  20.0)
@@ -182,7 +194,10 @@ public abstract class DRCICPOptimizationPushRecoveryTest
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
       assertTrue(success);
+      assertTrue(noExceptions);
    }
 
    @DeployableTestMethod(estimatedDuration =  20.0)
@@ -233,7 +248,10 @@ public abstract class DRCICPOptimizationPushRecoveryTest
       pushRobotController.applyForceDelayed(secondPushCondition, delay, secondForceDirection, magnitude, duration);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      boolean noExceptions = caughtException == null;
+
       assertTrue(success);
+      assertTrue(noExceptions);
    }
 
    private void setupTest(String scriptName) throws SimulationExceededMaximumTimeException
