@@ -20,6 +20,8 @@ public interface ICPOptimizationParameters
 
    public double getDynamicRelaxationWeight();
 
+   public double getDynamicRelaxationDoubleSupportWeightModifier();
+
    public boolean scaleStepRegularizationWeightWithTime();
 
    public boolean scaleFeedbackWeightWithGain();
@@ -53,4 +55,6 @@ public interface ICPOptimizationParameters
    public double getForwardAdjustmentDeadband();
 
    public double getLateralAdjustmentDeadband();
+
+   public double getRemainingTimeToStopAdjusting();
 }

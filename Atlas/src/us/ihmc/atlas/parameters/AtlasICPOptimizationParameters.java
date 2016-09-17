@@ -16,32 +16,32 @@ public class AtlasICPOptimizationParameters implements ICPOptimizationParameters
 
    @Override public double getFootstepWeight()
    {
-      return 1.0;
+      return 15.0;
    }
 
    @Override public double getFootstepRegularizationWeight()
    {
-      return 0.01;
+      return 0.0001;
    }
 
    @Override public double getFeedbackWeight()
    {
-      return 5.0;
+      return 1.0;
    }
 
    @Override public double getFeedbackRegularizationWeight()
    {
-      return 0.0001;
+      return 0.00005;
    }
 
    @Override public double getFeedbackParallelGain()
    {
-      return 6.0;
+      return 10.0;
    }
 
    @Override public double getFeedbackOrthogonalGain()
    {
-      return 6.0;
+      return 10.0;
    }
 
    @Override public double getDynamicRelaxationWeight()
@@ -49,14 +49,19 @@ public class AtlasICPOptimizationParameters implements ICPOptimizationParameters
       return 500.0;
    }
 
+   @Override public double getDynamicRelaxationDoubleSupportWeightModifier()
+   {
+      return 5.0;
+   }
+
    @Override public boolean scaleStepRegularizationWeightWithTime()
    {
-      return false;
+      return true;
    }
 
    @Override public boolean scaleFeedbackWeightWithGain()
    {
-      return false;
+      return true;
    }
 
    @Override public boolean scaleUpcomingStepWeights()
@@ -71,7 +76,7 @@ public class AtlasICPOptimizationParameters implements ICPOptimizationParameters
 
    @Override public boolean useFeedbackRegularization()
    {
-      return false;
+      return true;
    }
 
    @Override public boolean useStepAdjustment()
@@ -93,6 +98,7 @@ public class AtlasICPOptimizationParameters implements ICPOptimizationParameters
    {
       return true;
    }
+
    @Override public double getMinimumFootstepWeight()
    {
       return 0.0001;
@@ -115,12 +121,12 @@ public class AtlasICPOptimizationParameters implements ICPOptimizationParameters
 
    @Override public double getMaxCMPForwardExit()
    {
-      return 0.0;
+      return 0.01;
    }
 
    @Override public double getMaxCMPLateralExit()
    {
-      return 0.0;
+      return 0.015;
    }
 
    @Override public double getForwardAdjustmentDeadband()
@@ -131,5 +137,10 @@ public class AtlasICPOptimizationParameters implements ICPOptimizationParameters
    @Override public double getLateralAdjustmentDeadband()
    {
       return 0.02;
+   }
+
+   @Override public double getRemainingTimeToStopAdjusting()
+   {
+      return 0.05;
    }
 }

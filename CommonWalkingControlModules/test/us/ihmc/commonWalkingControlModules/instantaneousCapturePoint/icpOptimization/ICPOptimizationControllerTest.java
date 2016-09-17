@@ -203,6 +203,11 @@ public class ICPOptimizationControllerTest
          return 1000.0;
       }
 
+      @Override public double getDynamicRelaxationDoubleSupportWeightModifier()
+      {
+         return 1.0;
+      }
+
       @Override public boolean scaleStepRegularizationWeightWithTime()
       {
          return false;
@@ -285,6 +290,11 @@ public class ICPOptimizationControllerTest
       }
 
       @Override public double getLateralAdjustmentDeadband()
+      {
+         return 0.0;
+      }
+
+      @Override public double getRemainingTimeToStopAdjusting()
       {
          return 0.0;
       }

@@ -91,6 +91,8 @@ public class ICPOptimizationController
    private final DoubleYoVariable feedbackOrthogonalGain = new DoubleYoVariable("feedbackOrthogonalGain", registry);
    private final DoubleYoVariable feedbackParallelGain = new DoubleYoVariable("feedbackParallelGain", registry);
 
+   private final DoubleYoVariable remainingTimeToStopAdjusting = new DoubleYoVariable("remainingTimeToStopAdjusting", registry);
+
    private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("icpOptimizationNumberOfIterations", registry);
 
    private final ICPOptimizationSolver solver;
@@ -103,6 +105,7 @@ public class ICPOptimizationController
    private final ICPOptimizationInputHandler inputHandler;
 
    private final double controlDT;
+   private final double dynamicRelaxationDoubleSupportWeightModifier;
    private final int maximumNumberOfFootstepsToConsider;
 
    private boolean localUseTwoCMPs;
@@ -159,6 +162,9 @@ public class ICPOptimizationController
       feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
       dynamicRelaxationWeight.set(icpOptimizationParameters.getDynamicRelaxationWeight());
 
+      remainingTimeToStopAdjusting.set(icpOptimizationParameters.getRemainingTimeToStopAdjusting());
+
+      dynamicRelaxationDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicRelaxationDoubleSupportWeightModifier();
 
       DoubleYoVariable exitCMPDurationInPercentOfStepTime = new DoubleYoVariable(yoNamePrefix + "TimeSpentOnExitCMPInPercentOfStepTime", registry);
       DoubleYoVariable doubleSupportSplitFraction = new DoubleYoVariable(yoNamePrefix + "DoubleSupportSplitFraction", registry);
@@ -340,6 +346,8 @@ public class ICPOptimizationController
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
 
+      checkForEndingOfAdjustment(omega0);
+
       scaleStepRegularizationWeightWithTime();
       scaleFeedbackWeightWithGain();
 
@@ -414,7 +422,12 @@ public class ICPOptimizationController
    private void setFeedbackConditions()
    {
       getTransformedFeedbackGains(feedbackGains);
-      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(), dynamicRelaxationWeight.getDoubleValue());
+
+      double dynamicRelaxationWeight = this.dynamicRelaxationWeight.getDoubleValue();
+      if (isInTransfer.getBooleanValue())
+         dynamicRelaxationWeight = dynamicRelaxationWeight / dynamicRelaxationDoubleSupportWeightModifier;
+
+      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(), dynamicRelaxationWeight);
    }
 
    private void getTransformedFeedbackGains(FramePoint2d feedbackGainsToPack)
@@ -446,14 +459,30 @@ public class ICPOptimizationController
    {
       solver.submitProblemConditions(0, false, true, false);
 
-      getTransformedFeedbackGains(feedbackGains);
-
-      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(),
-            dynamicRelaxationWeight.getDoubleValue());
+      setFeedbackConditions();
 
       solver.compute(desiredICP, null, currentICP, perfectCMP, blankFramePoint, blankFramePoint);
 
       solutionHandler.setValuesForFeedbackOnly(desiredICP, desiredICPVelocity, omega0);
+   }
+
+   private void checkForEndingOfAdjustment(double omega0)
+   {
+      if (timeRemainingInState.getDoubleValue() < remainingTimeToStopAdjusting.getDoubleValue() && !isStanding.getBooleanValue() && !isInTransfer.getBooleanValue())
+      {
+         localUseStepAdjustment = false;
+
+         int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
+
+         footstepRecursionMultiplierCalculator.resetTimes();
+         footstepRecursionMultiplierCalculator.submitTimes(0, 0.0, singleSupportDuration.getDoubleValue());
+
+         for (int i = 1; i < numberOfFootstepsToConsider + 1; i++)
+            footstepRecursionMultiplierCalculator.submitTimes(i, doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
+         footstepRecursionMultiplierCalculator.submitTimes(numberOfFootstepsToConsider + 1, doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
+
+         footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), localUseTwoCMPs, omega0);
+      }
    }
 
    private void resetFootstepRegularizationTask()

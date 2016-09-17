@@ -890,6 +890,7 @@ public class ICPOptimizationSolver
 
       numberOfIterations = activeSetSolver.solve(solutionToPack);
 
+      // todo use previous solutions 
       if (MatrixTools.containsNaN(solutionToPack))
       {
          PrintTools.debug("number of steps = " + numberOfFootstepsToConsider);
