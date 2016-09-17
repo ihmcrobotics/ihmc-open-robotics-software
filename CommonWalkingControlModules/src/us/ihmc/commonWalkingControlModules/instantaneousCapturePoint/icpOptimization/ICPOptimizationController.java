@@ -17,7 +17,10 @@ import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.tools.io.printing.PrintTools;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -25,8 +28,6 @@ import java.util.ArrayList;
 
 public class ICPOptimizationController
 {
-   private static final boolean referenceFromNewCMP = true;
-
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -57,43 +58,46 @@ public class ICPOptimizationController
    private final EnumYoVariable<RobotSide> transferToSide = new EnumYoVariable<>(yoNamePrefix + "TransferToSide", registry, RobotSide.class, true);
    private final EnumYoVariable<RobotSide> supportSide = new EnumYoVariable<>(yoNamePrefix + "SupportSide", registry, RobotSide.class, true);
 
-   private final DoubleYoVariable initialTime = new DoubleYoVariable("initialTime", registry);
-   private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable("timeInCurrentState", registry);
-   private final DoubleYoVariable timeRemainingInState = new DoubleYoVariable("timeRemainingInState", registry);
+   private final DoubleYoVariable initialTime = new DoubleYoVariable(yoNamePrefix + "InitialTime", registry);
+   private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(yoNamePrefix + "TimeInCurrentState", registry);
+   private final DoubleYoVariable timeRemainingInState = new DoubleYoVariable(yoNamePrefix + "TimeRemainingInState", registry);
 
    private final FramePoint2d currentICP = new FramePoint2d();
    private final FramePoint2d desiredICP = new FramePoint2d();
    private final FrameVector2d desiredICPVelocity = new FrameVector2d();
-   private final FramePoint2d perfectCMP = new FramePoint2d();
+   private final FramePoint2d referenceCMP = new FramePoint2d();
 
-   private final YoFramePoint2d controllerFeedbackCMP = new YoFramePoint2d("controllerFeedbackCMP", worldFrame, registry);
-   private final YoFrameVector2d controllerFeedbackCMPDelta = new YoFrameVector2d("controllerFeedbackCMPDelta", worldFrame, registry);
+   private final YoFramePoint2d controllerFeedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMP", worldFrame, registry);
+   private final YoFrameVector2d controllerFeedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDelta", worldFrame, registry);
 
    private final FramePoint2d finalICPRecursion = new FramePoint2d();
    private final FramePoint2d cmpOffsetRecursionEffect = new FramePoint2d();
    private final FramePoint2d stanceCMPProjection = new FramePoint2d();
    private final FramePoint2d beginningOfStateICPProjection = new FramePoint2d();
 
-   private final YoFramePoint2d beginningOfStateICP = new YoFramePoint2d("beginningOfStateICP", worldFrame, registry);
+   private final YoFramePoint2d beginningOfStateICP = new YoFramePoint2d(yoNamePrefix + "BeginningOfStateICP", worldFrame, registry);
 
    private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
    private final ArrayList<YoFramePoint2d> upcomingFootstepLocations = new ArrayList<>();
    private final ArrayList<YoFramePoint2d> footstepSolutions = new ArrayList<>();
 
-   private final DoubleYoVariable footstepWeight = new DoubleYoVariable("footstepWeight", registry);
-   private final DoubleYoVariable footstepRegularizationWeight = new DoubleYoVariable("footstepRegularizationWeight", registry);
-   private final DoubleYoVariable feedbackWeight = new DoubleYoVariable("feedbackWeight", registry);
-   private final DoubleYoVariable feedbackRegularizationWeight = new DoubleYoVariable("feedbackRegularizationWeight", registry);
-   private final DoubleYoVariable scaledFootstepRegularizationWeight = new DoubleYoVariable("scaledFootstepRegularizationWeight", registry);
-   private final YoFramePoint2d scaledFeedbackWeight = new YoFramePoint2d("scaledFeedbackWeight", worldFrame, registry);
-   private final DoubleYoVariable dynamicRelaxationWeight = new DoubleYoVariable("dynamicRelaxationWeight", registry);
+   private final DoubleYoVariable footstepWeight = new DoubleYoVariable(yoNamePrefix + "FootstepWeight", registry);
+   private final DoubleYoVariable footstepRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "FootstepRegularizationWeight", registry);
+   private final DoubleYoVariable feedbackWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackWeight", registry);
+   private final DoubleYoVariable feedbackRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackRegularizationWeight", registry);
+   private final DoubleYoVariable scaledFootstepRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "ScaledFootstepRegularizationWeight", registry);
+   private final YoFramePoint2d scaledFeedbackWeight = new YoFramePoint2d(yoNamePrefix + "ScaledFeedbackWeight", worldFrame, registry);
+   private final DoubleYoVariable dynamicRelaxationWeight = new DoubleYoVariable(yoNamePrefix + "DynamicRelaxationWeight", registry);
 
-   private final DoubleYoVariable feedbackOrthogonalGain = new DoubleYoVariable("feedbackOrthogonalGain", registry);
-   private final DoubleYoVariable feedbackParallelGain = new DoubleYoVariable("feedbackParallelGain", registry);
+   private final DoubleYoVariable feedbackOrthogonalGain = new DoubleYoVariable(yoNamePrefix + "FeedbackOrthogonalGain", registry);
+   private final DoubleYoVariable feedbackParallelGain = new DoubleYoVariable(yoNamePrefix + "FeedbackParallelGain", registry);
+   private final YoFramePoint2d yoFeedbackGains = new YoFramePoint2d(yoNamePrefix + "EquilvalentFeedbackGains", worldFrame, registry);
 
-   private final DoubleYoVariable remainingTimeToStopAdjusting = new DoubleYoVariable("remainingTimeToStopAdjusting", registry);
+   private final DoubleYoVariable remainingTimeToStopAdjusting = new DoubleYoVariable(yoNamePrefix + "RemainingTimeToStopAdjusting", registry);
 
-   private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("icpOptimizationNumberOfIterations", registry);
+   private final IntegerYoVariable numberOfIterations = new IntegerYoVariable(yoNamePrefix + "NumberOfIterations", registry);
+   private final BooleanYoVariable hasNotConvergedInPast = new BooleanYoVariable(yoNamePrefix + "HasNotConvergedInPast", registry);
+   private final IntegerYoVariable hasNotConvergedCounts = new IntegerYoVariable(yoNamePrefix + "HasNotConvergedCounts", registry);
 
    private final ICPOptimizationSolver solver;
    private final FootstepRecursionMultiplierCalculator footstepRecursionMultiplierCalculator;
@@ -341,40 +345,84 @@ public class ICPOptimizationController
       this.desiredICP.set(desiredICP);
       this.desiredICPVelocity.set(desiredICPVelocity);
 
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredICP, desiredICPVelocity, omega0, perfectCMP);
+      solutionHandler.getControllerReferenceCMP(referenceCMP);
 
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
 
-      checkForEndingOfAdjustment(omega0);
+      int numberOfFootstepsToConsider = checkForEndingOfAdjustment(omega0);
 
       scaleStepRegularizationWeightWithTime();
       scaleFeedbackWeightWithGain();
 
       if (isStanding.getBooleanValue())
-         doFeedbackOnlyControl(omega0);
+         setConditionsForFeedbackOnlyControl();
       else
-         doControlForStepping(omega0);
+         setConditionsForSteppingControl(numberOfFootstepsToConsider, omega0);
 
-      solver.getCMPFeedback(desiredCMP);
-      solver.getCMPFeedbackDifference(desiredCMPDelta);
-
-      if (referenceFromNewCMP)
+      NoConvergenceException noConvergenceException = null;
+      try
       {
-         solutionHandler.getControllerReferenceCMP(desiredCMP);
-         desiredCMP.add(desiredCMPDelta);
+         solver.compute(finalICPRecursion, cmpOffsetRecursionEffect, currentICP, referenceCMP, stanceCMPProjection, beginningOfStateICPProjection);
       }
+      catch (NoConvergenceException e)
+      {
+         if (!hasNotConvergedInPast.getBooleanValue())
+         {
+            e.printStackTrace();
+            PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+         }
+
+         hasNotConvergedInPast.set(true);
+         hasNotConvergedCounts.increment();
+
+         noConvergenceException = e;
+      }
+
+      // don't pole the new solutions if there's a no convergence exception
+      if (noConvergenceException == null)
+      {
+         numberOfIterations.set(solver.getNumberOfIterations());
+
+         if (localUseStepAdjustment)
+            solutionHandler.extractFootstepSolutions(footstepSolutions, upcomingFootsteps, numberOfFootstepsToConsider, solver);
+
+         solver.getCMPFeedbackDifference(desiredCMPDelta);
+         solutionHandler.updateCostsToGo(solver);
+      }
+
+      if (isStanding.getBooleanValue())
+      {
+         solutionHandler.setValuesForFeedbackOnly(desiredICP, desiredICPVelocity, omega0);
+      }
+      else
+      {
+         solutionHandler.computeReferenceFromSolutions(footstepSolutions, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
+         solutionHandler.computeNominalValues(upcomingFootstepLocations, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
+      }
+
+      solutionHandler.getControllerReferenceCMP(desiredCMP);
+
+      desiredCMP.add(desiredCMPDelta);
 
       controllerFeedbackCMP.set(desiredCMP);
       controllerFeedbackCMPDelta.set(desiredCMPDelta);
-
-      solutionHandler.updateCostsToGo(solver);
    }
 
-   private void doControlForStepping(double omega0)
+   private void setConditionsForFeedbackOnlyControl()
    {
-      int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
+      solver.submitProblemConditions(0, false, true, false);
 
+      setFeedbackConditions();
+
+      finalICPRecursion.set(desiredICP);
+      cmpOffsetRecursionEffect.setToZero();
+      stanceCMPProjection.setToZero();
+      beginningOfStateICPProjection.setToZero();
+   }
+
+   private int setConditionsForSteppingControl(int numberOfFootstepsToConsider, double omega0)
+   {
       solver.submitProblemConditions(numberOfFootstepsToConsider, localUseStepAdjustment, localUseFeedback, localUseTwoCMPs);
 
       if (localUseFeedback)
@@ -402,77 +450,95 @@ public class ICPOptimizationController
             localUseInitialICP, omega0);
       inputHandler.computeBeginningOfStateICPProjection(beginningOfStateICPProjection, beginningOfStateICP.getFrameTuple2d());
 
-      FramePoint2d offsetRecursionEffect = null;
-      if (localUseTwoCMPs)
+      inputHandler.computeStanceCMPProjection(stanceCMPProjection, timeRemainingInState.getDoubleValue(), localUseTwoCMPs, isInTransfer.getBooleanValue(),
+            localUseInitialICP, omega0);
+
+      inputHandler.computeCMPOffsetRecursionEffect(cmpOffsetRecursionEffect, upcomingFootstepLocations, numberOfFootstepsToConsider);
+      if (!localUseTwoCMPs)
       {
-         inputHandler.computeCMPOffsetRecursionEffect(cmpOffsetRecursionEffect, upcomingFootstepLocations, numberOfFootstepsToConsider);
-         offsetRecursionEffect = cmpOffsetRecursionEffect;
+         cmpOffsetRecursionEffect.setToZero();
       }
 
-      solver.compute(finalICPRecursion, offsetRecursionEffect, currentICP, perfectCMP, stanceCMPProjection, beginningOfStateICPProjection);
-
-      numberOfIterations.set(solver.getNumberOfIterations());
-
-      solutionHandler.extractFootstepSolutions(footstepSolutions, upcomingFootsteps, numberOfFootstepsToConsider,solver);
-      solutionHandler.computeReferenceFromSolutions(footstepSolutions, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
-      solutionHandler.computeNominalValues(upcomingFootstepLocations, inputHandler, beginningOfStateICP, omega0, numberOfFootstepsToConsider);
+      return numberOfFootstepsToConsider;
    }
 
-   private final FramePoint2d feedbackGains = new FramePoint2d();
+   private final FrameVector2d feedbackGains = new FrameVector2d();
    private void setFeedbackConditions()
    {
       getTransformedFeedbackGains(feedbackGains);
 
       double dynamicRelaxationWeight = this.dynamicRelaxationWeight.getDoubleValue();
-      if (isInTransfer.getBooleanValue())
+      if (!localUseStepAdjustment)
          dynamicRelaxationWeight = dynamicRelaxationWeight / dynamicRelaxationDoubleSupportWeightModifier;
 
       solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGains.getX(), feedbackGains.getY(), dynamicRelaxationWeight);
    }
 
-   private void getTransformedFeedbackGains(FramePoint2d feedbackGainsToPack)
+   private final RigidBodyTransform transformTranspose = new RigidBodyTransform();
+   private final Matrix3d rotation = new Matrix3d();
+   private final Matrix3d rotationTranspose = new Matrix3d();
+   private final Matrix3d gainsMatrix = new Matrix3d();
+   private final Matrix3d gainsMatrixTransformed = new Matrix3d();
+
+   private void getTransformedFeedbackGains(FrameVector2d feedbackGainsToPack)
    {
       double epsilonZeroICPVelocity = 1e-5;
 
       if (desiredICPVelocity.lengthSquared() > MathTools.square(epsilonZeroICPVelocity))
       {
          icpVelocityDirectionFrame.setXAxis(desiredICPVelocity);
-         feedbackGainsToPack.setToZero(icpVelocityDirectionFrame);
+         RigidBodyTransform transform = icpVelocityDirectionFrame.getTransformToWorldFrame();
 
-         //adding 1 to have it have be equivalent to the feedback controller
-         feedbackGainsToPack.setX(1.0 + feedbackParallelGain.getDoubleValue());
-         feedbackGainsToPack.setY(1.0 + feedbackOrthogonalGain.getDoubleValue());
+         transform.getRotation(rotation);
+         rotationTranspose.set(rotation);
+         rotationTranspose.transpose();
+         transformTranspose.setRotation(rotationTranspose);
 
-         feedbackGainsToPack.changeFrame(worldFrame);
-         feedbackGainsToPack.set(Math.abs(feedbackGainsToPack.getX()), Math.abs(feedbackGainsToPack.getY()));
+         gainsMatrix.setZero();
+         gainsMatrix.setElement(0, 0, 1.0 + feedbackParallelGain.getDoubleValue());
+         gainsMatrix.setElement(1, 1, 1.0 + feedbackOrthogonalGain.getDoubleValue());
+
+         gainsMatrixTransformed.set(rotation);
+         gainsMatrixTransformed.mul(gainsMatrix);
+         gainsMatrixTransformed.mul(rotationTranspose);
+
+         feedbackGainsToPack.setToZero(worldFrame);
+         feedbackGainsToPack.setX(gainsMatrixTransformed.getElement(0, 0));
+         feedbackGainsToPack.setY(gainsMatrixTransformed.getElement(1, 1));
       }
       else
       {
          feedbackGainsToPack.setToZero(worldFrame);
          feedbackGainsToPack.set(feedbackOrthogonalGain.getDoubleValue(), feedbackOrthogonalGain.getDoubleValue());
       }
+      yoFeedbackGains.set(feedbackGainsToPack);
    }
 
 
-   private final FramePoint2d blankFramePoint = new FramePoint2d(worldFrame);
-   private void doFeedbackOnlyControl(double omega0)
+   private final FramePose footstepPose = new FramePose();
+   private int checkForEndingOfAdjustment(double omega0)
    {
-      solver.submitProblemConditions(0, false, true, false);
+      int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
 
-      setFeedbackConditions();
-
-      solver.compute(desiredICP, null, currentICP, perfectCMP, blankFramePoint, blankFramePoint);
-
-      solutionHandler.setValuesForFeedbackOnly(desiredICP, desiredICPVelocity, omega0);
-   }
-
-   private void checkForEndingOfAdjustment(double omega0)
-   {
-      if (timeRemainingInState.getDoubleValue() < remainingTimeToStopAdjusting.getDoubleValue() && !isStanding.getBooleanValue() && !isInTransfer.getBooleanValue())
+      if (timeRemainingInState.getDoubleValue() < remainingTimeToStopAdjusting.getDoubleValue() && localUseStepAdjustment && !isStanding.getBooleanValue()
+         && !isInTransfer.getBooleanValue())
       {
+         //record current locations
+         for (int i = 0; i < numberOfFootstepsToConsider; i++)
+         {
+            upcomingFootstepLocations.get(i).set(footstepSolutions.get(i));
+
+            Footstep footstep = upcomingFootsteps.get(i);
+            footstep.getPose(footstepPose);
+            footstepPose.setXYFromPosition2d(footstepSolutions.get(i).getFrameTuple2d());
+            footstep.setPose(footstepPose);
+
+            inputHandler.addFootstepToPlan(footstep);
+         }
+
          localUseStepAdjustment = false;
 
-         int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
+         numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
 
          footstepRecursionMultiplierCalculator.resetTimes();
          footstepRecursionMultiplierCalculator.submitTimes(0, 0.0, singleSupportDuration.getDoubleValue());
@@ -483,6 +549,8 @@ public class ICPOptimizationController
 
          footstepRecursionMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), localUseTwoCMPs, omega0);
       }
+
+      return numberOfFootstepsToConsider;
    }
 
    private void resetFootstepRegularizationTask()
@@ -498,7 +566,7 @@ public class ICPOptimizationController
       numberOfFootstepsToConsider = Math.min(numberOfFootstepsToConsider, upcomingFootsteps.size());
       numberOfFootstepsToConsider = Math.min(numberOfFootstepsToConsider, maximumNumberOfFootstepsToConsider);
 
-      if (!localUseStepAdjustment || isInTransfer.getBooleanValue())
+      if (!localUseStepAdjustment || isInTransfer.getBooleanValue() || isStanding.getBooleanValue())
          numberOfFootstepsToConsider = 0;
 
       return numberOfFootstepsToConsider;

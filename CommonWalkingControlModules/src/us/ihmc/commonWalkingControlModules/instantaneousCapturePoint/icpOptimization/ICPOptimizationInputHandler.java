@@ -272,7 +272,8 @@ public class ICPOptimizationInputHandler
       stanceEntryCMP2d.scale(entryMultiplier);
       stanceExitCMP2d.scale(exitMultiplier);
 
-      stanceCMPProjectionToPack.set(previousStanceExitCMP2d);
+      stanceCMPProjectionToPack.setToZero();
+      stanceCMPProjectionToPack.add(previousStanceExitCMP2d);
       stanceCMPProjectionToPack.add(stanceEntryCMP2d);
       stanceCMPProjectionToPack.add(stanceExitCMP2d);
    }

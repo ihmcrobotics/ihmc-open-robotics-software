@@ -12,6 +12,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
@@ -272,7 +273,13 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       initialICPProjection.set(currentICP);
       initialICPProjection.scale(currentStateProjection);
 
-      this.compute(finalICPRecursion, null, currentICP, perfectCMP, cmpProjection, initialICPProjection);
+      try
+      {
+         this.compute(finalICPRecursion, null, currentICP, perfectCMP, cmpProjection, initialICPProjection);
+      }
+      catch (NoConvergenceException e)
+      {
+      }
 
       FramePoint2d rightHandSide = new FramePoint2d();
       rightHandSide.set(currentICP);
@@ -348,7 +355,13 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       initialICPProjection.set(currentICP);
       initialICPProjection.scale(currentStateProjection);
 
-      this.compute(finalICPRecursion, null, currentICP, perfectCMP, cmpProjection, initialICPProjection);
+      try
+      {
+         this.compute(finalICPRecursion, null, currentICP, perfectCMP, cmpProjection, initialICPProjection);
+      }
+      catch (NoConvergenceException e)
+      {
+      }
 
       DenseMatrix64F extractedDynamics_Aeq = new DenseMatrix64F(4 + 2 * numberOffootstepsToConsider + numberOfVertices, 2);
       DenseMatrix64F extractedDynamics_beq = new DenseMatrix64F(2, 1);
