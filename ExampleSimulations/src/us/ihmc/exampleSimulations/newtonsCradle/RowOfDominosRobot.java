@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 
 public class RowOfDominosRobot extends Robot
 {
@@ -32,7 +32,8 @@ public class RowOfDominosRobot extends Robot
 
       int numberOfDominos = 10;
 
-      collisionDetector = new GdxCollisionDetector(1000.0);
+//      collisionDetector = new GdxCollisionDetector(1000.0);
+      collisionDetector = new SimpleCollisionDetector();
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(0.002);
 

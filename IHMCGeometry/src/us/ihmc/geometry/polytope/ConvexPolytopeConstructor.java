@@ -68,4 +68,11 @@ public class ConvexPolytopeConstructor
 
       return polytope;
    }
+   
+   public static ConvexPolytope constructSinglePointPolytope(Point3d singlePoint)
+   {
+      ConvexPolytope polytope = new ConvexPolytope();
+      polytope.addVertex(singlePoint);
+      return polytope;
+   }
 }

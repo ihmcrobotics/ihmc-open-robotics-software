@@ -255,8 +255,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       if (!areColliding)
       {
          double distanceSquared = pointOnAToPack.distanceSquared(pointOnBToPack);
-         System.out.println(distanceSquared);
-         if (distanceSquared < 0.01 * 0.01) //TODO: User Setable:
+//         System.out.println(distanceSquared);
+         if (distanceSquared < 0.003 * 0.003) //TODO: User Setable:
          {
             SimpleContactWrapper contacts = new SimpleContactWrapper(objectOne, objectTwo);
             normalVector.sub(pointOnBToPack, pointOnAToPack);
@@ -269,6 +269,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       else
       {
          //TODO: Deal with collision of the sharp objects...
+         // Need to first compute the intersecting regions...
       }
 
    }
