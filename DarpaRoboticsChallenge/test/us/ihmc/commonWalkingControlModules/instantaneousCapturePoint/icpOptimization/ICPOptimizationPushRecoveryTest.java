@@ -43,7 +43,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
    private static String script = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScript.xml";
 
-   private static double simulationTime = 8.0;
+   private static double simulationTime = 10.0;
 
    private PushRobotController pushRobotController;
 
@@ -122,7 +122,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
-      double magnitude = 500.0;
+      double magnitude = 450.0;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
@@ -425,10 +425,6 @@ public abstract class ICPOptimizationPushRecoveryTest
          InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
          drcSimulationTestHelper.loadScriptFile(scriptInputStream, ReferenceFrame.getWorldFrame());
       }
-
-      // get rid of this once push recovery is enabled by default
-      BooleanYoVariable useICPOptimizationModule = (BooleanYoVariable) scs.getVariable("useICPOptimizationModule");
-      useICPOptimizationModule.set(true);
 
       for (RobotSide robotSide : RobotSide.values)
       {

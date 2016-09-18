@@ -58,8 +58,7 @@ public class BalanceManager
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPPlannerWithTimeFreezer icpPlanner;
-   private final ICPBasedLinearMomentumRateOfChangeControlModule icpBasedLinearMomentumRateOfChangeControlModule;
-   private final ICPOptimizationLinearMomentumRateOfChangeControlModule icpOptimizationLinearMomentumRateOfChangeControlModule;
+   private final LinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final PushRecoveryControlModule pushRecoveryControlModule;
@@ -114,7 +113,7 @@ public class BalanceManager
    private final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
-   private final BooleanYoVariable useICPOptimizationModule = new BooleanYoVariable("useICPOptimizationModule", registry);
+   private final boolean useICPOptimizationControl;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, ICPOptimizationParameters icpOptimizationParameters, YoVariableRegistry parentRegistry)
@@ -146,18 +145,18 @@ public class BalanceManager
 
       bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
 
-      icpBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
-            totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
+      useICPOptimizationControl = walkingControllerParameters.useOptimizationBasedICPController() && (icpOptimizationParameters != null);
 
-      if (icpOptimizationParameters != null)
+      if (useICPOptimizationControl)
       {
-         icpOptimizationLinearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames,
+         linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames,
                bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, icpOptimizationParameters, yoTime, totalMass, gravityZ, controlDT,
                registry, yoGraphicsListRegistry);
       }
       else
       {
-         icpOptimizationLinearMomentumRateOfChangeControlModule = null;
+         linearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons, controlDT,
+               totalMass, gravityZ,icpControlGains, registry, yoGraphicsListRegistry, use2DCMPProjection);
       }
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
@@ -216,30 +215,23 @@ public class BalanceManager
 
    public void setMomentumWeight(Vector3d linearWeight)
    {
-      icpBasedLinearMomentumRateOfChangeControlModule.setMomentumWeight(linearWeight);
-      if (icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setMomentumWeight(linearWeight);
+      linearMomentumRateOfChangeControlModule.setMomentumWeight(linearWeight);
    }
 
    public void setMomentumWeight(Vector3d angularWeight, Vector3d linearWeight)
    {
-      icpBasedLinearMomentumRateOfChangeControlModule.setMomentumWeight(angularWeight, linearWeight);
-      if (icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setMomentumWeight(angularWeight, linearWeight);
+      linearMomentumRateOfChangeControlModule.setMomentumWeight(angularWeight, linearWeight);
    }
 
    public void setHighMomentumWeightForRecovery(Vector3d highLinearWeight)
    {
-      icpBasedLinearMomentumRateOfChangeControlModule.setHighMomentumWeightForRecovery(highLinearWeight);
-      if (icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setHighMomentumWeightForRecovery(highLinearWeight);
+      linearMomentumRateOfChangeControlModule.setHighMomentumWeightForRecovery(highLinearWeight);
    }
 
    public void addFootstepToPlan(Footstep footstep)
    {
       icpPlanner.addFootstepToPlan(footstep);
-      if (icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.addFootstepToPlan(footstep);
+      linearMomentumRateOfChangeControlModule.addFootstepToPlan(footstep);
    }
 
    public void setNextFootstep(Footstep nextFootstep)
@@ -254,35 +246,31 @@ public class BalanceManager
 
    public boolean checkAndUpdateFootstepFromICPOptimization(Footstep footstep)
    {
-      return icpOptimizationLinearMomentumRateOfChangeControlModule.getUpcomingFootstepSolution(footstep);
+      return linearMomentumRateOfChangeControlModule.getUpcomingFootstepSolution(footstep);
    }
 
    public void clearICPPlan()
    {
       icpPlanner.clearPlan();
-      if (icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.clearPlan();
+      linearMomentumRateOfChangeControlModule.clearPlan();
    }
 
    public void setICPPlanSupportSide(RobotSide robotSide)
    {
       icpPlanner.setSupportLeg(robotSide);
-      if (icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setSupportLegSide(robotSide);
+      linearMomentumRateOfChangeControlModule.setSupportLeg(robotSide);
    }
 
    public void setICPPlanTransferToSide(RobotSide robotSide)
    {
       icpPlanner.setTransferToSide(robotSide);
-      if (icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setTransferToSide(robotSide);
+      linearMomentumRateOfChangeControlModule.setTransferToSide(robotSide);
    }
 
    public void setICPPlanTransferFromSide(RobotSide robotSide)
    {
       icpPlanner.setTransferFromSide(robotSide);
-      if (icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
+      linearMomentumRateOfChangeControlModule.setTransferFromSide(robotSide);
    }
 
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon)
@@ -322,45 +310,28 @@ public class BalanceManager
       momentumRecoveryControlModule.getCMPProjectionArea(areaToProjectInto, safeArea);
       if (!keepCMPInsideSupportPolygon)
          areaToProjectInto.clearAndUpdate(worldFrame);
-      icpBasedLinearMomentumRateOfChangeControlModule.setCMPProjectionArea(areaToProjectInto, safeArea);
+      linearMomentumRateOfChangeControlModule.setCMPProjectionArea(areaToProjectInto, safeArea);
 
       if (momentumRecoveryControlModule.getUseHighMomentumWeight())
       {
-         icpBasedLinearMomentumRateOfChangeControlModule.setHighMomentumWeight();
-         if (icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-            icpOptimizationLinearMomentumRateOfChangeControlModule.setHighMomentumWeight();
+         linearMomentumRateOfChangeControlModule.setHighMomentumWeight();
       }
       else
       {
-         icpBasedLinearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
-         if (icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-            icpOptimizationLinearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
+         linearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
       }
 
-      if (!useICPOptimizationModule.getBooleanValue() || icpOptimizationLinearMomentumRateOfChangeControlModule == null)
-      {
-         icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
-         icpBasedLinearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
-         icpBasedLinearMomentumRateOfChangeControlModule.setOmega0(omega0);
-         icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePoint(adjustedDesiredCapturePoint2d);
-         icpBasedLinearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
-         icpBasedLinearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
-         icpBasedLinearMomentumRateOfChangeControlModule.setPerfectCMP(perfectCMP);
-         icpBasedLinearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
+         linearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
+         linearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
+         linearMomentumRateOfChangeControlModule.setOmega0(omega0);
+         linearMomentumRateOfChangeControlModule.setDesiredCapturePoint(adjustedDesiredCapturePoint2d);
+         linearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
+         linearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
+         linearMomentumRateOfChangeControlModule.setPerfectCMP(perfectCMP);
+         linearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
          yoDesiredCMP.getFrameTuple2d(desiredCMP);
-         icpBasedLinearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP);
+         linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP);
          yoDesiredCMP.set(desiredCMP);
-      }
-      else
-      {
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setOmega0(omega0);
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setDesiredCapturePoint(adjustedDesiredCapturePoint2d);
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
-         icpOptimizationLinearMomentumRateOfChangeControlModule.compute(desiredCMP);
-         yoDesiredCMP.set(desiredCMP);
-      }
    }
 
    public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
@@ -421,10 +392,7 @@ public class BalanceManager
 
    public MomentumRateCommand getInverseDynamicsCommand()
    {
-      if (!useICPOptimizationModule.getBooleanValue() || icpOptimizationLinearMomentumRateOfChangeControlModule == null)
-         return icpBasedLinearMomentumRateOfChangeControlModule.getMomentumRateCommand();
-      else
-         return icpOptimizationLinearMomentumRateOfChangeControlModule.getMomentumRateCommand();
+      return linearMomentumRateOfChangeControlModule.getMomentumRateCommand();
    }
 
    public void getNextExitCMP(FramePoint entryCMPToPack)
@@ -462,8 +430,7 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), tempCapturePoint);
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
 
-      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForStanding();
+      linearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
    public void prepareForDoubleSupportPushRecovery()
@@ -475,8 +442,7 @@ public class BalanceManager
    {
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
 
-      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForSingleSupport();
+      linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
    }
 
    public void initializeICPPlanForStanding()
@@ -487,9 +453,7 @@ public class BalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
-
-      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForStanding();
+      linearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
    public void initializeICPPlanForTransfer()
@@ -500,9 +464,7 @@ public class BalanceManager
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
-
-      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.initializeForTransfer();
+      linearMomentumRateOfChangeControlModule.initializeForTransfer();
    }
 
    public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)
@@ -556,7 +518,7 @@ public class BalanceManager
 
    public boolean useICPOptimization()
    {
-      return useICPOptimizationModule.getBooleanValue();
+      return useICPOptimizationControl;
    }
 
    public boolean isRecovering()
@@ -613,17 +575,13 @@ public class BalanceManager
    public void setDoubleSupportTime(double newDoubleSupportTime)
    {
       icpPlanner.setDoubleSupportTime(newDoubleSupportTime);
-
-      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setDoubleSupportDuration(newDoubleSupportTime);
+      linearMomentumRateOfChangeControlModule.setDoubleSupportDuration(newDoubleSupportTime);
    }
 
    public void setSingleSupportTime(double newSingleSupportTime)
    {
       icpPlanner.setSingleSupportTime(newSingleSupportTime);
-
-      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.setSingleSupportDuration(newSingleSupportTime);
+      linearMomentumRateOfChangeControlModule.setSingleSupportDuration(newSingleSupportTime);
    }
 
    /**
@@ -640,10 +598,7 @@ public class BalanceManager
 
    public void computeAchievedCMP(FrameVector achievedLinearMomentumRate)
    {
-      if (useICPOptimizationModule.getBooleanValue() && icpOptimizationLinearMomentumRateOfChangeControlModule != null)
-         icpOptimizationLinearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate, achievedCMP);
-      else
-         icpBasedLinearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate, achievedCMP);
+      linearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate, achievedCMP);
       yoAchievedCMP.setAndMatchFrame(achievedCMP);
    }
 
@@ -688,6 +643,6 @@ public class BalanceManager
 
    public void minimizeAngularMomentumRateZ(boolean enable)
    {
-      icpBasedLinearMomentumRateOfChangeControlModule.minimizeAngularMomentumRateZ(enable);
+      linearMomentumRateOfChangeControlModule.minimizeAngularMomentumRateZ(enable);
    }
 }
