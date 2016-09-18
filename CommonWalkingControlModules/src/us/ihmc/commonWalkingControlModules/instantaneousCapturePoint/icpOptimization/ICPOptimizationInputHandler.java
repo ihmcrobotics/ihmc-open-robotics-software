@@ -20,7 +20,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
 
 import java.util.ArrayList;
 
@@ -54,7 +56,7 @@ public class ICPOptimizationInputHandler
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maximumNumberOfFootstepsToConsider,
          FootstepRecursionMultiplierCalculator footstepRecursionMultiplierCalculator, DoubleYoVariable doubleSupportDuration,
          DoubleYoVariable singleSupportDuration, DoubleYoVariable exitCMPDurationInPercentOfStepTime, DoubleYoVariable doubleSupportSplitFraction,
-         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.footstepRecursionMultiplierCalculator = footstepRecursionMultiplierCalculator;
 
@@ -93,20 +95,31 @@ public class ICPOptimizationInputHandler
       }
 
       if (yoGraphicsListRegistry != null)
-      {
-         String name = "stanceCMPPoints";
-         YoGraphicPosition previousExitCMP = new YoGraphicPosition("previousExitCMP", previousStanceExitCMP, 0.01, YoAppearance.Red(), GraphicType.SQUARE);
-         YoGraphicPosition entryCMP = new YoGraphicPosition("entryCMP", stanceEntryCMP, 0.01, YoAppearance.Red(), GraphicType.SQUARE);
-         YoGraphicPosition exitCMP = new YoGraphicPosition("exitCMP", stanceExitCMP, 0.01, YoAppearance.Red(), GraphicType.SQUARE);
+         setupVisualizers(yoGraphicsListRegistry, visualize);
+   }
 
-         YoGraphicPosition finalICP = new YoGraphicPosition("finalICP", this.finalICP, 0.005, YoAppearance.Black(), GraphicType.SOLID_BALL);
+   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, boolean visualize)
+   {
+      YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-         yoGraphicsListRegistry.registerArtifact(name, previousExitCMP.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(name, entryCMP.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(name, exitCMP.createArtifact());
+      YoGraphicPosition previousExitCMP = new YoGraphicPosition("previousExitCMP", previousStanceExitCMP, 0.01, YoAppearance.Red(), GraphicType.SQUARE);
+      YoGraphicPosition entryCMP = new YoGraphicPosition("entryCMP", stanceEntryCMP, 0.01, YoAppearance.Red(), GraphicType.SQUARE);
+      YoGraphicPosition exitCMP = new YoGraphicPosition("exitCMP", stanceExitCMP, 0.01, YoAppearance.Red(), GraphicType.SQUARE);
+      YoGraphicPosition finalICP = new YoGraphicPosition("finalICP", this.finalICP, 0.005, YoAppearance.Black(), GraphicType.SOLID_BALL);
 
-         yoGraphicsListRegistry.registerArtifact(name, finalICP.createArtifact());
-      }
+      yoGraphicsList.add(finalICP);
+
+      artifactList.add(previousExitCMP.createArtifact());
+      artifactList.add(entryCMP.createArtifact());
+      artifactList.add(exitCMP.createArtifact());
+      artifactList.add(finalICP.createArtifact());
+
+      artifactList.setVisible(visualize);
+      yoGraphicsList.setVisible(visualize);
+
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    public void clearPlan()
