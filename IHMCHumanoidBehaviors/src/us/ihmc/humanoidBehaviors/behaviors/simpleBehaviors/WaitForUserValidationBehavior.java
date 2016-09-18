@@ -1,8 +1,9 @@
-package us.ihmc.humanoidBehaviors.behaviors;
+package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
@@ -38,63 +39,22 @@ public class WaitForUserValidationBehavior extends AbstractBehavior
    }
 
    @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   public void stop()
-   {
-      defaultStop();
-   }
-
-   @Override
-   public void enableActions()
-   {
-
-   }
-
-   @Override
-   public void pause()
-   {
-      defaultPause();
-   }
-
-   @Override
-   public void resume()
-   {
-      defaultResume();
-   }
-
-   @Override
    public boolean isDone()
    {
-      return true;
-      
-//      return validAcknoledged.getBooleanValue();
+     // return true;
+      return validAcknoledged.getBooleanValue();
    }
 
-   @Override
-   public void doPostBehaviorCleanup()
-   {
-      defaultPostBehaviorCleanup();
-   }
+
 
    @Override
    public boolean hasInputBeenSet()
    {
-      // TODO Auto-generated method stub
       return true;
    }
 
    @Override
    public void initialize()
    {
-      defaultPostBehaviorCleanup();
    }
 }

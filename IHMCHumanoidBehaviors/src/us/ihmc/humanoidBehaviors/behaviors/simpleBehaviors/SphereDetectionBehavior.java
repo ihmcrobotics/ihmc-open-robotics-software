@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors;
+package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,6 +16,7 @@ import javax.vecmath.Point3f;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
@@ -234,39 +235,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       return smallestRadius;
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
 
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   public void stop()
-   {
-      defaultStop();
-   }
-
-   @Override
-   public void enableActions()
-   {
-
-   }
-
-   @Override
-   public void pause()
-   {
-      defaultPause();
-   }
-
-   @Override
-   public void resume()
-   {
-      defaultResume();
-   }
 
    @Override
    public boolean isDone()
@@ -277,7 +246,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
    @Override
    public void doPostBehaviorCleanup()
    {
-      defaultPostBehaviorCleanup();
+      super.doPostBehaviorCleanup();
       ballFound.set(false);
    }
 
@@ -290,6 +259,6 @@ public class SphereDetectionBehavior extends AbstractBehavior
    @Override
    public void initialize()
    {
-      defaultPostBehaviorCleanup();
+      doPostBehaviorCleanup();
    }
 }

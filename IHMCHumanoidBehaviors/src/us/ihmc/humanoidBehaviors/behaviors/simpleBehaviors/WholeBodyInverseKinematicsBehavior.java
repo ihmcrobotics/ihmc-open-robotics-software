@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors;
+package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -11,6 +11,7 @@ import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxStateMessage;
 import us.ihmc.communication.packets.KinematicsToolboxStateMessage.KinematicsToolboxState;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
@@ -246,28 +247,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       return hasSolverFailed.getBooleanValue();
    }
 
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
-
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
-   }
+   
 
    @Override
    public boolean isDone()
@@ -303,15 +283,5 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             return true;
       }
       return false;
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
    }
 }

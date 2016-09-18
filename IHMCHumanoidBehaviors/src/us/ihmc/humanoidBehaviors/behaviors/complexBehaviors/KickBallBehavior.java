@@ -1,11 +1,16 @@
-package us.ihmc.humanoidBehaviors.behaviors;
+package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.KickBallBehaviorCoactiveElementBehaviorSide;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDetectionBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
@@ -63,9 +68,10 @@ public class KickBallBehavior extends AbstractBehavior
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
 
       // create sub-behaviors:
-      if(USE_BLOB_FILTERING)
+      if (USE_BLOB_FILTERING)
       {
-         BlobFilteredSphereDetectionBehavior sphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel); // new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
+         BlobFilteredSphereDetectionBehavior sphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(behaviorCommunicationBridge, referenceFrames,
+               fullRobotModel); // new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
          sphereDetectionBehavior.addHSVRange(new HSVRange(new HSVValue(55, 80, 80), new HSVValue(139, 255, 255)));
          this.sphereDetectionBehavior = sphereDetectionBehavior;
       }
@@ -198,7 +204,6 @@ public class KickBallBehavior extends AbstractBehavior
 
    private FramePose2d getoffsetPoint()
    {
-
       FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), sphereDetectionBehavior.getBallLocation().getX(),
             sphereDetectionBehavior.getBallLocation().getY());
       FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
@@ -217,16 +222,15 @@ public class KickBallBehavior extends AbstractBehavior
    @Override
    public void initialize()
    {
-      defaultInitialize();
+      super.initialize();
       setupPipelineForKick();
-
    }
 
    @Override
    public void doPostBehaviorCleanup()
    {
 
-      defaultPostBehaviorCleanup();
+      super.doPostBehaviorCleanup();
       pipelineSetUp = false;
       if (CREATE_COACTIVE_ELEMENT)
       {
@@ -242,19 +246,23 @@ public class KickBallBehavior extends AbstractBehavior
    }
 
    @Override
-   public void stop()
+   public void abort()
    {
-      defaultStop();
+      super.abort();
+      doPostBehaviorCleanup();
+      this.pipeLine.clearAll();
+
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.stop();
+         behavior.abort();
       }
+      
    }
 
    @Override
    public void pause()
    {
-      defaultPause();
+      super.pause();
       for (AbstractBehavior behavior : behaviors)
       {
          behavior.pause();
@@ -265,17 +273,6 @@ public class KickBallBehavior extends AbstractBehavior
    public boolean isDone()
    {
       return pipeLine.isDone();
-   }
-
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   public void resume()
-   {
-      defaultResume();
    }
 
    @Override
@@ -302,12 +299,6 @@ public class KickBallBehavior extends AbstractBehavior
       return true;
    }
 
-   public void abort()
-   {
-      doPostBehaviorCleanup();
-      this.stop();
-      this.pipeLine.clearAll();
-   }
 
    public boolean isUseBlobFiltering()
    {
@@ -316,7 +307,7 @@ public class KickBallBehavior extends AbstractBehavior
 
    public Point2d getBlobLocation()
    {
-      if(USE_BLOB_FILTERING)
+      if (USE_BLOB_FILTERING)
       {
          return ((BlobFilteredSphereDetectionBehavior) sphereDetectionBehavior).getLatestBallPosition();
       }
@@ -328,7 +319,7 @@ public class KickBallBehavior extends AbstractBehavior
 
    public int getNumBlobsDetected()
    {
-      if(USE_BLOB_FILTERING)
+      if (USE_BLOB_FILTERING)
       {
          return ((BlobFilteredSphereDetectionBehavior) sphereDetectionBehavior).getNumBallsDetected();
       }

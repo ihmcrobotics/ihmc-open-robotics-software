@@ -70,7 +70,7 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    {
       trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue());
 
-      if (!isDone.getBooleanValue() && hasInputBeenSet() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
+      if (!isDone.getBooleanValue() && hasInputBeenSet() && !isPaused.getBooleanValue() && !isAborted.getBooleanValue()
             && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime.getDoubleValue())
       {
          if (DEBUG)
@@ -86,7 +86,7 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
 
    private void sendOutgoingPacketToControllerAndNetworkProcessor()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          outgoingMessage.setDestination(PacketDestination.UI);
 
@@ -134,7 +134,7 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
       outgoingMessage = null;
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
 
       hasInputBeenSet.set(false);
       hasStatusBeenReceived.set(false);
@@ -147,10 +147,10 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void stop()
+   public void abort()
    {
       stopArmMotion();
-      isStopped.set(true);
+      isAborted.set(true);
    }
 
    @Override
@@ -191,20 +191,6 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
       return isDone.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
 
    @Override
    public boolean hasInputBeenSet()

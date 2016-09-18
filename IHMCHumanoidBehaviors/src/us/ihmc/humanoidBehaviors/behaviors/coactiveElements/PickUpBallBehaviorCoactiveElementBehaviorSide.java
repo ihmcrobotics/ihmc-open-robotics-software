@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.coactiveElements;
 
 
-import us.ihmc.humanoidBehaviors.behaviors.PickUpBallBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehavior;
 
 public class PickUpBallBehaviorCoactiveElementBehaviorSide extends PickUpBallBehaviorCoactiveElement
 {
