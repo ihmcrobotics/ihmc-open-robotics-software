@@ -14,6 +14,7 @@ import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import us.ihmc.javaFXToolkit.shapes.MeshBuilder.BoxMeshGenerator;
+import us.ihmc.javaFXToolkit.shapes.MeshBuilder.LineMeshGenerator;
 
 public class MultiColorMeshBuilder
 {
@@ -58,6 +59,16 @@ public class MultiColorMeshBuilder
          localFaces[i] = 0;
       float[] texCoords = colorPalette.getTextureLocation(color);
       meshBuilder.addMesh(points, texCoords, localFaces, faceSmoothingGroups, pointsOffset);
+   }
+
+   public void addMesh(float[] points, int[] faces, int[] faceSmoothingGroups, float pointsOffsetX, float pointsOffsetY, float pointsOffsetZ, Color color)
+   {
+      int[] localFaces = new int[faces.length];
+      System.arraycopy(faces, 0, localFaces, 0, faces.length);
+      for (int i = 1; i < localFaces.length; i += 2)
+         localFaces[i] = 0;
+      float[] texCoords = colorPalette.getTextureLocation(color);
+      meshBuilder.addMesh(points, texCoords, localFaces, faceSmoothingGroups, pointsOffsetX, pointsOffsetY, pointsOffsetZ);
    }
 
    public void addMesh(TFloatArrayList points, TIntArrayList faces, TIntArrayList faceSmoothingGroups, Color color)
@@ -115,6 +126,67 @@ public class MultiColorMeshBuilder
    public void addCubeMesh(double size, Tuple3d pointsOffset, Color color)
    {
       addBoxMesh(size, size, size, pointsOffset, color);
+   }
+
+   public void addLineMesh(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth, Color color)
+   {
+      float lx = xf - x0;
+      float ly = yf - y0;
+      float lz = zf - z0;
+      float[] linePoints = LineMeshGenerator.generatePoints(lx, ly, lz, lineWidth);
+      int[] lineFaces = LineMeshGenerator.faces;
+      int[] lineFaceSmoothingGroups = LineMeshGenerator.faceSmoothingGroups;
+      addMesh(linePoints, lineFaces, lineFaceSmoothingGroups, x0, y0, z0, color);
+   }
+
+   public void addLineMesh(double x0, double y0, double z0, double xf, double yf, double zf, double lineWidth, Color color)
+   {
+      addLineMesh((float) x0, (float) y0, (float) z0, (float) xf, (float) yf, (float) zf, (float) lineWidth, color);
+   }
+
+   public void addLineMesh(Point3d start, Point3d end, double lineWidth, Color color)
+   {
+      double x0 = start.getX();
+      double y0 = start.getY();
+      double z0 = start.getZ();
+      double xf = end.getX();
+      double yf = end.getY();
+      double zf = end.getZ();
+      addLineMesh(x0, y0, z0, xf, yf, zf, lineWidth, color);
+   }
+
+   public void addMultiLineMesh(Point3d[] points, double lineWidth, Color color, boolean close)
+   {
+      for (int i = 1; i < points.length; i++)
+      {
+         Point3d start = points[i-1];
+         Point3d end = points[i];
+         addLineMesh(start, end, lineWidth, color);
+      }
+
+      if (close)
+      {
+         Point3d start = points[points.length - 1];
+         Point3d end = points[0];
+         addLineMesh(start, end, lineWidth, color);
+      }
+   }
+
+   public void addMultiLineMesh(List<Point3d> points, double lineWidth, Color color, boolean close)
+   {
+      for (int i = 1; i < points.size(); i++)
+      {
+         Point3d start = points.get(i-1);
+         Point3d end = points.get(i);
+         addLineMesh(start, end, lineWidth, color);
+      }
+
+      if (close)
+      {
+         Point3d start = points.get(points.size() - 1);
+         Point3d end = points.get(0);
+         addLineMesh(start, end, lineWidth, color);
+      }
    }
 
    public Mesh generateMesh()

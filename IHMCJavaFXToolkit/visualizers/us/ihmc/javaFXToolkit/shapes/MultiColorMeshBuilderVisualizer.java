@@ -1,7 +1,10 @@
 package us.ihmc.javaFXToolkit.shapes;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
@@ -18,6 +21,8 @@ import us.ihmc.robotics.random.RandomTools;
 
 public class MultiColorMeshBuilderVisualizer extends Application
 {
+   private enum MeshToDisplay {BOX, LINE, MULTI_LINE}
+   private static final MeshToDisplay MESH_TO_DISPLAY = MeshToDisplay.MULTI_LINE;
 
    public MultiColorMeshBuilderVisualizer()
    {
@@ -39,11 +44,57 @@ public class MultiColorMeshBuilderVisualizer extends Application
 
       Color[] colors = {Color.YELLOW, Color.BEIGE, Color.CHOCOLATE, Color.ANTIQUEWHITE};
 
-      int count = 0;
       MultiColorMeshBuilder meshBuilder = new MultiColorMeshBuilder();
 
-//      meshBuilder.addCubeMesh(0.05f, Color.hsb(0.0, 1.0, 1.0));
-      
+      switch (MESH_TO_DISPLAY)
+      {
+      case BOX:
+         addRandomBoxes(colors, meshBuilder);
+         break;
+      case LINE:
+         addLine(meshBuilder);
+      case MULTI_LINE:
+         addMultiLine(meshBuilder);
+      default:
+         break;
+      }
+
+      MeshView meshView = new MeshView(meshBuilder.generateMesh());
+      meshView.setMaterial(meshBuilder.generateMaterial());
+      rootNode.getChildren().add(meshView);
+
+      primaryStage.setScene(scene);
+      primaryStage.show();
+   }
+
+   private void addMultiLine(MultiColorMeshBuilder meshBuilder)
+   {
+      List<Point3d> points = new ArrayList<>();
+      double radius = 0.4;
+      Random random = new Random();
+
+      for (double angle = 0.0; angle < 2.0 * Math.PI; angle += 2.0 * Math.PI / 50.0)
+      {
+         double x = radius * random.nextDouble() * Math.cos(angle);
+         double y = radius * Math.sin(angle);
+         double z = 0.1 * random.nextDouble();
+         points.add(new Point3d(x, y, z));
+      }
+      meshBuilder.addMultiLineMesh(points, 0.01, Color.YELLOWGREEN, true);
+   }
+
+   private void addLine(MultiColorMeshBuilder meshBuilder)
+   {
+      Point3d start = new Point3d(0.3, 0.0, -0.);
+      Point3d end = new Point3d(0.0, 0.3, 0.0);
+      double lineWidth = 0.01;
+      Color color = Color.RED;
+      meshBuilder.addLineMesh(start, end, lineWidth, color);
+   }
+
+   public void addRandomBoxes(Color[] colors, MultiColorMeshBuilder meshBuilder)
+   {
+      int count = 0;
       for (float x = -1.0f; x <= 1.0f; x += 0.055f)
       {
          for (float y = -1.0f; y <= 1.0f; y += 0.055f)
@@ -59,13 +110,6 @@ public class MultiColorMeshBuilderVisualizer extends Application
       }
 
       System.out.println("Number of boxes: " + count);
-
-      MeshView meshView = new MeshView(meshBuilder.generateMesh());
-      meshView.setMaterial(meshBuilder.generateMaterial());
-      rootNode.getChildren().add(meshView);
-
-      primaryStage.setScene(scene);
-      primaryStage.show();
    }
 
    private void setupCamera(Group root, Scene scene)
