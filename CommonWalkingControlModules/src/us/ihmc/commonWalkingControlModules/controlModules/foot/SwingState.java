@@ -110,8 +110,9 @@ public class SwingState extends AbstractUnconstrainedState
       replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
       swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
 
+      // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
-      doContinuousReplanning.set(true);
+      doContinuousReplanning.set(footControlHelper.getWalkingControllerParameters().useOptimizationBasedICPController());
 
       footFrame = contactableFoot.getFrameAfterParentJoint();
       toeFrame = createToeFrame(robotSide);
