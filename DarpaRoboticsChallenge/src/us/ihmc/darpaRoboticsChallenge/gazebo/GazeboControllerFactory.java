@@ -174,8 +174,9 @@ public class GazeboControllerFactory
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
             feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
-            icpOptimizationParameters, initialBehavior);
+            initialBehavior);
       controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), packetCommunicator);
+      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
 //      controllerFactory.addHighLevelBehaviorFactory(new JointPositionControllerFactory(true));
 

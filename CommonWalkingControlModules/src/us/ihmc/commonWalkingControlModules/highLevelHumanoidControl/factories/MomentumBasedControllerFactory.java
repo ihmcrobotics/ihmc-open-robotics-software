@@ -107,8 +107,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
          SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters,
-         ArmControllerParameters armControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
-         ICPOptimizationParameters icpOptimizationParameters, HighLevelState initialBehavior)
+         ArmControllerParameters armControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters, HighLevelState initialBehavior)
    {
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
@@ -124,7 +123,6 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       managerFactory = new HighLevelControlManagerFactory(statusOutputManager, registry);
       managerFactory.setArmControlParameters(armControllerParameters);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
-      managerFactory.setICPOptimizationParameters(icpOptimizationParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
    }
 
@@ -462,6 +460,11 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    public void setFallbackControllerForFailure(HighLevelState fallbackController)
    {
       highLevelHumanoidControllerManager.setFallbackControllerForFailure(fallbackController);
+   }
+
+   public void setICPOptimizationControllerParameters(ICPOptimizationParameters icpOptimizationParameters)
+   {
+      managerFactory.setICPOptimizationParameters(icpOptimizationParameters);
    }
 
    public HighLevelState getCurrentHighLevelState()
