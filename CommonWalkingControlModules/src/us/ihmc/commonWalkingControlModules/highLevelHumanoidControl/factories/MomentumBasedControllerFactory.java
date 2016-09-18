@@ -108,15 +108,6 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
          SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters,
          ArmControllerParameters armControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
-         HighLevelState initialBehavior)
-   {
-      this(contactableBodiesFactory, footForceSensorNames, footContactSensorNames, wristSensorNames, walkingControllerParameters, armControllerParameters,
-            capturePointPlannerParameters, null, initialBehavior);
-   }
-
-   public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
-         SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters,
-         ArmControllerParameters armControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters,
          ICPOptimizationParameters icpOptimizationParameters, HighLevelState initialBehavior)
    {
       this.footSensorNames = footForceSensorNames;
