@@ -15,7 +15,9 @@ import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
 
 import java.util.ArrayList;
 
@@ -47,7 +49,7 @@ public class ICPOptimizationSolutionHandler
    private final FootstepRecursionMultiplierCalculator footstepRecursionMultiplierCalculator;
 
    public ICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, FootstepRecursionMultiplierCalculator footstepRecursionMultiplierCalculator,
-         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.footstepRecursionMultiplierCalculator = footstepRecursionMultiplierCalculator;
 
@@ -77,23 +79,43 @@ public class ICPOptimizationSolutionHandler
       footstepLateralDeadband.set(icpOptimizationParameters.getLateralAdjustmentDeadband());
 
       if (yoGraphicsListRegistry != null)
-      {
-         String name = "ICPOptimization";
+         setupVisualizers(yoGraphicsListRegistry, visualize);
+   }
 
-         YoGraphicPosition actualEndOfStateICP = new YoGraphicPosition("actualEndOfStateICP", this.actualEndOfStateICP, 0.005, YoAppearance.Aquamarine(), GraphicType.SOLID_BALL);
+   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, boolean visualize)
+   {
+      YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-         YoGraphicPosition referenceICP = new YoGraphicPosition("controllerReferenceICP", controllerReferenceICP, 0.01, YoAppearance.Yellow(), GraphicType.SOLID_BALL);
-         YoGraphicPosition referenceCMP = new YoGraphicPosition("controllerReferenceCMP", controllerReferenceCMP, 0.01, YoAppearance.Beige(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition actualEndOfStateICP = new YoGraphicPosition("actualEndOfStateICP", this.actualEndOfStateICP, 0.005, YoAppearance.Aquamarine(),
+            GraphicType.SOLID_BALL);
 
-         YoGraphicPosition nominalReferenceICP = new YoGraphicPosition("nominalReferenceICP", this.nominalReferenceICP, 0.01, YoAppearance.LightYellow(), GraphicType.BALL);
-         YoGraphicPosition nominalEndOfStateICP = new YoGraphicPosition("nominalEndOfStateICP", this.nominalEndOfStateICP, 0.01, YoAppearance.Green(), GraphicType.SOLID_BALL);
+      YoGraphicPosition nominalReferenceICP = new YoGraphicPosition("nominalReferenceICP", this.nominalReferenceICP, 0.01, YoAppearance.LightYellow(),
+            GraphicType.BALL);
+      YoGraphicPosition nominalEndOfStateICP = new YoGraphicPosition("nominalEndOfStateICP", this.nominalEndOfStateICP, 0.01, YoAppearance.Green(),
+            GraphicType.SOLID_BALL);
 
-         yoGraphicsListRegistry.registerArtifact(name, actualEndOfStateICP.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(name, referenceICP.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(name, referenceCMP.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(name, nominalReferenceICP.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(name, nominalEndOfStateICP.createArtifact());
-      }
+      yoGraphicsList.add(actualEndOfStateICP);
+      yoGraphicsList.add(nominalReferenceICP);
+      yoGraphicsList.add(nominalEndOfStateICP);
+      artifactList.add(actualEndOfStateICP.createArtifact());
+      artifactList.add(nominalReferenceICP.createArtifact());
+      artifactList.add(nominalEndOfStateICP.createArtifact());
+
+      yoGraphicsList.setVisible(visualize);
+      artifactList.setVisible(visualize);
+
+      YoGraphicPosition referenceICP = new YoGraphicPosition("controllerReferenceICP", controllerReferenceICP, 0.005, YoAppearance.Yellow(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition referenceCMP = new YoGraphicPosition("controllerReferenceCMP", controllerReferenceCMP, 0.005, YoAppearance.Beige(), GraphicType.BALL_WITH_CROSS);
+
+      String name = "ICPOptimization";
+      yoGraphicsListRegistry.registerArtifact(name, referenceICP.createArtifact());
+      yoGraphicsListRegistry.registerArtifact(name, referenceCMP.createArtifact());
+      yoGraphicsListRegistry.registerYoGraphic(name, referenceICP);
+      yoGraphicsListRegistry.registerYoGraphic(name, referenceCMP);
+
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    public void updateCostsToGo(ICPOptimizationSolver solver)
@@ -105,7 +127,6 @@ public class ICPOptimizationSolutionHandler
       controllerFeedbackRegularizationCostToGo.set(solver.getFeedbackRegularizationCostToGo());
       controllerDynamicRelaxationCostToGo.set(solver.getDynamicRelaxationCostToGo());
    }
-
 
    private final FramePoint2d locationSolution = new FramePoint2d();
    private final FramePoint2d upcomingFootstepLocation = new FramePoint2d();
