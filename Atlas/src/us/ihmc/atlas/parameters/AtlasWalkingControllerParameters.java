@@ -918,7 +918,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxICPErrorBeforeSingleSupportX()
    {
-      return 0.03;
+      return 0.035;
    }
 
    @Override
