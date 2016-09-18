@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.pushRecovery;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import static org.junit.Assert.assertTrue;
 
@@ -33,8 +33,9 @@ import us.ihmc.tools.thread.ThreadTools;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import java.io.InputStream;
+import java.util.Random;
 
-public abstract class DRCICPOptimizationPushRecoveryTest
+public abstract class ICPOptimizationPushRecoveryTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
@@ -133,6 +134,131 @@ public abstract class DRCICPOptimizationPushRecoveryTest
 
    @DeployableTestMethod(estimatedDuration =  20.0)
    @Test(timeout = 120000)
+   public void testPushICPOptimizationRandomPushInSwing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(script);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * swingTime;
+
+      Random random = new Random();
+      double xDirection = 1.0 - 2.0 * random.nextDouble();
+      double yDirection = 1.0 - 2.0 * random.nextDouble();
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(xDirection, yDirection, 0.0);
+      double magnitude = 400.0;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
+      assertTrue(success);
+      assertTrue(noExceptions);
+   }
+
+   @DeployableTestMethod(estimatedDuration =  20.0)
+   @Test(timeout = 120000)
+   public void testPushICPOptimizationLongForwardPushInSwing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(script);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.1 * swingTime;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      double magnitude = 200.0;
+      double duration = 0.8 * swingTime;
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
+      assertTrue(success);
+      assertTrue(noExceptions);
+   }
+
+   @DeployableTestMethod(estimatedDuration =  20.0)
+   @Test(timeout = 120000)
+   public void testPushICPOptimizationLongBackwardPushInSwing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(script);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.1 * swingTime;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
+      double magnitude = 250.0;
+      double duration = 0.8 * swingTime;
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
+      assertTrue(success);
+      assertTrue(noExceptions);
+   }
+
+   @DeployableTestMethod(estimatedDuration =  20.0)
+   @Test(timeout = 120000)
+   public void testPushICPOptimizationLongInwardPushInSwing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(script);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.1 * swingTime;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
+      double magnitude = 120.0;
+      double duration = 0.8 * swingTime;
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
+      assertTrue(success);
+      assertTrue(noExceptions);
+   }
+
+   @DeployableTestMethod(estimatedDuration =  20.0)
+   @Test(timeout = 120000)
+   public void testPushICPOptimizationOutwardPushInTransfer() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(script);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * transferTime;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
+      double magnitude = 400.0;
+      double duration = 0.1;
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.7);
+      assertTrue(success);
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+
+      boolean noExceptions = caughtException == null;
+
+      assertTrue(success);
+      assertTrue(noExceptions);
+   }
+
+   @DeployableTestMethod(estimatedDuration =  20.0)
+   @Test(timeout = 120000)
    public void testPushICPOptimizationInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(script);
@@ -148,6 +274,35 @@ public abstract class DRCICPOptimizationPushRecoveryTest
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
+      assertTrue(success);
+      assertTrue(noExceptions);
+   }
+
+   @DeployableTestMethod(estimatedDuration =  20.0)
+   @Test(timeout = 120000)
+   public void testPushICPOptimizationInwardPushInTransfer() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(script);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * transferTime;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      double magnitude = 300.0;
+      double duration = 0.1;
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.7);
+      assertTrue(success);
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+
       boolean noExceptions = caughtException == null;
 
       assertTrue(success);

@@ -1,12 +1,12 @@
-package us.ihmc.atlas.pushRecovery;
+package us.ihmc.atlas.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.pushRecovery.DRCICPOptimizationPushRecoveryTest;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationPushRecoveryTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-public class AtlasICPOptimizationPushRecoveryTest extends DRCICPOptimizationPushRecoveryTest
+public class AtlasICPOptimizationPushRecoveryTest extends ICPOptimizationPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
    {
@@ -18,7 +18,7 @@ public class AtlasICPOptimizationPushRecoveryTest extends DRCICPOptimizationPush
       AtlasICPOptimizationPushRecoveryTest test = new AtlasICPOptimizationPushRecoveryTest();
       try
       {
-         test.testPushICPOptimizationOutwardPushInSwing();
+         test.testPushICPOptimizationLongForwardPushInSwing();
       }
       catch(SimulationExceededMaximumTimeException e)
       {
