@@ -24,7 +24,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
          ICPOptimizationParameters icpOptimizationParameters, DoubleYoVariable yoTime, double totalMass, double gravityZ, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super("ICPOptimization", referenceFrames, bipedSupportPolygons, gravityZ, totalMass, parentRegistry);
+      super("", referenceFrames, bipedSupportPolygons, gravityZ, totalMass, parentRegistry);
 
       this.yoTime = yoTime;
 

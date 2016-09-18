@@ -2,31 +2,15 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Purple;
 
-import javax.vecmath.Vector3d;
-
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
@@ -36,18 +20,17 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
 {
    private final ICPProportionalController icpProportionalController;
-
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
-
-   private final BooleanYoVariable desiredCMPinSafeArea = new BooleanYoVariable("DesiredCMPinSafeArea", registry);
-
-   private final YoFramePoint2d yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", worldFrame, registry);
-   private final YoFrameConvexPolygon2d yoSafeAreaPolygon = new YoFrameConvexPolygon2d("yoSafeAreaPolygon", worldFrame, 10, registry);
-   private final YoFrameConvexPolygon2d yoProjectionPolygon = new YoFrameConvexPolygon2d("yoProjectionPolygon", worldFrame, 10, registry);
 
    private final CMPProjector cmpProjector;
    private final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+
+   private final BooleanYoVariable desiredCMPinSafeArea;
+
+   private final YoFramePoint2d yoUnprojectedDesiredCMP;
+   private final YoFrameConvexPolygon2d yoSafeAreaPolygon;
+   private final YoFrameConvexPolygon2d yoProjectionPolygon;
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
@@ -60,7 +43,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
-      super("ICPBased", referenceFrames, bipedSupportPolygons, totalMass, gravityZ, parentRegistry);
+      super("", referenceFrames, bipedSupportPolygons, gravityZ, totalMass, parentRegistry);
+      MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       if (use2DProjection)
          cmpProjector = new SmartCMPProjector(yoGraphicsListRegistry, registry);
@@ -68,6 +52,12 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
          cmpProjector = new SmartCMPPlanarProjector(registry);
 
       icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, registry);
+
+      desiredCMPinSafeArea = new BooleanYoVariable("DesiredCMPinSafeArea", registry);
+
+      yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", worldFrame, registry);
+      yoSafeAreaPolygon = new YoFrameConvexPolygon2d("yoSafeAreaPolygon", worldFrame, 10, registry);
+      yoProjectionPolygon = new YoFrameConvexPolygon2d("yoProjectionPolygon", worldFrame, 10, registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -86,8 +76,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
       yoUnprojectedDesiredCMP.setToNaN();
    }
 
-
-   @Override
    public void computeCMPInternal(FramePoint2d desiredCMPPreviousValue)
    {
       if (supportSide != supportLegPreviousTick.getEnumValue())
@@ -116,7 +104,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
       }
    }
 
-   @Override
    public void setCMPProjectionArea(FrameConvexPolygon2d areaToProjectInto, FrameConvexPolygon2d safeArea)
    {
       this.areaToProjectInto.setIncludingFrameAndUpdate(areaToProjectInto);
@@ -126,30 +113,22 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
       yoProjectionPolygon.setFrameConvexPolygon2d(areaToProjectInto);
    }
 
-   // implementing methods to satisfy super class
-   public void setDoubleSupportDuration(double doubleSupportDuration)
-   {}
+   public void setDoubleSupportDuration(double doubleSupportDuration){}
 
-   public void setSingleSupportDuration(double singleSupportDuration)
-   {}
+   public void setSingleSupportDuration(double singleSupportDuration){}
 
-   public void clearPlan()
-   {}
+   public void clearPlan(){}
 
-   public void addFootstepToPlan(Footstep footstep)
-   {}
+   public void addFootstepToPlan(Footstep footstep){}
 
-   public void initializeForStanding()
-   {}
+   public void initializeForStanding(){}
 
-   public void initializeForSingleSupport()
-   {}
+   public void initializeForSingleSupport(){}
 
-   public void initializeForTransfer()
-   {}
+   public void initializeForTransfer(){}
 
    public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
    {
-      return false; // was not adjusted
+      return false;
    }
 }
