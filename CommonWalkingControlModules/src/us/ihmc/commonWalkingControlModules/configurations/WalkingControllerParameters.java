@@ -7,7 +7,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.SdfLoader.partNames.NeckJointName;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -73,6 +72,11 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public abstract boolean allowAutomaticManipulationAbort();
 
    public abstract double getMinimumSwingTimeForDisturbanceRecovery();
+
+   /**
+    * Determines whether to use the ICP Optimization controller or a standard ICP proportional controller (new feature to be tested with Atlas)
+    */
+   public abstract boolean useOptimizationBasedICPController();
 
    public abstract double getICPErrorThresholdToSpeedUpSwing();
 
