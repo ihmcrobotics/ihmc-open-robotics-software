@@ -168,6 +168,12 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    @Override
    public void doControl()
    {
+      // update fall detector
+      if (controllerToolbox.getFallDetector().detect())
+      {
+         stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FALL);
+      }
+
       // update controller state machine
       QuadrupedForceControllerRequestedEvent reqEvent = requestedEvent.getAndSet(null);
       if (reqEvent != null)
