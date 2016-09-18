@@ -64,7 +64,7 @@ public class SimplexPolytope
 
    public void clearPoints()
    {
-      pointOne = pointTwo = pointThree = pointFour;
+      pointOne = pointTwo = pointThree = pointFour = null;
    }
 
    public void setPoints(Point3d... points)
@@ -81,8 +81,13 @@ public class SimplexPolytope
          pointFour = points[3];
    }
 
-   public void addPoint(Point3d simplexPointToAdd, Point3d correspondingPointOnA, Point3d correspondingPointOnB)
+   public boolean addVertex(Point3d simplexPointToAdd, Point3d correspondingPointOnA, Point3d correspondingPointOnB)
    {
+      boolean alreadyHaveThatOne = doWeAlreadyHaveThatVertex(correspondingPointOnA, correspondingPointOnB);
+
+      if (alreadyHaveThatOne)
+         return false;
+
       if (pointOne == null)
       {
          pointOne = simplexPointToAdd;
@@ -104,6 +109,34 @@ public class SimplexPolytope
 
       simplexPointToPolytopePointA.put(simplexPointToAdd, correspondingPointOnA);
       simplexPointToPolytopePointB.put(simplexPointToAdd, correspondingPointOnB);
+
+      return true;
+   }
+
+   private boolean doWeAlreadyHaveThatVertex(Point3d correspondingPointOnA, Point3d correspondingPointOnB)
+   {
+      if (pointOne != null)
+      {
+         if ((correspondingPointOnA == simplexPointToPolytopePointA.get(pointOne)) && (correspondingPointOnB == simplexPointToPolytopePointB.get(pointOne)))
+            return true;
+      }
+      if (pointTwo != null)
+      {
+         if ((correspondingPointOnA == simplexPointToPolytopePointA.get(pointTwo)) && (correspondingPointOnB == simplexPointToPolytopePointB.get(pointTwo)))
+            return true;
+      }
+      if (pointThree != null)
+      {
+         if ((correspondingPointOnA == simplexPointToPolytopePointA.get(pointThree)) && (correspondingPointOnB == simplexPointToPolytopePointB.get(pointThree)))
+            return true;
+      }
+      if (pointFour != null)
+      {
+         if ((correspondingPointOnA == simplexPointToPolytopePointA.get(pointFour)) && (correspondingPointOnB == simplexPointToPolytopePointB.get(pointFour)))
+            return true;
+      }
+
+      return false;
    }
 
    public boolean containsPoint(Point3d pointToCheck)
@@ -153,6 +186,8 @@ public class SimplexPolytope
    public void getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(Point3d closestPointToOrigin)
    {
       // Use the distance subalgorithm of GJK and go through all the possibilities:
+
+      forgetDiscaredPoints();
 
       if (pointOne == null)
       {
@@ -218,13 +253,7 @@ public class SimplexPolytope
          }
          else
          {
-            //TODO: Compute lambdas for the case of intersection
-            closestPointToOrigin.set(0.0, 0.0, 0.0);
-
-            lambdas.clear();
-            lambdas.put(pointOne, 0.0);
-            lambdas.put(pointTwo, 0.0);
-            lambdas.put(pointThree, 0.0);
+            projectOriginOntoFace(pointOne, pointTwo, pointThree, closestPointToOrigin);
          }
       }
 
@@ -285,21 +314,25 @@ public class SimplexPolytope
          else if (isInVornoiRegionOfFace(pointOne, pointTwo, pointThree, pointFour))
          {
             projectOriginOntoFace(pointOne, pointTwo, pointThree, closestPointToOrigin);
+            rememberDiscardedVertices(pointFour);
             retainPoints(pointOne, pointTwo, pointThree);
          }
          else if (isInVornoiRegionOfFace(pointOne, pointTwo, pointFour, pointThree))
          {
             projectOriginOntoFace(pointOne, pointTwo, pointFour, closestPointToOrigin);
+            rememberDiscardedVertices(pointThree);
             retainPoints(pointOne, pointTwo, pointFour);
          }
          else if (isInVornoiRegionOfFace(pointOne, pointThree, pointFour, pointTwo))
          {
             projectOriginOntoFace(pointOne, pointThree, pointFour, closestPointToOrigin);
+            rememberDiscardedVertices(pointTwo);
             retainPoints(pointOne, pointThree, pointFour);
          }
          else if (isInVornoiRegionOfFace(pointTwo, pointThree, pointFour, pointOne))
          {
             projectOriginOntoFace(pointTwo, pointThree, pointFour, closestPointToOrigin);
+            rememberDiscardedVertices(pointOne);
             retainPoints(pointTwo, pointThree, pointFour);
          }
          else
@@ -360,6 +393,24 @@ public class SimplexPolytope
       simplexPointToPolytopePointA.put(pointToKeep2, point3dOnA2);
       simplexPointToPolytopePointB.put(pointToKeep1, point3dOnB1);
       simplexPointToPolytopePointB.put(pointToKeep2, point3dOnB2);
+   }
+
+   private Point3d discardedOnA, discardedOnB;
+
+   private void rememberDiscardedVertices(Point3d pointToDiscard)
+   {
+      discardedOnA = simplexPointToPolytopePointA.get(pointToDiscard);
+      discardedOnB = simplexPointToPolytopePointB.get(pointToDiscard);
+   }
+
+   private void forgetDiscaredPoints()
+   {
+      discardedOnA = discardedOnB = null;
+   }
+
+   public boolean wereMostRecentlyDiscared(Point3d checkOnA, Point3d checkOnB)
+   {
+      return ((discardedOnA == checkOnA) && (discardedOnB == checkOnB));
    }
 
    private void retainPoints(Point3d pointToKeep1, Point3d pointToKeep2, Point3d pointToKeep3)
@@ -441,9 +492,25 @@ public class SimplexPolytope
    private final Vector3d tempVector3 = new Vector3d();
    private final Vector3d tempVector4 = new Vector3d();
    private final Vector3d tempNormalVector1 = new Vector3d();
+   private final Vector3d tempNormalVector2 = new Vector3d();
 
    private boolean isInVornoiRegionOfEdge(Point3d edgePointOne, Point3d edgePointTwo, Point3d otherPoint)
    {
+      // TODO: Redundancies from other checks that be reused...
+      tempVector1.set(edgePointOne);
+      tempVector1.scale(-1.0);
+
+      tempVector2.sub(edgePointTwo, edgePointOne);
+      if (tempVector1.dot(tempVector2) < 0.0)
+         return false;
+      
+      tempVector1.set(edgePointTwo);
+      tempVector1.scale(-1.0);
+
+      tempVector2.sub(edgePointOne, edgePointTwo);
+      if (tempVector1.dot(tempVector2) < 0.0)
+         return false;
+      
       tempVector1.sub(edgePointTwo, edgePointOne);
       tempVector2.sub(otherPoint, edgePointOne);
 
@@ -457,6 +524,21 @@ public class SimplexPolytope
 
    private boolean isInVornoiRegionOfEdge(Point3d edgePointOne, Point3d edgePointTwo, Point3d otherPointOne, Point3d otherPointTwo)
    {
+   // TODO: Redundancies from other checks that be reused...
+      tempVector1.set(edgePointOne);
+      tempVector1.scale(-1.0);
+
+      tempVector2.sub(edgePointTwo, edgePointOne);
+      if (tempVector1.dot(tempVector2) < 0.0)
+         return false;
+      
+      tempVector1.set(edgePointTwo);
+      tempVector1.scale(-1.0);
+
+      tempVector2.sub(edgePointOne, edgePointTwo);
+      if (tempVector1.dot(tempVector2) < 0.0)
+         return false;
+      
       tempVector1.sub(edgePointTwo, edgePointOne);
       tempVector2.sub(otherPointOne, edgePointOne);
 
@@ -468,11 +550,12 @@ public class SimplexPolytope
       if (!(tempVector3.dot(tempVector2) >= 0.0))
          return false;
 
+      tempVector1.sub(edgePointTwo, edgePointOne);
       tempVector2.sub(otherPointTwo, edgePointOne);
 
-      tempNormalVector1.cross(tempVector1, tempVector2);
+      tempNormalVector2.cross(tempVector2, tempVector1);
 
-      tempVector2.cross(tempVector1, tempNormalVector1);
+      tempVector2.cross(tempNormalVector2, tempVector1);
       tempVector3.set(edgePointOne);
       tempVector3.scale(-1.0);
       if (!(tempVector3.dot(tempVector2) >= 0.0))
@@ -495,7 +578,12 @@ public class SimplexPolytope
       tempVector3.sub(otherPoint, facePointOne);
       double dot2 = tempVector3.dot(tempNormalVector1);
 
+      // TODO: Magic delta here. Figure out robustness to deltas.
+      if (Math.abs(dot2) < 1e-10)//1e-6)
+         return true; // Other point is in the same plane. Just project to the plane then.
       return (dot1 * dot2 < 0.0);
+
+      //      return (dot1 * dot2 < 0.0 + 1e-8);
    }
 
    private void projectOriginOntoEdge(Point3d vertexOne, Point3d vertexTwo, Point3d projectionToPack)
@@ -504,17 +592,17 @@ public class SimplexPolytope
       tempVector1.scale(-1.0);
       tempVector2.sub(vertexTwo, vertexOne);
 
-      double lambda = tempVector1.dot(tempVector2) / (tempVector2.dot(tempVector2));
-      tempVector2.scale(lambda);
+      double percentFromVertexOneToVertexTwo = tempVector1.dot(tempVector2) / (tempVector2.dot(tempVector2));
+      tempVector2.scale(percentFromVertexOneToVertexTwo);
 
       projectionToPack.set(vertexOne);
       projectionToPack.add(tempVector2);
 
-      double oneMinusLambda = 1.0 - lambda;
+      double oneMinusPercentFromVertexOneToVertexTwo = 1.0 - percentFromVertexOneToVertexTwo;
 
       lambdas.clear();
-      lambdas.put(vertexOne, lambda);
-      lambdas.put(vertexTwo, oneMinusLambda);
+      lambdas.put(vertexOne, oneMinusPercentFromVertexOneToVertexTwo);
+      lambdas.put(vertexTwo, percentFromVertexOneToVertexTwo);
 
    }
 
@@ -574,6 +662,30 @@ public class SimplexPolytope
       tempVector1.set(vertexThree);
       tempVector1.scale(lambdaThree);
       closestPointToOrigin.add(tempVector1);
+   }
+
+   public String toString()
+   {
+      String string = "";
+
+      if (pointOne != null)
+      {
+         string = string + pointOne + ": " + simplexPointToPolytopePointA.get(pointOne) + ", " + simplexPointToPolytopePointB.get(pointOne);
+      }
+      if (pointTwo != null)
+      {
+         string = string + "\n" + pointTwo + ": " + simplexPointToPolytopePointA.get(pointTwo) + ", " + simplexPointToPolytopePointB.get(pointTwo);
+      }
+      if (pointThree != null)
+      {
+         string = string + "\n" + pointThree + ": " + simplexPointToPolytopePointA.get(pointThree) + ", " + simplexPointToPolytopePointB.get(pointThree);
+      }
+      if (pointFour != null)
+      {
+         string = string + "\n" + pointFour + ": " + simplexPointToPolytopePointA.get(pointFour) + ", " + simplexPointToPolytopePointB.get(pointFour);
+      }
+
+      return string;
    }
 
 }

@@ -27,7 +27,7 @@ public class PileOfRandomObjectsRobot
 
    public PileOfRandomObjectsRobot()
    {
-      int numberOfObjects = 0; //40; //400;
+      int numberOfObjects = 20; //400;
 
 //      collisionDetector = new GdxCollisionDetector(100.0);
       collisionDetector = new SimpleCollisionDetector();
@@ -46,7 +46,7 @@ public class PileOfRandomObjectsRobot
 
          Link link;
 
-         int shape = random.nextInt(3);
+         int shape = random.nextInt(1);
          if (shape == 0)
          {
             link = createRandomBox(collisionShapeFactory, random, i, robot);
@@ -83,17 +83,17 @@ public class PileOfRandomObjectsRobot
       board0.setPosition(0.51, 0.0, boardZ);
       board0.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
 
-//      FloatingJoint board1 = createContainerBoard("board1", collisionShapeFactory, random);
-//      board1.setPosition(0.0, 0.35, boardZ);
-//      board1.setYawPitchRoll(0.0, 0.0, 0.0);
-//
-//      FloatingJoint board2 = createContainerBoard("board2", collisionShapeFactory, random);
-//      board2.setPosition(0.0, -0.35, boardZ);
-//      board2.setYawPitchRoll(0.0, 0.0, 0.0);
-//
-//      FloatingJoint board3 = createContainerBoard("board3", collisionShapeFactory, random);
-//      board3.setPosition(-0.51, 0.0, boardZ);
-//      board3.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
+      FloatingJoint board1 = createContainerBoard("board1", collisionShapeFactory, random);
+      board1.setPosition(0.0, 0.35, boardZ);
+      board1.setYawPitchRoll(0.0, 0.0, 0.0);
+
+      FloatingJoint board2 = createContainerBoard("board2", collisionShapeFactory, random);
+      board2.setPosition(0.0, -0.35, boardZ);
+      board2.setYawPitchRoll(0.0, 0.0, 0.0);
+
+      FloatingJoint board3 = createContainerBoard("board3", collisionShapeFactory, random);
+      board3.setPosition(-0.51, 0.0, boardZ);
+      board3.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
 
 
       Robot baseRobot = new Robot("BaseRobot");
@@ -167,9 +167,9 @@ public class PileOfRandomObjectsRobot
 
    private Link createRandomBox(CollisionShapeFactory collisionShapeFactory, Random random, int i, Robot robot)
    {
-      double objectWidth = RandomTools.generateRandomDouble(random, 0.01, 0.1);
-      double objectLength = RandomTools.generateRandomDouble(random, 0.01, 0.1);
-      double objectHeight = RandomTools.generateRandomDouble(random, 0.01, 0.1);
+      double objectLength = RandomTools.generateRandomDouble(random, 0.04, 0.1);
+      double objectWidth = RandomTools.generateRandomDouble(random, 0.04, 0.2);
+      double objectHeight = RandomTools.generateRandomDouble(random, 0.04, 0.1);
       double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
 
       Link link = new Link("object" + i);

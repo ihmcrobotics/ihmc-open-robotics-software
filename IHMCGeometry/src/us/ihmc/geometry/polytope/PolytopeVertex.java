@@ -53,5 +53,10 @@ public class PolytopeVertex
    {
       return position.getX() * vector.getX() + position.getY() * vector.getY() + position.getZ() * vector.getZ();
    }
+   
+   public String toString()
+   {
+      return position.toString();
+   }
 
 }

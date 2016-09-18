@@ -1,5 +1,17 @@
 <GraphGroup>
 	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.RowOfDominosRobot.t</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
 </Entry Boxes Tab Pane>
@@ -19,9 +31,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>1.4106713905746686</Camera X>
- <Camera Y>0.1265255409177229</Camera Y>
- <Camera Z>0.236185465248823</Camera Z>
+ <Camera X>0.06392050592146835</Camera X>
+ <Camera Y>-0.8124172040381286</Camera Y>
+ <Camera Z>0.10697234765045116</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -45,8 +57,8 @@
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.03404953352214344</Fix X>
-<Fix Y>-0.0786500263510228</Fix Y>
-<Fix Z>0.050701061860616514</Fix Z>
+<Fix X>0.18704164221816977</Fix X>
+<Fix Y>-0.11922377336727696</Fix Y>
+<Fix Z>0.03058739625357293</Fix Z>
 </Fix Position>
 </Canvas 1>
