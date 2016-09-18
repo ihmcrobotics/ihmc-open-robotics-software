@@ -68,6 +68,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       boolean icpErrorIsTooLarge = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
 
+      // todo figure out a way of combining these two modules
       if (balanceManager.useICPOptimization())
       {
          boolean footstepHasBeenAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
@@ -80,8 +81,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getSwingTime());
          }
       }
-
-      if (balanceManager.isPushRecoveryEnabled())
+      else if (balanceManager.isPushRecoveryEnabled())
       {
          boolean footstepHasBeenAdjusted = balanceManager.checkAndUpdateFootstep(nextFootstep);
          if (footstepHasBeenAdjusted)
