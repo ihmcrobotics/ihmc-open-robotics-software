@@ -130,7 +130,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       assertTrue(success);
       PrintTools.debug(this, "Stopping Behavior");
       double fingerJointQAtStop = getTotalFingerJointQ(robotSide);
-      behavior.stop();
+      behavior.abort();
       assertTrue(!behavior.isDone());
 
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(behavior, 1.0);

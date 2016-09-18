@@ -49,7 +49,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
          sendFootPosePacketToController();
       }
 
-      if (hasPacketBeenSent.getBooleanValue() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (hasPacketBeenSent.getBooleanValue() && !isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          if (Double.isNaN(startTime.getDoubleValue()) && !doubleSupport.getBooleanValue())
          {
@@ -60,7 +60,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
 
    private void sendFootPosePacketToController()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          outgoingFootTrajectoryMessage.setDestination(PacketDestination.UI);
          sendPacketToController(outgoingFootTrajectoryMessage);
@@ -77,7 +77,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
       hasBeenInitialized.set(true);
       
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
    }
 
    @Override
@@ -87,29 +87,13 @@ public class FootTrajectoryBehavior extends AbstractBehavior
       outgoingFootTrajectoryMessage = null;
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
 
       startTime.set(Double.NaN);
       trajectoryTime.set(Double.NaN);
    }
 
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
 
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
-   }
 
    @Override
    public boolean isDone()
@@ -122,20 +106,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
       return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
+   
 
    @Override
    public boolean hasInputBeenSet()

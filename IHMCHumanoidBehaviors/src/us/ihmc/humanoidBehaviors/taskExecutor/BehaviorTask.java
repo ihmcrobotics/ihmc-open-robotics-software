@@ -68,7 +68,7 @@ public abstract class BehaviorTask implements Task
 
    public void stop()
    {
-      behavior.stop();
+      behavior.abort();
    }
 
    public AbstractBehavior getBehavior()

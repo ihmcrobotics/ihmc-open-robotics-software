@@ -27,9 +27,11 @@ public abstract class AbstractBehavior implements RobotController
 {
    public static enum BehaviorStatus
    {
-      INITIALIZED, PAUSED, STOPPED, DONE, FINALIZED
+      INITIALIZED, PAUSED, ABORTED, DONE, FINALIZED
    }
    
+   private ArrayList<AbstractBehavior> childBehaviors = new ArrayList<AbstractBehavior>();
+
    protected final OutgoingCommunicationBridgeInterface outgoingCommunicationBridge;
    protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> listeningControllerQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
    protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> listeningNetworkProcessorQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
@@ -46,7 +48,7 @@ public abstract class AbstractBehavior implements RobotController
    protected final EnumYoVariable<BehaviorStatus> yoBehaviorStatus;
    protected final BooleanYoVariable hasBeenInitialized;
    protected final BooleanYoVariable isPaused;
-   protected final BooleanYoVariable isStopped;
+   protected final BooleanYoVariable isAborted;
    protected final DoubleYoVariable percentCompleted;
 
    public AbstractBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
@@ -66,7 +68,7 @@ public abstract class AbstractBehavior implements RobotController
       yoBehaviorStatus = new EnumYoVariable<AbstractBehavior.BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
       hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
       isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
-      isStopped = new BooleanYoVariable("isStopped" + behaviorName, registry);
+      isAborted = new BooleanYoVariable("isAborted" + behaviorName, registry);
       percentCompleted = new DoubleYoVariable("percentCompleted", registry);
    }
 
@@ -75,6 +77,12 @@ public abstract class AbstractBehavior implements RobotController
       return null;
    }
 
+   protected void addChildBehavior(AbstractBehavior childBehavior)
+   {
+      childBehaviors.add(childBehavior);
+      registry.addChild(childBehavior.getYoVariableRegistry());
+   }
+   
    public void sendPacketToController(Packet<?> obj)
    {
       outgoingCommunicationBridge.sendPacketToController(obj);
@@ -139,9 +147,25 @@ public abstract class AbstractBehavior implements RobotController
       listeningControllerQueues.get(key).add(queue);
    }
 
-   protected abstract void passReceivedNetworkProcessorObjectToChildBehaviors(Object object);
+   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+   {
+      for (AbstractBehavior behavior : childBehaviors)
+      {
+         behavior.consumeObjectFromNetworkProcessor(object);
+      }
+
+   }
    
-   protected abstract void passReceivedControllerObjectToChildBehaviors(Object object);
+   protected void passReceivedControllerObjectToChildBehaviors(Object object)
+   {
+
+      for (AbstractBehavior behavior : childBehaviors)
+      {
+         behavior.consumeObjectFromController(object);
+      }
+
+
+   }
 
    @Override
    public YoVariableRegistry getYoVariableRegistry()
@@ -164,24 +188,18 @@ public abstract class AbstractBehavior implements RobotController
    /**
     * The implementation of this method should result in a clean shut down of the behavior.
     */
-   public abstract void stop();
-   public void defaultStop()
+   public void abort()
    {
-      isStopped.set(true);
+      isAborted.set(true);
       isPaused.set(false);
    }
 
-   /**
-    * Needs to be clarified.
-    */
-   public abstract void enableActions();
 
    /**
     * The implementation of this method should result in pausing the behavior (pause current action and no more actions sent to the controller, the robot remains still).
     * The behavior should be resumable.
     */
-   public abstract void pause();
-   public void defaultPause()
+   public void pause()
    {
       isPaused.set(true);
    }
@@ -190,10 +208,9 @@ public abstract class AbstractBehavior implements RobotController
     * The implementation of this method should result in resuming the behavior after being paused.
     * Should not do anything if the behavior has not been paused.
     */
-   public abstract void resume();
-   public void defaultResume()
+   public void resume()
    {
-      isPaused.set(false);
+      isPaused.set(false);      
    }
 
    
@@ -207,36 +224,29 @@ public abstract class AbstractBehavior implements RobotController
     * @return
     */
    public abstract boolean isDone();
-   public boolean defaultIsDone()
-   {
-      boolean ret = !isPaused.getBooleanValue() && !isStopped.getBooleanValue();
-      return ret;
-   }
 
    /**
     * Clean up method that is called when leaving the behavior for another one.
     */
-   public abstract void doPostBehaviorCleanup();
-   public void defaultPostBehaviorCleanup()
+   public void doPostBehaviorCleanup()
    {
-      isPaused.set(false);
-      isStopped.set(false);
+         isPaused.set(false);
+         isAborted.set(false);
    }
    
    protected boolean isPaused()
    {
-      return isPaused.getBooleanValue() || isStopped.getBooleanValue();
+      return isPaused.getBooleanValue() || isAborted.getBooleanValue();
    }
 
    /**
     * Initialization method called when switching to this behavior.
     */
    @Override
-   public abstract void initialize();
-   public void defaultInitialize()
+   public void initialize()
    {
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
    }
    
    

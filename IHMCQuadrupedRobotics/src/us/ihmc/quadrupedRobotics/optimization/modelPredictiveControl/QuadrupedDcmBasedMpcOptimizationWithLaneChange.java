@@ -203,7 +203,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       {
          if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
          {
-            b.set(rowOffset++, 0, piecewiseConstantCopTrajectory.getNormalizedPressureAtStartOfInterval(0).get(robotQuadrant).getValue());
+            b.set(rowOffset++, 0, piecewiseConstantCopTrajectory.getNormalizedPressureAtStartOfInterval(0).get(robotQuadrant).doubleValue());
          }
       }
       CommonOps.multTransA(A, b, b);

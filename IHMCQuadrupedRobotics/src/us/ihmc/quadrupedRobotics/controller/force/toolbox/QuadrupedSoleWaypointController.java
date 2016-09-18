@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -22,8 +23,9 @@ public class QuadrupedSoleWaypointController
    // Feedback controller
    private final QuadrantDependentList<QuadrupedSolePositionController> solePositionController;
    private final QuadrantDependentList<QuadrupedSolePositionController.Setpoints> solePositionControllerSetpoints;
-   private final QuadrantDependentList<Double[]> initialSoleForces;
+   private final QuadrantDependentList<FrameVector> initialSoleForces;
 
+   private ReferenceFrame bodyFrame;
    private QuadrupedSoleWaypointList quadrupedSoleWaypointList;
    private double taskStartTime;
 
@@ -31,6 +33,7 @@ public class QuadrupedSoleWaypointController
          DoubleYoVariable robotTimeStamp, YoVariableRegistry parentRegistry)
    {
       this.quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
+      this.bodyFrame = bodyFrame;
       robotTime = robotTimeStamp;
       quadrupedWaypointsPositionTrajectoryGenerator = new QuadrantDependentList<>();
 
@@ -41,7 +44,7 @@ public class QuadrupedSoleWaypointController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePositionControllerSetpoints.set(robotQuadrant, new QuadrupedSolePositionController.Setpoints(robotQuadrant));
-         initialSoleForces.set(robotQuadrant, new Double[3]);
+         initialSoleForces.set(robotQuadrant, new FrameVector());
       }
       // Create waypoint trajectory for each quadrant
       for (RobotQuadrant quadrant : RobotQuadrant.values)
@@ -55,39 +58,27 @@ public class QuadrupedSoleWaypointController
 
 
    public void initialize(QuadrupedSoleWaypointList quadrupedSoleWaypointList, YoEuclideanPositionGains positionControllerGains,
-         QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates)
+         QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates, boolean useInitialSoleForceAsFeedforwardTerm)
    {
       this.quadrupedSoleWaypointList = quadrupedSoleWaypointList;
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePositionControllerSetpoints.get(robotQuadrant).initialize(taskSpaceEstimates);
          solePositionController.get(robotQuadrant).reset();
-         this.initialSoleForces.get(robotQuadrant)[0] = new Double(0.0);
-         this.initialSoleForces.get(robotQuadrant)[1] = new Double(0.0);
-         this.initialSoleForces.get(robotQuadrant)[2] = new Double(0.0);
+         if (useInitialSoleForceAsFeedforwardTerm)
+         {
+            this.initialSoleForces.get(robotQuadrant).setIncludingFrame(taskSpaceEstimates.getSoleVirtualForce(robotQuadrant));
+            this.initialSoleForces.get(robotQuadrant).changeFrame(bodyFrame);
+         }
+         else
+         {
+            this.initialSoleForces.get(robotQuadrant).setToZero(bodyFrame);
+         }
       }
       updateGains(positionControllerGains);
       createSoleWaypointTrajectory();
       taskStartTime = robotTime.getDoubleValue();
    }
-
-   public void initialize(QuadrupedSoleWaypointList quadrupedSoleWaypointList, YoEuclideanPositionGains positionControllerGains,
-         QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates, QuadrupedSoleForceEstimator soleForceEstimator)
-   {
-      this.quadrupedSoleWaypointList = quadrupedSoleWaypointList;
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         solePositionControllerSetpoints.get(robotQuadrant).initialize(taskSpaceEstimates);
-         solePositionController.get(robotQuadrant).reset();
-         this.initialSoleForces.get(robotQuadrant)[0] = soleForceEstimator.getSoleForce(robotQuadrant).getX();
-         this.initialSoleForces.get(robotQuadrant)[1] = soleForceEstimator.getSoleForce(robotQuadrant).getY();
-         this.initialSoleForces.get(robotQuadrant)[2] = soleForceEstimator.getSoleForce(robotQuadrant).getZ();
-      }
-      updateGains(positionControllerGains);
-      createSoleWaypointTrajectory();
-      taskStartTime = robotTime.getDoubleValue();
-   }
-
 
    public boolean compute(QuadrantDependentList<FrameVector> soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates)
    {
@@ -103,8 +94,7 @@ public class QuadrupedSoleWaypointController
             quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).compute(currentTrajectoryTime);
             quadrupedWaypointsPositionTrajectoryGenerator.get(quadrant).getPosition(solePositionControllerSetpoints.get(quadrant).getSolePosition());
             solePositionControllerSetpoints.get(quadrant).getSoleLinearVelocity().setToZero();
-            solePositionControllerSetpoints.get(quadrant).getSoleForceFeedforward()
-                  .set(initialSoleForces.get(quadrant)[0], initialSoleForces.get(quadrant)[1], initialSoleForces.get(quadrant)[2]);
+            solePositionControllerSetpoints.get(quadrant).getSoleForceFeedforward().setIncludingFrame(initialSoleForces.get(quadrant));
             solePositionController.get(quadrant).compute(soleForceCommand.get(quadrant), solePositionControllerSetpoints.get(quadrant), taskSpaceEstimates);
          }
          return true;
