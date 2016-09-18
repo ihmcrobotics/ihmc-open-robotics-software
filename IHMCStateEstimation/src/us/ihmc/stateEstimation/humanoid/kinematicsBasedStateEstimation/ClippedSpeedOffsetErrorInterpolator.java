@@ -386,9 +386,9 @@ public class ClippedSpeedOffsetErrorInterpolator
       
       offsetBetweenStartAndGoal_Rotation.setOrientationFromOneToTwo(updatedGoalOffset_Rotation, updatedStartOffset_Rotation);
       offsetBetweenStartAndGoal_Rotation.getYawPitchRoll(temporaryYawPitchRoll);
-      goalYawRaw.set(temporaryYawPitchRoll[0]);
+      goalYawRaw.set(updatedGoalOffset_Rotation_YawPitchRoll[0]);
       goalYawWithDeadZone.update();
-      RotationTools.convertYawPitchRollToQuaternion(updatedGoalOffset_Rotation_YawPitchRoll[0], temporaryYawPitchRoll[1], temporaryYawPitchRoll[2], updatedGoalOffsetWithDeadZone_Rotation_quat);
+      RotationTools.convertYawPitchRollToQuaternion(goalYawWithDeadZone.getDoubleValue(), temporaryYawPitchRoll[1], temporaryYawPitchRoll[2], updatedGoalOffsetWithDeadZone_Rotation_quat);
       updatedGoalOffsetWithDeadZone_Rotation.set(updatedGoalOffsetWithDeadZone_Rotation_quat);
       
       goalOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedGoalOffsetWithDeadZone_Rotation_quat);
