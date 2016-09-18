@@ -69,6 +69,7 @@ public class ICPOptimizationController
 
    private final YoFramePoint2d controllerFeedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMP", worldFrame, registry);
    private final YoFrameVector2d controllerFeedbackCMPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCMPDelta", worldFrame, registry);
+   private final YoFrameVector2d icpError = new YoFrameVector2d("icpError", "", worldFrame, registry);
 
    private final FramePoint2d finalICPRecursion = new FramePoint2d();
    private final FramePoint2d cmpOffsetRecursionEffect = new FramePoint2d();
@@ -402,6 +403,9 @@ public class ICPOptimizationController
       }
 
       solutionHandler.getControllerReferenceCMP(desiredCMP);
+
+      icpError.set(currentICP);
+      icpError.sub(solutionHandler.getControllerReferenceICP());
 
       desiredCMP.add(desiredCMPDelta);
 
