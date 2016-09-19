@@ -63,16 +63,16 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
          blockingSimulationRunner.destroySimulation();
          blockingSimulationRunner = null;
       }
-      
+
       GlobalTimer.clearTimers();
-      
-      
+
+
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
    //TODO: Get rid of the stuff below and use a test helper.....
-   
+
    @After
    public void destroyOtherStuff()
    {
@@ -88,7 +88,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
          robotVisualizer = null;
       }
    }
-   
+
 
    private DRCSimulationFactory drcSimulation;
    private RobotVisualizer robotVisualizer;
@@ -124,7 +124,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+
    private void simulateAndAssertGoodWalking(DRCFlatGroundWalkingTrack track, String runName, boolean doPelvisYawWarmup) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
@@ -165,18 +165,18 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
          userDesiredPelvisPoseTrajectoryTime.set(0.0);
          userUpdateDesiredPelvisPose.set(true);
          blockingSimulationRunner.simulateAndBlock(0.1);
-         
+
          double startingYaw = userDesiredPelvisPoseYaw.getDoubleValue();
          userDesiredPelvisPoseYaw.set(startingYaw + Math.PI/4.0);
          userDoPelvisPose.set(true);
-         
+
          blockingSimulationRunner.simulateAndBlock(yawingTimeDuration);
 
          double icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
          assertTrue(icpError < 0.005);
 
          userDesiredPelvisPoseYaw.set(startingYaw);
-         userDoPelvisPose.set(true);         
+         userDoPelvisPose.set(true);
          blockingSimulationRunner.simulateAndBlock(yawingTimeDuration + 0.3);
 
          icpError = Math.sqrt(icpErrorX.getDoubleValue() * icpErrorX.getDoubleValue() + icpErrorY.getDoubleValue() * icpErrorY.getDoubleValue());
@@ -197,17 +197,17 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 //          fail("Desired Heading too large of error: " + desiredHeading.getDoubleValue());
 //       }
 
-         //TODO: Reduce the error tolerance from 2.5 cm to under 1 cm after we change things so that we are truly 
+         //TODO: Reduce the error tolerance from 2.5 cm to under 1 cm after we change things so that we are truly
          // controlling pelvis height, not CoM height.
          if (Math.abs(comError.getDoubleValue()) > 0.06)
          {
             fail("Math.abs(comError.getDoubleValue()) > 0.06: " + comError.getDoubleValue() + " at t = " + scs.getTime());
          }
       }
-      
+
       if (CHECK_ICP_CONTINUITY)
          verifyDesiredICPIsContinous(scs);
-      
+
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())
          checkNothingChanged(nothingChangedVerifier);
 
@@ -220,45 +220,45 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       DoubleYoVariable desiredICPX = (DoubleYoVariable) scs.getVariable("desiredICPX");
       DoubleYoVariable desiredICPY = (DoubleYoVariable) scs.getVariable("desiredICPY");
       DoubleYoVariable t = (DoubleYoVariable) scs.getVariable("t");
-      
+
       scs.gotoInPointNow();
       while(Math.abs(desiredICPX.getDoubleValue()) < 1e-4)
       {
          scs.tick(1);
       }
       scs.setInPoint();
-      
+
       scs.cropBuffer();
       double[] desiredICPXData = scs.getDataBuffer().getEntry(desiredICPX).getData();
       double[] desiredICPYData = scs.getDataBuffer().getEntry(desiredICPY).getData();
 
-      
+
       double[] tValues = scs.getDataBuffer().getEntry(t).getData();
       double dt = tValues[1] - tValues[0];
-      
-      // Setting max velocity of desired ICP to 3.0. 
-      // This will need to increase once we start walking faster. 
+
+      // Setting max velocity of desired ICP to 3.0.
+      // This will need to increase once we start walking faster.
       // Then we'll need more clever icp continuity checks.
-      
+
       double maxChangePerTick = 3.0 * dt;
-      
+
       boolean icpXIsContinuous = ArrayTools.isContinuous(desiredICPXData, maxChangePerTick);
       boolean icpYIsContinuous = ArrayTools.isContinuous(desiredICPYData, maxChangePerTick);
-      
+
       if (!icpXIsContinuous || !icpYIsContinuous)
       {
          double xMaxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(desiredICPXData);
          int indexOfXMaxChange = ArrayTools.getIndexOfMaximumAbsoluteChangeBetweenTicks(desiredICPXData);
          double yMaxChange = ArrayTools.getMaximumAbsoluteChangeBetweenTicks(desiredICPYData);
          int indexOfYMaxChange = ArrayTools.getIndexOfMaximumAbsoluteChangeBetweenTicks(desiredICPYData);
-         
+
          System.err.println("Desired ICP xMaxChange = " + xMaxChange + ", at t = " + tValues[indexOfXMaxChange]);
          System.err.println("Desired ICP yMaxChange = " + yMaxChange + ", at t = " + tValues[indexOfYMaxChange]);
 
          fail("Desired ICP is not continuous!");
       }
    }
-   
+
 
    private void createVideo(SimulationConstructionSet scs)
    {
@@ -271,17 +271,17 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    private DRCFlatGroundWalkingTrack setupFlatGroundSimulationTrack(DRCRobotModel robotModel)
    {
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
-      
+
       GroundProfile3D groundProfile = new FlatGroundProfile();
-      
+
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(drawGroundProfile);
-      
+
       if (cheatWithGroundHeightAtForFootstep)
          scsInitialSetup.setInitializeEstimatorToActual(true);
 
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-      
+
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup,
                                                                scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel);
 
