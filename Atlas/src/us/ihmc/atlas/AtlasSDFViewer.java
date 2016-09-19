@@ -18,13 +18,13 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class AtlasSDFViewer
 {
    private static final boolean SHOW_ELLIPSOIDS = true;
-   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
+   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = true;
 
    public static void main(String[] args)
    {
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
       HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
-      SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
+
       if (SHOW_ELLIPSOIDS)
       {
          addIntertialEllipsoidsToVisualizer(sdfRobot);
@@ -35,6 +35,8 @@ public class AtlasSDFViewer
          addJointAxis(sdfRobot);
       }
 
+      SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
+      scs.setGroundVisible(false);
       scs.startOnAThread();
    }
 
@@ -48,14 +50,13 @@ public class AtlasSDFViewer
 
       for (Link link : links)
       {
-         if(link.getLinkGraphics() != null)
-         {
-            AppearanceDefinition appearance = YoAppearance.Green();
-            appearance.setTransparency(0.6);
-//            link.addEllipsoidFromMassProperties(appearance);
-            link.addCoordinateSystemToCOM(0.1);
-//         l.addBoxFromMassProperties(appearance);
-         }
+         if (link.getLinkGraphics() == null)
+            link.setLinkGraphics(new Graphics3DObject());
+
+         AppearanceDefinition appearance = YoAppearance.Green();
+         appearance.setTransparency(0.6);
+         link.addEllipsoidFromMassProperties(appearance);
+         link.addCoordinateSystemToCOM(0.1);
       }
    }
 
