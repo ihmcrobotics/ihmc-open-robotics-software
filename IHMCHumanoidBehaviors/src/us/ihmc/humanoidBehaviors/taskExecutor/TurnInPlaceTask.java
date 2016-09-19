@@ -11,24 +11,18 @@ public class TurnInPlaceTask extends BehaviorTask
    private double transferTime;
    private double swingTime;
 
-   public TurnInPlaceTask(double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, double transferTime, double swingTime, DoubleYoVariable yoTime,
-         double sleepTime)
+   public TurnInPlaceTask(double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, double transferTime, double swingTime, DoubleYoVariable yoTime)
    {
-      super(turnInPlaceBehavior, yoTime, sleepTime);
+      super(turnInPlaceBehavior, yoTime);
       this.desiredYaw = desiredYaw;
       this.turnInPlaceBehavior = turnInPlaceBehavior;
       this.transferTime = transferTime;
       this.swingTime = swingTime;
    }
 
-   public TurnInPlaceTask(double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, double transferTime, double swingTime, DoubleYoVariable yoTime)
-   {
-      this(desiredYaw, turnInPlaceBehavior, transferTime, swingTime, yoTime, 0.0);
-   }
-
    public TurnInPlaceTask(double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, DoubleYoVariable yoTime)
    {
-      this(desiredYaw, turnInPlaceBehavior, Double.NaN, Double.NaN, yoTime, 0.0);
+      this(desiredYaw, turnInPlaceBehavior, Double.NaN, Double.NaN, yoTime);
    }
 
    @Override
