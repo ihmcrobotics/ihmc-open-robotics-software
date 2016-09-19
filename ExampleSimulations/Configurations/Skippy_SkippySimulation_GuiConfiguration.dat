@@ -77,7 +77,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.tau_hip,root.Skippy.SkippyController.tauHipJointProjectionModulus,root.Skippy.SkippyController.stateMachine</Variables>
+		<Variables>root.Skippy.SkippyController.stateMachine,root.Skippy.SkippyController.actualIcpKPErrorX,root.Skippy.SkippyController.actualIcpKPErrorY,root.Skippy.SkippyController.actualIcpKDErrorX,root.Skippy.SkippyController.actualIcpKDErrorY</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
