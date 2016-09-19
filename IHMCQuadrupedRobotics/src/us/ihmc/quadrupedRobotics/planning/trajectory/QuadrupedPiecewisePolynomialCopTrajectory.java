@@ -271,7 +271,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
             double endTime = polynomial.getTimeInterval().getEndTime();
             if (currentTime >= startTime && currentTime <= endTime)
             {
-               polynomial.compute(currentTime);
+               polynomial.compute(currentTime - startTime);
                double normalizedLeftSidePressure = polynomial.getPosition();
                double numberOfEndContacts = getNumberOfEndContacts(robotEnd, contactStateAtCurrentTime);
                double numberOfOppositeEndContacts = getNumberOfEndContacts(robotEnd.getOppositeEnd(), contactStateAtCurrentTime);
@@ -363,7 +363,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
    {
       YoTimedPolynomial polynomial = pressurePolynomialsPerEnd.get(robotEnd).get(numberOfPressurePolynomialsPerEnd.get(robotEnd).getIntegerValue());
       polynomial.setTimeInterval(t0, tFinal);
-      polynomial.setCubic(t0, tFinal, z0, zd0, zFinal, zdFinal);
+      polynomial.setCubic(0.0, tFinal - t0, z0, zd0, zFinal, zdFinal);
       numberOfPressurePolynomialsPerEnd.get(robotEnd).increment();
    }
 
