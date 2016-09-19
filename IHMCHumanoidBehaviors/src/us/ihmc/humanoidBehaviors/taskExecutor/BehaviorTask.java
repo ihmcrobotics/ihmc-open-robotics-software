@@ -14,14 +14,9 @@ public abstract class BehaviorTask implements Task
 
    public BehaviorTask(AbstractBehavior behavior, DoubleYoVariable yoTime)
    {
-      this(behavior, yoTime, 0.0);
-   }
-
-   public BehaviorTask(AbstractBehavior behavior, DoubleYoVariable yoTime, double sleepTime)
-   {
       this.behavior = behavior;
       this.yoTime = yoTime;
-      this.sleepTime = sleepTime;
+      this.sleepTime = 0;
    }
 
    @Override

@@ -47,22 +47,23 @@ public class ResetRobotBehavior extends AbstractBehavior
 
    private void setupPipeline()
    {
+      
       //RESET BODY POSITIONS *******************************************
       GoHomeMessage goHomeChestMessage = new GoHomeMessage(BodyPart.CHEST, 2);
       chestGoHomeBehavior.setInput(goHomeChestMessage);
-      GoHomeTask goHomeChestTask = new GoHomeTask(goHomeChestMessage, chestGoHomeBehavior, yoTime, 0);
+      GoHomeTask goHomeChestTask = new GoHomeTask(goHomeChestMessage, chestGoHomeBehavior, yoTime);
 
       GoHomeMessage goHomepelvisMessage = new GoHomeMessage(BodyPart.PELVIS, 2);
       pelvisGoHomeBehavior.setInput(goHomepelvisMessage);
-      GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, pelvisGoHomeBehavior, yoTime, 0);
+      GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, pelvisGoHomeBehavior, yoTime);
 
       GoHomeMessage goHomeLeftArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2);
       armGoHomeLeftBehavior.setInput(goHomeLeftArmMessage);
-      GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior, yoTime, 0);
+      GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior, yoTime);
 
       GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
       armGoHomeRightBehavior.setInput(goHomeRightArmMessage);
-      GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior, yoTime, 0);
+      GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior, yoTime);
 
       pipeLine.requestNewStage();
 
