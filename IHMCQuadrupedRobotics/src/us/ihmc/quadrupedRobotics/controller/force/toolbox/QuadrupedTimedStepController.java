@@ -19,6 +19,7 @@ import us.ihmc.quadrupedRobotics.state.FiniteStateMachineStateChangedListener;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
@@ -328,7 +329,7 @@ public class QuadrupedTimedStepController
       {
          this.robotQuadrant = robotQuadrant;
          this.goalPosition = new FramePoint();
-         this.swingTrajectory = new ThreeDoFSwingFootTrajectory();
+         this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);
          this.touchdownTrigger = new GlitchFilteredBooleanYoVariable(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
                touchdownTriggerWindowParameter.get());
       }
@@ -377,7 +378,6 @@ public class QuadrupedTimedStepController
          }
          swingTrajectory.computeTrajectory(currentTime);
          swingTrajectory.getPosition(solePositionControllerSetpoints.get(robotQuadrant).getSolePosition());
-
 
          // detect early touch-down
          FrameVector soleForceEstimate = taskSpaceEstimates.getSoleVirtualForce(robotQuadrant);

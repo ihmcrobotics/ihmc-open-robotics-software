@@ -12,8 +12,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasFinalsWorldStairsTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseFlatTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasFinalsWorldStairsTest.class
 })
 
 public class AtlasCInDevelopmentTestSuite

@@ -72,6 +72,10 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
 
    private boolean deactivateWalkingFallDetector = false;
 
+   private boolean addFootstepMessageGenerator = false;
+   private boolean useHeadingAndVelocityScript = false;
+   private boolean cheatWithGroundHeightAtForFootstep = false;
+
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber;
 
    /**
@@ -395,6 +399,11 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
 
       scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands);
 
+      if (addFootstepMessageGenerator && cheatWithGroundHeightAtForFootstep)
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, scsInitialSetup.getHeightMap());
+      else if (addFootstepMessageGenerator)
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript);
+
       drcSimulationFactory = new DRCSimulationFactory(robotModel, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup, dataProducer);
 
       if (externalPelvisCorrectorSubscriber != null)
@@ -518,5 +527,12 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       {
          controllerPacketCommunicator.close();
       }
+   }
+
+   public void addFootstepMessageGenerator(boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep)
+   {
+      addFootstepMessageGenerator = true;
+      this.useHeadingAndVelocityScript = useHeadingAndVelocityScript;
+      this.cheatWithGroundHeightAtForFootstep = cheatWithGroundHeightAtForFootstep;
    }
 }
