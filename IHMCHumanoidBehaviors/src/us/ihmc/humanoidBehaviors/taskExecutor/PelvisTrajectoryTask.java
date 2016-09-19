@@ -11,12 +11,8 @@ public class PelvisTrajectoryTask extends BehaviorTask
 
    public PelvisTrajectoryTask(PelvisTrajectoryMessage pelvisTrajectoryMessage, DoubleYoVariable yoTime, PelvisTrajectoryBehavior pelvisTrajectoryBehavior)
    {
-      this(pelvisTrajectoryMessage, yoTime, pelvisTrajectoryBehavior, 0.0);
-   }
-
-   public PelvisTrajectoryTask(PelvisTrajectoryMessage pelvisTrajectoryMessage, DoubleYoVariable yoTime, PelvisTrajectoryBehavior pelvisTrajectoryBehavior, double sleepTime)
-   {
-      super(pelvisTrajectoryBehavior, yoTime, sleepTime);
+     
+      super(pelvisTrajectoryBehavior, yoTime);
       this.pelvisTrajectoryBehavior = pelvisTrajectoryBehavior;
       this.pelvisTrajectoryMessage = pelvisTrajectoryMessage;
    }

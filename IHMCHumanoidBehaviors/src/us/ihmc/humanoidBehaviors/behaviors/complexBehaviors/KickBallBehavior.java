@@ -129,7 +129,7 @@ public class KickBallBehavior extends AbstractBehavior
    private void setupPipelineForKick()
    {
 
-      BehaviorTask findBallTask = new BehaviorTask(sphereDetectionBehavior, yoTime, 0)
+      BehaviorTask findBallTask = new BehaviorTask(sphereDetectionBehavior, yoTime)
       {
          @Override
          protected void setBehaviorInput()
@@ -145,7 +145,7 @@ public class KickBallBehavior extends AbstractBehavior
 
       pipeLine.submitSingleTaskStage(findBallTask);
 
-      BehaviorTask validateBallTask = new BehaviorTask(waitForUserValidationBehavior, yoTime, 0)
+      BehaviorTask validateBallTask = new BehaviorTask(waitForUserValidationBehavior, yoTime)
       {
          @Override
          protected void setBehaviorInput()
@@ -164,7 +164,7 @@ public class KickBallBehavior extends AbstractBehavior
 
       pipeLine.submitSingleTaskStage(validateBallTask);
 
-      BehaviorTask walkToBallTask = new BehaviorTask(walkToLocationBehavior, yoTime, 0)
+      BehaviorTask walkToBallTask = new BehaviorTask(walkToLocationBehavior, yoTime)
       {
 
          @Override
@@ -184,7 +184,7 @@ public class KickBallBehavior extends AbstractBehavior
 
       pipeLine.submitSingleTaskStage(walkToBallTask);
 
-      BehaviorTask kickBallTask = new BehaviorTask(kickBehavior, yoTime, 0)
+      BehaviorTask kickBallTask = new BehaviorTask(kickBehavior, yoTime)
       {
          @Override
          protected void setBehaviorInput()
