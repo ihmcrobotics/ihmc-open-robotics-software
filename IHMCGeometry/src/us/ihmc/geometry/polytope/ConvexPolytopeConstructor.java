@@ -1,6 +1,11 @@
 package us.ihmc.geometry.polytope;
 
+import java.util.Random;
+
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.robotics.random.RandomTools;
 
 public class ConvexPolytopeConstructor
 {
@@ -68,7 +73,26 @@ public class ConvexPolytopeConstructor
 
       return polytope;
    }
-   
+
+   public static ConvexPolytope constructRandomSphereOutlinedPolytope(Random random, int numberOfPoints, double radius, double xyzBoundary)
+   {
+      ConvexPolytope polytope = new ConvexPolytope();
+
+      Point3d sphereCenter = RandomTools.generateRandomPoint(random, xyzBoundary, xyzBoundary, xyzBoundary);
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         Vector3d randomVector = RandomTools.generateRandomVector(random, radius);
+         Point3d point = new Point3d(sphereCenter);
+         point.add(randomVector);
+
+         //TODO: Need to connect the edges later once they are used in the algorithm!!
+         polytope.addVertex(point);
+      }
+
+      return polytope;
+   }
+
    public static ConvexPolytope constructSinglePointPolytope(Point3d singlePoint)
    {
       ConvexPolytope polytope = new ConvexPolytope();
