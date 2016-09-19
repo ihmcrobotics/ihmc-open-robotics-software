@@ -6,4 +6,4 @@ prior to merging, and passes after merging.
 <!-- If this pull request resolves any open issues, provide a link: -->
 Resolves [issue#](https://github.com/ihmcrobotics/ihmc-open-robotics-software/issues).
 
-Make sure code is formatted according to the template at IHMCJavaToolkit/CodeFormatTemplates/IHMCEclipseFormatter.xml
+Make sure code is formatted with the relevant template(s) at IHMCJavaToolkit/CodeFormatTemplates.
