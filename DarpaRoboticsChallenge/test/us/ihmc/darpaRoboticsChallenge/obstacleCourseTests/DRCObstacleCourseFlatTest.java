@@ -832,7 +832,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
 
    // Added for fixing DRC-866. Does not work for fast walking
-	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.InDevelopment)
+	@DeployableTestMethod(estimatedDuration = 50.0)
 	@Test(timeout=300000)
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {
