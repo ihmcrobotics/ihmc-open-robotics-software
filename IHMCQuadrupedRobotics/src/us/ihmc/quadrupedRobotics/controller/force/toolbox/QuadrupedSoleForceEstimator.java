@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
+import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
@@ -133,7 +134,8 @@ public class QuadrupedSoleForceEstimator
       {
          jacobianMatrix.set(robotQuadrant, soleJacobian.get(robotQuadrant).getJacobianMatrix());
          CommonOps.transpose(jacobianMatrix.get(robotQuadrant), jacobianMatrixTranspose.get(robotQuadrant));
-         CommonOps.pinv(jacobianMatrixTranspose.get(robotQuadrant), jacobianMatrixTransposePseudoInverse.get(robotQuadrant));
+         UnrolledInverseFromMinor.inv3(jacobianMatrixTranspose.get(robotQuadrant), jacobianMatrixTransposePseudoInverse.get(robotQuadrant),1.0);
+//         CommonOps.pinv(jacobianMatrixTranspose.get(robotQuadrant), jacobianMatrixTransposePseudoInverse.get(robotQuadrant));
          CommonOps.mult(jacobianMatrixTransposePseudoInverse.get(robotQuadrant), jointTorqueVector.get(robotQuadrant), soleForceMatrix.get(robotQuadrant));
 
          ReferenceFrame jacobianFrame = soleJacobian.get(robotQuadrant).getFrame();

@@ -7,6 +7,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple3f;
+import javax.vecmath.Vector3f;
 
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
@@ -50,7 +51,7 @@ public class MeshBuilder
       texCoords.add(texture.getX());
       texCoords.add(texture.getY());
 
-      this.faces.add(translateFaces(new int[]{0, 0, 1, 0, 2, 0}, numPoints, numTexCoords));
+      this.faces.add(translateFaces(new int[] {0, 0, 1, 0, 2, 0}, numPoints, numTexCoords));
       this.faceSmoothingGroups.add(0);
    }
 
@@ -199,6 +200,16 @@ public class MeshBuilder
       this.faceSmoothingGroups.add(faceSmoothingGroups);
    }
 
+   public void addMesh(float[] points, float[] texCoords, int[] faces, int[] faceSmoothingGroups, float pointsOffsetX, float pointsOffsetY, float pointsOffsetZ)
+   {
+      int numPoints = this.points.size() / 3;
+      int numTexCoords = this.texCoords.size() / 2;
+      this.points.add(translatePoints(points, pointsOffsetX, pointsOffsetY, pointsOffsetZ));
+      this.texCoords.add(texCoords);
+      this.faces.add(translateFaces(faces, numPoints, numTexCoords));
+      this.faceSmoothingGroups.add(faceSmoothingGroups);
+   }
+
    public void addMesh(MeshBuilder other)
    {
       addMesh(other.points, other.texCoords, other.faces, other.faceSmoothingGroups);
@@ -218,7 +229,6 @@ public class MeshBuilder
       addBoxMesh(size, size, size, cubeOffset);
    }
 
-
    public void addCubeMesh(double size, Tuple3d cubeOffset)
    {
       addBoxMesh(size, size, size, cubeOffset);
@@ -236,6 +246,68 @@ public class MeshBuilder
    public void addBoxMesh(double lx, double ly, double lz, Tuple3d boxOffset)
    {
       addBoxMesh((float) lx, (float) ly, (float) lz, new Point3f(boxOffset));
+   }
+
+   public void addLineMesh(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth)
+   {
+      float lx = xf - x0;
+      float ly = yf - y0;
+      float lz = zf - z0;
+      float[] linePoints = LineMeshGenerator.generatePoints(lx, ly, lz, lineWidth);
+      float[] lineTexCoords = LineMeshGenerator.texCoords;
+      int[] lineFaces = LineMeshGenerator.faces;
+      int[] lineFaceSmoothingGroups = LineMeshGenerator.faceSmoothingGroups;
+      addMesh(linePoints, lineTexCoords, lineFaces, lineFaceSmoothingGroups, x0, y0, z0);
+   }
+
+   public void addLineMesh(double x0, double y0, double z0, double xf, double yf, double zf, double lineWidth)
+   {
+      addLineMesh((float) x0, (float) y0, (float) z0, (float) xf, (float) yf, (float) zf, (float) lineWidth);
+   }
+
+   public void addLineMesh(Point3d start, Point3d end, double lineWidth)
+   {
+      double x0 = start.getX();
+      double y0 = start.getY();
+      double z0 = start.getZ();
+      double xf = end.getX();
+      double yf = end.getY();
+      double zf = end.getZ();
+      addLineMesh(x0, y0, z0, xf, yf, zf, lineWidth);
+   }
+
+   public void addMultiLineMesh(Point3d[] points, double lineWidth, boolean close)
+   {
+      for (int i = 1; i < points.length; i++)
+      {
+         Point3d start = points[i-1];
+         Point3d end = points[i];
+         addLineMesh(start, end, lineWidth);
+      }
+
+      if (close)
+      {
+         Point3d start = points[points.length - 1];
+         Point3d end = points[0];
+         addLineMesh(start, end, lineWidth);
+      }
+   }
+
+   public void addMultiLineMesh(List<Point3d> points, double lineWidth, boolean close)
+   {
+      for (int i = 1; i < points.size(); i++)
+      {
+         Point3d start = points.get(i-1);
+         Point3d end = points.get(i);
+         addLineMesh(start, end, lineWidth);
+      }
+
+      if (close)
+      {
+         Point3d start = points.get(points.size() - 1);
+         Point3d end = points.get(0);
+         addLineMesh(start, end, lineWidth);
+      }
    }
 
    private int[] translateFaces(int[] faces, int points, int texCoords)
@@ -260,12 +332,17 @@ public class MeshBuilder
 
    private float[] translatePoints(float[] points, Tuple3f offset)
    {
+      return translatePoints(points, offset.getX(), offset.getY(), offset.getZ());
+   }
+
+   private float[] translatePoints(float[] points, float offsetX, float offsetY, float offsetZ)
+   {
       float[] newPoints = new float[points.length];
       for (int i = 0; i < points.length / 3; i++)
       {
-         newPoints[3 * i] = points[3 * i] + offset.getX();
-         newPoints[3 * i + 1] = points[3 * i + 1] + offset.getY();
-         newPoints[3 * i + 2] = points[3 * i + 2] + offset.getZ();
+         newPoints[3 * i] = points[3 * i] + offsetX;
+         newPoints[3 * i + 1] = points[3 * i + 1] + offsetY;
+         newPoints[3 * i + 2] = points[3 * i + 2] + offsetZ;
       }
       return newPoints;
    }
@@ -284,9 +361,9 @@ public class MeshBuilder
    {
       static float[] generatePoints(float lx, float ly, float lz)
       {
-         float halfLx = lx / 2f;
-         float halfLy = ly / 2f;
-         float halfLz = lz / 2f;
+         float halfLx = lx / 2.0f;
+         float halfLy = ly / 2.0f;
+         float halfLz = lz / 2.0f;
 
          float points[] = {
              -halfLx, -halfLy, -halfLz,
@@ -318,5 +395,55 @@ public class MeshBuilder
           4, 0, 1, 2, 5, 1,
           1, 2, 4, 0, 0, 3,
       };
+   }
+
+   static class LineMeshGenerator
+   {
+      static float[] generatePoints(float lx, float ly, float lz, float width)
+      {
+         Vector3f localDirection = new Vector3f(lx, ly, lz);
+         float lineLength = localDirection.length();
+         localDirection.scale(1.0f / lineLength);
+
+         float halfL = lineLength / 2.0f;
+
+         float points[] = BoxMeshGenerator.generatePoints(width, width, lineLength);
+
+         for (int i = 2; i < points.length; i += 3)
+            points[i] += halfL;
+
+         if (Math.abs(localDirection.getZ()) < 1.0 - 1.0e-3)
+         {
+            float yaw;
+            float pitch;
+            yaw = (float) Math.atan2(localDirection.getY(), localDirection.getX());
+            double xyLength = Math.sqrt(localDirection.getX() * localDirection.getX() + localDirection.getY() * localDirection.getY());
+            pitch = (float) Math.atan2(xyLength, localDirection.getZ());
+
+            float cYaw = (float) Math.cos(yaw);
+            float sYaw = (float) Math.sin(yaw);
+
+            float cPitch = (float) Math.cos(pitch);
+            float sPitch = (float) Math.sin(pitch);
+
+            for (int i = 0; i < points.length; i += 3)
+            {
+               float x = points[i];
+               float y = points[i + 1];
+               float z = points[i + 2];
+               points[i] = cYaw * cPitch * x - sYaw * y + cYaw * sPitch * z;
+               points[i + 1] = sYaw * cPitch * x + cYaw * y + sYaw * sPitch * z;
+               points[i + 2] = -sPitch * x + cPitch * z;
+            }
+         }
+
+         return points;
+      }
+
+      static final float texCoords[] = BoxMeshGenerator.texCoords;
+
+      static final int faceSmoothingGroups[] = BoxMeshGenerator.faceSmoothingGroups;
+
+      static final int faces[] = BoxMeshGenerator.faces;
    }
 }
