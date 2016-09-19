@@ -132,10 +132,10 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
          // TODO: Do we need this epsilon here. Seems when to abort is tricky. Maybe look that the extremal points in the
          // simplex stop changing?
-//         if (percentCloser >= 1.0 - LAMBDA_STOPPING_DELTA)
-//         {
-//            metStoppingConditionsCount++;
-//         }
+         if (percentCloser >= 1.0 - LAMBDA_STOPPING_DELTA)
+         {
+            metStoppingConditionsCount++;
+         }
          
          // TODO: Get rid of this. Hack right now to make sure really hard cases get a full shot...
          if (metStoppingConditionsCount == 4)
@@ -148,28 +148,6 @@ public class GilbertJohnsonKeerthiCollisionDetector
             }
             
             return false;
-         }
-
-         // Step 7) Add v to Q and got to step 2.
-         Point3d pointToAddToSimplex = new Point3d(supportingVertexOnSimplex);
-         boolean successfullyAddedVertex = simplex.addVertex(pointToAddToSimplex, supportingVertexA.getPosition(), supportingVertexB.getPosition());
-
-         
-         if (!successfullyAddedVertex)
-         {
-            simplex.getClosestPointsOnAAndB(pointOnAToPack, pointOnBToPack);
-            
-            if (listener != null)
-            {
-               listener.metStoppingConditionForNoIntersection(pointOnAToPack, pointOnBToPack);
-            }
-            
-            return false;
-         }
-         
-         if (listener != null)
-         {
-            listener.addedVertexToSimplex(simplex, pointToAddToSimplex, supportingVertexA.getPosition(), supportingVertexB.getPosition());
          }
          
          iterations++;
@@ -190,8 +168,28 @@ public class GilbertJohnsonKeerthiCollisionDetector
             
             return false;
          }
+
+         // Step 7) Add v to Q and got to step 2.
+         Point3d pointToAddToSimplex = new Point3d(supportingVertexOnSimplex);
+         boolean successfullyAddedVertex = simplex.addVertex(pointToAddToSimplex, supportingVertexA.getPosition(), supportingVertexB.getPosition());
+         
+         if (!successfullyAddedVertex)
+         {
+            simplex.getClosestPointsOnAAndB(pointOnAToPack, pointOnBToPack);
+            
+            if (listener != null)
+            {
+               listener.metStoppingConditionForNoIntersection(pointOnAToPack, pointOnBToPack);
+            }
+            
+            return false;
+         }
+         
+         if (listener != null)
+         {
+            listener.addedVertexToSimplex(simplex, pointToAddToSimplex, supportingVertexA.getPosition(), supportingVertexB.getPosition());
+         }
+
       }
-
    }
-
 }

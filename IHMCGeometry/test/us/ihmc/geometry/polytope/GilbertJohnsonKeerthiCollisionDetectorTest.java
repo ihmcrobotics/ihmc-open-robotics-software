@@ -11,11 +11,12 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.stateMachines.StateMachineTest;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class GilbertJohnsonKeerthiCollisionDetectorTest
@@ -153,12 +154,15 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       {
          double xyzBoundary = 1000.0;
          double radius = 1.7;
-         int numberOfPoints = 4;
+         int maxNumberOfPoints = 5;
+         
+         int numberOfPoints = random.nextInt(maxNumberOfPoints) + 1;
          ConvexPolytope polytope = constructRandomSphereOutlinedPolytope(random, numberOfPoints, radius, xyzBoundary);
 
          int numberOfPointsToTests = 1000;
          int numberInside = 0;
          int numberOutside = 0;
+         
          for (int j = 0; j < numberOfPointsToTests; j++)
          {
             Point3d pointToProject = RandomTools.generateRandomPoint(random, xyzBoundary, xyzBoundary, xyzBoundary);
@@ -349,7 +353,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       Point3d tetragonPointD = new Point3d(-496.02959529366643, 939.9368132428073, 478.51963102396314);
       Point3d pointToProject = new Point3d(756.3802841804468, -14.952705301326773, -346.6583066638593);
 
-      doPointToTetragonProjectionTest(tetragonPointA, tetragonPointB, tetragonPointC, tetragonPointD, pointToProject, true);
+      doPointToTetragonProjectionTest(tetragonPointA, tetragonPointB, tetragonPointC, tetragonPointD, pointToProject, false);
    }
 
    private void doPointToEdgeProjectionTest(Point3d lineSegmentPointA, Point3d lineSegmentPointB, Point3d pointToProject, boolean verbose)
@@ -365,7 +369,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
    private void doPointToTetragonProjectionTest(Point3d tetragonPointA, Point3d tetragonPointB, Point3d tetragonPointC, Point3d tetragonPointD,
          Point3d pointToProject, boolean verbose)
    {
-      doPointToSimplePolytopeTest(pointToProject, verbose, tetragonPointA, tetragonPointB, tetragonPointC);
+      doPointToSimplePolytopeTest(pointToProject, verbose, tetragonPointA, tetragonPointB, tetragonPointC, tetragonPointD);
    }
 
    private void doPointToSimplePolytopeTest(Point3d pointToProject, boolean verbose, Point3d... polytopePoints)
@@ -402,7 +406,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       Point3d projectItselfCheckProjection = new Point3d();
       boolean projectItselfCheck = detector.arePolytopesColliding(polytope, closestPointCheckPolytope, projectItselfCheckProjection, new Point3d());
       assertTrue(projectItselfCheck);
-      //      JUnitTools.assertTuple3dEquals(closestPointOnPolytope, projectItselfCheckProjection, 1e-7);
+      JUnitTools.assertTuple3dEquals(closestPointOnPolytope, projectItselfCheckProjection, 1e-7);
 
       Vector3d vectorFromOutsidePointToProjection = new Vector3d();
       vectorFromOutsidePointToProjection.sub(closestPointOnPolytope, pointToProject);
@@ -454,11 +458,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       }
       else if (polytopePoints.length == 2)
       {
-         LineSegment3d lineSegment = new LineSegment3d(polytopePoints[0], polytopePoints[1]);
-         Point3d projectedPoint = new Point3d();
-         lineSegment.getProjectionOntoLineSegment(pointToProject, projectedPoint);
-
-         return projectedPoint;
+         return bruteForceProjectOntoLineSegment(pointToProject, polytopePoints[0], polytopePoints[1]);
       }
       else if (polytopePoints.length == 3)
       {
@@ -466,9 +466,51 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       }
       else if (polytopePoints.length == 4)
       {
-         throw new RuntimeException("Implement me!");
+         return bruteForceProjectOntoTetragon(pointToProject, polytopePoints[0], polytopePoints[1], polytopePoints[2], polytopePoints[3]);
       }
       throw new RuntimeException("Only support up to 4 vertices");
+   }
+
+   private Point3d bruteForceProjectOntoTetragon(Point3d pointToProject, Point3d pointA, Point3d pointB, Point3d pointC, Point3d pointD)
+   {
+      Point3d bestProjection = new Point3d();
+      double bestDistance = Double.POSITIVE_INFINITY;
+      
+      Point3d triangleProjection = bruteForceProjectOntoTriangle(pointToProject, pointA, pointB, pointC);
+      double distance = pointToProject.distance(triangleProjection);
+      if (distance < bestDistance)
+      {
+         bestDistance = distance;
+         bestProjection.set(triangleProjection);
+      }
+      
+      triangleProjection = bruteForceProjectOntoTriangle(pointToProject, pointA, pointB, pointD);
+      distance = pointToProject.distance(triangleProjection);
+      if (distance < bestDistance)
+      {
+         bestDistance = distance;
+         bestProjection.set(triangleProjection);
+      }
+      
+      triangleProjection = bruteForceProjectOntoTriangle(pointToProject, pointA, pointC, pointD);
+      distance = pointToProject.distance(triangleProjection);
+      if (distance < bestDistance)
+      {
+         bestDistance = distance;
+         bestProjection.set(triangleProjection);
+      }
+      
+      triangleProjection = bruteForceProjectOntoTriangle(pointToProject, pointB, pointC, pointD);
+      distance = pointToProject.distance(triangleProjection);
+      if (distance < bestDistance)
+      {
+         bestDistance = distance;
+         bestProjection.set(triangleProjection);
+      }
+
+      //TODO: See if inside Tetragon alread and if so, return the point.
+
+      return bestProjection;
    }
 
    private Point3d bruteForceProjectOntoTriangle(Point3d pointToProject, Point3d trianglePointA, Point3d trianglePointB, Point3d trianglePointC)
@@ -476,31 +518,15 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       Point3d bestProjection = new Point3d();
       double bestDistance = Double.POSITIVE_INFINITY;
 
-      double distance = pointToProject.distance(trianglePointA);
+      Point3d projectedPoint = bruteForceProjectOntoLineSegment(pointToProject, trianglePointA, trianglePointB);
+      double distance = pointToProject.distance(projectedPoint);
       if (distance < bestDistance)
       {
          bestDistance = distance;
-         bestProjection.set(trianglePointA);
+         bestProjection.set(projectedPoint);
       }
 
-      distance = pointToProject.distance(trianglePointB);
-      if (distance < bestDistance)
-      {
-         bestDistance = distance;
-         bestProjection.set(trianglePointB);
-      }
-
-      distance = pointToProject.distance(trianglePointC);
-      if (distance < bestDistance)
-      {
-         bestDistance = distance;
-         bestProjection.set(trianglePointC);
-      }
-
-      Point3d projectedPoint = new Point3d();
-      LineSegment3d lineSegment = new LineSegment3d(trianglePointA, trianglePointB);
-      lineSegment.getProjectionOntoLineSegment(pointToProject, projectedPoint);
-
+      projectedPoint = bruteForceProjectOntoLineSegment(pointToProject, trianglePointA, trianglePointC);
       distance = pointToProject.distance(projectedPoint);
       if (distance < bestDistance)
       {
@@ -508,21 +534,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
          bestProjection.set(projectedPoint);
       }
 
-      projectedPoint = new Point3d();
-      lineSegment = new LineSegment3d(trianglePointA, trianglePointC);
-      lineSegment.getProjectionOntoLineSegment(pointToProject, projectedPoint);
-
-      distance = pointToProject.distance(projectedPoint);
-      if (distance < bestDistance)
-      {
-         bestDistance = distance;
-         bestProjection.set(projectedPoint);
-      }
-
-      projectedPoint = new Point3d();
-      lineSegment = new LineSegment3d(trianglePointB, trianglePointC);
-      lineSegment.getProjectionOntoLineSegment(pointToProject, projectedPoint);
-
+      projectedPoint = bruteForceProjectOntoLineSegment(pointToProject, trianglePointB, trianglePointC);
       distance = pointToProject.distance(projectedPoint);
       if (distance < bestDistance)
       {
@@ -532,7 +544,57 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       //TODO: Project onto the plane ABC and make sure inside
 
+      Vector3d normal = new Vector3d();
+      Vector3d abVector = new Vector3d();
+      abVector.sub(trianglePointB, trianglePointA);
+      Vector3d acVector = new Vector3d();
+      abVector.sub(trianglePointC, trianglePointA);
+      
+      normal.cross(abVector, acVector);
+      
+      Vector3d aPVector = new Vector3d();
+      aPVector.sub(pointToProject, trianglePointA);
+      
+      Vector3d tempCross = new Vector3d();
+      tempCross.cross(abVector, aPVector);
+      
+      Vector3d tempCrossTwo = new Vector3d();
+      tempCross.cross(aPVector, acVector);
+      
+      double gamma = tempCross.dot(normal)/(normal.dot(normal));
+      double beta = tempCrossTwo.dot(normal)/(normal.dot(normal));
+      double alpha = 1.0 - beta - gamma;
+      
+      if ((alpha >= 0.0) && (alpha <= 1.0) && (beta > 0.0) && (beta <= 1.0) && (gamma >= 0.0) && (gamma <= 1.0))
+      {
+         projectedPoint = new Point3d();
+         Point3d tempPoint = new Point3d();
+
+         tempPoint.set(trianglePointA);
+         tempPoint.scale(alpha);
+         projectedPoint.add(tempPoint);
+
+         tempPoint.set(trianglePointB);
+         tempPoint.scale(beta);
+         projectedPoint.add(tempPoint);
+
+         tempPoint.set(trianglePointC);
+         tempPoint.scale(gamma);
+         projectedPoint.add(tempPoint);
+
+         bestProjection = projectedPoint;
+      }
+      
       return bestProjection;
+   }
+   
+   public Point3d bruteForceProjectOntoLineSegment(Point3d pointToProject, Point3d pointA, Point3d pointB)
+   {
+      LineSegment3d lineSegment = new LineSegment3d(pointA, pointB);
+      Point3d projectedPoint = new Point3d();
+      lineSegment.getProjectionOntoLineSegment(pointToProject, projectedPoint);
+
+      return projectedPoint;
    }
 
    private static ConvexPolytope constructRandomSphereOutlinedPolytope(Random random, int numberOfPoints, double radius, double xyzBoundary)
@@ -553,5 +615,11 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       return polytope;
    }
-
+   
+   public static void main(String[] args)
+   {
+      String targetTests = GilbertJohnsonKeerthiCollisionDetectorTest.class.getName();
+      String targetClassesInSamePackage = MutationTestingTools.createClassSelectorStringFromTargetString(targetTests);
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+   }
 }
