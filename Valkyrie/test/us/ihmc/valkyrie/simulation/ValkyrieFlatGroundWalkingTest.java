@@ -22,13 +22,8 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 	@Test(timeout = 1400000)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
-
-      String runName = "ValkyrieFlatGroundWalkingTest";
       robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
-
-      boolean doPelvisYawWarmup = true;
-      setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
+      super.testFlatGroundWalking(robotModel, true);
    }
 
    @Override
