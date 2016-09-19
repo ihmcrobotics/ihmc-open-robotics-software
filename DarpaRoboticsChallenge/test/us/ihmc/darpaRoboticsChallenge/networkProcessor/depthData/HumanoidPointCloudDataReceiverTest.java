@@ -85,7 +85,7 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       jmeLidarScanVisualizer = new JMELidarScanVisualizer();
-      
+
       DRCNetworkModuleParameters drcNetworkModuleParameters = new DRCNetworkModuleParameters();
       drcNetworkModuleParameters.enableNetworkProcessor(true);
       drcNetworkModuleParameters.enableBehaviorModule(false);
@@ -97,22 +97,23 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
       drcNetworkModuleParameters.enableRosModule(false);
       drcNetworkModuleParameters.enableSensorModule(true);
       drcNetworkModuleParameters.enableUiModule(true);
-      
+
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DRCWallAtDistanceEnvironment(WALL_DISTANCE);
-      testHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, getClass().getSimpleName(), startingLocation, simulationTestingParameters, getRobotModel(), drcNetworkModuleParameters, null, null);
+      testHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, getClass().getSimpleName(), startingLocation, simulationTestingParameters,
+            getRobotModel(), drcNetworkModuleParameters, null, null, false, false, false);
       testHelper.setupCameraForUnitTest(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
 
       testHelper.simulateAndBlockAndCatchExceptions(1.1); // Wait for sim to initialize
-      
+
       try
       {
          PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("localhost", NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, new IHMCCommunicationKryoNetClassList());
          packetCommunicator.attachListener(PointCloudWorldPacket.class, new PointCloudWorldConsumer());
          packetCommunicator.connect();
-         
+
          testHelper.simulateAndBlockAndCatchExceptions(1.1); // Wait for KryoObjectClient to connect
-         
+
          DepthDataStateCommand lidarEnablePacket = new DepthDataStateCommand(LidarState.ENABLE);
          lidarEnablePacket.setDestination(PacketDestination.SENSOR_MANAGER);
          packetCommunicator.send(lidarEnablePacket);
@@ -121,7 +122,7 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
       {
          e.printStackTrace();
       }
-      
+
       boolean success = testHelper.simulateAndBlockAndCatchExceptions(7.0);
 
       assertTrue(success);
