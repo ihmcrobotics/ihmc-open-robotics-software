@@ -84,6 +84,20 @@ public class SimplexPolytope
          pointFour = points[3];
    }
 
+   public Point3d getPoint(int i)
+   {
+      if (i == 0)
+         return pointOne;
+      if (i == 1)
+         return pointTwo;
+      if (i == 2)
+         return pointThree;
+      if (i == 3)
+         return pointFour;
+
+      return null;
+   }
+
    public boolean addVertex(Point3d simplexPointToAdd, Point3d correspondingPointOnA, Point3d correspondingPointOnB)
    {
       boolean alreadyHaveThatOne = doWeAlreadyHaveThatVertex(correspondingPointOnA, correspondingPointOnB);
@@ -343,35 +357,35 @@ public class SimplexPolytope
          else
          {
             // Compute barycentric coordinates for point inside the tetragon.
-            
+
             DenseMatrix64F tetragonMatrix = new DenseMatrix64F(4, 4);
-            
+
             tetragonMatrix.set(0, 0, pointOne.getX());
             tetragonMatrix.set(1, 0, pointOne.getY());
             tetragonMatrix.set(2, 0, pointOne.getZ());
             tetragonMatrix.set(3, 0, 1.0);
-            
+
             tetragonMatrix.set(0, 1, pointTwo.getX());
             tetragonMatrix.set(1, 1, pointTwo.getY());
             tetragonMatrix.set(2, 1, pointTwo.getZ());
             tetragonMatrix.set(3, 1, 1.0);
-            
+
             tetragonMatrix.set(0, 2, pointThree.getX());
             tetragonMatrix.set(1, 2, pointThree.getY());
             tetragonMatrix.set(2, 2, pointThree.getZ());
             tetragonMatrix.set(3, 2, 1.0);
-            
+
             tetragonMatrix.set(0, 3, pointFour.getX());
             tetragonMatrix.set(1, 3, pointFour.getY());
             tetragonMatrix.set(2, 3, pointFour.getZ());
             tetragonMatrix.set(3, 3, 1.0);
-            
+
             DenseMatrix64F tetragonVector = new DenseMatrix64F(4, 1);
             tetragonVector.set(0, 0, 0.0);
             tetragonVector.set(1, 0, 0.0);
             tetragonVector.set(2, 0, 0.0);
             tetragonVector.set(3, 0, 1.0);
-            
+
             DenseMatrix64F tetragonLambdas = new DenseMatrix64F(4, 1);
             CommonOps.solve(tetragonMatrix, tetragonVector, tetragonLambdas);
 
@@ -380,9 +394,9 @@ public class SimplexPolytope
             lambdas.put(pointTwo, tetragonLambdas.get(1, 0));
             lambdas.put(pointThree, tetragonLambdas.get(2, 0));
             lambdas.put(pointFour, tetragonLambdas.get(3, 0));
-            
+
             closestPointToOrigin.set(0.0, 0.0, 0.0);
-            
+
             //TODO: The retain points when you don't throw any away should be unnecessary...
             retainPoints(pointOne, pointTwo, pointThree, pointFour);
          }
@@ -481,7 +495,7 @@ public class SimplexPolytope
       simplexPointToPolytopePointB.put(pointToKeep2, point3dOnB2);
       simplexPointToPolytopePointB.put(pointToKeep3, point3dOnB3);
    }
-   
+
    private void retainPoints(Point3d pointToKeep1, Point3d pointToKeep2, Point3d pointToKeep3, Point3d pointToKeep4)
    {
       Point3d point3dOnA1 = simplexPointToPolytopePointA.get(pointToKeep1);
@@ -510,7 +524,7 @@ public class SimplexPolytope
       simplexPointToPolytopePointA.put(pointToKeep2, point3dOnA2);
       simplexPointToPolytopePointA.put(pointToKeep3, point3dOnA3);
       simplexPointToPolytopePointA.put(pointToKeep4, point3dOnA4);
-      
+
       simplexPointToPolytopePointB.put(pointToKeep1, point3dOnB1);
       simplexPointToPolytopePointB.put(pointToKeep2, point3dOnB2);
       simplexPointToPolytopePointB.put(pointToKeep3, point3dOnB3);
@@ -578,14 +592,14 @@ public class SimplexPolytope
       tempVector2.sub(edgePointTwo, edgePointOne);
       if (tempVector1.dot(tempVector2) < 0.0)
          return false;
-      
+
       tempVector1.set(edgePointTwo);
       tempVector1.scale(-1.0);
 
       tempVector2.sub(edgePointOne, edgePointTwo);
       if (tempVector1.dot(tempVector2) < 0.0)
          return false;
-      
+
       tempVector1.sub(edgePointTwo, edgePointOne);
       tempVector2.sub(otherPoint, edgePointOne);
 
@@ -599,21 +613,21 @@ public class SimplexPolytope
 
    private boolean isInVornoiRegionOfEdge(Point3d edgePointOne, Point3d edgePointTwo, Point3d otherPointOne, Point3d otherPointTwo)
    {
-   // TODO: Redundancies from other checks that be reused...
+      // TODO: Redundancies from other checks that be reused...
       tempVector1.set(edgePointOne);
       tempVector1.scale(-1.0);
 
       tempVector2.sub(edgePointTwo, edgePointOne);
       if (tempVector1.dot(tempVector2) < 0.0)
          return false;
-      
+
       tempVector1.set(edgePointTwo);
       tempVector1.scale(-1.0);
 
       tempVector2.sub(edgePointOne, edgePointTwo);
       if (tempVector1.dot(tempVector2) < 0.0)
          return false;
-      
+
       tempVector1.sub(edgePointTwo, edgePointOne);
       tempVector2.sub(otherPointOne, edgePointOne);
 
@@ -737,6 +751,16 @@ public class SimplexPolytope
       tempVector1.set(vertexThree);
       tempVector1.scale(lambdaThree);
       closestPointToOrigin.add(tempVector1);
+   }
+
+   public Point3d getCorrespondingPointOnPolytopeA(Point3d simplexPoint)
+   {
+      return simplexPointToPolytopePointA.get(simplexPoint);
+   }
+
+   public Point3d getCorrespondingPointOnPolytopeB(Point3d simplexPoint)
+   {
+      return simplexPointToPolytopePointB.get(simplexPoint);
    }
 
    public String toString()
