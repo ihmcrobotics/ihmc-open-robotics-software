@@ -9,7 +9,6 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.LineSegment3d;
@@ -98,7 +97,6 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       polytope.applyTransform(transform);
    }
 
-   @Ignore("Fixing this one...")
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIntersectingOnALotOfCubes()
@@ -138,7 +136,6 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       }
    }
 
-   @Ignore("Fixing this one...")
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testExtensivelyPointToPolytope()
@@ -303,7 +300,6 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       System.out.println("numberOutside = " + numberOutside);
    }
 
-   @Ignore("Fixing this one...")
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testExtensivelyPolytopeToPolytope()
