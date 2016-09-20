@@ -100,7 +100,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
    private static final boolean USE_WHOLE_BODY_IK = true;
 
-   private static final boolean BATTERY_MASS_SIMULATOR_IN_ROBOT = false;
+   public static final boolean BATTERY_MASS_SIMULATOR_IN_ROBOT = false;
 
    private final JaxbSDFLoader loader;
 
