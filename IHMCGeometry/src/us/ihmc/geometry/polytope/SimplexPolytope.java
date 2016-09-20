@@ -209,7 +209,7 @@ public class SimplexPolytope
    {
       // Use the distance subalgorithm of GJK and go through all the possibilities:
 
-      forgetDiscaredPoints();
+      forgetDiscardedVertices();
 
       if (pointOne == null)
       {
@@ -335,77 +335,147 @@ public class SimplexPolytope
             retainPoints(pointThree, pointFour);
          }
 
-         else if (isInVoronoiRegionOfFace(pointOne, pointTwo, pointThree, pointFour))
-         {
-            projectOriginOntoFace(pointOne, pointTwo, pointThree, closestPointToOrigin);
-            rememberDiscardedVertices(pointFour);
-            retainPoints(pointOne, pointTwo, pointThree);
-         }
-         else if (isInVoronoiRegionOfFace(pointOne, pointTwo, pointFour, pointThree))
-         {
-            projectOriginOntoFace(pointOne, pointTwo, pointFour, closestPointToOrigin);
-            rememberDiscardedVertices(pointThree);
-            retainPoints(pointOne, pointTwo, pointFour);
-         }
-         else if (isInVoronoiRegionOfFace(pointOne, pointThree, pointFour, pointTwo))
-         {
-            projectOriginOntoFace(pointOne, pointThree, pointFour, closestPointToOrigin);
-            rememberDiscardedVertices(pointTwo);
-            retainPoints(pointOne, pointThree, pointFour);
-         }
-         else if (isInVoronoiRegionOfFace(pointTwo, pointThree, pointFour, pointOne))
-         {
-            projectOriginOntoFace(pointTwo, pointThree, pointFour, closestPointToOrigin);
-            rememberDiscardedVertices(pointOne);
-            retainPoints(pointTwo, pointThree, pointFour);
-         }
          else
          {
-            // Compute barycentric coordinates for point inside the tetragon.
 
-            DenseMatrix64F tetragonMatrix = new DenseMatrix64F(4, 4);
+            // TODO: Should not have to check the lambdas with lambdasAreOK() call!
+            // Not sure why some of the harder, nearly coplanar are such that tow of these
+            // Face Voronoi region checks are true. Only one should be true if
+            // the edges and vertices are not Voronoi regions.
+            // Or maybe I have something wrong with the math?
 
-            tetragonMatrix.set(0, 0, pointOne.getX());
-            tetragonMatrix.set(1, 0, pointOne.getY());
-            tetragonMatrix.set(2, 0, pointOne.getZ());
-            tetragonMatrix.set(3, 0, 1.0);
+            if (isInVoronoiRegionOfFace(pointOne, pointTwo, pointThree, pointFour))
+            {
+               projectOriginOntoFace(pointOne, pointTwo, pointThree, closestPointToOrigin);
+               if (lambdasAreOK())
+               {
+                  rememberDiscardedVertices(pointFour);
+                  retainPoints(pointOne, pointTwo, pointThree);
+                  return;
+               }
+            }
 
-            tetragonMatrix.set(0, 1, pointTwo.getX());
-            tetragonMatrix.set(1, 1, pointTwo.getY());
-            tetragonMatrix.set(2, 1, pointTwo.getZ());
-            tetragonMatrix.set(3, 1, 1.0);
+            if (isInVoronoiRegionOfFace(pointOne, pointTwo, pointFour, pointThree))
+            {
+               projectOriginOntoFace(pointOne, pointTwo, pointFour, closestPointToOrigin);
+               if (lambdasAreOK())
+               {
+                  rememberDiscardedVertices(pointThree);
+                  retainPoints(pointOne, pointTwo, pointFour);
+                  return;
+               }
+            }
 
-            tetragonMatrix.set(0, 2, pointThree.getX());
-            tetragonMatrix.set(1, 2, pointThree.getY());
-            tetragonMatrix.set(2, 2, pointThree.getZ());
-            tetragonMatrix.set(3, 2, 1.0);
 
-            tetragonMatrix.set(0, 3, pointFour.getX());
-            tetragonMatrix.set(1, 3, pointFour.getY());
-            tetragonMatrix.set(2, 3, pointFour.getZ());
-            tetragonMatrix.set(3, 3, 1.0);
+            if (isInVoronoiRegionOfFace(pointOne, pointThree, pointFour, pointTwo))
+            {
+               projectOriginOntoFace(pointOne, pointThree, pointFour, closestPointToOrigin);
+               if (lambdasAreOK())
+               {
+                  rememberDiscardedVertices(pointTwo);
+                  retainPoints(pointOne, pointThree, pointFour);
+                  return;
+               }
+            }
 
-            DenseMatrix64F tetragonVector = new DenseMatrix64F(4, 1);
-            tetragonVector.set(0, 0, 0.0);
-            tetragonVector.set(1, 0, 0.0);
-            tetragonVector.set(2, 0, 0.0);
-            tetragonVector.set(3, 0, 1.0);
+            if (isInVoronoiRegionOfFace(pointTwo, pointThree, pointFour, pointOne))
+            {
+               projectOriginOntoFace(pointTwo, pointThree, pointFour, closestPointToOrigin);
+               if (lambdasAreOK())
+               {
+                  rememberDiscardedVertices(pointOne);
+                  retainPoints(pointTwo, pointThree, pointFour);
+                  return;
+               }
+            }
 
-            DenseMatrix64F tetragonLambdas = new DenseMatrix64F(4, 1);
-            CommonOps.solve(tetragonMatrix, tetragonVector, tetragonLambdas);
 
-            lambdas.clear();
-            setLambda(pointOne, tetragonLambdas.get(0, 0));
-            setLambda(pointTwo, tetragonLambdas.get(1, 0));
-            setLambda(pointThree, tetragonLambdas.get(2, 0));
-            setLambda(pointFour, tetragonLambdas.get(3, 0));
+            {
+               projectInsideTetragon(closestPointToOrigin);
 
-            closestPointToOrigin.set(0.0, 0.0, 0.0);
-
-            //TODO: The retain points when you don't throw any away should be unnecessary...
-            retainPoints(pointOne, pointTwo, pointThree, pointFour);
+               //TODO: The retain points when you don't throw any away should be unnecessary...
+               forgetDiscardedVertices();
+               retainPoints(pointOne, pointTwo, pointThree, pointFour);
+            }
          }
       }
+   }
+
+   private boolean lambdasAreOK()
+   {
+      if (lambdas.containsKey(pointOne))
+      {
+         double lambda = lambdas.get(pointOne);
+         if ((lambda < 0.0) || (lambda > 1.0))
+            return false;
+      }
+
+      if (lambdas.containsKey(pointTwo))
+      {
+         double lambda = lambdas.get(pointTwo);
+         if ((lambda < 0.0) || (lambda > 1.0))
+            return false;
+      }
+
+      if (lambdas.containsKey(pointThree))
+      {
+         double lambda = lambdas.get(pointThree);
+         if ((lambda < 0.0) || (lambda > 1.0))
+            return false;
+      }
+
+      if (lambdas.containsKey(pointFour))
+      {
+         double lambda = lambdas.get(pointFour);
+         if ((lambda < 0.0) || (lambda > 1.0))
+            return false;
+      }
+
+      return true;
+   }
+
+   private void projectInsideTetragon(Point3d closestPointToOrigin)
+   {
+      // Compute barycentric coordinates for point inside the tetragon.
+
+      DenseMatrix64F tetragonMatrix = new DenseMatrix64F(4, 4);
+
+      tetragonMatrix.set(0, 0, pointOne.getX());
+      tetragonMatrix.set(1, 0, pointOne.getY());
+      tetragonMatrix.set(2, 0, pointOne.getZ());
+      tetragonMatrix.set(3, 0, 1.0);
+
+      tetragonMatrix.set(0, 1, pointTwo.getX());
+      tetragonMatrix.set(1, 1, pointTwo.getY());
+      tetragonMatrix.set(2, 1, pointTwo.getZ());
+      tetragonMatrix.set(3, 1, 1.0);
+
+      tetragonMatrix.set(0, 2, pointThree.getX());
+      tetragonMatrix.set(1, 2, pointThree.getY());
+      tetragonMatrix.set(2, 2, pointThree.getZ());
+      tetragonMatrix.set(3, 2, 1.0);
+
+      tetragonMatrix.set(0, 3, pointFour.getX());
+      tetragonMatrix.set(1, 3, pointFour.getY());
+      tetragonMatrix.set(2, 3, pointFour.getZ());
+      tetragonMatrix.set(3, 3, 1.0);
+
+      DenseMatrix64F tetragonVector = new DenseMatrix64F(4, 1);
+      tetragonVector.set(0, 0, 0.0);
+      tetragonVector.set(1, 0, 0.0);
+      tetragonVector.set(2, 0, 0.0);
+      tetragonVector.set(3, 0, 1.0);
+
+      DenseMatrix64F tetragonLambdas = new DenseMatrix64F(4, 1);
+      CommonOps.solve(tetragonMatrix, tetragonVector, tetragonLambdas);
+
+      lambdas.clear();
+      setLambda(pointOne, tetragonLambdas.get(0, 0));
+      setLambda(pointTwo, tetragonLambdas.get(1, 0));
+      setLambda(pointThree, tetragonLambdas.get(2, 0));
+      setLambda(pointFour, tetragonLambdas.get(3, 0));
+
+      closestPointToOrigin.set(0.0, 0.0, 0.0);
    }
 
    private void retainPoints(Point3d pointToKeep)
@@ -526,7 +596,7 @@ public class SimplexPolytope
       discardedOnB = simplexPointToPolytopePointB.get(pointToDiscard);
    }
 
-   private void forgetDiscaredPoints()
+   private void forgetDiscardedVertices()
    {
       discardedOnA = discardedOnB = null;
    }
@@ -567,15 +637,18 @@ public class SimplexPolytope
       tempVector1.scale(-1.0);
 
       tempVector2.sub(otherPoint1, pointToCheck);
-      if (!(tempVector1.dot(tempVector2) <= 0.0))
+      double dotProduct = tempVector1.dot(tempVector2);
+      if (!(dotProduct <= 0.0))
          return false;
 
       tempVector2.sub(otherPoint2, pointToCheck);
-      if (!(tempVector1.dot(tempVector2) <= 0.0))
+      dotProduct = tempVector1.dot(tempVector2);
+      if (!(dotProduct <= 0.0))
          return false;
 
       tempVector2.sub(otherPoint3, pointToCheck);
-      if (!(tempVector1.dot(tempVector2) <= 0.0))
+      dotProduct = tempVector1.dot(tempVector2);
+      if (!(dotProduct <= 0.0))
          return false;
 
       return true;
@@ -590,20 +663,24 @@ public class SimplexPolytope
 
    public boolean isInVoronoiRegionOfEdge(Point3d edgePointOne, Point3d edgePointTwo, Point3d otherPoint)
    {
-      // TODO: Redundancies from other checks that be reused...
+      // TODO: Redundancies from other checks that be reused. Or is this just bad, due to epsilon problems.
+      // If we are here, then we know we failed one or more of the Vertex Voronoi region checks (but we do not know which ones...).
+      //So maybe these should be removed?
       tempVector1.set(edgePointOne);
       tempVector1.scale(-1.0);
 
       tempVector2.sub(edgePointTwo, edgePointOne);
-      if (tempVector1.dot(tempVector2) < 0.0)
+      if (!(tempVector1.dot(tempVector2) >= 0.0))
          return false;
 
       tempVector1.set(edgePointTwo);
       tempVector1.scale(-1.0);
 
       tempVector2.sub(edgePointOne, edgePointTwo);
-      if (tempVector1.dot(tempVector2) < 0.0)
+      if (!(tempVector1.dot(tempVector2) >= 0.0))
          return false;
+
+      ////////
 
       tempVector1.sub(edgePointTwo, edgePointOne);
       tempVector2.sub(otherPoint, edgePointOne);
@@ -623,15 +700,19 @@ public class SimplexPolytope
       tempVector1.scale(-1.0);
 
       tempVector2.sub(edgePointTwo, edgePointOne);
-      if (tempVector1.dot(tempVector2) < 0.0)
+      double dotProduct = tempVector1.dot(tempVector2);
+      if (!(dotProduct >= 0.0))
          return false;
 
       tempVector1.set(edgePointTwo);
       tempVector1.scale(-1.0);
 
       tempVector2.sub(edgePointOne, edgePointTwo);
-      if (tempVector1.dot(tempVector2) < 0.0)
+      dotProduct = tempVector1.dot(tempVector2);
+      if (!(dotProduct >= 0.0))
          return false;
+
+      ////////
 
       tempVector1.sub(edgePointTwo, edgePointOne);
       tempVector2.sub(otherPointOne, edgePointOne);
@@ -641,7 +722,8 @@ public class SimplexPolytope
       tempVector2.cross(tempVector1, tempNormalVector1);
       tempVector3.set(edgePointOne);
       tempVector3.scale(-1.0);
-      if (!(tempVector3.dot(tempVector2) >= 0.0))
+      dotProduct = tempVector3.dot(tempVector2);
+      if (!(dotProduct >= 0.0))
          return false;
 
       tempVector1.sub(edgePointTwo, edgePointOne);
@@ -652,7 +734,8 @@ public class SimplexPolytope
       tempVector2.cross(tempNormalVector2, tempVector1);
       tempVector3.set(edgePointOne);
       tempVector3.scale(-1.0);
-      if (!(tempVector3.dot(tempVector2) >= 0.0))
+      dotProduct = tempVector3.dot(tempVector2);
+      if (!(dotProduct >= 0.0))
          return false;
 
       return true;
@@ -684,15 +767,15 @@ public class SimplexPolytope
    {
       if (lambda < 0.0)
       {
-         System.err.println("Trouble with simplex:");
-         System.err.println(this);
-         throw new RuntimeException("lambda < 0.0! lambda = " + lambda);
+//         System.err.println("Trouble with simplex:");
+//         System.err.println(this);
+//         throw new RuntimeException("lambda < 0.0! lambda = " + lambda);
       }
       if (lambda > 1.0)
       {
-         System.err.println("Trouble with simplex:");
-         System.err.println(this);
-         throw new RuntimeException("lambda > 1.0! lambda = " + lambda);
+//         System.err.println("Trouble with simplex:");
+//         System.err.println(this);
+//         throw new RuntimeException("lambda > 1.0! lambda = " + lambda);
       }
 
       lambdas.put(vertex, lambda);
@@ -816,6 +899,35 @@ public class SimplexPolytope
       }
 
       return string;
+   }
+
+   public double computeTripleProductIfTetragon()
+   {
+      if (pointFour == null) return Double.NaN;
+
+      Vector3d vectorAB = new Vector3d();
+      Vector3d vectorAC = new Vector3d();
+      Vector3d vectorAD = new Vector3d();
+      Vector3d normalVector = new Vector3d();
+
+      vectorAB.sub(pointTwo, pointOne);
+      vectorAC.sub(pointThree, pointOne);
+      vectorAD.sub(pointFour, pointOne);
+      normalVector.cross(vectorAB, vectorAC);
+      double tripleProduct = vectorAD.dot(normalVector);
+
+      return tripleProduct;
+   }
+
+
+   public boolean hasFourCoplanarPoints()
+   {
+      if (pointFour == null) return false;
+
+      double tripleProduct = computeTripleProductIfTetragon();
+      if (tripleProduct == 0.0) return true;
+
+      return false;
    }
 
 }

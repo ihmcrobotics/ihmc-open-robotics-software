@@ -156,17 +156,25 @@ public class SimplexPolytopeTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test//(timeout = 30000)
    public void testVornoiRegionChecks()
    {
       SimplexPolytope simplex = new SimplexPolytope();
 
+      // Two Points:
       Point3d pointOne = new Point3d(1.0, 0.0, 0.0);
       Point3d pointTwo = new Point3d(2.0, 0.0, 0.0);
       simplex.setPoints(pointOne, pointTwo);
 
       assertTrue(simplex.isInVoronoiRegionOfVertex(pointOne, pointTwo));
       assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointOne));
+
+      pointOne = new Point3d(3.0, 4.0, 7.0);
+      pointTwo = new Point3d(2.0, 3.0, 5.0);
+      simplex.setPoints(pointOne, pointTwo);
+
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointOne, pointTwo));
+      assertTrue(simplex.isInVoronoiRegionOfVertex(pointTwo, pointOne));
 
       pointOne = new Point3d(-1.0, 0.01, 0.0);
       pointTwo = new Point3d(2.0, 0.01, 0.0);
@@ -175,6 +183,7 @@ public class SimplexPolytopeTest
       assertFalse(simplex.isInVoronoiRegionOfVertex(pointOne, pointTwo));
       assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointOne));
 
+      // Three Points:
       pointOne = new Point3d(1.0, 0.0, 0.0);
       pointTwo = new Point3d(2.0, 0.0, 0.0);
       Point3d pointThree = new Point3d(1.5, 1.0, 0.0);
@@ -206,7 +215,126 @@ public class SimplexPolytopeTest
       assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointOne, pointTwo));
       assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointTwo, pointOne));
 
+      assertTrue(simplex.isInVoronoiRegionOfEdge(pointOne, pointTwo, pointThree));
+      assertTrue(simplex.isInVoronoiRegionOfEdge(pointTwo, pointOne, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointThree, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointThree, pointOne, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointTwo, pointThree, pointOne));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointThree, pointTwo, pointOne));
 
+      double epsilon = 1e-7;
+      pointOne = new Point3d(3.0, 0.0 + epsilon, 0.0);
+      pointTwo = new Point3d(3.0, -1.0, 0.0);
+      pointThree = new Point3d(5.0, 0.0, 0.0);
+      simplex.setPoints(pointOne, pointTwo, pointThree);
+
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointOne, pointTwo, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointOne, pointThree, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointOne, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointThree, pointOne));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointOne, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointTwo, pointOne));
+
+      assertTrue(simplex.isInVoronoiRegionOfEdge(pointOne, pointTwo, pointThree));
+      assertTrue(simplex.isInVoronoiRegionOfEdge(pointTwo, pointOne, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointThree, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointThree, pointOne, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointTwo, pointThree, pointOne));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointThree, pointTwo, pointOne));
+
+      pointOne = new Point3d(3.0, 0.0 - epsilon, 0.0);
+      pointTwo = new Point3d(3.0, -1.0, 0.0);
+      pointThree = new Point3d(5.0, 0.0, 0.0);
+      simplex.setPoints(pointOne, pointTwo, pointThree);
+
+      assertTrue(simplex.isInVoronoiRegionOfVertex(pointOne, pointTwo, pointThree));
+      assertTrue(simplex.isInVoronoiRegionOfVertex(pointOne, pointThree, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointOne, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointThree, pointOne));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointOne, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointTwo, pointOne));
+
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointTwo, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointTwo, pointOne, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointThree, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointThree, pointOne, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointTwo, pointThree, pointOne));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointThree, pointTwo, pointOne));
+
+      pointOne = new Point3d(3.0, 0.0, 0.0);
+      pointTwo = new Point3d(3.0, -1.0, 0.0);
+      pointThree = new Point3d(5.0, 0.0, 0.0);
+      simplex.setPoints(pointOne, pointTwo, pointThree);
+
+      assertTrue(simplex.isInVoronoiRegionOfVertex(pointOne, pointTwo, pointThree));
+      assertTrue(simplex.isInVoronoiRegionOfVertex(pointOne, pointThree, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointOne, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointThree, pointOne));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointOne, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointTwo, pointOne));
+
+      assertTrue(simplex.isInVoronoiRegionOfEdge(pointOne, pointTwo, pointThree));
+      assertTrue(simplex.isInVoronoiRegionOfEdge(pointTwo, pointOne, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointThree, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointThree, pointOne, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointTwo, pointThree, pointOne));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointThree, pointTwo, pointOne));
+
+      // Four Points:
+      pointOne = new Point3d(3.0, 0.0, 0.0);
+      pointTwo = new Point3d(5.0, 0.0, 0.0);
+      pointThree = new Point3d(4.0, 2.0, 0.0);
+      Point3d pointFour = new Point3d(4.0, 1.0, 1.0);
+      simplex.setPoints(pointOne, pointTwo, pointThree, pointFour);
+
+      assertTrue(simplex.isInVoronoiRegionOfVertex(pointOne, pointTwo, pointThree, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointOne, pointThree, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointOne, pointTwo, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointFour, pointOne, pointTwo, pointThree));
+
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointTwo, pointThree, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointThree, pointTwo, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointFour, pointTwo, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointTwo, pointThree, pointOne, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointTwo, pointFour, pointOne, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointThree, pointFour, pointOne, pointTwo));
+
+      assertFalse(simplex.isInVoronoiRegionOfFace(pointOne, pointTwo, pointThree, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfFace(pointOne, pointTwo, pointFour, pointThree));
+      assertTrue(simplex.isInVoronoiRegionOfFace(pointOne, pointThree, pointFour, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfFace(pointTwo, pointThree, pointFour, pointOne));
+
+
+      // A Troublesome one:
+//      pointOne = new Point3d(-99.63099726377406, -101.05538475479693, -300.5);
+//      pointTwo = new Point3d(101.80371491802498, 97.55120182650874, -299.5);
+//      pointThree = new Point3d(-100.32770397312123, 98.22725915430355, -299.5);
+//      pointFour = new Point3d(-98.89299179132217, -103.16615426439077, -299.5);
+
+      pointOne = new Point3d(-0.996, -1.01, -3.01);
+      pointTwo = new Point3d(1.00, 0.98, -3.0);
+      pointThree = new Point3d(-1.00, 0.98, -3.0);
+      pointFour = new Point3d(-0.988, -1.01, -3.0);
+      simplex.setPoints(pointOne, pointTwo, pointThree, pointFour);
+
+      assertFalse(simplex.hasFourCoplanarPoints());
+
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointOne, pointTwo, pointThree, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointOne, pointThree, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointOne, pointTwo, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointFour, pointOne, pointTwo, pointThree));
+
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointTwo, pointThree, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointThree, pointTwo, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointFour, pointTwo, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointTwo, pointThree, pointOne, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointTwo, pointFour, pointOne, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointThree, pointFour, pointOne, pointTwo));
+
+      assertFalse(simplex.isInVoronoiRegionOfFace(pointOne, pointTwo, pointThree, pointFour));
+      assertFalse(simplex.isInVoronoiRegionOfFace(pointOne, pointTwo, pointFour, pointThree));
+      assertTrue(simplex.isInVoronoiRegionOfFace(pointOne, pointThree, pointFour, pointTwo));
+      assertTrue(simplex.isInVoronoiRegionOfFace(pointTwo, pointThree, pointFour, pointOne));
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
