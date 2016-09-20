@@ -29,14 +29,14 @@ public class GilbertJohnsonKeerthiCollisionDetectorAssertListener implements Gil
       {
          Point3d point = simplex.getPoint(i);
          double lambda = simplex.getLambda(point);
-         
-         if (lambda < 0.0)
+
+         if ((lambda < 0.0 - 1e-7) || (lambda > 1.0 + 1e-7))
          {
-            System.err.println("\n---------------------\nTroublesome simplex for closest point:");
+            System.err.println("\n---------------------\nlambda = " + lambda + ". Troublesome simplex for closest point:");
             System.err.println(simplex);
          }
-         assertTrue("lambda = " + lambda, lambda >= 0.0);
-         assertTrue("lambda = " + lambda, lambda <= 1.0);
+         assertTrue("lambda = " + lambda, lambda >= 0.0 -1e-7);
+         assertTrue("lambda = " + lambda, lambda <= 1.0 + 1e-7);
          lambdaTotal = lambdaTotal + lambda;
       }
 
