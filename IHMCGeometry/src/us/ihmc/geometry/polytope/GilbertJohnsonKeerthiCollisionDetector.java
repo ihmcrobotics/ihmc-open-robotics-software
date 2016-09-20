@@ -18,7 +18,7 @@ public class GilbertJohnsonKeerthiCollisionDetector
    private final Vector3d tempVertex = new Vector3d();
 
    private GilbertJohnsonKeerthiCollisionDetectorListener listener;
-   
+
    public void computeSupportPointOnMinkowskiDifference(ConvexPolytope cubeOne, ConvexPolytope cubeTwo, Vector3d supportDirection, Point3d supportPoint)
    {
       // Because everything is linear and convex, the support point on the Minkowski difference is s_{a minkowskidiff b}(d) = s_a(d) - s_b(-d)
@@ -38,7 +38,7 @@ public class GilbertJohnsonKeerthiCollisionDetector
    {
       this.listener = listener;
    }
-   
+
    public boolean arePolytopesColliding(ConvexPolytope polytopeA, ConvexPolytope polytopeB, Point3d pointOnAToPack, Point3d pointOnBToPack)
    {
       simplex.clearPoints();
@@ -51,12 +51,12 @@ public class GilbertJohnsonKeerthiCollisionDetector
       minkowskiDifferenceVertex.sub(vertexOne.getPosition(), vertexTwo.getPosition());
 
       simplex.addVertex(minkowskiDifferenceVertex, vertexOne.getPosition(), vertexTwo.getPosition());
-      
+
       if (listener != null)
       {
          listener.addedVertexToSimplex(simplex, minkowskiDifferenceVertex, vertexOne.getPosition(), vertexTwo.getPosition());
       }
-      
+
       int iterations = 0;
       int metStoppingConditionsCount = 0;
       while (true)
@@ -69,7 +69,7 @@ public class GilbertJohnsonKeerthiCollisionDetector
          {
             listener.foundClosestPointOnSimplex(simplex, closestPointToOrigin);
          }
-         
+
          // Step 3) If P is origin, done.
          double distanceSquared = closestPointToOrigin.distanceSquared(new Point3d());
          //TODO: Magic epsilon here...
@@ -79,7 +79,7 @@ public class GilbertJohnsonKeerthiCollisionDetector
             {
                listener.foundCollision(simplex, pointOnAToPack, pointOnBToPack);
             }
-            
+
             simplex.getClosestPointsOnAAndB(pointOnAToPack, pointOnBToPack);
             return true;
          }
@@ -95,22 +95,22 @@ public class GilbertJohnsonKeerthiCollisionDetector
          PolytopeVertex supportingVertexB = polytopeB.getSupportingVertex(supportDirection);
 
          Vector3d supportingVertexOnSimplex = new Vector3d();
-         
+
          Point3d supportingVertexOnA = supportingVertexA.getPosition();
          Point3d supportingVertexOnB = supportingVertexB.getPosition();
          if (simplex.wereMostRecentlyDiscared(supportingVertexOnA, supportingVertexOnB))
          {
             simplex.getClosestPointsOnAAndB(pointOnAToPack, pointOnBToPack);
-            
+
             if (listener != null)
             {
                listener.metStoppingConditionForNoIntersection(pointOnAToPack, pointOnBToPack);
             }
-            
+
             return false;
          }
          supportingVertexOnSimplex.sub(supportingVertexOnA, supportingVertexOnB);
-         
+
          if (listener != null)
          {
             listener.foundSupportPoints(simplex, supportingVertexOnA, supportingVertexOnB, supportingVertexOnSimplex);
@@ -121,14 +121,14 @@ public class GilbertJohnsonKeerthiCollisionDetector
          Vector3d P = new Vector3d(closestPointToOrigin);
 
          double vDotP = supportingVertexOnSimplex.dot(P);
-         double percentCloser = vDotP/P.dot(P);
+         double percentCloser = vDotP / P.dot(P);
 
          if (listener != null)
          {
             listener.computeVDotPAndPercentCloser(vDotP, percentCloser);
          }
-         
-//         System.out.println("vDotP - PSquared = " + foo);
+
+         //         System.out.println("vDotP - PSquared = " + foo);
 
          // TODO: Do we need this epsilon here. Seems when to abort is tricky. Maybe look that the extremal points in the
          // simplex stop changing?
@@ -136,55 +136,55 @@ public class GilbertJohnsonKeerthiCollisionDetector
          {
             metStoppingConditionsCount++;
          }
-         
+
          // TODO: Get rid of this. Hack right now to make sure really hard cases get a full shot...
          if (metStoppingConditionsCount == 4)
          {
             simplex.getClosestPointsOnAAndB(pointOnAToPack, pointOnBToPack);
-            
+
             if (listener != null)
             {
                listener.metStoppingConditionForNoIntersection(pointOnAToPack, pointOnBToPack);
             }
-            
+
             return false;
          }
-         
+
          iterations++;
          if (iterations > 100)
          {
             System.out.println("Seems to be looping... lambda = " + percentCloser);
             System.out.println("Seems to be looping... closestPointToOrigin = " + closestPointToOrigin);
          }
-         
+
          if (iterations > 106)
          {
             simplex.getClosestPointsOnAAndB(pointOnAToPack, pointOnBToPack);
-            
+
             if (listener != null)
             {
                listener.tooManyIterationsStopping(simplex, pointOnAToPack, pointOnBToPack);
             }
-            
+
             return false;
          }
 
          // Step 7) Add v to Q and got to step 2.
          Point3d pointToAddToSimplex = new Point3d(supportingVertexOnSimplex);
          boolean successfullyAddedVertex = simplex.addVertex(pointToAddToSimplex, supportingVertexA.getPosition(), supportingVertexB.getPosition());
-         
+
          if (!successfullyAddedVertex)
          {
             simplex.getClosestPointsOnAAndB(pointOnAToPack, pointOnBToPack);
-            
+
             if (listener != null)
             {
                listener.metStoppingConditionForNoIntersection(pointOnAToPack, pointOnBToPack);
             }
-            
+
             return false;
          }
-         
+
          if (listener != null)
          {
             listener.addedVertexToSimplex(simplex, pointToAddToSimplex, supportingVertexA.getPosition(), supportingVertexB.getPosition());

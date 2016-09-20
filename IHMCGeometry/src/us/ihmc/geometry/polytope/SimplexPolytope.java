@@ -366,7 +366,6 @@ public class SimplexPolytope
                }
             }
 
-
             if (isInVoronoiRegionOfFace(pointOne, pointThree, pointFour, pointTwo))
             {
                projectOriginOntoFace(pointOne, pointThree, pointFour, closestPointToOrigin);
@@ -388,7 +387,6 @@ public class SimplexPolytope
                   return;
                }
             }
-
 
             {
                projectInsideTetragon(closestPointToOrigin);
@@ -767,15 +765,15 @@ public class SimplexPolytope
    {
       if (lambda < 0.0)
       {
-//         System.err.println("Trouble with simplex:");
-//         System.err.println(this);
-//         throw new RuntimeException("lambda < 0.0! lambda = " + lambda);
+         //         System.err.println("Trouble with simplex:");
+         //         System.err.println(this);
+         //         throw new RuntimeException("lambda < 0.0! lambda = " + lambda);
       }
       if (lambda > 1.0)
       {
-//         System.err.println("Trouble with simplex:");
-//         System.err.println(this);
-//         throw new RuntimeException("lambda > 1.0! lambda = " + lambda);
+         //         System.err.println("Trouble with simplex:");
+         //         System.err.println(this);
+         //         throw new RuntimeException("lambda > 1.0! lambda = " + lambda);
       }
 
       lambdas.put(vertex, lambda);
@@ -903,7 +901,8 @@ public class SimplexPolytope
 
    public double computeTripleProductIfTetragon()
    {
-      if (pointFour == null) return Double.NaN;
+      if (pointFour == null)
+         return Double.NaN;
 
       Vector3d vectorAB = new Vector3d();
       Vector3d vectorAC = new Vector3d();
@@ -919,13 +918,14 @@ public class SimplexPolytope
       return tripleProduct;
    }
 
-
    public boolean hasFourCoplanarPoints()
    {
-      if (pointFour == null) return false;
+      if (pointFour == null)
+         return false;
 
       double tripleProduct = computeTripleProductIfTetragon();
-      if (tripleProduct == 0.0) return true;
+      if (tripleProduct == 0.0)
+         return true;
 
       return false;
    }

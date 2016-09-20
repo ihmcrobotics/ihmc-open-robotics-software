@@ -51,7 +51,7 @@ public class PrintingGilbertJohnsonKeerthiCollisionDetectorListener implements G
       System.out.println("\nMet Stopping Condition For No Intersection");
       System.out.println("closestPointOnA = " + closestPointOnA);
       System.out.println("closestPointOnB = " + closestPointOnB);
-      
+
       System.out.println("---------------------------");
       System.out.println("");
    }
@@ -62,7 +62,7 @@ public class PrintingGilbertJohnsonKeerthiCollisionDetectorListener implements G
       System.out.println("\nToo Many Iterations. No Intersection");
       System.out.println("closestPointOnA = " + closestPointOnA);
       System.out.println("closestPointOnB = " + closestPointOnB);
-      
+
       System.out.println("---------------------------");
       System.out.println("");
    }
@@ -75,7 +75,7 @@ public class PrintingGilbertJohnsonKeerthiCollisionDetectorListener implements G
       System.out.println("closestPointOnB = " + closestPointOnB);
       System.out.println("---------------------------");
       System.out.println("");
-      
+
    }
 
 }
