@@ -93,7 +93,7 @@ public class SimplexPolytopeTest
 
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
       assertLambdasOnSimplex(simplex);
-      
+
       JUnitTools.assertPoint3dEquals("", new Point3d(0.0, 2.0, 0.0), closestPointToOrigin, 1e-7);
       assertEquals(3, simplex.getNumberOfPoints());
       assertTrue(simplex.containsPoint(pointOne));
@@ -154,7 +154,61 @@ public class SimplexPolytopeTest
       assertTrue(simplex.containsPoint(pointThree));
       assertTrue(simplex.containsPoint(pointFour));
    }
-   
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testVornoiRegionChecks()
+   {
+      SimplexPolytope simplex = new SimplexPolytope();
+
+      Point3d pointOne = new Point3d(1.0, 0.0, 0.0);
+      Point3d pointTwo = new Point3d(2.0, 0.0, 0.0);
+      simplex.setPoints(pointOne, pointTwo);
+
+      assertTrue(simplex.isInVoronoiRegionOfVertex(pointOne, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointOne));
+
+      pointOne = new Point3d(-1.0, 0.01, 0.0);
+      pointTwo = new Point3d(2.0, 0.01, 0.0);
+      simplex.setPoints(pointOne, pointTwo);
+
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointOne, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointOne));
+
+      pointOne = new Point3d(1.0, 0.0, 0.0);
+      pointTwo = new Point3d(2.0, 0.0, 0.0);
+      Point3d pointThree = new Point3d(1.5, 1.0, 0.0);
+      simplex.setPoints(pointOne, pointTwo, pointThree);
+
+      assertTrue(simplex.isInVoronoiRegionOfVertex(pointOne, pointTwo, pointThree));
+      assertTrue(simplex.isInVoronoiRegionOfVertex(pointOne, pointThree, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointOne, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointThree, pointOne));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointOne, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointTwo, pointOne));
+
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointTwo, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointOne, pointThree, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointTwo, pointOne, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointTwo, pointThree, pointOne));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointThree, pointOne, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfEdge(pointThree, pointTwo, pointOne));
+
+      pointOne = new Point3d(3.0, 1.0, 0.0);
+      pointTwo = new Point3d(3.0, -1.0, 0.0);
+      pointThree = new Point3d(5.0, 0.0, 0.0);
+      simplex.setPoints(pointOne, pointTwo, pointThree);
+
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointOne, pointTwo, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointOne, pointThree, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointOne, pointThree));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointTwo, pointThree, pointOne));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointOne, pointTwo));
+      assertFalse(simplex.isInVoronoiRegionOfVertex(pointThree, pointTwo, pointOne));
+
+
+   }
+
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test//(timeout = 30000)
    public void testTroublesomeOnes()
@@ -165,11 +219,11 @@ public class SimplexPolytopeTest
       Point3d pointTwo = new Point3d(-100.32770397312123, 98.22725915430355, -299.5);
       Point3d pointThree = new Point3d(-98.89299179132217, -103.16615426439077, -299.5);
       simplex.setPoints(pointOne, pointTwo, pointThree);
-      
+
       Point3d closestPointToOrigin = new Point3d();
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
       assertLambdasOnSimplex(simplex);
-      
+
       simplex = new SimplexPolytope();
       pointOne = new Point3d(-0.5379411195816246, -0.38484462547765474, -1.1060106195237154);
       pointTwo = new Point3d(0.020587720117710262, -0.6621396208363777, 1.3677196242027705);
@@ -179,14 +233,14 @@ public class SimplexPolytopeTest
 
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
       assertLambdasOnSimplex(simplex);
-      
+
       simplex = new SimplexPolytope();
       pointOne = new Point3d(-99.63099726377406, -101.05538475479693, -300.5);
       pointTwo = new Point3d(101.80371491802498, 97.55120182650874, -299.5);
       pointThree = new Point3d(-100.32770397312123, 98.22725915430355, -299.5);
       pointFour = new Point3d(-98.89299179132217, -103.16615426439077, -299.5);
       simplex.setPoints(pointOne, pointTwo, pointThree, pointFour);
-      
+
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
       assertLambdasOnSimplex(simplex);
    }
