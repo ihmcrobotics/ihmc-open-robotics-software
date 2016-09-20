@@ -25,7 +25,7 @@ public class ConvexPolytope
 
    public void addVertices(Point3d[] polytopePoints)
    {
-      for (int i=0; i<polytopePoints.length; i++)
+      for (int i = 0; i < polytopePoints.length; i++)
       {
          addVertex(polytopePoints[i]);
       }
@@ -105,18 +105,17 @@ public class ConvexPolytope
 
       return bestVertex;
    }
-   
+
    public String toString()
    {
       String string = "";
-      
+
       for (PolytopeVertex vertex : vertices)
       {
          string = string + "\n" + vertex;
       }
-      
+
       return string;
    }
-
 
 }

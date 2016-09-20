@@ -156,7 +156,7 @@ public class SimplexPolytopeTest
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test //(timeout = 30000)
    public void testVornoiRegionChecks()
    {
       SimplexPolytope simplex = new SimplexPolytope();
@@ -304,12 +304,11 @@ public class SimplexPolytopeTest
       assertTrue(simplex.isInVoronoiRegionOfFace(pointOne, pointThree, pointFour, pointTwo));
       assertFalse(simplex.isInVoronoiRegionOfFace(pointTwo, pointThree, pointFour, pointOne));
 
-
       // A Troublesome one:
-//      pointOne = new Point3d(-99.63099726377406, -101.05538475479693, -300.5);
-//      pointTwo = new Point3d(101.80371491802498, 97.55120182650874, -299.5);
-//      pointThree = new Point3d(-100.32770397312123, 98.22725915430355, -299.5);
-//      pointFour = new Point3d(-98.89299179132217, -103.16615426439077, -299.5);
+      //      pointOne = new Point3d(-99.63099726377406, -101.05538475479693, -300.5);
+      //      pointTwo = new Point3d(101.80371491802498, 97.55120182650874, -299.5);
+      //      pointThree = new Point3d(-100.32770397312123, 98.22725915430355, -299.5);
+      //      pointFour = new Point3d(-98.89299179132217, -103.16615426439077, -299.5);
 
       pointOne = new Point3d(-0.996, -1.01, -3.01);
       pointTwo = new Point3d(1.00, 0.98, -3.0);
