@@ -97,7 +97,7 @@ public class SimplexPolytope
 
       return null;
    }
-   
+
    public double getLambda(Point3d point)
    {
       return lambdas.get(point);
@@ -259,17 +259,17 @@ public class SimplexPolytope
             retainPoints(pointThree);
          }
 
-         else if (isInVornoiRegionOfEdge(pointOne, pointTwo, pointThree))
+         else if (isInVoronoiRegionOfEdge(pointOne, pointTwo, pointThree))
          {
             projectOriginOntoEdge(pointOne, pointTwo, closestPointToOrigin);
             retainPoints(pointOne, pointTwo);
          }
-         else if (isInVornoiRegionOfEdge(pointOne, pointThree, pointTwo))
+         else if (isInVoronoiRegionOfEdge(pointOne, pointThree, pointTwo))
          {
             projectOriginOntoEdge(pointOne, pointThree, closestPointToOrigin);
             retainPoints(pointOne, pointThree);
          }
-         else if (isInVornoiRegionOfEdge(pointTwo, pointThree, pointOne))
+         else if (isInVoronoiRegionOfEdge(pointTwo, pointThree, pointOne))
          {
             projectOriginOntoEdge(pointTwo, pointThree, closestPointToOrigin);
             retainPoints(pointTwo, pointThree);
@@ -304,56 +304,56 @@ public class SimplexPolytope
             retainPoints(pointFour);
          }
 
-         else if (isInVornoiRegionOfEdge(pointOne, pointTwo, pointThree, pointFour))
+         else if (isInVoronoiRegionOfEdge(pointOne, pointTwo, pointThree, pointFour))
          {
             projectOriginOntoEdge(pointOne, pointTwo, closestPointToOrigin);
             retainPoints(pointOne, pointTwo);
          }
-         else if (isInVornoiRegionOfEdge(pointOne, pointThree, pointTwo, pointFour))
+         else if (isInVoronoiRegionOfEdge(pointOne, pointThree, pointTwo, pointFour))
          {
             projectOriginOntoEdge(pointOne, pointThree, closestPointToOrigin);
             retainPoints(pointOne, pointThree);
          }
-         else if (isInVornoiRegionOfEdge(pointOne, pointFour, pointTwo, pointThree))
+         else if (isInVoronoiRegionOfEdge(pointOne, pointFour, pointTwo, pointThree))
          {
             projectOriginOntoEdge(pointOne, pointFour, closestPointToOrigin);
             retainPoints(pointOne, pointFour);
          }
-         else if (isInVornoiRegionOfEdge(pointTwo, pointThree, pointOne, pointFour))
+         else if (isInVoronoiRegionOfEdge(pointTwo, pointThree, pointOne, pointFour))
          {
             projectOriginOntoEdge(pointTwo, pointThree, closestPointToOrigin);
             retainPoints(pointTwo, pointThree);
          }
-         else if (isInVornoiRegionOfEdge(pointTwo, pointFour, pointOne, pointThree))
+         else if (isInVoronoiRegionOfEdge(pointTwo, pointFour, pointOne, pointThree))
          {
             projectOriginOntoEdge(pointTwo, pointFour, closestPointToOrigin);
             retainPoints(pointTwo, pointFour);
          }
-         else if (isInVornoiRegionOfEdge(pointThree, pointFour, pointOne, pointTwo))
+         else if (isInVoronoiRegionOfEdge(pointThree, pointFour, pointOne, pointTwo))
          {
             projectOriginOntoEdge(pointThree, pointFour, closestPointToOrigin);
             retainPoints(pointThree, pointFour);
          }
 
-         else if (isInVornoiRegionOfFace(pointOne, pointTwo, pointThree, pointFour))
+         else if (isInVoronoiRegionOfFace(pointOne, pointTwo, pointThree, pointFour))
          {
             projectOriginOntoFace(pointOne, pointTwo, pointThree, closestPointToOrigin);
             rememberDiscardedVertices(pointFour);
             retainPoints(pointOne, pointTwo, pointThree);
          }
-         else if (isInVornoiRegionOfFace(pointOne, pointTwo, pointFour, pointThree))
+         else if (isInVoronoiRegionOfFace(pointOne, pointTwo, pointFour, pointThree))
          {
             projectOriginOntoFace(pointOne, pointTwo, pointFour, closestPointToOrigin);
             rememberDiscardedVertices(pointThree);
             retainPoints(pointOne, pointTwo, pointFour);
          }
-         else if (isInVornoiRegionOfFace(pointOne, pointThree, pointFour, pointTwo))
+         else if (isInVoronoiRegionOfFace(pointOne, pointThree, pointFour, pointTwo))
          {
             projectOriginOntoFace(pointOne, pointThree, pointFour, closestPointToOrigin);
             rememberDiscardedVertices(pointTwo);
             retainPoints(pointOne, pointThree, pointFour);
          }
-         else if (isInVornoiRegionOfFace(pointTwo, pointThree, pointFour, pointOne))
+         else if (isInVoronoiRegionOfFace(pointTwo, pointThree, pointFour, pointOne))
          {
             projectOriginOntoFace(pointTwo, pointThree, pointFour, closestPointToOrigin);
             rememberDiscardedVertices(pointOne);
@@ -431,7 +431,7 @@ public class SimplexPolytope
    {
       Point3d point3dOnA1 = simplexPointToPolytopePointA.get(pointToKeep1);
       Point3d point3dOnA2 = simplexPointToPolytopePointA.get(pointToKeep2);
- 
+
       Point3d point3dOnB1 = simplexPointToPolytopePointB.get(pointToKeep1);
       Point3d point3dOnB2 = simplexPointToPolytopePointB.get(pointToKeep2);
 
@@ -457,7 +457,7 @@ public class SimplexPolytope
       Point3d point3dOnA1 = simplexPointToPolytopePointA.get(pointToKeep1);
       Point3d point3dOnA2 = simplexPointToPolytopePointA.get(pointToKeep2);
       Point3d point3dOnA3 = simplexPointToPolytopePointA.get(pointToKeep3);
- 
+
       Point3d point3dOnB1 = simplexPointToPolytopePointB.get(pointToKeep1);
       Point3d point3dOnB2 = simplexPointToPolytopePointB.get(pointToKeep2);
       Point3d point3dOnB3 = simplexPointToPolytopePointB.get(pointToKeep3);
@@ -535,8 +535,8 @@ public class SimplexPolytope
    {
       return ((discardedOnA == checkOnA) && (discardedOnB == checkOnB));
    }
-   
-   private boolean isInVoronoiRegionOfVertex(Point3d pointToCheck, Point3d otherPoint)
+
+   public boolean isInVoronoiRegionOfVertex(Point3d pointToCheck, Point3d otherPoint)
    {
       tempVector1.set(pointToCheck);
       tempVector1.scale(-1.0);
@@ -545,7 +545,7 @@ public class SimplexPolytope
       return (tempVector1.dot(tempVector2) <= 0.0);
    }
 
-   private boolean isInVoronoiRegionOfVertex(Point3d pointToCheck, Point3d otherPoint1, Point3d otherPoint2)
+   public boolean isInVoronoiRegionOfVertex(Point3d pointToCheck, Point3d otherPoint1, Point3d otherPoint2)
    {
       tempVector1.set(pointToCheck);
       tempVector1.scale(-1.0);
@@ -561,7 +561,7 @@ public class SimplexPolytope
       return true;
    }
 
-   private boolean isInVoronoiRegionOfVertex(Point3d pointToCheck, Point3d otherPoint1, Point3d otherPoint2, Point3d otherPoint3)
+   public boolean isInVoronoiRegionOfVertex(Point3d pointToCheck, Point3d otherPoint1, Point3d otherPoint2, Point3d otherPoint3)
    {
       tempVector1.set(pointToCheck);
       tempVector1.scale(-1.0);
@@ -588,7 +588,7 @@ public class SimplexPolytope
    private final Vector3d tempNormalVector1 = new Vector3d();
    private final Vector3d tempNormalVector2 = new Vector3d();
 
-   private boolean isInVornoiRegionOfEdge(Point3d edgePointOne, Point3d edgePointTwo, Point3d otherPoint)
+   public boolean isInVoronoiRegionOfEdge(Point3d edgePointOne, Point3d edgePointTwo, Point3d otherPoint)
    {
       // TODO: Redundancies from other checks that be reused...
       tempVector1.set(edgePointOne);
@@ -616,7 +616,7 @@ public class SimplexPolytope
       return (tempVector3.dot(tempVector2) >= 0.0);
    }
 
-   private boolean isInVornoiRegionOfEdge(Point3d edgePointOne, Point3d edgePointTwo, Point3d otherPointOne, Point3d otherPointTwo)
+   public boolean isInVoronoiRegionOfEdge(Point3d edgePointOne, Point3d edgePointTwo, Point3d otherPointOne, Point3d otherPointTwo)
    {
       // TODO: Redundancies from other checks that be reused...
       tempVector1.set(edgePointOne);
@@ -658,7 +658,7 @@ public class SimplexPolytope
       return true;
    }
 
-   private boolean isInVornoiRegionOfFace(Point3d facePointOne, Point3d facePointTwo, Point3d facePointThree, Point3d otherPoint)
+   public boolean isInVoronoiRegionOfFace(Point3d facePointOne, Point3d facePointTwo, Point3d facePointThree, Point3d otherPoint)
    {
       tempVector1.sub(facePointTwo, facePointOne);
       tempVector2.sub(facePointThree, facePointOne);
@@ -688,22 +688,22 @@ public class SimplexPolytope
          System.err.println(this);
          throw new RuntimeException("lambda < 0.0! lambda = " + lambda);
       }
-      if (lambda > 1.0) 
+      if (lambda > 1.0)
       {
          System.err.println("Trouble with simplex:");
          System.err.println(this);
          throw new RuntimeException("lambda > 1.0! lambda = " + lambda);
       }
-      
-      lambdas.put(vertex, lambda); 
+
+      lambdas.put(vertex, lambda);
    }
-   
+
    private void projectOriginOntoPoint(Point3d vertex, Point3d projectionToPack)
    {
       projectionToPack.set(vertex);
 
       lambdas.clear();
-      setLambda(vertex, 1.0); 
+      setLambda(vertex, 1.0);
    }
 
    private void projectOriginOntoEdge(Point3d vertexOne, Point3d vertexTwo, Point3d projectionToPack)
