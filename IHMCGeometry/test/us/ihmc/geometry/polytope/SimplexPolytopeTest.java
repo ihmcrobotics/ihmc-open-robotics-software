@@ -26,6 +26,7 @@ public class SimplexPolytopeTest
 
       Point3d closestPointToOrigin = new Point3d();
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
       assertEquals(1, simplex.getNumberOfPoints());
 
       JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 2.0, 3.0), closestPointToOrigin, 1e-7);
@@ -35,6 +36,7 @@ public class SimplexPolytopeTest
       simplex.setPoints(pointOne, pointTwo);
 
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
       JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 2.0, 3.0), closestPointToOrigin, 1e-7);
       assertEquals(1, simplex.getNumberOfPoints());
       assertTrue(simplex.containsPoint(pointOne));
@@ -44,6 +46,7 @@ public class SimplexPolytopeTest
       simplex.setPoints(pointOne, pointTwo);
 
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
       JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 2.0, 2.5), closestPointToOrigin, 1e-7);
       assertEquals(1, simplex.getNumberOfPoints());
       assertFalse(simplex.containsPoint(pointOne));
@@ -53,6 +56,7 @@ public class SimplexPolytopeTest
       simplex.setPoints(pointOne, pointTwo);
 
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
       JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 2.0, 0.0), closestPointToOrigin, 1e-7);
       assertEquals(2, simplex.getNumberOfPoints());
       assertTrue(simplex.containsPoint(pointOne));
@@ -66,6 +70,7 @@ public class SimplexPolytopeTest
       simplex.setPoints(pointOne, pointTwo, pointThree);
 
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
       JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 2.0, 3.0), closestPointToOrigin, 1e-7);
       assertEquals(1, simplex.getNumberOfPoints());
       assertTrue(simplex.containsPoint(pointOne));
@@ -76,6 +81,7 @@ public class SimplexPolytopeTest
       simplex.setPoints(pointOne, pointTwo, pointThree);
 
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
       JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 2.0, 0.0), closestPointToOrigin, 1e-7);
       assertEquals(2, simplex.getNumberOfPoints());
       assertTrue(simplex.containsPoint(pointOne));
@@ -86,7 +92,9 @@ public class SimplexPolytopeTest
       simplex.setPoints(pointOne, pointTwo, pointThree);
 
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
-      JUnitTools.assertPoint3dEquals("", new Point3d(0.0, 0.0, 0.0), closestPointToOrigin, 1e-7);
+      assertLambdasOnSimplex(simplex);
+      
+      JUnitTools.assertPoint3dEquals("", new Point3d(0.0, 2.0, 0.0), closestPointToOrigin, 1e-7);
       assertEquals(3, simplex.getNumberOfPoints());
       assertTrue(simplex.containsPoint(pointOne));
       assertTrue(simplex.containsPoint(pointTwo));
@@ -102,6 +110,7 @@ public class SimplexPolytopeTest
       simplex.setPoints(pointOne, pointTwo, pointThree, pointFour);
 
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
       JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 1.0, 1.0), closestPointToOrigin, 1e-7);
       assertEquals(1, simplex.getNumberOfPoints());
       assertTrue(simplex.containsPoint(pointOne));
@@ -113,6 +122,7 @@ public class SimplexPolytopeTest
       simplex.setPoints(pointOne, pointTwo, pointThree, pointFour);
 
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
       JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 1.0, 0.0), closestPointToOrigin, 1e-7);
       assertEquals(2, simplex.getNumberOfPoints());
       assertTrue(simplex.containsPoint(pointOne));
@@ -124,6 +134,7 @@ public class SimplexPolytopeTest
       simplex.setPoints(pointOne, pointTwo, pointThree, pointFour);
 
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
       JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 0.0, 0.0), closestPointToOrigin, 1e-7);
       assertEquals(3, simplex.getNumberOfPoints());
       assertTrue(simplex.containsPoint(pointOne));
@@ -135,12 +146,68 @@ public class SimplexPolytopeTest
       simplex.setPoints(pointOne, pointTwo, pointThree, pointFour);
 
       simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
       JUnitTools.assertPoint3dEquals("", new Point3d(0.0, 0.0, 0.0), closestPointToOrigin, 1e-7);
       assertEquals(4, simplex.getNumberOfPoints());
       assertTrue(simplex.containsPoint(pointOne));
       assertTrue(simplex.containsPoint(pointTwo));
       assertTrue(simplex.containsPoint(pointThree));
       assertTrue(simplex.containsPoint(pointFour));
+   }
+   
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test//(timeout = 30000)
+   public void testTroublesomeOnes()
+   {
+      SimplexPolytope simplex = new SimplexPolytope();
+
+      Point3d pointOne = new Point3d(-99.63099726377406, -101.05538475479693, -300.5);
+      Point3d pointTwo = new Point3d(-100.32770397312123, 98.22725915430355, -299.5);
+      Point3d pointThree = new Point3d(-98.89299179132217, -103.16615426439077, -299.5);
+      simplex.setPoints(pointOne, pointTwo, pointThree);
+      
+      Point3d closestPointToOrigin = new Point3d();
+      simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
+      
+      simplex = new SimplexPolytope();
+      pointOne = new Point3d(-0.5379411195816246, -0.38484462547765474, -1.1060106195237154);
+      pointTwo = new Point3d(0.020587720117710262, -0.6621396208363777, 1.3677196242027705);
+      pointThree = new Point3d(0.19546617376320796, -0.10118334510837457, -0.1912468320707319);
+      Point3d pointFour = new Point3d(-1.277478438460875, -0.22650524035534403, 0.7366990117925241);
+      simplex.setPoints(pointOne, pointTwo, pointThree, pointFour);
+
+      simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
+      
+      simplex = new SimplexPolytope();
+      pointOne = new Point3d(-99.63099726377406, -101.05538475479693, -300.5);
+      pointTwo = new Point3d(101.80371491802498, 97.55120182650874, -299.5);
+      pointThree = new Point3d(-100.32770397312123, 98.22725915430355, -299.5);
+      pointFour = new Point3d(-98.89299179132217, -103.16615426439077, -299.5);
+      simplex.setPoints(pointOne, pointTwo, pointThree, pointFour);
+      
+      simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
+      assertLambdasOnSimplex(simplex);
+   }
+
+   private void assertLambdasOnSimplex(SimplexPolytope simplex)
+   {
+      int numberOfPoints = simplex.getNumberOfPoints();
+
+      double lambdaTotal = 0.0;
+
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         Point3d point = simplex.getPoint(i);
+         double lambda = simplex.getLambda(point);
+         assertTrue(lambda >= 0.0);
+         assertTrue(lambda <= 1.0);
+
+         lambdaTotal = lambdaTotal + lambda;
+      }
+
+      assertEquals(1.0, lambdaTotal, 1e-7);
    }
 
 }
