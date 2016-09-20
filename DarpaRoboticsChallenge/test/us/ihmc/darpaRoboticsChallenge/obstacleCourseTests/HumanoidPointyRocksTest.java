@@ -306,6 +306,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
       enablePartialFootholdDetectionAndResponse(drcSimulationTestHelper, 0.5, 0.0, defaultChickenPercentage);
+      BooleanYoVariable doFootExplorationInTransferToStanding = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
+      doFootExplorationInTransferToStanding.set(false);
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
