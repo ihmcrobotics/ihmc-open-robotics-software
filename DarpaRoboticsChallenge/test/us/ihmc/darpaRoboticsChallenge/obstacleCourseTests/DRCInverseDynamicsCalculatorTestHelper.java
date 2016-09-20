@@ -25,15 +25,7 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -150,7 +142,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public void setRobotTorquesToMatchFullRobotModel()
    {
-      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame bodyFixedFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
 
       Wrench rootJointWrench = new Wrench(bodyFixedFrame, bodyFixedFrame);
@@ -246,7 +238,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public boolean checkAccelerationsMatchBetweenFullRobotModelAndSimulatedRobot(double epsilon)
    {
-      SixDoFJoint sixDoFJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint sixDoFJoint = fullRobotModel.getRootJoint();
       FloatingJoint floatingJoint = robot.getRootJoint();
       boolean allAccelerationsMatch = checkFullRobotModelRootJointAccelerationmatchesRobot(floatingJoint, sixDoFJoint, epsilon);
 
@@ -280,7 +272,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
 
-      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       Wrench rootJointWrench = new Wrench(rootJoint.getFrameAfterJoint(), rootJoint.getFrameAfterJoint());
       rootJoint.getWrench(rootJointWrench);
 
@@ -356,7 +348,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    {
       robot.update();
 
-      SixDoFJoint sixDoFJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint sixDoFJoint = fullRobotModel.getRootJoint();
       FloatingJoint floatingJoint = robot.getRootJoint();
 
       setFullRobotModelRootJointPositionAndOrientationToMatchRobot(sixDoFJoint, floatingJoint);
@@ -413,7 +405,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public void setRobotStateToMatchFullRobotModel()
    {
-      SixDoFJoint sixDoFJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint sixDoFJoint = fullRobotModel.getRootJoint();
       FloatingJoint floatingJoint = robot.getRootJoint();
 
       fullRobotModel.updateFrames();
@@ -438,7 +430,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    public void setFullRobotModelAccelerationRandomly(Random random, double maxPelvisLinearAcceleration, double maxPelvisAngularAcceleration,
          double maxJointAcceleration)
    {
-      SixDoFJoint sixDoFJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint sixDoFJoint = fullRobotModel.getRootJoint();
       setSixDoFJointAccelerationRandomly(sixDoFJoint, random, maxPelvisLinearAcceleration, maxPelvisAngularAcceleration);
 
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
@@ -455,7 +447,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
    {
       robot.update();
 
-      SixDoFJoint sixDoFJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint sixDoFJoint = fullRobotModel.getRootJoint();
       FloatingJoint floatingJoint = robot.getRootJoint();
 
       fullRobotModel.updateFrames();
@@ -554,7 +546,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       }
    }
 
-   public void setFullRobotModelRootJointVelocityAndAngularVelocityToMatchRobot(SixDoFJoint sixDoFJoint, FloatingJoint floatingJoint)
+   public void setFullRobotModelRootJointVelocityAndAngularVelocityToMatchRobot(FloatingInverseDynamicsJoint sixDoFJoint, FloatingJoint floatingJoint)
    {
       FrameVector angularVelocityFrameVector = new FrameVector();
       FrameVector linearVelocityFrameVector = new FrameVector();
@@ -570,7 +562,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       sixDoFJoint.setJointTwist(bodyTwist);
    }
 
-   public void setRobotRootJointVelocityAndAngularVelocityToMatchFullRobotModel(SixDoFJoint sixDoFJoint, FloatingJoint floatingJoint)
+   public void setRobotRootJointVelocityAndAngularVelocityToMatchFullRobotModel(FloatingInverseDynamicsJoint sixDoFJoint, FloatingJoint floatingJoint)
    {
       Twist rootJointTwist = new Twist();
       sixDoFJoint.getJointTwist(rootJointTwist);
@@ -584,14 +576,14 @@ public class DRCInverseDynamicsCalculatorTestHelper
       floatingJoint.setVelocity(linearVelocityInWorld.getVectorCopy());
    }
 
-   public void setFullRobotModelRootJointPositionAndOrientationToMatchRobot(SixDoFJoint sixDoFJoint, FloatingJoint floatingJoint)
+   public void setFullRobotModelRootJointPositionAndOrientationToMatchRobot(FloatingInverseDynamicsJoint sixDoFJoint, FloatingJoint floatingJoint)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       floatingJoint.getTransformToWorld(transformToWorld);
       sixDoFJoint.setPositionAndRotation(transformToWorld);
    }
 
-   public void setRobotRootJointPositionAndOrientationToMatchFullRobotModel(SixDoFJoint sixDoFJoint, FloatingJoint floatingJoint)
+   public void setRobotRootJointPositionAndOrientationToMatchFullRobotModel(FloatingInverseDynamicsJoint sixDoFJoint, FloatingJoint floatingJoint)
    {
       RigidBodyTransform transform = new RigidBodyTransform(sixDoFJoint.getJointTransform3D());
       floatingJoint.setRotationAndTranslation(transform);
@@ -599,7 +591,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public void setFullRobotModelStateRandomly(Random random, double maxJointVelocity, double maxRootJointLinearAndAngularVelocity)
    {
-      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
 
       ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
       ReferenceFrame bodyFrame = rootJoint.getFrameAfterJoint();
@@ -764,10 +756,10 @@ public class DRCInverseDynamicsCalculatorTestHelper
       }
    }
 
-   public void copyAccelerationFromForwardToInverseBroken(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)
+   public void copyAccelerationFromForwardToInverseBroken(FloatingJoint floatingJoint, FloatingInverseDynamicsJoint sixDoFJoint)
    {
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
-      SixDoFJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+      FloatingInverseDynamicsJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       FrameVector angularAccelerationInBody = new FrameVector();
       floatingJoint.getAngularAcceleration(angularAccelerationInBody, bodyFrame);
@@ -782,12 +774,12 @@ public class DRCInverseDynamicsCalculatorTestHelper
       sixDoFJoint.setDesiredAcceleration(jointAcceleration);
    }
 
-   public void setSixDoFJointAccelerationRandomly(SixDoFJoint sixDoFJoint, Random random, double maxRootJointLinearAcceleration,
+   public void setSixDoFJointAccelerationRandomly(FloatingInverseDynamicsJoint sixDoFJoint, Random random, double maxRootJointLinearAcceleration,
          double maxRootJointAngularAcceleration)
    {
       // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
-      SixDoFJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+      FloatingInverseDynamicsJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
@@ -802,11 +794,11 @@ public class DRCInverseDynamicsCalculatorTestHelper
       sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
    }
 
-   public void copyAccelerationFromForwardToInverse(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)
+   public void copyAccelerationFromForwardToInverse(FloatingJoint floatingJoint, FloatingInverseDynamicsJoint sixDoFJoint)
    {
       // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
-      SixDoFJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+      FloatingInverseDynamicsJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
@@ -824,11 +816,11 @@ public class DRCInverseDynamicsCalculatorTestHelper
       sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
    }
 
-   public boolean checkFullRobotModelRootJointAccelerationmatchesRobot(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint, double epsilon)
+   public boolean checkFullRobotModelRootJointAccelerationmatchesRobot(FloatingJoint floatingJoint, FloatingInverseDynamicsJoint sixDoFJoint, double epsilon)
    {
       // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
-      SixDoFJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+      FloatingInverseDynamicsJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);

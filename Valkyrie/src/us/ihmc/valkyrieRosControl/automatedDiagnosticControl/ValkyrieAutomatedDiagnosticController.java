@@ -17,7 +17,7 @@ import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.*;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -150,7 +150,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider,
             diagnosticSensorProcessingConfiguration, jointHandles, emptyPositionJointHandles, emptyJointStateHandles, imuHandles, forceTorqueSensorHandles, sensorInformation);
 
-      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       ContactSensorHolder contactSensorHolder = new ContactSensorHolder(Arrays.asList(fullRobotModel.getContactSensorDefinitions()));

@@ -10,8 +10,8 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJointReferenceFrame;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJointReferenceFrame;
 
 public class FullRobotModelRootJointRewinder implements RewoundListener
 {
@@ -31,8 +31,8 @@ public class FullRobotModelRootJointRewinder implements RewoundListener
    
    public void recordCurrentState()
    {
-      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
-      SixDoFJointReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
+      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJointReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
       
       rootJointFrame.getTraslation(rootJointTranslation);
       rootJointFrame.getRotation(rootJointRotation);
@@ -44,7 +44,7 @@ public class FullRobotModelRootJointRewinder implements RewoundListener
    @Override
    public void wasRewound()
    {      
-      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       
       yoRootJointTranslation.get(rootJointTranslation);
       rootJoint.setPosition(rootJointTranslation);

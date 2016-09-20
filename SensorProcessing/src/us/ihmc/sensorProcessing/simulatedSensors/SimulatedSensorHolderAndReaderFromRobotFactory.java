@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianDoubleCorruptor;
 import us.ihmc.sensorProcessing.signalCorruption.GaussianOrientationCorruptor;
@@ -28,7 +29,6 @@ import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorReaderFactory
 {
@@ -55,7 +55,8 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       robot.getForceSensors(groundContactPointBasedWrenchCalculators);
    }
 
-   public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions,
+   @Override
+   public void build(FloatingInverseDynamicsJoint rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions,
          ContactSensorHolder contactSensorHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();

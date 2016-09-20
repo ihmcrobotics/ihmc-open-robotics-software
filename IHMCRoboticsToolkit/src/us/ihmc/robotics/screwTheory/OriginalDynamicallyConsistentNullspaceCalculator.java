@@ -22,7 +22,7 @@ import java.util.Map;
  */
 public class OriginalDynamicallyConsistentNullspaceCalculator implements DynamicallyConsistentNullspaceCalculator
 {
-   private final SixDoFJoint rootJoint;
+   private final FloatingInverseDynamicsJoint rootJoint;
    private final InverseDynamicsJoint[] jointsInOrder;
    private final Map<RigidBody, DenseMatrix64F> constrainedBodiesAndSelectionMatrices = new LinkedHashMap<RigidBody, DenseMatrix64F>();
    private final List<InverseDynamicsJoint> actuatedJoints = new ArrayList<InverseDynamicsJoint>();
@@ -55,7 +55,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
    private final int nDegreesOfFreedom;
    private int nConstraints;
 
-   public OriginalDynamicallyConsistentNullspaceCalculator(SixDoFJoint rootJoint,
+   public OriginalDynamicallyConsistentNullspaceCalculator(FloatingInverseDynamicsJoint rootJoint,
                                                            boolean computeSNsBar)
    {
       this.rootJoint = rootJoint;

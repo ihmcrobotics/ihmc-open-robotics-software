@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -34,7 +34,7 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
    }
 
    @Override
-   public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
+   public void build(FloatingInverseDynamicsJoint rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
          ContactSensorHolder contactSensorDataHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
          DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {

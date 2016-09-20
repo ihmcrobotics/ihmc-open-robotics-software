@@ -2,10 +2,7 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.*;
 
 public class FullInverseDynamicsStructure
 {
@@ -13,10 +10,10 @@ public class FullInverseDynamicsStructure
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final RigidBody estimationLink;
    private final RigidBody elevator;
-   private final SixDoFJoint rootJoint;
+   private final FloatingInverseDynamicsJoint rootJoint;
 
    // TODO: What's a good name for this?
-   public FullInverseDynamicsStructure(RigidBody elevator, RigidBody estimationLink, SixDoFJoint rootInverseDynamicsJoint)
+   public FullInverseDynamicsStructure(RigidBody elevator, RigidBody estimationLink, FloatingInverseDynamicsJoint rootInverseDynamicsJoint)
    {
       this.elevator = elevator;
       this.rootJoint = rootInverseDynamicsJoint;
@@ -27,7 +24,7 @@ public class FullInverseDynamicsStructure
       this.estimationLink = estimationLink;
    }
 
-   public SixDoFJoint getRootJoint()
+   public FloatingInverseDynamicsJoint getRootJoint()
    {
       return rootJoint;
    }
@@ -66,7 +63,7 @@ public class FullInverseDynamicsStructure
    public static FullInverseDynamicsStructure createInverseDynamicStructure(FullRobotModel fullRobotModel)
    {
       RigidBody elevator = fullRobotModel.getElevator();
-      SixDoFJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
       RigidBody estimationLink = fullRobotModel.getPelvis();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);

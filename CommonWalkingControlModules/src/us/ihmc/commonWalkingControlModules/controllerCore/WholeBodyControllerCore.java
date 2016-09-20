@@ -17,7 +17,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.time.ExecutionTimer;
 
 public class WholeBodyControllerCore
@@ -49,7 +49,7 @@ public class WholeBodyControllerCore
       virtualModelControlSolver = new WholeBodyVirtualModelControlSolver(toolbox, registry);
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
-      SixDoFJoint rootJoint = toolbox.getRobotRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = toolbox.getRobotRootJoint();
       yoRootJointDesiredConfigurationData = new YoRootJointDesiredConfigurationData(rootJoint, registry);
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
 
