@@ -100,6 +100,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
    private static final boolean USE_WHOLE_BODY_IK = true;
 
+   private static final boolean BATTERY_MASS_SIMULATOR_IN_ROBOT = false;
+
    private final JaxbSDFLoader loader;
 
    private final AtlasJointMap jointMap;
@@ -575,20 +577,23 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          case "utorso":
             addCustomCrashProtectionVisual(linkHolder);
 
-            // with battery mass simulator:
-//            modifyLinkInertialPose(linkHolder, "-0.043 0.00229456 0.316809 0 -0 0");
-//            modifyLinkMass(linkHolder, 84.609);
-
-            // without battery mass simulator:
-            modifyLinkInertialPose(linkHolder, "0.017261 0.0032352 0.3483 0 0 0");
-            modifyLinkMass(linkHolder, 60.009);
-            double ixx = 1.5;
-            double ixy = 0.0;
-            double ixz = 0.1;
-            double iyy = 1.5;
-            double iyz = 0.0;
-            double izz = 0.5;
-            modifyLinkInertia(linkHolder, new Matrix3d(ixx, ixy, ixz, ixy, iyy, iyz, ixz, iyz, izz));
+            if (BATTERY_MASS_SIMULATOR_IN_ROBOT)
+            {
+               modifyLinkInertialPose(linkHolder, "-0.043 0.00229456 0.316809 0 -0 0");
+               modifyLinkMass(linkHolder, 84.609);
+            }
+            else
+            {
+               modifyLinkInertialPose(linkHolder, "0.017261 0.0032352 0.3483 0 0 0");
+               modifyLinkMass(linkHolder, 60.009);
+               double ixx = 1.5;
+               double ixy = 0.0;
+               double ixz = 0.1;
+               double iyy = 1.5;
+               double iyz = 0.0;
+               double izz = 0.5;
+               modifyLinkInertia(linkHolder, new Matrix3d(ixx, ixy, ixz, ixy, iyy, iyz, ixz, iyz, izz));
+            }
 
             break;
          case "l_lfarm":
