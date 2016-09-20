@@ -204,4 +204,9 @@ public class SDFLinkHolder
    {
       this.inertialFrameWithRespectToLinkFrame.set(newTransform);
    }
+
+   public void setInertia(Matrix3d inertia)
+   {
+      this.inertia.set(inertia);
+   }
 }
