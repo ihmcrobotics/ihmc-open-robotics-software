@@ -125,12 +125,6 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       for (int i = 0; i < 100; i++)
       {
          rotateObject(cubeTwo, 0.0, 0.0, 0.01);
-                  //System.out.println("Test " + i);
-
-         //         if (i == 11)
-         //         {
-         //            System.out.println("ThisOne ");
-         //         }
          areColliding = detector.arePolytopesColliding(cubeOne, cubeTwo, closestPointOnA, closestPointOnB);
          assertFalse("" + cubeTwo, areColliding);
       }
@@ -164,7 +158,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       for (int i = 0; i < numberOfPolytopesToTests; i++)
       {
          double xyzBoundary = RandomTools.generateRandomDouble(random, 1000.0);
-         double radius = 1.7;
+         double radius = RandomTools.generateRandomDouble(random, 1.0, 20.0);
          int maxNumberOfPoints = 40;
 
          int numberOfPoints = random.nextInt(maxNumberOfPoints) + 1;
@@ -183,8 +177,16 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
             JUnitTools.assertTuple3dEquals(pointToProject, closestPointOnPoint, 1e-7);
 
-            boolean isInsideCheck = Math.abs(pointToProject.distance(closestPointOnPolytope)) < 1e-7;
-            assertEquals(isInside, isInsideCheck);
+            if (isInside)
+            {
+               JUnitTools.assertTuple3dEquals(pointToProject, closestPointOnPolytope, 1e-4);
+            }
+
+            double distance = closestPointOnPolytope.distance(pointToProject);
+            if (distance > 1e-4)
+            {
+               assertFalse(isInside);
+            }
 
             // Make sure the projection projects to itself:
             ConvexPolytope closestPointCheckPolytope = ConvexPolytopeConstructor.constructSinglePointPolytope(closestPointOnPolytope);
@@ -203,11 +205,10 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
             if (isInside)
             {
                numberInside++;
-               System.out.println("Inside!");
+//               System.out.println("Inside!");
 
-               numberInside++;
                // For each vertex, go mostly to that vertex and make sure that point is still inside.
-               // Then go beyond the vertex and make sure that point projects back to the vertex.
+               // Then go beyond the vertex and make sure that point is outside of the polytope.
 
                int numberOfVertices = polytope.getNumberOfVertices();
                for (int k = 0; k < numberOfVertices; k++)
@@ -231,8 +232,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
                         pointShouldBeInPolytopeTwo);
                   assertTrue(shouldStillBeInside);
 
-                  JUnitTools.assertTuple3dEquals(pointNearVertex, pointShouldBeInPolytopeOne, 1e-7);
-                  JUnitTools.assertTuple3dEquals(pointNearVertex, pointShouldBeInPolytopeTwo, 1e-7);
+                  JUnitTools.assertTuple3dEquals(pointNearVertex, pointShouldBeInPolytopeOne, 1e-4);
+                  JUnitTools.assertTuple3dEquals(pointNearVertex, pointShouldBeInPolytopeTwo, 1e-4);
 
                   Point3d pointBeyondVertex = new Point3d(pointToProject);
                   Vector3d beyoneThere = new Vector3d(vectorFromInteriorPointToVertex);
@@ -242,18 +243,18 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
                   pointToCheckPolytope = ConvexPolytopeConstructor.constructSinglePointPolytope(pointBeyondVertex);
 
                   Point3d pointShouldStayOutsidePolytope = new Point3d();
-                  Point3d pointShouldProjectToVertex = new Point3d();
-                  boolean shouldBeOutside = detector.arePolytopesColliding(polytope, pointToCheckPolytope, pointShouldProjectToVertex,
+                  Point3d pointShouldProjectBackToPolytope = new Point3d();
+                  boolean shouldBeOutside = detector.arePolytopesColliding(polytope, pointToCheckPolytope, pointShouldProjectBackToPolytope,
                         pointShouldStayOutsidePolytope);
                   assertFalse(shouldBeOutside);
                   assertTrue(Math.abs(pointBeyondVertex.distance(pointShouldStayOutsidePolytope)) < 1e-7);
-                  assertTrue(Math.abs(vertexPosition.distance(pointShouldProjectToVertex)) < 1e-7);
                }
             }
             else
             {
                numberOutside++;
-               //               System.out.println("Outside!");
+//               System.out.println("Outside!");
+
                Vector3d vectorFromOutsidePointToProjection = new Vector3d();
                vectorFromOutsidePointToProjection.sub(closestPointOnPolytope, pointToProject);
 
@@ -296,8 +297,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
          }
       }
 
-      System.out.println("numberInside = " + numberInside);
-      System.out.println("numberOutside = " + numberOutside);
+//      System.out.println("numberInside = " + numberInside);
+//      System.out.println("numberOutside = " + numberOutside);
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -325,8 +326,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
       for (int i = 0; i < numberOfPolytopesToTests; i++)
       {
-         double xyzBoundary = RandomTools.generateRandomDouble(random, 1000.0);
-         double radius = 1.7;
+         double xyzBoundary = RandomTools.generateRandomDouble(random, 500.0);
+         double radius = RandomTools.generateRandomDouble(random, 1.0, 10.0);
          int maxNumberOfPoints = 40;
 
          int numberOfPoints = random.nextInt(maxNumberOfPoints) + 1;
@@ -340,8 +341,16 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
             Point3d closestPointOnPolytopeTwo = new Point3d();
             boolean areColliding = detector.arePolytopesColliding(polytopeOne, polytopeTwo, closestPointOnPolytopeOne, closestPointOnPolytopeTwo);
 
-            boolean isInsideCheck = Math.abs(closestPointOnPolytopeOne.distance(closestPointOnPolytopeTwo)) < 1e-7;
-            assertEquals(areColliding, isInsideCheck);
+            if (areColliding)
+            {
+               JUnitTools.assertTuple3dEquals(closestPointOnPolytopeOne, closestPointOnPolytopeTwo, 1e-4);
+            }
+
+            double distance = closestPointOnPolytopeOne.distance(closestPointOnPolytopeTwo);
+            if (distance > 1e-4)
+            {
+               assertFalse(areColliding);
+            }
 
             // Make sure the projection projects to itself:
             checkPointProjectsToItself(detector, polytopeOne, closestPointOnPolytopeOne);
@@ -351,7 +360,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
             {
                numberColliding++;
 
-               System.out.println("Are Colliding!");
+//               System.out.println("Are Colliding!");
                //TODO: Check these...
             }
             else
