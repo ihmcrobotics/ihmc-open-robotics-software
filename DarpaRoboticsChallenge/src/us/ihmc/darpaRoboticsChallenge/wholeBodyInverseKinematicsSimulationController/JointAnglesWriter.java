@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -18,7 +19,7 @@ public class JointAnglesWriter
    private String name;
    private FloatingRootJointRobot robot;
    protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
-   protected ImmutablePair<FloatingJoint, SixDoFJoint> rootJointPair;
+   protected ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint> rootJointPair;
 
    public JointAnglesWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel)
    {
@@ -42,7 +43,7 @@ public class JointAnglesWriter
          this.revoluteJoints.add(jointPair);
       }
 
-      rootJointPair = new ImmutablePair<FloatingJoint, SixDoFJoint>(robot.getRootJoint(), fullRobotModel.getRootJoint());
+      rootJointPair = new ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint>(robot.getRootJoint(), fullRobotModel.getRootJoint());
    }
 
    public String getName()
@@ -74,7 +75,7 @@ public class JointAnglesWriter
       }
       
       FloatingJoint floatingJoint = rootJointPair.getLeft();
-      SixDoFJoint sixDoFJoint = rootJointPair.getRight();
+      FloatingInverseDynamicsJoint sixDoFJoint = rootJointPair.getRight();
       
       RigidBodyTransform transform = sixDoFJoint.getJointTransform3D();
       floatingJoint.setRotationAndTranslation(transform);

@@ -19,7 +19,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 
 public class WholeBodyInverseKinematicsSolver
 {
@@ -33,7 +33,7 @@ public class WholeBodyInverseKinematicsSolver
    private final Map<OneDoFJoint, DoubleYoVariable> jointVelocitiesSolution = new HashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> jointPositionsSolution = new HashMap<>();
 
-   private final SixDoFJoint rootJoint;
+   private final FloatingInverseDynamicsJoint rootJoint;
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final JointIndexHandler jointIndexHandler;

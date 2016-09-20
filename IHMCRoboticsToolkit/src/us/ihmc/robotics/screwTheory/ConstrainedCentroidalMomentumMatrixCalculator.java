@@ -16,7 +16,7 @@ public class ConstrainedCentroidalMomentumMatrixCalculator
    private final DenseMatrix64F temp = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F constrainedCentroidalMomentumMatrix = new DenseMatrix64F(1, 1);
 
-   public ConstrainedCentroidalMomentumMatrixCalculator(SixDoFJoint rootJoint, ReferenceFrame centerOfMassFrame,
+   public ConstrainedCentroidalMomentumMatrixCalculator(FloatingInverseDynamicsJoint rootJoint, ReferenceFrame centerOfMassFrame,
                                                         DenseMatrix64F selectionMatrix)
    {
       this.dynamicallyConsistentNullspaceCalculator = new OriginalDynamicallyConsistentNullspaceCalculator(rootJoint,

@@ -252,12 +252,12 @@ public class ScrewTestTools
       }
    }
 
-   public static void setRandomPositionAndOrientation(SixDoFJoint rootJoint, Random random)
+   public static void setRandomPositionAndOrientation(FloatingInverseDynamicsJoint rootJoint, Random random)
    {
       rootJoint.setPositionAndRotation(RigidBodyTransform.generateRandomTransform(random));
    }
 
-   public static void setRandomVelocity(SixDoFJoint rootJoint, Random random)
+   public static void setRandomVelocity(FloatingInverseDynamicsJoint rootJoint, Random random)
    {
       Twist jointTwist = new Twist();
       rootJoint.getJointTwist(jointTwist);

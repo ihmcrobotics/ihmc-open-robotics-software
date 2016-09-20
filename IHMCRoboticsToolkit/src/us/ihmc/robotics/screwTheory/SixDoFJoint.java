@@ -16,9 +16,9 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class SixDoFJoint extends AbstractInverseDynamicsJoint
+public class SixDoFJoint extends AbstractInverseDynamicsJoint implements FloatingInverseDynamicsJoint
 {
-   private final SixDoFJointReferenceFrame afterJointFrame;
+   private final FloatingInverseDynamicsJointReferenceFrame afterJointFrame;
    private final Quat4d jointRotation = new Quat4d(0.0, 0.0, 0.0, 1.0);
    private final Vector3d jointTranslation = new Vector3d();
    private final Twist jointTwist;
@@ -30,14 +30,14 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint
    public SixDoFJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
    {
       super(name, predecessor, beforeJointFrame);
-      this.afterJointFrame = new SixDoFJointReferenceFrame(name, beforeJointFrame);
+      this.afterJointFrame = new FloatingInverseDynamicsJointReferenceFrame(name, beforeJointFrame);
       this.jointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame);
       this.jointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
       this.jointAccelerationDesired = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
    }
    
    @Override
-   public SixDoFJointReferenceFrame getFrameAfterJoint()
+   public FloatingInverseDynamicsJointReferenceFrame getFrameAfterJoint()
    {
       return afterJointFrame;
    }

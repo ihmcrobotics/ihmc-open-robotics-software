@@ -6,19 +6,13 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class PositionStateRobotModelUpdater implements Runnable
 {
@@ -41,7 +35,7 @@ public class PositionStateRobotModelUpdater implements Runnable
 
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
       RigidBody elevator = inverseDynamicsStructure.getElevator();
-      SixDoFJoint rootJoint = inverseDynamicsStructure.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = inverseDynamicsStructure.getRootJoint();
       this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJoint.getFrameAfterJoint());
       this.centerOfMassJacobianBody = new CenterOfMassJacobian(ScrewTools.computeSupportAndSubtreeSuccessors(elevator),
               ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()), rootJoint.getFrameAfterJoint());
@@ -50,7 +44,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    public void run()
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
-      SixDoFJoint rootJoint = inverseDynamicsStructure.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = inverseDynamicsStructure.getRootJoint();
       ReferenceFrame estimationFrame = inverseDynamicsStructure.getEstimationFrame();
 
       centerOfMassCalculator.compute();
@@ -67,7 +61,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    private final FrameVector tempRootJointAngularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
    private final FrameVector tempRootJointLinearVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
 
-   private void updateRootJointTwistLinearPart(FrameVector centerOfMassVelocityWorld, SixDoFJoint rootJoint)
+   private void updateRootJointTwistLinearPart(FrameVector centerOfMassVelocityWorld, FloatingInverseDynamicsJoint rootJoint)
    {
       rootJoint.getJointTwist(tempRootJointTwist);
       tempRootJointTwist.getAngularPart(tempRootJointAngularVelocity);
@@ -86,7 +80,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    private final FrameVector tempCenterOfMassVelocityWorld = new FrameVector(ReferenceFrame.getWorldFrame());
 
    private void computeRootJointLinearVelocity(FrameVector centerOfMassVelocityWorld, FrameVector rootJointVelocityToPack,
-           FrameVector rootJointAngularVelocity, SixDoFJoint rootJoint)
+           FrameVector rootJointAngularVelocity, FloatingInverseDynamicsJoint rootJoint)
    {
       tempCenterOfMassVelocityWorld.setIncludingFrame(centerOfMassVelocityWorld);
       ReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
@@ -117,7 +111,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    private final Twist tempRootJointTwistExisting = new Twist();
    private final FrameVector tempRootJointTwistExistingAngularPart = new FrameVector();
 
-   private void computeRootJointTwistLinearPart(SixDoFJoint rootJoint, Twist rootJointTwistToPack, FrameVector rootJointLinearVelocity)
+   private void computeRootJointTwistLinearPart(FloatingInverseDynamicsJoint rootJoint, Twist rootJointTwistToPack, FrameVector rootJointLinearVelocity)
    {
       rootJoint.getJointTwist(tempRootJointTwistExisting);
       tempRootJointTwistExisting.checkReferenceFramesMatch(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
@@ -135,7 +129,7 @@ public class PositionStateRobotModelUpdater implements Runnable
    private final RigidBodyTransform tempEstimationLinkToWorld = new RigidBodyTransform();
    private final RigidBodyTransform tempRootJointToWorld = new RigidBodyTransform();
 
-   private void updateRootJointPosition(SixDoFJoint rootJoint, ReferenceFrame estimationFrame, FramePoint centerOfMassPosition)
+   private void updateRootJointPosition(FloatingInverseDynamicsJoint rootJoint, ReferenceFrame estimationFrame, FramePoint centerOfMassPosition)
    {
       tempCenterOfMassPositionState.setIncludingFrame(centerOfMassPosition);
       estimationFrame.getTransformToDesiredFrame(worldFrame).getRotation(tempOrientationStateReconstructMatrix);
@@ -178,7 +172,7 @@ public class PositionStateRobotModelUpdater implements Runnable
 
    private final RigidBodyTransform tempRootJointFrameToEstimationFrame = new RigidBodyTransform();
 
-   private void computeRootJointToWorldTransform(SixDoFJoint rootJoint, ReferenceFrame estimationFrame, RigidBodyTransform rootJointToWorldToPack,
+   private void computeRootJointToWorldTransform(FloatingInverseDynamicsJoint rootJoint, ReferenceFrame estimationFrame, RigidBodyTransform rootJointToWorldToPack,
            RigidBodyTransform estimationLinkTransform)
    {
       // H_{root}^{estimation}
