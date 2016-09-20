@@ -41,7 +41,7 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
@@ -358,7 +358,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
       postProcessedSensors.startComputation(rawSensorMap.getTimestamp(), rawSensorMap.getVisionSensorTimestamp(), -1);
       stateEstimator.doControl();
 
-      SixDoFJoint rootJoint = estimatorFullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = estimatorFullRobotModel.getRootJoint();
 
       rootJoint.getTranslation(translation);
       estimatedRootJointPosition.set(translation);

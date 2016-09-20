@@ -1,110 +1,40 @@
 package us.ihmc.robotics.screwTheory;
 
-import java.util.ArrayList;
-
-import javax.vecmath.Vector2d;
+import javax.vecmath.*;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class PlanarJoint extends AbstractInverseDynamicsJoint
-{
-   private final PlanarJointReferenceFrame afterJointFrame;
-   private double qRot;
-   private double qdRot;
-   private double qddRot;
-   private double qddRotDesired;
-   private double tauRot;
+import java.util.ArrayList;
 
-   private final FrameVector2d qTrans;
-   private final FrameVector2d qdTrans;
-   private final FrameVector2d qddTrans;
-   private final FrameVector2d qddTransDesired;
-   private final FrameVector2d tauTrans;
+public class PlanarJoint extends AbstractInverseDynamicsJoint implements FloatingInverseDynamicsJoint
+{
+   private final FloatingInverseDynamicsJointReferenceFrame afterJointFrame;
+   private final Quat4d jointRotation = new Quat4d();
+   private final Vector3d jointTranslation = new Vector3d();
+   private final Twist jointTwist;
+   public final SpatialAccelerationVector jointAcceleration;
+   protected final SpatialAccelerationVector jointAccelerationDesired;
+
+   private Wrench successorWrench;
 
    public PlanarJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
    {
       super(name, predecessor, beforeJointFrame);
-      this.afterJointFrame = new PlanarJointReferenceFrame(name, beforeJointFrame);
-      this.qTrans = new FrameVector2d(beforeJointFrame);
-      this.qdTrans = new FrameVector2d(afterJointFrame);
-      this.qddTrans = new FrameVector2d(afterJointFrame);
-      this.qddTransDesired = new FrameVector2d(afterJointFrame);
-      this.tauTrans = new FrameVector2d(afterJointFrame);
+
+      this.afterJointFrame = new FloatingInverseDynamicsJointReferenceFrame(name, beforeJointFrame);
+      this.jointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame);
+      this.jointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
+      this.jointAccelerationDesired = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
    }
 
    @Override
-   public ReferenceFrame getFrameAfterJoint()
+   public FloatingInverseDynamicsJointReferenceFrame getFrameAfterJoint()
    {
       return afterJointFrame;
-   }
-
-   @Override
-   public void getJointTwist(Twist twistToPack)
-   {
-      twistToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
-      twistToPack.setAngularPartZ(qdRot);
-      twistToPack.setLinearPartX(qdTrans.getX());
-      twistToPack.setLinearPartY(qdTrans.getY());
-   }
-
-   @Override
-   public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
-   {
-      accelerationToPack.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
-      accelerationToPack.setAngularPartZ(qddRot);
-      accelerationToPack.setLinearPartX(qddTrans.getX());
-      accelerationToPack.setLinearPartY(qddTrans.getY());
-   }
-
-   @Override
-   public void getDesiredJointAcceleration(SpatialAccelerationVector jointAcceleration)
-   {
-      jointAcceleration.setToZero(afterJointFrame, beforeJointFrame, afterJointFrame);
-      jointAcceleration.setAngularPartZ(qddRotDesired);
-      jointAcceleration.setLinearPartX(qddTransDesired.getX());
-      jointAcceleration.setLinearPartY(qddTransDesired.getY());
-   }
-
-   @Override
-   public void getTauMatrix(DenseMatrix64F matrix)
-   {
-      matrix.set(0, 0, tauRot);
-      matrix.set(1, 0, tauTrans.getX());
-      matrix.set(2, 0, tauTrans.getY());
-   }
-
-   @Override
-   public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
-   {
-      matrix.set(rowStart + 0, 0, qdRot);
-      matrix.set(rowStart + 1, 0, qdTrans.getX());
-      matrix.set(rowStart + 2, 0, qdTrans.getY());
-   }
-
-   @Override
-   public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
-   {
-      matrix.set(rowStart + 0, 0, qddRotDesired);
-      matrix.set(rowStart + 1, 0, qddTransDesired.getX());
-      matrix.set(rowStart + 2, 0, qddTransDesired.getY());
-   }
-
-   @Override
-   public void setDesiredAccelerationToZero()
-   {
-      qddRot = 0.0;
-      qddTrans.set(0.0, 0.0);
-   }
-
-   @Override
-   public void setSuccessor(RigidBody successor)
-   {
-      this.successor = successor;
-      setMotionSubspace();
    }
 
    @Override
@@ -114,13 +44,99 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
+   public void setDesiredAccelerationToZero()
+   {
+      jointAccelerationDesired.setToZero();
+   }
+
+   @Override
+   public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
+   {
+      PlanarJoint floatingJoint = checkAndGetAsPlanarJoint(originalJoint);
+
+      setPosition(floatingJoint.jointTranslation);
+      setRotation(floatingJoint.jointRotation);
+
+      setJointTwist(floatingJoint.jointTwist);
+      setAcceleration(floatingJoint.jointAcceleration);
+   }
+
+   @Override
+   public void setQddDesired(InverseDynamicsJoint originalJoint)
+   {
+      PlanarJoint floatingJoint = checkAndGetAsPlanarJoint(originalJoint);
+
+      jointAccelerationDesired.setAngularPart(floatingJoint.jointAccelerationDesired.getAngularPart());
+      jointAccelerationDesired.setLinearPart(floatingJoint.jointAccelerationDesired.getLinearPart());
+   }
+
+   @Override
+   public void setSuccessor(RigidBody successor)
+   {
+      this.successor = successor;
+      setMotionSubspace();
+
+      ReferenceFrame successorFrame = successor.getBodyFixedFrame();
+
+      this.successorWrench = new Wrench(successorFrame, successorFrame);
+   }
+
+   @Override
+   public void getJointTwist(Twist twistToPack)
+   {
+      twistToPack.setAngularPartY(jointTwist.getAngularPartY());
+      twistToPack.setLinearPartX(jointTwist.getLinearPartX());
+      twistToPack.setLinearPartZ(jointTwist.getLinearPartZ());
+   }
+
+   @Override
+   public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   {
+      accelerationToPack.setAngularPartY(jointAcceleration.getAngularPartY());
+      accelerationToPack.setLinearPartX(jointAcceleration.getLinearPartX());
+      accelerationToPack.setLinearPartZ(jointAcceleration.getLinearPartZ());
+   }
+
+   @Override
+   public void getDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
+   {
+      accelerationToPack.setAngularPartY(jointAccelerationDesired.getAngularPartY());
+      accelerationToPack.setLinearPartX(jointAccelerationDesired.getLinearPartX());
+      accelerationToPack.setLinearPartZ(jointAccelerationDesired.getLinearPartZ());
+   }
+
+   @Override
+   public void getTauMatrix(DenseMatrix64F matrix)
+   {
+      matrix.set(0, 0, successorWrench.getAngularPartY());
+      matrix.set(1, 0, successorWrench.getLinearPartX());
+      matrix.set(2, 0, successorWrench.getLinearPartZ());
+   }
+
+   @Override
+   public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
+   {
+      matrix.set(rowStart + 0, 0, jointTwist.getAngularPartY());
+      matrix.set(rowStart + 1, 0, jointTwist.getLinearPartX());
+      matrix.set(rowStart + 2, 0, jointTwist.getLinearPartZ());
+   }
+
+   @Override
+   public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
+   {
+      matrix.set(rowStart + 0, 0, jointAccelerationDesired.getAngularPartY());
+      matrix.set(rowStart + 1, 0, jointAccelerationDesired.getLinearPartX());
+      matrix.set(rowStart + 2, 0, jointAccelerationDesired.getLinearPartZ());
+   }
+
+   @Override
    public void setTorqueFromWrench(Wrench jointWrench)
    {
       jointWrench.getBodyFrame().checkReferenceFrameMatch(successor.getBodyFixedFrame());
-      jointWrench.setToZero(successor.getBodyFixedFrame(), tauTrans.getReferenceFrame());
-      jointWrench.setAngularPartX(tauRot);
-      jointWrench.setLinearPartX(tauTrans.getX());
-      jointWrench.setLinearPartY(tauTrans.getY());
+      jointWrench.setToZero(successor.getBodyFixedFrame(), successorWrench.getExpressedInFrame());
+      jointWrench.setAngularPartY(successorWrench.getAngularPartY());
+      jointWrench.setLinearPartX(successorWrench.getLinearPartX());
+      jointWrench.setLinearPartZ(successorWrench.getLinearPartZ());
       jointWrench.changeFrame(successor.getBodyFixedFrame());
    }
 
@@ -133,132 +149,262 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
    @Override
    public void setDesiredAcceleration(DenseMatrix64F matrix, int rowStart)
    {
-      qddRotDesired = matrix.get(rowStart + 0, 0);
-      qddTransDesired.setX(matrix.get(rowStart + 1, 0));
-      qddTransDesired.setY(matrix.get(rowStart + 2, 0));
+      jointAccelerationDesired.setToZero();
+      jointAccelerationDesired.setAngularPartY(matrix.get(rowStart + 0, 0));
+      jointAccelerationDesired.setLinearPartX(matrix.get(rowStart + 1, 0));
+      jointAccelerationDesired.setLinearPartZ(matrix.get(rowStart + 2, 0));
    }
 
-   public void setRotation(double qRot)
+   // fixme
+   public void setRotation(double yaw, double pitch, double roll)
    {
-      this.qRot = qRot;
-      afterJointFrame.setRotationAndUpdate(qRot);
+      RotationTools.convertYawPitchRollToQuaternion(0.0, pitch, 0.0, jointRotation);
+      afterJointFrame.setRotation(this.jointRotation);
    }
 
-   public void setTranslation(FrameVector2d qTrans)
+   private final double[] yawPitchRoll = new double[3];
+   public void setRotation(Quat4d jointRotation)
    {
-      this.qTrans.set(qTrans);
-      afterJointFrame.setTranslationAndUpdate(qTrans);
+      RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
+      RotationTools.convertYawPitchRollToQuaternion(0.0, yawPitchRoll[1], 0.0, this.jointRotation);
+      this.afterJointFrame.setRotation(this.jointRotation);
+   }
+
+   public void setRotation(double x, double y, double z, double w)
+   {
+      RotationTools.convertQuaternionToYawPitchRoll(x, y, z, w, yawPitchRoll);
+      RotationTools.convertYawPitchRollToQuaternion(0.0, yawPitchRoll[1], 0.0, jointRotation);
+      this.afterJointFrame.setRotation(this.jointRotation);
+   }
+
+   public void setRotation(Matrix3d jointRotation)
+   {
+      RotationTools.convertMatrixToYawPitchRoll(jointRotation, yawPitchRoll);
+      RotationTools.convertYawPitchRollToQuaternion(0.0, yawPitchRoll[1], 0.0, this.jointRotation);
+
+      // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
+      //      this.jointRotation.set(jointRotation);
+
+      this.afterJointFrame.setRotation(this.jointRotation);
+   }
+
+   public void setPosition(Tuple3d jointTranslation)
+   {
+      this.jointTranslation.set(jointTranslation.getX(), 0.0, jointTranslation.getZ());
+      afterJointFrame.setTranslation(this.jointTranslation);
    }
    
-   protected void setTranslation(Vector2d qTrans)
+   public void setPosition(double x, double y, double z)
    {
-      this.qTrans.set(qTrans);
-      afterJointFrame.setTranslationAndUpdate(this.qTrans);
+      jointTranslation.set(x, 0.0, z);
+      afterJointFrame.setTranslation(this.jointTranslation);
    }
 
-   public void setRotationalVelocity(double qdRot)
+   public void setJointTwist(Twist jointTwist)
    {
-      this.qdRot = qdRot;
+      this.jointTwist.checkReferenceFramesMatch(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getExpressedInFrame());
+      this.jointTwist.setAngularPartY(jointTwist.getAngularPartY());
+      this.jointTwist.setLinearPartX(jointTwist.getLinearPartX());
+      this.jointTwist.setLinearPartZ(jointTwist.getLinearPartZ());
    }
 
-   public void setTranslationalVelocity(FrameVector2d qdTrans)
+   public void setAcceleration(SpatialAccelerationVector jointAcceleration)
    {
-      this.qdTrans.set(qdTrans);
+      this.jointAcceleration.checkReferenceFramesMatch(jointAcceleration);
+      this.jointAcceleration.setAngularPartY(jointAcceleration.getAngularPartY());
+      this.jointAcceleration.setLinearPartX(jointAcceleration.getLinearPartX());
+      this.jointAcceleration.setLinearPartZ(jointAcceleration.getLinearPartZ());
+   }
+
+   public void setDesiredAcceleration(SpatialAccelerationVector jointAcceleration)
+   {
+      this.jointAccelerationDesired.checkReferenceFramesMatch(jointAcceleration);
+      this.jointAccelerationDesired.setAngularPartY(jointAcceleration.getAngularPartY());
+      this.jointAccelerationDesired.setLinearPartX(jointAcceleration.getLinearPartX());
+      this.jointAccelerationDesired.setLinearPartZ(jointAcceleration.getLinearPartZ());
    }
    
-   protected void setTranslationalVelocity(Vector2d qdTrans)
+
+   public void setWrench(Wrench jointWrench)
    {
-      this.qdTrans.set(qdTrans);
+      successorWrench.getBodyFrame().checkReferenceFrameMatch(jointWrench.getBodyFrame());
+      successorWrench.getExpressedInFrame().checkReferenceFrameMatch(jointWrench.getExpressedInFrame());
+      successorWrench.setAngularPartY(jointWrench.getAngularPartY());
+      successorWrench.setLinearPartX(jointWrench.getLinearPartX());
+      successorWrench.setLinearPartZ(jointWrench.getLinearPartZ());
    }
 
-   public void setRotationalAcceleration(double qddRot)
+   public void getRotation(Quat4d rotationToPack)
    {
-      this.qddRot = qddRot;
+      RotationTools.convertQuaternionToYawPitchRoll(this.jointRotation, yawPitchRoll);
+      RotationTools.convertYawPitchRollToQuaternion(0.0, yawPitchRoll[1], 0.0, rotationToPack);
    }
 
-   public void setTranslationalAcceleration(FrameVector2d qddTrans)
+   public void getRotation(Quat4f rotationToPack)
    {
-      this.qddTrans.set(qddTrans);
-   }
-   
-   protected void setTranslationalAcceleration(Vector2d qddTrans)
-   {
-      this.qddTrans.set(qddTrans);
+      RotationTools.convertQuaternionToYawPitchRoll(this.jointRotation, yawPitchRoll);
+      RotationTools.convertYawPitchRollToQuaternion(0.0, yawPitchRoll[1], 0.0, this.jointRotation);
+      rotationToPack.set(jointRotation);
    }
 
-   public void setDesiredRotationalAcceleration(double qddRotDesired)
+   public void getRotation(Matrix3d rotationToPack)
    {
-      this.qddRotDesired = qddRotDesired;
+      RotationTools.convertQuaternionToYawPitchRoll(this.jointRotation, yawPitchRoll);
+      RotationTools.convertYawPitchRollToMatrix(0.0, yawPitchRoll[1], 0.0, rotationToPack);
    }
 
-   public void setDesiredTranslationalAcceleration(FrameVector2d qddTransDesired)
+   public void getRotation(double[] yawPitchRoll)
    {
-      this.qddTransDesired.set(qddTransDesired);
-   }
-   
-   private void setDesiredTranslationalAcceleration(Vector2d qddTransDesired)
-   {
-      this.qddTransDesired.set(qddTransDesired);
+      RotationTools.convertQuaternionToYawPitchRoll(this.jointRotation, this.yawPitchRoll);
+      yawPitchRoll[0] = 0.0;
+      yawPitchRoll[1] = this.yawPitchRoll[1];
+      yawPitchRoll[2] = 0.0;
    }
 
-   public void setTauRotation(double tauRot)
+   public void getTranslation(Tuple3d translationToPack)
    {
-      this.tauRot = tauRot;
+      translationToPack.setX(jointTranslation.getX());
+      translationToPack.setZ(jointTranslation.getZ());
    }
 
-   public void setTauTranslation(FrameVector2d tauTrans)
+   public void getTranslation(Tuple3f translationToPack)
    {
-      this.tauTrans.set(tauTrans);
+      translationToPack.set(jointTranslation);
+      translationToPack.setY((float) 0.0);
    }
 
-   public double getRotation()
+   public void setPositionAndRotation(RigidBodyTransform transform)
    {
-      return qRot;
+      RotationTools.convertTransformToYawPitchRoll(transform, yawPitchRoll);
+      RotationTools.convertYawPitchRollToQuaternion(0.0, yawPitchRoll[1], 0.0, jointRotation);
+
+      if (!RotationTools.isQuaternionNormalized(jointRotation))
+      {
+         throw new AssertionError("quaternion is not normalized.  " + jointRotation);
+      }
+
+      transform.getTranslation(jointTranslation);
+      jointTranslation.setY(0.0);
+      this.afterJointFrame.setRotation(jointRotation);
+      this.afterJointFrame.setTranslation(jointTranslation);
    }
 
-   public void getTranslation(FrameVector2d vectorToPack)
+   public Tuple3d getTranslationForReading()
    {
-      vectorToPack.setIncludingFrame(qTrans);
+      return jointTranslation;
    }
 
-   public double getRotationalVelocity()
+   public Quat4d getRotationForReading()
    {
-      return qdRot;
+      return jointRotation;
    }
 
-   public void getTranslationalVelocity(FrameVector2d vectorToPack)
+   public Vector3d getLinearVelocityForReading()
    {
-      vectorToPack.set(qdTrans);
+      Vector3d linearVelocity = jointTwist.getLinearPart();
+      linearVelocity.setY(0.0);
+
+      return linearVelocity;
    }
 
-   public double getRotationalAcceleration()
+   public Vector3d getAngularVelocityForReading()
    {
-      return qddRot;
+      Vector3d angularVelocity = jointTwist.getAngularPart();
+      angularVelocity.setX(0.0);
+      angularVelocity.setZ(0.0);
+
+      return angularVelocity;
    }
 
-   public void getTranslationalAcceleration(FrameVector2d vectorToPack)
+   public void getAngularVelocity(Vector3d angularVelocityToPack)
    {
-      vectorToPack.set(qddTrans);
+      angularVelocityToPack.set(0.0, jointTwist.getAngularPartY(), 0.0);
    }
 
-   public double getDesiredRotationalAcceleration()
+   public void getLinearVelocity(Vector3d linearVelocityToPack)
    {
-      return qddRotDesired;
+      linearVelocityToPack.set(jointTwist.getLinearPartX(), 0.0, jointTwist.getLinearPartZ());
    }
 
-   public void getDesiredTranslationalAcceleration(FrameVector2d vectorToPack)
+   public void getWrench(Wrench wrenchToPack)
    {
-      vectorToPack.set(qddTransDesired);
+      successorWrench.getBodyFrame().checkReferenceFrameMatch(wrenchToPack.getBodyFrame());
+      successorWrench.getExpressedInFrame().checkReferenceFrameMatch(wrenchToPack.getExpressedInFrame());
+      wrenchToPack.setAngularPartY(successorWrench.getAngularPartY());
+      wrenchToPack.setLinearPartX(successorWrench.getLinearPartX());
+      wrenchToPack.setLinearPartZ(successorWrench.getLinearPartZ());
    }
 
-   public double getTauRotation()
+   public void getLinearAcceleration(Vector3d linearAccelerationToPack)
    {
-      return tauRot;
+      linearAccelerationToPack.setX(jointAcceleration.getLinearPartX());
+      linearAccelerationToPack.setY(0.0);
+      linearAccelerationToPack.setZ(jointAcceleration.getLinearPartZ());
    }
 
-   public void getTauTranslation(FrameVector2d vectorToPack)
+   @Override
+   public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
-      vectorToPack.set(tauTrans);
+      RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
+      int index = rowStart;
+      matrix.set(index++, 0, yawPitchRoll[1]);
+      matrix.set(index++, 0, jointTranslation.getX());
+      matrix.set(index++, 0, jointTranslation.getZ());
+   }
+
+   @Override
+   public void setConfiguration(DenseMatrix64F matrix, int rowStart)
+   {
+      int index = rowStart;
+      double qRot = matrix.get(index++, 0);
+      double x = matrix.get(index++, 0);
+      double z = matrix.get(index++, 0);
+      RotationTools.convertYawPitchRollToQuaternion(0.0, qRot, 0.0, jointRotation);
+      jointTranslation.set(x, 0.0, z);
+      afterJointFrame.setRotation(jointRotation);
+      afterJointFrame.setTranslation(jointTranslation);
+   }
+
+   @Override
+   public void setVelocity(DenseMatrix64F matrix, int rowStart)
+   {
+      int index = rowStart;
+      double qdRot = matrix.get(index++, 0);
+      double xd = matrix.get(index++, 0);
+      double zd = matrix.get(index++, 0);
+      jointTwist.setToZero();
+      jointTwist.setAngularPartY(qdRot);
+      jointTwist.setLinearPart(xd, 0.0, zd);
+   }
+
+   @Override
+   public void calculateJointStateChecksum(GenericCRC32 checksum)
+   {
+      RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
+      checksum.update(yawPitchRoll[1]);
+      checksum.update(jointTwist.getAngularPartY());
+      checksum.update(jointAcceleration.getAngularPartY());
+
+      checksum.update(jointTranslation.getX());
+      checksum.update(jointTranslation.getY());
+      checksum.update(jointTwist.getLinearPartX());
+      checksum.update(jointTwist.getLinearPartZ());
+      checksum.update(jointAcceleration.getLinearPartX());
+      checksum.update(jointAcceleration.getLinearPartZ());
+   }
+
+   @Override
+   public void calculateJointDesiredChecksum(GenericCRC32 checksum)
+   {
+      checksum.update(jointAccelerationDesired.getAngularPartY());
+      checksum.update(jointAccelerationDesired.getLinearPartX());
+      checksum.update(jointAccelerationDesired.getLinearPartZ());
+   }
+
+   @Override
+   public int getConfigurationMatrixSize()
+   {
+      return getDegreesOfFreedom();
    }
 
    private void setMotionSubspace()
@@ -305,44 +451,6 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       this.motionSubspace.compute();
    }
 
-   @Override
-   public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
-   {
-      int index = rowStart;
-      matrix.set(index++, 0, qRot);
-      matrix.set(index++, 0, qTrans.getX());
-      matrix.set(index++, 0, qTrans.getY());
-   }
-
-   @Override
-   public void setConfiguration(DenseMatrix64F matrix, int rowStart)
-   {
-      int index = rowStart;
-      qRot = matrix.get(index++, 0);
-      double x = matrix.get(index++, 0);
-      double y = matrix.get(index++, 0);
-      qTrans.set(x, y);
-      afterJointFrame.setRotationAndUpdate(qRot);
-      afterJointFrame.setTranslationAndUpdate(qTrans);
-   }
-
-   @Override
-   public void setVelocity(DenseMatrix64F matrix, int rowStart)
-   {
-      int index = rowStart;
-      qdRot = matrix.get(index++, 0);
-      double xd = matrix.get(index++, 0);
-      double yd = matrix.get(index++, 0);
-      qdTrans.set(xd, yd);
-   }
-
-
-   @Override
-   public int getConfigurationMatrixSize()
-   {
-      return getDegreesOfFreedom();
-   }
-   
    private PlanarJoint checkAndGetAsPlanarJoint(InverseDynamicsJoint originalJoint)
    {
       if (originalJoint instanceof PlanarJoint)
@@ -353,48 +461,5 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint
       {
          throw new RuntimeException("Cannot set " + getClass().getSimpleName() + " to " + originalJoint.getClass().getSimpleName());
       }
-   }
-
-   @Override
-   public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
-   {
-      PlanarJoint originalPlanarJoint = checkAndGetAsPlanarJoint(originalJoint);
-      setRotation(originalPlanarJoint.qRot);
-      setRotationalVelocity(originalPlanarJoint.qdRot);
-      setRotationalAcceleration(originalPlanarJoint.qddRot);
-
-      // HumanoidReferenceFrames are not the same!
-      setTranslation(originalPlanarJoint.qTrans.getVector());
-      setTranslationalVelocity(originalPlanarJoint.qdTrans.getVector());
-      setTranslationalAcceleration(originalPlanarJoint.qddTrans.getVector());
-   }
-
-   @Override
-   public void setQddDesired(InverseDynamicsJoint originalJoint)
-   {
-      PlanarJoint originalPlanarJoint = checkAndGetAsPlanarJoint(originalJoint);
-      
-      setDesiredRotationalAcceleration(originalPlanarJoint.getDesiredRotationalAcceleration());
-      setDesiredTranslationalAcceleration(originalPlanarJoint.qddTransDesired.getVector());      
-      
-   }
-
-   @Override
-   public void calculateJointStateChecksum(GenericCRC32 checksum)
-   {
-      checksum.update(qRot);
-      checksum.update(qdRot);
-      checksum.update(qddRot);
-      
-      checksum.update(qTrans.getVector());
-      checksum.update(qdTrans.getVector());
-      checksum.update(qddTrans.getVector());
-   }
-
-   @Override
-   public void calculateJointDesiredChecksum(GenericCRC32 checksum)
-   {
-      checksum.update(qddRotDesired);
-      checksum.update(qddTransDesired.getVector());
    }
 }

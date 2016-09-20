@@ -32,10 +32,10 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    @Override
    protected DRCRobotModel getRobotModel(int xContactPoints, int yContactPoints, boolean createOnlyEdgePoints)
    {
-      robotModel.addMoreFootContactPointsSimOnly(16, 8, createOnlyEdgePoints);
+      robotModel.addMoreFootContactPointsSimOnly(xContactPoints, yContactPoints, createOnlyEdgePoints);
       return robotModel;
    }
-   
+
    @Override
    @DeployableTestMethod(estimatedDuration = 137.5, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
    @Test(timeout = 690000)
@@ -43,7 +43,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    {
       super.testWalkingOnLinesInEnvironment();
    }
-   
+
    @Override
    @DeployableTestMethod(estimatedDuration = 69.7, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
    @Test(timeout = 350000)

@@ -63,11 +63,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
@@ -126,7 +122,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final SwingTargetGenerator swingTargetGenerator;
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
    private final FullRobotModel actualFullRobotModel;
-   private final SixDoFJoint actualRobotRootJoint;
+   private final FloatingInverseDynamicsJoint actualRobotRootJoint;
 
    private final QuadrupedReferenceFrames referenceFrames;
    private final CenterOfMassJacobian centerOfMassJacobian;
@@ -787,7 +783,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       feedForwardReferenceFrames.updateFrames();
       actualFullRobotModel.updateFrames();
 
-      SixDoFJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
 
       actualRobotRootJoint.getJointTransform3D(rootJointPose);
       feedForwardRootJoint.setPositionAndRotation(rootJointPose);
@@ -849,7 +845,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 		   oneDoFJointFeedforward.setQ(oneDoFJoint.getqDesired());
 	   }
 
-	   SixDoFJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
+	   FloatingInverseDynamicsJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
 
 	   feedForwardRootJoint.setRotation(filteredDesiredCoMOrientation.getYaw().getDoubleValue(), filteredDesiredCoMOrientation.getPitch().getDoubleValue(), filteredDesiredCoMOrientation.getRoll().getDoubleValue());
 	   feedForwardFullRobotModel.updateFrames();

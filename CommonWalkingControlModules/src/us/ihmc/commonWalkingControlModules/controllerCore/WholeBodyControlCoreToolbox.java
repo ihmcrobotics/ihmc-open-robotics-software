@@ -17,7 +17,7 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -143,7 +143,7 @@ public class WholeBodyControlCoreToolbox
       return inverseDynamicsCalculator;
    }
 
-   public SixDoFJoint getRobotRootJoint()
+   public FloatingInverseDynamicsJoint getRobotRootJoint()
    {
       return fullRobotModel.getRootJoint();
    }

@@ -3,19 +3,21 @@ package us.ihmc.atlas;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import javax.vecmath.Matrix3d;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.math.Transform;
 
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.SdfLoader.SDFContactSensor;
 import us.ihmc.SdfLoader.SDFConversionsHelper;
 import us.ihmc.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.SdfLoader.SDFForceSensor;
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.SDFJointHolder;
 import us.ihmc.SdfLoader.SDFLinkHolder;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
@@ -98,6 +100,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
    private static final boolean USE_WHOLE_BODY_IK = true;
 
+   private static final boolean BATTERY_MASS_SIMULATOR_IN_ROBOT = false;
+
    private final JaxbSDFLoader loader;
 
    private final AtlasJointMap jointMap;
@@ -115,7 +119,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private boolean enableJointDamping = true;
 
    private final RobotDescription robotDescription;
-   
+
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
    {
       selectedVersion = atlasVersion;
@@ -571,8 +575,26 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          switch(linkHolder.getName())
          {
          case "utorso":
-            modifyLinkInertialPose(linkHolder, "-0.043 0.00229456 0.316809 0 -0 0");
             addCustomCrashProtectionVisual(linkHolder);
+
+            if (BATTERY_MASS_SIMULATOR_IN_ROBOT)
+            {
+               modifyLinkInertialPose(linkHolder, "-0.043 0.00229456 0.316809 0 -0 0");
+               modifyLinkMass(linkHolder, 84.609);
+            }
+            else
+            {
+               modifyLinkInertialPose(linkHolder, "0.017261 0.0032352 0.3483 0 0 0");
+               modifyLinkMass(linkHolder, 60.009);
+               double ixx = 1.5;
+               double ixy = 0.0;
+               double ixz = 0.1;
+               double iyy = 1.5;
+               double iyz = 0.0;
+               double izz = 0.5;
+               modifyLinkInertia(linkHolder, new Matrix3d(ixx, ixy, ixz, ixy, iyy, iyz, ixz, iyz, izz));
+            }
+
             break;
          case "l_lfarm":
          case "r_lfarm":
@@ -858,6 +880,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private void modifyLinkInertialPose(SDFLinkHolder linkHolder, String pose)
    {
       linkHolder.setInertialFrameWithRespectToLinkFrame(SDFConversionsHelper.poseToTransform(pose));
+   }
+
+   private void modifyLinkInertia(SDFLinkHolder linkHolder, Matrix3d inertia)
+   {
+      linkHolder.setInertia(inertia);
    }
 
 }

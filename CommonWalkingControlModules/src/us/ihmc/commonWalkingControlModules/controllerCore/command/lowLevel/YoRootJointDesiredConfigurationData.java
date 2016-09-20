@@ -8,7 +8,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 
 public class YoRootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataReadOnly
 {
@@ -24,7 +24,7 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
    private final DenseMatrix64F desiredVelocity = new DenseMatrix64F(6, 0);
    private final DenseMatrix64F desiredAcceleration = new DenseMatrix64F(6, 0);
 
-   public YoRootJointDesiredConfigurationData(SixDoFJoint rootJoint, YoVariableRegistry parentRegistry)
+   public YoRootJointDesiredConfigurationData(FloatingInverseDynamicsJoint rootJoint, YoVariableRegistry parentRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry("RootJointDesiredConfigurationData");
       parentRegistry.addChild(registry);
