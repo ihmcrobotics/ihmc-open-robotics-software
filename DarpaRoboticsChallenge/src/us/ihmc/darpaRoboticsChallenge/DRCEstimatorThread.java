@@ -32,8 +32,8 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
@@ -114,7 +114,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       this.robotVisualizer = robotVisualizer;
       this.globalDataProducer = dataProducer;
       estimatorFullRobotModel = threadDataSynchronizer.getEstimatorFullRobotModel();
-      SixDoFJoint rootJoint = estimatorFullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = estimatorFullRobotModel.getRootJoint();
       rootFrame = rootJoint.getFrameAfterJoint();
 
       forceSensorDataHolderForEstimator = threadDataSynchronizer.getEstimatorForceSensorDataHolder();

@@ -7,13 +7,13 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
-public class SixDoFJointReferenceFrame extends ReferenceFrame
+public class FloatingInverseDynamicsJointReferenceFrame extends ReferenceFrame
 {
    private static final long serialVersionUID = 8238436678986979988L;
    private final Quat4d rotation = new Quat4d();
    private final Vector3d translation = new Vector3d();
 
-   public SixDoFJointReferenceFrame(String frameName, ReferenceFrame parentFrame)
+   public FloatingInverseDynamicsJointReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
       super(frameName, parentFrame);
    }
