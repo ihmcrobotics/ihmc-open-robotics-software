@@ -344,9 +344,20 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
+   public boolean useIMUsForSpineJointVelocityEstimation()
+   {
+      return true;
+   }
+   
+   @Override
+   public double getAlphaIMUsForSpineJointVelocityEstimation()
+   {
+      return 0.95;
+   }
+   
+   @Override
    public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
    {
-      return null;
-//      return imusForSpineJointEstimation;
+      return imusForSpineJointEstimation;
    }
 }
