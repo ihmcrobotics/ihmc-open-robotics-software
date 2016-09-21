@@ -850,6 +850,12 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    }
 
    @Override
+   public boolean useOptimizationBasedICPController()
+   {
+      return false;
+   }
+
+   @Override
    public void useInverseDynamicsControlCore()
    {
       // once another mode is implemented, use this to change the default gains for inverse dynamics

@@ -48,6 +48,7 @@ public class SwingState extends AbstractUnconstrainedState
    private static final boolean CONTROL_TOE = false;
 
    private final BooleanYoVariable replanTrajectory;
+   private final BooleanYoVariable doContinuousReplanning;
    private final YoVariableDoubleProvider swingTimeRemaining;
 
    private final TwoWaypointPositionTrajectoryGenerator swingTrajectoryGenerator;
@@ -108,6 +109,10 @@ public class SwingState extends AbstractUnconstrainedState
       finalSwingHeightOffset.set(footControlHelper.getWalkingControllerParameters().getDesiredTouchdownHeightOffset());
       replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
       swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
+
+      // todo make a smarter distinction on this as a way to work with the push recovery module
+      doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
+      doContinuousReplanning.set(footControlHelper.getWalkingControllerParameters().useOptimizationBasedICPController());
 
       footFrame = contactableFoot.getFrameAfterParentJoint();
       toeFrame = createToeFrame(robotSide);
@@ -252,13 +257,40 @@ public class SwingState extends AbstractUnconstrainedState
       replanTrajectory.set(false);
    }
 
+   protected void reinitializeTrajectory()
+   {
+      orientationTrajectoryGenerator.setTrajectoryTime(swingTimeProvider.getValue());
+
+      if (useNewSwingTrajectoyOptimization)
+      {
+         finalConfigurationProvider.getPosition(finalPosition);
+         touchdownVelocityProvider.get(finalVelocity);
+         swingTrajectoryGeneratorNew.setFinalConditions(finalPosition, finalVelocity);
+         swingTrajectoryGeneratorNew.setStepTime(swingTimeProvider.getValue());
+         swingTrajectoryGeneratorNew.setTrajectoryType(trajectoryParametersProvider.getTrajectoryParameters().getTrajectoryType());
+      }
+
+      positionTrajectoryGenerator.initialize();
+      orientationTrajectoryGenerator.initialize();
+
+      trajectoryWasReplanned = false;
+      replanTrajectory.set(false);
+   }
+
    protected void computeAndPackTrajectory()
    {
       if (replanTrajectory.getBooleanValue()) // This seems like a bad place for this?
       {
-         pushRecoveryPositionTrajectoryGenerator.initialize();
-         replanTrajectory.set(false);
-         trajectoryWasReplanned = true;
+         if (!doContinuousReplanning.getBooleanValue())
+         {
+            pushRecoveryPositionTrajectoryGenerator.initialize();
+            replanTrajectory.set(false);
+            trajectoryWasReplanned = true;
+         }
+         else
+         {
+            reinitializeTrajectory();
+         }
       }
 
       currentTime.set(getTimeInCurrentState());
@@ -272,7 +304,7 @@ public class SwingState extends AbstractUnconstrainedState
          time = currentTimeWithSwingSpeedUp.getDoubleValue();
       }
 
-      if (!trajectoryWasReplanned)
+      if (!trajectoryWasReplanned || doContinuousReplanning.getBooleanValue())
       {
          positionTrajectoryGenerator.compute(time);
 
@@ -358,6 +390,7 @@ public class SwingState extends AbstractUnconstrainedState
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - currentTimeWithSwingSpeedUp.getDoubleValue());
       else
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - getTimeInCurrentState());
+
       this.replanTrajectory.set(true);
    }
 
