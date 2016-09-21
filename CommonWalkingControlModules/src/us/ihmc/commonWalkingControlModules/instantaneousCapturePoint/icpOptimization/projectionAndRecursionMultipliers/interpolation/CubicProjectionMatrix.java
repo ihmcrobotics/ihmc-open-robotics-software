@@ -22,6 +22,11 @@ public class CubicProjectionMatrix extends DenseMatrix64F
       cubicSplineCoefficientMatrix.setSegmentDuration(duration);
    }
 
+   public double getSegmentDuration()
+   {
+      return duration;
+   }
+
    public void update(double timeRemaining)
    {
       double timeInCurrentState = duration - timeRemaining;
