@@ -71,8 +71,10 @@ public class QuadrupedTimedStepInputProvider
       });
    }
 
-   public ArrayList<QuadrupedTimedStep> get()
+   public ArrayList<QuadrupedTimedStep> getAndClearSteps()
    {
-      return timedStepPacket.get().get();
+      ArrayList<QuadrupedTimedStep> steps = timedStepPacket.get().get();
+      timedStepPacket.set(new QuadrupedTimedStepPacket());
+      return steps;
    }
 }
