@@ -7,8 +7,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class SwingEntryCMPProjectionMatrixTest
@@ -21,7 +23,6 @@ public class SwingEntryCMPProjectionMatrixTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
-      DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
@@ -42,29 +43,34 @@ public class SwingEntryCMPProjectionMatrixTest
 
       Random random = new Random();
       int iters = 100;
+      double omega0 = 3.0;
 
-      DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfSteptime = new DoubleYoVariable("exitCMPDurationInPercentOfSteptime", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
+
+      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration", registry));
+      singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
 
       SwingEntryCMPProjectionMatrix swingEntryCMPProjectionMatrix = new SwingEntryCMPProjectionMatrix(doubleSupportSplitRatio,
             exitCMPDurationInPercentOfSteptime, startOfSplineTime);
 
       for (int i = 0; i < iters; i++)
       {
-         double omega0 = 3.0;
          double splitRatio = 0.5 * random.nextDouble();
          double exitRatio = 0.5 * random.nextDouble();
          double startOfSpline = 0.2 * random.nextDouble();
 
-         omega.set(omega0);
          doubleSupportSplitRatio.set(splitRatio);
          exitCMPDurationInPercentOfSteptime.set(exitRatio);
          startOfSplineTime.set(startOfSpline);
 
          double doubleSupportDuration = 2.0 * random.nextDouble();
          double singleSupportDuration = 5.0 * random.nextDouble();
+         doubleSupportDurations.get(0).set(doubleSupportDuration);
+         singleSupportDurations.get(0).set(singleSupportDuration);
 
          String name = "splitRatio = " + splitRatio + ", exitRatio = " + exitRatio + ",\n doubleSupportDuration = " + doubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
 
@@ -74,25 +80,39 @@ public class SwingEntryCMPProjectionMatrixTest
          double projectionTime = startOfSpline + endOfDoubleSupport - timeSpentOnEntry;
          double projection = Math.exp(omega0 * projectionTime);
 
-         swingEntryCMPProjectionMatrix.compute(doubleSupportDuration, singleSupportDuration, omega0, false);
-
-
+         boolean useInitialICP = false;
+         swingEntryCMPProjectionMatrix.compute(doubleSupportDuration, singleSupportDuration, omega0, useInitialICP);
          shouldBe.zero();
          shouldBe.set(0, 0, 1.0 - projection);
          shouldBe.set(1, 0, -omega0 * projection);
-
+         JUnitTools.assertMatrixEquals(name, shouldBe, swingEntryCMPProjectionMatrix, epsilon);
+         swingEntryCMPProjectionMatrix.reset();
+         swingEntryCMPProjectionMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0, useInitialICP);
          JUnitTools.assertMatrixEquals(name, shouldBe, swingEntryCMPProjectionMatrix, epsilon);
 
+         useInitialICP = true;
          projectionTime = startOfSpline;
          projection = Math.exp(omega0 * projectionTime);
 
-         swingEntryCMPProjectionMatrix.compute(doubleSupportDuration, singleSupportDuration, omega0, true);
+         swingEntryCMPProjectionMatrix.compute(doubleSupportDuration, singleSupportDuration, omega0, useInitialICP);
 
          shouldBe.zero();
          shouldBe.set(0, 0, 1.0 - projection);
          shouldBe.set(1, 0, -omega0 * projection);
 
          JUnitTools.assertMatrixEquals(name, shouldBe, swingEntryCMPProjectionMatrix, epsilon);
+         swingEntryCMPProjectionMatrix.reset();
+         swingEntryCMPProjectionMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0, useInitialICP);
+         JUnitTools.assertMatrixEquals(name, shouldBe, swingEntryCMPProjectionMatrix, epsilon);
+
+         shouldBe.zero();
+         swingEntryCMPProjectionMatrix.reset();
+         JUnitTools.assertMatrixEquals(name, shouldBe, swingEntryCMPProjectionMatrix, epsilon);
       }
+   }
+
+   public static void main(String[] args)
+   {
+      MutationTestingTools.doPITMutationTestAndOpenResult(SwingEntryCMPProjectionMatrixTest.class);
    }
 }
