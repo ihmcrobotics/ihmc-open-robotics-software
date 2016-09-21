@@ -572,6 +572,9 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
          switch(linkHolder.getName())
          {
+         case "pelvis":
+            addAdditionalPelvisImuInImuFrame(linkHolder);
+            break;
          case "utorso":
             addCustomCrashProtectionVisual(linkHolder);
 
@@ -593,6 +596,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
                modifyLinkInertia(linkHolder, new Matrix3d(ixx, ixy, ixz, ixy, iyy, iyz, ixz, iyz, izz));
             }
 
+            addChestIMU(linkHolder);
             break;
          case "l_lfarm":
          case "r_lfarm":
@@ -723,13 +727,13 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    @Override public void mutateModelWithAdditions(GeneralizedSDFRobotModel model)
    {
-      if(this.jointMap.getModelName().equals(model.getName()))
+      if (this.jointMap.getModelName().equals(model.getName()))
       {
-         addAdditionalImuInImuFrame(model);
+
       }
    }
 
-   private void addAdditionalImuInImuFrame(GeneralizedSDFRobotModel model)
+   private void addAdditionalPelvisImuInImuFrame(SDFLinkHolder pelvis)
    {
       SDFSensor sdfImu = new SDFSensor();
       sdfImu.setName("imu_sensor_at_imu_frame");
@@ -759,13 +763,24 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       imu.setNoise(imuNoise);
       sdfImu.setImu(imu);
 
-      for (SDFLinkHolder sdfLinkHolder : model.getRootLinks())
-      {
-         if(sdfLinkHolder.getName().equals("pelvis"))
-         {
-            sdfLinkHolder.getSensors().add(sdfImu);
-         }
-      }
+      pelvis.getSensors().add(sdfImu);
+   }
+
+   private void addChestIMU(SDFLinkHolder chestLink)
+   {
+      SDFSensor chestIMU = new SDFSensor();
+      chestIMU.setName("imu_sensor_chest");
+      chestIMU.setType("imu");
+
+      // Position only approximate. If we start using the acceleration measurements this will have to be fixed.
+      String piHalf = String.valueOf(Math.PI/2.0);
+      String negativePiHalf = String.valueOf(-Math.PI/2.0);
+      chestIMU.setPose("-0.15 0.0 0.3 " + piHalf + " 0.0 " + negativePiHalf);
+
+      SDFSensor.IMU imu = new SDFSensor.IMU();
+      chestIMU.setImu(imu);
+
+      chestLink.getSensors().add(chestIMU);
    }
 
    private void modifyHokuyoInertia(SDFLinkHolder linkHolder)
