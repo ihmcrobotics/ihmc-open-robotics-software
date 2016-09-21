@@ -12,12 +12,11 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @TestSuiteTarget(TestPlanTarget.Fast)
 @SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasHighSwingTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class
+   us.ihmc.atlas.roughTerrainWalking.AtlasSwingTrajectoryTest.class,
+   us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class
 })
 
-public class AtlasJFastTestSuite
+public class AtlasPFastTestSuite
 {
    public static void main(String[] args)
    {
