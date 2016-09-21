@@ -10,6 +10,8 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -17,8 +19,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class AtlasSDFViewer
 {
-   private static final boolean SHOW_ELLIPSOIDS = true;
-   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = true;
+   private static final boolean SHOW_ELLIPSOIDS = false;
+   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
+   private static final boolean SHOW_IMU_FRAMES = true;
 
    public static void main(String[] args)
    {
@@ -35,9 +38,36 @@ public class AtlasSDFViewer
          addJointAxis(sdfRobot);
       }
 
+      if (SHOW_IMU_FRAMES)
+      {
+         showIMUFrames(sdfRobot);
+      }
+
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
       scs.setGroundVisible(false);
       scs.startOnAThread();
+   }
+
+
+   private static void showIMUFrames(HumanoidFloatingRootJointRobot sdfRobot)
+   {
+      ArrayList<IMUMount> imuMounts = new ArrayList<>();
+      sdfRobot.getIMUMounts(imuMounts);
+
+      for (IMUMount imuMount : imuMounts)
+      {
+         Link imuLink = imuMount.getParentJoint().getLink();
+         if (imuLink.getLinkGraphics() == null)
+            imuLink.setLinkGraphics(new Graphics3DObject());
+
+         Graphics3DObject linkGraphics = imuLink.getLinkGraphics();
+         linkGraphics.identity();
+         RigidBodyTransform mountToJoint = new RigidBodyTransform();
+         imuMount.getTransformFromMountToJoint(mountToJoint);
+         linkGraphics.transform(mountToJoint);
+         linkGraphics.addCoordinateSystem(0.3);
+         linkGraphics.identity();
+      }
    }
 
 
