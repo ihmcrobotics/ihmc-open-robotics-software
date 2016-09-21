@@ -233,6 +233,11 @@ public class GeometryTools
       return true;
    }
 
+   public static double computeTriangleArea(Point2d a, Point2d b, Point2d c)
+   {
+      return Math.abs(0.5 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)));
+   }
+
    /**
     * Averages the 2D points in a given Array
     *
