@@ -1529,7 +1529,8 @@ public class GeometryToolsTest
       }
    }
 
-   @Test
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testGetAngleFromFirstToSecondVector() throws Exception
    {
       Random random = new Random(51651L);
