@@ -84,7 +84,14 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
    {
       if (hasChanged.getAndSet(false))
       {
-         instruction.setMesh(MeshDataGenerator.Polygon(new Point3d[] { pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy() }));
+         if ((!pointOne.containsNaN()) && (!pointTwo.containsNaN()) && (!pointThree.containsNaN()))
+         {
+            instruction.setMesh(MeshDataGenerator.Polygon(new Point3d[] { pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy() }));
+         }
+         else
+         {
+            instruction.setMesh(null);
+         }
       }
    }
 
@@ -172,5 +179,14 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
          return true;
 
       return false;
+   }
+
+   public void setToNaN()
+   {
+      pointOne.setToNaN();
+      pointTwo.setToNaN();
+      pointThree.setToNaN();
+
+      this.update();
    }
 }

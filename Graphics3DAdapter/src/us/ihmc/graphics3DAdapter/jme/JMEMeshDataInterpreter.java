@@ -20,41 +20,43 @@ public class JMEMeshDataInterpreter
 
    public static Mesh interpretMeshData(MeshDataHolder meshData)
    {
+      if (meshData == null) return null;
+
       Vector3f[] vertices = JMEDataTypeUtils.vecMathTuple3fArrayToJMEVector3fArray(meshData.getVertices());
       Vector2f[] textureCoords = JMEDataTypeUtils.texCoord2fArrayToJMEVector2fArray(meshData.getTexturePoints());
       int[] polygonIndices = meshData.getPolygonIndices();
       int[] pointsPerPolygonCount = meshData.getPolygonStripCounts();
-            
+
       ArrayList<Integer> triangleIndices = new ArrayList<Integer>();
-      
+
       int polygonIndicesStart = 0;
       for (int pointsForThisPolygon : pointsPerPolygonCount)
       {
          int[] polygon = new int[pointsForThisPolygon];
-         
+
          for(int i = 0; i < pointsForThisPolygon; i++)
          {
             polygon[i] = polygonIndices[polygonIndicesStart + i];
          }
-         
+
          int[] splitIntoTriangles = splitPolygonIntoTriangles(polygon);
-         
+
          for (int i : splitIntoTriangles)
          {
             triangleIndices.add(i);
          }
-         
+
          polygonIndicesStart += pointsForThisPolygon;
       }
-      
+
       int[] indices = new int[triangleIndices.size()];
       for(int i = 0; i < indices.length; i++)
       {
          indices[i] = triangleIndices.get(i);
       }
-      
+
       float[] normals = findNormalsPerVertex(indices, vertices);
-      
+
       Mesh mesh = new Mesh();
       mesh.setBuffer(Type.Position, 3, BufferUtils.createFloatBuffer(vertices));
       if(textureCoords != null)
@@ -62,14 +64,14 @@ public class JMEMeshDataInterpreter
       mesh.setBuffer(Type.Normal, 3, BufferUtils.createFloatBuffer(normals));
       mesh.setBuffer(Type.Index, 3, BufferUtils.createIntBuffer(indices));
       mesh.updateBound();
-      
+
       return mesh;
    }
-   
+
    private static float[] findNormalsPerVertex(int[] indices, Vector3f[] vertices)
    {
       Map<Integer,Set<Integer>> participatingFacesPerVertex = new LinkedHashMap<Integer,Set<Integer>>();
-      
+
       Set<Integer> vertexFacesSet;
       for (int i = 0; i < indices.length; i++)
       {
@@ -82,12 +84,12 @@ public class JMEMeshDataInterpreter
          {
             vertexFacesSet = participatingFacesPerVertex.get(indices[i]);
          }
-         
+
          vertexFacesSet.add(i / 3); // Abuse integer division.
       }
-      
+
       Vector3f[] normalsPerFace = findNormalsPerFace(indices, vertices);
-      
+
       int pos = 0;
       float[] normals = new float[3 * vertices.length];
       Vector3f vertexNormal, faceNormal;
@@ -100,43 +102,43 @@ public class JMEMeshDataInterpreter
             faceNormal = normalsPerFace[face];
             vertexNormal.addLocal(faceNormal);
          }
-                  
+
          float faces = (float) participatingFaceIndices.size();
          normals[pos++] = vertexNormal.x / faces;
          normals[pos++] = vertexNormal.y / faces;
          normals[pos++] = vertexNormal.z / faces;
       }
-      
+
       return normals;
    }
 
    private static Vector3f[] findNormalsPerFace(int[] indices, Vector3f[] vertices)
    {
-      Vector3f[] normalsPerFace = new Vector3f[indices.length / 3]; // Abuse integer division. 
-      
+      Vector3f[] normalsPerFace = new Vector3f[indices.length / 3]; // Abuse integer division.
+
       Vector3f firstVector = new Vector3f();
       Vector3f secondVector = new Vector3f();
       Vector3f[] faceVertices = new Vector3f[3];
       for(int face = 0; face < normalsPerFace.length; face++)
       {
          normalsPerFace[face] = new Vector3f();
-         
+
          for(int i = 0; i < faceVertices.length; i++)
          {
             faceVertices[i] = vertices[indices[face * 3 + i]];
          }
 
          firstVector.set(faceVertices[2]);
-         firstVector.subtractLocal(faceVertices[1]);        
-         
+         firstVector.subtractLocal(faceVertices[1]);
+
          secondVector.set(faceVertices[2]);
-         secondVector.subtractLocal(faceVertices[0]);    
-         
+         secondVector.subtractLocal(faceVertices[0]);
+
          normalsPerFace[face] = secondVector.cross(firstVector, normalsPerFace[face]);
-         
+
          normalsPerFace[face].normalizeLocal();
       }
-      
+
       return normalsPerFace;
    }
 
@@ -144,7 +146,7 @@ public class JMEMeshDataInterpreter
    {
       if(polygonIndices.length <= 3)
          return polygonIndices;
-   
+
       // Do a naive way of splitting a polygon into triangles. Assumes convexity and ccw ordering.
       int[] ret = new int[3 * (polygonIndices.length - 2)];
       int i = 0;
@@ -154,9 +156,9 @@ public class JMEMeshDataInterpreter
          ret[i++] = polygonIndices[j-1];
          ret[i++] = polygonIndices[j];
       }
-      
+
       return ret;
    }
 
-   
+
 }
