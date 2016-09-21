@@ -1,15 +1,16 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer;
 
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferEntryCMPProjectionMatrix;
+
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-
-import java.util.Random;
 
 public class TransferEntryCMPProjectionMatrixTest
 {
@@ -96,5 +97,10 @@ public class TransferEntryCMPProjectionMatrixTest
          shouldBe.set(3, 0, -omega0);
          JUnitTools.assertMatrixEquals(name, shouldBe, transferEntryCMPProjectionMatrix, epsilon);
       }
+   }
+   
+   public static void main(String[] args)
+   {
+      MutationTestingTools.doPITMutationTestAndOpenResult(TransferEntryCMPProjectionMatrixTest.class);
    }
 }
