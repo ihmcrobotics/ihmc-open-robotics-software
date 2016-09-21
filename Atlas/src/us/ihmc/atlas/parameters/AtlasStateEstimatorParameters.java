@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.LegJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
@@ -51,12 +53,15 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 
    private final DRCRobotJointMap jointMap;
 
+   private final ImmutablePair<String, String> imusForSpineJointEstimation;
+
    public AtlasStateEstimatorParameters(DRCRobotJointMap jointMap, AtlasSensorInformation sensorInformation, boolean runningOnRealRobot, double estimatorDT)
    {
       this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
-
       this.estimatorDT = estimatorDT;
+
+      imusForSpineJointEstimation = new ImmutablePair<String, String>(sensorInformation.getPrimaryBodyImu(), sensorInformation.getChestImu());
 
       wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       footForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -336,5 +341,12 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    public boolean correctTrustedFeetPositions()
    {
       return true;
+   }
+
+   @Override
+   public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
+   {
+      return null;
+//      return imusForSpineJointEstimation;
    }
 }
