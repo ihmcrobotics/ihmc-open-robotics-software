@@ -73,6 +73,11 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getMinimumSwingTimeForDisturbanceRecovery();
 
+   /**
+    * Determines whether to use the ICP Optimization controller or a standard ICP proportional controller (new feature to be tested with Atlas)
+    */
+   public abstract boolean useOptimizationBasedICPController();
+
    public abstract double getICPErrorThresholdToSpeedUpSwing();
 
    public abstract ICPControlGains createICPControlGains(YoVariableRegistry registry);

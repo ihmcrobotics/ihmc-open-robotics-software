@@ -28,18 +28,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
-import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
-import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
-import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameterization;
-import us.ihmc.atlas.parameters.AtlasHeightCalculatorParameters;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
-import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
@@ -47,6 +36,7 @@ import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -108,6 +98,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasSensorInformation sensorInformation;
    private final AtlasArmControllerParameters armControllerParameters;
    private final AtlasCapturePointPlannerParameters capturePointPlannerParameters;
+   private final AtlasICPOptimizationParameters icpOptimizationParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final AtlasRobotMultiContactControllerParameters multiContactControllerParameters;
@@ -135,6 +126,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       capturePointPlannerParameters = new AtlasCapturePointPlannerParameters();
+      icpOptimizationParameters = new AtlasICPOptimizationParameters();
       sensorInformation = new AtlasSensorInformation(target);
       armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap);
@@ -388,6 +380,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public CapturePointPlannerParameters getCapturePointPlannerParameters()
    {
       return capturePointPlannerParameters;
+   }
+
+   @Override
+   public ICPOptimizationParameters getICPOptimizationParameters()
+   {
+      return icpOptimizationParameters;
    }
 
    @Override

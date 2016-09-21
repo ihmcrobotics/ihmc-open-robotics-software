@@ -10,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationInputHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
@@ -163,6 +165,7 @@ public class GazeboControllerFactory
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       final HighLevelState initialBehavior;
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
       initialBehavior = HighLevelState.WALKING; // HERE!!
 
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
@@ -170,8 +173,10 @@ public class GazeboControllerFactory
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, initialBehavior);
+            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
+            initialBehavior);
       controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), packetCommunicator);
+      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
 //      controllerFactory.addHighLevelBehaviorFactory(new JointPositionControllerFactory(true));
 

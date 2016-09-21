@@ -77,7 +77,7 @@ public class PushRecoveryControlModule
       soleFrames = referenceFrames.getSoleFrames();
 
       enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
-      enablePushRecovery.set(ENABLE);
+      enablePushRecovery.set(ENABLE); // todo add some smartness on whether ot not to enable this if using the icp optimization
 
       yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, yoGraphicsListRegistry);
