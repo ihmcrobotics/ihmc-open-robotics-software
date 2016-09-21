@@ -7,6 +7,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class StanceCMPProjectionMultipliersTest
@@ -25,8 +26,14 @@ public class StanceCMPProjectionMultipliersTest
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
       DoubleYoVariable exitCMPDurationInPercentOfStepTime = new DoubleYoVariable("exitCMPDurationInPercentOfStepTime", registry);
 
+      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new DoubleYoVariable("currentDoubleSupportDuration", registry));
+      doubleSupportDurations.add(new DoubleYoVariable("upcomingDoubleSupportDuration", registry));
+      singleSupportDurations.add(new DoubleYoVariable("singleSupportduration", registry));
+
       StanceCMPProjectionMultipliers stanceCMPProjectionMultipliers = new StanceCMPProjectionMultipliers("", doubleSupportSplitRatio,
-                                                                                                         exitCMPDurationInPercentOfStepTime, registry);
+            exitCMPDurationInPercentOfStepTime, registry);
 
       for (int i = 0; i < iters; i++)
       {
@@ -41,6 +48,10 @@ public class StanceCMPProjectionMultipliersTest
          double currentDoubleSupportDuration = 1.0 * random.nextDouble();
          double upcomingDoubleSupportDuration = 1.0 * random.nextDouble();
          double singleSupportDuration = 2.0 * random.nextDouble();
+
+         doubleSupportDurations.get(0).set(currentDoubleSupportDuration);
+         doubleSupportDurations.get(1).set(upcomingDoubleSupportDuration);
+         singleSupportDurations.get(0).set(singleSupportDuration);
 
          double upcomingInitialDoubleSupportDuration = splitRatio * upcomingDoubleSupportDuration;
          double endOfDoubleSupport = (1.0 - splitRatio) * currentDoubleSupportDuration;
@@ -58,6 +69,10 @@ public class StanceCMPProjectionMultipliersTest
          Assert.assertEquals("", exitMultiplier, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
          Assert.assertEquals("", entryMultiplier, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
 
+         stanceCMPProjectionMultipliers.compute(doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0, 1);
+         Assert.assertEquals("", exitMultiplier, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
+         Assert.assertEquals("", entryMultiplier, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
+
          isInTransfer = true;
 
          exitMultiplier = Math.exp(-omega0 * (timeOnEntry - endOfDoubleSupport)) * (1.0 - Math.exp(-omega0 * timeOnExit));
@@ -65,6 +80,10 @@ public class StanceCMPProjectionMultipliersTest
 
          stanceCMPProjectionMultipliers.compute(upcomingDoubleSupportDuration, currentDoubleSupportDuration, singleSupportDuration, useTwoCMPs, isInTransfer, omega0, 1);
 
+         Assert.assertEquals("", exitMultiplier, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
+         Assert.assertEquals("", entryMultiplier, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
+
+         stanceCMPProjectionMultipliers.compute(doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0, 1);
          Assert.assertEquals("", exitMultiplier, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
          Assert.assertEquals("", entryMultiplier, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
 
@@ -79,6 +98,10 @@ public class StanceCMPProjectionMultipliersTest
          Assert.assertEquals("", exitMultiplier, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
          Assert.assertEquals("", entryMultiplier, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
 
+         stanceCMPProjectionMultipliers.compute(doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0, 1);
+         Assert.assertEquals("", exitMultiplier, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
+         Assert.assertEquals("", entryMultiplier, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
+
          useTwoCMPs = false;
          isInTransfer = true;
 
@@ -89,6 +112,15 @@ public class StanceCMPProjectionMultipliersTest
 
          Assert.assertEquals("", exitMultiplier, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
          Assert.assertEquals("", entryMultiplier, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
+
+         stanceCMPProjectionMultipliers.compute(doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0, 1);
+         Assert.assertEquals("", exitMultiplier, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
+         Assert.assertEquals("", entryMultiplier, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
+
+         stanceCMPProjectionMultipliers.reset();
+         ;
+         Assert.assertEquals("", 0.0, stanceCMPProjectionMultipliers.getExitMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, stanceCMPProjectionMultipliers.getEntryMultiplier(), epsilon);
       }
    }
 }
