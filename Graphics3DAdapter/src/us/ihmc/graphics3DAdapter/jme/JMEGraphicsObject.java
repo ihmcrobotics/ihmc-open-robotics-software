@@ -88,17 +88,17 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
          if (submesh != null)
          {
             spatial = findSubmesh(spatial, submesh, centerSubmesh);
-            
+
             // The Polaris Ranger had multiple subnodes, which shouldn't be displayed. Two stategies could be useful, taking only the first node or ignoring named nodes. Because terrible documentation, we don't know
             // what Gazebo does. Therefore, we take the first node. Implement ignore named nodes if this breaks things.
             if(spatial instanceof Node)
             {
                if(((Node) spatial).getChildren().size() > 1)
                {
-                  spatial = ((Node) spatial).getChild(0); 
+                  spatial = ((Node) spatial).getChild(0);
                }
             }
-            
+
             if (spatial == null)
             {
                System.err.println("Cannot find submesh " + submesh);
@@ -401,6 +401,8 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
    protected void doAddMeshDataInstruction(final Graphics3DAddMeshDataInstruction graphics3dObjectAddMeshData)
    {
       MeshDataHolder meshData = graphics3dObjectAddMeshData.getMeshData();
+      if (meshData == null) return;
+
       AppearanceDefinition appearance = graphics3dObjectAddMeshData.getAppearance();
 
       Mesh mesh = JMEMeshDataInterpreter.interpretMeshData(meshData);
@@ -418,6 +420,8 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 
          public void meshChanged(final MeshDataHolder newMesh)
          {
+            if (newMesh == null) return;
+
             checkIfNotImmutable();
 
             application.enqueue(new Callable<Object>()
