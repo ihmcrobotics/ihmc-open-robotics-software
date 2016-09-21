@@ -33,7 +33,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    public void onEntry()
    {
       double currentTime = timestamp.getDoubleValue();
-      ArrayList<QuadrupedTimedStep> steps = timedStepInputProvider.get();
+      ArrayList<QuadrupedTimedStep> steps = timedStepInputProvider.getAndClearSteps();
       stepSequence.clear();
       for (int i = 0; i < steps.size(); i++)
       {
@@ -65,7 +65,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    @Override
    public void onExit()
    {
-
+      stepSequence.clear();
    }
 
    @Override
