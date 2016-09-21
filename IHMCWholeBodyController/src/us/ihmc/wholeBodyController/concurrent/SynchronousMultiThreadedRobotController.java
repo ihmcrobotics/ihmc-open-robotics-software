@@ -40,6 +40,7 @@ public class SynchronousMultiThreadedRobotController implements MultiThreadedRob
       for(int i = 0; i < robotControllerRunners.size(); i++)
       {
          robotControllerRunners.get(i).tick();
+         robotControllerRunners.get(i).runIfReady();
       }
    }
 
@@ -59,7 +60,8 @@ public class SynchronousMultiThreadedRobotController implements MultiThreadedRob
    {
       private final MultiThreadedRobotControlElement controller;
       private final ReentrantLock reentrantLock = new ReentrantLock();
-      private final Condition condition;
+      private final Condition shouldRunCondition;
+      private final Condition isRunningCondition;
       private final TimestampProvider timestampProvider;
       private final int ticksPerExecution;
       private int ticks;
@@ -71,7 +73,8 @@ public class SynchronousMultiThreadedRobotController implements MultiThreadedRob
          this.ticksPerExecution = ticksPerExecution;
          this.ticks = 0;
 
-         condition = reentrantLock.newCondition();
+         shouldRunCondition = reentrantLock.newCondition();
+         isRunningCondition = reentrantLock.newCondition();
       }
 
       @Override
@@ -85,12 +88,14 @@ public class SynchronousMultiThreadedRobotController implements MultiThreadedRob
                controller.read(timestampProvider.getTimestamp());
                controller.run();
                controller.write(timestampProvider.getTimestamp());
-               condition.await();
+               isRunningCondition.signalAll();
+               shouldRunCondition.await();
             }
             catch (InterruptedException e)
             {
                e.printStackTrace();
-            } finally
+            }
+            finally
             {
                reentrantLock.unlock();
             }
@@ -103,12 +108,30 @@ public class SynchronousMultiThreadedRobotController implements MultiThreadedRob
          try
          {
             this.ticks++;
+         }
+         finally
+         {
+            reentrantLock.unlock();
+         }
+      }
+
+      private void runIfReady()
+      {
+         reentrantLock.lock();
+         try
+         {
             if (this.ticks >= this.ticksPerExecution)
             {
-               condition.signalAll();
                this.ticks = 0;
+               shouldRunCondition.signalAll();
+               isRunningCondition.await();
             }
-         } finally
+         }
+         catch (InterruptedException e)
+         {
+            e.printStackTrace();
+         }
+         finally
          {
             reentrantLock.unlock();
          }
