@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
+import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.InclinedGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RampsGroundProfile;
@@ -117,6 +118,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       InclinedGroundProfile groundProfile = new InclinedGroundProfile(slope);
       
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+      quadrupedTestFactory.setParameterSet(QuadrupedParameterSet.SIMULATION_REAL);
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setUseStateEstimator(false);
