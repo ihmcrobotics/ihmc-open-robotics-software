@@ -28,7 +28,19 @@ import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.*;
+import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
+import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
+import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
+import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameterization;
+import us.ihmc.atlas.parameters.AtlasHeightCalculatorParameters;
+import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
+import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
@@ -769,7 +781,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private void addChestIMU(SDFLinkHolder chestLink)
    {
       SDFSensor chestIMU = new SDFSensor();
-      chestIMU.setName("imu_sensor_chest");
+      chestIMU.setName(sensorInformation.getChestImu());
       chestIMU.setType("imu");
 
       // Position only approximate. If we start using the acceleration measurements this will have to be fixed.
