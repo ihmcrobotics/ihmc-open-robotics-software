@@ -781,7 +781,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private void addChestIMU(SDFLinkHolder chestLink)
    {
       SDFSensor chestIMU = new SDFSensor();
-      chestIMU.setName(sensorInformation.getChestImu());
+      chestIMU.setName("imu_sensor_chest");
       chestIMU.setType("imu");
 
       // Position only approximate. If we start using the acceleration measurements this will have to be fixed.
