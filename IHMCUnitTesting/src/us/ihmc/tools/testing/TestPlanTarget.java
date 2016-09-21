@@ -12,7 +12,8 @@ public enum TestPlanTarget
    UI(true, false),
    CodeQuality(false, false),
    Flaky(true, false),
-   InDevelopment(true, false);
+   InDevelopment(true, false),
+   RepoHealth(false, false);
    
    public static final TestPlanTarget[] values = values();
    public static final TestPlanTarget defaultTarget = Fast;
