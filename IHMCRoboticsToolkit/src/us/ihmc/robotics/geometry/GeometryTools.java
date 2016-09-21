@@ -199,6 +199,41 @@ public class GeometryTools
    }
 
    /**
+    * Returns true only if the point is inside the triangle defined by the vertices a, b, and c.
+    * The triangle can be clockwise or counter-clockwise ordered.
+    * @param point the point to check if lying inside the triangle.
+    * @param a first vertex of the triangle.
+    * @param b second vertex of the triangle.
+    * @param c third vertex of the triangle.
+    * @return
+    */
+   public static boolean isPointInsideTriangleABC(Point2d point, Point2d a, Point2d b, Point2d c)
+   {
+      boolean isClockwiseOrdered = isPointOnLeftSideOfLine(b, a, c);
+
+      if (isClockwiseOrdered)
+      { // The point must be on the right side of each vertex of the triangle
+         if (isPointOnLeftSideOfLine(point, a, b))
+            return false;
+         if (isPointOnLeftSideOfLine(point, b, c))
+            return false;
+         if (isPointOnLeftSideOfLine(point, c, a))
+            return false;
+      }
+      else
+      { // The point must be on the left side of each vertex of the triangle
+         if (!isPointOnLeftSideOfLine(point, a, b))
+            return false;
+         if (!isPointOnLeftSideOfLine(point, b, c))
+            return false;
+         if (!isPointOnLeftSideOfLine(point, c, a))
+            return false;
+      }
+
+      return true;
+   }
+
+   /**
     * Averages the 2D points in a given Array
     *
     * @param points ArrayList
