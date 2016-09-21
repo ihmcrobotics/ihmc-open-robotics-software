@@ -27,7 +27,7 @@ public class MutationTestingTools
 {
    public static void doPITMutationTestAndOpenResult(String targetTests, String targetClasses)
    {
-      String reportDirectoryName = "pit-reports";
+      final String reportDirectoryName = "pit-reports";
       MutationCoverageReport.main(new String[] {"--reportDir", reportDirectoryName,
                                                 "--targetClasses", targetClasses,
                                                 "--targetTests", targetTests,
@@ -60,7 +60,7 @@ public class MutationTestingTools
       if (reportDirectory.isDirectory() && reportDirectory.exists())
       {
          String[] list = reportDirectory.list();
-         String lastDirectoryName = list[list.length-1];
+         final String lastDirectoryName = list[list.length-1];
 
          System.out.println("Found last directory " + lastDirectoryName);
          
