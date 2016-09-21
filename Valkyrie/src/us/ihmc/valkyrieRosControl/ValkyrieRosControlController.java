@@ -29,6 +29,7 @@ import us.ihmc.rosControl.wholeRobot.*;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
@@ -303,6 +304,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       if (isGazebo)
       {
+         PrintTools.info(ValkyrieRosControlController.class, "Running with blocking synchronous execution between estimator and controller");
          SynchronousMultiThreadedRobotController coordinator = new SynchronousMultiThreadedRobotController(estimatorThread, timestampProvider);
          coordinator.addController(controllerThread, (int) (robotModel.getControllerDT() / robotModel.getEstimatorDT()));
 
@@ -310,6 +312,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
       else
       {
+         PrintTools.info(ValkyrieRosControlController.class, "Running with multi-threaded RT threads for estimator and controller");
          MultiThreadedRealTimeRobotController coordinator = new MultiThreadedRealTimeRobotController(estimatorThread);
          if (valkyrieAffinity.setAffinity())
          {
