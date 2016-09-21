@@ -6,8 +6,10 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class SwingInitialICPProjectionMatrixTest
@@ -37,46 +39,41 @@ public class SwingInitialICPProjectionMatrixTest
 
       Random random = new Random();
       int iters = 100;
+      double omega0 = 3.0;
 
 
 
-      DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
-      DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
-      DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
 
       SwingInitialICPProjectionMatrix swingStateEndRecursionMatrix = new SwingInitialICPProjectionMatrix(startOfSplineTime);
 
       for (int i = 0; i < iters; i++)
       {
-         double omega0 = 3.0;
-         double splitRatio = 0.5 * random.nextDouble();
-
-         omega.set(omega0);
-         doubleSupportSplitRatio.set(splitRatio);
-
-         double currentDoubleSupportDuration = 2.0 * random.nextDouble();
          double singleSupportDuration = 5.0 * random.nextDouble();
 
          double alpha1 = random.nextDouble();
          double alpha2 = random.nextDouble();
          double startOfSpline = Math.min(alpha1, alpha2) * singleSupportDuration;
-         double endOfSpline = Math.max(alpha1, alpha2) * singleSupportDuration;
 
          startOfSplineTime.set(startOfSpline);
-         endOfSplineTime.set(endOfSpline);
-         totalTrajectoryTime.set(singleSupportDuration);
 
-         String name = "splitRatio = " + splitRatio + ",\n doubleSupportDuration = " + currentDoubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
+         String name = " = " ;
 
          shouldBe.zero();
          shouldBe.set(0, 0, Math.exp(omega0 * startOfSpline));
          shouldBe.set(1, 0, omega0 * Math.exp(omega0 * startOfSpline));
 
          swingStateEndRecursionMatrix.compute(omega0);
+         JUnitTools.assertMatrixEquals(name, shouldBe, swingStateEndRecursionMatrix, epsilon);
 
+         swingStateEndRecursionMatrix.reset();
+         shouldBe.zero();
          JUnitTools.assertMatrixEquals(name, shouldBe, swingStateEndRecursionMatrix, epsilon);
       }
+   }
+
+   public static void main(String[] args)
+   {
+      MutationTestingTools.doPITMutationTestAndOpenResult(SwingInitialICPProjectionMatrixTest.class);
    }
 }

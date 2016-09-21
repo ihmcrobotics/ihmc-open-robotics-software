@@ -7,8 +7,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class TransferPreviousExitCMPProjectionMatrixTest
@@ -21,7 +23,6 @@ public class TransferPreviousExitCMPProjectionMatrixTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
-      DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
       TransferPreviousExitCMPProjectionMatrix entryCMPProjectionMatrix = new TransferPreviousExitCMPProjectionMatrix(doubleSupportSplitRatio);
 
@@ -38,22 +39,22 @@ public class TransferPreviousExitCMPProjectionMatrixTest
 
       Random random = new Random();
       int iters = 100;
+      double omega0 = 3.0;
 
-
-      DoubleYoVariable omega = new DoubleYoVariable("omega", registry);
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
+      doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration", registry));
 
       TransferPreviousExitCMPProjectionMatrix entryCMPProjectionMatrix = new TransferPreviousExitCMPProjectionMatrix(doubleSupportSplitRatio);
 
       for (int i = 0; i < iters; i++)
       {
-         double omega0 = 3.0;
          double splitRatio = 0.5 * random.nextDouble();
 
-         omega.set(omega0);
          doubleSupportSplitRatio.set(splitRatio);
 
          double doubleSupportDuration = 2.0 * random.nextDouble();
+         doubleSupportDurations.get(0).set(doubleSupportDuration);
 
          String name = "splitRatio = " + splitRatio + ", doubleSupportDuration = " + doubleSupportDuration;
 
@@ -68,6 +69,10 @@ public class TransferPreviousExitCMPProjectionMatrixTest
 
          JUnitTools.assertMatrixEquals(name, shouldBe, entryCMPProjectionMatrix, epsilon);
 
+         entryCMPProjectionMatrix.reset();
+         entryCMPProjectionMatrix.compute(doubleSupportDurations, omega0, useInitialICP);
+         JUnitTools.assertMatrixEquals(name, shouldBe, entryCMPProjectionMatrix, epsilon);
+
          useInitialICP = true;
 
          entryCMPProjectionMatrix.compute(doubleSupportDuration, omega0, useInitialICP);
@@ -75,6 +80,19 @@ public class TransferPreviousExitCMPProjectionMatrixTest
          shouldBe.set(1, 0, -omega0);
 
          JUnitTools.assertMatrixEquals(name, shouldBe, entryCMPProjectionMatrix, epsilon);
+
+         entryCMPProjectionMatrix.reset();
+         entryCMPProjectionMatrix.compute(doubleSupportDurations, omega0, useInitialICP);
+         JUnitTools.assertMatrixEquals(name, shouldBe, entryCMPProjectionMatrix, epsilon);
+
+         entryCMPProjectionMatrix.reset();
+         shouldBe.zero();
+         JUnitTools.assertMatrixEquals(name, shouldBe, entryCMPProjectionMatrix, epsilon);
       }
+   }
+
+   public static void main(String[] args)
+   {
+      MutationTestingTools.doPITMutationTestAndOpenResult(TransferPreviousExitCMPProjectionMatrixTest.class);
    }
 }
