@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
@@ -340,6 +341,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
       final HighLevelState initialBehavior;
       initialBehavior = HighLevelState.DO_NOTHING_BEHAVIOR; // HERE!!
 
@@ -350,6 +352,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
             feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
             initialBehavior);
+      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), packetCommunicator);
 

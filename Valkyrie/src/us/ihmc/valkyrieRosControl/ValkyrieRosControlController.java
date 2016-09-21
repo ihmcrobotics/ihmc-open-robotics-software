@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -128,13 +129,14 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       WalkingControllerParameters walkingControllerParamaters = robotModel.getWalkingControllerParameters();
       ArmControllerParameters armControllerParamaters = robotModel.getArmControllerParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
 
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-            feetContactSensorNames, wristForceSensorNames, walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters,
-            initialBehavior);
+            feetContactSensorNames, wristForceSensorNames, walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters, initialBehavior);
+      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
       valkyrieTorqueOffsetPrinter.setRobotName(robotModel.getFullRobotName());

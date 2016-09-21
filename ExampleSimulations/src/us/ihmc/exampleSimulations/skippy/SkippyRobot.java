@@ -42,7 +42,7 @@ import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class SkippyRobot extends Robot
 {
-   private static final boolean SHOW_MOI_ELLIPSOIDS = true;
+   private static final boolean SHOW_MOI_ELLIPSOIDS = false;
 
    private static final long serialVersionUID = -7671864179791904256L;
 

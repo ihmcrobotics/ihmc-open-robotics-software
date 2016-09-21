@@ -89,7 +89,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.actualCMPFromICPX,root.Skippy.SkippyController.actualCMPFromICPY</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>

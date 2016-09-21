@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
@@ -92,6 +93,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    private final WalkingControllerParameters walkingControllerParameters;
    private final ArmControllerParameters armControllerParameters;
    private final CapturePointPlannerParameters capturePointPlannerParameters;
+   private final ICPOptimizationParameters icpOptimizationParameters;
    private final RobotContactPointParameters contactPointParameters;
 
    private final Point3d scsCameraPosition = new Point3d(6.0, -2.0, 4.5);
@@ -122,6 +124,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
       this.armControllerParameters = robotModel.getArmControllerParameters();
       this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      this.icpOptimizationParameters = robotModel.getICPOptimizationParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
    }
 
@@ -386,6 +389,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames, wristForceSensorNames,
             walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
+      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
       if (setupControllerNetworkSubscriber)
          controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), controllerPacketCommunicator);
 
