@@ -1033,4 +1033,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       String[] joints = {bkxName, bkyName};
       return joints;
    }
+
+   @Override
+   public boolean useOptimizationBasedICPController()
+   {
+      return false;
+   }
 }
