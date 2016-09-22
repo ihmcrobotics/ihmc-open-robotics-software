@@ -154,6 +154,8 @@ public class SkippyController implements RobotController {
 			ReferenceFrame.getWorldFrame(), registry);
 	private final YoFramePoint desiredCMPFromICP = new YoFramePoint("desiredCMPFromICP", ReferenceFrame.getWorldFrame(),
 			registry);
+	private final YoFramePoint icpToFootError = new YoFramePoint("icpToFootError", ReferenceFrame.getWorldFrame(),
+			registry);
 	private PIDController controllerCmpX;
 	private PIDController controllerCmpY;
 
@@ -318,7 +320,7 @@ public class SkippyController implements RobotController {
 		yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), actualGRFYoGraphic);
 		
 		YoGraphicVector cmpToComPositionVectorYoGraphic = new YoGraphicVector("cmpToComPositionVectorYoGraphic", desiredCMPFromICP,
-				cmpToComPositionVector, 1.0, YoAppearance.Coral(), true);
+				cmpToComPositionVector, 1.0, YoAppearance.LightBlue(), true);
 		yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), cmpToComPositionVectorYoGraphic);
 
 		YoGraphicVector hipJointAxisYoGraphic = new YoGraphicVector("hipJointAxisYoGraphic", hipJointPosition,
@@ -470,8 +472,6 @@ public class SkippyController implements RobotController {
 		hipJointUnitVector.normalize();
 
 		// shoulder:
-		tempJointAxis.set(0.0,0.0,0.0);
-		transformToWorld.setIdentity();
 		robot.getShoulderJoint().getJointAxis(tempJointAxis);
 		robot.getShoulderJoint().getTransformToWorld(transformToWorld);
 		transformToWorld.transform(tempJointAxis);
@@ -626,10 +626,13 @@ public class SkippyController implements RobotController {
 			/*
 			 * Apply CMP controller to Skippy
 			 */
-			double desiredCmpX = actualICP.getX() - controllerCmpX.compute(actualICP.getX(), footLocation.getX(),
+			double icpToFootErrorX = controllerCmpX.compute(actualICP.getX(), footLocation.getX(),
 					centerOfMassVelocity.getX(), 0.0, SkippySimulation.DT);
-			double desiredCmpY = actualICP.getY() - controllerCmpY.compute(actualICP.getY(), footLocation.getY(),
+			double icpToFootErrorY = controllerCmpY.compute(actualICP.getY(), footLocation.getY(),
 					centerOfMassVelocity.getY(), 0.0, SkippySimulation.DT);
+			icpToFootError.set(icpToFootErrorX, icpToFootErrorY,0.0);
+			double desiredCmpX = actualICP.getX() - icpToFootErrorX;	//controllerCmpX.compute(actualICP.getX(), footLocation.getX(),
+			double desiredCmpY = actualICP.getY() - icpToFootErrorY;	//controllerCmpY.compute(actualICP.getY(), footLocation.getY(),
 			desiredCMPFromICP.setX(desiredCmpX);
 			desiredCMPFromICP.setY(desiredCmpY);
 			/*
