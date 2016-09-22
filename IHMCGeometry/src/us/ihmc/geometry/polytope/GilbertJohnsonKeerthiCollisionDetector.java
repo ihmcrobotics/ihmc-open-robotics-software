@@ -48,6 +48,7 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
       simplex.clearPoints();
 
+
       // Step 1) Initialize Simplex Q to a single point in A minkowskiDifference B. Here we'll just use A.vertex0 and B.vertex0
       PolytopeVertex vertexOne = polytopeA.getVertex(0);
       PolytopeVertex vertexTwo = polytopeB.getVertex(0);
