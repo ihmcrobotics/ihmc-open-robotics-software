@@ -18,7 +18,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedTimedStepInputProvider
+public class QuadrupedPreplannedStepInputProvider
 {
    private final AtomicReference<QuadrupedTimedStepPacket> timedStepPacket;
    
@@ -27,7 +27,7 @@ public class QuadrupedTimedStepInputProvider
    private final DoubleYoVariable yoTimedStepGroundClearance;
    private final YoFramePoint yoTimedStepGoalPosition;
 
-   public QuadrupedTimedStepInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry registry)
+   public QuadrupedPreplannedStepInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry registry)
    {
       timedStepPacket = new AtomicReference<>(new QuadrupedTimedStepPacket());
 
@@ -71,7 +71,13 @@ public class QuadrupedTimedStepInputProvider
       });
    }
 
-   public ArrayList<QuadrupedTimedStep> getAndClearSteps()
+   public boolean isStepPlanAvailable()
+   {
+      ArrayList<QuadrupedTimedStep> steps = timedStepPacket.get().get();
+      return (steps.size() > 0);
+   }
+
+   public ArrayList<QuadrupedTimedStep> getAndClearStepPlan()
    {
       ArrayList<QuadrupedTimedStep> steps = timedStepPacket.get().get();
       timedStepPacket.set(new QuadrupedTimedStepPacket());

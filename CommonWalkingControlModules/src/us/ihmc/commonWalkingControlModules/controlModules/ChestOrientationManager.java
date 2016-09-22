@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
@@ -27,8 +29,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientation
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.io.printing.PrintTools;
-
-import javax.vecmath.Vector3d;
 
 public class ChestOrientationManager
 {
@@ -314,6 +314,25 @@ public class ChestOrientationManager
 
       isTrackingOrientation.set(true);
       isTrajectoryStopped.set(false);
+   }
+
+   public void goToHomeFromCurrent(double trajectoryTime)
+   {
+      receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
+      orientationTrajectoryGenerator.clear(pelvisZUpFrame);
+
+      desiredAngularVelocity.setToZero(pelvisZUpFrame);
+      desiredOrientation.setToZero(pelvisZUpFrame);
+      initialTrajectoryPoint.setToZero(chestFrame);
+      initialTrajectoryPoint.changeFrame(pelvisZUpFrame);
+
+      orientationTrajectoryGenerator.appendWaypoint(initialTrajectoryPoint);
+      orientationTrajectoryGenerator.appendWaypoint(trajectoryTime, desiredOrientation, desiredAngularVelocity);
+      orientationTrajectoryGenerator.initialize();
+
+      isTrackingOrientation.set(true);
+      isTrajectoryStopped.set(false);
+
    }
 
    private void clearCommandQueue(long lastCommandId)

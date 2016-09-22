@@ -32,7 +32,7 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedTimedStepInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
@@ -64,7 +64,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
    private final QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider;
-   private final QuadrupedTimedStepInputProvider timedStepProvider;
+   private final QuadrupedPreplannedStepInputProvider preplannedStepProvider;
    private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
 
    private final QuadrupedPreplannedStepStream preplannedStepStream;
@@ -88,13 +88,13 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       postureProvider = new QuadrupedPostureInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       planarVelocityProvider = new QuadrupedPlanarVelocityInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       xGaitSettingsProvider = new QuadrupedXGaitSettingsInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
-      timedStepProvider = new QuadrupedTimedStepInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      preplannedStepProvider = new QuadrupedPreplannedStepInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
 
       // Initialize input step streams.
       xGaitStepStream = new QuadrupedXGaitStepStream(planarVelocityProvider, xGaitSettingsProvider, controllerToolbox.getReferenceFrames(),
             runtimeEnvironment.getControlDT(), runtimeEnvironment.getRobotTimestamp(), registry);
-      preplannedStepStream = new QuadrupedPreplannedStepStream(timedStepProvider, controllerToolbox.getReferenceFrames(),
+      preplannedStepStream = new QuadrupedPreplannedStepStream(preplannedStepProvider, controllerToolbox.getReferenceFrames(),
             runtimeEnvironment.getRobotTimestamp());
       stepStreamMultiplexer = new QuadrupedStepStreamMultiplexer<>();
       stepStreamMultiplexer.addStepStream(QuadrupedForceControllerState.XGAIT, xGaitStepStream);
@@ -174,13 +174,20 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
          stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FALL);
       }
 
-      // update controller state machine
+      // update requested events
       QuadrupedForceControllerRequestedEvent reqEvent = requestedEvent.getAndSet(null);
       if (reqEvent != null)
       {
          lastEvent.set(reqEvent);
          stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, reqEvent);
       }
+      if (preplannedStepProvider.isStepPlanAvailable())
+      {
+         lastEvent.set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
+         stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
+      }
+
+      // update controller state machine
       stateMachine.process();
 
       // update contact state used for state estimation
