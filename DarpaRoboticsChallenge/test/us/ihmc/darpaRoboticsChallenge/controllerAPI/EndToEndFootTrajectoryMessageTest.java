@@ -92,7 +92,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
          assertTrue(success);
-         
+
          // Now we can do the usual test.
          double trajectoryTime = 1.0;
          FramePose desiredRandomFootPose = new FramePose(foot.getBodyFixedFrame());
@@ -159,7 +159,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
          assertTrue(success);
-         
+
          // Now we can do the usual test.
          double firstTrajectoryPointTime = 0.5;
          double timePerWaypoint = 0.1;
@@ -283,7 +283,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
          assertTrue(success);
-         
+
          // Now we can do the usual test.
          double firstTrajectoryPointTime = 0.5;
          int numberOfTrajectoryPoints = 100;
@@ -434,7 +434,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
          assertTrue(success);
-         
+
          // Now we can do the usual test.
          double firstTrajectoryPointTime = 0.5;
          int numberOfTrajectoryPoints = 20;
@@ -443,7 +443,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
          FramePoint circleCenter = new FramePoint(ankleFrame);
-         circleCenter.set(0.0, robotSide.negateIfRightSide(0.0), 0.10);
+         circleCenter.set(0.0, robotSide.negateIfRightSide(0.0), 0.15);
          double radiusXY = 0.15;
          double radiusZ = 0.08;
          FramePoint tempPoint = new FramePoint();
@@ -592,7 +592,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
          assertTrue(success);
-         
+
          // Now we can do the usual test.
          double firstTrajectoryPointTime = 0.5;
          int numberOfTrajectoryPoints = 20;
@@ -728,7 +728,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
          assertTrue(success);
-         
+
          // Now we can do the usual test.
          double firstTrajectoryPointTime = 0.5;
          int numberOfTrajectoryPoints = 20;
