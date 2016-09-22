@@ -39,6 +39,11 @@ public class PolytopeVertex
       return connectingVertices.size();
    }
 
+   public PolytopeVertex getConnectingVertex(int index)
+   {
+      return connectingVertices.get(index);
+   }
+
    public Point3d getPosition()
    {
       return position;

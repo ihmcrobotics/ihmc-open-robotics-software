@@ -1,7 +1,10 @@
 package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
+import javax.vecmath.Point3d;
+
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.Transform3d;
@@ -25,6 +28,12 @@ public class YoGraphicLineSegment extends YoGraphicVector
    private final DoubleYoVariable startX, startY, startZ, endX, endY, endZ;
    private final DoubleYoVariable vectorX, vectorY, vectorZ;
 
+   public YoGraphicLineSegment(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, AppearanceDefinition appearance, YoVariableRegistry registry)
+   {
+      this(namePrefix, new YoFramePoint(namePrefix, nameSuffix + "Start", referenceFrame, registry),
+            new YoFramePoint(namePrefix, nameSuffix + "End", referenceFrame, registry), appearance);
+   }
+
    public YoGraphicLineSegment(String name, YoFramePoint startPoint, YoFramePoint endPoint, AppearanceDefinition appearance)
    {
       this(name, startPoint, endPoint, 1.0, appearance);
@@ -32,7 +41,7 @@ public class YoGraphicLineSegment extends YoGraphicVector
 
    public YoGraphicLineSegment(String name, YoFramePoint startPoint, YoFramePoint endPoint, double scale, AppearanceDefinition appearance)
    {
-      this(name, startPoint, endPoint, scale, appearance, true);
+      this(name, startPoint, endPoint, scale, appearance, false);
    }
 
    public YoGraphicLineSegment(String name, YoFramePoint startPoint, YoFramePoint endPoint, double scale, AppearanceDefinition appearance,
@@ -133,5 +142,35 @@ public class YoGraphicLineSegment extends YoGraphicVector
    public double[] getConstants()
    {
       return new double[] { scaleFactor };
+   }
+
+   public void setStartAndEnd(Point3d startPoint, Point3d endPoint)
+   {
+      this.startX.set(startPoint.getX());
+      this.startY.set(startPoint.getY());
+      this.startZ.set(startPoint.getZ());
+
+      this.endX.set(endPoint.getX());
+      this.endY.set(endPoint.getY());
+      this.endZ.set(endPoint.getZ());
+
+      this.vectorX.set(endPoint.getX() - startPoint.getX());
+      this.vectorY.set(endPoint.getY() - startPoint.getY());
+      this.vectorZ.set(endPoint.getZ() - startPoint.getZ());
+   }
+
+   public void setToNaN()
+   {
+      startX.setToNaN();
+      startY.setToNaN();
+      startZ.setToNaN();
+
+      endX.setToNaN();
+      endY.setToNaN();
+      endZ.setToNaN();
+
+      vectorX.setToNaN();
+      vectorY.setToNaN();
+      vectorZ.setToNaN();
    }
 }

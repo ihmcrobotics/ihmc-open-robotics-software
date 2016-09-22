@@ -11,10 +11,15 @@ public class GilbertJohnsonKeerthiCollisionDetectorAssertListener implements Gil
 {
 
    @Override
+   public void checkingIfPolytopesAreColliding(ConvexPolytope polytopeA, ConvexPolytope polytopeB)
+   {
+      // TODO Auto-generated method stub
+   }
+
+   @Override
    public void addedVertexToSimplex(SimplexPolytope simplex, Point3d vertexOnSimplex, Point3d vertexOnA, Point3d vertexOnB)
    {
       // TODO Auto-generated method stub
-
    }
 
    @Override

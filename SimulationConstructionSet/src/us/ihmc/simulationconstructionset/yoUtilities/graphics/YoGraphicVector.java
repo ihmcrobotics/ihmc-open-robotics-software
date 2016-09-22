@@ -8,6 +8,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.plotting.artifact.Artifact;
@@ -20,15 +21,16 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.tools.gui.GraphicsUpdatable;
 
-public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic
+public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {
    private static final double DEFAULT_LINE_THICKNESS_RATIO = 0.02;
 
-   private DoubleYoVariable baseX, baseY, baseZ, x, y, z;
-   protected double scaleFactor;
-   private boolean drawArrowhead;
-   private double lineThicknessRatio;
+   private final DoubleYoVariable baseX, baseY, baseZ, x, y, z;
+   protected final double scaleFactor;
+   private final boolean drawArrowhead;
+   private final double lineThicknessRatio;
    private final AppearanceDefinition appearance;
 
    public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector frameVector, AppearanceDefinition appearance)
@@ -171,6 +173,22 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic
       transform3D.setRotation(rotMatrix);
 
    }
+
+//   @Override
+//   public void update()
+//   {
+//      if (hasChanged.getAndSet(false))
+//      {
+//         if ((!pointOne.containsNaN()) && (!pointTwo.containsNaN()) && (!pointThree.containsNaN()))
+//         {
+//            instruction.setMesh(MeshDataGenerator.Polygon(new Point3d[] { pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy() }));
+//         }
+//         else
+//         {
+//            instruction.setMesh(null);
+//         }
+//      }
+//   }
 
    public void set(DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z)
    {
