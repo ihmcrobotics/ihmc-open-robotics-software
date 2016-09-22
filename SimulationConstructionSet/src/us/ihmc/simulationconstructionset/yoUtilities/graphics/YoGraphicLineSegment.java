@@ -78,14 +78,14 @@ public class YoGraphicLineSegment extends YoGraphicVector
    public YoGraphicLineSegment(String name, DoubleYoVariable startX, DoubleYoVariable startY, DoubleYoVariable startZ, DoubleYoVariable endX,
          DoubleYoVariable endY, DoubleYoVariable endZ, double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead, double lineThicknessRatio)
    {
-      this(name, startX, startY, startZ, endX, endY, endZ, tempYoFrameVector(), scaleFactor, appearance, drawArrowhead, lineThicknessRatio);
+      this(name, startX, startY, startZ, endX, endY, endZ, createDirectionVector(name, startX.getYoVariableRegistry()), scaleFactor, appearance, drawArrowhead, lineThicknessRatio);
    }
 
-   private static YoFrameVector tempYoFrameVector()
+   private static YoFrameVector createDirectionVector(String name, YoVariableRegistry registry)
    {
-      YoVariable.warnAboutNullRegistries = false;
-      YoFrameVector temp = new YoFrameVector("temp", "", ReferenceFrame.getWorldFrame(), null);
-      YoVariable.warnAboutNullRegistries = true;
+//      YoVariable.warnAboutNullRegistries = false;
+      YoFrameVector temp = new YoFrameVector(name, "Direction", ReferenceFrame.getWorldFrame(), registry);
+//      YoVariable.warnAboutNullRegistries = true;
 
       return temp;
    }
