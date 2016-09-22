@@ -34,6 +34,23 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    private final Vector3d normalVector = new Vector3d();
    private final Vector3d tempVector = new Vector3d();
 
+   private double objectSmoothingRadius = 0.003;
+
+   public SimpleCollisionDetector()
+   {
+      this(0.003);
+   }
+   
+   public SimpleCollisionDetector(double objectSmoothingRadius)
+   {
+      this.objectSmoothingRadius = objectSmoothingRadius;
+   }
+   
+   public void setObjectSmoothingRadius(double objectSmoothingRadius)
+   {
+      this.objectSmoothingRadius = objectSmoothingRadius;
+   }
+   
    @Override
    public void initialize()
    {
@@ -256,7 +273,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       {
          double distanceSquared = pointOnAToPack.distanceSquared(pointOnBToPack);
 //         System.out.println(distanceSquared);
-         if (distanceSquared < 0.003 * 0.003) //TODO: User Setable:
+         if (distanceSquared < objectSmoothingRadius * objectSmoothingRadius ) //TODO: Consider the objects instead of one constant.
          {
             SimpleContactWrapper contacts = new SimpleContactWrapper(objectOne, objectTwo);
             normalVector.sub(pointOnBToPack, pointOnAToPack);
