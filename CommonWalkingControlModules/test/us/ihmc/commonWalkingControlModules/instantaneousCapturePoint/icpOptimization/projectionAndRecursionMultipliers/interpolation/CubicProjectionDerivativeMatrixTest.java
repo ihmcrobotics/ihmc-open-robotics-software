@@ -4,13 +4,12 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionMatrix;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.Random;
 
-public class CubicProjectionMatrixTest
+public class CubicProjectionDerivativeMatrixTest
 {
    private static final double epsilon = 0.00005;
 
@@ -18,7 +17,7 @@ public class CubicProjectionMatrixTest
    @Test(timeout = 21000)
    public void testCreationSize()
    {
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
+      CubicProjectionDerivativeMatrix cubicProjectionMatrix = new CubicProjectionDerivativeMatrix();
 
       Assert.assertEquals("", 4, cubicProjectionMatrix.numCols);
       Assert.assertEquals("", 1, cubicProjectionMatrix.numRows);
@@ -28,7 +27,7 @@ public class CubicProjectionMatrixTest
    @Test(timeout = 21000)
    public void testSegmentDuration()
    {
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
+      CubicProjectionDerivativeMatrix cubicProjectionMatrix = new CubicProjectionDerivativeMatrix();
 
       Random random = new Random();
       int iters = 100;
@@ -47,7 +46,7 @@ public class CubicProjectionMatrixTest
    @Test(timeout = 21000)
    public void testCalculation()
    {
-      CubicProjectionMatrix cubicProjectionMatrix = new CubicProjectionMatrix();
+      CubicProjectionDerivativeMatrix cubicProjectionMatrix = new CubicProjectionDerivativeMatrix();
 
       DenseMatrix64F cubicSplineMatrix = new DenseMatrix64F(4, 4);
       DenseMatrix64F cubicTimeMatrix = new DenseMatrix64F(1, 4);
@@ -69,10 +68,10 @@ public class CubicProjectionMatrixTest
          cubicTimeMatrix.zero();
          shouldBe.zero();
 
-         cubicTimeMatrix.set(0, 0, Math.pow(time, 3.0));
-         cubicTimeMatrix.set(0, 1, Math.pow(time, 2.0));
-         cubicTimeMatrix.set(0, 2, time);
-         cubicTimeMatrix.set(0, 3, 1);
+         cubicTimeMatrix.set(0, 0, 3.0 * Math.pow(time, 2.0));
+         cubicTimeMatrix.set(0, 1, 2.0 * time);
+         cubicTimeMatrix.set(0, 2, 1.0);
+         cubicTimeMatrix.set(0, 3, 0.0);
 
          cubicSplineMatrix.set(0, 0, 2.0 / Math.pow(duration, 3.0));
          cubicSplineMatrix.set(0, 1, 1.0 / Math.pow(duration, 2.0));
