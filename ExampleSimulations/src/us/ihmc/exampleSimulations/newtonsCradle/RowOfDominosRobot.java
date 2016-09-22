@@ -32,10 +32,12 @@ public class RowOfDominosRobot extends Robot
 
       int numberOfDominos = 10;
 
-//      collisionDetector = new GdxCollisionDetector(1000.0);
+//            collisionDetector = new GdxCollisionDetector(1000.0);
       collisionDetector = new SimpleCollisionDetector();
+//      ((SimpleCollisionDetector) collisionDetector).setObjectSmoothingRadius(0.001);
+
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
-      collisionShapeFactory.setMargin(0.002);
+      collisionShapeFactory.setMargin(0.001);
 
       double dominoWidth = 0.024;
       double dominoDepth = 0.0075;
