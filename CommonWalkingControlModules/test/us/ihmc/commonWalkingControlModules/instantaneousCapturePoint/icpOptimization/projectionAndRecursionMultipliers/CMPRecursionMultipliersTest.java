@@ -76,6 +76,13 @@ public class CMPRecursionMultipliersTest
                totalTime += stepDuration;
             }
 
+            for (int j = 0; j < i; j++)
+            {
+               cmpRecursionMultipliers.reset();
+               Assert.assertEquals("", 0.0, cmpRecursionMultipliers.getEntryMultiplier(j), epsilon);
+               Assert.assertEquals("", 0.0, cmpRecursionMultipliers.getExitMultiplier(j), epsilon);
+            }
+
             isInTransfer = false;
 
             cmpRecursionMultipliers.compute(i, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);

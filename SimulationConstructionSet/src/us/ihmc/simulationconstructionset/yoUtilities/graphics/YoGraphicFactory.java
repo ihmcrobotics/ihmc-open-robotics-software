@@ -23,7 +23,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifac
 /**
  * This class allows constructs RemoteDynamicGraphic objects from parsed
  * data retrieved by the YoVariableHandshakeClient.
- *  
+ *
  * @author Alex Lesman
  *
  */
@@ -37,6 +37,12 @@ public class YoGraphicFactory
       case CYLINDER_DGO:
          return new YoGraphicCylinder(name, (DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1], (DoubleYoVariable) vars[2],
                (DoubleYoVariable) vars[3], (DoubleYoVariable) vars[4], (DoubleYoVariable) vars[5], appearance, consts[0]);
+
+      case TRIANGLE_DGO:
+         return new YoGraphicTriangle(name, (DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1], (DoubleYoVariable) vars[2],
+               (DoubleYoVariable) vars[3], (DoubleYoVariable) vars[4], (DoubleYoVariable) vars[5],
+               (DoubleYoVariable) vars[6], (DoubleYoVariable) vars[7], (DoubleYoVariable) vars[8],
+               appearance);
 
       case VECTOR_DGO:
          return new YoGraphicVector(name, (DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1], (DoubleYoVariable) vars[2], (DoubleYoVariable) vars[3],
@@ -83,10 +89,10 @@ public class YoGraphicFactory
                (DoubleYoVariable) vars[2], appearance.getColor().get());
 
       case LINE_SEGMENT_2D_ARTIFACT:
-         
+
          YoFrameLineSegment2d segment = new YoFrameLineSegment2d((DoubleYoVariable) vars[0], (DoubleYoVariable) vars[1], (DoubleYoVariable) vars[2], (DoubleYoVariable) vars[3],
                ReferenceFrame.getWorldFrame());
-         
+
          return new YoArtifactLineSegment2d(name, segment, appearance.getColor().get());
 
       case POLYGON_ARTIFACT:

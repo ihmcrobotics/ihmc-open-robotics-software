@@ -124,6 +124,9 @@ public class FinalICPRecursionMultiplierTest
             expected = Math.exp(-omega * totalTime);
 
             Assert.assertEquals("two cmp in swing, " + name, expected, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+
+            finalICPRecursionMultiplier.reset();
+            Assert.assertEquals("reset ", 0.0, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
          }
       }
    }

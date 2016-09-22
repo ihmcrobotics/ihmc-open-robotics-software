@@ -18,7 +18,7 @@ public class GeometryTools
 {
    public static final boolean DEBUG = false;
 
-   private static double EPSILON = 1e-6;
+   private static final double EPSILON = 1e-6;
 
    /**
     * Compute the distance from a point to a line (defined by two 3D points).
@@ -196,6 +196,46 @@ public class GeometryTools
       Point2d checkPointPoint2d = new Point2d(point.getX(), point.getY());
 
       return isPointOnLeftSideOfLine(checkPointPoint2d, lineStartPoint2d, lineEndPoint2d);
+   }
+
+   /**
+    * Returns true only if the point is inside the triangle defined by the vertices a, b, and c.
+    * The triangle can be clockwise or counter-clockwise ordered.
+    * @param point the point to check if lying inside the triangle.
+    * @param a first vertex of the triangle.
+    * @param b second vertex of the triangle.
+    * @param c third vertex of the triangle.
+    * @return
+    */
+   public static boolean isPointInsideTriangleABC(Point2d point, Point2d a, Point2d b, Point2d c)
+   {
+      boolean isClockwiseOrdered = isPointOnLeftSideOfLine(b, a, c);
+
+      if (isClockwiseOrdered)
+      { // The point must be on the right side of each vertex of the triangle
+         if (isPointOnLeftSideOfLine(point, a, b))
+            return false;
+         if (isPointOnLeftSideOfLine(point, b, c))
+            return false;
+         if (isPointOnLeftSideOfLine(point, c, a))
+            return false;
+      }
+      else
+      { // The point must be on the left side of each vertex of the triangle
+         if (!isPointOnLeftSideOfLine(point, a, b))
+            return false;
+         if (!isPointOnLeftSideOfLine(point, b, c))
+            return false;
+         if (!isPointOnLeftSideOfLine(point, c, a))
+            return false;
+      }
+
+      return true;
+   }
+
+   public static double computeTriangleArea(Point2d a, Point2d b, Point2d c)
+   {
+      return Math.abs(0.5 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)));
    }
 
    /**
@@ -1102,40 +1142,32 @@ public class GeometryTools
 
    public static double getAngleFromFirstToSecondVector(Vector2d firstVector, Vector2d secondVector)
    {
-      Vector3d firstVector3d = new Vector3d(firstVector.getX(), firstVector.getY(), 0.0);
-      if (firstVector3d.length() < 1e-7)
-         return 0.0;
-      else
-         firstVector3d.normalize();
+      double v1x = firstVector.getX();
+      double v1y = firstVector.getY();
+      double v1Length = Math.sqrt(v1x * v1x + v1y * v1y);
 
-      Vector3d secondVector3d = new Vector3d(secondVector.getX(), secondVector.getY(), 0.0);
-      if (secondVector3d.length() < 1e-7)
+      if (v1Length < 1e-7)
          return 0.0;
-      else
-         secondVector3d.normalize();
+
+      v1x /= v1Length;
+      v1y /= v1Length;
+
+      double v2x = secondVector.getX();
+      double v2y = secondVector.getY();
+      double v2Length = Math.sqrt(v2x * v2x + v2y * v2y);
+
+      if (v2Length < 1e-7)
+         return 0.0;
+
+      v2x /= v2Length;
+      v2y /= v2Length;
 
       // The sign of the angle comes from the cross product
-      Vector3d crossProduct = new Vector3d();
-      crossProduct.cross(firstVector3d, secondVector3d);
-
+      double crossProduct = v1x * v2y - v1y * v2x;
       // the magnitude of the angle comes from the dot product
-      double dotProduct = firstVector3d.dot(secondVector3d);
-      dotProduct = MathTools.clipToMinMax(dotProduct, -1.0 + EPSILON, 1.0 - EPSILON);
-      double angleMagnitude = Math.acos(dotProduct);
+      double dotProduct = v1x * v2x + v1y * v2y;
 
-      double ret;
-      if (crossProduct.getZ() > 0.0)
-         ret = angleMagnitude;
-      else
-         ret = -angleMagnitude;
-
-      if (Double.isNaN(ret))
-      {
-         throw new RuntimeException("NaN. dotProduct = " + dotProduct + ", crossProduct.z = " + crossProduct.getZ() + ", firstVector = " + firstVector
-                                    + ", secondVector = " + secondVector);
-      }
-      else
-         return ret;
+      return Math.atan2(crossProduct, dotProduct);
    }
 
    /**

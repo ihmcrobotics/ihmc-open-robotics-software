@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferStateEndRecursionMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import java.util.ArrayList;
@@ -86,6 +87,10 @@ public class CurrentStateProjectionMultiplierTest
 
          Assert.assertEquals("", recursionMultiplier, multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMultiplier, multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -154,6 +159,10 @@ public class CurrentStateProjectionMultiplierTest
 
          Assert.assertEquals("", recursionMultiplier, multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMultiplier, multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -234,6 +243,10 @@ public class CurrentStateProjectionMultiplierTest
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -314,6 +327,10 @@ public class CurrentStateProjectionMultiplierTest
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -389,6 +406,10 @@ public class CurrentStateProjectionMultiplierTest
 
          Assert.assertEquals("", recursion, multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityRecursion, multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -452,6 +473,10 @@ public class CurrentStateProjectionMultiplierTest
 
          multiplier.compute(doubleSupportDurations, singleSupportDurations, timeRemaining, true, false, omega0, true);
 
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
          Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
@@ -524,6 +549,10 @@ public class CurrentStateProjectionMultiplierTest
 
          Assert.assertEquals("", recursion, multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityRecursion, multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -594,6 +623,10 @@ public class CurrentStateProjectionMultiplierTest
 
          Assert.assertEquals("", recursion, multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityRecursion, multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -679,6 +712,10 @@ public class CurrentStateProjectionMultiplierTest
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -764,6 +801,10 @@ public class CurrentStateProjectionMultiplierTest
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -844,6 +885,10 @@ public class CurrentStateProjectionMultiplierTest
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -924,6 +969,15 @@ public class CurrentStateProjectionMultiplierTest
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
+   }
+
+   public static void main(String[] args)
+   {
+      MutationTestingTools.doPITMutationTestAndOpenResult(CurrentStateProjectionMultiplierTest.class);
    }
 }

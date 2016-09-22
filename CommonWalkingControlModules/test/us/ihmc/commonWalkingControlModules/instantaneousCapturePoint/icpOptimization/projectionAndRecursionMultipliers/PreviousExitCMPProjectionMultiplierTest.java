@@ -222,6 +222,10 @@ public class PreviousExitCMPProjectionMultiplierTest
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -302,6 +306,10 @@ public class PreviousExitCMPProjectionMultiplierTest
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -364,6 +372,10 @@ public class PreviousExitCMPProjectionMultiplierTest
 
          multiplier.compute(doubleSupportDurations, timeRemaining, false, omega0, false);
 
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
          Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
@@ -773,6 +785,10 @@ public class PreviousExitCMPProjectionMultiplierTest
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 
@@ -852,6 +868,10 @@ public class PreviousExitCMPProjectionMultiplierTest
 
          Assert.assertEquals("", positionMatrixOut.get(0, 0), multiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals("", velocityMatrixOut.get(0, 0), multiplier.getVelocityMultiplier(), epsilon);
+
+         multiplier.reset();
+         Assert.assertEquals("", 0.0, multiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals("", 0.0, multiplier.getVelocityMultiplier(), epsilon);
       }
    }
 }

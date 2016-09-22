@@ -27,6 +27,7 @@ public class AtlasICPOptimizationPushRecoveryTest extends ICPOptimizationPushRec
             };
          }
       };
+
       return atlasRobotModel;
    }
 
