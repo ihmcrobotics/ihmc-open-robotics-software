@@ -41,6 +41,11 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
    public boolean arePolytopesColliding(ConvexPolytope polytopeA, ConvexPolytope polytopeB, Point3d pointOnAToPack, Point3d pointOnBToPack)
    {
+      if (listener != null)
+      {
+         listener.checkingIfPolytopesAreColliding(polytopeA, polytopeB);
+      }
+
       simplex.clearPoints();
 
       // Step 1) Initialize Simplex Q to a single point in A minkowskiDifference B. Here we'll just use A.vertex0 and B.vertex0

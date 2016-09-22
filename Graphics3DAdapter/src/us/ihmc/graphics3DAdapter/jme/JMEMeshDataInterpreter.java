@@ -20,7 +20,11 @@ public class JMEMeshDataInterpreter
 
    public static Mesh interpretMeshData(MeshDataHolder meshData)
    {
-      if (meshData == null) return null;
+      if (meshData == null)
+      {
+         // Null meshes are problematic. But empty ones seem to work ok.
+         meshData = MeshDataHolder.createEmptyMeshDataHolder();
+      }
 
       Vector3f[] vertices = JMEDataTypeUtils.vecMathTuple3fArrayToJMEVector3fArray(meshData.getVertices());
       Vector2f[] textureCoords = JMEDataTypeUtils.texCoord2fArrayToJMEVector2fArray(meshData.getTexturePoints());

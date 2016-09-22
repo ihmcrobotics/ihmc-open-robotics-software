@@ -401,8 +401,6 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
    protected void doAddMeshDataInstruction(final Graphics3DAddMeshDataInstruction graphics3dObjectAddMeshData)
    {
       MeshDataHolder meshData = graphics3dObjectAddMeshData.getMeshData();
-      if (meshData == null) return;
-
       AppearanceDefinition appearance = graphics3dObjectAddMeshData.getAppearance();
 
       Mesh mesh = JMEMeshDataInterpreter.interpretMeshData(meshData);
