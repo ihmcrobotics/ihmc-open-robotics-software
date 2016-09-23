@@ -8,7 +8,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.plotting.artifact.Artifact;
@@ -25,12 +24,13 @@ import us.ihmc.tools.gui.GraphicsUpdatable;
 
 public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {
-   private static final double DEFAULT_LINE_THICKNESS_RATIO = 0.02;
+   private double lineRadiusWhenOneMeterLong = 0.015;
+   private double minScaleFactor = 0.3;
+   private double maxScaleFactor = 3.0;
 
    private final DoubleYoVariable baseX, baseY, baseZ, x, y, z;
    protected final double scaleFactor;
    private final boolean drawArrowhead;
-   private final double lineThicknessRatio;
    private final AppearanceDefinition appearance;
 
    public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector frameVector, AppearanceDefinition appearance)
@@ -48,39 +48,30 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       this(name, startPoint, frameVector, scale, appearance, true);
    }
 
-   public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector frameVector, double scale, AppearanceDefinition appearance,
-         boolean drawArrowhead)
+   public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector directionVector, double scale, AppearanceDefinition appearance, boolean drawArrowhead, double lineRadiusWhenOneMeterLong)
    {
-      this(name, startPoint, frameVector, scale, appearance, drawArrowhead, -1.0);
+      this(name, startPoint, directionVector, scale, appearance, drawArrowhead);
+      this.setLineRadiusWhenOneMeterLong(lineRadiusWhenOneMeterLong);
    }
 
-   public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector frameVector, double scale, AppearanceDefinition appearance,
-         boolean drawArrowhead, double lineThicknessRatio)
+   public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector frameVector, double scale, AppearanceDefinition appearance, boolean drawArrowhead)
    {
-      this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), frameVector.getYoX(), frameVector.getYoY(), frameVector.getYoZ(), scale,
-            appearance, drawArrowhead, lineThicknessRatio);
+      this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), frameVector.getYoX(), frameVector.getYoY(), frameVector.getYoZ(), scale, appearance, drawArrowhead);
 
       if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!frameVector.getReferenceFrame().isWorldFrame()))
       {
-         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicVector. startPoint = " + startPoint + ", frameVector = "
-               + frameVector);
+         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicVector. startPoint = " + startPoint + ", frameVector = " + frameVector);
       }
    }
 
-   public YoGraphicVector(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y,
-         DoubleYoVariable z, double scaleFactor, AppearanceDefinition appearance)
+   public YoGraphicVector(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z, double scaleFactor,
+         AppearanceDefinition appearance)
    {
       this(name, baseX, baseY, baseZ, x, y, z, scaleFactor, appearance, true);
    }
 
-   public YoGraphicVector(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y,
-         DoubleYoVariable z, double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead)
-   {
-      this(name, baseX, baseY, baseZ, x, y, z, scaleFactor, appearance, drawArrowhead, -1.0);
-   }
-
-   public YoGraphicVector(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y,
-         DoubleYoVariable z, double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead, double lineThicknessRatio)
+   public YoGraphicVector(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z, double scaleFactor,
+         AppearanceDefinition appearance, boolean drawArrowhead)
    {
       super(name);
 
@@ -93,15 +84,17 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       this.drawArrowhead = drawArrowhead;
       this.scaleFactor = scaleFactor;
       this.appearance = appearance;
+   }
 
-      if (lineThicknessRatio < 0.0)
-      {
-         this.lineThicknessRatio = DEFAULT_LINE_THICKNESS_RATIO;
-      }
-      else
-      {
-         this.lineThicknessRatio = lineThicknessRatio;
-      }
+   public void setLineRadiusWhenOneMeterLong(double lineRadiusWhenOneMeterLong)
+   {
+      this.lineRadiusWhenOneMeterLong = lineRadiusWhenOneMeterLong;
+   }
+
+   public void setMinAndMaxScaleFactors(double minScaleFactor, double maxScaleFactor)
+   {
+      this.minScaleFactor = minScaleFactor;
+      this.maxScaleFactor = maxScaleFactor;
    }
 
    public void getBasePosition(Point3d point3d)
@@ -139,6 +132,8 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
    private Vector3d z_rot = new Vector3d(), y_rot = new Vector3d(), x_rot = new Vector3d();
    private Matrix3d rotMatrix = new Matrix3d();
 
+   private Transform3d scaleTransform = new Transform3d();
+
    @Override
    protected void computeRotationTranslation(Transform3d transform3D)
    {
@@ -168,27 +163,42 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
 
       translationVector.set(baseX.getDoubleValue(), baseY.getDoubleValue(), baseZ.getDoubleValue());
 
-      transform3D.setScale(length * scaleFactor);
+      double xyScaleFactor = length * scaleFactor;
+
+      if (xyScaleFactor < minScaleFactor)
+      {
+         xyScaleFactor = minScaleFactor;
+      }
+      if (xyScaleFactor > maxScaleFactor)
+      {
+         xyScaleFactor = maxScaleFactor;
+      }
+
+      scaleTransform.setScale(xyScaleFactor, xyScaleFactor, length * scaleFactor);
+
+      transform3D.setScale(1.0); //length * scaleFactor, 1.0, length * scaleFactor);
       transform3D.setTranslation(translationVector);
       transform3D.setRotation(rotMatrix);
 
+      transform3D.multiply(transform3D, scaleTransform);
+      //      scaleTransform.multiply(transform3D);
    }
 
-//   @Override
-//   public void update()
-//   {
-//      if (hasChanged.getAndSet(false))
-//      {
-//         if ((!pointOne.containsNaN()) && (!pointTwo.containsNaN()) && (!pointThree.containsNaN()))
-//         {
-//            instruction.setMesh(MeshDataGenerator.Polygon(new Point3d[] { pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy() }));
-//         }
-//         else
-//         {
-//            instruction.setMesh(null);
-//         }
-//      }
-//   }
+   //   @Override
+   //   public void update()
+   //   {
+   //      if (hasChanged.getAndSet(false))
+   //      {
+   //         if ((!pointOne.containsNaN()) && (!pointTwo.containsNaN()) && (!pointThree.containsNaN()))
+   //         {
+   //            instruction.setMesh(MeshDataGenerator.Polygon(new Point3d[] { pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy() }));
+   //         }
+   //         else
+   //         {
+   //            instruction.setMesh(null);
+   //         }
+   //      }
+   //   }
 
    public void set(DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z)
    {
@@ -277,13 +287,13 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
 
       if (drawArrowhead)
       {
-         linkGraphics.addCylinder(0.9, lineThicknessRatio, appearance);
+         linkGraphics.addCylinder(0.9, lineRadiusWhenOneMeterLong, appearance);
          linkGraphics.translate(0.0, 0.0, 0.9);
-         linkGraphics.addCone(0.1, (0.05 / 0.02) * lineThicknessRatio, appearance);
+         linkGraphics.addCone(0.1, (0.05 / 0.02) * lineRadiusWhenOneMeterLong, appearance);
       }
       else
       {
-         linkGraphics.addCylinder(1.0, lineThicknessRatio, appearance);
+         linkGraphics.addCylinder(1.0, lineRadiusWhenOneMeterLong, appearance);
       }
 
       return linkGraphics;
