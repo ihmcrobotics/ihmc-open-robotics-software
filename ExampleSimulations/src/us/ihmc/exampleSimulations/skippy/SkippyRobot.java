@@ -126,8 +126,8 @@ public class SkippyRobot extends Robot
    private ExternalForcePoint balanceForce;
    public static ExternalForcePoint glueDownToGroundPoint;
 
-   private final double initialBodySidewaysLean = 0.2 * Math.PI / 48.0;
-   private final double initialShoulderJointAngle = 0.0 * Math.PI / 6.0;
+   private final double initialBodySidewaysLean = 0.4 * Math.PI / 48.0;
+   private final double initialShoulderJointAngle = 0.25 * Math.PI / 6.0;
    private final double initialYawIfSkippy = 0.0* Math.PI * 0.8;
 
    public SkippyRobot(RobotType typeOfRobot)
