@@ -12,7 +12,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorWithDerivatives;
+import us.ihmc.robotics.kinematics.fourbar.ConstantSideFourBarCalculatorWithDerivatives;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class FourBarKinematicLoop
 {
    /*
     * Representation of the four bar with name correspondences. This name
-    * convention matches the one used in the FourBarCalculatorWithDerivatives
+    * convention matches the one used in the ConstantSideFourBarCalculatorWithDerivatives
     * 
     *              masterL
     *     master=A--------B
@@ -47,7 +47,7 @@ public class FourBarKinematicLoop
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD, fourBarOutputJoint;
    private final Vector3d jointDInJointABeforeFrame;
 
-   private final FourBarCalculatorWithDerivatives fourBarCalculator;
+   private final ConstantSideFourBarCalculatorWithDerivatives fourBarCalculator;
 
    private final FourBarKinematicLoopJacobianSolver fourBarJacobianSolver;
    private final DenseMatrix64F columnJacobian = new DenseMatrix64F(6, 1);
@@ -213,7 +213,7 @@ public class FourBarKinematicLoop
       }
    }
 
-   private FourBarCalculatorWithDerivatives createFourBarCalculator(FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected,
+   private ConstantSideFourBarCalculatorWithDerivatives createFourBarCalculator(FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected,
          FrameVector2d vectorDAProjected, FrameVector2d vectorABProjected)
    {
       double masterLinkAB = vectorABProjected.length();
@@ -227,7 +227,7 @@ public class FourBarKinematicLoop
          System.out.println("masterLinkAB BC CD DA : " + masterLinkAB + ", " + BC + ", " + CD + ", " + DA);
       }
 
-      FourBarCalculatorWithDerivatives fourBarCalculator = new FourBarCalculatorWithDerivatives(DA, masterLinkAB, BC, CD);
+      ConstantSideFourBarCalculatorWithDerivatives fourBarCalculator = new ConstantSideFourBarCalculatorWithDerivatives(DA, masterLinkAB, BC, CD);
 
       return fourBarCalculator;
    }
