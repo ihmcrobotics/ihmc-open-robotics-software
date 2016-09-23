@@ -206,7 +206,7 @@ public class SkippyController implements RobotController {
 	double lastReactionForce = 0.0;
 	int counterForZ0Average = 1;
 	boolean printOnce = true;
-//	PrintWriter writer = null;
+	PrintWriter writer = null;
 
 	public SkippyController(SkippyRobot robot, RobotType robotType, String name, double controlDT,
 			YoGraphicsListRegistry yoGraphicsListRegistries) {
@@ -229,13 +229,13 @@ public class SkippyController implements RobotController {
 		/*
 		 * Set up a file for output method 1
 		 */
-//		try {
-//			writer = new PrintWriter("Output.txt", "UTF-8");
-//		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		writer.println("actualCMPFromDefinition" + "\t" + "\t" + "actualCMPFromICP");
+		try {
+			writer = new PrintWriter("Output.txt", "UTF-8");
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		writer.println("actualCMPFromDefinition" + "\t" + "\t" + "actualCMPFromICP");
 		//
 		footToCoMInBodyFrame = new YoFrameVector("footToCoMInBody", robot.updateAndGetBodyFrame(), registry);
 		forceToCOM = new ExternalForcePoint("FORCETOCOM", robot);
@@ -353,7 +353,6 @@ public class SkippyController implements RobotController {
 		// desiredBodyZ.set(1.5);
 	}
 	public void doControl() {
-		actualCoMAndCoMVelocity();
 		actualGroundReactionForce();
 		computeFootToCenterOfMassLocation();
 		setParametersForControlModes();
@@ -664,15 +663,15 @@ public class SkippyController implements RobotController {
 			/*
 			 * Apply torques
 			 */
-//			robot.getHipJointTippy().setTau(tauHipJointProjectionModulus.getDoubleValue());
-//			robot.getShoulderJoint().setTau(-tauShoulderJointProjectionModulus.getDoubleValue());
+			robot.getHipJointTippy().setTau(tauHipJointProjectionModulus.getDoubleValue());
+			robot.getShoulderJoint().setTau(-tauShoulderJointProjectionModulus.getDoubleValue());
 
 //		} else {
 			/*
 			 * Apply torques from actual controller on Skippy
 			 */
-			applyTorqueToHip(q_d_hip.getDoubleValue());
-			applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
+//			applyTorqueToHip(q_d_hip.getDoubleValue());
+//			applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
 //		}
 	}
 
