@@ -283,22 +283,23 @@ public class SupportState extends AbstractFootControlState
       desiredPosition.checkReferenceFrameMatch(footPosition);
       desiredOrientation.checkReferenceFrameMatch(footOrientation);
 
-      if (footBarelyLoaded.getBooleanValue() && copOnEdge.getBooleanValue())
-      {
+      // The z component is always updated as it is never held in place
+      if (footBarelyLoaded.getBooleanValue() && copOnEdge.getBooleanValue()) // => Holding X-Y-Yaw-Components (cuz barely loaded) and Pitch-Roll-Components (cuz CoP on edge)
+      { // Only the z component is not held
          desiredPosition.setZ(footPosition.getZ());
       }
-      else if (footBarelyLoaded.getBooleanValue())
-      {
+      else if (footBarelyLoaded.getBooleanValue()) // => Holding X-Y-Yaw-Components (cuz barely loaded)
+      { // Update pitch and roll for when the CoP will get on the edge, and z as always
          desiredPosition.setZ(footPosition.getZ());
          desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), footOrientation.getPitch(), footOrientation.getRoll());
       }
-      else if (copOnEdge.getBooleanValue())
-      {
+      else if (copOnEdge.getBooleanValue()) // => Holding Pitch-Roll-Components (cuz CoP on edge)
+      { // Update X-Y-Z and yaw for next time the foot will be barely loaded
          desiredPosition.set(footPosition);
          desiredOrientation.setYawPitchRoll(footOrientation.getYaw(), desiredOrientation.getPitch(), desiredOrientation.getRoll());
       }
-      else
-      {
+      else // Not holding anything
+      { // Update the full pose.
          desiredPosition.set(footPosition);
          desiredOrientation.set(footOrientation);
       }
