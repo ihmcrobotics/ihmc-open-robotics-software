@@ -163,14 +163,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getMaxCMPForwardExit()
    {
-      return 0.01;
+      return 0.02;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMaxCMPLateralExit()
    {
-      return 0.015;
+      return 0.03;
    }
 
    /** {@inheritDoc} */
