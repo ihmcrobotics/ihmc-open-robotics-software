@@ -1144,6 +1144,13 @@ public class GeometryTools
    {
       double v1x = firstVector.getX();
       double v1y = firstVector.getY();
+      double v2x = secondVector.getX();
+      double v2y = secondVector.getY();
+      return getAngleFromFirstToSecondVector(v1x, v1y, v2x, v2y);
+   }
+
+   public static double getAngleFromFirstToSecondVector(double v1x, double v1y, double v2x, double v2y)
+   {
       double v1Length = Math.sqrt(v1x * v1x + v1y * v1y);
 
       if (v1Length < 1e-7)
@@ -1152,8 +1159,6 @@ public class GeometryTools
       v1x /= v1Length;
       v1y /= v1Length;
 
-      double v2x = secondVector.getX();
-      double v2y = secondVector.getY();
       double v2Length = Math.sqrt(v2x * v2x + v2y * v2y);
 
       if (v2Length < 1e-7)
