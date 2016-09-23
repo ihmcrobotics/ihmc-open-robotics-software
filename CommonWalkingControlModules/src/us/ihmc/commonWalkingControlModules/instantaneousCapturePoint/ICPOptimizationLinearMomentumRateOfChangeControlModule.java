@@ -24,7 +24,16 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
          ICPOptimizationParameters icpOptimizationParameters, DoubleYoVariable yoTime, double totalMass, double gravityZ, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super("", referenceFrames, bipedSupportPolygons, gravityZ, totalMass, parentRegistry);
+      this(referenceFrames, bipedSupportPolygons, contactableFeet, icpPlannerParameters, icpOptimizationParameters, yoTime, totalMass, gravityZ, controlDT,
+            parentRegistry, yoGraphicsListRegistry, true);
+   }
+
+   public ICPOptimizationLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
+         SideDependentList<? extends ContactablePlaneBody> contactableFeet, CapturePointPlannerParameters icpPlannerParameters,
+         ICPOptimizationParameters icpOptimizationParameters, DoubleYoVariable yoTime, double totalMass, double gravityZ, double controlDT,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
+   {
+      super("", referenceFrames, bipedSupportPolygons, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry, use2DProjection);
 
       this.yoTime = yoTime;
 
@@ -74,6 +83,21 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    {
       icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint, desiredCapturePointVelocity, capturePoint, omega0);
       icpOptimizationController.getDesiredCMP(desiredCMP);
+
+      yoUnprojectedDesiredCMP.set(desiredCMP);
+
+      // do projection here:
+      if (!areaToProjectInto.isEmpty())
+      {
+         desiredCMPinSafeArea.set(safeArea.isPointInside(desiredCMP));
+         if (safeArea.isPointInside(desiredCMP))
+         {
+            supportPolygon.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
+            areaToProjectInto.setIncludingFrameAndUpdate(supportPolygon);
+         }
+
+         cmpProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, areaToProjectInto, finalDesiredCapturePoint, desiredCMP);
+      }
    }
 
    private final FramePose footstepPose = new FramePose();
@@ -91,8 +115,4 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
 
       return icpOptimizationController.wasFootstepAdjusted();
    }
-
-   public void setCMPProjectionArea(FrameConvexPolygon2d areaToProjectInto, FrameConvexPolygon2d safeArea)
-   {}
-
 }
