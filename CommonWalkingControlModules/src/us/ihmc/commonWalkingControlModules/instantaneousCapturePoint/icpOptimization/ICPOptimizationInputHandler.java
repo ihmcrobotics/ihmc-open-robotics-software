@@ -161,6 +161,12 @@ public class ICPOptimizationInputHandler
 
    }
 
+   public void update(boolean useTwoCMPs, double omega0)
+   {
+      referenceCMPsCalculator.update();
+      updateCornerPoints(useTwoCMPs, omega0);
+   }
+
    public void computeFinalICPRecursion(FramePoint2d finalICPRecursionToPack, int numberOfFootstepsToConsider, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       computeFinalICP(numberOfFootstepsToConsider, useTwoCMPs, isInTransfer, omega0);
