@@ -15,8 +15,6 @@ public class GilbertJohnsonKeerthiCollisionDetector
    private final Vector3d negativeSupportDirection = new Vector3d();
 
    private final SimplexPolytope simplex = new SimplexPolytope();
-   private final Vector3d tempVertex = new Vector3d();
-
    private GilbertJohnsonKeerthiCollisionDetectorListener listener;
 
    public void computeSupportPointOnMinkowskiDifference(ConvexPolytope cubeOne, ConvexPolytope cubeTwo, Vector3d supportDirection, Point3d supportPoint)
@@ -48,7 +46,8 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
       simplex.clearPoints();
 
-      // Step 1) Initialize Simplex Q to a single point in A minkowskiDifference B. Here we'll just use A.vertex0 and B.vertex0
+      // Step 1) Initialize Simplex Q to a single point in A minkowskiDifference B. Here we'll just use A.vertex0 and B.vertex0.
+      // TODO: Is this fine? Or does it have to be on the surface of the Minkowski Difference. This might be on the interior...
       PolytopeVertex vertexOne = polytopeA.getVertex(0);
       PolytopeVertex vertexTwo = polytopeB.getVertex(0);
 
@@ -196,5 +195,10 @@ public class GilbertJohnsonKeerthiCollisionDetector
          }
 
       }
+   }
+
+   public SimplexPolytope getSimplex()
+   {
+      return simplex;
    }
 }
