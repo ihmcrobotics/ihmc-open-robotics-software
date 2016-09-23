@@ -15,9 +15,16 @@ public class ExpandingPolytopeAlgorithm
 
    private final double epsilonRelative;
 
+   private ExpandingPolytopeAlgorithmListener listener;
+
    public ExpandingPolytopeAlgorithm(double epsilonRelative)
    {
       this.epsilonRelative = epsilonRelative;
+   }
+
+   public void setExpandingPolytopeAlgorithmListener(ExpandingPolytopeAlgorithmListener listener)
+   {
+      this.listener = listener;
    }
 
    public void setPolytopes(SimplexPolytope simplex, ConvexPolytope polytopeOne, ConvexPolytope polytopeTwo)
@@ -32,55 +39,62 @@ public class ExpandingPolytopeAlgorithm
          throw new RuntimeException("Implement for non tetrahedral simplex");
 
       Point3d pointOne = simplex.getPoint(0);
-      Point3d pointTwo = simplex.getPoint(0);
-      Point3d pointThree = simplex.getPoint(0);
-      Point3d pointFour = simplex.getPoint(0);
+      Point3d pointTwo = simplex.getPoint(1);
+      Point3d pointThree = simplex.getPoint(2);
+      Point3d pointFour = simplex.getPoint(3);
 
       ExpandingPolytopeEntry entry123 = new ExpandingPolytopeEntry(pointOne, pointTwo, pointThree);
-      ExpandingPolytopeEntry entry124 = new ExpandingPolytopeEntry(pointOne, pointTwo, pointFour);
+      ExpandingPolytopeEntry entry324 = new ExpandingPolytopeEntry(pointThree, pointTwo, pointFour);
+      ExpandingPolytopeEntry entry421 = new ExpandingPolytopeEntry(pointFour, pointTwo, pointOne);
       ExpandingPolytopeEntry entry134 = new ExpandingPolytopeEntry(pointOne, pointThree, pointFour);
-      ExpandingPolytopeEntry entry234 = new ExpandingPolytopeEntry(pointThree, pointThree, pointFour);
 
-      entry123.setAdjacentTriangle(0, entry124, 0);
-      entry124.setAdjacentTriangle(0, entry123, 0);
+      entry123.setAdjacentTriangle(1, entry324, 0);
+      entry324.setAdjacentTriangle(0, entry123, 1);
 
-      entry123.setAdjacentTriangle(1, entry234, 0);
-      entry234.setAdjacentTriangle(0, entry123, 1);
+      entry123.setAdjacentTriangle(0, entry421, 1);
+      entry421.setAdjacentTriangle(1, entry123, 0);
 
       entry123.setAdjacentTriangle(2, entry134, 0);
       entry134.setAdjacentTriangle(0, entry123, 2);
 
-      entry124.setAdjacentTriangle(1, entry234, 2);
-      entry234.setAdjacentTriangle(2, entry124, 1);
+      entry324.setAdjacentTriangle(1, entry421, 0);
+      entry421.setAdjacentTriangle(0, entry324, 1);
 
-      entry124.setAdjacentTriangle(2, entry134, 2);
-      entry134.setAdjacentTriangle(2, entry124, 2);
+      entry324.setAdjacentTriangle(2, entry134, 1);
+      entry134.setAdjacentTriangle(1, entry324, 2);
 
-      entry134.setAdjacentTriangle(1, entry234, 1);
-      entry234.setAdjacentTriangle(1, entry134, 1);
+      entry421.setAdjacentTriangle(2, entry134, 2);
+      entry134.setAdjacentTriangle(2, entry421, 2);
 
-      triangleEntryQueue.add(entry123);
-      triangleEntryQueue.add(entry124);
-      triangleEntryQueue.add(entry134);
-      triangleEntryQueue.add(entry234);
+      if (entry123.closestIsInternal()) triangleEntryQueue.add(entry123);
+      if (entry324.closestIsInternal()) triangleEntryQueue.add(entry324);
+      if (entry421.closestIsInternal()) triangleEntryQueue.add(entry421);
+      if (entry134.closestIsInternal()) triangleEntryQueue.add(entry134);
+
+      if (listener != null)
+      {
+         listener.setPolytopes(simplex, polytopeOne, polytopeTwo, entry123);
+      }
    }
 
    private final Vector3d supportDirection = new Vector3d();
-   //   private final Vector3d supportingVertexOne = new Vector3d();
-   //   private final Vector3d supportingVertexTwo = new Vector3d();
 
-   public void computeExpandedPolytope()
+   public Vector3d computeExpandedPolytope()
    {
       double mu = Double.POSITIVE_INFINITY; // Upper bound for the square penetration depth.
-
+      Vector3d closestPointToOrigin = null;
+      
       while (true)
       {
          ExpandingPolytopeEntry triangleEntryToExpand = triangleEntryQueue.poll();
+         if (listener != null)
+            listener.polledEntryToExpand(triangleEntryToExpand);
+
          boolean closeEnough = false;
 
          if (!triangleEntryToExpand.isObsolete())
          {
-            Vector3d closestPointToOrigin = triangleEntryToExpand.getClosestPointToOrigin();
+            closestPointToOrigin = triangleEntryToExpand.getClosestPointToOrigin();
 
             supportDirection.set(closestPointToOrigin);
 
@@ -91,29 +105,40 @@ public class ExpandingPolytopeAlgorithm
             Vector3d w = new Vector3d();
             w.sub(supportingVertexA.getPosition(), supportingVertexB.getPosition());
 
+            if (listener != null)
+            {
+               listener.computedSupportingVertices(supportingVertexA, supportingVertexB, w);
+            }
+
             double vDotW = closestPointToOrigin.dot(w);
             double lengthSquared = closestPointToOrigin.lengthSquared();
             mu = Math.min(mu, vDotW * vDotW / lengthSquared);
-
             closeEnough = (mu <= (1.0 + epsilonRelative) * (1.0 + epsilonRelative) * lengthSquared);
+
+            if (listener != null)
+            {
+               listener.computedCloseEnough(vDotW, lengthSquared, mu, closeEnough);
+            }
 
             if (!closeEnough)
             {
                // Blow up the current polytope by adding vertex w.
-               triangleEntryToExpand.setObsolete(); // This triangle is visible from w.
-               edgeList.clear();
+               computeSilhouetteFromW(triangleEntryToExpand, w, edgeList);
 
-               for (int triangleIndex = 0; triangleIndex < 3; triangleIndex++)
+               if (listener != null)
                {
-                  ExpandingPolytopeEntry adjacentTriangle = triangleEntryToExpand.getAdjacentTriangle(triangleIndex);
-                  int adjacentTriangleEdgeIndex = triangleEntryToExpand.getAdjacentTriangleEdgeIndex(triangleIndex);
-
-                  silhouette(adjacentTriangle, adjacentTriangleEdgeIndex, w, edgeList);
+                  listener.computedSilhouetteFromW(edgeList);
                }
 
                // edgeList now is the entire silhouette of the current polytope as seen from w.
 
                int numberOfEdges = edgeList.getNumberOfEdges();
+//               if (numberOfEdges < 3) throw new RuntimeException("Should have at least three edges, no?");
+               
+               ExpandingPolytopeEntry firstNewEntry = null;
+               ExpandingPolytopeEntry previousEntry = null;
+               Point3d wPoint = new Point3d(w);
+               
                for (int edgeIndex = 0; edgeIndex < numberOfEdges; edgeIndex++)
                {
                   ExpandingPolytopeEdge edge = edgeList.getEdge(edgeIndex);
@@ -121,23 +146,66 @@ public class ExpandingPolytopeAlgorithm
                   ExpandingPolytopeEntry sentry = edge.getEntry();
                   int sentryEdgeIndex = edge.getEdgeIndex();
                   int nextIndex = (sentryEdgeIndex + 1) % 3;
-                  //TODO: Finish this after we get some vizes...
-//                  ExpandingPolytopeEntry newEntry = new ExpandingPolytopeEntry(sentry.getVertex(nextIndex), sentry.getVertex(sentryEdgeIndex), w);
+
+                  ExpandingPolytopeEntry newEntry = new ExpandingPolytopeEntry(sentry.getVertex(nextIndex), sentry.getVertex(sentryEdgeIndex), wPoint);
+                  newEntry.setAdjacentTriangle(0, sentry, sentryEdgeIndex);
+                  sentry.setAdjacentTriangle(sentryEdgeIndex, newEntry, 0);
+                  
+                  if (previousEntry != null) 
+                  {
+                     //TODO: Verify if these are correct:
+                     newEntry.setAdjacentTriangle(1, previousEntry, 2);
+                     newEntry.setAdjacentTriangle(2, previousEntry, 1);
+                  }
+                  
+                  if (edgeIndex == 0) firstNewEntry = newEntry;
+                  
+                  if (listener != null)
+                     listener.createdNewEntry(newEntry);
+                  
+                  if (newEntry.isAffinelyDependent())
+                  {
+                     return closestPointToOrigin;
+                  }
+
+                  double newEntryClosestDistanceSquared = newEntry.getClosestPointToOrigin().lengthSquared();
+                  if ((newEntry.closestIsInternal()) && (closestPointToOrigin.lengthSquared() <= newEntryClosestDistanceSquared)
+                        && (newEntryClosestDistanceSquared <= mu))
+                  {
+                     triangleEntryQueue.add(newEntry);
+                     
+                     if (listener != null)
+                        listener.addedNewEntryToQueue(newEntry);
+                  }
+                  
+                  previousEntry = newEntry;
                }
-
             }
-
          }
 
-         if (closeEnough)
-            return;
-         if (triangleEntryQueue.isEmpty())
-            return;
+         if ((closeEnough) || (triangleEntryQueue.isEmpty()) || (triangleEntryQueue.peek().getClosestPointToOrigin().lengthSquared() > mu))
+         {
+            if (listener != null)
+            {
+               listener.foundMinimumPenetrationVector(closestPointToOrigin);
+            }
+            return closestPointToOrigin;
+         }
+      }
+   }
 
-         ExpandingPolytopeEntry bestRemainingTriangle = triangleEntryQueue.peek();
-         Vector3d bestRemainingPointToOrigin = bestRemainingTriangle.getClosestPointToOrigin();
-         if (bestRemainingPointToOrigin.lengthSquared() > mu)
-            return;
+   public static void computeSilhouetteFromW(ExpandingPolytopeEntry triangleEntrySeenByW, Vector3d w,  ExpandingPolytopeEdgeList edgeListToPack)
+   {
+      triangleEntrySeenByW.setObsolete(); // This triangle is visible from w.
+
+      edgeListToPack.clear();
+
+      for (int triangleIndex = 0; triangleIndex < 3; triangleIndex++)
+      {
+         ExpandingPolytopeEntry adjacentTriangle = triangleEntrySeenByW.getAdjacentTriangle(triangleIndex);
+         int adjacentTriangleEdgeIndex = triangleEntrySeenByW.getAdjacentTriangleEdgeIndex(triangleIndex);
+
+         silhouette(adjacentTriangle, adjacentTriangleEdgeIndex, w, edgeListToPack);
       }
    }
 

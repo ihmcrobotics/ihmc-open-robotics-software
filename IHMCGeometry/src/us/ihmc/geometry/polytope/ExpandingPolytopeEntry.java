@@ -27,9 +27,10 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
 
    public ExpandingPolytopeEntry(Point3d pointOne, Point3d pointTwo, Point3d pointThree)
    {
-      triangleVertices = new Point3d[] { pointOne, pointTwo, pointThree };
+      triangleVertices = new Point3d[] {pointOne, pointTwo, pointThree};
       projectOriginOntoFace(pointOne, pointTwo, pointThree, closestPointToOrigin, lambdas);
       distanceToOriginKey = closestPointToOrigin.length();
+      if (Double.isNaN(distanceToOriginKey)) throw new RuntimeException();
    }
 
    public boolean closestIsInternal()
@@ -127,6 +128,12 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
       if (this.distanceToOriginKey > entry.distanceToOriginKey)
          return 1;
       return -1;
+   }
+
+   public boolean isAffinelyDependent()
+   {
+      // TODO: Implement and test this!
+      return false;
    }
 
 }
