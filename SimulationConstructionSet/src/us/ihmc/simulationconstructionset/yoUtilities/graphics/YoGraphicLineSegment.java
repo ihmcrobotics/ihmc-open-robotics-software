@@ -30,8 +30,7 @@ public class YoGraphicLineSegment extends YoGraphicVector
 
    public YoGraphicLineSegment(String namePrefix, String nameSuffix, ReferenceFrame referenceFrame, AppearanceDefinition appearance, YoVariableRegistry registry)
    {
-      this(namePrefix, new YoFramePoint(namePrefix, nameSuffix + "Start", referenceFrame, registry),
-            new YoFramePoint(namePrefix, nameSuffix + "End", referenceFrame, registry), appearance);
+      this(namePrefix, new YoFramePoint(namePrefix, nameSuffix + "Start", referenceFrame, registry), new YoFramePoint(namePrefix, nameSuffix + "End", referenceFrame, registry), appearance);
    }
 
    public YoGraphicLineSegment(String name, YoFramePoint startPoint, YoFramePoint endPoint, AppearanceDefinition appearance)
@@ -44,58 +43,38 @@ public class YoGraphicLineSegment extends YoGraphicVector
       this(name, startPoint, endPoint, scale, appearance, false);
    }
 
-   public YoGraphicLineSegment(String name, YoFramePoint startPoint, YoFramePoint endPoint, double scale, AppearanceDefinition appearance,
-         boolean drawArrowhead)
+   public YoGraphicLineSegment(String name, YoFramePoint startPoint, YoFramePoint endPoint, double scale, AppearanceDefinition appearance, boolean drawArrowhead)
    {
-      this(name, startPoint, endPoint, scale, appearance, drawArrowhead, -1.0);
-   }
-
-   public YoGraphicLineSegment(String name, YoFramePoint startPoint, YoFramePoint endPoint, double scale, AppearanceDefinition appearance,
-         boolean drawArrowhead, double lineThicknessRatio)
-   {
-      this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), endPoint.getYoX(), endPoint.getYoY(), endPoint.getYoZ(), scale, appearance,
-            drawArrowhead, lineThicknessRatio);
+      this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), endPoint.getYoX(), endPoint.getYoY(), endPoint.getYoZ(), scale, appearance, drawArrowhead);
 
       if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!endPoint.getReferenceFrame().isWorldFrame()))
       {
-         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicLineSegment. startPoint = " + startPoint + ", endPoint = "
-               + endPoint);
+         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicLineSegment. startPoint = " + startPoint + ", endPoint = " + endPoint);
       }
    }
 
-   public YoGraphicLineSegment(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x,
-         DoubleYoVariable y, DoubleYoVariable z, double scaleFactor, AppearanceDefinition appearance)
+   public YoGraphicLineSegment(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z, double scaleFactor,
+         AppearanceDefinition appearance)
    {
       this(name, baseX, baseY, baseZ, x, y, z, scaleFactor, appearance, true);
    }
 
-   public YoGraphicLineSegment(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable endX,
-         DoubleYoVariable endY, DoubleYoVariable endZ, double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead)
+   public YoGraphicLineSegment(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable endX, DoubleYoVariable endY, DoubleYoVariable endZ, double scaleFactor,
+         AppearanceDefinition appearance, boolean drawArrowhead)
    {
-      this(name, baseX, baseY, baseZ, endX, endY, endZ, scaleFactor, appearance, drawArrowhead, -1.0);
-   }
-
-   public YoGraphicLineSegment(String name, DoubleYoVariable startX, DoubleYoVariable startY, DoubleYoVariable startZ, DoubleYoVariable endX,
-         DoubleYoVariable endY, DoubleYoVariable endZ, double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead, double lineThicknessRatio)
-   {
-      this(name, startX, startY, startZ, endX, endY, endZ, createDirectionVector(name, startX.getYoVariableRegistry()), scaleFactor, appearance, drawArrowhead, lineThicknessRatio);
+      this(name, baseX, baseY, baseZ, endX, endY, endZ, createDirectionVector(name, baseX.getYoVariableRegistry()), scaleFactor, appearance, drawArrowhead);
    }
 
    private static YoFrameVector createDirectionVector(String name, YoVariableRegistry registry)
    {
-//      YoVariable.warnAboutNullRegistries = false;
-      YoFrameVector temp = new YoFrameVector(name, "Direction", ReferenceFrame.getWorldFrame(), registry);
-//      YoVariable.warnAboutNullRegistries = true;
-
-      return temp;
+      YoFrameVector directionVector = new YoFrameVector(name, "Direction", ReferenceFrame.getWorldFrame(), registry);
+      return directionVector;
    }
 
-   private YoGraphicLineSegment(String name, DoubleYoVariable startX, DoubleYoVariable startY, DoubleYoVariable startZ, DoubleYoVariable endX,
-         DoubleYoVariable endY, DoubleYoVariable endZ, YoFrameVector yoFrameVector, double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead,
-         double lineThicknessRatio)
+   private YoGraphicLineSegment(String name, DoubleYoVariable startX, DoubleYoVariable startY, DoubleYoVariable startZ, DoubleYoVariable endX, DoubleYoVariable endY, DoubleYoVariable endZ, YoFrameVector yoFrameVector,
+         double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead)
    {
-      super(name, startX, startY, startZ, yoFrameVector.getYoX(), yoFrameVector.getYoY(), yoFrameVector.getYoZ(), scaleFactor, appearance, drawArrowhead,
-            lineThicknessRatio);
+      super(name, startX, startY, startZ, yoFrameVector.getYoX(), yoFrameVector.getYoY(), yoFrameVector.getYoZ(), scaleFactor, appearance, drawArrowhead);
 
       this.vectorX = yoFrameVector.getYoX();
       this.vectorY = yoFrameVector.getYoY();
