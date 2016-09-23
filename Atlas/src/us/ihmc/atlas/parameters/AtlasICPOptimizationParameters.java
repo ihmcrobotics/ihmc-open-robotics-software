@@ -5,6 +5,13 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 /** {@inheritDoc} */
 public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 {
+   private final boolean runningOnRealRobot;
+
+   public AtlasICPOptimizationParameters(boolean runningOnRealRobot)
+   {
+      this.runningOnRealRobot = runningOnRealRobot;
+   }
+
    /** {@inheritDoc} */
    @Override
    public int numberOfFootstepsToConsider()
@@ -37,21 +44,21 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackRegularizationWeight()
    {
-      return 0.001;
+      return runningOnRealRobot ? 0.01 : 0.001;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackParallelGain()
    {
-      return 5.0;
+      return runningOnRealRobot ? 3.0 : 5.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackOrthogonalGain()
    {
-      return 5.0;
+      return runningOnRealRobot ? 2.0 : 5.0;
    }
 
    /** {@inheritDoc} */
