@@ -23,7 +23,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFootstepWeight()
    {
-      return 15.0;
+      return runningOnRealRobot ? 100.0 : 15.0;
    }
 
    /** {@inheritDoc} */
@@ -37,35 +37,35 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackWeight()
    {
-      return 0.1;
+      return 0.05;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackRegularizationWeight()
    {
-      return runningOnRealRobot ? 0.01 : 0.001;
+      return runningOnRealRobot ? 0.001 : 0.001;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackParallelGain()
    {
-      return runningOnRealRobot ? 3.0 : 5.0;
+      return runningOnRealRobot ? 2.5 : 5.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackOrthogonalGain()
    {
-      return runningOnRealRobot ? 2.0 : 5.0;
+      return runningOnRealRobot ? 1.5 : 5.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDynamicRelaxationWeight()
    {
-      return 5000.0;
+      return runningOnRealRobot ? 1000.0 : 5000.0;
    }
 
    /** {@inheritDoc} */
