@@ -24,6 +24,11 @@ public class ConvexPolytope
       }
    }
 
+   public ArrayList<PolytopeVertex> getVertices()
+   {
+      return vertices;
+   }
+
    public void addVertices(Point3d[] polytopePoints)
    {
       for (int i = 0; i < polytopePoints.length; i++)
@@ -85,13 +90,13 @@ public class ConvexPolytope
       {
          PolytopeVertex vertex = vertices.get(i);
          int numberOfConnectingVertices = vertex.getNumberOfConnectingVertices();
-         for (int j=0; j<numberOfConnectingVertices; j++)
+         for (int j = 0; j < numberOfConnectingVertices; j++)
          {
             PolytopeVertex connectingVertex = vertex.getConnectingVertex(j);
 
             if (!alreadyHaveEdgeInList(edgesToReturn, vertex, connectingVertex))
             {
-               edgesToReturn.add(new PolytopeVertex[]{vertex, connectingVertex});
+               edgesToReturn.add(new PolytopeVertex[] { vertex, connectingVertex });
             }
          }
       }
@@ -101,11 +106,10 @@ public class ConvexPolytope
 
    private boolean alreadyHaveEdgeInList(ArrayList<PolytopeVertex[]> listOfEdges, PolytopeVertex vertexOne, PolytopeVertex vertexTwo)
    {
-      for (int k=0; k<listOfEdges.size(); k++)
+      for (int k = 0; k < listOfEdges.size(); k++)
       {
          PolytopeVertex[] edgeToReturn = listOfEdges.get(k);
-         if (((edgeToReturn[0] == vertexOne) && (edgeToReturn[1] == vertexTwo))
-            || ((edgeToReturn[0] == vertexTwo) && (edgeToReturn[1] == vertexOne)))
+         if (((edgeToReturn[0] == vertexOne) && (edgeToReturn[1] == vertexTwo)) || ((edgeToReturn[0] == vertexTwo) && (edgeToReturn[1] == vertexOne)))
          {
             return true;
          }
