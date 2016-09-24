@@ -10,7 +10,7 @@ public class ExpandingPolytopeEntryTest
 {
 
    @Test
-   public void testManuallyAssembledTetrahedral()
+   public void testManuallyAssembledTetrahedron()
    {
       Point3d pointOne = new Point3d(0.0, 0.0, 0.0);
       Point3d pointTwo = new Point3d(2.0, 0.0, 0.0);
@@ -69,7 +69,7 @@ public class ExpandingPolytopeEntryTest
    }
 
    @Test
-   public void testAutomaticallyAssembledTetrahedral()
+   public void testAutomaticallyAssembledTetrahedron()
    {
       Point3d pointOne = new Point3d(0.0, 0.0, 0.0);
       Point3d pointTwo = new Point3d(2.0, 0.0, 0.0);

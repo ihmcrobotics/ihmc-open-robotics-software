@@ -85,6 +85,11 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
       this.obsolete = true;
    }
 
+   public void clearObsolete()
+   {
+      this.obsolete = false;
+   }
+
    public ExpandingPolytopeEntry getAdjacentTriangle(int index)
    {
       return adjacentTriangles[index];
