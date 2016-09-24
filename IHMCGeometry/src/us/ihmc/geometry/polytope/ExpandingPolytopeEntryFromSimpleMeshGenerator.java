@@ -39,15 +39,18 @@ public class ExpandingPolytopeEntryFromSimpleMeshGenerator
       {
          ExpandingPolytopeEntry entryToLinkUp = entriesToLinkUp.remove(entriesToLinkUp.size() - 1);
 
-         Point3d vertex = entryToLinkUp.getVertex(0);
-         ArrayList<ExpandingPolytopeEntry> entryiesContainingThisVertex = entriesContainingThisVertexMap.get(vertex);
-
-         for (ExpandingPolytopeEntry entry : entryiesContainingThisVertex)
+         for (int i=0; i<3; i++)
          {
-            boolean addedAdjacentTriangle = entryToLinkUp.setAdjacentTriangleIfPossible(entry);
-            if (addedAdjacentTriangle)
+            Point3d vertex = entryToLinkUp.getVertex(i);
+            ArrayList<ExpandingPolytopeEntry> entryiesContainingThisVertex = entriesContainingThisVertexMap.get(vertex);
+
+            for (ExpandingPolytopeEntry entry : entryiesContainingThisVertex)
             {
-               entriesToLinkUp.add(entry);
+               boolean addedAdjacentTriangle = entryToLinkUp.setAdjacentTriangleIfPossible(entry);
+               if (addedAdjacentTriangle)
+               {
+                  entriesToLinkUp.add(entry);
+               }
             }
          }
 

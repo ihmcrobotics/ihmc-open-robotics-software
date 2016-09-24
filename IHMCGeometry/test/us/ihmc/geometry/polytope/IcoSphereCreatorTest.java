@@ -12,9 +12,8 @@ public class IcoSphereCreatorTest
 {
 
    @Test
-   public void test()
+   public void testIcosphereCreator()
    {
-
       IcoSphereCreator icoSphereCreator = new IcoSphereCreator();
 
       int recursionLevel = 0;
@@ -25,8 +24,6 @@ public class IcoSphereCreatorTest
 
       assertEquals(12, positions.size());
       assertEquals(60, triangleIndices.size());
-
-
 
       recursionLevel = 1;
       icoSphere = icoSphereCreator.createIcoSphere(recursionLevel);
