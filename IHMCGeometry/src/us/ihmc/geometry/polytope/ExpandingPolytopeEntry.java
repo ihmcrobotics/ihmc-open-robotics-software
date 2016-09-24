@@ -29,18 +29,21 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
 
    public ExpandingPolytopeEntry(Point3d pointOne, Point3d pointTwo, Point3d pointThree)
    {
-      triangleVertices = new Point3d[] {pointOne, pointTwo, pointThree};
+      triangleVertices = new Point3d[] { pointOne, pointTwo, pointThree };
       projectOriginOntoFace(pointOne, pointTwo, pointThree, closestPointToOrigin, lambdas);
       distanceToOriginKey = closestPointToOrigin.length();
-      if (Double.isNaN(distanceToOriginKey)) throw new RuntimeException();
+      if (Double.isNaN(distanceToOriginKey))
+         throw new RuntimeException();
    }
 
    public boolean closestIsInternal()
    {
-      for (int i=0; i<3; i++)
+      for (int i = 0; i < 3; i++)
       {
-         if (lambdas[i] < 0.0) return false;
-         if (lambdas[i] > 1.0) return false;
+         if (lambdas[i] < 0.0)
+            return false;
+         if (lambdas[i] > 1.0)
+            return false;
       }
 
       return true;
@@ -155,26 +158,27 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
 
    public boolean setAdjacentTriangleIfPossible(ExpandingPolytopeEntry entry)
    {
-      if (this == entry) return false;
+      if (this == entry)
+         return false;
 
-      for (int i=0; i<3; i++)
+      for (int i = 0; i < 3; i++)
       {
-         for (int j=0; j<3; j++)
+         for (int j = 0; j < 3; j++)
          {
-            if ((triangleVertices[i] == entry.triangleVertices[j]) && (triangleVertices[(i+1) % 3] == entry.triangleVertices[(j-1+3)%3]))
+            if ((triangleVertices[i] == entry.triangleVertices[j]) && (triangleVertices[(i + 1) % 3] == entry.triangleVertices[(j - 1 + 3) % 3]))
             {
-               boolean madeADifference = this.setAdjacentTriangle(i, entry, (j-1+3)%3);
-               entry.setAdjacentTriangle((j-1+3)%3, this, i);
+               boolean madeADifference = this.setAdjacentTriangle(i, entry, (j - 1 + 3) % 3);
+               entry.setAdjacentTriangle((j - 1 + 3) % 3, this, i);
                return madeADifference;
             }
 
-            if ((triangleVertices[i] == entry.triangleVertices[j]) && (triangleVertices[(i+1) % 3] == entry.triangleVertices[(j+1)%3]))
+            if ((triangleVertices[i] == entry.triangleVertices[j]) && (triangleVertices[(i + 1) % 3] == entry.triangleVertices[(j + 1) % 3]))
             {
-               entry.swapTrianglesToReverseClockwiseness((j+1)%3, (j-1+3)%3);
+               entry.swapTrianglesToReverseClockwiseness((j + 1) % 3, (j - 1 + 3) % 3);
 
                // Now same as case above. Do same thing:
-               boolean madeADifference = this.setAdjacentTriangle(i, entry, (j-1+3)%3);
-               entry.setAdjacentTriangle((j-1+3)%3, this, i);
+               boolean madeADifference = this.setAdjacentTriangle(i, entry, (j - 1 + 3) % 3);
+               entry.setAdjacentTriangle((j - 1 + 3) % 3, this, i);
                return madeADifference;
             }
          }
@@ -195,26 +199,29 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
       }
    }
 
-
    public boolean isAdjacentTo(ExpandingPolytopeEntry entry)
    {
-      if (this.adjacentTriangles[0] == entry) return true;
-      if (this.adjacentTriangles[1] == entry) return true;
-      if (this.adjacentTriangles[2] == entry) return true;
+      if (this.adjacentTriangles[0] == entry)
+         return true;
+      if (this.adjacentTriangles[1] == entry)
+         return true;
+      if (this.adjacentTriangles[2] == entry)
+         return true;
       return false;
    }
 
    public void checkConsistency()
    {
-      for (int i=0; i<3; i++)
+      for (int i = 0; i < 3; i++)
       {
          ExpandingPolytopeEntry adjacentTriangle = adjacentTriangles[i];
          if (adjacentTriangle != null)
          {
             int j = this.adjacentTriangleEdgeIndices[i];
-            if (adjacentTriangle.adjacentTriangles[j] != this) throw new RuntimeException("");
-            if (adjacentTriangle.adjacentTriangleEdgeIndices[j] != i) throw new RuntimeException("");
-
+            if (adjacentTriangle.adjacentTriangles[j] != this)
+               throw new RuntimeException("");
+            if (adjacentTriangle.adjacentTriangleEdgeIndices[j] != i)
+               throw new RuntimeException("");
 
             Point3d firstVertex = this.triangleVertices[i];
             Point3d secondVertex = this.triangleVertices[(i + 1) % 3];
@@ -222,8 +229,10 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
             Point3d firstVertexOtherSide = adjacentTriangle.triangleVertices[j];
             Point3d secondVertexOtherSide = adjacentTriangle.triangleVertices[(j + 1) % 3];
 
-            if (firstVertex != secondVertexOtherSide) throw new RuntimeException("");
-            if (secondVertex != firstVertexOtherSide) throw new RuntimeException("");
+            if (firstVertex != secondVertexOtherSide)
+               throw new RuntimeException("");
+            if (secondVertex != firstVertexOtherSide)
+               throw new RuntimeException("");
          }
       }
    }
@@ -234,7 +243,7 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
       {
          trianglesToPack.add(this);
 
-         for (int i=0; i<3; i++)
+         for (int i = 0; i < 3; i++)
          {
             ExpandingPolytopeEntry adjacentTriangle = this.adjacentTriangles[i];
             if (adjacentTriangle != null)
