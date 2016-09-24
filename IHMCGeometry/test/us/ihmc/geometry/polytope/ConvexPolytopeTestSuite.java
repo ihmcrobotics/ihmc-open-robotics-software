@@ -10,8 +10,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 @RunWith(TestPlanSuite.class)
 @TestSuiteTarget(TestPlanTarget.Fast)
-@SuiteClasses({ IcoSphereCreatorTest.class, SimplexPolytopeTest.class, ExpandingPolytopeEntryTest.class, ExpandingPolytopeEntryFromSimpleMeshGeneratorTest.class, ConvexPolytopeTest.class,
-      GilbertJohnsonKeerthiCollisionDetectorTest.class })
+@SuiteClasses({ ExpandingPolytopeAlgorithmTest.class, IcoSphereCreatorTest.class, SimplexPolytopeTest.class, ExpandingPolytopeEntryTest.class, ExpandingPolytopeEntryFromSimpleMeshGeneratorTest.class,
+      ConvexPolytopeTest.class, GilbertJohnsonKeerthiCollisionDetectorTest.class, ConvexPolytopeFromExpandingPolytopeEntryGeneratorTest.class })
 
 public class ConvexPolytopeTestSuite
 {

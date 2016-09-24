@@ -155,6 +155,8 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
 
    public boolean setAdjacentTriangleIfPossible(ExpandingPolytopeEntry entry)
    {
+      if (this == entry) return false;
+
       for (int i=0; i<3; i++)
       {
          for (int j=0; j<3; j++)
@@ -166,11 +168,13 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
                return madeADifference;
             }
 
-            if ((triangleVertices[i] == entry.triangleVertices[j]) && (triangleVertices[(i-1+3) % 3] == entry.triangleVertices[(j+1)%3]))
+            if ((triangleVertices[i] == entry.triangleVertices[j]) && (triangleVertices[(i+1) % 3] == entry.triangleVertices[(j+1)%3]))
             {
-               //TODO: Rearrange ordering?
-               boolean madeADifference = this.setAdjacentTriangle((i-1+3) % 3, entry, j);
-               entry.setAdjacentTriangle(j, this, (i-1+3) % 3);
+               entry.swapTrianglesToReverseClockwiseness((j+1)%3, (j-1+3)%3);
+
+               // Now same as case above. Do same thing:
+               boolean madeADifference = this.setAdjacentTriangle(i, entry, (j-1+3)%3);
+               entry.setAdjacentTriangle((j-1+3)%3, this, i);
                return madeADifference;
             }
          }
@@ -178,6 +182,19 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
 
       return false;
    }
+
+   private void swapTrianglesToReverseClockwiseness(int i, int j)
+   {
+      Point3d temp = triangleVertices[i];
+      triangleVertices[i] = triangleVertices[j];
+      triangleVertices[j] = temp;
+
+      if ((adjacentTriangles[0] != null) || (adjacentTriangles[0] != null) || (adjacentTriangles[0] != null))
+      {
+         throw new RuntimeException("Cannot swap triangles if it already has a neighbor!");
+      }
+   }
+
 
    public boolean isAdjacentTo(ExpandingPolytopeEntry entry)
    {
@@ -226,6 +243,11 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
             }
          }
       }
+   }
+
+   public String toString()
+   {
+      return "[" + triangleVertices[0] + "; " + triangleVertices[1] + "; " + triangleVertices[2] + "]";
    }
 
 }

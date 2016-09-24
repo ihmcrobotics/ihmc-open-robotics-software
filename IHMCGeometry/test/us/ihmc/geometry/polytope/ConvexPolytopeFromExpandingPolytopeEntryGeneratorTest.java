@@ -12,7 +12,7 @@ public class ConvexPolytopeFromExpandingPolytopeEntryGeneratorTest
 {
 
    @Test
-   public void test()
+   public void testGeneratorUsingIcoSpheres()
    {
       IcoSphereCreator creator = new IcoSphereCreator();
       int recursionLevel = 0;
@@ -42,6 +42,35 @@ public class ConvexPolytopeFromExpandingPolytopeEntryGeneratorTest
       ArrayList<PolytopeVertex> vertices = convexPolytope.getVertices();
 
       assertEquals(numberOfVertices, vertices.size());
+      assertEquals(30, edges.size());
+
+      // Bigger One:
+      recursionLevel = 1;
+      icoSphere = creator.createIcoSphere(recursionLevel);
+
+      vertexPoints = icoSphere.positions;
+      triangleIndices = icoSphere.triangleIndices;
+      assertTrue(triangleIndices.size() % 3 == 0);
+
+      numberOfVertices = vertexPoints.size();
+      numberOfTriangles = triangleIndices.size() / 3;
+
+      assertEquals(42, numberOfVertices);
+      assertEquals(80, numberOfTriangles);
+
+      expandingPolytope = generatorOne.generateExpandingPolytope(icoSphere);
+
+      triangles.clear();
+      expandingPolytope.getAllConnectedTriangles(triangles);
+      assertEquals(numberOfTriangles, triangles.size());
+
+      convexPolytope = generatorTwo.generateConvexPolytope(expandingPolytope);
+
+      edges = convexPolytope.getEdges();
+      vertices = convexPolytope.getVertices();
+
+      assertEquals(numberOfVertices, vertices.size());
+      assertEquals(120, edges.size());
    }
 
 }
