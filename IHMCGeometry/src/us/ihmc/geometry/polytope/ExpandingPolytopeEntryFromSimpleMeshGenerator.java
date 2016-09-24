@@ -8,23 +8,22 @@ import javax.vecmath.Point3d;
 public class ExpandingPolytopeEntryFromSimpleMeshGenerator
 {
 
-
    public ExpandingPolytopeEntry generateExpandingPolytope(SimpleTriangleMesh mesh)
    {
       ArrayList<Point3d> positions = mesh.positions;
       ArrayList<Integer> triangleIndices = mesh.triangleIndices;
 
-      int numberOfTriangles = triangleIndices.size()/3;
+      int numberOfTriangles = triangleIndices.size() / 3;
 
       HashMap<Point3d, ArrayList<ExpandingPolytopeEntry>> entriesContainingThisVertexMap = new HashMap<>();
 
       ArrayList<ExpandingPolytopeEntry> entries = new ArrayList<>();
 
-      for (int i=0; i<numberOfTriangles; i++)
+      for (int i = 0; i < numberOfTriangles; i++)
       {
-         Point3d pointOne = positions.get(triangleIndices.get(i*3));
-         Point3d pointTwo = positions.get(triangleIndices.get(i*3 + 1));
-         Point3d pointThree = positions.get(triangleIndices.get(i*3 + 2));
+         Point3d pointOne = positions.get(triangleIndices.get(i * 3));
+         Point3d pointTwo = positions.get(triangleIndices.get(i * 3 + 1));
+         Point3d pointThree = positions.get(triangleIndices.get(i * 3 + 2));
 
          ExpandingPolytopeEntry entry = new ExpandingPolytopeEntry(pointOne, pointTwo, pointThree);
          entries.add(entry);
@@ -35,11 +34,11 @@ public class ExpandingPolytopeEntryFromSimpleMeshGenerator
       ArrayList<ExpandingPolytopeEntry> entriesToLinkUp = new ArrayList<>();
       entriesToLinkUp.add(entries.get(0));
 
-      while(!entriesToLinkUp.isEmpty())
+      while (!entriesToLinkUp.isEmpty())
       {
          ExpandingPolytopeEntry entryToLinkUp = entriesToLinkUp.remove(entriesToLinkUp.size() - 1);
 
-         for (int i=0; i<3; i++)
+         for (int i = 0; i < 3; i++)
          {
             Point3d vertex = entryToLinkUp.getVertex(i);
             ArrayList<ExpandingPolytopeEntry> entryiesContainingThisVertex = entriesContainingThisVertexMap.get(vertex);
@@ -61,7 +60,7 @@ public class ExpandingPolytopeEntryFromSimpleMeshGenerator
 
    private void addToMap(HashMap<Point3d, ArrayList<ExpandingPolytopeEntry>> entriesContainingThisVertexMap, ExpandingPolytopeEntry entry)
    {
-      for (int vertexIndex=0; vertexIndex<3; vertexIndex++)
+      for (int vertexIndex = 0; vertexIndex < 3; vertexIndex++)
       {
          Point3d vertex = entry.getVertex(vertexIndex);
 
