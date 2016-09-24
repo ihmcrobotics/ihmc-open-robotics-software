@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerStatePacket;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
@@ -67,6 +68,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final QuadrupedPreplannedStepInputProvider preplannedStepProvider;
    private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
 
+   private final QuadrupedForceControllerStatePacket quadrupedForceControllerStatePacket;
+
    private final QuadrupedPreplannedStepStream preplannedStepStream;
    private final QuadrupedXGaitStepStream xGaitStepStream;
    private final QuadrupedStepStreamMultiplexer<QuadrupedForceControllerState> stepStreamMultiplexer;
@@ -125,6 +128,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
          ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
       }
+      this.quadrupedForceControllerStatePacket = new QuadrupedForceControllerStatePacket();
 
       this.stateMachine = buildStateMachine(runtimeEnvironment, postureProvider);
       this.userEventTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerRequestedEvent.class);
@@ -226,6 +230,10 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       // update output processor
       outputProcessor.update();
+
+      // Send state information
+      quadrupedForceControllerStatePacket.set(stateMachine.getState());
+      runtimeEnvironment.getGlobalDataProducer().queueDataToSend(quadrupedForceControllerStatePacket);
    }
 
    @Override
