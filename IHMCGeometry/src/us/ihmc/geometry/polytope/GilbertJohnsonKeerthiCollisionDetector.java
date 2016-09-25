@@ -37,7 +37,14 @@ public class GilbertJohnsonKeerthiCollisionDetector
       this.listener = listener;
    }
 
+   private final Vector3d defaultInitialGuessOfSeparatingVector = new Vector3d(0.0, 0.0, 1.0);
+
    public boolean arePolytopesColliding(ConvexPolytope polytopeA, ConvexPolytope polytopeB, Point3d pointOnAToPack, Point3d pointOnBToPack)
+   {
+      return arePolytopesColliding(defaultInitialGuessOfSeparatingVector, polytopeA, polytopeB, pointOnAToPack, pointOnBToPack);
+   }
+
+   public boolean arePolytopesColliding(Vector3d initialGuessOfSeparatingVector, ConvexPolytope polytopeA, ConvexPolytope polytopeB, Point3d pointOnAToPack, Point3d pointOnBToPack)
    {
       if (listener != null)
       {
@@ -46,10 +53,14 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
       simplex.clearPoints();
 
-      // Step 1) Initialize Simplex Q to a single point in A minkowskiDifference B. Here we'll just use A.vertex0 and B.vertex0.
-      // TODO: Is this fine? Or does it have to be on the surface of the Minkowski Difference. This might be on the interior...
-      PolytopeVertex vertexOne = polytopeA.getVertex(0);
-      PolytopeVertex vertexTwo = polytopeB.getVertex(0);
+      // Step 1) Initialize Simplex Q to a single point in A minkowskiDifference B. Here we'll search in the direction of 
+      // initialGuessOfSeparatingVector. That will ensure that the point is on the exterior of the Minkowski Difference
+      // and will allow us to speed things up by remembering the previous separating vector.
+      
+      PolytopeVertex vertexOne = polytopeA.getSupportingVertex(initialGuessOfSeparatingVector);
+      negativeSupportDirection.set(initialGuessOfSeparatingVector);
+      negativeSupportDirection.negate();
+      PolytopeVertex vertexTwo = polytopeB.getSupportingVertex(negativeSupportDirection);
 
       Point3d minkowskiDifferenceVertex = new Point3d();
       minkowskiDifferenceVertex.sub(vertexOne.getPosition(), vertexTwo.getPosition());

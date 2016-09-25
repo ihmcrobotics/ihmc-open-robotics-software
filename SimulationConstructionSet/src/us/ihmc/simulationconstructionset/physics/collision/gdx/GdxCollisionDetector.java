@@ -173,7 +173,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          btBoxShape box = new btBoxShape(new Vector3((float) radiusX, (float) radiusY, (float) radiusZ));
          box.setMargin(margin);
 
-         return new ShapeDescription(box);
+         return new BulletShapeDescription(box);
       }
 
       public CollisionShapeDescription createCylinder(double radius, double height)
@@ -181,7 +181,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          btCylinderShape shape = new btCylinderShapeZ(new Vector3((float) radius, (float) radius, (float) height / 2.0f));
          shape.setMargin((float) margin);
 
-         return new ShapeDescription(shape);
+         return new BulletShapeDescription(shape);
       }
 
       public CollisionShapeDescription createSphere(double radius)
@@ -189,7 +189,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          btSphereShape shape = new btSphereShape((float) radius);
          shape.setMargin(margin);
 
-         return new ShapeDescription(shape);
+         return new BulletShapeDescription(shape);
       }
 
       @Override
@@ -199,7 +199,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          Link link = null;
          boolean isGround = false;
 
-         BulletCollisionShapeWithLink shape = new BulletCollisionShapeWithLink("shape" + allShapes.size(), (ShapeDescription) description, link, isGround, shapeToLink);
+         BulletCollisionShapeWithLink shape = new BulletCollisionShapeWithLink("shape" + allShapes.size(), (BulletShapeDescription) description, link, isGround, shapeToLink);
          collisionWorld.addCollisionObject(shape, (short) 0xFFFF, (short) 0xFFFF);
 
          allShapes.add(shape);
@@ -215,7 +215,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
             shapeToLink = new RigidBodyTransform();
          }
 
-         BulletCollisionShapeWithLink shape = new BulletCollisionShapeWithLink("shape" + allShapes.size(), (ShapeDescription) description, link, isGround, shapeToLink);
+         BulletCollisionShapeWithLink shape = new BulletCollisionShapeWithLink("shape" + allShapes.size(), (BulletShapeDescription) description, link, isGround, shapeToLink);
          collisionWorld.addCollisionObject(shape, (short) collisionGroup, (short) collisionMask);
 
          allShapes.add(shape);
@@ -227,13 +227,44 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    /**
     * Just a wrapper around {@link com.bulletphysics.collision.shapes.CollisionShape}.
     */
-   public static class ShapeDescription implements CollisionShapeDescription
+   public static class BulletShapeDescription<T extends BulletShapeDescription<T>> implements CollisionShapeDescription<T>
    {
-      public btCollisionShape shape;
+      private btCollisionShape shape;
+      private final RigidBodyTransform transform = new RigidBodyTransform();
 
-      public ShapeDescription(btCollisionShape shape)
+      public BulletShapeDescription(btCollisionShape shape)
       {
          this.shape = shape;
+      }
+
+      public btCollisionShape getShape()
+      {
+         return shape;
+      }
+
+      public void getTransform(RigidBodyTransform transformToPack)
+      {
+         transformToPack.set(transform);
+      }
+ 
+      @Override
+      public BulletShapeDescription<T> copy()
+      {
+         BulletShapeDescription<T> copy = new BulletShapeDescription<T>(shape);
+         return copy;
+      }
+
+      @Override
+      public void setFrom(T collisionShapeDescription)
+      {
+         this.shape = collisionShapeDescription.getShape();  
+         collisionShapeDescription.getTransform(this.transform);
+      }
+
+      @Override
+      public void applyTransform(RigidBodyTransform transformToWorld)
+      {
+         transform.multiply(transformToWorld, transform);
       }
    }
 
@@ -242,7 +273,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
     */
    private static class BulletCollisionShapeWithLink extends btCollisionObject implements CollisionShapeWithLink
    {
-      private final ShapeDescription description;
+      private final BulletShapeDescription description;
       private final Link link;
       private final boolean isGround;
 
@@ -250,7 +281,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       private final RigidBodyTransform shapeToLink = new RigidBodyTransform();
       private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-      public BulletCollisionShapeWithLink(String name, ShapeDescription description, Link link, boolean isGround, RigidBodyTransform shapeToLink)
+      public BulletCollisionShapeWithLink(String name, BulletShapeDescription description, Link link, boolean isGround, RigidBodyTransform shapeToLink)
       {
          this.description = description;
          this.link = link;
@@ -324,6 +355,20 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          {
             this.transformToWorld.set(transformToWorld);
          }
+      }
+
+      @Override
+      public CollisionShapeDescription getTransformedCollisionShapeDescription()
+      {
+         // TODO Auto-generated method stub
+         return null;
+      }
+
+      @Override
+      public void computeTransformedCollisionShape()
+      {
+         // TODO Auto-generated method stub
+         
       }
    }
 

@@ -39,7 +39,10 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
       projectOriginOntoFace(pointOne, pointTwo, pointThree, closestPointToOrigin, lambdas);
       distanceToOriginKey = closestPointToOrigin.length();
       if (Double.isNaN(distanceToOriginKey))
-         throw new RuntimeException();
+      {
+         this.affinelyDependent = true;
+//         throw new RuntimeException("Distance to origin is NaN!. \npointOne = " + pointOne + ", \npointTwo = " + pointTwo + ", \npointThree = " + pointThree);
+      }
    }
 
    public boolean closestIsInternal()

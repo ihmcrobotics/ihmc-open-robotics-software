@@ -126,8 +126,9 @@ public class NewtonsCradleSimulation
 
       CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
 
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
-      handler.addListener(visualize);
+//    DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
+    DefaultCollisionVisualize visualize = null;
+//      handler.addListener(visualize);
 
       ScsCollisionDetector collisionDetector = pileOfRandomObjectsRobot.getCollisionDetector();
       collisionDetector.initialize();

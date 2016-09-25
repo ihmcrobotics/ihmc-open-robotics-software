@@ -99,4 +99,15 @@ public class ConvexPolytopeConstructor
       polytope.addVertex(singlePoint);
       return polytope;
    }
+
+   public static ConvexPolytope constructFromVertices(double[][] vertices)
+   {
+      ConvexPolytope polytope = new ConvexPolytope();
+      for (double[] vertex : vertices)
+      {
+         polytope.addVertex(vertex);
+      }
+
+      return polytope;
+   }
 }

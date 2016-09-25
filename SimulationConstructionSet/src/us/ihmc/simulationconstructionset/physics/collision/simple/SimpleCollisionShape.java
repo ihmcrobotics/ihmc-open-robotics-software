@@ -8,11 +8,13 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 public class SimpleCollisionShape implements CollisionShape
 {
    private final CollisionShapeDescription collisionShapeDescription;
+   private final CollisionShapeDescription transformedCollisionShapeDescription;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    public SimpleCollisionShape(CollisionShapeDescription collisionShapeDescription)
    {
       this.collisionShapeDescription = collisionShapeDescription;
+      this.transformedCollisionShapeDescription = collisionShapeDescription.copy();
    }
 
    @Override
@@ -49,6 +51,20 @@ public class SimpleCollisionShape implements CollisionShape
    public void setTransformToWorld(RigidBodyTransform transformToWorld)
    {
       this.transformToWorld.set(transformToWorld);
+   }
+
+   @Override
+   public CollisionShapeDescription getTransformedCollisionShapeDescription()
+   {
+      return transformedCollisionShapeDescription;
+   }
+
+   @Override
+   public void computeTransformedCollisionShape()
+   {
+      transformedCollisionShapeDescription.setFrom(collisionShapeDescription);
+      this.getTransformToWorld(transformToWorld);
+      transformedCollisionShapeDescription.applyTransform(transformToWorld);
    }
 
 }

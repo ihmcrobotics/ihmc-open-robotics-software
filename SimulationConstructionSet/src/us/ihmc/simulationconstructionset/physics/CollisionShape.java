@@ -11,29 +11,33 @@ public interface CollisionShape
    /**
     * Returns true if the shape is not mobile and part of the environment.
     */
-   public boolean isGround();
+   public abstract boolean isGround();
 
    /**
     * Returns a description of the shape.  Multiple {@link CollisionShape} can have the same description.
     */
-   public CollisionShapeDescription getDescription();
+   public abstract CollisionShapeDescription getDescription();
 
    /**
     * Bit field indicating which groups the shape belongs to
     */
-   public int getGroupMask();
+   public abstract int getGroupMask();
 
    /**
     * Bit field indicating which groups the shape can collide against
     */
-   public int getCollisionMask();
+   public abstract int getCollisionMask();
 
 //   /**
 //    * Returns the distance a point is from the surface of the shape.  Positive values are outside and negative values are inside.
 //    */
 //   public double distance(double x, double y, double z);
 
-   public void getTransformToWorld(RigidBodyTransform transformToWorldToPack);
+   public abstract void getTransformToWorld(RigidBodyTransform transformToWorldToPack);
 
-   public void setTransformToWorld(RigidBodyTransform transformToWorld);
+   public abstract void setTransformToWorld(RigidBodyTransform transformToWorld);
+
+   public abstract CollisionShapeDescription getTransformedCollisionShapeDescription();
+
+   public abstract void computeTransformedCollisionShape();
 }

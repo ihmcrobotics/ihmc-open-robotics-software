@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import javax.vecmath.Point3d;
@@ -21,6 +20,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class GilbertJohnsonKeerthiCollisionDetectorTest
 {
+   private static boolean VERBOSE = false;
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -100,7 +100,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testIntersectingOnALotOfCubes()
+   public void testIntersectingOnARotatingCube()
    {
       GilbertJohnsonKeerthiCollisionDetector detector = new GilbertJohnsonKeerthiCollisionDetector();
       GilbertJohnsonKeerthiCollisionDetectorAssertListener listener = new GilbertJohnsonKeerthiCollisionDetectorAssertListener();
@@ -118,8 +118,13 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       boolean areColliding = detector.arePolytopesColliding(cubeOne, cubeTwo, closestPointOnA, closestPointOnB);
       assertFalse(areColliding);
 
-      JUnitTools.assertPoint3dEquals("", new Point3d(0.99502487, 1.980198, 0.0), closestPointOnA, 1e-4);
-      JUnitTools.assertPoint3dEquals("", new Point3d(0.99502487, 1.980198, 299.5), closestPointOnB, 1e-7);
+      assertEquals(0.0, closestPointOnA.getZ(), 1e-7);
+      assertEquals(299.5, closestPointOnB.getZ(), 1e-7);
+
+      assertTrue(closestPointOnA.getX() >= -100.0);
+      assertTrue(closestPointOnA.getX() <= 100.0);
+      assertTrue(closestPointOnA.getY() >= -100.0);
+      assertTrue(closestPointOnA.getY() <= 100.0);
 
       assertEquals(299.5, closestPointOnA.distance(closestPointOnB), 1e-7);
 
@@ -200,7 +205,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
             {
                printTroublesomeOne(polytope, pointToProject);
             }
-            assertTrue("closestPointOnPolytope = " + closestPointOnPolytope + " distanceBetweenTheTwoProjections = " + distanceBetweenTheTwoProjections, distanceBetweenTheTwoProjections < 1e-4);
+            assertTrue("closestPointOnPolytope = " + closestPointOnPolytope + " distanceBetweenTheTwoProjections = " + distanceBetweenTheTwoProjections,
+                  distanceBetweenTheTwoProjections < 1e-4);
 
             if (isInside)
             {
@@ -228,7 +234,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
                   Point3d pointShouldBeInPolytopeOne = new Point3d();
                   Point3d pointShouldBeInPolytopeTwo = new Point3d();
-                  boolean shouldStillBeInside = detector.arePolytopesColliding(polytope, pointToCheckPolytope, pointShouldBeInPolytopeOne, pointShouldBeInPolytopeTwo);
+                  boolean shouldStillBeInside = detector.arePolytopesColliding(polytope, pointToCheckPolytope, pointShouldBeInPolytopeOne,
+                        pointShouldBeInPolytopeTwo);
                   assertTrue(shouldStillBeInside);
 
                   JUnitTools.assertTuple3dEquals(pointNearVertex, pointShouldBeInPolytopeOne, 1e-4);
@@ -243,7 +250,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
                   Point3d pointShouldStayOutsidePolytope = new Point3d();
                   Point3d pointShouldProjectBackToPolytope = new Point3d();
-                  boolean shouldBeOutside = detector.arePolytopesColliding(polytope, pointToCheckPolytope, pointShouldProjectBackToPolytope, pointShouldStayOutsidePolytope);
+                  boolean shouldBeOutside = detector.arePolytopesColliding(polytope, pointToCheckPolytope, pointShouldProjectBackToPolytope,
+                        pointShouldStayOutsidePolytope);
                   assertFalse(shouldBeOutside);
                   assertTrue(Math.abs(pointBeyondVertex.distance(pointShouldStayOutsidePolytope)) < 1e-7);
                }
@@ -264,7 +272,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
                ConvexPolytope halfwayToProjectionPolytope = ConvexPolytopeConstructor.constructSinglePointPolytope(pointHalfwayToProjection);
                Point3d projectionFromHalfwayPoint = new Point3d();
                Point3d shouldBeSameHalfwayPoint = new Point3d();
-               boolean shouldStillBeOutside = detector.arePolytopesColliding(polytope, halfwayToProjectionPolytope, projectionFromHalfwayPoint, shouldBeSameHalfwayPoint);
+               boolean shouldStillBeOutside = detector.arePolytopesColliding(polytope, halfwayToProjectionPolytope, projectionFromHalfwayPoint,
+                     shouldBeSameHalfwayPoint);
 
                assertFalse(shouldStillBeOutside);
                JUnitTools.assertTuple3dEquals(shouldBeSameHalfwayPoint, pointHalfwayToProjection, 1e-7);
@@ -273,7 +282,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
                double newProjectionDistance = pointToProject.distance(projectionFromHalfwayPoint);
 
                double newDistance = projectionFromHalfwayPoint.distance(closestPointOnPolytope);
-               if (newDistance > 1e-7)
+               if ((newDistance > 1e-7) && (VERBOSE))
                {
                   System.err.println("\n-------------\nnumberOutside = " + numberOutside);
                   System.err.println("Polytope = " + polytope);
@@ -368,23 +377,21 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
                pointHalfwayBetweenPolytopes.add(closestPointOnPolytopeTwo);
                pointHalfwayBetweenPolytopes.scale(0.5);
 
-               Point3d closestPointOnPolytopeOneCheck = checkPointProjectsToSamePoint(detector, polytopeOne, pointHalfwayBetweenPolytopes, closestPointOnPolytopeOne);
-               Point3d closestPointOnPolytopeTwoCheck = checkPointProjectsToSamePoint(detector, polytopeTwo, pointHalfwayBetweenPolytopes, closestPointOnPolytopeTwo);
+               Point3d closestPointOnPolytopeOneCheck = checkPointProjectsToSamePoint(detector, polytopeOne, pointHalfwayBetweenPolytopes,
+                     closestPointOnPolytopeOne);
+               Point3d closestPointOnPolytopeTwoCheck = checkPointProjectsToSamePoint(detector, polytopeTwo, pointHalfwayBetweenPolytopes,
+                     closestPointOnPolytopeTwo);
 
                double originalProjectionDistance = closestPointOnPolytopeOne.distance(closestPointOnPolytopeTwo);
                double newProjectionDistance = closestPointOnPolytopeOneCheck.distance(closestPointOnPolytopeTwoCheck);
 
                double newDistanceOne = closestPointOnPolytopeOneCheck.distance(closestPointOnPolytopeOne);
-               if (newDistanceOne > 1e-7)
+               if ((newDistanceOne > 1e-7) && (VERBOSE))
                {
-                  //                  System.err.println("numberOutside = " + numberOutside);
-                  //                  System.err.println("Polytope = " + polytope);
-                  //                  System.err.println("Point to project = " + pointToProject);
-                  //                  System.err.println("pointHalfwayToProjection = " + pointHalfwayToProjection);
-                  //                  System.err.println("Projection = " + closestPointOnPolytope);
-                  //                  System.err.println("Projection from halfway point = " + projectionFromHalfwayPoint);
-                  //                  System.err.println("Original distance = " + originalProjectionDistance);
-                  //                  System.err.println("New point distance = " + newProjectionDistance);
+                  System.err.println("PolytopeOne = " + polytopeOne);
+                  System.err.println("PolytopeTwo = " + polytopeTwo);
+                  System.err.println("Original distance = " + originalProjectionDistance);
+                  System.err.println("New point distance = " + newProjectionDistance);
                }
                JUnitTools.assertTuple3dEquals(closestPointOnPolytopeOneCheck, closestPointOnPolytopeOne, 1e-7);
                JUnitTools.assertTuple3dEquals(closestPointOnPolytopeTwoCheck, closestPointOnPolytopeTwo, 1e-7);
@@ -393,11 +400,19 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
          }
       }
 
-      System.out.println("number colliding = " + numberColliding);
-      System.out.println("number not colliding = " + numberNotColliding);
+      if (VERBOSE)
+      {
+         System.out.println("number colliding = " + numberColliding);
+         System.out.println("number not colliding = " + numberNotColliding);
+      }
+
+      // Make sure some are both colliding and not colliding
+      assertTrue("numberColliding = " + numberColliding, numberColliding > 1000);
+      assertTrue("numberNotColliding = " + numberNotColliding, numberNotColliding > 1000);
    }
 
-   private Point3d checkPointProjectsToSamePoint(GilbertJohnsonKeerthiCollisionDetector detector, ConvexPolytope polytope, Point3d pointToProject, Point3d pointItShouldProjectTo)
+   private Point3d checkPointProjectsToSamePoint(GilbertJohnsonKeerthiCollisionDetector detector, ConvexPolytope polytope, Point3d pointToProject,
+         Point3d pointItShouldProjectTo)
    {
       ConvexPolytope pointToProjectPolytope = ConvexPolytopeConstructor.constructSinglePointPolytope(pointToProject);
       Point3d projectionPoint = new Point3d();
@@ -427,9 +442,12 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
    private void printTroublesomeOne(ConvexPolytope polytope, Point3d pointToProject)
    {
-      System.err.println("\n\nTroublesome point to polytope projection!!");
-      System.err.println("Polytope = " + polytope);
-      System.err.println("Point to project = " + pointToProject);
+      if (VERBOSE)
+      {
+         System.err.println("\n\nTroublesome point to polytope projection!!");
+         System.err.println("Polytope = " + polytope);
+         System.err.println("Point to project = " + pointToProject);
+      }
    }
 
    @DeployableTestMethod(estimatedDuration = 0.0)
@@ -509,7 +527,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       doPointToSimplePolytopeTest(pointToProject, verbose, trianglePointA, trianglePointB, trianglePointC);
    }
 
-   private void doPointToTetragonProjectionTest(Point3d tetragonPointA, Point3d tetragonPointB, Point3d tetragonPointC, Point3d tetragonPointD, Point3d pointToProject, boolean verbose)
+   private void doPointToTetragonProjectionTest(Point3d tetragonPointA, Point3d tetragonPointB, Point3d tetragonPointC, Point3d tetragonPointD,
+         Point3d pointToProject, boolean verbose)
    {
       doPointToSimplePolytopeTest(pointToProject, verbose, tetragonPointA, tetragonPointB, tetragonPointC, tetragonPointD);
    }
