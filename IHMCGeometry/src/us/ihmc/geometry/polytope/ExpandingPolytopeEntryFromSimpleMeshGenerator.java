@@ -1,9 +1,10 @@
 package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.vecmath.Point3d;
+
+import gnu.trove.map.hash.THashMap;
 
 public class ExpandingPolytopeEntryFromSimpleMeshGenerator
 {
@@ -15,7 +16,7 @@ public class ExpandingPolytopeEntryFromSimpleMeshGenerator
 
       int numberOfTriangles = triangleIndices.size() / 3;
 
-      HashMap<Point3d, ArrayList<ExpandingPolytopeEntry>> entriesContainingThisVertexMap = new HashMap<>();
+      THashMap<Point3d, ArrayList<ExpandingPolytopeEntry>> entriesContainingThisVertexMap = new THashMap<>();
 
       ArrayList<ExpandingPolytopeEntry> entries = new ArrayList<>();
 
@@ -58,7 +59,7 @@ public class ExpandingPolytopeEntryFromSimpleMeshGenerator
       return entries.get(0);
    }
 
-   private void addToMap(HashMap<Point3d, ArrayList<ExpandingPolytopeEntry>> entriesContainingThisVertexMap, ExpandingPolytopeEntry entry)
+   private void addToMap(THashMap<Point3d, ArrayList<ExpandingPolytopeEntry>> entriesContainingThisVertexMap, ExpandingPolytopeEntry entry)
    {
       for (int vertexIndex = 0; vertexIndex < 3; vertexIndex++)
       {

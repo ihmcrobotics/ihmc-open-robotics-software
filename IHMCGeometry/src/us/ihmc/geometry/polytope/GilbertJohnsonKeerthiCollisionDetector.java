@@ -3,6 +3,8 @@ package us.ihmc.geometry.polytope;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.lists.RecyclingArrayList;
+
 /**
  * GilbertJohnsonKeerthi (GJK) algorithm for doing collision detection
  *
@@ -13,9 +15,12 @@ public class GilbertJohnsonKeerthiCollisionDetector
    private static final double LAMBDA_STOPPING_DELTA = 1e-9;
 
    private final Vector3d negativeSupportDirection = new Vector3d();
+   private final Vector3d supportingVertexOnSimplex = new Vector3d();
 
    private final SimplexPolytope simplex = new SimplexPolytope();
    private GilbertJohnsonKeerthiCollisionDetectorListener listener;
+
+   private final RecyclingArrayList<Point3d> poolOfPoints = new RecyclingArrayList<Point3d>(Point3d.class);
 
    public void computeSupportPointOnMinkowskiDifference(ConvexPolytope cubeOne, ConvexPolytope cubeTwo, Vector3d supportDirection, Point3d supportPoint)
    {
@@ -46,6 +51,8 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
    public boolean arePolytopesColliding(Vector3d initialGuessOfSeparatingVector, ConvexPolytope polytopeA, ConvexPolytope polytopeB, Point3d pointOnAToPack, Point3d pointOnBToPack)
    {
+      poolOfPoints.clear();
+
       if (listener != null)
       {
          listener.checkingIfPolytopesAreColliding(polytopeA, polytopeB);
@@ -62,7 +69,7 @@ public class GilbertJohnsonKeerthiCollisionDetector
       negativeSupportDirection.negate();
       PolytopeVertex vertexTwo = polytopeB.getSupportingVertex(negativeSupportDirection);
 
-      Point3d minkowskiDifferenceVertex = new Point3d();
+      Point3d minkowskiDifferenceVertex = poolOfPoints.add();//new Point3d();
       minkowskiDifferenceVertex.sub(vertexOne.getPosition(), vertexTwo.getPosition());
 
       simplex.addVertex(minkowskiDifferenceVertex, vertexOne.getPosition(), vertexTwo.getPosition());
@@ -74,10 +81,14 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
       int iterations = 0;
       int metStoppingConditionsCount = 0;
+      Point3d closestPointToOrigin = poolOfPoints.add();
+      closestPointToOrigin.set(0.0, 0.0, 0.0);
+      Point3d origin = poolOfPoints.add();
+      origin.set(0.0, 0.0, 0.0);
+
       while (true)
       {
          // Step 2) Compute closest point to origin in the simplex. 4) Reduce points of Q not used in determining P.
-         Point3d closestPointToOrigin = new Point3d();
          simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
 
          if (listener != null)
@@ -86,7 +97,7 @@ public class GilbertJohnsonKeerthiCollisionDetector
          }
 
          // Step 3) If P is origin, done.
-         double distanceSquared = closestPointToOrigin.distanceSquared(new Point3d());
+         double distanceSquared = closestPointToOrigin.distanceSquared(origin);
          //TODO: Magic epsilon here...
          if (distanceSquared < 1e-8)
          {
@@ -108,8 +119,6 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
          supportDirection.negate();
          PolytopeVertex supportingVertexB = polytopeB.getSupportingVertex(supportDirection);
-
-         Vector3d supportingVertexOnSimplex = new Vector3d();
 
          Point3d supportingVertexOnA = supportingVertexA.getPosition();
          Point3d supportingVertexOnB = supportingVertexB.getPosition();
@@ -185,7 +194,8 @@ public class GilbertJohnsonKeerthiCollisionDetector
          }
 
          // Step 7) Add v to Q and got to step 2.
-         Point3d pointToAddToSimplex = new Point3d(supportingVertexOnSimplex);
+         Point3d pointToAddToSimplex = poolOfPoints.add();
+         pointToAddToSimplex.set(supportingVertexOnSimplex);
          boolean successfullyAddedVertex = simplex.addVertex(pointToAddToSimplex, supportingVertexA.getPosition(), supportingVertexB.getPosition());
 
          if (!successfullyAddedVertex)

@@ -1,19 +1,20 @@
 package us.ihmc.geometry.polytope;
 
-import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Set;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import gnu.trove.map.hash.THashMap;
+
 public class ExpandingPolytopeAlgorithm
 {
    private final PriorityQueue<ExpandingPolytopeEntry> triangleEntryQueue = new PriorityQueue<ExpandingPolytopeEntry>();
    private final ExpandingPolytopeEdgeList edgeList = new ExpandingPolytopeEdgeList();
 
-   private final HashMap<Point3d, Point3d> correspondingPointsOnA = new HashMap<>();
-   private final HashMap<Point3d, Point3d> correspondingPointsOnB = new HashMap<>();
+   private final THashMap<Point3d, Point3d> correspondingPointsOnA = new THashMap<>();
+   private final THashMap<Point3d, Point3d> correspondingPointsOnB = new THashMap<>();
 
    private ConvexPolytope polytopeA;
    private ConvexPolytope polytopeB;
@@ -34,10 +35,13 @@ public class ExpandingPolytopeAlgorithm
 
    public void setPolytopes(SimplexPolytope simplex, ConvexPolytope polytopeOne, ConvexPolytope polytopeTwo)
    {
+      correspondingPointsOnA.clear();
+      correspondingPointsOnB.clear();
+      edgeList.clear();
+      triangleEntryQueue.clear();
+
       this.polytopeA = polytopeOne;
       this.polytopeB = polytopeTwo;
-
-      triangleEntryQueue.clear();
 
       int numberOfPoints = simplex.getNumberOfPoints();
       if (numberOfPoints != 4)
@@ -165,7 +169,7 @@ public class ExpandingPolytopeAlgorithm
                int numberOfEdges = edgeList.getNumberOfEdges();
                
                //TODO: Recycle the trash here...
-               HashMap<Point3d, ExpandingPolytopeEntry[]> mapFromStitchVertexToTriangles = new HashMap<>();
+               THashMap<Point3d, ExpandingPolytopeEntry[]> mapFromStitchVertexToTriangles = new THashMap<>();
                
                for (int edgeIndex = 0; edgeIndex < numberOfEdges; edgeIndex++)
                {
@@ -268,7 +272,7 @@ public class ExpandingPolytopeAlgorithm
       }
    }
 
-   private ExpandingPolytopeEntry[] getOrCreateTwoTriangleArray(HashMap<Point3d, ExpandingPolytopeEntry[]> mapFromStitchVertexToTriangles, Point3d sentryVertexOne)
+   private ExpandingPolytopeEntry[] getOrCreateTwoTriangleArray(THashMap<Point3d, ExpandingPolytopeEntry[]> mapFromStitchVertexToTriangles, Point3d sentryVertexOne)
    {
       ExpandingPolytopeEntry[] twoTriangleArray = mapFromStitchVertexToTriangles.get(sentryVertexOne);
       if (twoTriangleArray == null)
