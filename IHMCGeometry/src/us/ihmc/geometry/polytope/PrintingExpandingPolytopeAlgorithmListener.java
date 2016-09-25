@@ -1,5 +1,6 @@
 package us.ihmc.geometry.polytope;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 public class PrintingExpandingPolytopeAlgorithmListener implements ExpandingPolytopeAlgorithmListener
@@ -40,9 +41,11 @@ public class PrintingExpandingPolytopeAlgorithmListener implements ExpandingPoly
    }
 
    @Override
-   public void foundMinimumPenetrationVector(Vector3d minimumPenetrationVector)
+   public void foundMinimumPenetrationVector(Vector3d minimumPenetrationVector, Point3d closestPointOnA, Point3d closestPointOnB)
    {
       System.out.println("Found Minimum Penetration Vector:" + minimumPenetrationVector);
+      System.out.println("closestPointOnA = " + closestPointOnA);
+      System.out.println("closestPointOnB = " + closestPointOnB);
    }
 
    @Override
@@ -55,6 +58,12 @@ public class PrintingExpandingPolytopeAlgorithmListener implements ExpandingPoly
    public void addedNewEntryToQueue(ExpandingPolytopeEntry newEntry)
    {
       System.out.println("Added New Entry To Queue:" + newEntry);
+   }
+
+   @Override
+   public void expandedPolytope(ExpandingPolytopeEntry firstNewEntry)
+   {
+      System.out.println("Expanded the polytope. First new entry = " + firstNewEntry);
    }
 
 }

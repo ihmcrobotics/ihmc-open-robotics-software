@@ -1,5 +1,6 @@
 package us.ihmc.geometry.polytope;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 public interface ExpandingPolytopeAlgorithmListener
@@ -15,10 +16,11 @@ public interface ExpandingPolytopeAlgorithmListener
 
    public abstract void computedSilhouetteFromW(ExpandingPolytopeEdgeList edgeList);
 
-   public abstract void foundMinimumPenetrationVector(Vector3d minimumPenetrationVector);
-
    public abstract void addedNewEntryToQueue(ExpandingPolytopeEntry newEntry);
 
    public abstract void createdNewEntry(ExpandingPolytopeEntry newEntry);
 
+   public abstract void expandedPolytope(ExpandingPolytopeEntry firstNewEntry);
+
+   public abstract void foundMinimumPenetrationVector(Vector3d minimumPenetrationVector, Point3d closestPointOnA, Point3d closestPointOnB);
 }

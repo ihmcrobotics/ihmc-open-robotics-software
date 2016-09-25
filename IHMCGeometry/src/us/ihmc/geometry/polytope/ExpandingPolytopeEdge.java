@@ -1,5 +1,7 @@
 package us.ihmc.geometry.polytope;
 
+import javax.vecmath.Point3d;
+
 public class ExpandingPolytopeEdge
 {
    private final ExpandingPolytopeEntry entry;
@@ -19,5 +21,15 @@ public class ExpandingPolytopeEdge
    public int getEdgeIndex()
    {
       return edgeIndex;
+   }
+   
+   public Point3d getStartPoint()
+   {
+      return entry.getVertex(edgeIndex);
+   }
+   
+   public Point3d getEndPoint()
+   {
+      return entry.getVertex((edgeIndex + 1) %3);
    }
 }
