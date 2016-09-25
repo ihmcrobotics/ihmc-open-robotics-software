@@ -1,9 +1,10 @@
 package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.vecmath.Point3d;
+
+import gnu.trove.map.hash.THashMap;
 
 public class ConvexPolytopeFromExpandingPolytopeEntryGenerator
 {
@@ -15,7 +16,7 @@ public class ConvexPolytopeFromExpandingPolytopeEntryGenerator
       ArrayList<ExpandingPolytopeEntry> triangles = new ArrayList<>();
       expandingPolytope.getAllConnectedTriangles(triangles);
 
-      HashMap<Point3d, PolytopeVertex> pointsToPolytopeVertices = new HashMap<>();
+      THashMap<Point3d, PolytopeVertex> pointsToPolytopeVertices = new THashMap<>();
 
       for (ExpandingPolytopeEntry triangle : triangles)
       {

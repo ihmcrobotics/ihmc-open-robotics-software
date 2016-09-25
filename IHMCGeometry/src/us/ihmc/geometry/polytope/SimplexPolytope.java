@@ -1,20 +1,21 @@
 package us.ihmc.geometry.polytope;
 
-import java.util.LinkedHashMap;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import gnu.trove.map.hash.THashMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
+
 public class SimplexPolytope
 {
    private Point3d pointOne, pointTwo, pointThree, pointFour;
 
-   private LinkedHashMap<Point3d, Point3d> simplexPointToPolytopePointA = new LinkedHashMap<>();
-   private LinkedHashMap<Point3d, Point3d> simplexPointToPolytopePointB = new LinkedHashMap<>();
-   private LinkedHashMap<Point3d, Double> lambdas = new LinkedHashMap<>();
+   private THashMap<Point3d, Point3d> simplexPointToPolytopePointA = new THashMap<>();
+   private THashMap<Point3d, Point3d> simplexPointToPolytopePointB = new THashMap<>();
+   private TObjectDoubleHashMap<Point3d> lambdas = new TObjectDoubleHashMap<>();
 
    public int getNumberOfPoints()
    {

@@ -1,10 +1,11 @@
 package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
+import gnu.trove.map.hash.THashMap;
 
 /**
  * From http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
@@ -29,7 +30,7 @@ public class IcoSphereCreator
    private SimpleTriangleMesh geometry;
 
    private int index;
-   private HashMap<Long, Integer> middlePointIndexCache = new HashMap<>();
+   private THashMap<Long, Integer> middlePointIndexCache = new THashMap<>();
 
    // add vertex to mesh, fix position to be on unit sphere, return index
    private int addVertex(Point3d point)
@@ -72,7 +73,7 @@ public class IcoSphereCreator
    public SimpleTriangleMesh createIcoSphere(int recursionLevel)
    {
       this.geometry = new SimpleTriangleMesh();
-      this.middlePointIndexCache = new HashMap<Long, Integer>();
+      this.middlePointIndexCache = new THashMap<Long, Integer>();
       this.index = 0;
 
       // create 12 vertices of a icosahedron
