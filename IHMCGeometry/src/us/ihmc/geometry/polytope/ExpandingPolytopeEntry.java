@@ -1,5 +1,7 @@
 package us.ihmc.geometry.polytope;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -27,27 +29,45 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
 
    public ExpandingPolytopeEntry(Point3d pointOne, Point3d pointTwo, Point3d pointThree)
    {
-      triangleVertices = new Point3d[] {pointOne, pointTwo, pointThree};
+      triangleVertices = new Point3d[] { pointOne, pointTwo, pointThree };
       projectOriginOntoFace(pointOne, pointTwo, pointThree, closestPointToOrigin, lambdas);
       distanceToOriginKey = closestPointToOrigin.length();
-      if (Double.isNaN(distanceToOriginKey)) throw new RuntimeException();
+      if (Double.isNaN(distanceToOriginKey))
+         throw new RuntimeException();
    }
 
    public boolean closestIsInternal()
    {
-      for (int i=0; i<3; i++)
+      for (int i = 0; i < 3; i++)
       {
-         if (lambdas[i] < 0.0) return false;
-         if (lambdas[i] > 1.0) return false;
+         if (lambdas[i] < 0.0)
+            return false;
+         if (lambdas[i] > 1.0)
+            return false;
       }
 
       return true;
    }
 
-   public void setAdjacentTriangle(int thisTriangleEdgeIndex, ExpandingPolytopeEntry adjacentTriangleEntry, int adjacentTriangleEdgeIndex)
+   /**
+    *
+    * @param thisTriangleEdgeIndex
+    * @param adjacentTriangleEntry
+    * @param adjacentTriangleEdgeIndex
+    * @return true if the set made a difference, false if it was already set that way.
+    */
+   public boolean setAdjacentTriangle(int thisTriangleEdgeIndex, ExpandingPolytopeEntry adjacentTriangleEntry, int adjacentTriangleEdgeIndex)
    {
+      boolean alreadySetThisWay = false;
+      if (adjacentTriangles[thisTriangleEdgeIndex] == adjacentTriangleEntry)
+      {
+         alreadySetThisWay = true;
+      }
+
       adjacentTriangles[thisTriangleEdgeIndex] = adjacentTriangleEntry;
       adjacentTriangleEdgeIndices[thisTriangleEdgeIndex] = adjacentTriangleEdgeIndex;
+
+      return !alreadySetThisWay;
    }
 
    public boolean isObsolete()
@@ -63,6 +83,11 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
    public void setObsolete()
    {
       this.obsolete = true;
+   }
+
+   public void clearObsolete()
+   {
+      this.obsolete = false;
    }
 
    public ExpandingPolytopeEntry getAdjacentTriangle(int index)
@@ -134,6 +159,109 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
    {
       // TODO: Implement and test this!
       return false;
+   }
+
+   public boolean setAdjacentTriangleIfPossible(ExpandingPolytopeEntry entry)
+   {
+      if (this == entry)
+         return false;
+
+      for (int i = 0; i < 3; i++)
+      {
+         for (int j = 0; j < 3; j++)
+         {
+            if ((triangleVertices[i] == entry.triangleVertices[j]) && (triangleVertices[(i + 1) % 3] == entry.triangleVertices[(j - 1 + 3) % 3]))
+            {
+               boolean madeADifference = this.setAdjacentTriangle(i, entry, (j - 1 + 3) % 3);
+               entry.setAdjacentTriangle((j - 1 + 3) % 3, this, i);
+               return madeADifference;
+            }
+
+            if ((triangleVertices[i] == entry.triangleVertices[j]) && (triangleVertices[(i + 1) % 3] == entry.triangleVertices[(j + 1) % 3]))
+            {
+               entry.swapTrianglesToReverseClockwiseness((j + 1) % 3, (j - 1 + 3) % 3);
+
+               // Now same as case above. Do same thing:
+               boolean madeADifference = this.setAdjacentTriangle(i, entry, (j - 1 + 3) % 3);
+               entry.setAdjacentTriangle((j - 1 + 3) % 3, this, i);
+               return madeADifference;
+            }
+         }
+      }
+
+      return false;
+   }
+
+   private void swapTrianglesToReverseClockwiseness(int i, int j)
+   {
+      Point3d temp = triangleVertices[i];
+      triangleVertices[i] = triangleVertices[j];
+      triangleVertices[j] = temp;
+
+      if ((adjacentTriangles[0] != null) || (adjacentTriangles[0] != null) || (adjacentTriangles[0] != null))
+      {
+         throw new RuntimeException("Cannot swap triangles if it already has a neighbor!");
+      }
+   }
+
+   public boolean isAdjacentTo(ExpandingPolytopeEntry entry)
+   {
+      if (this.adjacentTriangles[0] == entry)
+         return true;
+      if (this.adjacentTriangles[1] == entry)
+         return true;
+      if (this.adjacentTriangles[2] == entry)
+         return true;
+      return false;
+   }
+
+   public void checkConsistency()
+   {
+      for (int i = 0; i < 3; i++)
+      {
+         ExpandingPolytopeEntry adjacentTriangle = adjacentTriangles[i];
+         if (adjacentTriangle != null)
+         {
+            int j = this.adjacentTriangleEdgeIndices[i];
+            if (adjacentTriangle.adjacentTriangles[j] != this)
+               throw new RuntimeException("");
+            if (adjacentTriangle.adjacentTriangleEdgeIndices[j] != i)
+               throw new RuntimeException("");
+
+            Point3d firstVertex = this.triangleVertices[i];
+            Point3d secondVertex = this.triangleVertices[(i + 1) % 3];
+
+            Point3d firstVertexOtherSide = adjacentTriangle.triangleVertices[j];
+            Point3d secondVertexOtherSide = adjacentTriangle.triangleVertices[(j + 1) % 3];
+
+            if (firstVertex != secondVertexOtherSide)
+               throw new RuntimeException("");
+            if (secondVertex != firstVertexOtherSide)
+               throw new RuntimeException("");
+         }
+      }
+   }
+
+   public void getAllConnectedTriangles(ArrayList<ExpandingPolytopeEntry> trianglesToPack)
+   {
+      if (!trianglesToPack.contains(this))
+      {
+         trianglesToPack.add(this);
+
+         for (int i = 0; i < 3; i++)
+         {
+            ExpandingPolytopeEntry adjacentTriangle = this.adjacentTriangles[i];
+            if (adjacentTriangle != null)
+            {
+               adjacentTriangle.getAllConnectedTriangles(trianglesToPack);
+            }
+         }
+      }
+   }
+
+   public String toString()
+   {
+      return "[" + triangleVertices[0] + "; " + triangleVertices[1] + "; " + triangleVertices[2] + "]";
    }
 
 }

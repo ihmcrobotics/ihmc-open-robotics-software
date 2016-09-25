@@ -66,10 +66,14 @@ public class ExpandingPolytopeAlgorithm
       entry421.setAdjacentTriangle(2, entry134, 2);
       entry134.setAdjacentTriangle(2, entry421, 2);
 
-      if (entry123.closestIsInternal()) triangleEntryQueue.add(entry123);
-      if (entry324.closestIsInternal()) triangleEntryQueue.add(entry324);
-      if (entry421.closestIsInternal()) triangleEntryQueue.add(entry421);
-      if (entry134.closestIsInternal()) triangleEntryQueue.add(entry134);
+      if (entry123.closestIsInternal())
+         triangleEntryQueue.add(entry123);
+      if (entry324.closestIsInternal())
+         triangleEntryQueue.add(entry324);
+      if (entry421.closestIsInternal())
+         triangleEntryQueue.add(entry421);
+      if (entry134.closestIsInternal())
+         triangleEntryQueue.add(entry134);
 
       if (listener != null)
       {
@@ -83,7 +87,7 @@ public class ExpandingPolytopeAlgorithm
    {
       double mu = Double.POSITIVE_INFINITY; // Upper bound for the square penetration depth.
       Vector3d closestPointToOrigin = null;
-      
+
       while (true)
       {
          ExpandingPolytopeEntry triangleEntryToExpand = triangleEntryQueue.poll();
@@ -123,7 +127,7 @@ public class ExpandingPolytopeAlgorithm
             if (!closeEnough)
             {
                // Blow up the current polytope by adding vertex w.
-               computeSilhouetteFromW(triangleEntryToExpand, w, edgeList);
+               ExpandingPolytopeSilhouetteConstructor.computeSilhouetteFromW(triangleEntryToExpand, w, edgeList);
 
                if (listener != null)
                {
@@ -133,12 +137,12 @@ public class ExpandingPolytopeAlgorithm
                // edgeList now is the entire silhouette of the current polytope as seen from w.
 
                int numberOfEdges = edgeList.getNumberOfEdges();
-//               if (numberOfEdges < 3) throw new RuntimeException("Should have at least three edges, no?");
-               
+               //               if (numberOfEdges < 3) throw new RuntimeException("Should have at least three edges, no?");
+
                ExpandingPolytopeEntry firstNewEntry = null;
                ExpandingPolytopeEntry previousEntry = null;
                Point3d wPoint = new Point3d(w);
-               
+
                for (int edgeIndex = 0; edgeIndex < numberOfEdges; edgeIndex++)
                {
                   ExpandingPolytopeEdge edge = edgeList.getEdge(edgeIndex);
@@ -150,34 +154,34 @@ public class ExpandingPolytopeAlgorithm
                   ExpandingPolytopeEntry newEntry = new ExpandingPolytopeEntry(sentry.getVertex(nextIndex), sentry.getVertex(sentryEdgeIndex), wPoint);
                   newEntry.setAdjacentTriangle(0, sentry, sentryEdgeIndex);
                   sentry.setAdjacentTriangle(sentryEdgeIndex, newEntry, 0);
-                  
-                  if (previousEntry != null) 
+
+                  if (previousEntry != null)
                   {
                      //TODO: Verify if these are correct:
                      newEntry.setAdjacentTriangle(1, previousEntry, 2);
                      newEntry.setAdjacentTriangle(2, previousEntry, 1);
                   }
-                  
-                  if (edgeIndex == 0) firstNewEntry = newEntry;
-                  
+
+                  if (edgeIndex == 0)
+                     firstNewEntry = newEntry;
+
                   if (listener != null)
                      listener.createdNewEntry(newEntry);
-                  
+
                   if (newEntry.isAffinelyDependent())
                   {
                      return closestPointToOrigin;
                   }
 
                   double newEntryClosestDistanceSquared = newEntry.getClosestPointToOrigin().lengthSquared();
-                  if ((newEntry.closestIsInternal()) && (closestPointToOrigin.lengthSquared() <= newEntryClosestDistanceSquared)
-                        && (newEntryClosestDistanceSquared <= mu))
+                  if ((newEntry.closestIsInternal()) && (closestPointToOrigin.lengthSquared() <= newEntryClosestDistanceSquared) && (newEntryClosestDistanceSquared <= mu))
                   {
                      triangleEntryQueue.add(newEntry);
-                     
+
                      if (listener != null)
                         listener.addedNewEntryToQueue(newEntry);
                   }
-                  
+
                   previousEntry = newEntry;
                }
             }
@@ -192,54 +196,6 @@ public class ExpandingPolytopeAlgorithm
             return closestPointToOrigin;
          }
       }
-   }
-
-   public static void computeSilhouetteFromW(ExpandingPolytopeEntry triangleEntrySeenByW, Vector3d w,  ExpandingPolytopeEdgeList edgeListToPack)
-   {
-      triangleEntrySeenByW.setObsolete(); // This triangle is visible from w.
-
-      edgeListToPack.clear();
-
-      for (int triangleIndex = 0; triangleIndex < 3; triangleIndex++)
-      {
-         ExpandingPolytopeEntry adjacentTriangle = triangleEntrySeenByW.getAdjacentTriangle(triangleIndex);
-         int adjacentTriangleEdgeIndex = triangleEntrySeenByW.getAdjacentTriangleEdgeIndex(triangleIndex);
-
-         silhouette(adjacentTriangle, adjacentTriangleEdgeIndex, w, edgeListToPack);
-      }
-   }
-
-   public static void silhouette(ExpandingPolytopeEntry entry, int i, Vector3d w, ExpandingPolytopeEdgeList edgeList)
-   {
-      if (!entry.isObsolete())
-      {
-         // Facet entry is visited for the first time.
-
-         Vector3d closestPointToOrigin = entry.getClosestPointToOrigin();
-         if (distanceSquared(closestPointToOrigin, w) < closestPointToOrigin.lengthSquared())
-         {
-            // Facet entry is not visible from w.
-            edgeList.addEdge(entry, i);
-         }
-         else
-         {
-            // Mark entry visible, and search its neighbors.
-            entry.setObsolete();
-            int iPlusOne = (i + 1) % 3;
-            int iPlusTwo = (i + 1) % 3;
-            silhouette(entry.getAdjacentTriangle(iPlusOne), entry.getAdjacentTriangleEdgeIndex(iPlusOne), w, edgeList);
-            silhouette(entry.getAdjacentTriangle(iPlusTwo), entry.getAdjacentTriangleEdgeIndex(iPlusTwo), w, edgeList);
-         }
-      }
-   }
-
-   private static double distanceSquared(Vector3d v, Vector3d w)
-   {
-      double xDiff = v.getX() - w.getX();
-      double yDiff = v.getY() - w.getY();
-      double zDiff = v.getZ() - w.getZ();
-
-      return (xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
    }
 
 }

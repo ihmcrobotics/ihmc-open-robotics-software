@@ -30,7 +30,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
 
    private final DoubleYoVariable baseX, baseY, baseZ, x, y, z;
    protected final double scaleFactor;
-   private final boolean drawArrowhead;
+   private boolean drawArrowhead;
    private final AppearanceDefinition appearance;
 
    public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector frameVector, AppearanceDefinition appearance)
@@ -95,6 +95,12 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
    {
       this.minScaleFactor = minScaleFactor;
       this.maxScaleFactor = maxScaleFactor;
+   }
+
+
+   public void setDrawArrowhead(boolean drawArrowhead)
+   {
+      this.drawArrowhead = drawArrowhead;
    }
 
    public void getBasePosition(Point3d point3d)

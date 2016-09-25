@@ -131,7 +131,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 10.0)
    @Test(timeout = 30000)
    public void testExtensivelyPointToPolytope()
    {
@@ -141,7 +141,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       GilbertJohnsonKeerthiCollisionDetectorAssertListener listener = new GilbertJohnsonKeerthiCollisionDetectorAssertListener();
       detector.setGilbertJohnsonKeerthiCollisionDetectorListener(listener);
 
-      int numberOfPolytopesToTests = 1000;
+      int numberOfPolytopesToTests = 500;
 
       // Generate a lot of random Polytopes. For each polytope generate a lot of points.
       // For each point do intersection and closest point test with GJK.
@@ -298,7 +298,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       //      System.out.println("numberOutside = " + numberOutside);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @DeployableTestMethod(estimatedDuration = 10.0)
    @Test(timeout = 30000)
    public void testExtensivelyPolytopeToPolytope()
    {
@@ -308,7 +308,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       GilbertJohnsonKeerthiCollisionDetectorAssertListener listener = new GilbertJohnsonKeerthiCollisionDetectorAssertListener();
       detector.setGilbertJohnsonKeerthiCollisionDetectorListener(listener);
 
-      int numberOfPolytopesToTests = 1000;
+      int numberOfPolytopesToTests = 500;
 
       // Generate a lot of random sets of two Polytopes.
       // For each set of two polytopes do intersection and closest point test with GJK.
