@@ -10,7 +10,6 @@ public class SimpleCollisionShapeWithLink extends SimpleCollisionShape implement
 
    private final RigidBodyTransform shapeToLink = new RigidBodyTransform();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    public SimpleCollisionShapeWithLink(Link link, CollisionShapeDescription collisionShapeDescription, RigidBodyTransform shapeToLink)
    {

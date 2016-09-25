@@ -104,8 +104,12 @@ public class ExpandingPolytopeAlgorithm
       Vector3d closestPointToOrigin = null;
       ExpandingPolytopeEntry closestTriangleToOrigin = null;
 
+      int numberOfIterations = 0;
       while (true)
       {
+         //TODO: Stop the looping!
+         numberOfIterations++;
+         
          ExpandingPolytopeEntry triangleEntryToExpand = triangleEntryQueue.poll();
          if (listener != null)
             listener.polledEntryToExpand(triangleEntryToExpand);
@@ -175,6 +179,16 @@ public class ExpandingPolytopeAlgorithm
                   Point3d sentryVertexTwo = sentry.getVertex(nextIndex);
 
                   ExpandingPolytopeEntry newEntry = new ExpandingPolytopeEntry(sentryVertexTwo, sentryVertexOne, wPoint);
+                  if (newEntry.isAffinelyDependent())
+                  {
+                     computeClosestPointsOnAAndB(closestTriangleToOrigin, closestPointOnA, closestPointOnB);
+                     if (listener != null)
+                     {
+                        listener.foundMinimumPenetrationVector(closestPointToOrigin, closestPointOnA, closestPointOnB);
+                     }
+                     return closestPointToOrigin;
+                  }
+                  
                   ExpandingPolytopeEntry[] twoTriangles = getOrCreateTwoTriangleArray(mapFromStitchVertexToTriangles, sentryVertexOne);
                   storeNewEntry(newEntry, twoTriangles);
                   twoTriangles = getOrCreateTwoTriangleArray(mapFromStitchVertexToTriangles, sentryVertexTwo);
@@ -188,16 +202,6 @@ public class ExpandingPolytopeAlgorithm
 
                   if (listener != null)
                      listener.createdNewEntry(newEntry);
-
-                  if (newEntry.isAffinelyDependent())
-                  {
-                     computeClosestPointsOnAAndB(closestTriangleToOrigin, closestPointOnA, closestPointOnB);
-                     if (listener != null)
-                     {
-                        listener.foundMinimumPenetrationVector(closestPointToOrigin, closestPointOnA, closestPointOnB);
-                     }
-                     return closestPointToOrigin;
-                  }
 
                   double newEntryClosestDistanceSquared = newEntry.getClosestPointToOrigin().lengthSquared();
                   if ((newEntry.closestIsInternal()) && (closestPointToOrigin.lengthSquared() <= newEntryClosestDistanceSquared)
@@ -238,7 +242,7 @@ public class ExpandingPolytopeAlgorithm
             }
          }
 
-         if ((closeEnough) || (triangleEntryQueue.isEmpty()) || (triangleEntryQueue.peek().getClosestPointToOrigin().lengthSquared() > mu))
+         if ((numberOfIterations > 1000) || (closeEnough) || (triangleEntryQueue.isEmpty()) || (triangleEntryQueue.peek().getClosestPointToOrigin().lengthSquared() > mu))
          {
             computeClosestPointsOnAAndB(closestTriangleToOrigin, closestPointOnA, closestPointOnB);
 

@@ -1,7 +1,6 @@
 package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -21,6 +20,21 @@ public class ConvexPolytope
       for (PolytopeVertex vertex : polytope.vertices)
       {
          this.vertices.add(new PolytopeVertex(vertex));
+      }
+   }
+
+   public void copyVerticesFrom(ConvexPolytope polytope)
+   {
+      int numberOfVertices = this.vertices.size();
+
+      if (numberOfVertices != polytope.vertices.size())
+      {
+         throw new RuntimeException("Vertices are not same size!");
+      }
+
+      for (int i = 0; i < numberOfVertices; i++)
+      {
+         this.vertices.get(i).setPosition(polytope.vertices.get(i));
       }
    }
 
@@ -47,6 +61,13 @@ public class ConvexPolytope
    public PolytopeVertex addVertex(double x, double y, double z)
    {
       PolytopeVertex vertex = new PolytopeVertex(x, y, z);
+      vertices.add(vertex);
+      return vertex;
+   }
+
+   public PolytopeVertex addVertex(double[] xyzValues)
+   {
+      PolytopeVertex vertex = new PolytopeVertex(xyzValues[0], xyzValues[1], xyzValues[2]);
       vertices.add(vertex);
       return vertex;
    }
@@ -96,7 +117,7 @@ public class ConvexPolytope
 
             if (!alreadyHaveEdgeInList(edgesToReturn, vertex, connectingVertex))
             {
-               edgesToReturn.add(new PolytopeVertex[] { vertex, connectingVertex });
+               edgesToReturn.add(new PolytopeVertex[] {vertex, connectingVertex});
             }
          }
       }

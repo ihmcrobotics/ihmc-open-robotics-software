@@ -1,5 +1,7 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
+import javax.vecmath.Point3d;
+
 import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.geometry.polytope.ConvexPolytopeConstructor;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -42,7 +44,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    @Override
    public CollisionShapeDescription createSphere(double radius)
    {
-      return new SphereShapeDescription(radius);
+      return new SphereShapeDescription(radius, new Point3d());
    }
 
    @Override

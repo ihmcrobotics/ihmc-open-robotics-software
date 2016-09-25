@@ -28,6 +28,11 @@ public class PolytopeVertex
       //      TODO: Copy connecting vertices..getClass().
    }
 
+   public void setPosition(PolytopeVertex vertex)
+   {
+      this.position.set(vertex.position);
+   }
+
    public void addConnectingVertex(PolytopeVertex vertex)
    {
       if (!connectingVertices.contains(vertex))
@@ -61,7 +66,7 @@ public class PolytopeVertex
 
    public String toString()
    {
-      return position.toString();
+      return "{" + position.getX() + ", " + position.getY() + ", " + position.getZ() + "}";
    }
 
 }

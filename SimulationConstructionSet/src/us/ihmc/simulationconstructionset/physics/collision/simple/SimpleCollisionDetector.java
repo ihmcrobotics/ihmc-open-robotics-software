@@ -10,7 +10,9 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.geometry.polytope.ConvexPolytope;
+import us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithm;
 import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
+import us.ihmc.geometry.polytope.SimplexPolytope;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
@@ -25,32 +27,31 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    private final ArrayList<CollisionShape> collisionObjects = new ArrayList<CollisionShape>();
 
    // Temporary variables for computation:
-   private final RigidBodyTransform transformOne = new RigidBodyTransform();
-   private final RigidBodyTransform transformTwo = new RigidBodyTransform();
+//   private final RigidBodyTransform transformOne = new RigidBodyTransform();
+//   private final RigidBodyTransform transformTwo = new RigidBodyTransform();
    private final Point3d centerOne = new Point3d();
    private final Point3d centerTwo = new Point3d();
    private final Vector3d centerToCenterVector = new Vector3d();
 
-   private final Vector3d normalVector = new Vector3d();
    private final Vector3d tempVector = new Vector3d();
 
-   private double objectSmoothingRadius = 0.003;
+   private double objectSmoothingRadius = 0.00003;
 
    public SimpleCollisionDetector()
    {
-      this(0.003);
+      this(0.00003);
    }
-   
+
    public SimpleCollisionDetector(double objectSmoothingRadius)
    {
       this.objectSmoothingRadius = objectSmoothingRadius;
    }
-   
+
    public void setObjectSmoothingRadius(double objectSmoothingRadius)
    {
       this.objectSmoothingRadius = objectSmoothingRadius;
    }
-   
+
    @Override
    public void initialize()
    {
@@ -80,17 +81,24 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
 
       for (int i = 0; i < numberOfObjects; i++)
       {
+         CollisionShape collisionShape = collisionObjects.get(i);
+         collisionShape.computeTransformedCollisionShape();
+      }
+      
+      
+      for (int i = 0; i < numberOfObjects; i++)
+      {
          CollisionShape objectOne = collisionObjects.get(i);
 
          for (int j = i + 1; j < numberOfObjects; j++)
          {
             CollisionShape objectTwo = collisionObjects.get(j);
 
-            objectOne.getTransformToWorld(transformOne);
-            objectTwo.getTransformToWorld(transformTwo);
+//            objectOne.getTransformToWorld(transformOne);
+//            objectTwo.getTransformToWorld(transformTwo);
 
-            CollisionShapeDescription descriptionOne = objectOne.getDescription();
-            CollisionShapeDescription descriptionTwo = objectTwo.getDescription();
+            CollisionShapeDescription descriptionOne = objectOne.getTransformedCollisionShapeDescription();
+            CollisionShapeDescription descriptionTwo = objectTwo.getTransformedCollisionShapeDescription();
 
             if ((descriptionOne instanceof SphereShapeDescription) && (descriptionTwo instanceof SphereShapeDescription))
             {
@@ -98,7 +106,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             }
             else if ((descriptionOne instanceof PolytopeShapeDescription) && (descriptionTwo instanceof PolytopeShapeDescription))
             {
-               doPolytopePolytopeCollisionDetection(objectOne, (PolytopeShapeDescription) descriptionOne, objectTwo, (PolytopeShapeDescription) descriptionTwo, result);
+               doPolytopePolytopeCollisionDetection(objectOne, (PolytopeShapeDescription) descriptionOne, objectTwo, (PolytopeShapeDescription) descriptionTwo,
+                     result);
             }
             else if ((descriptionOne instanceof BoxShapeDescription) && (descriptionTwo instanceof BoxShapeDescription))
             {
@@ -136,101 +145,109 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    private final DenseMatrix64F solutionVector = new DenseMatrix64F(16, 1);
    private final Point3d vertex = new Point3d();
 
-   private void doBoxBoxCollisionDetection(CollisionShape objectOne, BoxShapeDescription descriptionOne, CollisionShape objectTwo, BoxShapeDescription descriptionTwo, CollisionDetectionResult result)
+   private void doBoxBoxCollisionDetection(CollisionShape objectOne, BoxShapeDescription descriptionOne, CollisionShape objectTwo,
+         BoxShapeDescription descriptionTwo, CollisionDetectionResult result)
    {
-      objectOne.getTransformToWorld(transformOne);
-      objectOne.getTransformToWorld(transformTwo);
-
-      populateMatrixWithBoxVertices(GMatrix, descriptionOne);
-      populateMatrixWithBoxVertices(HMatrix, descriptionTwo);
-
-      CommonOps.transpose(GMatrix, GTransposeMatrix);
-      CommonOps.transpose(HMatrix, HTransposeMatrix);
-
-      CommonOps.mult(GTransposeMatrix, GMatrix, GTransposeGMatrix);
-      CommonOps.mult(HTransposeMatrix, HMatrix, HTransposeHMatrix);
-      CommonOps.mult(HTransposeMatrix, GMatrix, HTransposeGMatrix);
-
-      CommonOps.transpose(HTransposeGMatrix, GTransposeHMatrix);
-
-      for (int i = 0; i < 8; i++)
-      {
-         for (int j = 0; j < 8; j++)
-         {
-            quadraticCostGMatrix.set(i, j, GTransposeGMatrix.get(i, j));
-            quadraticCostGMatrix.set(i + 8, j + 8, HTransposeHMatrix.get(i, j));
-
-            quadraticCostGMatrix.set(i + 8, j, -HTransposeGMatrix.get(i, j));
-            quadraticCostGMatrix.set(i, j + 8, -GTransposeHMatrix.get(i, j));
-
-         }
-
-         linearInequalityActiveSet[i] = false;
-         linearInequalityActiveSet[i + 8] = false;
-
-         linearEqualityConstraintA.set(0, i, 1.0);
-         linearEqualityConstraintA.set(1, i + 8, 1.0);
-
-         linearInequalityConstraintA.set(i, i, 1.0);
-         linearInequalityConstraintB.set(i, 0, 0.0);
-         linearInequalityConstraintA.set(i + 8, i + 8, 1.0);
-         linearInequalityConstraintB.set(i + 8, 0, 0.0);
-      }
-
-      linearEqualityConstraintB.set(0, 0, 1.0);
-      linearEqualityConstraintB.set(1, 0, 1.0);
-
-      boolean initialize = false;
-      try
-      {
-         solver.solve(quadraticCostGMatrix, quadraticCostFVector, linearEqualityConstraintA, linearEqualityConstraintB, linearInequalityConstraintA, linearInequalityConstraintB, solutionVector, initialize);
-         System.out.println("solutionVector = " + solutionVector);
-
-      }
-      catch (NoConvergenceException exception)
-      {
-
-      }
+////      objectOne.getTransformToWorld(transformOne);
+////      objectOne.getTransformToWorld(transformTwo);
+//
+//      populateMatrixWithBoxVertices(GMatrix, descriptionOne);
+//      populateMatrixWithBoxVertices(HMatrix, descriptionTwo);
+//
+//      CommonOps.transpose(GMatrix, GTransposeMatrix);
+//      CommonOps.transpose(HMatrix, HTransposeMatrix);
+//
+//      CommonOps.mult(GTransposeMatrix, GMatrix, GTransposeGMatrix);
+//      CommonOps.mult(HTransposeMatrix, HMatrix, HTransposeHMatrix);
+//      CommonOps.mult(HTransposeMatrix, GMatrix, HTransposeGMatrix);
+//
+//      CommonOps.transpose(HTransposeGMatrix, GTransposeHMatrix);
+//
+//      for (int i = 0; i < 8; i++)
+//      {
+//         for (int j = 0; j < 8; j++)
+//         {
+//            quadraticCostGMatrix.set(i, j, GTransposeGMatrix.get(i, j));
+//            quadraticCostGMatrix.set(i + 8, j + 8, HTransposeHMatrix.get(i, j));
+//
+//            quadraticCostGMatrix.set(i + 8, j, -HTransposeGMatrix.get(i, j));
+//            quadraticCostGMatrix.set(i, j + 8, -GTransposeHMatrix.get(i, j));
+//
+//         }
+//
+//         linearInequalityActiveSet[i] = false;
+//         linearInequalityActiveSet[i + 8] = false;
+//
+//         linearEqualityConstraintA.set(0, i, 1.0);
+//         linearEqualityConstraintA.set(1, i + 8, 1.0);
+//
+//         linearInequalityConstraintA.set(i, i, 1.0);
+//         linearInequalityConstraintB.set(i, 0, 0.0);
+//         linearInequalityConstraintA.set(i + 8, i + 8, 1.0);
+//         linearInequalityConstraintB.set(i + 8, 0, 0.0);
+//      }
+//
+//      linearEqualityConstraintB.set(0, 0, 1.0);
+//      linearEqualityConstraintB.set(1, 0, 1.0);
+//
+//      boolean initialize = false;
+//      try
+//      {
+//         solver.solve(quadraticCostGMatrix, quadraticCostFVector, linearEqualityConstraintA, linearEqualityConstraintB, linearInequalityConstraintA,
+//               linearInequalityConstraintB, solutionVector, initialize);
+//         System.out.println("solutionVector = " + solutionVector);
+//
+//      }
+//      catch (NoConvergenceException exception)
+//      {
+//
+//      }
    }
 
-   private void populateMatrixWithBoxVertices(DenseMatrix64F matrix, BoxShapeDescription descriptionOne)
-   {
-      double halfLengthXOne = descriptionOne.getHalfLengthX();
-      double halfWidthYOne = descriptionOne.getHalfWidthY();
-      double halfHeightZOne = descriptionOne.getHalfHeightZ();
+//   private void populateMatrixWithBoxVertices(DenseMatrix64F matrix, BoxShapeDescription descriptionOne)
+//   {
+//      double halfLengthXOne = descriptionOne.getHalfLengthX();
+//      double halfWidthYOne = descriptionOne.getHalfWidthY();
+//      double halfHeightZOne = descriptionOne.getHalfHeightZ();
+//
+//      int index = 0;
+//
+//      for (double multX = -1.0; multX < 1.1; multX += 2.0)
+//      {
+//         for (double multY = -1.0; multY < 1.1; multY += 2.0)
+//         {
+//            for (double multZ = -1.0; multZ < 1.1; multZ += 2.0)
+//            {
+//               vertex.set(halfLengthXOne * multX, halfWidthYOne * multY, halfHeightZOne * multZ);
+//               transformOne.transform(vertex);
+//               matrix.set(0, index, vertex.getX());
+//               matrix.set(1, index, vertex.getY());
+//               matrix.set(2, index, vertex.getZ());
+//
+//               index++;
+//            }
+//         }
+//      }
+//   }
 
-      int index = 0;
-
-      for (double multX = -1.0; multX < 1.1; multX += 2.0)
-      {
-         for (double multY = -1.0; multY < 1.1; multY += 2.0)
-         {
-            for (double multZ = -1.0; multZ < 1.1; multZ += 2.0)
-            {
-               vertex.set(halfLengthXOne * multX, halfWidthYOne * multY, halfHeightZOne * multZ);
-               transformOne.transform(vertex);
-               matrix.set(0, index, vertex.getX());
-               matrix.set(1, index, vertex.getY());
-               matrix.set(2, index, vertex.getZ());
-
-               index++;
-            }
-         }
-      }
-   }
-
-   private void doSphereSphereCollisionDetection(CollisionShape objectOne, SphereShapeDescription descriptionOne, CollisionShape objectTwo, SphereShapeDescription descriptionTwo, CollisionDetectionResult result)
+   private void doSphereSphereCollisionDetection(CollisionShape objectOne, SphereShapeDescription descriptionOne, CollisionShape objectTwo,
+         SphereShapeDescription descriptionTwo, CollisionDetectionResult result)
    {
       double radiusOne = descriptionOne.getRadius();
       double radiusTwo = descriptionTwo.getRadius();
 
-      transformOne.getTranslation(centerOne);
-      transformTwo.getTranslation(centerTwo);
+      descriptionOne.getCenter(centerOne);
+      descriptionTwo.getCenter(centerTwo);
+      
+//      transformOne.getTranslation(centerOne);
+//      transformTwo.getTranslation(centerTwo);
 
       double distanceSquared = centerOne.distanceSquared(centerTwo);
 
       if (distanceSquared <= (radiusOne + radiusTwo) * (radiusOne + radiusTwo))
       {
+         Vector3d normalVector = new Vector3d();
+
          centerToCenterVector.sub(centerTwo, centerOne);
 
          Point3d pointOnOne = new Point3d(centerOne);
@@ -256,37 +273,82 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    }
 
    private final GilbertJohnsonKeerthiCollisionDetector gjkCollisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
+   private double epsilonRelative = 1e-4;
+   private final ExpandingPolytopeAlgorithm expandingPolytopeAlgorithm = new ExpandingPolytopeAlgorithm(epsilonRelative);
    private final Point3d pointOnAToPack = new Point3d();
    private final Point3d pointOnBToPack = new Point3d();
 
-   private void doPolytopePolytopeCollisionDetection(CollisionShape objectOne, PolytopeShapeDescription descriptionOne, CollisionShape objectTwo, PolytopeShapeDescription descriptionTwo, CollisionDetectionResult result)
+   private void doPolytopePolytopeCollisionDetection(CollisionShape objectOne, PolytopeShapeDescription descriptionOne, CollisionShape objectTwo,
+         PolytopeShapeDescription descriptionTwo, CollisionDetectionResult result)
    {
-      ConvexPolytope polytopeOneCopy = new ConvexPolytope(descriptionOne.getPolytope());
-      ConvexPolytope polytopeTwoCopy = new ConvexPolytope(descriptionTwo.getPolytope());
+      ConvexPolytope polytopeOne = descriptionOne.getPolytope();
+      ConvexPolytope polytopeTwo = descriptionTwo.getPolytope();
 
-      polytopeOneCopy.applyTransform(transformOne);
-      polytopeTwoCopy.applyTransform(transformTwo);
-
-      boolean areColliding = gjkCollisionDetector.arePolytopesColliding(polytopeOneCopy, polytopeTwoCopy, pointOnAToPack, pointOnBToPack);
+      boolean areColliding = gjkCollisionDetector.arePolytopesColliding(polytopeOne, polytopeTwo, pointOnAToPack, pointOnBToPack);
 
       if (!areColliding)
       {
          double distanceSquared = pointOnAToPack.distanceSquared(pointOnBToPack);
-//         System.out.println(distanceSquared);
-         if (distanceSquared < objectSmoothingRadius * objectSmoothingRadius ) //TODO: Consider the objects instead of one constant.
+         //         System.out.println(distanceSquared);
+         if (distanceSquared < objectSmoothingRadius * objectSmoothingRadius) //TODO: Consider the objects instead of one constant.
          {
+            //TODO: Find more than one point per object...
+
             SimpleContactWrapper contacts = new SimpleContactWrapper(objectOne, objectTwo);
+            Vector3d normalVector = new Vector3d();
             normalVector.sub(pointOnBToPack, pointOnAToPack);
 
-            double distanceToReport = -0.001; //TODO: Do we even need this?
-            contacts.addContact(new Point3d(pointOnAToPack), new Point3d(pointOnBToPack), normalVector, distanceToReport);
-            result.addContact(contacts);
+            //TODO: Magic distance number...
+            if (normalVector.lengthSquared() > 1e-6)
+            {
+               normalVector.normalize();
+               double distanceToReport = -pointOnAToPack.distance(pointOnBToPack); //0.001; //TODO: Do we even need this?
+               contacts.addContact(new Point3d(pointOnAToPack), new Point3d(pointOnBToPack), normalVector, distanceToReport);
+               result.addContact(contacts);
+            }
          }
       }
       else
       {
+//         System.out.println("Colliding!");
          //TODO: Deal with collision of the sharp objects...
          // Need to first compute the intersecting regions...
+
+         SimplexPolytope simplex = gjkCollisionDetector.getSimplex();
+         //TODO: Add points to the simplex when it is not a tetrahedral...
+         //TODO: Find more than one point per object...
+
+//         System.out.println("simplex points = " + simplex.getNumberOfPoints());
+
+         if (simplex.getNumberOfPoints() == 4)
+         {
+            expandingPolytopeAlgorithm.setPolytopes(simplex, polytopeOne, polytopeTwo);
+            try
+            {
+               Vector3d collisionNormal = expandingPolytopeAlgorithm.computeExpandedPolytope(pointOnAToPack, pointOnBToPack);
+
+               //TODO: Magic number for normalize
+               if (collisionNormal.lengthSquared() > 1e-6)
+               {
+                  collisionNormal.normalize();
+                  SimpleContactWrapper contacts = new SimpleContactWrapper(objectOne, objectTwo);
+
+                  double distanceToReport = -pointOnAToPack.distance(pointOnBToPack); //TODO: Do we even need this?
+                  contacts.addContact(new Point3d(pointOnAToPack), new Point3d(pointOnBToPack), collisionNormal, distanceToReport);
+                  result.addContact(contacts);
+               }
+            }
+            catch (RuntimeException e)
+            {
+               System.err.println("\n-------------------\nTroublesome Polytopes!: ");
+               System.err.println("simplex = ");
+               System.err.println(simplex);
+               System.err.println("polytopeOneCopy = ");
+               System.err.println(polytopeOne);
+               System.err.println("polytopeTwoCopy = ");
+               System.err.println(polytopeTwo);
+            }
+         }
       }
 
    }
