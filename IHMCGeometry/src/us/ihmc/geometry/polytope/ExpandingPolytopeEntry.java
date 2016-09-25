@@ -15,6 +15,7 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
    private final Point3d[] triangleVertices;
    private final Vector3d closestPointToOrigin = new Vector3d();
    private final double[] lambdas = new double[3];
+   private boolean affinelyDependent = false;
    private double distanceToOriginKey;
 
    private final ExpandingPolytopeEntry[] adjacentTriangles = new ExpandingPolytopeEntry[3];
@@ -25,6 +26,11 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
    public Point3d getVertex(int index)
    {
       return triangleVertices[index];
+   }
+
+   public double getLambda(int index)
+   {
+      return lambdas[index];
    }
 
    public ExpandingPolytopeEntry(Point3d pointOne, Point3d pointTwo, Point3d pointThree)
@@ -113,7 +119,14 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
       tempVector2.sub(vertexThree, vertexOne);
 
       tempNormalVector1.cross(tempVector1, tempVector2);
-      double oneOver4ASquared = 1.0 / (tempNormalVector1.dot(tempNormalVector1));
+      double fourASquared = tempNormalVector1.dot(tempNormalVector1);
+      
+      //TODO: Magic number for checking affinely Dependent...
+      // Probably a better way to check this than just the area of the triangle.
+      // Something relative. 
+      this.affinelyDependent = fourASquared < 1e-10;
+      
+      double oneOver4ASquared = 1.0 / (fourASquared);
 
       tempVector3.set(vertexOne);
       tempVector3.scale(-1.0); //w
@@ -157,8 +170,7 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
 
    public boolean isAffinelyDependent()
    {
-      // TODO: Implement and test this!
-      return false;
+      return affinelyDependent;
    }
 
    public boolean setAdjacentTriangleIfPossible(ExpandingPolytopeEntry entry)
@@ -220,25 +232,31 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
       for (int i = 0; i < 3; i++)
       {
          ExpandingPolytopeEntry adjacentTriangle = adjacentTriangles[i];
-         if (adjacentTriangle != null)
+
+         if (adjacentTriangle == null)
          {
-            int j = this.adjacentTriangleEdgeIndices[i];
-            if (adjacentTriangle.adjacentTriangles[j] != this)
-               throw new RuntimeException("");
-            if (adjacentTriangle.adjacentTriangleEdgeIndices[j] != i)
-               throw new RuntimeException("");
-
-            Point3d firstVertex = this.triangleVertices[i];
-            Point3d secondVertex = this.triangleVertices[(i + 1) % 3];
-
-            Point3d firstVertexOtherSide = adjacentTriangle.triangleVertices[j];
-            Point3d secondVertexOtherSide = adjacentTriangle.triangleVertices[(j + 1) % 3];
-
-            if (firstVertex != secondVertexOtherSide)
-               throw new RuntimeException("");
-            if (secondVertex != firstVertexOtherSide)
-               throw new RuntimeException("");
+            throw new RuntimeException("Adjacent triangle is null. Not fully connected!");
          }
+
+         //         if (adjacentTriangle != null)
+         //         {
+         int j = this.adjacentTriangleEdgeIndices[i];
+         if (adjacentTriangle.adjacentTriangles[j] != this)
+            throw new RuntimeException("Adjacent triangle was not connected properly!");
+         if (adjacentTriangle.adjacentTriangleEdgeIndices[j] != i)
+            throw new RuntimeException("Adjacent triangle was not connected properly!");
+
+         Point3d firstVertex = this.triangleVertices[i];
+         Point3d secondVertex = this.triangleVertices[(i + 1) % 3];
+
+         Point3d firstVertexOtherSide = adjacentTriangle.triangleVertices[j];
+         Point3d secondVertexOtherSide = adjacentTriangle.triangleVertices[(j + 1) % 3];
+
+         if (firstVertex != secondVertexOtherSide)
+            throw new RuntimeException("");
+         if (secondVertex != firstVertexOtherSide)
+            throw new RuntimeException("");
+         //         }
       }
    }
 
@@ -263,5 +281,6 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
    {
       return "[" + triangleVertices[0] + "; " + triangleVertices[1] + "; " + triangleVertices[2] + "]";
    }
+
 
 }

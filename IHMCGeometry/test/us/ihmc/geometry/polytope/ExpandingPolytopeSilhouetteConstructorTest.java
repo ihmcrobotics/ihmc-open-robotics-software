@@ -1,6 +1,7 @@
 package us.ihmc.geometry.polytope;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
@@ -9,11 +10,13 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.tools.testing.MutationTestingTools;
+
 public class ExpandingPolytopeSilhouetteConstructorTest
 {
 
    @Test
-   public void testWithTetrahedron()
+   public void testSilhouetteConstructorWithTetrahedron()
    {
       Point3d pointOne = new Point3d(-1.0, -1.0, -1.0);
       Point3d pointTwo = new Point3d(1.0, -1.0, -1.0);
@@ -63,15 +66,12 @@ public class ExpandingPolytopeSilhouetteConstructorTest
       assertEquals(0, edge.getEdgeIndex());
    }
 
-
    @Test
-   public void testWithIcoSphere()
+   public void testSilhouetteConstructorWithIcoSphere()
    {
       IcoSphereCreator creator = new IcoSphereCreator();
       int recursionLevel = 0;
       SimpleTriangleMesh icoSphere = creator.createIcoSphere(recursionLevel);
-
-      Vector3d w = new Vector3d(0.0, 0.0, 1.5);
 
       ExpandingPolytopeEntryFromSimpleMeshGenerator generator = new ExpandingPolytopeEntryFromSimpleMeshGenerator();
       ExpandingPolytopeEntry expandingPolytope = generator.generateExpandingPolytope(icoSphere);
@@ -79,33 +79,113 @@ public class ExpandingPolytopeSilhouetteConstructorTest
       ArrayList<ExpandingPolytopeEntry> triangles = new ArrayList<>();
       expandingPolytope.getAllConnectedTriangles(triangles);
 
+      // These were all verified by eye using ExpandingPolytopeSilhouetteConstructorVisualizer
+      Vector3d w = new Vector3d(0.0, 0.0, 1.37);
+      int expectedNumberOfEdgesOnSilhouette = 4;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 1.38);
+      expectedNumberOfEdgesOnSilhouette = 8;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 2.22);
+      expectedNumberOfEdgesOnSilhouette = 8;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 2.23);
+      expectedNumberOfEdgesOnSilhouette = 6;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(1.0, 0.0, 1.23);
+      expectedNumberOfEdgesOnSilhouette = 5;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(1.0, 0.0, 1.24);
+      expectedNumberOfEdgesOnSilhouette = 6;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(1.0, 0.0, 2.22);
+      expectedNumberOfEdgesOnSilhouette = 6;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(1.0, 0.0, 2.23);
+      expectedNumberOfEdgesOnSilhouette = 8;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      recursionLevel = 1;
+      icoSphere = creator.createIcoSphere(recursionLevel);
+
+      expandingPolytope = generator.generateExpandingPolytope(icoSphere);
+
+      triangles.clear();
+      expandingPolytope.getAllConnectedTriangles(triangles);
+
+      // These were all verified by eye using ExpandingPolytopeSilhouetteConstructorVisualizer
+      w = new Vector3d(0.0, 0.0, 1.21);
+      expectedNumberOfEdgesOnSilhouette = 6;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 1.22);
+      expectedNumberOfEdgesOnSilhouette = 8;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 1.26);
+      expectedNumberOfEdgesOnSilhouette = 8;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 1.27);
+      expectedNumberOfEdgesOnSilhouette = 12;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 1.5);
+      expectedNumberOfEdgesOnSilhouette = 12;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 1.51);
+      expectedNumberOfEdgesOnSilhouette = 10;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 2.61);
+      expectedNumberOfEdgesOnSilhouette = 10;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 2.62);
+      expectedNumberOfEdgesOnSilhouette = 12;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 2.99);
+      expectedNumberOfEdgesOnSilhouette = 12;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 3.0);
+      expectedNumberOfEdgesOnSilhouette = 16;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 4.84);
+      expectedNumberOfEdgesOnSilhouette = 16;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+
+      w = new Vector3d(0.0, 0.0, 4.85);
+      expectedNumberOfEdgesOnSilhouette = 12;
+      confirmNumberOfEdgesInSilhouette(triangles, w, expectedNumberOfEdgesOnSilhouette);
+   }
+
+   private void confirmNumberOfEdgesInSilhouette(ArrayList<ExpandingPolytopeEntry> triangles, Vector3d w, int expectedNumberOfEdgesOnSilhouette)
+   {
       for (ExpandingPolytopeEntry triangle : triangles)
       {
-         clearObsolete(triangles);
-
-         if (ExpandingPolytopeSilhouetteConstructor.isSeeableFromW(triangle.getClosestPointToOrigin(), w))
+         if (!ExpandingPolytopeSilhouetteConstructor.isNotVisibleFromW(triangle.getClosestPointToOrigin(), w))
          {
+            clearObsolete(triangles);
+
             ExpandingPolytopeEdgeList edgeListToPack = new ExpandingPolytopeEdgeList();
-            ExpandingPolytopeSilhouetteConstructor.computeSilhouetteFromW(expandingPolytope, w, edgeListToPack);
+            ExpandingPolytopeSilhouetteConstructor.computeSilhouetteFromW(triangle, w, edgeListToPack);
 
             int numberOfEdges = edgeListToPack.getNumberOfEdges();
-            assertEquals(8, numberOfEdges);
-
-            System.out.print("\n\nEdgeList:\n");
-
-            for (int i=0; i<numberOfEdges; i++)
-            {
-               ExpandingPolytopeEdge edge = edgeListToPack.getEdge(i);
-               ExpandingPolytopeEntry entry = edge.getEntry();
-               int edgeIndex = edge.getEdgeIndex();
-               Point3d vertexOne = entry.getVertex(edgeIndex);
-               Point3d vertexTwo = entry.getVertex((edgeIndex + 1) %3);
-               System.out.println(vertexOne + " -- " + vertexTwo);
-            }
+            assertEquals(expectedNumberOfEdgesOnSilhouette, numberOfEdges);
          }
       }
    }
-
 
    private void clearObsolete(ArrayList<ExpandingPolytopeEntry> triangles)
    {
@@ -113,7 +193,13 @@ public class ExpandingPolytopeSilhouetteConstructorTest
       {
          triangle.clearObsolete();
       }
+   }
 
+   public static void main(String[] args)
+   {
+      String targetTests = ExpandingPolytopeSilhouetteConstructorTest.class.getName();
+      String targetClassesInSamePackage = MutationTestingTools.createClassSelectorStringFromTargetString(targetTests);
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
    }
 
 }
