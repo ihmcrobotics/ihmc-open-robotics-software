@@ -97,9 +97,11 @@ public class NewtonsCradleSimulation
 //      CollisionHandler handler = new DefaultCollisionHandler(0.98, 0.1, robot);
       CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
 
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
+//      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
+//
+//      handler.addListener(visualize);
+    DefaultCollisionVisualize visualize = null;
 
-      handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
       collisionDetector.initialize();
 
@@ -155,8 +157,8 @@ public class NewtonsCradleSimulation
    {
 //      createNewtonsCradleSimulation();
 //      createStackOfBouncyBallsSimulation();
-//      createRowOfDominosSimulation();
-      createPileOfRandomObjectsSimulation();
+      createRowOfDominosSimulation();
+//      createPileOfRandomObjectsSimulation();
 //      createSpinningCoinSimulation();
    }
 }
