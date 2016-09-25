@@ -152,4 +152,5 @@ public class YoGraphicLineSegment extends YoGraphicVector
       vectorY.setToNaN();
       vectorZ.setToNaN();
    }
+
 }
