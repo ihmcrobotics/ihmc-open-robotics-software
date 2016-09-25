@@ -34,7 +34,7 @@ public class RowOfDominosRobot extends Robot
 
 //            collisionDetector = new GdxCollisionDetector(1000.0);
       collisionDetector = new SimpleCollisionDetector();
-//      ((SimpleCollisionDetector) collisionDetector).setObjectSmoothingRadius(0.001);
+      ((SimpleCollisionDetector) collisionDetector).setObjectSmoothingRadius(0.00001);
 
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(0.001);
@@ -98,15 +98,15 @@ public class RowOfDominosRobot extends Robot
       Link baseLink = new Link("base");
       baseLink.setMassAndRadiiOfGyration(1000000000.0, 100.0, 100.0, 100.0);
       Graphics3DObject baseLinkGraphics = new Graphics3DObject();
-      baseLinkGraphics.translate(0.0, 0.0, -0.01);
-      baseLinkGraphics.addCube(100.0, 100.0, 0.01, YoAppearance.Green());
+      baseLinkGraphics.translate(0.0, 0.0, -0.01/2.0);
+      baseLinkGraphics.addCube(1.0, 1.0, 0.01, YoAppearance.Green());
       baseLink.setLinkGraphics(baseLinkGraphics);
       baseLink.enableCollisions(100.0, this.getRobotsYoVariableRegistry());
 
       CollisionShapeDescription shapeDesc = collisionShapeFactory.createBox(100.0, 100.0, 0.01/2.0);
 
       RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-      shapeToLinkTransform.setTranslation(new Vector3d(-0.005, 0.0, 0.0));
+      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
       collisionShapeFactory.addShape(baseLink, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
 
 //    baseJoint.setVelocity(0.0, 0.0, 1.0);
