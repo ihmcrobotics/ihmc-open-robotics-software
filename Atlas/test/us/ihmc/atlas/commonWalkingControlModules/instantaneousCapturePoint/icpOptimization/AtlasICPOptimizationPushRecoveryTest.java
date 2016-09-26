@@ -36,7 +36,7 @@ public class AtlasICPOptimizationPushRecoveryTest extends ICPOptimizationPushRec
       AtlasICPOptimizationPushRecoveryTest test = new AtlasICPOptimizationPushRecoveryTest();
       try
       {
-         test.testPushICPOptimizationLongForwardPushInSwing();
+         test.testPushICPOptimizationRandomPushInSwing();
       }
       catch(SimulationExceededMaximumTimeException e)
       {
