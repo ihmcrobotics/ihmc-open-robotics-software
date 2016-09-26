@@ -170,28 +170,28 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getMaxCMPForwardExit()
    {
-      return 0.02;
+      return 0.00;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMaxCMPLateralExit()
    {
-      return 0.03;
+      return 0.00;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getForwardAdjustmentDeadband()
    {
-      return 0.00;
+      return 0.02;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getLateralAdjustmentDeadband()
    {
-      return 0.00;
+      return 0.02;
    }
 
    /** {@inheritDoc} */

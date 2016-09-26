@@ -78,8 +78,8 @@ public class ICPOptimizationSolutionHandler
       footstepForwardDeadband.set(icpOptimizationParameters.getForwardAdjustmentDeadband());
       footstepLateralDeadband.set(icpOptimizationParameters.getLateralAdjustmentDeadband());
 
-      if (yoGraphicsListRegistry != null)
-         setupVisualizers(yoGraphicsListRegistry, visualize);
+      //if (yoGraphicsListRegistry != null)
+      //   setupVisualizers(yoGraphicsListRegistry, visualize);
    }
 
    private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, boolean visualize)
