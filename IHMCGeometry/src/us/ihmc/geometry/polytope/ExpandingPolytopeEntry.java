@@ -12,16 +12,60 @@ import javax.vecmath.Vector3d;
  */
 public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry>
 {
-   private final Point3d[] triangleVertices;
+   private final Point3d[] triangleVertices = new Point3d[3];
    private final Vector3d closestPointToOrigin = new Vector3d();
    private final double[] lambdas = new double[3];
-   private boolean affinelyDependent = false;
    private double distanceToOriginKey;
 
    private final ExpandingPolytopeEntry[] adjacentTriangles = new ExpandingPolytopeEntry[3];
    private final int[] adjacentTriangleEdgeIndices = new int[3];
 
+   private boolean affinelyDependent = false;
    private boolean obsolete = false;
+
+   public ExpandingPolytopeEntry()
+   {
+      
+   }
+
+   public ExpandingPolytopeEntry(Point3d vertexOne, Point3d vertexTwo, Point3d vertexThree)
+   {
+      reset(vertexOne, vertexTwo, vertexThree);
+   }
+
+   public void reset(Point3d pointOne, Point3d pointTwo, Point3d pointThree)
+   {
+      this.obsolete = false;
+      this.affinelyDependent = false;
+
+      adjacentTriangles[0] = null;
+      adjacentTriangles[1] = null;
+      adjacentTriangles[2] = null;
+
+      lambdas[0] = 0.0;
+      lambdas[1] = 0.0;
+      lambdas[2] = 0.0;
+
+      distanceToOriginKey = 0.0;
+
+      adjacentTriangleEdgeIndices[0] = 0;
+      adjacentTriangleEdgeIndices[1] = 0;
+      adjacentTriangleEdgeIndices[2] = 0;
+      
+      closestPointToOrigin.set(0.0, 0.0, 0.0);
+
+      triangleVertices[0] = pointOne;
+      triangleVertices[1] = pointTwo;
+      triangleVertices[2] = pointThree;
+
+      projectOriginOntoFace(pointOne, pointTwo, pointThree, closestPointToOrigin, lambdas);
+      distanceToOriginKey = closestPointToOrigin.length();
+      if (Double.isNaN(distanceToOriginKey))
+      {
+         this.affinelyDependent = true;
+         //         throw new RuntimeException("Distance to origin is NaN!. \npointOne = " + pointOne + ", \npointTwo = " + pointTwo + ", \npointThree = " + pointThree);
+      }
+   }
 
    public Point3d getVertex(int index)
    {
@@ -31,18 +75,6 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
    public double getLambda(int index)
    {
       return lambdas[index];
-   }
-
-   public ExpandingPolytopeEntry(Point3d pointOne, Point3d pointTwo, Point3d pointThree)
-   {
-      triangleVertices = new Point3d[] { pointOne, pointTwo, pointThree };
-      projectOriginOntoFace(pointOne, pointTwo, pointThree, closestPointToOrigin, lambdas);
-      distanceToOriginKey = closestPointToOrigin.length();
-      if (Double.isNaN(distanceToOriginKey))
-      {
-         this.affinelyDependent = true;
-//         throw new RuntimeException("Distance to origin is NaN!. \npointOne = " + pointOne + ", \npointTwo = " + pointTwo + ", \npointThree = " + pointThree);
-      }
    }
 
    public boolean closestIsInternal()
@@ -123,12 +155,12 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
 
       tempNormalVector1.cross(tempVector1, tempVector2);
       double fourASquared = tempNormalVector1.dot(tempNormalVector1);
-      
+
       //TODO: Magic number for checking affinely Dependent...
       // Probably a better way to check this than just the area of the triangle.
       // Something relative. 
       this.affinelyDependent = fourASquared < 1e-10;
-      
+
       double oneOver4ASquared = 1.0 / (fourASquared);
 
       tempVector3.set(vertexOne);
@@ -284,6 +316,5 @@ public class ExpandingPolytopeEntry implements Comparable<ExpandingPolytopeEntry
    {
       return "[" + triangleVertices[0] + "; " + triangleVertices[1] + "; " + triangleVertices[2] + "]";
    }
-
 
 }

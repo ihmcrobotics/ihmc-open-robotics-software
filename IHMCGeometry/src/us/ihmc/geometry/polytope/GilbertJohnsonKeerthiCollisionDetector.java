@@ -14,9 +14,11 @@ public class GilbertJohnsonKeerthiCollisionDetector
 {
    private static final double LAMBDA_STOPPING_DELTA = 1e-9;
 
+   private final Vector3d supportDirection = new Vector3d();
    private final Vector3d negativeSupportDirection = new Vector3d();
    private final Vector3d supportingVertexOnSimplex = new Vector3d();
-
+   private final Vector3d tempPVector = new Vector3d();
+   
    private final SimplexPolytope simplex = new SimplexPolytope();
    private GilbertJohnsonKeerthiCollisionDetectorListener listener;
 
@@ -113,7 +115,7 @@ public class GilbertJohnsonKeerthiCollisionDetector
          // Step 5) v = support vector in negative P direction on A minkowskiDifference B.
          // In other words, it is suppport vector on A in P direction minus support vector on B in negative P direction.
 
-         Vector3d supportDirection = new Vector3d(closestPointToOrigin);
+         supportDirection.set(closestPointToOrigin);
          supportDirection.negate();
          PolytopeVertex supportingVertexA = polytopeA.getSupportingVertex(supportDirection);
 
@@ -142,10 +144,10 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
          // Step 6) If v is no more extremal in direction -P than P itself, then not intersecting. magnitude(v) is distance. Use v to determine closest points.
 
-         Vector3d P = new Vector3d(closestPointToOrigin);
+         tempPVector.set(closestPointToOrigin);
 
-         double vDotP = supportingVertexOnSimplex.dot(P);
-         double percentCloser = vDotP / P.dot(P);
+         double vDotP = supportingVertexOnSimplex.dot(tempPVector);
+         double percentCloser = vDotP / tempPVector.dot(tempPVector);
 
          if (listener != null)
          {
