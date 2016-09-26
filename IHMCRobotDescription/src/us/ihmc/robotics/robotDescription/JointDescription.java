@@ -79,6 +79,11 @@ public class JointDescription implements RobotDescriptionNode
 
       childJointDescription.setParentJoint(this);
    }
+   
+   public boolean removeJoint(JointDescription childJointDescription)
+   {
+      return childrenJointDescriptions.remove(childJointDescription);
+   }
 
    @Override
    public ArrayList<JointDescription> getChildrenJoints()
