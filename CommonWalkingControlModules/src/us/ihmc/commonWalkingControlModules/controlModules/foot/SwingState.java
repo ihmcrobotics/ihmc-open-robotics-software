@@ -21,6 +21,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.WrapperForMultiplePositionTrajectoryGenerators;
@@ -95,6 +96,9 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final RigidBodyTransform transformFromToeToAnkle = new RigidBodyTransform();
 
+   private final FramePoint unadjustedPosition = new FramePoint(worldFrame);
+   private final YoFrameVector adjustmentVelocityCorrection;
+
    public SwingState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider,
          YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
@@ -109,6 +113,8 @@ public class SwingState extends AbstractUnconstrainedState
       finalSwingHeightOffset.set(footControlHelper.getWalkingControllerParameters().getDesiredTouchdownHeightOffset());
       replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
       swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
+
+      adjustmentVelocityCorrection = new YoFrameVector(namePrefix + "AdjustmentVelocityCorrection", worldFrame, registry);
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
@@ -279,17 +285,13 @@ public class SwingState extends AbstractUnconstrainedState
 
    protected void computeAndPackTrajectory()
    {
-      if (replanTrajectory.getBooleanValue()) // This seems like a bad place for this?
+      if (this.replanTrajectory.getBooleanValue()) // This seems like a bad place for this?
       {
          if (!doContinuousReplanning.getBooleanValue())
          {
             pushRecoveryPositionTrajectoryGenerator.initialize();
-            replanTrajectory.set(false);
+            this.replanTrajectory.set(false);
             trajectoryWasReplanned = true;
-         }
-         else
-         {
-            reinitializeTrajectory();
          }
       }
 
@@ -306,9 +308,33 @@ public class SwingState extends AbstractUnconstrainedState
 
       if (!trajectoryWasReplanned || doContinuousReplanning.getBooleanValue())
       {
+         boolean footstepWasAdjusted = false;
          positionTrajectoryGenerator.compute(time);
 
+         if (replanTrajectory.getBooleanValue())
+         {
+            footstepWasAdjusted = true;
+            positionTrajectoryGenerator.getLinearData(unadjustedPosition, desiredLinearVelocity, desiredAngularAcceleration);
+
+            reinitializeTrajectory();
+            positionTrajectoryGenerator.compute(time);
+         }
+
          positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+
+         if (footstepWasAdjusted)
+         {
+            adjustmentVelocityCorrection.set(desiredPosition);
+            adjustmentVelocityCorrection.sub(unadjustedPosition);
+            adjustmentVelocityCorrection.scale(1.0 / controlDT);
+            adjustmentVelocityCorrection.setZ(0.0);
+
+            desiredLinearVelocity.add(adjustmentVelocityCorrection.getFrameTuple());
+         }
+         else
+         {
+            adjustmentVelocityCorrection.setToZero();
+         }
       }
       else
       {
