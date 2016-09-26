@@ -84,6 +84,8 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void getJointTwist(Twist twistToPack)
    {
+      twistToPack.setToZero(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getExpressedInFrame());
+
       twistToPack.setAngularPartY(jointTwist.getAngularPartY());
       twistToPack.setLinearPartX(jointTwist.getLinearPartX());
       twistToPack.setLinearPartZ(jointTwist.getLinearPartZ());
@@ -92,6 +94,8 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void getJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
+      accelerationToPack.setToZero(jointAcceleration.getBodyFrame(), jointAcceleration.getBaseFrame(), jointAcceleration.getExpressedInFrame());
+
       accelerationToPack.setAngularPartY(jointAcceleration.getAngularPartY());
       accelerationToPack.setLinearPartX(jointAcceleration.getLinearPartX());
       accelerationToPack.setLinearPartZ(jointAcceleration.getLinearPartZ());
@@ -100,6 +104,8 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void getDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
+      accelerationToPack.setToZero(jointAccelerationDesired.getBodyFrame(), jointAccelerationDesired.getBaseFrame(), jointAccelerationDesired.getExpressedInFrame());
+
       accelerationToPack.setAngularPartY(jointAccelerationDesired.getAngularPartY());
       accelerationToPack.setLinearPartX(jointAccelerationDesired.getLinearPartX());
       accelerationToPack.setLinearPartZ(jointAccelerationDesired.getLinearPartZ());
@@ -155,7 +161,6 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       jointAccelerationDesired.setLinearPartZ(matrix.get(rowStart + 2, 0));
    }
 
-   // fixme
    public void setRotation(double yaw, double pitch, double roll)
    {
       RotationTools.convertYawPitchRollToQuaternion(0.0, pitch, 0.0, jointRotation);
@@ -328,8 +333,8 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
 
    public void getWrench(Wrench wrenchToPack)
    {
-      successorWrench.getBodyFrame().checkReferenceFrameMatch(wrenchToPack.getBodyFrame());
-      successorWrench.getExpressedInFrame().checkReferenceFrameMatch(wrenchToPack.getExpressedInFrame());
+      wrenchToPack.setToZero(successorWrench.getBodyFrame(), successorWrench.getExpressedInFrame());
+
       wrenchToPack.setAngularPartY(successorWrench.getAngularPartY());
       wrenchToPack.setLinearPartX(successorWrench.getLinearPartX());
       wrenchToPack.setLinearPartZ(successorWrench.getLinearPartZ());

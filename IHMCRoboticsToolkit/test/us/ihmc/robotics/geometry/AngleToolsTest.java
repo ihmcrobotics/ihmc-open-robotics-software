@@ -290,6 +290,48 @@ public class AngleToolsTest
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testShiftAngleToStartOfRangeUnitless()
+   {
+      double range = Math.pow(2.0, 13.0);
+
+      double endOfAngleRange = range;
+      double angleToShift = 1.6 * range;
+      double expectedReturn = 0.6 * range;
+      double actualReturn = AngleTools.shiftAngleToStartOfRange(angleToShift, 0.0, endOfAngleRange);
+      assertEquals(expectedReturn, actualReturn, 1e-12);
+
+      angleToShift = -0.4 * range;
+      expectedReturn = 0.6 * range;
+      actualReturn = AngleTools.shiftAngleToStartOfRange(angleToShift, 0.0, endOfAngleRange);
+      assertEquals(expectedReturn, actualReturn, 1e-12);
+
+      angleToShift = 0.4 * range;
+      expectedReturn = 0.4 * range;
+      actualReturn = AngleTools.shiftAngleToStartOfRange(angleToShift, 0.0, endOfAngleRange);
+      assertEquals(expectedReturn, actualReturn, 1e-12);
+
+      int iters = 1000;
+      Random random = new Random();
+      for (int i = 0; i < iters; i++)
+      {
+         double ratio = -6.0 + 12.0 * random.nextDouble();
+
+         angleToShift = ratio * range;
+         expectedReturn = angleToShift;
+
+         if (angleToShift < 0.0)
+            expectedReturn = angleToShift + Math.ceil((-angleToShift) / endOfAngleRange) * endOfAngleRange;
+
+         if (angleToShift >= endOfAngleRange)
+            expectedReturn = angleToShift - Math.floor((angleToShift) / endOfAngleRange) * endOfAngleRange;
+
+         actualReturn = AngleTools.shiftAngleToStartOfRange(angleToShift, 0.0, endOfAngleRange);
+         assertEquals(expectedReturn, actualReturn, 1e-12);
+      }
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTrimAngleMinusPiToPi()
    {
       Random random = new Random(0);
