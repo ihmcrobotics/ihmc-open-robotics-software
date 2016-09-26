@@ -208,7 +208,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
 
       for (OneDegreeOfFreedomJoint fingerJoint : fingerJoints)
       {
-         double q = fingerJoint.getQ().getDoubleValue();
+         double q = fingerJoint.getQYoVariable().getDoubleValue();
          ret += q;
          if (DEBUG)
          {

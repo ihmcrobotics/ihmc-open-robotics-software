@@ -81,7 +81,7 @@ public class BuildingPendulumRobot extends Robot
    public double getPendulumAngle(RobotSide activeSide)
    {
       PinJoint joint = joints.get(activeSide);
-      return joint.getQ().getDoubleValue();
+      return joint.getQYoVariable().getDoubleValue();
    }
 
    public void setPendulumAngle(RobotSide activeSide, double q)
@@ -99,7 +99,7 @@ public class BuildingPendulumRobot extends Robot
    public double getPendulumVelocity(RobotSide activeSide)
    {
       PinJoint joint = joints.get(activeSide);
-       return joint.getQD().getDoubleValue();
+       return joint.getQDYoVariable().getDoubleValue();
    }
    public double getSwitchAngle(RobotSide activeSide)
    {

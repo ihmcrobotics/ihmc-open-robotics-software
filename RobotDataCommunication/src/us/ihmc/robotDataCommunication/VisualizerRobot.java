@@ -36,8 +36,8 @@ public class VisualizerRobot extends HumanoidFloatingRootJointRobot
 
       for(OneDegreeOfFreedomJoint joint : getOneDegreeOfFreedomJoints())
       {
-         reducedRegistry.registerVariable(joint.getQ());
-         reducedRegistry.registerVariable(joint.getQD());
+         reducedRegistry.registerVariable(joint.getQYoVariable());
+         reducedRegistry.registerVariable(joint.getQDYoVariable());
       }
 
    }

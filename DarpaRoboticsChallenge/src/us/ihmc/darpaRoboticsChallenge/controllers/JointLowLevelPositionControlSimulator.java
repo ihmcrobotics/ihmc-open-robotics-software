@@ -73,9 +73,9 @@ public class JointLowLevelPositionControlSimulator implements RobotController
    {
       if (highLevelControllerOutputJoint.isUnderPositionControl())
       {
-         double currentPosition = simulatedJoint.getQ().getDoubleValue();
+         double currentPosition = simulatedJoint.getQYoVariable().getDoubleValue();
          double desiredPosition = highLevelControllerOutputJoint.getqDesired();
-         double currentRate = simulatedJoint.getQD().getDoubleValue();
+         double currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
          double desiredRate = highLevelControllerOutputJoint.getQdDesired();
          double desiredTau = jointController.compute(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
          simulatedJoint.setTau(desiredTau);

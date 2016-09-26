@@ -337,8 +337,8 @@ public class Step5IDandSCSRobot extends Robot
       for (OneDoFJoint idJoint : idToSCSLegJointMap.keySet())
       {
          OneDegreeOfFreedomJoint scsJoint = idToSCSLegJointMap.get(idJoint);
-         idJoint.setQ(scsJoint.getQ().getDoubleValue());
-         idJoint.setQd(scsJoint.getQD().getDoubleValue());
+         idJoint.setQ(scsJoint.getQYoVariable().getDoubleValue());
+         idJoint.setQd(scsJoint.getQDYoVariable().getDoubleValue());
       }
 
       elevator.updateFramesRecursively();

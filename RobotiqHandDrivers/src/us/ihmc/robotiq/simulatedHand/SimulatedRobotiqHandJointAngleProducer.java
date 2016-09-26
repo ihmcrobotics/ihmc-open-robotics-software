@@ -69,15 +69,15 @@ public class SimulatedRobotiqHandJointAngleProducer
          {
             final double[] indexJoints = new double[this.indexJoints.get(robotSide).size()];
             for (int i = 0; i < this.indexJoints.get(robotSide).size(); i++)
-               indexJoints[i] = this.indexJoints.get(robotSide).get(i).getQ().getDoubleValue();
+               indexJoints[i] = this.indexJoints.get(robotSide).get(i).getQYoVariable().getDoubleValue();
 
             final double[] middleJoints = new double[this.middleJoints.get(robotSide).size()];
             for (int i = 0; i < this.middleJoints.get(robotSide).size(); i++)
-               middleJoints[i] = this.middleJoints.get(robotSide).get(i).getQ().getDoubleValue();
+               middleJoints[i] = this.middleJoints.get(robotSide).get(i).getQYoVariable().getDoubleValue();
 
             final double[] thumbJoints = new double[this.thumbJoints.get(robotSide).size()];
             for (int i = 0; i < this.thumbJoints.get(robotSide).size(); i++)
-               thumbJoints[i] = this.thumbJoints.get(robotSide).get(i).getQ().getDoubleValue();
+               thumbJoints[i] = this.thumbJoints.get(robotSide).get(i).getQYoVariable().getDoubleValue();
 
             jointAngleCommunicators.get(robotSide).updateHandAngles(new HandSensorData()
             {

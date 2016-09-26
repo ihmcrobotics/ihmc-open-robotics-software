@@ -102,19 +102,19 @@ public class TwoLinkRobotForTesting extends Robot
 
    public double getElbowAngle()
    {
-      return elbowJoint.getQ().getDoubleValue();
+      return elbowJoint.getQYoVariable().getDoubleValue();
    }
 
  
    public double getElbowVelocity()
    {
-      return elbowJoint.getQD().getDoubleValue();
+      return elbowJoint.getQDYoVariable().getDoubleValue();
    }
 
  
    public double getElbowTorque()
    {
-      return elbowJoint.getTau().getDoubleValue();
+      return elbowJoint.getTauYoVariable().getDoubleValue();
    }
 
  
@@ -125,32 +125,32 @@ public class TwoLinkRobotForTesting extends Robot
    
    public void setElbowPosition(double value)
    {
-      elbowJoint.q.set(value);
+      elbowJoint.setQ(value);
    }
 
    public void setUpperPosition(double value)
    {
-      upperJoint.q.set(value);
+      upperJoint.setQ(value);
    }
    
    public void setElbowVelocity(double velocity)
    {
-      elbowJoint.qd.set(velocity);
+      elbowJoint.setQd(velocity);
    }
 
    public void setUpperVelocity(double velocity)
    {
-      upperJoint.qd.set(velocity);
+      upperJoint.setQd(velocity);
    }
 
    public void setElbowAcceleration(double value)
    {
-      elbowJoint.qdd.set(value);
+      elbowJoint.setQdd(value);
    }
 
    public void setUpperAcceleration(double value)
    {
-      upperJoint.qdd.set(value);
+      upperJoint.setQdd(value);
    }
 
    private Link lowerArm()

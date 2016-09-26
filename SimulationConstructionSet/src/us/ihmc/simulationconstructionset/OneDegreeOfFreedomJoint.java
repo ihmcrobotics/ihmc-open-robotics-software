@@ -21,11 +21,17 @@ public abstract class OneDegreeOfFreedomJoint extends Joint
       super(jname, offset, rob, 1);
    }
 
-   public abstract DoubleYoVariable getQDD();
+   public abstract DoubleYoVariable getQDDYoVariable();
 
-   public abstract DoubleYoVariable getQD();
+   public abstract double getQDD();
 
-   public abstract DoubleYoVariable getQ();
+   public abstract DoubleYoVariable getQDYoVariable();
+
+   public abstract double getQD();
+
+   public abstract DoubleYoVariable getQYoVariable();
+
+   public abstract double getQ();
 
    public abstract void setQdd(double qdd);
 
@@ -35,7 +41,9 @@ public abstract class OneDegreeOfFreedomJoint extends Joint
 
    public abstract void setTau(double tau);
 
-   public abstract DoubleYoVariable getTau();
+   public abstract DoubleYoVariable getTauYoVariable();
+
+   public abstract double getTau();
 
    public abstract double getDamping();
 
@@ -96,8 +104,8 @@ public abstract class OneDegreeOfFreedomJoint extends Joint
 
    public double doPDControl()
    {
-      double qError = qDesired - getQ().getDoubleValue();
-      double qdError = qdDesired - getQD().getDoubleValue();
+      double qError = qDesired - getQYoVariable().getDoubleValue();
+      double qdError = qdDesired - getQDYoVariable().getDoubleValue();
 
       return kp * qError + kd * qdError;
    }

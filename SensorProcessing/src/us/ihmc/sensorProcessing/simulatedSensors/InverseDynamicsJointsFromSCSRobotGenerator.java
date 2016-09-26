@@ -152,9 +152,9 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          {
             OneDoFJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint); //pinToRevoluteJointMap.get(pinJoint);
 
-            double jointPosition = pinJoint.getQ().getDoubleValue();
-            double jointVelocity = pinJoint.getQD().getDoubleValue();
-            double jointAcceleration = pinJoint.getQDD().getDoubleValue();
+            double jointPosition = pinJoint.getQYoVariable().getDoubleValue();
+            double jointVelocity = pinJoint.getQDYoVariable().getDoubleValue();
+            double jointAcceleration = pinJoint.getQDDYoVariable().getDoubleValue();
             revoluteJoint.setQ(jointPosition);
             revoluteJoint.setQd(jointVelocity);
 

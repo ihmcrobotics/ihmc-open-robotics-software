@@ -351,7 +351,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       LinkedHashMap<OneDegreeOfFreedomJoint, Double> savedJointAngles = new LinkedHashMap<>();
       
       for (OneDegreeOfFreedomJoint joint : allSCSJoints)
-         savedJointAngles.put(joint, joint.getQ().getDoubleValue());
+         savedJointAngles.put(joint, joint.getQYoVariable().getDoubleValue());
       
       double temp_q_x = q_x.getDoubleValue();
       double temp_q_y = q_y.getDoubleValue();
@@ -455,8 +455,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             oppositeSignForYawAndRollOnly.transform(unitVectorThisSide);
             double sign = unitVectorOtherSide.dot(unitVectorThisSide);
 
-            SymmetricModeListener symmetricModeListener = new SymmetricModeListener(otherJoint.getQ(), robotSide, sign);
-            thisJoint.getQ().addVariableChangedListener(symmetricModeListener);
+            SymmetricModeListener symmetricModeListener = new SymmetricModeListener(otherJoint.getQYoVariable(), robotSide, sign);
+            thisJoint.getQYoVariable().addVariableChangedListener(symmetricModeListener);
          }
 
          for (LegJointName jointName : legSCSJoints.get(robotSide).keySet())
@@ -470,8 +470,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
             oppositeSignForYawAndRollOnly.transform(unitVectorThisSide);
             double sign = unitVectorOtherSide.dot(unitVectorThisSide);
 
-            SymmetricModeListener symmetricModeListener = new SymmetricModeListener(otherJoint.getQ(), robotSide, sign);
-            thisJoint.getQ().addVariableChangedListener(symmetricModeListener);
+            SymmetricModeListener symmetricModeListener = new SymmetricModeListener(otherJoint.getQYoVariable(), robotSide, sign);
+            thisJoint.getQYoVariable().addVariableChangedListener(symmetricModeListener);
          }
       }
       
@@ -518,7 +518,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          {
             OneDegreeOfFreedomJoint legSCSJoint = legSCSJoints.get(robotSide).get(legJointName);
             OneDoFJoint legIDJoint = fullRobotModel.getLegJoint(robotSide, legJointName);
-            sliderBoard.setSlider(sliderChannel++, legSCSJoint.getQ(), legIDJoint.getJointLimitLower(), legIDJoint.getJointLimitUpper());
+            sliderBoard.setSlider(sliderChannel++, legSCSJoint.getQYoVariable(), legIDJoint.getJointLimitLower(), legIDJoint.getJointLimitUpper());
          }
          break;
       }
@@ -562,7 +562,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          {
             OneDegreeOfFreedomJoint armSCSJoint = armSCSJoints.get(robotSide).get(armJointName);
             OneDoFJoint armIDJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
-            sliderBoard.setSlider(sliderChannel++, armSCSJoint.getQ(), armIDJoint.getJointLimitLower(), armIDJoint.getJointLimitUpper());
+            sliderBoard.setSlider(sliderChannel++, armSCSJoint.getQYoVariable(), armIDJoint.getJointLimitLower(), armIDJoint.getJointLimitUpper());
          }
 
          if (controlFingers.getBooleanValue())
@@ -633,14 +633,14 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       {
          OneDegreeOfFreedomJoint spineSCSJoint = spineSCSJoints.get(spineJointName);
          OneDoFJoint spineIDJoint = fullRobotModel.getSpineJoint(spineJointName);
-         sliderBoard.setSlider(sliderChannel++, spineSCSJoint.getQ(), spineIDJoint.getJointLimitLower(), spineIDJoint.getJointLimitUpper());
+         sliderBoard.setSlider(sliderChannel++, spineSCSJoint.getQYoVariable(), spineIDJoint.getJointLimitLower(), spineIDJoint.getJointLimitUpper());
       }
 
       for (NeckJointName neckJointName : neckJointNames)
       {
          OneDegreeOfFreedomJoint neckSCSJoint = neckSCSJoints.get(neckJointName);
          OneDoFJoint neckIDJoint = fullRobotModel.getNeckJoint(neckJointName);
-         sliderBoard.setSlider(sliderChannel++, neckSCSJoint.getQ(), neckIDJoint.getJointLimitLower(), neckIDJoint.getJointLimitUpper());
+         sliderBoard.setSlider(sliderChannel++, neckSCSJoint.getQYoVariable(), neckIDJoint.getJointLimitLower(), neckIDJoint.getJointLimitUpper());
       }
    }
 

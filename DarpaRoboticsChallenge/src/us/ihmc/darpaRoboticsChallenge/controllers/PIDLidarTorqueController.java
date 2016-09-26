@@ -33,7 +33,7 @@ public class PIDLidarTorqueController implements RobotController
    {
       desiredLidarAngle.add(desiredLidarVelocity.getDoubleValue() * controlDT);
          
-      double lidarJointTau = lidarJointController.compute(lidarJoint.getQ().getDoubleValue(), desiredLidarAngle.getDoubleValue(), lidarJoint.getQD()
+      double lidarJointTau = lidarJointController.compute(lidarJoint.getQYoVariable().getDoubleValue(), desiredLidarAngle.getDoubleValue(), lidarJoint.getQDYoVariable()
             .getDoubleValue(), desiredLidarVelocity.getDoubleValue(), controlDT) + lidarJoint.getDamping() * desiredLidarVelocity.getDoubleValue();
       lidarJoint.setTau(lidarJointTau);
    }

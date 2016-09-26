@@ -25,7 +25,7 @@ public class PlaybackPose
          String jointName = oneDoFJoint.getName();
          OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = oneDegreeOfFreedomJointHolder.getOneDegreeOfFreedomJoint(jointName);
 
-         double jointAngle = oneDegreeOfFreedomJoint.getQ().getDoubleValue();
+         double jointAngle = oneDegreeOfFreedomJoint.getQYoVariable().getDoubleValue();
 
          playbackPoseMap.put(oneDoFJoint, jointAngle);
       }
@@ -97,7 +97,7 @@ public class PlaybackPose
          OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = oneDegreeOfFreedomJointHolder.getOneDegreeOfFreedomJoint(jointName);
 
          Double value = playbackPoseMap.get(oneDoFJoint);
-         oneDegreeOfFreedomJoint.getQ().set(value);
+         oneDegreeOfFreedomJoint.getQYoVariable().set(value);
       }
    }
 

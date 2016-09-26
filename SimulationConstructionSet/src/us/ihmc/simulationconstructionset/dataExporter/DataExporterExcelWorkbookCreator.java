@@ -155,9 +155,9 @@ public class DataExporterExcelWorkbookCreator
       {
          int column = 0;
 
-         DataBufferEntry position = dataBuffer.getEntry(joint.getQ());
-         DataBufferEntry speed = dataBuffer.getEntry(joint.getQD());
-         DataBufferEntry torque = dataBuffer.getEntry(joint.getTau());
+         DataBufferEntry position = dataBuffer.getEntry(joint.getQYoVariable());
+         DataBufferEntry speed = dataBuffer.getEntry(joint.getQDYoVariable());
+         DataBufferEntry torque = dataBuffer.getEntry(joint.getTauYoVariable());
 
          addHeaderEntry(dataSheet, column, "Joint");
          String jointName = joint.getName();
@@ -257,8 +257,8 @@ public class DataExporterExcelWorkbookCreator
 
       for (PinJoint joint : pinJoints)
       {
-         double[] speed = dataBuffer.getEntry(joint.getQD()).getData();
-         double[] torque = dataBuffer.getEntry(joint.getTau()).getData();
+         double[] speed = dataBuffer.getEntry(joint.getQDYoVariable()).getData();
+         double[] torque = dataBuffer.getEntry(joint.getTauYoVariable()).getData();
 
          double[] jointMechincalPower = computeMechanicalPower(speed, torque);
 
@@ -383,9 +383,9 @@ public class DataExporterExcelWorkbookCreator
       
       for (PinJoint joint : pinJoints)
       {
-         DataBufferEntry position = dataBuffer.getEntry(joint.getQ());
-         DataBufferEntry speed = dataBuffer.getEntry(joint.getQD());
-         DataBufferEntry torque = dataBuffer.getEntry(joint.getTau());
+         DataBufferEntry position = dataBuffer.getEntry(joint.getQYoVariable());
+         DataBufferEntry speed = dataBuffer.getEntry(joint.getQDYoVariable());
+         DataBufferEntry torque = dataBuffer.getEntry(joint.getTauYoVariable());
 
          writeJointDataColumn(jointDataSheet, column++, position, false);
          writeJointDataColumn(jointDataSheet, column++, speed, false);

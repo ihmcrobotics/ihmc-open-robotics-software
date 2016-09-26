@@ -983,7 +983,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
          for (OneDegreeOfFreedomJoint joint : oneDegreeOfFreedomJoints)
          {
-            qDesireds.put(joint, joint.getQ().getDoubleValue());
+            qDesireds.put(joint, joint.getQYoVariable().getDoubleValue());
          }
       }
 
