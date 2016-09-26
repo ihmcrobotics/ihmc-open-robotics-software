@@ -84,7 +84,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       updateLock.unlock();
    }
 
-   private long getNewestTimestamp()
+   public long getNewestTimestamp()
    {
       RobotConfigurationData newestConfigurationData = configurationBuffer[currentIndex.get()];
       if(newestConfigurationData == null)
