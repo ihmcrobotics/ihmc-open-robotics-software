@@ -295,7 +295,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
       @Override
-      public CollisionShapeDescription getDescription()
+      public CollisionShapeDescription getCollisionShapeDescription()
       {
          return description;
       }

@@ -24,7 +24,7 @@ public class SimpleCollisionShape implements CollisionShape
    }
 
    @Override
-   public CollisionShapeDescription getDescription()
+   public CollisionShapeDescription getCollisionShapeDescription()
    {
       return collisionShapeDescription;
    }
