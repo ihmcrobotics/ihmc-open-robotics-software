@@ -255,9 +255,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       double temporaryEdgeDistance;
       double smallestEdgeDistance = Double.MAX_VALUE;
       Point3d projectionOnEdge = new Point3d();
-      Point3d vertex1 = new Point3d();
-      Point3d vertex2 = new Point3d();
-      LineSegment3d temporaryEdge = new LineSegment3d(vertex1, vertex2);
+      LineSegment3d temporaryEdge = new LineSegment3d();
       for (int j = 0; j < convexPolygon.getNumberOfVertices(); j++)
       {
          Point2d vertex = convexPolygon.getVertex(j);
@@ -314,8 +312,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
          if ((lateralFacesLookingThePoint.get(i) == true)
                  && (lateralFacesLookingThePoint.get((lateralFacesLookingThePoint.size() + i - 1) % lateralFacesLookingThePoint.size()) == true))
          {
-            vertex1.set(upperVertices.get(i));
-            vertex2.set(lowerVertices.get(i));
+            temporaryEdge.set(upperVertices.get(i), lowerVertices.get(i));
             temporaryEdgeDistance = temporaryEdge.distanceToAPoint(pointToCheck);
 
             if (temporaryEdgeDistance < smallestEdgeDistance)
@@ -328,8 +325,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
          // Check edges of the top face
          if ((lateralFacesLookingThePoint.get(i) == true) && (topFaceLookingThePoint == true))
          {
-            vertex1.set(upperVertices.get(i));
-            vertex2.set(upperVertices.get((i + 1) % upperVertices.size()));
+            temporaryEdge.set(upperVertices.get(i), upperVertices.get((i + 1) % upperVertices.size()));
             temporaryEdgeDistance = temporaryEdge.distanceToAPoint(pointToCheck);
 
             if (temporaryEdgeDistance < smallestEdgeDistance)
