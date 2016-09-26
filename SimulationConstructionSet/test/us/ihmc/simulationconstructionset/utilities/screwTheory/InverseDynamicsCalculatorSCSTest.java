@@ -379,7 +379,7 @@ public class InverseDynamicsCalculatorSCSTest
       {
          OneDegreeOfFreedomJoint revoluteJoint = jointMap.get(idJoint);
 
-         DoubleYoVariable qddVariable = revoluteJoint.getQDD();
+         DoubleYoVariable qddVariable = revoluteJoint.getQDDYoVariable();
          double qdd = qddVariable.getDoubleValue();
          double qddInverse = idJoint.getQddDesired();
 
@@ -396,7 +396,7 @@ public class InverseDynamicsCalculatorSCSTest
       double epsilon = 1e-12;
       for (OneDegreeOfFreedomJoint joint : jointMap.values())
       {
-         double qdd = joint.getQDD().getDoubleValue();
+         double qdd = joint.getQDDYoVariable().getDoubleValue();
          assertEquals(0.0, qdd, epsilon);
       }
    }

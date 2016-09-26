@@ -88,15 +88,15 @@ public class RobotTest
 //    System.out.println("\n\n\n");
 
       pin1.setQ(random.nextDouble());
-      pin2.setQ(-pin1.getQ().getDoubleValue());
+      pin2.setQ(-pin1.getQYoVariable().getDoubleValue());
 
       pin1.setQd(10.0);
-      pin2.setQd(-pin1.getQD().getDoubleValue());
-      Vector3d angularVelocityInBody = new Vector3d(0.0, pin1.getQD().getDoubleValue(), 0.0);
+      pin2.setQd(-pin1.getQDYoVariable().getDoubleValue());
+      Vector3d angularVelocityInBody = new Vector3d(0.0, pin1.getQDYoVariable().getDoubleValue(), 0.0);
       root2.setAngularVelocityInBody(angularVelocityInBody);
 
       pin1.setTau(random.nextDouble());
-      pin2.setTau(-pin1.getTau().getDoubleValue());
+      pin2.setTau(-pin1.getTauYoVariable().getDoubleValue());
 
       robot1.update();
       RigidBodyTransform pin1ToWorld = new RigidBodyTransform();
@@ -133,7 +133,7 @@ public class RobotTest
       robot1.doDynamicsButDoNotIntegrate();
       robot2.doDynamicsButDoNotIntegrate();
 
-      assertEquals(pin1.getQDD().getDoubleValue(), pin1.getQDD().getDoubleValue(), 1e-8);
+      assertEquals(pin1.getQDDYoVariable().getDoubleValue(), pin1.getQDDYoVariable().getDoubleValue(), 1e-8);
 
       double simulateTime = 1.0;
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
@@ -259,8 +259,8 @@ public class RobotTest
 
       double scalarInertiaAboutJointAxis = computeScalarInertiaAroundJointAxis(floatingBody, pin1);
 
-      double torqueFromDynamics = scalarInertiaAboutJointAxis * pin1.getQDD().getDoubleValue();
-      assertEquals(pin1.getTau().getDoubleValue(), torqueFromDynamics, pin1.getTau().getDoubleValue() * 1e-3);
+      double torqueFromDynamics = scalarInertiaAboutJointAxis * pin1.getQDDYoVariable().getDoubleValue();
+      assertEquals(pin1.getTauYoVariable().getDoubleValue(), torqueFromDynamics, pin1.getTauYoVariable().getDoubleValue() * 1e-3);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -662,11 +662,11 @@ public class RobotTest
          expectedRobot.doDynamicsAndIntegrate(dt);
       }
       
-      assertFalse(Double.isNaN(expectedJoint.getQ().getDoubleValue()));
+      assertFalse(Double.isNaN(expectedJoint.getQYoVariable().getDoubleValue()));
 
-      assertEquals(expectedJoint.getQ().getDoubleValue(), joint1.getQ().getDoubleValue(), epsilon);
-      assertEquals(expectedJoint.getQD().getDoubleValue(), joint1.getQD().getDoubleValue(), epsilon);
-      assertEquals(expectedJoint.getQDD().getDoubleValue(), joint1.getQDD().getDoubleValue(), epsilon);
+      assertEquals(expectedJoint.getQYoVariable().getDoubleValue(), joint1.getQYoVariable().getDoubleValue(), epsilon);
+      assertEquals(expectedJoint.getQDYoVariable().getDoubleValue(), joint1.getQDYoVariable().getDoubleValue(), epsilon);
+      assertEquals(expectedJoint.getQDDYoVariable().getDoubleValue(), joint1.getQDDYoVariable().getDoubleValue(), epsilon);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.0)
@@ -946,15 +946,15 @@ public class RobotTest
       
       double epsilon = 1e-7;
       
-      assertFalse(Double.isNaN(joint1.getQ().getDoubleValue()));
+      assertFalse(Double.isNaN(joint1.getQYoVariable().getDoubleValue()));
       
-      assertEquals(joint1.getQ().getDoubleValue(), joint1B.getQ().getDoubleValue(), epsilon);
-      assertEquals(joint1.getQD().getDoubleValue(), joint1B.getQD().getDoubleValue(), epsilon);
-      assertEquals(joint1.getQDD().getDoubleValue(), joint1B.getQDD().getDoubleValue(), epsilon);
+      assertEquals(joint1.getQYoVariable().getDoubleValue(), joint1B.getQYoVariable().getDoubleValue(), epsilon);
+      assertEquals(joint1.getQDYoVariable().getDoubleValue(), joint1B.getQDYoVariable().getDoubleValue(), epsilon);
+      assertEquals(joint1.getQDDYoVariable().getDoubleValue(), joint1B.getQDDYoVariable().getDoubleValue(), epsilon);
       
-      assertEquals(joint2.getQ().getDoubleValue(), joint2B.getQ().getDoubleValue(), epsilon);
-      assertEquals(joint2.getQD().getDoubleValue(), joint2B.getQD().getDoubleValue(), epsilon);
-      assertEquals(joint2.getQDD().getDoubleValue(), joint2B.getQDD().getDoubleValue(), epsilon);
+      assertEquals(joint2.getQYoVariable().getDoubleValue(), joint2B.getQYoVariable().getDoubleValue(), epsilon);
+      assertEquals(joint2.getQDYoVariable().getDoubleValue(), joint2B.getQDYoVariable().getDoubleValue(), epsilon);
+      assertEquals(joint2.getQDDYoVariable().getDoubleValue(), joint2B.getQDDYoVariable().getDoubleValue(), epsilon);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.3)

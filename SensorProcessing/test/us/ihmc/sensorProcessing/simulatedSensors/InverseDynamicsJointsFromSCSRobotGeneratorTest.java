@@ -382,7 +382,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          for (int i = 0; i < pinJoints.size(); i++)
          {
             OneDegreeOfFreedomJoint pinJoint = pinJoints.get(i);
-            double appliedTau = pinJoint.getTau().getDoubleValue();
+            double appliedTau = pinJoint.getTauYoVariable().getDoubleValue();
 
             OneDoFJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint);
             DoubleYoVariable inverseDynamicsTau = inverseDynamicsTaus.get(i);

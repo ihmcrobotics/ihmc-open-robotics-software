@@ -828,8 +828,8 @@ public class SkippyController implements RobotController {
 		// if(angle > Math.PI)
 		// angle = angle - Math.PI*2;
 
-		double angle = joint.getQ().getDoubleValue();
-		double angleVel = joint.getQD().getDoubleValue();
+		double angle = joint.getQYoVariable().getDoubleValue();
+		double angleVel = joint.getQDYoVariable().getDoubleValue();
 		finale[0] = angle;
 		finale[1] = (angleVel);
 		return finale;
@@ -853,7 +853,7 @@ public class SkippyController implements RobotController {
 		/*
 		 * // increases same speed wrt angle diff. between root and leg
 		 */
-		double angleVel = robot.getLegJoint().getQD().getDoubleValue();
+		double angleVel = robot.getLegJoint().getQDYoVariable().getDoubleValue();
 		finale[0] = angle;
 		finale[1] = (angleVel);
 		return finale;
@@ -875,8 +875,8 @@ public class SkippyController implements RobotController {
 		// if(angle > Math.PI)
 		// angle = angle - Math.PI*2;
 
-		double angle = joint.getQ().getDoubleValue();
-		double angleVel = joint.getQD().getDoubleValue();
+		double angle = joint.getQYoVariable().getDoubleValue();
+		double angleVel = joint.getQDYoVariable().getDoubleValue();
 
 		finale[0] = angle;
 		finale[1] = angleVel;
@@ -901,7 +901,7 @@ public class SkippyController implements RobotController {
 		if (robot.getGroundContactPoints().get(2).getZ() < shoulderJointPosition.getZ())
 			angle = angle * -1;
 
-		double angleVel = robot.getShoulderJoint().getQD().getDoubleValue();
+		double angleVel = robot.getShoulderJoint().getQDYoVariable().getDoubleValue();
 		finale[0] = angle;
 		finale[1] = angleVel;
 		return finale;
@@ -943,11 +943,11 @@ public class SkippyController implements RobotController {
 			// System.out.println(joint.getName() + " " +
 			// (joint.getQ().getDoubleValue()) + " " + rotationToWorld);
 		} else
-			rotationToWorld = joint.getQ().getDoubleValue();
+			rotationToWorld = joint.getQYoVariable().getDoubleValue();
 
 		double positionError = (positionErrorGain) * ((desiredValue - rotationToWorld));
 		integralTerm += (integralErrorGain) * positionError * SkippySimulation.DT;
-		double derivativeError = (derivativeErrorGain) * (0 - joint.getQD().getDoubleValue());
+		double derivativeError = (derivativeErrorGain) * (0 - joint.getQDYoVariable().getDoubleValue());
 		joint.setTau(positionError + integralTerm + derivativeError);
 		// System.out.print(joint.getName() + ": " +
 		// (joint.getQ().getDoubleValue() - desiredValue));

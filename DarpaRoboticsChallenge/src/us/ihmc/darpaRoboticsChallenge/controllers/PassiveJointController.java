@@ -27,9 +27,9 @@ public class PassiveJointController implements RobotController
 
    public void doControl()
    {
-      double currentPosition = simulatedJoint.getQ().getDoubleValue();
+      double currentPosition = simulatedJoint.getQYoVariable().getDoubleValue();
       double desiredPosition = 0.0;
-      double currentRate = simulatedJoint.getQD().getDoubleValue();
+      double currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
       double desiredRate = 0.0;
       double desiredTau = jointController.compute(currentPosition, desiredPosition, currentRate, desiredRate);
       simulatedJoint.setTau(desiredTau);

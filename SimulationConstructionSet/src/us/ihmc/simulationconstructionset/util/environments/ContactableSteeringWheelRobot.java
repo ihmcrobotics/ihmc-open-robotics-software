@@ -237,14 +237,14 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 
       yoGraphicsListRegistries.add(graphListRegistry);
 
-      steeringWheelPinJoint.getQ().addVariableChangedListener(new VariableChangedListener()
+      steeringWheelPinJoint.getQYoVariable().addVariableChangedListener(new VariableChangedListener()
       {
 
          @Override
          public void variableChanged(YoVariable<?> v)
          {
             double rangeOfMotion = 2 * Math.PI * totalNumberOfPossibleTurns;
-            steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion.set((Math.abs(steeringWheelPinJoint.getQ().getDoubleValue()) / (0.5 * rangeOfMotion)) * 100);
+            steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion.set((Math.abs(steeringWheelPinJoint.getQYoVariable().getDoubleValue()) / (0.5 * rangeOfMotion)) * 100);
          }
       });
    }
@@ -254,7 +254,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    {
       RigidBodyTransform pinJointTransform = new RigidBodyTransform();
       RigidBodyTransform newPose = new RigidBodyTransform();
-      pinJointTransform.setRotationYawAndZeroTranslation(steeringWheelPinJoint.getQ().getDoubleValue());
+      pinJointTransform.setRotationYawAndZeroTranslation(steeringWheelPinJoint.getQYoVariable().getDoubleValue());
       newPose.multiply(originalSteeringWheelPose, pinJointTransform);
       steeringWheelFrame.setPoseAndUpdate(newPose);
 

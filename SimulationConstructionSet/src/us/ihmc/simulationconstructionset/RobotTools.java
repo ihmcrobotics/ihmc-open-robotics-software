@@ -146,7 +146,7 @@ public class RobotTools
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
             OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
-            idJoint.setQ(scsJoint.getQ().getDoubleValue());
+            idJoint.setQ(scsJoint.getQYoVariable().getDoubleValue());
          }
       }
 
@@ -166,7 +166,7 @@ public class RobotTools
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
             OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
-            idJoint.setQd(scsJoint.getQD().getDoubleValue());
+            idJoint.setQd(scsJoint.getQDYoVariable().getDoubleValue());
          }
       }
 

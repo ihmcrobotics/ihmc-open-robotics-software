@@ -37,8 +37,8 @@ public class DataExporterGraphCreator
    {
       for (PinJoint pinJoint : pinJoints)
       {
-         DataBufferEntry torque = dataBuffer.getEntry(pinJoint.getTau());
-         DataBufferEntry speed = dataBuffer.getEntry(pinJoint.getQD());
+         DataBufferEntry torque = dataBuffer.getEntry(pinJoint.getTauYoVariable());
+         DataBufferEntry speed = dataBuffer.getEntry(pinJoint.getQDYoVariable());
 
          createDataVsTimeGraph(directory, fileHeader, torque, createJPG, createPDF);
          createDataVsTimeGraph(directory, fileHeader, speed, createJPG, createPDF);
