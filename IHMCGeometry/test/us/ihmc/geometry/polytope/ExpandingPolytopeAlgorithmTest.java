@@ -60,7 +60,8 @@ public class ExpandingPolytopeAlgorithmTest
       assertEquals(4, numberOfPointsOnSimplex);
 
       expandingPolytopeAlgorithm.setPolytopes(simplex, polytopeOne, polytopeTwo);
-      Vector3d separatingDistanceVector = expandingPolytopeAlgorithm.computeExpandedPolytope(closestPointOnA, closestPointOnB);
+      Vector3d separatingDistanceVector = new Vector3d();
+      expandingPolytopeAlgorithm.computeExpandedPolytope(separatingDistanceVector, closestPointOnA, closestPointOnB);
 
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, -0.2), separatingDistanceVector, 1e-7);
       JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, -0.15), closestPointOnA, 1e-7);
@@ -96,7 +97,8 @@ public class ExpandingPolytopeAlgorithmTest
       assertEquals(4, numberOfPointsOnSimplex);
 
       expandingPolytopeAlgorithm.setPolytopes(simplex, cubeOne, cubeTwo);
-      Vector3d separatingDistanceVector = expandingPolytopeAlgorithm.computeExpandedPolytope(closestPointOnA, closestPointOnB);
+      Vector3d separatingDistanceVector = new Vector3d();
+      expandingPolytopeAlgorithm.computeExpandedPolytope(separatingDistanceVector, closestPointOnA, closestPointOnB);
 
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, -0.2), separatingDistanceVector, 1e-7);
       JUnitTools.assertTuple3dEquals(new Point3d(1.7, 2.75, 3.8), closestPointOnA, 1e-7);
@@ -154,7 +156,8 @@ public class ExpandingPolytopeAlgorithmTest
             {
                numberOfCollisions++;
                expandingPolytopeAlgorithm.setPolytopes(simplex, cubeOne, cubeTwo);
-               Vector3d separatingDistanceVector = expandingPolytopeAlgorithm.computeExpandedPolytope(closestPointOnA, closestPointOnB);
+               Vector3d separatingDistanceVector = new Vector3d();
+               expandingPolytopeAlgorithm.computeExpandedPolytope(separatingDistanceVector, closestPointOnA, closestPointOnB);
 
                assertEquals(separatingDistanceVector.length(), closestPointOnA.distance(closestPointOnB), 1e-7);
             }
@@ -199,7 +202,8 @@ public class ExpandingPolytopeAlgorithmTest
       assertEquals(4, numberOfPointsOnSimplex);
 
       expandingPolytopeAlgorithm.setPolytopes(simplex, cubeOne, cubeTwo);
-      Vector3d separatingDistanceVector = expandingPolytopeAlgorithm.computeExpandedPolytope(closestPointOnA, closestPointOnB);
+      Vector3d separatingDistanceVector = new Vector3d();
+      expandingPolytopeAlgorithm.computeExpandedPolytope(separatingDistanceVector, closestPointOnA, closestPointOnB);
 
       assertEquals(1.469517381122009E-5, separatingDistanceVector.length(), 1e-7);
       JUnitTools.assertTuple3dEquals(new Point3d(-0.6654362950758336, 0.0120271553579471, 0.00498530482618878), closestPointOnA, 1e-7);

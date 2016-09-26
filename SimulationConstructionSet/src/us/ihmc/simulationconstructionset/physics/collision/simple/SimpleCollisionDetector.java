@@ -325,7 +325,9 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             expandingPolytopeAlgorithm.setPolytopes(simplex, polytopeOne, polytopeTwo);
             try
             {
-               Vector3d collisionNormal = expandingPolytopeAlgorithm.computeExpandedPolytope(pointOnAToPack, pointOnBToPack);
+               //TODO: Reduce trash here...
+               Vector3d collisionNormal = new Vector3d();
+               expandingPolytopeAlgorithm.computeExpandedPolytope(collisionNormal, pointOnAToPack, pointOnBToPack);
 
                //TODO: Magic number for normalize
                if (collisionNormal.lengthSquared() > 1e-6)

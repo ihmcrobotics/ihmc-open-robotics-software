@@ -157,8 +157,8 @@ public class NewtonsCradleSimulation
    {
 //      createNewtonsCradleSimulation();
 //      createStackOfBouncyBallsSimulation();
-      createRowOfDominosSimulation();
-//      createPileOfRandomObjectsSimulation();
+//      createRowOfDominosSimulation();
+      createPileOfRandomObjectsSimulation();
 //      createSpinningCoinSimulation();
    }
 }
