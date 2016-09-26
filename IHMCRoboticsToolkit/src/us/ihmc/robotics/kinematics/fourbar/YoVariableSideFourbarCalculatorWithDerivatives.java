@@ -13,7 +13,7 @@ import static us.ihmc.robotics.geometry.GeometryTools.getUnknownTriangleSideLeng
 
 public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCalculatorWithDerivatives
 {
-   private final DoubleYoVariable a, b, c, d;
+   private final DoubleYoVariable lengthAD, lengthBA, lengthCB, lengthDC;
    private final DoubleYoVariable minA, maxA;
 
    // Angles
@@ -27,33 +27,33 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
 
    public YoVariableSideFourbarCalculatorWithDerivatives(String namePrefix, YoVariableRegistry registry)
    {
-      this.a = new DoubleYoVariable(namePrefix + "_lenghtA", registry);
-      this.b = new DoubleYoVariable(namePrefix + "_lenghtB", registry);
-      this.c = new DoubleYoVariable(namePrefix + "_lenghtC", registry);
-      this.d = new DoubleYoVariable(namePrefix + "_lenghtD", registry);
+      this.lengthAD = new DoubleYoVariable(namePrefix + "_lenghtAD", registry);
+      this.lengthBA = new DoubleYoVariable(namePrefix + "_lenghtBA", registry);
+      this.lengthCB = new DoubleYoVariable(namePrefix + "_lenghtCB", registry);
+      this.lengthDC = new DoubleYoVariable(namePrefix + "_lenghtDC", registry);
 
       this.minA = new DoubleYoVariable(namePrefix + "_minLengthA", registry);
       this.maxA = new DoubleYoVariable(namePrefix + "_maxLengthA", registry);
    }
 
-   public void setSideLengths(double lengthA, double lengthB, double lengthC, double lengthD)
+   public void setSideLengths(double lengthAD, double lengthBA, double lengthCB, double lengthDC)
    {
-      this.a.set(lengthA);
-      this.b.set(lengthB);
-      this.c.set(lengthC);
-      this.d.set(lengthD);
+      this.lengthAD.set(lengthAD);
+      this.lengthBA.set(lengthBA);
+      this.lengthCB.set(lengthCB);
+      this.lengthDC.set(lengthDC);
 
-      double eMax = min(lengthA + lengthB, lengthD + lengthC);
-      if (eMax == lengthA + lengthB)
+      double eMax = min(lengthAD + lengthBA, lengthDC + lengthCB);
+      if (eMax == lengthAD + lengthBA)
          maxA.set(PI);
       else
-         maxA.set(getAngleWithCosineLaw(lengthA, lengthB, eMax));
+         maxA.set(getAngleWithCosineLaw(lengthAD, lengthBA, eMax));
 
-      double fMax = min(lengthA + lengthD, lengthB + lengthC);
-      if (fMax == lengthA + lengthD)
-         minA.set(getAngleWithCosineLaw(fMax, lengthB, lengthC));
+      double fMax = min(lengthAD + lengthDC, lengthBA + lengthCB);
+      if (fMax == lengthAD + lengthDC)
+         minA.set(getAngleWithCosineLaw(fMax, lengthBA, lengthCB));
       else
-         minA.set(getAngleWithCosineLaw(fMax, lengthA, lengthD));
+         minA.set(getAngleWithCosineLaw(fMax, lengthAD, lengthDC));
    }
 
    private static double getAngleWithCosineLaw(double l_neighbour1, double l_neighbour2, double l_opposite)
@@ -79,10 +79,10 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
    {
       // Solve angles
       double A = clipToMinMax(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
-      double e = getUnknownTriangleSideLengthByLawOfCosine(a.getDoubleValue(), b.getDoubleValue(), A);
-      double C = getAngleWithCosineLaw(c.getDoubleValue(), d.getDoubleValue(), e);
-      double angleDBA = getAngleWithCosineLaw(b.getDoubleValue(), e, a.getDoubleValue());
-      double angleDBC = getAngleWithCosineLaw(c.getDoubleValue(), e, d.getDoubleValue());
+      double e = getUnknownTriangleSideLengthByLawOfCosine(lengthAD.getDoubleValue(), lengthBA.getDoubleValue(), A);
+      double C = getAngleWithCosineLaw(lengthCB.getDoubleValue(), lengthDC.getDoubleValue(), e);
+      double angleDBA = getAngleWithCosineLaw(lengthBA.getDoubleValue(), e, lengthAD.getDoubleValue());
+      double angleDBC = getAngleWithCosineLaw(lengthCB.getDoubleValue(), e, lengthDC.getDoubleValue());
       double B = angleDBA + angleDBC;
       double D = 2 * PI - A - B - C;
       this.angleDAB = A;
@@ -96,10 +96,10 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
    public void computeMasterJointAngleGivenAngleABC(double angleABCInRadians)
    {
       double B = angleABCInRadians;
-      double f = getUnknownTriangleSideLengthByLawOfCosine(b.getDoubleValue(), c.getDoubleValue(), B);
-      double D = getAngleWithCosineLaw(d.getDoubleValue(), a.getDoubleValue(), f);
-      double angleACB = getAngleWithCosineLaw(c.getDoubleValue(), f, b.getDoubleValue());
-      double angleACD = getAngleWithCosineLaw(d.getDoubleValue(), f, a.getDoubleValue());
+      double f = getUnknownTriangleSideLengthByLawOfCosine(lengthBA.getDoubleValue(), lengthCB.getDoubleValue(), B);
+      double D = getAngleWithCosineLaw(lengthDC.getDoubleValue(), lengthAD.getDoubleValue(), f);
+      double angleACB = getAngleWithCosineLaw(lengthCB.getDoubleValue(), f, lengthBA.getDoubleValue());
+      double angleACD = getAngleWithCosineLaw(lengthDC.getDoubleValue(), f, lengthAD.getDoubleValue());
       double C = angleACB + angleACD;
       double A = 2 * PI - D - B - C;
       this.angleDAB = A;
@@ -108,8 +108,8 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
    public void computeMasterJointAngleGivenAngleBCD(double angleBCDInRadians)
    {
       double C = angleBCDInRadians;
-      double e = getUnknownTriangleSideLengthByLawOfCosine(c.getDoubleValue(), d.getDoubleValue(), C);
-      double A = getAngleWithCosineLaw(a.getDoubleValue(), b.getDoubleValue(), e);
+      double e = getUnknownTriangleSideLengthByLawOfCosine(lengthCB.getDoubleValue(), lengthDC.getDoubleValue(), C);
+      double A = getAngleWithCosineLaw(lengthAD.getDoubleValue(), lengthBA.getDoubleValue(), e);
       this.angleDAB = A;
    }
 
@@ -120,16 +120,16 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
    public void computeMasterJointAngleGivenAngleCDA(double angleCDAInRadians)
    {
       double D = angleCDAInRadians;
-      double f = getUnknownTriangleSideLengthByLawOfCosine(d.getDoubleValue(), a.getDoubleValue(), D);
-      double angleCAD = getAngleWithCosineLaw(a.getDoubleValue(), f, d.getDoubleValue());
-      double angleCAB = getAngleWithCosineLaw(b.getDoubleValue(), f, c.getDoubleValue());
+      double f = getUnknownTriangleSideLengthByLawOfCosine(lengthDC.getDoubleValue(), lengthAD.getDoubleValue(), D);
+      double angleCAD = getAngleWithCosineLaw(lengthAD.getDoubleValue(), f, lengthDC.getDoubleValue());
+      double angleCAB = getAngleWithCosineLaw(lengthBA.getDoubleValue(), f, lengthCB.getDoubleValue());
       double A = angleCAD + angleCAB;
       this.angleDAB = A;
    }
 
    /**
     * Compute every angle of the quadrilateral.
-    * @param angleDABInRadians is the angle formed by the sides a and b (see scheme in this class)
+    * @param angleDABInRadians is the angle formed by the sides lengthAD and lengthBA (see scheme in this class)
     * @param angularVelocityDAB first time-derivative of the angle DAB
     * @return true if the angle DAB is out of range making the quadrilateral non-convex
     */
@@ -141,11 +141,11 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
       // Solve angular velocity
       double A = clipToMinMax(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
       double dAdT = angularVelocityDAB;
-      double e = getUnknownTriangleSideLengthByLawOfCosine(a.getDoubleValue(), b.getDoubleValue(), A);
-      double eDot = a.getDoubleValue() * b.getDoubleValue() * sin(A) * dAdT / e;
-      double dCdT = FourbarCalculatorTools.getAngleDotWithCosineLaw(c.getDoubleValue(), d.getDoubleValue(), 0.0, e, eDot);
-      double angleDotDBA = FourbarCalculatorTools.getAngleDotWithCosineLaw(b.getDoubleValue(), e, eDot, a.getDoubleValue(), 0.0);
-      double angleDotDBC = FourbarCalculatorTools.getAngleDotWithCosineLaw(c.getDoubleValue(), e, eDot, d.getDoubleValue(), 0.0);
+      double e = getUnknownTriangleSideLengthByLawOfCosine(lengthAD.getDoubleValue(), lengthBA.getDoubleValue(), A);
+      double eDot = lengthAD.getDoubleValue() * lengthBA.getDoubleValue() * sin(A) * dAdT / e;
+      double dCdT = FourbarCalculatorTools.getAngleDotWithCosineLaw(lengthCB.getDoubleValue(), lengthDC.getDoubleValue(), 0.0, e, eDot);
+      double angleDotDBA = FourbarCalculatorTools.getAngleDotWithCosineLaw(lengthBA.getDoubleValue(), e, eDot, lengthAD.getDoubleValue(), 0.0);
+      double angleDotDBC = FourbarCalculatorTools.getAngleDotWithCosineLaw(lengthCB.getDoubleValue(), e, eDot, lengthDC.getDoubleValue(), 0.0);
       double dBdT = angleDotDBA + angleDotDBC;
       double dDdT = -dAdT - dBdT - dCdT;
       this.angleDtDAB = dAdT;
@@ -165,12 +165,12 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
       double A = clipToMinMax(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
       double dAdT = angularVelocityDAB;
       double dAdT2 = angularAccelerationDAB;
-      double e = getUnknownTriangleSideLengthByLawOfCosine(a.getDoubleValue(), b.getDoubleValue(), A);
-      double eDot = a.getDoubleValue() * b.getDoubleValue() * sin(A) * dAdT / e;
-      double eDDot = a.getDoubleValue() * b.getDoubleValue() / e * (cos(A) * dAdT * dAdT + sin(A) * (dAdT2 - eDot * dAdT / e));
-      double dCdT2 = FourbarCalculatorTools.getAngleDDotWithCosineLaw(c.getDoubleValue(), d.getDoubleValue(), 0.0, 0.0, e, eDot, eDDot);
-      double angleDDotDBA = FourbarCalculatorTools.getAngleDDotWithCosineLaw(b.getDoubleValue(), e, eDot, eDDot, a.getDoubleValue(), 0.0, 0.0);
-      double angleDDotDBC = FourbarCalculatorTools.getAngleDDotWithCosineLaw(c.getDoubleValue(), e, eDot, eDDot, d.getDoubleValue(), 0.0, 0.0);
+      double e = getUnknownTriangleSideLengthByLawOfCosine(lengthAD.getDoubleValue(), lengthBA.getDoubleValue(), A);
+      double eDot = lengthAD.getDoubleValue() * lengthBA.getDoubleValue() * sin(A) * dAdT / e;
+      double eDDot = lengthAD.getDoubleValue() * lengthBA.getDoubleValue() / e * (cos(A) * dAdT * dAdT + sin(A) * (dAdT2 - eDot * dAdT / e));
+      double dCdT2 = FourbarCalculatorTools.getAngleDDotWithCosineLaw(lengthCB.getDoubleValue(), lengthDC.getDoubleValue(), 0.0, 0.0, e, eDot, eDDot);
+      double angleDDotDBA = FourbarCalculatorTools.getAngleDDotWithCosineLaw(lengthBA.getDoubleValue(), e, eDot, eDDot, lengthAD.getDoubleValue(), 0.0, 0.0);
+      double angleDDotDBC = FourbarCalculatorTools.getAngleDDotWithCosineLaw(lengthCB.getDoubleValue(), e, eDot, eDDot, lengthDC.getDoubleValue(), 0.0, 0.0);
       double dBdT2 = angleDDotDBA + angleDDotDBC;
       double dDdT2 = -dAdT2 - dBdT2 - dCdT2;
       this.angleDt2DAB = dAdT2;
@@ -254,21 +254,21 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
 
    public double getAB()
    {
-      return a.getDoubleValue();
+      return lengthAD.getDoubleValue();
    }
 
    public double getBC()
    {
-      return b.getDoubleValue();
+      return lengthBA.getDoubleValue();
    }
 
    public double getCD()
    {
-      return c.getDoubleValue();
+      return lengthCB.getDoubleValue();
    }
 
    public double getDA()
    {
-      return d.getDoubleValue();
+      return lengthDC.getDoubleValue();
    }
 }
