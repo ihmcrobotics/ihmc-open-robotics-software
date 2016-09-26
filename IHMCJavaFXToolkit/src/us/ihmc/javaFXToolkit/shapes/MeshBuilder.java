@@ -412,13 +412,19 @@ public class MeshBuilder
          for (int i = 2; i < points.length; i += 3)
             points[i] += halfL;
 
-         if (Math.abs(localDirection.getZ()) < 1.0 - 1.0e-3)
-         {
             float yaw;
             float pitch;
-            yaw = (float) Math.atan2(localDirection.getY(), localDirection.getX());
-            double xyLength = Math.sqrt(localDirection.getX() * localDirection.getX() + localDirection.getY() * localDirection.getY());
-            pitch = (float) Math.atan2(xyLength, localDirection.getZ());
+            if (Math.abs(localDirection.getZ()) < 1.0 - 1.0e-3)
+            {
+               yaw = (float) Math.atan2(localDirection.getY(), localDirection.getX());
+               double xyLength = Math.sqrt(localDirection.getX() * localDirection.getX() + localDirection.getY() * localDirection.getY());
+               pitch = (float) Math.atan2(xyLength, localDirection.getZ());
+            }
+            else
+            {
+               yaw = 0.0f;
+               pitch = localDirection.getZ() >= 0.0 ? 0.0f : (float) Math.PI;
+            }
 
             float cYaw = (float) Math.cos(yaw);
             float sYaw = (float) Math.sin(yaw);
@@ -435,7 +441,6 @@ public class MeshBuilder
                points[i + 1] = sYaw * cPitch * x + cYaw * y + sYaw * sPitch * z;
                points[i + 2] = -sPitch * x + cPitch * z;
             }
-         }
 
          return points;
       }
