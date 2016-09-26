@@ -16,7 +16,7 @@ public interface CollisionShape
    /**
     * Returns a description of the shape.  Multiple {@link CollisionShape} can have the same description.
     */
-   public abstract CollisionShapeDescription getDescription();
+   public abstract CollisionShapeDescription getCollisionShapeDescription();
 
    /**
     * Bit field indicating which groups the shape belongs to

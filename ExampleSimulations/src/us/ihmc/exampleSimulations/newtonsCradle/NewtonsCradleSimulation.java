@@ -122,7 +122,8 @@ public class NewtonsCradleSimulation
       parameters.setCreateGUI(showGUI);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
-      scs.setDT(0.0001, 100);
+      scs.setDT(0.00025, 100);
+      scs.setFastSimulate(true);
       scs.setGroundVisible(false);
       scs.startOnAThread();
 
@@ -142,7 +143,7 @@ public class NewtonsCradleSimulation
       long wallStartTime = System.currentTimeMillis();
       while(true)
       {
-         ThreadTools.sleep(1000);
+         ThreadTools.sleep(5000);
 
          double simTime = scs.getTime();
          long wallTime = System.currentTimeMillis();

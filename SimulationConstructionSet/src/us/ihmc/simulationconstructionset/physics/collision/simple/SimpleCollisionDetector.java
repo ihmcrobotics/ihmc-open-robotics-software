@@ -1,26 +1,25 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
+import gnu.trove.map.hash.THashMap;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithm;
 import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.geometry.polytope.SimplexPolytope;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class SimpleCollisionDetector implements ScsCollisionDetector
 {
@@ -74,10 +73,20 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       return null;
    }
 
+   private final Random random = new Random(1776L);
+   
+//   private final THashMap<CollisionShapeFactory, ArrayList<CollisionShape>> collidingPairs = new THashMap<>();
+   private boolean[][] haveCollided = null;
+   
    @Override
    public void performCollisionDetection(CollisionDetectionResult result)
    {
       int numberOfObjects = collisionObjects.size();
+
+      if (haveCollided == null) 
+      {
+         haveCollided = new boolean[numberOfObjects][numberOfObjects];
+      }
 
       for (int i = 0; i < numberOfObjects; i++)
       {
@@ -87,31 +96,47 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       
       
       for (int i = 0; i < numberOfObjects; i++)
-      {
+      {         
          CollisionShape objectOne = collisionObjects.get(i);
+         CollisionShapeDescription descriptionOne = objectOne.getTransformedCollisionShapeDescription();
 
          for (int j = i + 1; j < numberOfObjects; j++)
          {
+            if ((!haveCollided[i][j]) && (random.nextDouble() < 0.9)) continue;
+
             CollisionShape objectTwo = collisionObjects.get(j);
-
-//            objectOne.getTransformToWorld(transformOne);
-//            objectTwo.getTransformToWorld(transformTwo);
-
-            CollisionShapeDescription descriptionOne = objectOne.getTransformedCollisionShapeDescription();
             CollisionShapeDescription descriptionTwo = objectTwo.getTransformedCollisionShapeDescription();
 
+            boolean areColliding = false;
+            
             if ((descriptionOne instanceof SphereShapeDescription) && (descriptionTwo instanceof SphereShapeDescription))
             {
                doSphereSphereCollisionDetection(objectOne, (SphereShapeDescription) descriptionOne, objectTwo, (SphereShapeDescription) descriptionTwo, result);
             }
             else if ((descriptionOne instanceof PolytopeShapeDescription) && (descriptionTwo instanceof PolytopeShapeDescription))
             {
-               doPolytopePolytopeCollisionDetection(objectOne, (PolytopeShapeDescription) descriptionOne, objectTwo, (PolytopeShapeDescription) descriptionTwo,
+               areColliding = doPolytopePolytopeCollisionDetection(objectOne, (PolytopeShapeDescription) descriptionOne, objectTwo, (PolytopeShapeDescription) descriptionTwo,
                      result);
             }
             else if ((descriptionOne instanceof BoxShapeDescription) && (descriptionTwo instanceof BoxShapeDescription))
             {
                doBoxBoxCollisionDetection(objectOne, (BoxShapeDescription) descriptionOne, objectTwo, (BoxShapeDescription) descriptionTwo, result);
+            }
+            
+            if (areColliding)
+            {
+               haveCollided[i][j] = true;
+//               ArrayList<CollisionShape> arrayList = collidingPairs.get(objectOne);
+//               if (arrayList == null)
+//               {
+//                  arrayList = new ArrayList<>();
+//                  collidingPairs.put(objectOne, arrayList);
+//               }
+//               
+//               if (!arrayList.contains(objectTwo))
+//               {
+//                  arrayList.add(objectTwo);
+//               }
             }
          }
       }
@@ -278,7 +303,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    private final Point3d pointOnAToPack = new Point3d();
    private final Point3d pointOnBToPack = new Point3d();
 
-   private void doPolytopePolytopeCollisionDetection(CollisionShape objectOne, PolytopeShapeDescription descriptionOne, CollisionShape objectTwo,
+   private boolean doPolytopePolytopeCollisionDetection(CollisionShape objectOne, PolytopeShapeDescription descriptionOne, CollisionShape objectTwo,
          PolytopeShapeDescription descriptionTwo, CollisionDetectionResult result)
    {
       ConvexPolytope polytopeOne = descriptionOne.getPolytope();
@@ -305,6 +330,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
                double distanceToReport = -pointOnAToPack.distance(pointOnBToPack); //0.001; //TODO: Do we even need this?
                contacts.addContact(new Point3d(pointOnAToPack), new Point3d(pointOnBToPack), normalVector, distanceToReport);
                result.addContact(contacts);
+               return true;
             }
          }
       }
@@ -351,8 +377,11 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
                System.err.println(polytopeTwo);
             }
          }
+         
+         return true;
       }
 
+      return false;
    }
 
    public void addShape(CollisionShape collisionShape)
