@@ -199,6 +199,6 @@ public abstract class ICPOptimizationParameters
     */
    public double getFootstepSolutionResolution()
    {
-      return 0.01;
+      return 0.015;
    }
 }

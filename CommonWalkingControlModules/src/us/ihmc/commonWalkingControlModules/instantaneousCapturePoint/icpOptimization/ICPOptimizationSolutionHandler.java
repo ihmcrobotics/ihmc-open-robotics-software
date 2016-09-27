@@ -178,17 +178,17 @@ public class ICPOptimizationSolutionHandler
       referenceLocation.setXYIncludingFrame(referenceLocation2d);
       previousLocation.setXYIncludingFrame(currentSolutionLocation);
 
-      solutionLocation.changeFrame(deadbandFrame);
-      referenceLocation.changeFrame(deadbandFrame);
-      previousLocation.changeFrame(deadbandFrame);
-      solutionAdjustment.setToZero(deadbandFrame);
-      adjustmentFromPrevious.setToZero(deadbandFrame);
+      solutionLocation.changeFrame(worldFrame);
+      referenceLocation.changeFrame(worldFrame);
+      previousLocation.changeFrame(worldFrame);
+
+      solutionAdjustment.setToZero(worldFrame);
+      adjustmentFromPrevious.setToZero(worldFrame);
 
       solutionAdjustment.set(solutionLocation);
       solutionAdjustment.sub(referenceLocation);
 
-      adjustmentFromPrevious.set(solutionLocation);
-      adjustmentFromPrevious.sub(previousLocation);
+      solutionAdjustment.changeFrame(deadbandFrame);
 
       boolean wasAdjusted = false;
 
@@ -207,20 +207,6 @@ public class ICPOptimizationSolutionHandler
          }
       }
 
-      if (Math.abs(adjustmentFromPrevious.getX()) < deadbandResolution)
-      {
-         solutionLocation.setX(previousLocation.getX());
-      }
-      else
-      {
-         if (solutionLocation.getX() > deadbandResolution)
-            solutionLocation.setX(solutionLocation.getX() - deadbandResolution);
-         else if (solutionLocation.getX() < -deadbandResolution)
-            solutionLocation.setX(solutionLocation.getX() + deadbandResolution);
-
-         wasAdjusted = true;
-      }
-
       if (Math.abs(solutionAdjustment.getY()) < lateralDeadband)
       {
          solutionLocation.setY(referenceLocation.getY());
@@ -236,18 +222,19 @@ public class ICPOptimizationSolutionHandler
          }
       }
 
-      if (Math.abs(adjustmentFromPrevious.getY()) < deadbandResolution)
-      {
-         solutionLocation.setY(previousLocation.getY());
-      }
+      adjustmentFromPrevious.set(solutionLocation);
+      adjustmentFromPrevious.sub(previousLocation);
+      adjustmentFromPrevious.changeFrame(deadbandFrame);
+
+      if (Math.abs(adjustmentFromPrevious.getX()) < deadbandResolution)
+         solutionLocation.setX(previousLocation.getX());
       else
-      {
-         if (solutionLocation.getY() > deadbandResolution)
-            solutionLocation.setY(solutionLocation.getY() - deadbandResolution);
-         else if (solutionLocation.getY() < -deadbandResolution)
-            solutionLocation.setY(solutionLocation.getY() + deadbandResolution);
          wasAdjusted = true;
-      }
+
+      if (Math.abs(adjustmentFromPrevious.getY()) < deadbandResolution)
+         solutionLocation.setY(previousLocation.getY());
+      else
+         wasAdjusted = true;
 
       solutionLocation.changeFrame(solutionLocationToPack.getReferenceFrame());
       solutionLocationToPack.setByProjectionOntoXYPlane(solutionLocation);
