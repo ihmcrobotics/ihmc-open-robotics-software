@@ -25,7 +25,7 @@ public class ICPOptimizationCMPConstraintHandler
    }
 
    private final FramePoint2d tempVertex = new FramePoint2d();
-   public void initializeCMPConstraintForDoubleSupport(ICPOptimizationSolver solver)
+   public void updateCMPConstraintForDoubleSupport(ICPOptimizationSolver solver)
    {
       int numberOfVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
@@ -48,7 +48,7 @@ public class ICPOptimizationCMPConstraintHandler
       }
    }
 
-   public void initializeCMPConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationSolver solver)
+   public void updateCMPConstraintForSingleSupport(RobotSide supportSide, ICPOptimizationSolver solver)
    {
       FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide);
       solver.setNumberOfVertices(supportPolygon.getNumberOfVertices());
