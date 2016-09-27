@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.gc_foot_fs</Variables>
+		<Variables>root.Skippy.gc_foot_fs,root.Skippy.SkippyController.stateMachine,root.Skippy.SkippyController.SkippyToDo</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
