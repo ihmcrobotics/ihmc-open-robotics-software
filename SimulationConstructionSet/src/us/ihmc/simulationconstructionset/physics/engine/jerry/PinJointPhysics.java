@@ -80,17 +80,17 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
       // User torque-speed curve:
       if (owner.torqueSpeedCurve != null)
       {
-         owner.getTauYoVariable().set(owner.torqueSpeedCurve.limitTorque(owner.getTauYoVariable().getDoubleValue(), owner.getQDYoVariable().getDoubleValue()));
+         owner.getTauYoVariable().set(owner.torqueSpeedCurve.limitTorque(owner.getTau(), owner.getQDYoVariable().getDoubleValue()));
       }
 
       // Torque Limits
       if (owner.tau_max != null)
       {
          double maxTorque = owner.tau_max.getDoubleValue();
-         owner.getTauYoVariable().set(MathTools.clipToMinMax(owner.getTauYoVariable().getDoubleValue(), -maxTorque, maxTorque));
+         owner.getTauYoVariable().set(MathTools.clipToMinMax(owner.getTau(), -maxTorque, maxTorque));
       }
 
-      Q_i = owner.doPDControl() + owner.getTauYoVariable().getDoubleValue();
+      Q_i = owner.doPDControl() + owner.getTau();
 
       // Limit stops:
       if (owner.tauJointLimit != null)
