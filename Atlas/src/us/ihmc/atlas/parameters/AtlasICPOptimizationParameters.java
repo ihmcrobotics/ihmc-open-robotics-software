@@ -23,14 +23,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFootstepWeight()
    {
-      return runningOnRealRobot ? 100.0 : 15.0;
+      return runningOnRealRobot ? 20.0 : 15.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFootstepRegularizationWeight()
    {
-      return 0.0001;
+      return 0.001;
    }
 
    /** {@inheritDoc} */
@@ -44,35 +44,35 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackRegularizationWeight()
    {
-      return runningOnRealRobot ? 0.001 : 0.001;
+      return runningOnRealRobot ? 0.0001 : 0.001;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackParallelGain()
    {
-      return runningOnRealRobot ? 2.5 : 5.0;
+      return runningOnRealRobot ? 3.0 : 5.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackOrthogonalGain()
    {
-      return runningOnRealRobot ? 1.5 : 5.0;
+      return runningOnRealRobot ? 2.5 : 5.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDynamicRelaxationWeight()
    {
-      return runningOnRealRobot ? 1000.0 : 5000.0;
+      return runningOnRealRobot ? 500.0 : 5000.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDynamicRelaxationDoubleSupportWeightModifier()
    {
-      return 5.0;
+      return runningOnRealRobot ? 1.0 : 5.0;
    }
 
    /** {@inheritDoc} */
@@ -170,28 +170,28 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getMaxCMPForwardExit()
    {
-      return 0.00;
+      return 0.01;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMaxCMPLateralExit()
    {
-      return 0.00;
+      return 0.005;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getForwardAdjustmentDeadband()
    {
-      return 0.02;
+      return 0.03;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getLateralAdjustmentDeadband()
    {
-      return 0.02;
+      return 0.03;
    }
 
    /** {@inheritDoc} */
@@ -199,5 +199,12 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    public double getRemainingTimeToStopAdjusting()
    {
       return 0.05;
+   }
+   
+   /** {@inheritDoc} */
+   @Override
+   public boolean useDiscontinuousDeadband()
+   {
+      return false;
    }
 }
