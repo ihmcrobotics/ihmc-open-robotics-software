@@ -42,7 +42,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    public DoubleYoVariable qd_max, b_vel_limit;
    public DoubleYoVariable tau_max;
 
-   private YoVariableRegistry registry;
+   protected YoVariableRegistry registry;
 
    public TorqueSpeedCurve torqueSpeedCurve;
 
