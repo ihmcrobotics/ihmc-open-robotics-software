@@ -647,8 +647,8 @@ public class SkippyController implements RobotController {
 			double icpToFootErrorY = controllerCmpY.compute(actualICP.getY(), footLocation.getY(),
 					centerOfMassVelocity.getY(), 0.0, SkippySimulation.DT);
 			icpToFootError.set(icpToFootErrorX, icpToFootErrorY,0.0);
-			double desiredCmpX = actualICP.getX() + icpToFootErrorX;	//controllerCmpX.compute(actualICP.getX(), footLocation.getX(),
-			double desiredCmpY = actualICP.getY() + icpToFootErrorY;	//controllerCmpY.compute(actualICP.getY(), footLocation.getY(),
+			double desiredCmpX = actualICP.getX();// + kCapture.getDoubleValue()*icpToFootErrorX;	//controllerCmpX.compute(actualICP.getX(), footLocation.getX(),
+			double desiredCmpY = actualICP.getY();// + kCapture.getDoubleValue()*icpToFootErrorY;	//controllerCmpY.compute(actualICP.getY(), footLocation.getY(),
 			desiredCMPFromICP.setX(desiredCmpX);
 			desiredCMPFromICP.setY(desiredCmpY);
 			/*
@@ -684,15 +684,15 @@ public class SkippyController implements RobotController {
 			/*
 			 * Apply torques
 			 */
-//			robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue());
-//			robot.getShoulderJoint().setTau(-tauOnShoulderJointAxis.getDoubleValue());
+			robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue());
+			robot.getShoulderJoint().setTau(-tauOnShoulderJointAxis.getDoubleValue());
 
 //		} else {
 			/*
 			 * Apply torques from actual controller on Skippy
 			 */
-			applyTorqueToHip(q_d_hip.getDoubleValue());
-			applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
+//			applyTorqueToHip(q_d_hip.getDoubleValue());
+//			applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
 //		}
 	}
 
