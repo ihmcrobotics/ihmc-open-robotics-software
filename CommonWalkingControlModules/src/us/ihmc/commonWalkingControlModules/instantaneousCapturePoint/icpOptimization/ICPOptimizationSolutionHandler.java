@@ -37,6 +37,8 @@ public class ICPOptimizationSolutionHandler
 
    private final DoubleYoVariable footstepForwardDeadband;
    private final DoubleYoVariable footstepLateralDeadband;
+   
+   private final BooleanYoVariable useDiscontinuousDeadband;
    private final BooleanYoVariable footstepWasAdjusted;
 
    private final DoubleYoVariable controllerCostToGo;
@@ -73,10 +75,13 @@ public class ICPOptimizationSolutionHandler
 
       footstepForwardDeadband = new DoubleYoVariable("footstepForwardDeadband", registry);
       footstepLateralDeadband = new DoubleYoVariable("footstepLateralDeadband", registry);
+      
+      useDiscontinuousDeadband = new BooleanYoVariable("useDiscontinuousDeadband", registry);
       footstepWasAdjusted = new BooleanYoVariable("footstepWasAdjusted", registry);
 
       footstepForwardDeadband.set(icpOptimizationParameters.getForwardAdjustmentDeadband());
       footstepLateralDeadband.set(icpOptimizationParameters.getLateralAdjustmentDeadband());
+      useDiscontinuousDeadband.set(icpOptimizationParameters.useDiscontinuousDeadband());
 
       //if (yoGraphicsListRegistry != null)
       //   setupVisualizers(yoGraphicsListRegistry, visualize);
@@ -180,11 +185,13 @@ public class ICPOptimizationSolutionHandler
       }
       else
       {
-         if (solutionAdjustment.getX() > 0.0)
-            solutionLocation.setX(solutionLocation.getX() - forwardDeadband);
-         else
-            solutionLocation.setX(solutionLocation.getX() + forwardDeadband);
-
+         if (!useDiscontinuousDeadband.getBooleanValue())
+         {
+            if (solutionAdjustment.getX() > forwardDeadband)
+               solutionLocation.setX(solutionLocation.getX() - forwardDeadband);
+            else if (solutionAdjustment.getX() < -forwardDeadband)
+               solutionLocation.setX(solutionLocation.getX() + forwardDeadband);
+         }
          wasAdjusted = true;
       }
 
@@ -194,11 +201,13 @@ public class ICPOptimizationSolutionHandler
       }
       else
       {
-         if (solutionAdjustment.getY() > 0.0)
-            solutionLocation.setY(solutionLocation.getY() - lateralDeadband);
-         else
-            solutionLocation.setY(solutionLocation.getY() + lateralDeadband);
-
+         if (!useDiscontinuousDeadband.getBooleanValue())
+         {
+            if (solutionAdjustment.getY() > lateralDeadband)
+                solutionLocation.setY(solutionLocation.getY() - lateralDeadband);
+            else if (solutionAdjustment.getY() < -lateralDeadband)
+                solutionLocation.setY(solutionLocation.getY() + lateralDeadband);
+         }
          wasAdjusted = true;
       }
 
