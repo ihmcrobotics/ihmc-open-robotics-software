@@ -190,6 +190,15 @@ public abstract class ICPOptimizationParameters
     */
    public boolean useDiscontinuousDeadband()
    {
-      return true;
+      return false;
+   }
+
+   /**
+    * This method sets what the minimum change in the current footstep is allowed to be.
+    * Works in tandem with the footstep regularization parameter.
+    */
+   public double getFootstepSolutionResolution()
+   {
+      return 0.01;
    }
 }

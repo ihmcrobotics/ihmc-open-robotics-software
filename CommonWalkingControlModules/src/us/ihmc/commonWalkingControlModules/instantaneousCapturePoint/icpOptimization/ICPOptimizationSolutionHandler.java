@@ -37,7 +37,8 @@ public class ICPOptimizationSolutionHandler
 
    private final DoubleYoVariable footstepForwardDeadband;
    private final DoubleYoVariable footstepLateralDeadband;
-   
+   private final DoubleYoVariable footstepSolutionResolution;
+
    private final BooleanYoVariable useDiscontinuousDeadband;
    private final BooleanYoVariable footstepWasAdjusted;
 
@@ -75,12 +76,15 @@ public class ICPOptimizationSolutionHandler
 
       footstepForwardDeadband = new DoubleYoVariable("footstepForwardDeadband", registry);
       footstepLateralDeadband = new DoubleYoVariable("footstepLateralDeadband", registry);
-      
+      footstepSolutionResolution = new DoubleYoVariable("footstepSolutionResolution", registry);
+
       useDiscontinuousDeadband = new BooleanYoVariable("useDiscontinuousDeadband", registry);
       footstepWasAdjusted = new BooleanYoVariable("footstepWasAdjusted", registry);
 
       footstepForwardDeadband.set(icpOptimizationParameters.getForwardAdjustmentDeadband());
       footstepLateralDeadband.set(icpOptimizationParameters.getLateralAdjustmentDeadband());
+      footstepSolutionResolution.set(icpOptimizationParameters.getFootstepSolutionResolution());
+
       useDiscontinuousDeadband.set(icpOptimizationParameters.useDiscontinuousDeadband());
 
       //if (yoGraphicsListRegistry != null)
@@ -136,7 +140,8 @@ public class ICPOptimizationSolutionHandler
    private final FramePoint2d locationSolution = new FramePoint2d();
    private final FramePoint2d upcomingFootstepLocation = new FramePoint2d();
 
-   public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider,
+   public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<YoFramePoint2d> referenceFootstepLocations,
+         ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider,
          ICPOptimizationSolver solver)
    {
       boolean firstStepAdjusted = false;
@@ -147,8 +152,8 @@ public class ICPOptimizationSolutionHandler
          upcomingFootsteps.get(i).getPosition2d(upcomingFootstepLocation);
          ReferenceFrame deadbandFrame = upcomingFootsteps.get(i).getSoleReferenceFrame();
 
-         boolean footstepWasAdjusted = applyLocationDeadband(locationSolution, upcomingFootstepLocation, deadbandFrame, footstepForwardDeadband.getDoubleValue(),
-               footstepLateralDeadband.getDoubleValue());
+         boolean footstepWasAdjusted = applyLocationDeadband(locationSolution, upcomingFootstepLocation, referenceFootstepLocations.get(i).getFrameTuple2d(), deadbandFrame,
+               footstepForwardDeadband.getDoubleValue(), footstepLateralDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
 
          if (i == 0)
             firstStepAdjusted = footstepWasAdjusted;
@@ -162,20 +167,28 @@ public class ICPOptimizationSolutionHandler
 
    private final FramePoint solutionLocation = new FramePoint();
    private final FramePoint referenceLocation = new FramePoint();
+   private final FramePoint previousLocation = new FramePoint();
    private final FrameVector solutionAdjustment = new FrameVector();
+   private final FrameVector adjustmentFromPrevious = new FrameVector();
 
-   private boolean applyLocationDeadband(FramePoint2d solutionLocationToPack, FramePoint2d referenceLocation2d, ReferenceFrame deadbandFrame, double forwardDeadband,
-         double lateralDeadband)
+   private boolean applyLocationDeadband(FramePoint2d solutionLocationToPack, FramePoint2d currentSolutionLocation, FramePoint2d referenceLocation2d,
+         ReferenceFrame deadbandFrame, double forwardDeadband, double lateralDeadband, double deadbandResolution)
    {
       solutionLocation.setXYIncludingFrame(solutionLocationToPack);
       referenceLocation.setXYIncludingFrame(referenceLocation2d);
+      previousLocation.setXYIncludingFrame(currentSolutionLocation);
 
       solutionLocation.changeFrame(deadbandFrame);
       referenceLocation.changeFrame(deadbandFrame);
+      previousLocation.changeFrame(deadbandFrame);
       solutionAdjustment.setToZero(deadbandFrame);
+      adjustmentFromPrevious.setToZero(deadbandFrame);
 
       solutionAdjustment.set(solutionLocation);
       solutionAdjustment.sub(referenceLocation);
+
+      adjustmentFromPrevious.set(solutionLocation);
+      adjustmentFromPrevious.sub(previousLocation);
 
       boolean wasAdjusted = false;
 
@@ -192,6 +205,19 @@ public class ICPOptimizationSolutionHandler
             else if (solutionAdjustment.getX() < -forwardDeadband)
                solutionLocation.setX(solutionLocation.getX() + forwardDeadband);
          }
+      }
+
+      if (Math.abs(adjustmentFromPrevious.getX()) < deadbandResolution)
+      {
+         solutionLocation.setX(previousLocation.getX());
+      }
+      else
+      {
+         if (solutionLocation.getX() > deadbandResolution)
+            solutionLocation.setX(solutionLocation.getX() - deadbandResolution);
+         else if (solutionLocation.getX() < -deadbandResolution)
+            solutionLocation.setX(solutionLocation.getX() + deadbandResolution);
+
          wasAdjusted = true;
       }
 
@@ -208,6 +234,18 @@ public class ICPOptimizationSolutionHandler
             else if (solutionAdjustment.getY() < -lateralDeadband)
                 solutionLocation.setY(solutionLocation.getY() + lateralDeadband);
          }
+      }
+
+      if (Math.abs(adjustmentFromPrevious.getY()) < deadbandResolution)
+      {
+         solutionLocation.setY(previousLocation.getY());
+      }
+      else
+      {
+         if (solutionLocation.getY() > deadbandResolution)
+            solutionLocation.setY(solutionLocation.getY() - deadbandResolution);
+         else if (solutionLocation.getY() < -deadbandResolution)
+            solutionLocation.setY(solutionLocation.getY() + deadbandResolution);
          wasAdjusted = true;
       }
 
