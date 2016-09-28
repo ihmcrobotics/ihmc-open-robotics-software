@@ -5,8 +5,7 @@ import javax.vecmath.Vector3d;
 
 public interface ExpandingPolytopeAlgorithmListener
 {
-
-   public abstract void setPolytopes(SimplexPolytope simplex, ConvexPolytope polytopeOne, ConvexPolytope polytopeTwo, ExpandingPolytopeEntry triangleEntry);
+   public abstract void setPolytopes(SimplexPolytope simplex, SupportingVertexHolder polytopeOne, SupportingVertexHolder polytopeTwo, ExpandingPolytopeEntry triangleEntry);
 
    public abstract void polledEntryToExpand(ExpandingPolytopeEntry triangleEntryToExpand);
 

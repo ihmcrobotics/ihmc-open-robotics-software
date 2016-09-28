@@ -14,11 +14,6 @@ public interface CollisionShape
    public abstract boolean isGround();
 
    /**
-    * Returns a description of the shape.  Multiple {@link CollisionShape} can have the same description.
-    */
-   public abstract CollisionShapeDescription<?> getCollisionShapeDescription();
-
-   /**
     * Bit field indicating which groups the shape belongs to
     */
    public abstract int getGroupMask();
@@ -28,16 +23,22 @@ public interface CollisionShape
     */
    public abstract int getCollisionMask();
 
-//   /**
-//    * Returns the distance a point is from the surface of the shape.  Positive values are outside and negative values are inside.
-//    */
-//   public double distance(double x, double y, double z);
+   //   /**
+   //    * Returns the distance a point is from the surface of the shape.  Positive values are outside and negative values are inside.
+   //    */
+   //   public double distance(double x, double y, double z);
 
    public abstract void getTransformToWorld(RigidBodyTransform transformToWorldToPack);
 
    public abstract void setTransformToWorld(RigidBodyTransform transformToWorld);
 
+   public abstract void computeTransformedCollisionShape();
+
+   /**
+    * Returns a description of the shape.  Multiple {@link CollisionShape} can have the same description.
+    */
+   public abstract CollisionShapeDescription<?> getCollisionShapeDescription();
+
    public abstract CollisionShapeDescription<?> getTransformedCollisionShapeDescription();
 
-   public abstract void computeTransformedCollisionShape();
 }
