@@ -79,6 +79,8 @@ public class WalkingSingleSupportState extends SingleSupportState
             updateFootstepParameters();
 
             feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getSwingTime());
+
+            balanceManager.updateICPPlanForSingleSupportDisturbances();
          }
       }
       else if (balanceManager.isPushRecoveryEnabled())

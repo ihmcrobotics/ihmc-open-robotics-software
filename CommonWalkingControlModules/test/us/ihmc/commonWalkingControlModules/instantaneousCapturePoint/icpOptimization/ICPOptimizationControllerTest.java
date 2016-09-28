@@ -61,7 +61,7 @@ public class ICPOptimizationControllerTest
       omega.set(omega0);
 
       ICPPlanner icpPlanner = new ICPPlanner(bipedSupportPolygons, contactableFeet, icpPlannerParameters, registry, null);
-      ICPOptimizationController icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, bipedSupportPolygons,
+      ICPOptimizationController icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, null, bipedSupportPolygons,
             contactableFeet, 0.001, registry, null);
       icpOptimizationController.setStepDurations(doubleSupportDuration, singleSupportDuration);
       icpPlanner.setSingleSupportTime(singleSupportDuration);

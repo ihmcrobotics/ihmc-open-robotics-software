@@ -149,8 +149,8 @@ public class BalanceManager
 
       if (useICPOptimizationControl)
       {
-         linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames,
-               bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, icpOptimizationParameters, yoTime, totalMass, gravityZ, controlDT,
+         linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons,
+               contactableFeet, capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters, yoTime, totalMass, gravityZ, controlDT,
                registry, yoGraphicsListRegistry);
       }
       else
@@ -634,6 +634,9 @@ public class BalanceManager
    {
       momentumBasedController.getCapturePoint(capturePoint2d);
       icpPlanner.updatePlanForSingleSupportDisturbances(yoTime.getDoubleValue(), capturePoint2d);
+
+      double remainingTimeForSwing = icpPlanner.estimateTimeRemainingForStateUnderDisturbance(yoTime.getDoubleValue(), capturePoint2d);
+      linearMomentumRateOfChangeControlModule.submitRemainingTimeInSwingUnderDisturbance(remainingTimeForSwing);
    }
 
    public void getCapturePoint(FramePoint2d capturePointToPack)

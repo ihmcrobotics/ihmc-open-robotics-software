@@ -74,8 +74,11 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
 
    public void initializeForTransfer(){}
 
+   public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeInSwing) {}
+
    public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
    {
       return false;
    }
+
 }

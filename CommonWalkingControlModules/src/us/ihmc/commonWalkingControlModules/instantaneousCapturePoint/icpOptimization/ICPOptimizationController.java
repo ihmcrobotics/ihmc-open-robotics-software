@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -47,6 +48,8 @@ public class ICPOptimizationController
    private final BooleanYoVariable scaleStepRegularizationWeightWithTime = new BooleanYoVariable("scaleStepRegularizationWeightWithTime", registry);
    private final BooleanYoVariable scaleFeedbackWeightWithGain = new BooleanYoVariable("scaleFeedbackWeightWithGain", registry);
    private final BooleanYoVariable scaleUpcomingStepWeights = new BooleanYoVariable("scaleUpcomingStepWeights", registry);
+
+   private final BooleanYoVariable swingSpeedUpEnabled = new BooleanYoVariable(yoNamePrefix + "SwingSpeedUpEnabled", registry);
 
    private final BooleanYoVariable isStanding = new BooleanYoVariable(yoNamePrefix + "IsStanding", registry);
    private final BooleanYoVariable isInTransfer = new BooleanYoVariable(yoNamePrefix + "IsInTransfer", registry);
@@ -127,7 +130,7 @@ public class ICPOptimizationController
    private final Vector2dZUpFrame icpVelocityDirectionFrame;
 
    public ICPOptimizationController(CapturePointPlannerParameters icpPlannerParameters, ICPOptimizationParameters icpOptimizationParameters,
-         BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
+         WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.icpOptimizationParameters = icpOptimizationParameters;
@@ -166,6 +169,10 @@ public class ICPOptimizationController
       dynamicRelaxationWeight.set(icpOptimizationParameters.getDynamicRelaxationWeight());
 
       remainingTimeToStopAdjusting.set(icpOptimizationParameters.getRemainingTimeToStopAdjusting());
+      if (walkingControllerParameters != null)
+         swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+      else
+         swingSpeedUpEnabled.set(false);
 
       dynamicRelaxationDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicRelaxationDoubleSupportWeightModifier();
 
@@ -454,12 +461,10 @@ public class ICPOptimizationController
 
       inputHandler.update(localUseTwoCMPs, omega0);
       inputHandler.computeFinalICPRecursion(finalICPRecursion, numberOfFootstepsToConsider, localUseTwoCMPs, isInTransfer.getBooleanValue(), omega0);
-      inputHandler.computeStanceCMPProjection(stanceCMPProjection, timeRemainingInState.getDoubleValue(), localUseTwoCMPs, isInTransfer.getBooleanValue(),
-            localUseInitialICP, omega0);
+      inputHandler.computeStanceCMPProjection(stanceCMPProjection, timeRemainingInState.getDoubleValue(), localUseTwoCMPs, isInTransfer.getBooleanValue(), localUseInitialICP, omega0);
       inputHandler.computeBeginningOfStateICPProjection(beginningOfStateICPProjection, beginningOfStateICP.getFrameTuple2d());
 
-      inputHandler.computeStanceCMPProjection(stanceCMPProjection, timeRemainingInState.getDoubleValue(), localUseTwoCMPs, isInTransfer.getBooleanValue(),
-            localUseInitialICP, omega0);
+      inputHandler.computeStanceCMPProjection(stanceCMPProjection, timeRemainingInState.getDoubleValue(), localUseTwoCMPs, isInTransfer.getBooleanValue(), localUseInitialICP, omega0);
 
       inputHandler.computeCMPOffsetRecursionEffect(cmpOffsetRecursionEffect, upcomingFootstepLocations, numberOfFootstepsToConsider);
       if (!localUseTwoCMPs)
@@ -528,8 +533,7 @@ public class ICPOptimizationController
    {
       int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
 
-      if (timeRemainingInState.getDoubleValue() < remainingTimeToStopAdjusting.getDoubleValue() && localUseStepAdjustment && !isStanding.getBooleanValue()
-         && !isInTransfer.getBooleanValue())
+      if (timeRemainingInState.getDoubleValue() < remainingTimeToStopAdjusting.getDoubleValue() && localUseStepAdjustment && !isStanding.getBooleanValue() && !isInTransfer.getBooleanValue())
       {
          //record current locations
          for (int i = 0; i < numberOfFootstepsToConsider; i++)
@@ -621,18 +625,24 @@ public class ICPOptimizationController
       {
          double remainingTime;
          if (isInTransfer.getBooleanValue())
-         {
             remainingTime = doubleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue();
-         }
          else
-         {
             remainingTime = singleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue();
-         }
 
          remainingTime = Math.max(icpOptimizationParameters.getMinimumTimeRemaining(), remainingTime);
          timeRemainingInState.set(remainingTime);
       }
    }
+
+   public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
+   {
+      if (swingSpeedUpEnabled.getBooleanValue() && remainingTimeForSwing < timeRemainingInState.getDoubleValue())
+      {
+         double speedUpTime = timeRemainingInState.getDoubleValue() - remainingTimeForSwing;
+         initialTime.sub(speedUpTime);
+      }
+   }
+
 
    private void scaleStepRegularizationWeightWithTime()
    {
