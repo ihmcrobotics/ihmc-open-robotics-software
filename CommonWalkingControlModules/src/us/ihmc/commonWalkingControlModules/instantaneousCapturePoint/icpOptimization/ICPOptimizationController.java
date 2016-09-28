@@ -459,12 +459,13 @@ public class ICPOptimizationController
             solver.setFootstepRegularizationWeight(scaledFootstepRegularizationWeight.getDoubleValue() / controlDT);
       }
 
+      double clippedTimeRemaining = Math.max(icpOptimizationParameters.getMinimumTimeRemaining(), timeRemainingInState.getDoubleValue());
       inputHandler.update(localUseTwoCMPs, omega0);
       inputHandler.computeFinalICPRecursion(finalICPRecursion, numberOfFootstepsToConsider, localUseTwoCMPs, isInTransfer.getBooleanValue(), omega0);
-      inputHandler.computeStanceCMPProjection(stanceCMPProjection, timeRemainingInState.getDoubleValue(), localUseTwoCMPs, isInTransfer.getBooleanValue(), localUseInitialICP, omega0);
+      inputHandler.computeStanceCMPProjection(stanceCMPProjection, clippedTimeRemaining, localUseTwoCMPs, isInTransfer.getBooleanValue(), localUseInitialICP, omega0);
       inputHandler.computeBeginningOfStateICPProjection(beginningOfStateICPProjection, beginningOfStateICP.getFrameTuple2d());
 
-      inputHandler.computeStanceCMPProjection(stanceCMPProjection, timeRemainingInState.getDoubleValue(), localUseTwoCMPs, isInTransfer.getBooleanValue(), localUseInitialICP, omega0);
+      inputHandler.computeStanceCMPProjection(stanceCMPProjection, clippedTimeRemaining, localUseTwoCMPs, isInTransfer.getBooleanValue(), localUseInitialICP, omega0);
 
       inputHandler.computeCMPOffsetRecursionEffect(cmpOffsetRecursionEffect, upcomingFootstepLocations, numberOfFootstepsToConsider);
       if (!localUseTwoCMPs)
@@ -629,7 +630,6 @@ public class ICPOptimizationController
          else
             remainingTime = singleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue();
 
-         remainingTime = Math.max(icpOptimizationParameters.getMinimumTimeRemaining(), remainingTime);
          timeRemainingInState.set(remainingTime);
       }
    }
@@ -648,7 +648,7 @@ public class ICPOptimizationController
    {
       if (scaleStepRegularizationWeightWithTime.getBooleanValue())
       {
-         double alpha = timeRemainingInState.getDoubleValue() / singleSupportDuration.getDoubleValue();
+         double alpha = Math.max(timeRemainingInState.getDoubleValue(), icpOptimizationParameters.getMinimumTimeRemaining()) / singleSupportDuration.getDoubleValue();
          scaledFootstepRegularizationWeight.set(footstepRegularizationWeight.getDoubleValue() / alpha);
       }
       else
