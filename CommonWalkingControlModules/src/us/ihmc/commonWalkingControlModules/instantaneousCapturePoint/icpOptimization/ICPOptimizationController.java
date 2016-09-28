@@ -65,6 +65,8 @@ public class ICPOptimizationController
    private final DoubleYoVariable initialTime = new DoubleYoVariable(yoNamePrefix + "InitialTime", registry);
    private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(yoNamePrefix + "TimeInCurrentState", registry);
    private final DoubleYoVariable timeRemainingInState = new DoubleYoVariable(yoNamePrefix + "TimeRemainingInState", registry);
+   private final DoubleYoVariable speedUpTime = new DoubleYoVariable(yoNamePrefix + "SpeedUpTime", registry);
+   private final DoubleYoVariable minimumTimeRemaining = new DoubleYoVariable(yoNamePrefix + "MinimumTimeRemaining", registry);
 
    private final FramePoint2d currentICP = new FramePoint2d();
    private final FramePoint2d desiredICP = new FramePoint2d();
@@ -168,6 +170,8 @@ public class ICPOptimizationController
       feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
       dynamicRelaxationWeight.set(icpOptimizationParameters.getDynamicRelaxationWeight());
 
+      minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
+
       remainingTimeToStopAdjusting.set(icpOptimizationParameters.getRemainingTimeToStopAdjusting());
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
@@ -253,6 +257,7 @@ public class ICPOptimizationController
       footstepRecursionMultiplierCalculator.resetTimes();
 
       cmpConstraintHandler.updateCMPConstraintForDoubleSupport(solver);
+      speedUpTime.set(0.0);
    }
 
    public void initializeForTransfer(double initialTime, RobotSide transferToSide, double omega0)
@@ -289,6 +294,8 @@ public class ICPOptimizationController
          solver.resetFeedbackRegularization();
 
       cmpConstraintHandler.updateCMPConstraintForDoubleSupport(solver);
+
+      speedUpTime.set(0.0);
    }
 
    public void initializeForSingleSupport(double initialTime, RobotSide supportSide, double omega0)
@@ -323,6 +330,8 @@ public class ICPOptimizationController
          solver.resetFeedbackRegularization();
 
       cmpConstraintHandler.updateCMPConstraintForSingleSupport(supportSide, solver);
+
+      speedUpTime.set(0.0);
    }
 
    private void setProblemBooleans()
@@ -459,7 +468,7 @@ public class ICPOptimizationController
             solver.setFootstepRegularizationWeight(scaledFootstepRegularizationWeight.getDoubleValue() / controlDT);
       }
 
-      double clippedTimeRemaining = Math.max(icpOptimizationParameters.getMinimumTimeRemaining(), timeRemainingInState.getDoubleValue());
+      double clippedTimeRemaining = Math.max(minimumTimeRemaining.getDoubleValue(), timeRemainingInState.getDoubleValue());
       inputHandler.update(localUseTwoCMPs, omega0);
       inputHandler.computeFinalICPRecursion(finalICPRecursion, numberOfFootstepsToConsider, localUseTwoCMPs, isInTransfer.getBooleanValue(), omega0);
       inputHandler.computeStanceCMPProjection(stanceCMPProjection, clippedTimeRemaining, localUseTwoCMPs, isInTransfer.getBooleanValue(), localUseInitialICP, omega0);
@@ -613,7 +622,7 @@ public class ICPOptimizationController
 
    private void computeTimeInCurrentState(double currentTime)
    {
-      timeInCurrentState.set(currentTime - initialTime.getDoubleValue());
+      timeInCurrentState.set(currentTime - initialTime.getDoubleValue() + speedUpTime.getDoubleValue());
    }
 
    private void computeTimeRemainingInState()
@@ -639,7 +648,7 @@ public class ICPOptimizationController
       if (swingSpeedUpEnabled.getBooleanValue() && remainingTimeForSwing < timeRemainingInState.getDoubleValue())
       {
          double speedUpTime = timeRemainingInState.getDoubleValue() - remainingTimeForSwing;
-         initialTime.sub(speedUpTime);
+         this.speedUpTime.add(speedUpTime);
       }
    }
 
@@ -648,7 +657,7 @@ public class ICPOptimizationController
    {
       if (scaleStepRegularizationWeightWithTime.getBooleanValue())
       {
-         double alpha = Math.max(timeRemainingInState.getDoubleValue(), icpOptimizationParameters.getMinimumTimeRemaining()) / singleSupportDuration.getDoubleValue();
+         double alpha = Math.max(timeRemainingInState.getDoubleValue(), minimumTimeRemaining.getDoubleValue()) / singleSupportDuration.getDoubleValue();
          scaledFootstepRegularizationWeight.set(footstepRegularizationWeight.getDoubleValue() / alpha);
       }
       else

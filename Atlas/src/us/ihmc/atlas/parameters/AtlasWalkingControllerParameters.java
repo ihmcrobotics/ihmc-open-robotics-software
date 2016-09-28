@@ -1034,9 +1034,18 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return joints;
    }
 
+   /** {@inheritDoc} */
    @Override
    public boolean useOptimizationBasedICPController()
    {
       return false;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getSwingFootVelocityAdjustmentDamping()
+   {
+      boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+      return realRobot ? 0.8 : 0.5;
    }
 }

@@ -165,18 +165,11 @@ public abstract class ICPOptimizationParameters
    public abstract double getMaxCMPLateralExit();
 
    /**
-    * Deadband on the adjustment in the forward direction.
+    * Deadband on the step adjustment.
     * When the adjustment is within the deadband, it is set to zero.
     * When it is outside the deadband, the deadband is subtracted from it.
     */
-   public abstract double getForwardAdjustmentDeadband();
-
-   /**
-    * Deadband on the adjustment in the lateral direction.
-    * When the adjustment is within the deadband, it is set to zero.
-    * When it is outside the deadband, the deadband is subtracted from it.
-    */
-   public abstract double getLateralAdjustmentDeadband();
+   public abstract double getAdjustmentDeadband();
 
    /**
     * This is the time to disable step adjustment.
