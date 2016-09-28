@@ -257,4 +257,14 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return new String[0];
    }
+
+   /**
+    * Returns a ratio to multiply the swing foot velocity adjustment when the swing trajectory is modified online.
+    * 0.0 will eliminate any velocity adjustment.
+    * 1.0 will make it try to move to the new trajectory in 1 dt.
+    */
+   public double getSwingFootVelocityAdjustmentDamping()
+   {
+      return 0.0;
+   }
 }

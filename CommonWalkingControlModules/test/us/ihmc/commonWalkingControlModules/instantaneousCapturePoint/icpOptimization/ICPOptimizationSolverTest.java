@@ -801,12 +801,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
          return 0.03;
       }
 
-      @Override public double getForwardAdjustmentDeadband()
-      {
-         return 0.0;
-      }
-
-      @Override public double getLateralAdjustmentDeadband()
+      @Override public double getAdjustmentDeadband()
       {
          return 0.0;
       }

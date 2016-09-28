@@ -182,14 +182,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getForwardAdjustmentDeadband()
-   {
-      return 0.03;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getLateralAdjustmentDeadband()
+   public double getAdjustmentDeadband()
    {
       return 0.03;
    }
