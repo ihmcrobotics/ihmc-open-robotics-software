@@ -14,6 +14,10 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
    {
       super(outgoingCommunicationBridge);
    }
+   public EndEffectorLoadBearingBehavior(String prefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   {
+      super(prefix,outgoingCommunicationBridge);
+   }
 
    public void setInput(EndEffectorLoadBearingMessage endEffectorLoadBearingMessage)
    {

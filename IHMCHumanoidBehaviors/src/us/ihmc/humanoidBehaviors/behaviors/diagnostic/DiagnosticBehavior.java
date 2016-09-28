@@ -24,7 +24,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.SleepBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
