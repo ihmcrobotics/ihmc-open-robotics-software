@@ -171,6 +171,8 @@ public class ICPOptimizationSolutionHandler
    private final FrameVector solutionAdjustment = new FrameVector();
    private final FrameVector adjustmentFromPrevious = new FrameVector();
 
+   private final FrameVector tmpVector = new FrameVector();
+
    private boolean applyLocationDeadband(FramePoint2d solutionLocationToPack, FramePoint2d currentSolutionLocation, FramePoint2d referenceLocation2d,
          ReferenceFrame deadbandFrame, double forwardDeadband, double lateralDeadband, double deadbandResolution)
    {
@@ -192,47 +194,30 @@ public class ICPOptimizationSolutionHandler
 
       boolean wasAdjusted = false;
 
-      if (Math.abs(solutionAdjustment.getX()) < forwardDeadband)
+      if (solutionAdjustment.length() < forwardDeadband)
       {
-         solutionLocation.setX(referenceLocation.getX());
+         solutionLocation.set(referenceLocation);
       }
       else
       {
          if (!useDiscontinuousDeadband.getBooleanValue())
          {
-            if (solutionAdjustment.getX() > forwardDeadband)
-               solutionLocation.setX(solutionLocation.getX() - forwardDeadband);
-            else if (solutionAdjustment.getX() < -forwardDeadband)
-               solutionLocation.setX(solutionLocation.getX() + forwardDeadband);
+            tmpVector.setIncludingFrame(solutionAdjustment);
+            tmpVector.normalize();
+            tmpVector.scale(forwardDeadband);
+
+            solutionLocation.changeFrame(deadbandFrame);
+            solutionLocation.sub(tmpVector);
          }
       }
 
-      if (Math.abs(solutionAdjustment.getY()) < lateralDeadband)
-      {
-         solutionLocation.setY(referenceLocation.getY());
-      }
-      else
-      {
-         if (!useDiscontinuousDeadband.getBooleanValue())
-         {
-            if (solutionAdjustment.getY() > lateralDeadband)
-                solutionLocation.setY(solutionLocation.getY() - lateralDeadband);
-            else if (solutionAdjustment.getY() < -lateralDeadband)
-                solutionLocation.setY(solutionLocation.getY() + lateralDeadband);
-         }
-      }
-
+      solutionLocation.changeFrame(worldFrame);
       adjustmentFromPrevious.set(solutionLocation);
       adjustmentFromPrevious.sub(previousLocation);
       adjustmentFromPrevious.changeFrame(deadbandFrame);
 
-      if (Math.abs(adjustmentFromPrevious.getX()) < deadbandResolution)
-         solutionLocation.setX(previousLocation.getX());
-      else
-         wasAdjusted = true;
-
-      if (Math.abs(adjustmentFromPrevious.getY()) < deadbandResolution)
-         solutionLocation.setY(previousLocation.getY());
+      if (adjustmentFromPrevious.length() < deadbandResolution)
+         solutionLocation.set(previousLocation);
       else
          wasAdjusted = true;
 
