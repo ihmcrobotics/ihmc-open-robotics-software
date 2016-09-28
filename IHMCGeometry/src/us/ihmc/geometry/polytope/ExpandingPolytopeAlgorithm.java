@@ -137,12 +137,12 @@ public class ExpandingPolytopeAlgorithm
 
             supportDirection.set(closestPointToOrigin);
 
-            PolytopeVertex supportingVertexA = polytopeA.getSupportingVertex(supportDirection);
+            Point3d supportingVertexA = polytopeA.getSupportingVertex(supportDirection);
             supportDirection.negate();
-            PolytopeVertex supportingVertexB = polytopeB.getSupportingVertex(supportDirection);
+            Point3d supportingVertexB = polytopeB.getSupportingVertex(supportDirection);
 
             Vector3d w = new Vector3d();
-            w.sub(supportingVertexA.getPosition(), supportingVertexB.getPosition());
+            w.sub(supportingVertexA, supportingVertexB);
 
             if (listener != null)
             {
@@ -173,8 +173,8 @@ public class ExpandingPolytopeAlgorithm
 
                ExpandingPolytopeEntry firstNewEntry = null;
                Point3d wPoint = new Point3d(w);
-               correspondingPointsOnA.put(wPoint, supportingVertexA.getPosition());
-               correspondingPointsOnB.put(wPoint, supportingVertexB.getPosition());
+               correspondingPointsOnA.put(wPoint, supportingVertexA);
+               correspondingPointsOnB.put(wPoint, supportingVertexB);
 
                int numberOfEdges = edgeList.getNumberOfEdges();
 

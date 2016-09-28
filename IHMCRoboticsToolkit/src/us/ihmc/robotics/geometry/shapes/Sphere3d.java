@@ -11,7 +11,7 @@ public class Sphere3d implements Shape3d
    private double radius = 1.0;
 
    private final Point3d temporaryPoint = new Point3d();
-   public final Vector3d temporaryVector = new Vector3d();
+   private final Vector3d temporaryVector = new Vector3d();
 
    public Sphere3d()
    {

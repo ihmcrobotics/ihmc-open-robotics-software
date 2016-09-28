@@ -16,7 +16,7 @@ public interface CollisionShape
    /**
     * Returns a description of the shape.  Multiple {@link CollisionShape} can have the same description.
     */
-   public abstract CollisionShapeDescription getCollisionShapeDescription();
+   public abstract CollisionShapeDescription<?> getCollisionShapeDescription();
 
    /**
     * Bit field indicating which groups the shape belongs to
@@ -37,7 +37,7 @@ public interface CollisionShape
 
    public abstract void setTransformToWorld(RigidBodyTransform transformToWorld);
 
-   public abstract CollisionShapeDescription getTransformedCollisionShapeDescription();
+   public abstract CollisionShapeDescription<?> getTransformedCollisionShapeDescription();
 
    public abstract void computeTransformedCollisionShape();
 }
