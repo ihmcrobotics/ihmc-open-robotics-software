@@ -62,6 +62,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       minimizeAngularMomentumRateZDuringSwing.set(walkingControllerParameters.minimizeAngularMomentumRateZDuringSwing());
    }
 
+
    @Override
    public void doAction()
    {
@@ -70,11 +71,12 @@ public class WalkingSingleSupportState extends SingleSupportState
       boolean icpErrorIsTooLarge = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
 
       // todo figure out a way of combining these two modules
+      boolean footstepIsBeingAdjusted = false;
       if (balanceManager.useICPOptimization())
       {
-         boolean footstepHasBeenAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
+         footstepIsBeingAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
 
-         if (footstepHasBeenAdjusted)
+         if (footstepIsBeingAdjusted)
          {
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
@@ -104,9 +106,10 @@ public class WalkingSingleSupportState extends SingleSupportState
          }
       }
 
-      if (icpErrorIsTooLarge || balanceManager.isRecovering())
+      if (icpErrorIsTooLarge || balanceManager.isRecovering() || footstepIsBeingAdjusted)
       {
-         requestSwingSpeedUpIfNeeded();
+         double swingTimeRemaining = requestSwingSpeedUpIfNeeded();
+         balanceManager.updateSwingTimeRemaining(swingTimeRemaining);
       }
 
       walkingMessageHandler.clearFootTrajectory();
