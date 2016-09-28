@@ -17,8 +17,8 @@ public class ExpandingPolytopeAlgorithm
    private final THashMap<Point3d, Point3d> correspondingPointsOnA = new THashMap<>();
    private final THashMap<Point3d, Point3d> correspondingPointsOnB = new THashMap<>();
 
-   private ConvexPolytope polytopeA;
-   private ConvexPolytope polytopeB;
+   private SupportingVertexHolder polytopeA;
+   private SupportingVertexHolder polytopeB;
 
    private final double epsilonRelative;
 
@@ -36,7 +36,7 @@ public class ExpandingPolytopeAlgorithm
       this.listener = listener;
    }
 
-   public void setPolytopes(SimplexPolytope simplex, ConvexPolytope polytopeOne, ConvexPolytope polytopeTwo)
+   public void setPolytopes(SimplexPolytope simplex, SupportingVertexHolder polytopeOne, SupportingVertexHolder polytopeTwo)
    {
       polytopeEntryPool.clear();
 

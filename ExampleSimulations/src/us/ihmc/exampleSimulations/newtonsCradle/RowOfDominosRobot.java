@@ -34,7 +34,7 @@ public class RowOfDominosRobot extends Robot
 
 //            collisionDetector = new GdxCollisionDetector(1000.0);
       collisionDetector = new SimpleCollisionDetector();
-      ((SimpleCollisionDetector) collisionDetector).setObjectSmoothingRadius(0.00001);
+      ((SimpleCollisionDetector) collisionDetector).setObjectSmoothingRadius(0.0);
 
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(0.001);

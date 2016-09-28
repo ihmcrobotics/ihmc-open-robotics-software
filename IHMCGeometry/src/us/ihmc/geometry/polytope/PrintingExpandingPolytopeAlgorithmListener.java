@@ -7,7 +7,7 @@ public class PrintingExpandingPolytopeAlgorithmListener implements ExpandingPoly
 {
 
    @Override
-   public void setPolytopes(SimplexPolytope simplex, ConvexPolytope polytopeA, ConvexPolytope polytopeB, ExpandingPolytopeEntry triangleEntry)
+   public void setPolytopes(SimplexPolytope simplex, SupportingVertexHolder polytopeA, SupportingVertexHolder polytopeB, ExpandingPolytopeEntry triangleEntry)
    {
       System.out.println("\n-----------\nExpandingPolytopeAlgorithm -- Setting Polytopes:");
       System.out.println("simplex:" + simplex);

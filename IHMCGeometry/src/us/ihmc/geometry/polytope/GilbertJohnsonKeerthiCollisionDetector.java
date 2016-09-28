@@ -46,7 +46,7 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
    private final Vector3d defaultInitialGuessOfSeparatingVector = new Vector3d(0.0, 0.0, 1.0);
 
-   public boolean arePolytopesColliding(ConvexPolytope polytopeA, ConvexPolytope polytopeB, Point3d pointOnAToPack, Point3d pointOnBToPack)
+   public boolean arePolytopesColliding(SupportingVertexHolder polytopeA, SupportingVertexHolder polytopeB, Point3d pointOnAToPack, Point3d pointOnBToPack)
    {
       return arePolytopesColliding(defaultInitialGuessOfSeparatingVector, polytopeA, polytopeB, pointOnAToPack, pointOnBToPack);
    }

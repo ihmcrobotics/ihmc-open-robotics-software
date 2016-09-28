@@ -13,10 +13,12 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionHandlerListener;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class DefaultCollisionVisualize implements CollisionHandlerListener
 {
    private SimulationConstructionSet scs;
+   private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
    private List<YoGraphicVector> activeRedYoGraphicVectors = new ArrayList<YoGraphicVector>();
    private List<YoGraphicVector> activeBlueYoGraphicVectors = new ArrayList<YoGraphicVector>();
@@ -48,16 +50,18 @@ public class DefaultCollisionVisualize implements CollisionHandlerListener
          addImpulseYoGraphicVector(i * 2, true, impulseScale);
          addImpulseYoGraphicVector(i * 2 + 1, false, impulseScale);
       }
+
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
    }
 
    public void callBeforeCollisionDetection()
    {
-//      System.out.println("CallBeforeCollision");
-//      for (int i = 0; i < total; i++)
-//      {
-//         setToInfinity(activeRedYoGraphicVectors.get(i));
-//         setToInfinity(activeBlueYoGraphicVectors.get(i));
-//      }
+      //      System.out.println("CallBeforeCollision");
+      //      for (int i = 0; i < total; i++)
+      //      {
+      //         setToInfinity(activeRedYoGraphicVectors.get(i));
+      //         setToInfinity(activeBlueYoGraphicVectors.get(i));
+      //      }
 
       total = 0;
    }
@@ -71,18 +75,18 @@ public class DefaultCollisionVisualize implements CollisionHandlerListener
       YoGraphicVector yoGraphicVectorA = activeRedYoGraphicVectors.get(total);
       YoGraphicVector yoGraphicVectorB = activeBlueYoGraphicVectors.get(total);
 
-//      System.out.println(forceA);
+      //      System.out.println(forceA);
 
-//      yoGraphicVectorA.set(forceA.getYoPosition(), forceA.getYoForce());
-//      yoGraphicVectorB.set(forceB.getYoPosition(), forceB.getYoForce());
+      //      yoGraphicVectorA.set(forceA.getYoPosition(), forceA.getYoForce());
+      //      yoGraphicVectorB.set(forceB.getYoPosition(), forceB.getYoForce());
 
-//      System.out.println("Visualizing Collision. forceA = " + forceA);
-//      System.out.println("Visualizing Collision. forceB = " + forceB);
-//
-//      System.out.println("Visualizing Collision. forceA.getYoPosition() = " + forceA.getYoPosition());
-//      System.out.println("Visualizing Collision. forceA.getYoImpulse() = " + forceA.getYoImpulse());
-//      System.out.println("Visualizing Collision. forceB.getYoPosition() = " + forceB.getYoPosition());
-//      System.out.println("Visualizing Collision. forceB.getYoImpulse() = " + forceB.getYoImpulse());
+      //      System.out.println("Visualizing Collision. forceA = " + forceA);
+      //      System.out.println("Visualizing Collision. forceB = " + forceB);
+      //
+      //      System.out.println("Visualizing Collision. forceA.getYoPosition() = " + forceA.getYoPosition());
+      //      System.out.println("Visualizing Collision. forceA.getYoImpulse() = " + forceA.getYoImpulse());
+      //      System.out.println("Visualizing Collision. forceB.getYoPosition() = " + forceB.getYoPosition());
+      //      System.out.println("Visualizing Collision. forceB.getYoImpulse() = " + forceB.getYoImpulse());
 
       yoGraphicVectorA.set(forceA.getYoPosition(), forceA.getYoImpulse());
       yoGraphicVectorB.set(forceB.getYoPosition(), forceB.getYoImpulse());
@@ -103,7 +107,12 @@ public class DefaultCollisionVisualize implements CollisionHandlerListener
       String name = "ContactVisualized" + num;
       AppearanceDefinition appearance = isRed ? YoAppearance.Red() : YoAppearance.Blue();
       YoGraphicVector yoGraphicVector = new YoGraphicVector(name, yo0, yo1, yo2, yo3, yo4, yo5, scale, appearance);
-      scs.addYoGraphic(yoGraphicVector, true);
+      yoGraphicVector.setLineRadiusWhenOneMeterLong(0.005);
+      yoGraphicVector.setMinAndMaxScaleFactors(0.01, 1.5);
+      
+      yoGraphicsListRegistry.registerYoGraphic("CollisionVectors", yoGraphicVector);
+
+      //      scs.addYoGraphic(yoGraphicVector, true);
       active.add(yoGraphicVector);
    }
 

@@ -38,7 +38,7 @@ public class PileOfRandomObjectsRobot
       Random random = new Random(1886L);
 
       createFallingObjects(numberOfObjects, collisionShapeFactory, random);
-      createBoardFrame(collisionShapeFactory, random);
+//      createBoardFrame(collisionShapeFactory, random);
       createGroundAsABox(collisionShapeFactory);
    }
 
@@ -53,7 +53,7 @@ public class PileOfRandomObjectsRobot
 
          Link link;
 
-         int shape = random.nextInt(1);
+         int shape = random.nextInt(2);
          if (shape == 0)
          {
             link = createRandomBox(collisionShapeFactory, random, i, robot);
@@ -94,12 +94,12 @@ public class PileOfRandomObjectsRobot
       Link baseLink = new Link("base");
       baseLink.setMassAndRadiiOfGyration(1000000000.0, 100.0, 100.0, 100.0);
       Graphics3DObject baseLinkGraphics = new Graphics3DObject();
-      baseLinkGraphics.translate(0.0, 0.0, -0.01);
-      baseLinkGraphics.addCube(100.0, 100.0, 0.01, YoAppearance.Green());
+      baseLinkGraphics.translate(0.0, 0.0, -0.01 / 2.0);
+      baseLinkGraphics.addCube(4.0, 4.0, 0.01, YoAppearance.Green());
       baseLink.setLinkGraphics(baseLinkGraphics);
       baseLink.enableCollisions(100.0, baseRobot.getRobotsYoVariableRegistry());
 
-      CollisionShapeDescription shapeDesc = collisionShapeFactory.createBox(100.0, 100.0, 0.01 / 2.0);
+      CollisionShapeDescription shapeDesc = collisionShapeFactory.createBox(4.0 / 2.0, 4.0 / 2.0, 0.01 / 2.0);
 
       RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
       shapeToLinkTransform.setTranslation(new Vector3d(-0.005, 0.0, 0.0));
