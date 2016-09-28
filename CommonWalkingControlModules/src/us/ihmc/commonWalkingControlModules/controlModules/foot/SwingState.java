@@ -425,12 +425,18 @@ public class SwingState extends AbstractUnconstrainedState
       this.replanTrajectory.set(true);
    }
 
-   public void requestSwingSpeedUp(double speedUpFactor)
+   /**
+    * Request the swing trajectory to speed up using the given speed up factor.
+    * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
+    * @param speedUpFactor
+    * @return the current swing time remaining for the swing foot trajectory
+    */
+   public double requestSwingSpeedUp(double speedUpFactor)
    {
       if (isSwingSpeedUpEnabled.getBooleanValue())
       {
          if (speedUpFactor <= 1.1 || speedUpFactor <= swingTimeSpeedUpFactor.getDoubleValue())
-            return;
+            return swingTimeRemaining.getValue();
          speedUpFactor = MathTools.clipToMinMax(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
 
          //         speedUpFactor = MathTools.clipToMinMax(speedUpFactor, 0.7, maxSwingTimeSpeedUpFactor.getDoubleValue());
@@ -440,6 +446,7 @@ public class SwingState extends AbstractUnconstrainedState
          if (currentTimeWithSwingSpeedUp.isNaN())
             currentTimeWithSwingSpeedUp.set(currentTime.getDoubleValue());
       }
+      return swingTimeRemaining.getValue();
    }
 
    @Override
