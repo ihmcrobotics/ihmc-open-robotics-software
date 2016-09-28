@@ -10,13 +10,12 @@ public abstract class BehaviorTask implements Task
 
    protected final DoubleYoVariable yoTime;
    protected double behaviorDoneTime = Double.NaN;
-   protected final double sleepTime;
 
    public BehaviorTask(AbstractBehavior behavior, DoubleYoVariable yoTime)
    {
+
       this.behavior = behavior;
       this.yoTime = yoTime;
-      this.sleepTime = 0;
    }
 
    @Override
@@ -47,8 +46,7 @@ public abstract class BehaviorTask implements Task
    @Override
    public boolean isDone()
    {
-      boolean sleepTimeAchieved = yoTime.getDoubleValue() > behaviorDoneTime + sleepTime;
-      return behavior.isDone() && sleepTimeAchieved;
+      return behavior.isDone();
    }
 
    public void pause()

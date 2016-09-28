@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import us.ihmc.humanoidBehaviors.behaviors.primitives.SleepBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class SleepTask extends BehaviorTask
