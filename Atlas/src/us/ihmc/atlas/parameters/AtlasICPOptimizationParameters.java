@@ -79,7 +79,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public boolean scaleStepRegularizationWeightWithTime()
    {
-      return true;
+      return !runningOnRealRobot;
    }
 
    /** {@inheritDoc} */
