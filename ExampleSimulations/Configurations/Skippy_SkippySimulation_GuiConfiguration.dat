@@ -60,8 +60,8 @@
 <Graph Array Window Size>1</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
-<WindowLocation>-1928.0, 85.0</WindowLocation>
-<WindowSize>1936.0, 1176.0</WindowSize>
+<WindowLocation>-1927.0, 95.0</WindowLocation>
+<WindowSize>1932.0, 1165.0</WindowSize>
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
@@ -89,7 +89,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.actualCMPFromDefinitionX,root.Skippy.SkippyController.actualCMPFromDefinitionY,root.Skippy.SkippyController.desiredCMPFromICPX,root.Skippy.SkippyController.desiredCMPFromICPY</Variables>
+		<Variables>root.Skippy.SkippyController.actualGroundReactionForceX,root.Skippy.SkippyController.actualGroundReactionForceY,root.Skippy.SkippyController.actualGroundReactionForceZ,root.Skippy.SkippyController.desiredGroundReactionForceZ,root.Skippy.qdd_z</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
