@@ -1,5 +1,6 @@
 | Required Info ||
 |---|---|
+|Sim or Real Robot||
 |Operating System||
 |JDK||
 
