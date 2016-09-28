@@ -10,7 +10,7 @@ public interface ExpandingPolytopeAlgorithmListener
 
    public abstract void polledEntryToExpand(ExpandingPolytopeEntry triangleEntryToExpand);
 
-   public abstract void computedSupportingVertices(PolytopeVertex supportingVertexA, PolytopeVertex supportingVertexB, Vector3d w);
+   public abstract void computedSupportingVertices(Point3d supportingVertexA, Point3d supportingVertexB, Vector3d w);
 
    public abstract void computedCloseEnough(double vDotW, double lengthSquared, double mu, boolean closeEnough);
 

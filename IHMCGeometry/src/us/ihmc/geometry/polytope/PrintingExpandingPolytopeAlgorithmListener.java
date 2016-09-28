@@ -23,7 +23,7 @@ public class PrintingExpandingPolytopeAlgorithmListener implements ExpandingPoly
    }
 
    @Override
-   public void computedSupportingVertices(PolytopeVertex supportingVertexA, PolytopeVertex supportingVertexB, Vector3d w)
+   public void computedSupportingVertices(Point3d supportingVertexA, Point3d supportingVertexB, Vector3d w)
    {
       System.out.println("Computed Supporting Vertex:" + w);
    }
