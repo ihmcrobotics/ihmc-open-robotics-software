@@ -347,4 +347,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
    public abstract void initializeForTransfer();
 
    public abstract boolean getUpcomingFootstepSolution(Footstep footstepToPack);
+
+   public abstract void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 }

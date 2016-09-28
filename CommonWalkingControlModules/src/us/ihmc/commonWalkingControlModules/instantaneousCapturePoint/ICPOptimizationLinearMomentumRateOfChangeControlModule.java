@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -21,16 +22,17 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, CapturePointPlannerParameters icpPlannerParameters,
-         ICPOptimizationParameters icpOptimizationParameters, DoubleYoVariable yoTime, double totalMass, double gravityZ, double controlDT,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime, double totalMass,
+         double gravityZ, double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(referenceFrames, bipedSupportPolygons, contactableFeet, icpPlannerParameters, icpOptimizationParameters, yoTime, totalMass, gravityZ, controlDT,
-            parentRegistry, yoGraphicsListRegistry, true);
+      this(referenceFrames, bipedSupportPolygons, contactableFeet, icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters, yoTime,
+            totalMass, gravityZ, controlDT, parentRegistry, yoGraphicsListRegistry, true);
    }
 
    public ICPOptimizationLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, CapturePointPlannerParameters icpPlannerParameters,
-         ICPOptimizationParameters icpOptimizationParameters, DoubleYoVariable yoTime, double totalMass, double gravityZ, double controlDT,
+         ICPOptimizationParameters icpOptimizationParameters, WalkingControllerParameters walkingControllerParameters,
+         DoubleYoVariable yoTime, double totalMass, double gravityZ, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
       super("", referenceFrames, bipedSupportPolygons, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry, use2DProjection);
@@ -39,8 +41,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
 
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, bipedSupportPolygons, contactableFeet,
-            controlDT, registry, yoGraphicsListRegistry);
+      icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
+            bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
    }
 
    public void setDoubleSupportDuration(double doubleSupportDuration)
@@ -114,5 +116,11 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
       }
 
       return icpOptimizationController.wasFootstepAdjusted();
+   }
+
+   @Override
+   public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing)
+   {
+      icpOptimizationController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeForSwing);
    }
 }
