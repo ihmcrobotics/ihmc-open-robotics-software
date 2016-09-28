@@ -634,9 +634,11 @@ public class BalanceManager
    {
       momentumBasedController.getCapturePoint(capturePoint2d);
       icpPlanner.updatePlanForSingleSupportDisturbances(yoTime.getDoubleValue(), capturePoint2d);
+   }
 
-      double remainingTimeForSwing = icpPlanner.estimateTimeRemainingForStateUnderDisturbance(yoTime.getDoubleValue(), capturePoint2d);
-      linearMomentumRateOfChangeControlModule.submitRemainingTimeInSwingUnderDisturbance(remainingTimeForSwing);
+   public void updateSwingTimeRemaining(double timeRemainingInSwing)
+   {
+      linearMomentumRateOfChangeControlModule.submitRemainingTimeInSwingUnderDisturbance(timeRemainingInSwing);
    }
 
    public void getCapturePoint(FramePoint2d capturePointToPack)
