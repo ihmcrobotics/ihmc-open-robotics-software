@@ -156,7 +156,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getMinimumTimeRemaining()
    {
-      return 0.001;
+      return 0.005;
    }
 
    /** {@inheritDoc} */
@@ -198,7 +198,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getRemainingTimeToStopAdjusting()
    {
-      return 0.05;
+      return -0.1;
    }
    
    /** {@inheritDoc} */
