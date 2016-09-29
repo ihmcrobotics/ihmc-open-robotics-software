@@ -50,6 +50,11 @@ public class YoFootSE3Gains implements YoSE3PIDGainsInterface
       positionGains.setDerivativeGains(derivativeGainXY, derivativeGainZ);
    }
 
+   public void setPositionDerivativeCorrectionGains(double derivativeCorrectionGainXY, double derivativeCorrectionGainZ)
+   {
+      positionGains.setDerivativeCorrectionGains(derivativeCorrectionGainXY, derivativeCorrectionGainZ);
+   }
+
    public void setPositionDampingRatio(double dampingRatio)
    {
       positionGains.setDampingRatio(dampingRatio);
@@ -83,6 +88,11 @@ public class YoFootSE3Gains implements YoSE3PIDGainsInterface
    public void setOrientationDerivativeGains(double derivativeGainXY, double derivativeGainZ)
    {
       orientationGains.setDerivativeGains(derivativeGainXY, derivativeGainZ);
+   }
+
+   public void setOrientationDerivativeCorrectionGains(double derivativeCorrectionGainXY, double derivativeCorrectionGainZ)
+   {
+      orientationGains.setDerivativeGains(derivativeCorrectionGainXY, derivativeCorrectionGainZ);
    }
 
    public void setOrientationDampingRatio(double dampingRatio)

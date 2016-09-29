@@ -598,6 +598,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double kpXY = 150.0;
       double kpZ = 200.0;
       double zetaXYZ = realRobot ? 0.7 : 0.7;
+      double kvXY = realRobot ? 0.0 : 10.0;
+      double kvZ = realRobot ? 0.0 : 10.0;
 
       double kpXYOrientation = 200.0;
       double kpZOrientation = 200.0;
@@ -612,6 +614,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
+      gains.setPositionDerivativeCorrectionGains(kvXY, kvZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxPositionAcceleration, maxPositionJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
