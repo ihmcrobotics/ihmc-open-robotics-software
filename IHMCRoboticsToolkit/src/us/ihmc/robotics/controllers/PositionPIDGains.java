@@ -4,6 +4,7 @@ public class PositionPIDGains implements PositionPIDGainsInterface
 {
    private double[] positionProportionalGains = new double[3];
    private double[] positionDerivativeGains = new double[3];
+   private double[] positionDerivativeCorrectionGains = new double[3];
    private double[] positionIntegralGains = new double[3];
 
    private double positionMaxIntegralError = 0.0;
@@ -20,6 +21,7 @@ public class PositionPIDGains implements PositionPIDGainsInterface
       {
          positionProportionalGains[i] = gains.getProportionalGains()[i];
          positionDerivativeGains[i] = gains.getDerivativeGains()[i];
+         positionDerivativeCorrectionGains[i] = gains.getDerivativeGains()[i];
          positionIntegralGains[i] = gains.getIntegralGains()[i];
       }
 
@@ -33,13 +35,24 @@ public class PositionPIDGains implements PositionPIDGainsInterface
 
    public void setGains(double proportionalGain, double derivativeGain)
    {
-      setGains(proportionalGain, derivativeGain, 0.0, 0.0);
+      setGains(proportionalGain, derivativeGain, 0.0, 0.0, 0.0);
+   }
+
+   public void setGains(double proportionalGain, double derivativeGain, double derivativeCorrectionGain)
+   {
+      setGains(proportionalGain, derivativeGain, derivativeCorrectionGain, 0.0, 0.0);
    }
 
    public void setGains(double proportionalGain, double derivativeGain, double integralGain, double maxIntegralError)
    {
+      setGains(proportionalGain, derivativeGain, 0.0, integralGain, maxIntegralError);
+   }
+
+   public void setGains(double proportionalGain, double derivativeGain, double derivativeCorrectionGain, double integralGain, double maxIntegralError)
+   {
       setProportionalGains(proportionalGain, proportionalGain, proportionalGain);
       setDerivativeGains(derivativeGain, derivativeGain, derivativeGain);
+      setDerivativeCorrectionGains(derivativeCorrectionGain, derivativeCorrectionGain, derivativeCorrectionGain);
       setIntegralGains(integralGain, integralGain, integralGain, maxIntegralError);
    }
 
@@ -55,6 +68,13 @@ public class PositionPIDGains implements PositionPIDGainsInterface
       this.positionDerivativeGains[0] = derivativeGainX;
       this.positionDerivativeGains[1] = derivativeGainY;
       this.positionDerivativeGains[2] = derivativeGainZ;
+   }
+
+   public void setDerivativeCorrectionGains(double derivativeCorrectionGainX, double derivativeCorrectionGainY, double derivativeCorrectionGainZ)
+   {
+      this.positionDerivativeCorrectionGains[0] = derivativeCorrectionGainX;
+      this.positionDerivativeCorrectionGains[1] = derivativeCorrectionGainY;
+      this.positionDerivativeCorrectionGains[2] = derivativeCorrectionGainZ;
    }
 
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
@@ -91,6 +111,12 @@ public class PositionPIDGains implements PositionPIDGainsInterface
    public double[] getDerivativeGains()
    {
       return positionDerivativeGains;
+   }
+
+   @Override
+   public double[] getDerivativeCorrectionGains()
+   {
+      return positionDerivativeCorrectionGains;
    }
 
    @Override

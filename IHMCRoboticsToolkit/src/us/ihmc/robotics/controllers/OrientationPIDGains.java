@@ -4,6 +4,7 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
 {
    private double[] orientationProportionalGains = new double[3];
    private double[] orientationDerivativeGains = new double[3];
+   private double[] orientationDerivativeCorrectionGains = new double[3];
    private double[] orientationIntegralGains = new double[3];
 
    private double orientationMaxIntegralError = 0.0;
@@ -20,6 +21,7 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
       {
          orientationProportionalGains[i] = gains.getProportionalGains()[i];
          orientationDerivativeGains[i] = gains.getDerivativeGains()[i];
+         orientationDerivativeCorrectionGains[i] = gains.getDerivativeCorrectionGains()[i];
          orientationIntegralGains[i] = gains.getIntegralGains()[i];
       }
 
@@ -33,13 +35,24 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
 
    public void setGains(double proportionalGain, double derivativeGain)
    {
-      setGains(proportionalGain, derivativeGain, 0.0, 0.0);
+      setGains(proportionalGain, derivativeGain, 0.0, 0.0, 0.0);
+   }
+
+   public void setGains(double proportionalGain, double derivativeGain, double derivativeCorrectionGain)
+   {
+      setGains(proportionalGain, derivativeGain, derivativeCorrectionGain, 0.0, 0.0);
    }
 
    public void setGains(double proportionalGain, double derivativeGain, double integralGain, double maxIntegralError)
    {
+      setGains(proportionalGain, derivativeGain, 0.0, integralGain, maxIntegralError);
+   }
+
+   public void setGains(double proportionalGain, double derivativeGain, double derivativeCorrectionGain, double integralGain, double maxIntegralError)
+   {
       setProportionalGains(proportionalGain, proportionalGain, proportionalGain);
       setDerivativeGains(derivativeGain, derivativeGain, derivativeGain);
+      setDerivativeCorrectionGains(derivativeCorrectionGain, derivativeCorrectionGain, derivativeCorrectionGain);
       setIntegralGains(integralGain, integralGain, integralGain, maxIntegralError);
    }
 
@@ -55,6 +68,13 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
       this.orientationDerivativeGains[0] = derivativeGainX;
       this.orientationDerivativeGains[1] = derivativeGainY;
       this.orientationDerivativeGains[2] = derivativeGainZ;
+   }
+
+   public void setDerivativeCorrectionGains(double derivativeCorrectionGainX, double derivativeCorrectionGainY, double derivativeCorrectionGainZ)
+   {
+      this.orientationDerivativeCorrectionGains[0] = derivativeCorrectionGainX;
+      this.orientationDerivativeCorrectionGains[1] = derivativeCorrectionGainY;
+      this.orientationDerivativeCorrectionGains[2] = derivativeCorrectionGainZ;
    }
 
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
@@ -91,6 +111,12 @@ public class OrientationPIDGains implements OrientationPIDGainsInterface
    public double[] getDerivativeGains()
    {
       return orientationDerivativeGains;
+   }
+
+   @Override
+   public double[] getDerivativeCorrectionGains()
+   {
+      return orientationDerivativeCorrectionGains;
    }
 
    @Override

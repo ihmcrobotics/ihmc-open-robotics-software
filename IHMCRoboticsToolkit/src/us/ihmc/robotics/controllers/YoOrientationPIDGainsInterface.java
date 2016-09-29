@@ -10,17 +10,23 @@ public interface YoOrientationPIDGainsInterface extends OrientationPIDGainsInter
 
    public abstract Matrix3d createDerivativeGainMatrix();
 
+   public abstract Matrix3d createDerivativeCorrectionGainMatrix();
+
    public abstract Matrix3d createIntegralGainMatrix();
 
    public abstract void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ);
 
    public abstract void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ);
 
+   public abstract void setDerivativeCorrectionGains(double derivativeCorrectionGainX, double derivativeCorrectionGainY, double derivativeCorrectionGainZ);
+
    public abstract void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError);
 
    public abstract void setProportionalGains(double[] proportionalGains);
 
    public abstract void setDerivativeGains(double[] derivativeGains);
+
+   public abstract void setDerivativeCorrectionGains(double[] derivativeGains);
 
    public abstract void setIntegralGains(double[] integralGains, double maxIntegralError);
 

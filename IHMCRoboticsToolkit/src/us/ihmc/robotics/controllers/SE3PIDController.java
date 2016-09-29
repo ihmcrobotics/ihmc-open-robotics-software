@@ -65,6 +65,12 @@ public class SE3PIDController
       positionController.resetIntegrator();
    }
 
+   /**
+    * This method provides a twist feedback controller, intended for spatial velocity control.
+    * @param twistToPack twist to return
+    * @param desiredPose desired pose that we want to achieve.
+    * @param desiredTwist feed forward twist from a reference trajectory
+    */
    public void compute(Twist twistToPack, FramePose desiredPose, Twist desiredTwist)
    {
       checkBodyFrames(desiredTwist, twistToPack);
@@ -86,6 +92,14 @@ public class SE3PIDController
       twistToPack.setLinearPart(actionFromPositionController.getVector());
    }
 
+   /**
+    * This method provides a spatial acceleration controller.
+    * @param spatialAccelerationToPack spatial acceleration to return.
+    * @param desiredPose desired pose that we want to achieve.
+    * @param desiredTwist desired twist to damp around.
+    * @param feedForwardAcceleration feed forward acceleration from a reference trajectory.
+    * @param currentTwist current twist of the rigid body.
+    */
    public void compute(SpatialAccelerationVector spatialAccelerationToPack, FramePose desiredPose, Twist desiredTwist,
          SpatialAccelerationVector feedForwardAcceleration, Twist currentTwist)
    {
