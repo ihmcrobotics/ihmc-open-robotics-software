@@ -28,11 +28,13 @@ public interface CollisionShapeFactory
     * @param radiusZ Radius of box along z-axis
     * @return Description of the shape.
     */
-   public CollisionShapeDescription createBox(double radiusX, double radiusY, double radiusZ);
+   public abstract CollisionShapeDescription createBox(double radiusX, double radiusY, double radiusZ);
 
-   public CollisionShapeDescription createCylinder(double radius, double height);
+   public abstract CollisionShapeDescription createCylinder(double radius, double height);
 
-   public CollisionShapeDescription createSphere(double radius);
+   public abstract CollisionShapeDescription createSphere(double radius);
+
+   public abstract CollisionShapeDescription createCapsule(double radius, double objectHeight);
 
    /**
     * Adds a shape.

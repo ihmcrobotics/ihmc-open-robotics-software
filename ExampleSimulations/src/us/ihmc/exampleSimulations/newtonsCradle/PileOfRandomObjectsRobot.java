@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -53,7 +54,7 @@ public class PileOfRandomObjectsRobot
 
          Link link;
 
-         int shape = random.nextInt(2);
+         int shape = random.nextInt(3);
          if (shape == 0)
          {
             link = createRandomBox(collisionShapeFactory, random, i, robot);
@@ -61,6 +62,10 @@ public class PileOfRandomObjectsRobot
          else if (shape == 1)
          {
             link = createRandomSphere(collisionShapeFactory, random, i, robot);
+         }
+         else if (shape == 2)
+         {
+            link = createRandomCapsule(collisionShapeFactory, random, i, robot);
          }
          else
          {
@@ -218,6 +223,32 @@ public class PileOfRandomObjectsRobot
       link.setLinkGraphics(linkGraphics);
 
       CollisionShapeDescription shapeDesc = collisionShapeFactory.createSphere(objectRadius);
+
+      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
+      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
+      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
+      link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
+      return link;
+   }
+   
+   private Link createRandomCapsule(CollisionShapeFactory collisionShapeFactory, Random random, int i, Robot robot)
+   {
+      double objectRadius = RandomTools.generateRandomDouble(random, 0.01, 0.05);
+      double objectHeight = 2.0 * objectRadius + RandomTools.generateRandomDouble(random, 0.02, 0.05);
+      double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
+
+      LineSegment3d objectLineSegment = new LineSegment3d();
+
+      Link link = new Link("object" + i);
+      link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectHeight / 2.0);
+      link.setComOffset(0.0, 0.0, 0.0);
+
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      AppearanceDefinition randomColor = YoAppearance.randomColor(random);
+      linkGraphics.addCapsule(objectRadius, objectHeight, randomColor);
+      link.setLinkGraphics(linkGraphics);
+
+      CollisionShapeDescription shapeDesc = collisionShapeFactory.createCapsule(objectRadius, objectHeight);
 
       RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
       shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
