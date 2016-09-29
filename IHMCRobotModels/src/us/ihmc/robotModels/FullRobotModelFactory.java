@@ -1,4 +1,4 @@
-package us.ihmc.SdfLoader.models;
+package us.ihmc.robotModels;
 
 import us.ihmc.robotics.robotDescription.RobotDescription;
 

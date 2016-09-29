@@ -1,4 +1,4 @@
-package us.ihmc.SdfLoader;
+package us.ihmc.robotModels;
 
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModelFactory;

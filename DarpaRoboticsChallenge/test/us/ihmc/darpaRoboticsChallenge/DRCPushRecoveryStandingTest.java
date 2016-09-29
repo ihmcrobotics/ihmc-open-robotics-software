@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;

@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;

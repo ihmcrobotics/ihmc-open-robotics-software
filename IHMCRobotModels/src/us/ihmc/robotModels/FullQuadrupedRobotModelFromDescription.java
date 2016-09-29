@@ -1,4 +1,4 @@
-package us.ihmc.SdfLoader;
+package us.ihmc.robotModels;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -8,6 +8,7 @@ import java.util.Map;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import us.ihmc.SdfLoader.SDFQuadrupedJointNameMap;
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.SdfLoader.partNames.QuadrupedJointName;

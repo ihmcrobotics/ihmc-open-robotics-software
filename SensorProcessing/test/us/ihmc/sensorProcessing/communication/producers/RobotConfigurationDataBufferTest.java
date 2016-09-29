@@ -15,7 +15,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
 

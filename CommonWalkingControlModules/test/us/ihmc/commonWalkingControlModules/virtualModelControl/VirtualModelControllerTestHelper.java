@@ -10,8 +10,6 @@ import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelController;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;

@@ -1,10 +1,11 @@
-package us.ihmc.SdfLoader;
+package us.ihmc.robotModels;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.FingerName;

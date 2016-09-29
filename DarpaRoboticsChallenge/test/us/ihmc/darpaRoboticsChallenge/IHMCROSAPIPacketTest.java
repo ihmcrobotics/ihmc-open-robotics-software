@@ -8,7 +8,7 @@ import org.ros.RosCore;
 import org.ros.internal.message.Message;
 import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;

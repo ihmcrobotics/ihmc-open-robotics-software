@@ -1,6 +1,5 @@
 package us.ihmc.wholeBodyController;
  
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
 import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
