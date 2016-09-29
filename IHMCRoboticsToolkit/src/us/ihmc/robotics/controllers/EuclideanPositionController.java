@@ -183,7 +183,7 @@ public class EuclideanPositionController implements PositionController
       derivativeCorrectionTerm.set(positionError.getFrameTuple());
       if (errorMagnitude > maximumError)
       {
-         derivativeCorrectionTerm.scale(maximumError / errorMagnitude); // fixme again, this seems incorrect
+         derivativeCorrectionTerm.scale(maximumError / errorMagnitude);
       }
 
       derivativeCorrectionGainMatrix.transform(derivativeCorrectionTerm.getVector());
