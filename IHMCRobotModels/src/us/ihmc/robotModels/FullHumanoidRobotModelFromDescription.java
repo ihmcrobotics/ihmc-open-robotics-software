@@ -1,19 +1,7 @@
 package us.ihmc.robotModels;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.FingerName;
-import us.ihmc.SdfLoader.partNames.JointRole;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.LimbName;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -25,6 +13,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
 
 public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDescription implements FullHumanoidRobotModel
 {
