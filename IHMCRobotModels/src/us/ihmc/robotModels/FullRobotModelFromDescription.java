@@ -1,4 +1,4 @@
-package us.ihmc.SdfLoader;
+package us.ihmc.robotModels;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.partNames.JointRole;
 import us.ihmc.SdfLoader.partNames.NeckJointName;

@@ -1,4 +1,4 @@
-package us.ihmc.SdfLoader.models;
+package us.ihmc.robotModels;
 
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.SdfLoader.partNames.FingerName;

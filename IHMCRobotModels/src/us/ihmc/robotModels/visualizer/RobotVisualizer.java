@@ -1,6 +1,6 @@
-package us.ihmc.SdfLoader.visualizer;
+package us.ihmc.robotModels.visualizer;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 

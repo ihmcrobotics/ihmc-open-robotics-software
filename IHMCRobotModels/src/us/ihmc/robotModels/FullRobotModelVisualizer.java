@@ -1,22 +1,19 @@
-package us.ihmc.SdfLoader;
-
-import java.util.ArrayList;
-
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+package us.ihmc.robotModels;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
+import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+import java.util.ArrayList;
 
 /*
  * Simple class that makes simpler to visualize a FullRobotModel inside the SimulationConstructionSet.

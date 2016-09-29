@@ -9,7 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;

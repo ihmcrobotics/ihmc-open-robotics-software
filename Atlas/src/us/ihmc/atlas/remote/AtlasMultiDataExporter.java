@@ -21,8 +21,6 @@ import javax.vecmath.Vector3d;
 
 import org.apache.batik.dom.util.HashTable;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.partNames.ArmJointName;
 import us.ihmc.atlas.AtlasRobotModel;
