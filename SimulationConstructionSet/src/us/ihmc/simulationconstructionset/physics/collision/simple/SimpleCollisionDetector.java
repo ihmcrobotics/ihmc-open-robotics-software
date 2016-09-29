@@ -148,16 +148,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             }
             else if ((descriptionOne instanceof PolytopeShapeDescription) && (descriptionTwo instanceof PolytopeShapeDescription))
             {
-               PolytopeShapeDescription<?> polytopeShapeDescriptionOne = (PolytopeShapeDescription<?>) descriptionOne;
-               PolytopeShapeDescription<?> polytopeShapeDescriptionTwo = (PolytopeShapeDescription<?>) descriptionTwo;
-
-               ConvexPolytope polytopeOne = polytopeShapeDescriptionOne.getPolytope();
-               ConvexPolytope polytopeTwo = polytopeShapeDescriptionTwo.getPolytope();
-
-               double radiusOne = polytopeShapeDescriptionOne.getSmoothingRadius();
-               double radiusTwo = polytopeShapeDescriptionTwo.getSmoothingRadius();
-
-               areColliding = doPolytopePolytopeCollisionDetection(objectOne, polytopeOne, radiusOne, objectTwo, polytopeTwo, radiusTwo, result);
+               areColliding = doPolytopePolytopeCollisionDetection(objectOne, (PolytopeShapeDescription<?>) descriptionOne, objectTwo,
+                     (PolytopeShapeDescription<?>) descriptionTwo, result);
             }
             else if ((descriptionOne instanceof SphereShapeDescription) && (descriptionTwo instanceof PolytopeShapeDescription))
             {
@@ -194,11 +186,28 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       }
    }
 
+   private boolean doPolytopePolytopeCollisionDetection(CollisionShape objectOne, PolytopeShapeDescription<?> polytopeShapeDescriptionOne,
+         CollisionShape objectTwo, PolytopeShapeDescription<?> polytopeShapeDescriptionTwo, CollisionDetectionResult result)
+   {
+      SupportingVertexHolder polytopeOne = polytopeShapeDescriptionOne.getPolytope();
+      SupportingVertexHolder polytopeTwo = polytopeShapeDescriptionTwo.getPolytope();
+
+      double radiusOne = polytopeShapeDescriptionOne.getSmoothingRadius();
+      double radiusTwo = polytopeShapeDescriptionTwo.getSmoothingRadius();
+
+      return doPolytopePolytopeCollisionDetection(objectOne, polytopeOne, radiusOne, objectTwo, polytopeTwo, radiusTwo, result);
+   }
+
    private boolean doCylinderPolytopeCollisionDetection(CollisionShape objectOne, CylinderShapeDescription<?> descriptionOne, CollisionShape objectTwo,
          PolytopeShapeDescription<?> descriptionTwo, CollisionDetectionResult result)
    {
-      // TODO Auto-generated method stub
-      return false;
+      SupportingVertexHolder polytopeOne = descriptionOne.getSupportingVertexHolder();
+      SupportingVertexHolder polytopeTwo = descriptionTwo.getPolytope();
+
+      double radiusOne = descriptionOne.getSmoothingRadius();
+      double radiusTwo = descriptionTwo.getSmoothingRadius();
+
+      return doPolytopePolytopeCollisionDetection(objectOne, polytopeOne, radiusOne, objectTwo, polytopeTwo, radiusTwo, result);
    }
 
    private boolean doBoxBoxCollisionDetection(CollisionShape objectOne, BoxShapeDescription<?> descriptionOne, CollisionShape objectTwo,
@@ -215,8 +224,26 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    private boolean doCapsuleSphereCollisionDetection(CollisionShape objectOne, CapsuleShapeDescription<?> descriptionOne, CollisionShape objectTwo,
          SphereShapeDescription<?> descriptionTwo, CollisionDetectionResult result)
    {
-      //TODO: Implement!
-      return false;
+      double capsuleRadius = descriptionOne.getRadius();
+      descriptionOne.getLineSegment(lineSegmentOne);
+
+      double sphereRadius = descriptionTwo.getRadius();
+      descriptionTwo.getCenter(centerOfSphere);
+
+      lineSegmentOne.getProjectionOntoLineSegment(centerOfSphere, closestPointOnOne);
+
+      double distanceSquared = centerOfSphere.distanceSquared(closestPointOnOne);
+
+      if (distanceSquared <= (capsuleRadius + sphereRadius) * (capsuleRadius + sphereRadius))
+      {
+         addCollisionPairToResult(closestPointOnOne, centerOfSphere, capsuleRadius, sphereRadius, distanceSquared, objectOne, objectTwo, result);
+         return true;
+      }
+
+      else
+      {
+         return false;
+      }
    }
 
    private boolean doCapsuleCapsuleCollisionDetection(CollisionShape objectOne, CapsuleShapeDescription<?> descriptionOne, CollisionShape objectTwo,

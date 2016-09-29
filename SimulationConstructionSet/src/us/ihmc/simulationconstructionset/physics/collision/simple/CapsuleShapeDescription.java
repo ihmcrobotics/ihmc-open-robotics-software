@@ -15,6 +15,13 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
       this.lineSegment.set(lineSegment);
    }
 
+   public CapsuleShapeDescription(double radius, double height)
+   {
+      if (height < 2.0 * radius) throw new RuntimeException("Capsule height must be at least 2.0 * radius!");
+      this.radius = radius;
+      this.lineSegment.set(0.0, 0.0, -height/2.0 + radius, 0.0, 0.0, height/2.0 - radius);
+   }
+
    @Override
    public CapsuleShapeDescription<T> copy()
    {

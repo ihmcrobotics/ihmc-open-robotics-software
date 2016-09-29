@@ -122,7 +122,7 @@ public class NewtonsCradleSimulation
       parameters.setCreateGUI(showGUI);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
-      scs.setDT(0.00025, 10);
+      scs.setDT(0.00025, 1);
       scs.setFastSimulate(true);
       scs.setGroundVisible(false);
       scs.startOnAThread();
