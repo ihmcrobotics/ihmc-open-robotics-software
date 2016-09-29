@@ -11,6 +11,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
 {
    private final DoubleYoVariable proportionalGain;
    private final DoubleYoVariable derivativeGain;
+   private final DoubleYoVariable derivativeCorrectionGain;
    private final DoubleYoVariable dampingRatio;
    private final DoubleYoVariable integralGain;
 
@@ -25,6 +26,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    {
       proportionalGain = new DoubleYoVariable("kp" + suffix, registry);
       derivativeGain = new DoubleYoVariable("kd" + suffix, registry);
+      derivativeCorrectionGain = new DoubleYoVariable("kv" + suffix, registry);
       dampingRatio = new DoubleYoVariable("zeta" + suffix, registry);
       integralGain = new DoubleYoVariable("ki" + suffix, registry);
 
@@ -46,6 +48,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    {
       proportionalGain.set(0.0);
       derivativeGain.set(0.0);
+      derivativeCorrectionGain.set(0.0);
       dampingRatio.set(0.0);
       integralGain.set(0.0);
 
@@ -79,6 +82,11 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       this.derivativeGain.set(derivativeGain);
    }
 
+   public void setDerivativeCorrectionGain(double derivativeCorrectionGain)
+   {
+      this.derivativeCorrectionGain.set(derivativeCorrectionGain);
+   }
+
    public void setDampingRatio(double dampingRatio)
    {
       this.dampingRatio.set(dampingRatio);
@@ -108,6 +116,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    public void set(OrientationPIDGainsInterface gains)
    {
       setProportionalGains(gains.getProportionalGains());
+      setDerivativeCorrectionGains(gains.getDerivativeCorrectionGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
       setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
@@ -179,6 +188,19 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       return derivativeGainMatrix;
    }
 
+   @Override public Matrix3d createDerivativeCorrectionGainMatrix()
+   {
+      Matrix3d derivativeCorrectionGainMatrix = new Matrix3d();
+
+      for (int i = 0; i < 3; i++)
+      {
+         derivativeCorrectionGain.addVariableChangedListener(new MatrixUpdater(i, i, derivativeCorrectionGainMatrix));
+      }
+
+      derivativeCorrectionGain.notifyVariableChangedListeners();
+      return derivativeCorrectionGainMatrix;
+   }
+
    @Override
    public Matrix3d createIntegralGainMatrix()
    {
@@ -205,6 +227,11 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       derivativeGain.set(derivativeGainX);
    }
 
+   @Override public void setDerivativeCorrectionGains(double correctionGainX, double correctionGainY, double correctionGainZ)
+   {
+      derivativeCorrectionGain.set(correctionGainX);
+   }
+
    @Override
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
    {
@@ -222,6 +249,11 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    public void setDerivativeGains(double[] derivativeGains)
    {
       derivativeGain.set(derivativeGains[0]);
+   }
+
+   @Override public void setDerivativeCorrectionGains(double[] derivativeCorrectionGains)
+   {
+      derivativeCorrectionGain.set(derivativeCorrectionGains[0]);
    }
 
    @Override
@@ -292,6 +324,16 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       for (int i = 0; i < 3; i++)
          tempDerivativeGains[i] = derivativeGain.getDoubleValue();
       return tempDerivativeGains;
+   }
+
+   private double[] tempDerivativeCorrectionGains = new double[3];
+
+   @Override
+   public double[] getDerivativeCorrectionGains()
+   {
+      for (int i = 0; i < 3; i++)
+         tempDerivativeCorrectionGains[i] = derivativeCorrectionGain.getDoubleValue();
+      return tempDerivativeCorrectionGains;
    }
 
    private double[] tempIntegralGains = new double[3];
