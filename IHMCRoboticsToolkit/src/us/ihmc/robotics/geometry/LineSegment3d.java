@@ -22,6 +22,11 @@ public class LineSegment3d
       set(pointA, pointB);
    }
 
+   public void set(LineSegment3d lineSegment)
+   {
+      set(lineSegment.pointA, lineSegment.pointB);
+   }
+
    public void set(Point3d pointA, Point3d pointB)
    {
       setPointA(pointA);
@@ -54,6 +59,12 @@ public class LineSegment3d
       pointB.set(xB, yB, zB);
    }
 
+   public void applyTransform(RigidBodyTransform transform)
+   {
+      transform.transform(pointA);
+      transform.transform(pointB);
+   }
+   
    public double length()
    {
       return Math.sqrt((pointB.getX() - pointA.getX()) * (pointB.getX() - pointA.getX()) + (pointB.getY() - pointA.getY()) * (pointB.getY() - pointA.getY())
@@ -154,4 +165,5 @@ public class LineSegment3d
    {
       return pointB;
    }
+
 }
