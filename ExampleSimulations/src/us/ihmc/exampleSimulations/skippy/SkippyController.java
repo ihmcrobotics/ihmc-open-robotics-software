@@ -139,7 +139,6 @@ public class SkippyController implements RobotController
    private final YoFramePoint icpToFootError = new YoFramePoint("icpToFootError", ReferenceFrame.getWorldFrame(), registry);
    private PIDController controllerCmpX;
    private PIDController controllerCmpY;
-
    private final YoFramePoint footLocation = new YoFramePoint("foot", ReferenceFrame.getWorldFrame(), registry);
 
    private final DoubleYoVariable robotMass = new DoubleYoVariable("robotMass", registry);
@@ -344,9 +343,9 @@ public class SkippyController implements RobotController
        * ICP_Y
        */
       controllerCmpY = new PIDController("icpY", registry);
-      controllerCmpX.setProportionalGain(0.6);// 3);
-      controllerCmpX.setDerivativeGain(0.1);// 05);
-      controllerCmpX.setIntegralGain(0.02);// 01);
+      controllerCmpY.setProportionalGain(0.6);// 3);
+      controllerCmpY.setDerivativeGain(0.1);// 05);
+      controllerCmpY.setIntegralGain(0.02);// 01);
       // desiredBodyZ = new DoubleYoVariable("desiredBodyZ", registry);
       // desiredBodyZ.set(1.5);
    }
@@ -508,7 +507,10 @@ public class SkippyController implements RobotController
        * Ground reaction force
        */
       Vector3d tempReactionForce = new Vector3d();
-      robot.computeFootContactForce(tempReactionForce);
+      /*
+       * tempReactionForce is packed from a YoFrameVector in WorldFrame
+       */
+      robot.computeFootContactForce(tempReactionForce); 
       actualGroundReactionForce.set(tempReactionForce);
    }
 
@@ -522,7 +524,7 @@ public class SkippyController implements RobotController
       Vector3d tempComVelocity = new Vector3d();
       Vector3d tempAngularMomentum = new Vector3d();
       /*
-       * CoM and CoM velocity
+       * CoM and CoM velocity in WorldFrame
        */
       double totalMass = robot.computeCOMMomentum(tempCOMPosition, tempComVelocity, tempAngularMomentum);
       centerOfMass.set(tempCOMPosition);
@@ -584,10 +586,10 @@ public class SkippyController implements RobotController
    {
       if (robot.getFootFS())
       {
-         actualCMPFromDefinition.setX((-rateOfChangeOfAngularMomentum.getY() + centerOfMass.getX() * desiredGroundReactionForce.getZ()
-               - centerOfMass.getZ() * desiredGroundReactionForce.getX()) / desiredGroundReactionForce.getZ());
-         actualCMPFromDefinition.setY((-rateOfChangeOfAngularMomentum.getX() + centerOfMass.getY() * desiredGroundReactionForce.getZ()
-               - centerOfMass.getZ() * desiredGroundReactionForce.getY()) / desiredGroundReactionForce.getZ());
+         actualCMPFromDefinition.setX((-rateOfChangeOfAngularMomentum.getY() + centerOfMass.getX() * actualGroundReactionForce.getZ()
+               - centerOfMass.getZ() * actualGroundReactionForce.getX()) / actualGroundReactionForce.getZ());
+         actualCMPFromDefinition.setY((-rateOfChangeOfAngularMomentum.getX() + centerOfMass.getY() * actualGroundReactionForce.getZ()
+               - centerOfMass.getZ() * actualGroundReactionForce.getY()) / actualGroundReactionForce.getZ());
          actualCMPFromDefinition.setZ(0.0);
       }
 
@@ -655,15 +657,18 @@ public class SkippyController implements RobotController
        */
       double icpToFootErrorX = controllerCmpX.compute(actualICP.getX(), footLocation.getX(), centerOfMassVelocity.getX(), 0.0, SkippySimulation.DT);
       double icpToFootErrorY = controllerCmpY.compute(actualICP.getY(), footLocation.getY(), centerOfMassVelocity.getY(), 0.0, SkippySimulation.DT);
+      /*
+       * Compute CMP
+       */
       icpToFootError.set(icpToFootErrorX, icpToFootErrorY, 0.0);
-      double desiredCmpX = actualICP.getX() + kCapture.getDoubleValue() * icpToFootErrorX;
-      // //controllerCmpX.compute(actualICP.getX(),
-      // footLocation.getX(),
-      double desiredCmpY = actualICP.getY() + kCapture.getDoubleValue() * icpToFootErrorY;
+      desiredCMPFromICP.set(icpToFootError);
+      desiredCMPFromICP.scale(kCapture.getDoubleValue());
+      desiredCMPFromICP.add(icpToFootError);
+      desiredCMPFromICP.add(footLocation);
+//      double desiredCmpX = actualICP.getX() + kCapture.getDoubleValue() * icpToFootErrorX;
+//      double desiredCmpY = actualICP.getY() + kCapture.getDoubleValue() * icpToFootErrorY;
       // //controllerCmpY.compute(actualICP.getY(),
       // footLocation.getY(),
-      desiredCMPFromICP.setX(desiredCmpX);
-      desiredCMPFromICP.setY(desiredCmpY);
       /*
        * Compute position vector from CMP to COM
        */
@@ -699,15 +704,15 @@ public class SkippyController implements RobotController
       /*
        * Apply torques
        */
-      //		robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue());
-      //		robot.getShoulderJoint().setTau(-tauOnShoulderJointAxis.getDoubleValue());
+      robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue());
+      robot.getShoulderJoint().setTau(-tauOnShoulderJointAxis.getDoubleValue());
 
       // } else {
       /*
        * Apply torques from actual controller on Skippy
        */
-      applyTorqueToHip(q_d_hip.getDoubleValue());
-      applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
+//            applyTorqueToHip(q_d_hip.getDoubleValue());
+//            applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
       // }
    }
 
