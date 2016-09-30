@@ -57,7 +57,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
 
    private void sendHandDesiredConfigurationToController()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
 
 //         sendPacketToController(outgoingHandDesiredConfigurationMessage);
@@ -73,18 +73,9 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       }
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
 
    @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   public void stop()
+   public void abort()
    {
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -93,13 +84,10 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
          sendPacketToController(stopMessage);
          sendPacketToNetworkProcessor(stopMessage);
       }
-      isStopped.set(true);
+      isAborted.set(true);
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
+  
 
    @Override
    public void pause()
@@ -138,7 +126,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       else
          trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
-      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue();
+      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue() && !isAborted.getBooleanValue();
    }
 
    @Override
@@ -152,7 +140,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       hasPacketBeenSet.set(false);
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
       trajectoryTime.set(1.0); //TODO hardCoded to be determined
 
       trajectoryTimeElapsed.set(false);
@@ -165,7 +153,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       hasPacketBeenSet.set(false);
       outgoingHandDesiredConfigurationMessage = null;
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
 
       trajectoryTime.set(Double.NaN);
       startTime.set(Double.NaN);

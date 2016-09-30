@@ -1,0 +1,7 @@
+root*false*false
+root.SpinningCoin*false*false
+root.SpinningCoin.Collision*false*false
+root.SpinningCoin.Collision.GDX*false*false
+root.SpinningCoin.Collision.GDX.shape0*false*false
+root.SpinningCoin.Collision.GDX.shape1*false*false
+root.DefaultCollisionVisualize*false*false

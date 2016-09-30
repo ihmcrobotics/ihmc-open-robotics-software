@@ -218,7 +218,7 @@ public class OnToesState extends AbstractFootControlState
          rayOrigin = footPolygon.getCentroid();
 
       rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
-      FramePoint2d[] intersectionWithRay = footPolygon.intersectionWithRay(rayThroughExitCMP);
+      FramePoint2d[] intersectionWithRay = footPolygon.intersectionWithRayCopy(rayThroughExitCMP);
       toeOffContactPoint2d.set(intersectionWithRay[0]);
 
       contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);

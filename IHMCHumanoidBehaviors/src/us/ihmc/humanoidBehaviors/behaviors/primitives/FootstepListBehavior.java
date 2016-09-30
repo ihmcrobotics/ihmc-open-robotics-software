@@ -197,7 +197,7 @@ public class FootstepListBehavior extends AbstractBehavior
    }
 
    @Override
-   public void stop()
+   public void abort()
    {
       sendPacketToController(new PauseWalkingMessage(true));
       isPaused.set(true);
@@ -236,20 +236,7 @@ public class FootstepListBehavior extends AbstractBehavior
       return ret;
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
+  
 
    @Override
    public boolean hasInputBeenSet()

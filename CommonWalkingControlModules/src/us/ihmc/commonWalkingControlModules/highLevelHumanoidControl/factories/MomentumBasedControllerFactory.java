@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHum
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -459,6 +460,11 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    public void setFallbackControllerForFailure(HighLevelState fallbackController)
    {
       highLevelHumanoidControllerManager.setFallbackControllerForFailure(fallbackController);
+   }
+
+   public void setICPOptimizationControllerParameters(ICPOptimizationParameters icpOptimizationParameters)
+   {
+      managerFactory.setICPOptimizationParameters(icpOptimizationParameters);
    }
 
    public HighLevelState getCurrentHighLevelState()

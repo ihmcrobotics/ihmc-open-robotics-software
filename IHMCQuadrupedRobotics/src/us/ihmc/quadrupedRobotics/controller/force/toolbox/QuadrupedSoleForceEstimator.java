@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
+import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
@@ -24,17 +25,13 @@ public class QuadrupedSoleForceEstimator
    private final ReferenceFrame worldFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
 
-   private final QuadrantDependentList<FrameVector> soleForce;
+   private final QuadrantDependentList<FrameVector> soleVirtualForce;
    private final QuadrantDependentList<FrameVector> soleContactForce;
    private final QuadrantDependentList<FramePoint> solePosition;
-   private final QuadrantDependentList<FrameVector[]> jointTorques;
-   private final QuadrantDependentList<YoFrameVector> yoSoleForce;
+   private final QuadrantDependentList<YoFrameVector> yoSoleVirtualForce;
    private final QuadrantDependentList<YoFrameVector> yoSoleContactForce;
-   private final QuadrantDependentList<YoFramePoint> yoSolePosition;
-   private final QuadrantDependentList<YoFrameVector[]> yoJointTorques;
 
    private final QuadrantDependentList<OneDoFJoint[]> legJoints;
-   private final LegJointName[] legJointNames;
    private final QuadrantDependentList<GeometricJacobian> footJacobian;
    private final QuadrantDependentList<PointJacobian> soleJacobian;
 
@@ -48,7 +45,6 @@ public class QuadrupedSoleForceEstimator
    public QuadrupedSoleForceEstimator(FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
-      legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
       registry = new YoVariableRegistry(getClass().getSimpleName());
 
       // initialize reference frames
@@ -56,40 +52,24 @@ public class QuadrupedSoleForceEstimator
       worldFrame = ReferenceFrame.getWorldFrame();
       soleFrame = referenceFrames.getFootReferenceFrames();
 
-      // initialize control variables
+      // initialize estimate variables
       solePosition = new QuadrantDependentList<>();
-      soleForce = new QuadrantDependentList<>();
+      soleVirtualForce = new QuadrantDependentList<>();
       soleContactForce = new QuadrantDependentList<>();
-      jointTorques = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePosition.set(robotQuadrant, new FramePoint(worldFrame));
-         soleForce.set(robotQuadrant, new FrameVector(worldFrame));
+         soleVirtualForce.set(robotQuadrant, new FrameVector(worldFrame));
          soleContactForce.set(robotQuadrant, new FrameVector(worldFrame));
-         jointTorques.set(robotQuadrant, new FrameVector[legJointNames.length]);
-         for (int i = 0; i < legJointNames.length; i++)
-         {
-            jointTorques.get(robotQuadrant)[i] = new FrameVector(worldFrame);
-         }
       }
 
       // initialize yo variables
-      yoSolePosition = new QuadrantDependentList<>();
-      yoSoleForce = new QuadrantDependentList<>();
+      yoSoleVirtualForce = new QuadrantDependentList<>();
       yoSoleContactForce = new QuadrantDependentList<>();
-      yoJointTorques = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         yoSolePosition.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseName() + "SolePosition", worldFrame, registry));
-         yoSoleForce.set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseName() + "SoleForceEstimate", worldFrame, registry));
-         yoSoleForce.get(robotQuadrant).set(soleForce.get(robotQuadrant));
+         yoSoleVirtualForce.set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseName() + "SoleVirtualForceEstimate", worldFrame, registry));
          yoSoleContactForce.set(robotQuadrant, new YoFrameVector(robotQuadrant.getCamelCaseName() + "SoleContactForceEstimate", worldFrame, registry));
-         yoJointTorques.set(robotQuadrant, new YoFrameVector[legJointNames.length]);
-         for (int i = 0; i < legJointNames.length; i++)
-         {
-            yoJointTorques.get(robotQuadrant)[i] = new YoFrameVector(robotQuadrant.getCamelCaseName() + legJointNames[i].getPascalCaseName() + "JointTorques",
-                  worldFrame, registry);
-         }
       }
 
       // initialize jacobian variables
@@ -105,17 +85,17 @@ public class QuadrupedSoleForceEstimator
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(robotQuadrant);
-         int jacobianCols = fullRobotModel.getLegOneDoFJoints(robotQuadrant).size();
-         int jacobianRows = 3;
          RigidBody body = fullRobotModel.getRootJoint().getSuccessor();
          RigidBody foot = jointBeforeFoot.getSuccessor();
          legJoints.set(robotQuadrant, ScrewTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJoint.class));
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());
+         int jacobianRows = 3;
+         int jacobianCols = legJoints.get(robotQuadrant).length;
          jacobianMatrix.set(robotQuadrant, new DenseMatrix64F(jacobianRows, jacobianCols));
-         jacobianMatrixTranspose.set(robotQuadrant, new DenseMatrix64F(jacobianMatrix.get(robotQuadrant).getNumCols(), jacobianMatrix.get(robotQuadrant).getNumRows()));
-         jacobianMatrixTransposePseudoInverse.set(robotQuadrant, new DenseMatrix64F(jacobianMatrix.get(robotQuadrant).getNumRows(), jacobianMatrix.get(robotQuadrant).getNumCols()));
-         soleForceMatrix.set(robotQuadrant, new DenseMatrix64F(jacobianMatrix.get(robotQuadrant).getNumRows(), 1));
+         jacobianMatrixTranspose.set(robotQuadrant, new DenseMatrix64F(jacobianCols, jacobianRows));
+         jacobianMatrixTransposePseudoInverse.set(robotQuadrant, new DenseMatrix64F(jacobianRows, jacobianCols));
+         soleForceMatrix.set(robotQuadrant, new DenseMatrix64F(3, 1));
          jointTorqueVector.set(robotQuadrant, new DenseMatrix64F(legJoints.get(robotQuadrant).length, 1));
          fullRobotModel.getLegOneDoFJoints(robotQuadrant).get(0).getTau();
       }
@@ -127,14 +107,13 @@ public class QuadrupedSoleForceEstimator
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         soleForce.get(robotQuadrant).setToZero();
+         soleVirtualForce.get(robotQuadrant).setToZero();
          soleContactForce.get(robotQuadrant).setToZero();
       }
    }
 
    public void compute()
    {
-
       // compute sole positions and jacobians
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -145,7 +124,7 @@ public class QuadrupedSoleForceEstimator
 
          for (int i = 0; i < legJoints.get(robotQuadrant).length; ++i)
          {
-            jointTorqueVector.get(robotQuadrant).set(i, 0, fullRobotModel.getLegOneDoFJoints(robotQuadrant).get(i).getTau());
+            jointTorqueVector.get(robotQuadrant).set(i, 0, legJoints.get(robotQuadrant)[i].getTauMeasured());
          }
       }
 
@@ -155,27 +134,30 @@ public class QuadrupedSoleForceEstimator
       {
          jacobianMatrix.set(robotQuadrant, soleJacobian.get(robotQuadrant).getJacobianMatrix());
          CommonOps.transpose(jacobianMatrix.get(robotQuadrant), jacobianMatrixTranspose.get(robotQuadrant));
-         CommonOps.pinv(jacobianMatrixTranspose.get(robotQuadrant), jacobianMatrixTransposePseudoInverse.get(robotQuadrant));
+         UnrolledInverseFromMinor.inv3(jacobianMatrixTranspose.get(robotQuadrant), jacobianMatrixTransposePseudoInverse.get(robotQuadrant),1.0);
+//         CommonOps.pinv(jacobianMatrixTranspose.get(robotQuadrant), jacobianMatrixTransposePseudoInverse.get(robotQuadrant));
          CommonOps.mult(jacobianMatrixTransposePseudoInverse.get(robotQuadrant), jointTorqueVector.get(robotQuadrant), soleForceMatrix.get(robotQuadrant));
 
          ReferenceFrame jacobianFrame = soleJacobian.get(robotQuadrant).getFrame();
-         soleForce.get(robotQuadrant).changeFrame(jacobianFrame);
+         soleVirtualForce.get(robotQuadrant).changeFrame(jacobianFrame);
          soleContactForce.get(robotQuadrant).changeFrame(jacobianFrame);
-         soleForce.get(robotQuadrant).set(soleForceMatrix.get(robotQuadrant).get(0), soleForceMatrix.get(robotQuadrant).get(1), soleForceMatrix.get(robotQuadrant).get(2));
-         soleContactForce.get(robotQuadrant).set(-soleForceMatrix.get(robotQuadrant).get(0), -soleForceMatrix.get(robotQuadrant).get(1), -soleForceMatrix.get(robotQuadrant).get(2));
-         yoSoleForce.get(robotQuadrant).setAndMatchFrame(soleForce.get(robotQuadrant));
+         soleVirtualForce.get(robotQuadrant)
+               .set(soleForceMatrix.get(robotQuadrant).get(0), soleForceMatrix.get(robotQuadrant).get(1), soleForceMatrix.get(robotQuadrant).get(2));
+         soleContactForce.get(robotQuadrant)
+               .set(-soleForceMatrix.get(robotQuadrant).get(0), -soleForceMatrix.get(robotQuadrant).get(1), -soleForceMatrix.get(robotQuadrant).get(2));
+         yoSoleVirtualForce.get(robotQuadrant).setAndMatchFrame(soleVirtualForce.get(robotQuadrant));
          yoSoleContactForce.get(robotQuadrant).setAndMatchFrame(soleContactForce.get(robotQuadrant));
       }
    }
 
-   public QuadrantDependentList<FrameVector> getSoleForce()
+   public QuadrantDependentList<FrameVector> getSoleVirtualForce()
    {
-      return soleForce;
+      return soleVirtualForce;
    }
 
-   public FrameVector getSoleForce(RobotQuadrant key)
+   public FrameVector getSoleVirtualForce(RobotQuadrant robotQuadrant)
    {
-      return soleForce.get(key);
+      return soleVirtualForce.get(robotQuadrant);
    }
 
    public QuadrantDependentList<FrameVector> getSoleContactForce()
@@ -183,8 +165,8 @@ public class QuadrupedSoleForceEstimator
       return soleContactForce;
    }
 
-   public FrameVector getSoleContactForce(RobotQuadrant key)
+   public FrameVector getSoleContactForce(RobotQuadrant robotQuadrant)
    {
-      return soleContactForce.get(key);
+      return soleContactForce.get(robotQuadrant);
    }
 }

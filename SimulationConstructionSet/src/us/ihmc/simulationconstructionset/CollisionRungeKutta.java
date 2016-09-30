@@ -314,7 +314,8 @@ public class CollisionRungeKutta implements java.io.Serializable
          currentStepSize_ = h;    // added for comphys
       }
 
-      throw new ODEException("Too many steps in routine odeint.");
+      System.err.println("Too many steps in routine odeint.");
+//      throw new ODEException("Too many steps in routine odeint.");
 
       // error("Too many steps in routine odeint.  NVARS: " + NVARS);
    }

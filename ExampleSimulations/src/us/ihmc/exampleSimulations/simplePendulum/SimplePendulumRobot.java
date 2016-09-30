@@ -57,9 +57,9 @@ public class SimplePendulumRobot extends Robot
       fulcrumPinJoint.setLink(pendulumLink());// pendulumLink() method defined next.
       fulcrumPinJoint.setDamping(0.3);
 
-      q_fulcrum = fulcrumPinJoint.getQ();
-      qd_fulcrum = fulcrumPinJoint.getQD();
-      tau_fulcrum = fulcrumPinJoint.getTau();
+      q_fulcrum = fulcrumPinJoint.getQYoVariable();
+      qd_fulcrum = fulcrumPinJoint.getQDYoVariable();
+      tau_fulcrum = fulcrumPinJoint.getTauYoVariable();
 
       this.addRootJoint(fulcrumPinJoint);
    }

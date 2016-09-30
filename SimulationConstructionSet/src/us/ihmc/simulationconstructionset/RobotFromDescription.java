@@ -325,7 +325,9 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
 
          if (jointDescription.isDynamic())
          {
-            joint = new PinJoint(jointDescription.getName(), offset, this, pinJointDescription.getJointAxis());
+            Vector3d jointAxis = new Vector3d();
+            pinJointDescription.getJointAxis(jointAxis);
+            joint = new PinJoint(jointDescription.getName(), offset, this, jointAxis);
 
             PinJoint pinJoint = (PinJoint) joint;
 
@@ -347,7 +349,9 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
          }
          else
          {
-            joint = new DummyOneDegreeOfFreedomJoint(jointDescription.getName(), offset, this, pinJointDescription.getJointAxis());
+            Vector3d jointAxis = new Vector3d();
+            pinJointDescription.getJointAxis(jointAxis);
+            joint = new DummyOneDegreeOfFreedomJoint(jointDescription.getName(), offset, this, jointAxis);
          }
       }
       else if (jointDescription instanceof SliderJointDescription)
@@ -356,7 +360,9 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
          Vector3d offset = new Vector3d();
          sliderJointDescription.getOffsetFromParentJoint(offset);
 
-         joint = new SliderJoint(jointDescription.getName(), offset, this, sliderJointDescription.getJointAxis());
+         Vector3d jointAxis = new Vector3d();
+         sliderJointDescription.getJointAxis(jointAxis);
+         joint = new SliderJoint(jointDescription.getName(), offset, this, jointAxis);
 
          SliderJoint sliderJoint = (SliderJoint) joint;
 

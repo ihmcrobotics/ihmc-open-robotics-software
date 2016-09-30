@@ -11,6 +11,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.testing.TestPlanAnnotations;
 
 public class RobotDescriptionUsingSpringFlamingoTest
 {
@@ -55,7 +56,8 @@ public class RobotDescriptionUsingSpringFlamingoTest
    private static final double FOOT_BEHIND = FOOT_X - FOOT_FORWARD;
    private static final double HIP_OFFSET_Y = 0.12;
 
-   @Test
+   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 300)
+   @Test(timeout = 1000)
    public void testUsingSpringFlamingoRobotDescription()
    {
       FloatingPlanarJointDescription plane;

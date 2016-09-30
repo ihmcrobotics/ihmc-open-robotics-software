@@ -71,6 +71,18 @@ public class JointDescription implements RobotDescriptionNode
    public void addJoint(JointDescription childJointDescription)
    {
       childrenJointDescriptions.add(childJointDescription);
+
+      if (childJointDescription.getParentJoint() != null)
+      {
+         throw new RuntimeException("JointDescription " + childJointDescription.getName() + "already has a parent joint: " + childJointDescription.getParentJoint().getName());
+      }
+
+      childJointDescription.setParentJoint(this);
+   }
+   
+   public boolean removeJoint(JointDescription childJointDescription)
+   {
+      return childrenJointDescriptions.remove(childJointDescription);
    }
 
    @Override

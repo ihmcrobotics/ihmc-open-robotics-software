@@ -19,8 +19,8 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
-import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior.WalkingOrientation;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior.WalkingOrientation;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
@@ -227,6 +227,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       WalkToLocationBehavior walkToLocationBehavior = createNewWalkToLocationBehavior();
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose2d, WalkingOrientation.TARGET_ORIENTATION);
+      walkToLocationBehavior.doControl();
+
       ArrayList<Footstep> footsteps = walkToLocationBehavior.getFootSteps();
       int numberOfFootsteps = footsteps.size();
       FramePose2d currentFootstepPose = new FramePose2d();
@@ -266,6 +268,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       WalkToLocationBehavior walkToLocationBehavior = createNewWalkToLocationBehavior();
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose2d, WalkingOrientation.START_TARGET_ORIENTATION_MEAN);
+      walkToLocationBehavior.doControl();
+
       ArrayList<Footstep> footsteps = walkToLocationBehavior.getFootSteps();
       int numberOfFootsteps = footsteps.size();
       FramePose2d currentFootstepPose = new FramePose2d();

@@ -131,12 +131,15 @@ public class KinematicPoint implements java.io.Serializable
 
    public void setOffsetWorld(double x, double y, double z)
    {
+//      System.out.println("Setting offset World: " + x + ", " + y + ", " + z);
       tempTransformFromWorldToJoint.set(parentJoint.transformToNext);
       tempTransformFromWorldToJoint.invert();
       offsetPlus.set(x, y, z, 1.0);
       tempTransformFromWorldToJoint.transform(offsetPlus);
 
       setOffsetJoint(offsetPlus.getX(), offsetPlus.getY(), offsetPlus.getZ());
+//      System.out.println("Setting offset Joint: " + offsetPlus.getX() + ", " + offsetPlus.getY() + ", " + offsetPlus.getZ());
+
    }
 
    public void updatePointVelocity(Matrix3d R0_i, Vector3d comOffset, Vector3d v_i, Vector3d w_i)

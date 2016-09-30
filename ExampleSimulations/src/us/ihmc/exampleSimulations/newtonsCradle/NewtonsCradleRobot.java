@@ -13,19 +13,21 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 
 public class NewtonsCradleRobot extends Robot
 {
    private final ScsCollisionDetector collisionDetector;
-   
+
    public NewtonsCradleRobot()
    {
       super("NewtonsCradle");
 
       int numberOfBalls = 6;
 
-      collisionDetector = new GdxCollisionDetector(this.getRobotsYoVariableRegistry(), 10000);
+//      collisionDetector = new GdxCollisionDetector(this.getRobotsYoVariableRegistry(), 10000);
+      collisionDetector = new SimpleCollisionDetector();
+
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(0.02);
 
@@ -67,15 +69,15 @@ public class NewtonsCradleRobot extends Robot
 
          if ((i == 0) || (i == 1))
             pinJoint.setQ(0.3);
-         
+
 //         if ((i == numberOfBalls-1) || (i == numberOfBalls-2))
 //            pinJoint.setQ(-0.3);
       }
-      
+
       Graphics3DObject barAbove = new Graphics3DObject();
       this.addStaticLinkGraphics(barAbove);
    }
-   
+
    public ScsCollisionDetector getCollisionDetector()
    {
       return collisionDetector;

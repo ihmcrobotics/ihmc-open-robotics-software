@@ -55,7 +55,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
       {
          String prefix = StringUtils.uncapitalize(robotSide.getSideNameFirstLetter());
          robot.getOneDegreeOfFreedomJoint(prefix + "_leg_hpy").setQ(legInitialJointPositions.get(LegJointName.HIP_PITCH));
-         robot.getOneDegreeOfFreedomJoint(prefix + "_leg_kny").setQ(legInitialJointPositions.get(LegJointName.KNEE));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_leg_kny").setQ(legInitialJointPositions.get(LegJointName.KNEE_PITCH));
          robot.getOneDegreeOfFreedomJoint(prefix + "_leg_aky").setQ(legInitialJointPositions.get(LegJointName.ANKLE_PITCH));
 
          robot.getOneDegreeOfFreedomJoint(prefix + "_arm_wry").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH));
@@ -124,7 +124,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          pelvisOrientation.setYawPitchRoll(0, 0, 0);
          
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.5958);
-         legInitialJointPositions.put(LegJointName.KNEE, 1.0931);
+         legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.0931);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.4973);
 
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, 0.0957);
@@ -147,7 +147,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          pelvisOrientation.setYawPitchRoll(0, 0, 0);
          
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.5958);
-         legInitialJointPositions.put(LegJointName.KNEE, 1.0931);
+         legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.0931);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.4973);
 
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, 0.0957);
@@ -170,7 +170,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          pelvisOrientation.setYawPitchRoll(0, 0, 0);
          
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.84);
-         legInitialJointPositions.put(LegJointName.KNEE, 1.34);
+         legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.34);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.5);
 
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, -0.5);
@@ -193,7 +193,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
          
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
-         legInitialJointPositions.put(LegJointName.KNEE, 1.1418);
+         legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.1418);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.49);
 
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, 0.3431);
@@ -216,7 +216,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
 
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
-         legInitialJointPositions.put(LegJointName.KNEE, 1.1418);
+         legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.1418);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.49);
 
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, 0.34);
@@ -239,7 +239,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
 
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
-         legInitialJointPositions.put(LegJointName.KNEE, 1.1418);
+         legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.1418);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.49);
 
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, -1.7913);
@@ -262,7 +262,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
 
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
-         legInitialJointPositions.put(LegJointName.KNEE, 1.1418);
+         legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.1418);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.49);
 
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, -1.7913);
@@ -285,7 +285,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
 
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
-         legInitialJointPositions.put(LegJointName.KNEE, 1.1418);
+         legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.1418);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.49);
 
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, -1.7913);
@@ -314,7 +314,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          pelvisOrientation.setYawPitchRoll(Math.PI, 0, 0);
 
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
-         legInitialJointPositions.put(LegJointName.KNEE, 1.1418);
+         legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.1418);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.49);
 
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, 0.0);
@@ -337,7 +337,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
 
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
-         legInitialJointPositions.put(LegJointName.KNEE, 1.1418);
+         legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.1418);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.49);
 
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, -1.7913);

@@ -55,11 +55,11 @@ public class FullRobotModelCorruptor
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
          String thighName = sidePrefix + "Thigh";
-         final RigidBody thigh = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getPredecessor();
+         final RigidBody thigh = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getPredecessor();
          createMassAndCoMOffsetCorruptors(namePrefix, thighName, thigh);
 
          String shinName = sidePrefix + "Shin";
-         final RigidBody shin = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE).getSuccessor();
+         final RigidBody shin = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getSuccessor();
          createMassAndCoMOffsetCorruptors(namePrefix, shinName, shin);
 
          String footName = sidePrefix + "Foot";

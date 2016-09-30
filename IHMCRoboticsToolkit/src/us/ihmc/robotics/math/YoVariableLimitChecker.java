@@ -47,6 +47,16 @@ public class YoVariableLimitChecker
    {
       return status.getEnumValue();
    }
+   
+   
+   public double getDoubleValue()
+   {
+      return variableToCheck.getDoubleValue();
+   }
+   public String getName()
+   {
+      return variableToCheck.getName();
+   }
 
    public enum Status
    {

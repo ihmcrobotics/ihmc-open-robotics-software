@@ -158,7 +158,7 @@ public class Step2RobotVold extends Robot
    //*************************  Part 1
    public void setKneeForce(double desiredTauKnee)
    {
-      this.kneeJoint.tau.set(desiredTauKnee);
+      this.kneeJoint.setTau(desiredTauKnee);
    }
    
    public double getBodyPositionZ()
@@ -179,7 +179,7 @@ public class Step2RobotVold extends Robot
    
    public void setHipForce(double desiredTauHip)
    {
-      this.hipJoint.tau.set(desiredTauHip);
+      this.hipJoint.setTau(desiredTauHip);
    }
    
    public double getBodyPitchVel()

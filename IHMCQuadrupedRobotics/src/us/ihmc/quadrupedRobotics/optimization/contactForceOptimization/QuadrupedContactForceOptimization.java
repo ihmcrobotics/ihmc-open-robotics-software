@@ -4,8 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolver;
-import us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.QuadProgSolver;
+import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -23,7 +23,7 @@ public class QuadrupedContactForceOptimization
    private final ReferenceFrame comFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
    private final ReferenceFrame worldFrame;
-   private static final ConstrainedQPSolver qpSolver = new QuadProgSolver(null);
+   private static final ConstrainedQPSolver qpSolver = new QuadProgSolver();
 
    private final FrameVector comTorqueCommand;
    private final FrameVector comTorqueSolution;

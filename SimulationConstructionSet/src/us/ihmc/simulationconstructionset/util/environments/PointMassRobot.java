@@ -120,18 +120,18 @@ public class PointMassRobot extends Robot
 
    public void getPosition(Tuple3d tuple3d)
    {
-      double x = xJoint.getQ().getDoubleValue();
-      double y = yJoint.getQ().getDoubleValue();
-      double z = zJoint.getQ().getDoubleValue();
+      double x = xJoint.getQYoVariable().getDoubleValue();
+      double y = yJoint.getQYoVariable().getDoubleValue();
+      double z = zJoint.getQYoVariable().getDoubleValue();
 
       tuple3d.set(x, y, z);
    }
 
    public void getVelocity(Tuple3d tuple3d)
    {
-      double xd = xJoint.getQD().getDoubleValue();
-      double yd = yJoint.getQD().getDoubleValue();
-      double zd = zJoint.getQD().getDoubleValue();
+      double xd = xJoint.getQDYoVariable().getDoubleValue();
+      double yd = yJoint.getQDYoVariable().getDoubleValue();
+      double zd = zJoint.getQDYoVariable().getDoubleValue();
 
       tuple3d.set(xd, yd, zd);
    }

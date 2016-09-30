@@ -8,7 +8,7 @@ public class Graphics3DAddMeshDataInstruction extends Graphics3DInstruction
 {
    private MeshDataHolder meshData;
    private MeshChangedListener meshChangedListener;
-   
+
    public Graphics3DAddMeshDataInstruction(MeshDataHolder meshData, AppearanceDefinition appearance)
    {
       this.meshData = meshData;
@@ -19,7 +19,7 @@ public class Graphics3DAddMeshDataInstruction extends Graphics3DInstruction
    {
       return meshData;
    }
-   
+
 
    public String toString()
    {
@@ -31,7 +31,7 @@ public class Graphics3DAddMeshDataInstruction extends Graphics3DInstruction
    {
       this.meshChangedListener = meshChangedListener;
    }
-   
+
    public void setMesh(MeshDataHolder newMesh)
    {
       this.meshData = newMesh;

@@ -11,7 +11,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -34,7 +34,7 @@ public interface FullRobotModel
    /**
     * Returns the root joint of this robot. It is a six degrees of freedom joint.
     */
-   public abstract SixDoFJoint getRootJoint();
+   public abstract FloatingInverseDynamicsJoint getRootJoint();
 
    /**
     * Returns the elevator of this robot.

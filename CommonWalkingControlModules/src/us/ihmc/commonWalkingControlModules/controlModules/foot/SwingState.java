@@ -21,6 +21,8 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.WrapperForMultiplePositionTrajectoryGenerators;
@@ -48,6 +50,7 @@ public class SwingState extends AbstractUnconstrainedState
    private static final boolean CONTROL_TOE = false;
 
    private final BooleanYoVariable replanTrajectory;
+   private final BooleanYoVariable doContinuousReplanning;
    private final YoVariableDoubleProvider swingTimeRemaining;
 
    private final TwoWaypointPositionTrajectoryGenerator swingTrajectoryGenerator;
@@ -94,6 +97,10 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final RigidBodyTransform transformFromToeToAnkle = new RigidBodyTransform();
 
+   private final DoubleYoVariable velocityAdjustmentDamping;
+   private final YoFrameVector adjustmentVelocityCorrection;
+   private final FramePoint unadjustedPosition = new FramePoint(worldFrame);
+
    public SwingState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider,
          YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
@@ -108,6 +115,14 @@ public class SwingState extends AbstractUnconstrainedState
       finalSwingHeightOffset.set(footControlHelper.getWalkingControllerParameters().getDesiredTouchdownHeightOffset());
       replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
       swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
+
+      velocityAdjustmentDamping = new DoubleYoVariable(namePrefix + "VelocityAdjustmentDamping", registry);
+      velocityAdjustmentDamping.set(footControlHelper.getWalkingControllerParameters().getSwingFootVelocityAdjustmentDamping());
+      adjustmentVelocityCorrection = new YoFrameVector(namePrefix + "AdjustmentVelocityCorrection", worldFrame, registry);
+
+      // todo make a smarter distinction on this as a way to work with the push recovery module
+      doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
+      doContinuousReplanning.set(footControlHelper.getWalkingControllerParameters().useOptimizationBasedICPController());
 
       footFrame = contactableFoot.getFrameAfterParentJoint();
       toeFrame = createToeFrame(robotSide);
@@ -252,13 +267,36 @@ public class SwingState extends AbstractUnconstrainedState
       replanTrajectory.set(false);
    }
 
+   protected void reinitializeTrajectory()
+   {
+      orientationTrajectoryGenerator.setTrajectoryTime(swingTimeProvider.getValue());
+
+      if (useNewSwingTrajectoyOptimization)
+      {
+         finalConfigurationProvider.getPosition(finalPosition);
+         touchdownVelocityProvider.get(finalVelocity);
+         swingTrajectoryGeneratorNew.setFinalConditions(finalPosition, finalVelocity);
+         swingTrajectoryGeneratorNew.setStepTime(swingTimeProvider.getValue());
+         swingTrajectoryGeneratorNew.setTrajectoryType(trajectoryParametersProvider.getTrajectoryParameters().getTrajectoryType());
+      }
+
+      positionTrajectoryGenerator.initialize();
+      orientationTrajectoryGenerator.initialize();
+
+      trajectoryWasReplanned = false;
+      replanTrajectory.set(false);
+   }
+
    protected void computeAndPackTrajectory()
    {
-      if (replanTrajectory.getBooleanValue()) // This seems like a bad place for this?
+      if (this.replanTrajectory.getBooleanValue()) // This seems like a bad place for this?
       {
-         pushRecoveryPositionTrajectoryGenerator.initialize();
-         replanTrajectory.set(false);
-         trajectoryWasReplanned = true;
+         if (!doContinuousReplanning.getBooleanValue())
+         {
+            pushRecoveryPositionTrajectoryGenerator.initialize();
+            this.replanTrajectory.set(false);
+            trajectoryWasReplanned = true;
+         }
       }
 
       currentTime.set(getTimeInCurrentState());
@@ -272,11 +310,36 @@ public class SwingState extends AbstractUnconstrainedState
          time = currentTimeWithSwingSpeedUp.getDoubleValue();
       }
 
-      if (!trajectoryWasReplanned)
+      if (!trajectoryWasReplanned || doContinuousReplanning.getBooleanValue())
       {
+         boolean footstepWasAdjusted = false;
          positionTrajectoryGenerator.compute(time);
 
+         if (replanTrajectory.getBooleanValue())
+         {
+            footstepWasAdjusted = true;
+            positionTrajectoryGenerator.getLinearData(unadjustedPosition, desiredLinearVelocity, desiredAngularAcceleration);
+
+            reinitializeTrajectory();
+            positionTrajectoryGenerator.compute(time);
+         }
+
          positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+
+         if (footstepWasAdjusted)
+         {
+            adjustmentVelocityCorrection.set(desiredPosition);
+            adjustmentVelocityCorrection.sub(unadjustedPosition);
+            adjustmentVelocityCorrection.scale(1.0 / controlDT);
+            adjustmentVelocityCorrection.setZ(0.0);
+            adjustmentVelocityCorrection.scale(velocityAdjustmentDamping.getDoubleValue());
+
+            desiredLinearVelocity.add(adjustmentVelocityCorrection.getFrameTuple());
+         }
+         else
+         {
+            adjustmentVelocityCorrection.setToZero();
+         }
       }
       else
       {
@@ -358,15 +421,22 @@ public class SwingState extends AbstractUnconstrainedState
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - currentTimeWithSwingSpeedUp.getDoubleValue());
       else
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - getTimeInCurrentState());
+
       this.replanTrajectory.set(true);
    }
 
-   public void requestSwingSpeedUp(double speedUpFactor)
+   /**
+    * Request the swing trajectory to speed up using the given speed up factor.
+    * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
+    * @param speedUpFactor
+    * @return the current swing time remaining for the swing foot trajectory
+    */
+   public double requestSwingSpeedUp(double speedUpFactor)
    {
       if (isSwingSpeedUpEnabled.getBooleanValue())
       {
          if (speedUpFactor <= 1.1 || speedUpFactor <= swingTimeSpeedUpFactor.getDoubleValue())
-            return;
+            return swingTimeRemaining.getValue();
          speedUpFactor = MathTools.clipToMinMax(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
 
          //         speedUpFactor = MathTools.clipToMinMax(speedUpFactor, 0.7, maxSwingTimeSpeedUpFactor.getDoubleValue());
@@ -376,6 +446,7 @@ public class SwingState extends AbstractUnconstrainedState
          if (currentTimeWithSwingSpeedUp.isNaN())
             currentTimeWithSwingSpeedUp.set(currentTime.getDoubleValue());
       }
+      return swingTimeRemaining.getValue();
    }
 
    @Override
@@ -401,5 +472,7 @@ public class SwingState extends AbstractUnconstrainedState
          swingTrajectoryGeneratorNew.informDone();
       else
          swingTrajectoryGenerator.informDone();
+
+      adjustmentVelocityCorrection.setToZero();
    }
 }

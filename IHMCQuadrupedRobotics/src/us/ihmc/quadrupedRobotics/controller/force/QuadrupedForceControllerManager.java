@@ -9,7 +9,14 @@ import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerE
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
-import us.ihmc.quadrupedRobotics.controller.force.states.*;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedDcmBasedStandController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedDcmBasedStepController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedDoNothingController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFallController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedJointInitializationController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedSoleWaypointController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
@@ -21,8 +28,17 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPreplannedStepStream;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStreamMultiplexer;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
-import us.ihmc.quadrupedRobotics.providers.*;
-import us.ihmc.quadrupedRobotics.state.*;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineStateChangedListener;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -48,7 +64,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
    private final QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider;
-   private final QuadrupedTimedStepInputProvider timedStepProvider;
+   private final QuadrupedPreplannedStepInputProvider preplannedStepProvider;
    private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
 
    private final QuadrupedPreplannedStepStream preplannedStepStream;
@@ -72,13 +88,13 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       postureProvider = new QuadrupedPostureInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       planarVelocityProvider = new QuadrupedPlanarVelocityInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       xGaitSettingsProvider = new QuadrupedXGaitSettingsInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
-      timedStepProvider = new QuadrupedTimedStepInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      preplannedStepProvider = new QuadrupedPreplannedStepInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
 
       // Initialize input step streams.
       xGaitStepStream = new QuadrupedXGaitStepStream(planarVelocityProvider, xGaitSettingsProvider, controllerToolbox.getReferenceFrames(),
             runtimeEnvironment.getControlDT(), runtimeEnvironment.getRobotTimestamp(), registry);
-      preplannedStepStream = new QuadrupedPreplannedStepStream(timedStepProvider, controllerToolbox.getReferenceFrames(),
+      preplannedStepStream = new QuadrupedPreplannedStepStream(preplannedStepProvider, controllerToolbox.getReferenceFrames(),
             runtimeEnvironment.getRobotTimestamp());
       stepStreamMultiplexer = new QuadrupedStepStreamMultiplexer<>();
       stepStreamMultiplexer.addStepStream(QuadrupedForceControllerState.XGAIT, xGaitStepStream);
@@ -152,13 +168,26 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    @Override
    public void doControl()
    {
-      // update controller state machine
+      // update fall detector
+      if (controllerToolbox.getFallDetector().detect())
+      {
+         stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_FALL);
+      }
+
+      // update requested events
       QuadrupedForceControllerRequestedEvent reqEvent = requestedEvent.getAndSet(null);
       if (reqEvent != null)
       {
          lastEvent.set(reqEvent);
          stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, reqEvent);
       }
+      if (preplannedStepProvider.isStepPlanAvailable())
+      {
+         lastEvent.set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
+         stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
+      }
+
+      // update controller state machine
       stateMachine.process();
 
       // update contact state used for state estimation
@@ -269,6 +298,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       // Manually triggered events to transition to main controllers.
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND,
             QuadrupedForceControllerState.STAND_READY, QuadrupedForceControllerState.STAND);
+      builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND,
+            QuadrupedForceControllerState.DO_NOTHING, QuadrupedForceControllerState.STAND);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND,
             QuadrupedForceControllerState.FREEZE, QuadrupedForceControllerState.STAND);
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND,

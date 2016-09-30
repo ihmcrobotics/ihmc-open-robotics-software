@@ -126,7 +126,7 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 	
 	footForces = new DoubleYoVariable[][]{{leftGC.getYoForce().getYoX(), leftGC.getYoForce().getYoY(), leftGC.getYoForce().getYoZ()}, 
 	      {rightGC.getYoForce().getYoX(), rightGC.getYoForce().getYoY(), rightGC.getYoForce().getYoZ()}};
-	bodyVelocityInWorld = new DoubleYoVariable[]{bodyJoint_T1.getQD(), bodyJoint_R.getQD(), bodyJoint_T2.getQD()};
+	bodyVelocityInWorld = new DoubleYoVariable[]{bodyJoint_T1.getQDYoVariable(), bodyJoint_R.getQDYoVariable(), bodyJoint_T2.getQDYoVariable()};
 	
 	this.setController(this);
 	initControl();
@@ -290,16 +290,16 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 	return bodyVelocityInWorld[axis.ordinal()].getDoubleValue();
     }
     public double getBodyPitch () {
-	return bodyJoint_R.getQ().getDoubleValue();
+	return bodyJoint_R.getQYoVariable().getDoubleValue();
     }
     public double getBodyPitchVelocity () {
-	return bodyJoint_R.getQD().getDoubleValue();
+	return bodyJoint_R.getQDYoVariable().getDoubleValue();
     }
     public double getHipPitch (RobotSide rS) {
 	if (rS == RobotSide.LEFT)
-	    return leftUpperHip.getQ().getDoubleValue();
+	    return leftUpperHip.getQYoVariable().getDoubleValue();
 	else
-	    return rightUpperHip.getQ().getDoubleValue();
+	    return rightUpperHip.getQYoVariable().getDoubleValue();
     }
     public double getL0() {
 	return thighLength.getDoubleValue() + shinLength.getDoubleValue();

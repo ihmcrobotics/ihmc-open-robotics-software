@@ -59,32 +59,32 @@ public class DoubleMassSpringRobot extends Robot
 
    public void addX1Force(double x1Force)
    {
-      x1Joint.setTau(x1Joint.getTau().getDoubleValue() + x1Force);
+      x1Joint.setTau(x1Joint.getTauYoVariable().getDoubleValue() + x1Force);
    }
 
    public void addX2Force(double x2Force)
    {
-      x2Joint.setTau(x2Joint.getTau().getDoubleValue() + x2Force);
+      x2Joint.setTau(x2Joint.getTauYoVariable().getDoubleValue() + x2Force);
    }
 
    public double getX1()
    {
-      return x1Joint.getQ().getDoubleValue();
+      return x1Joint.getQYoVariable().getDoubleValue();
    }
 
    public double getX2()
    {
-      return x2Joint.getQ().getDoubleValue();
+      return x2Joint.getQYoVariable().getDoubleValue();
    }
 
    public double getX1Dot()
    {
-      return x1Joint.getQD().getDoubleValue();
+      return x1Joint.getQDYoVariable().getDoubleValue();
    }
 
    public double getX2Dot()
    {
-      return x2Joint.getQD().getDoubleValue();
+      return x2Joint.getQDYoVariable().getDoubleValue();
    }
 
 

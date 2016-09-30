@@ -1,6 +1,12 @@
 package us.ihmc.llaQuadruped;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.vecmath.Vector3d;
 
@@ -15,14 +21,13 @@ import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.SdfLoader.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
 {
    private final String modelName = "llaQuadruped";
    private final String rootJoint = "body";
 
-   private final LegJointName[] legJointNames = {LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE};
+   private final LegJointName[] legJointNames = {LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH};
    private final String[] jointNamesBeforeFeet = new String[4];
 
    private final HashMap<String, QuadrupedJointName> quadrupedJointNameMap = new HashMap<>();
@@ -34,18 +39,14 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
 
    public LLAQuadrupedJointNameMap(LLAQuadrupedPhysicalProperties physicalProperties)
    {
-      quadrupedJointNameMap.put("front_left_hip_roll", QuadrupedJointName.FRONT_LEFT_HIP_ROLL);
-      quadrupedJointNameMap.put("front_left_hip_pitch", QuadrupedJointName.FRONT_LEFT_HIP_PITCH);
-      quadrupedJointNameMap.put("front_left_knee_pitch", QuadrupedJointName.FRONT_LEFT_KNEE_PITCH);
-      quadrupedJointNameMap.put("front_right_hip_roll", QuadrupedJointName.FRONT_RIGHT_HIP_ROLL);
-      quadrupedJointNameMap.put("front_right_hip_pitch", QuadrupedJointName.FRONT_RIGHT_HIP_PITCH);
-      quadrupedJointNameMap.put("front_right_knee_pitch", QuadrupedJointName.FRONT_RIGHT_KNEE_PITCH);
-      quadrupedJointNameMap.put("hind_left_hip_roll", QuadrupedJointName.HIND_LEFT_HIP_ROLL);
-      quadrupedJointNameMap.put("hind_left_hip_pitch", QuadrupedJointName.HIND_LEFT_HIP_PITCH);
-      quadrupedJointNameMap.put("hind_left_knee_pitch", QuadrupedJointName.HIND_LEFT_KNEE_PITCH);
-      quadrupedJointNameMap.put("hind_right_hip_roll", QuadrupedJointName.HIND_RIGHT_HIP_ROLL);
-      quadrupedJointNameMap.put("hind_right_hip_pitch", QuadrupedJointName.HIND_RIGHT_HIP_PITCH);
-      quadrupedJointNameMap.put("hind_right_knee_pitch", QuadrupedJointName.HIND_RIGHT_KNEE_PITCH);
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         for (LegJointName legJointName : legJointNames)
+         {
+            QuadrupedJointName quadrupedJointName = QuadrupedJointName.getName(robotQuadrant, legJointName);
+            quadrupedJointNameMap.put(quadrupedJointName.getUnderBarName(), quadrupedJointName);
+         }
+      }
 
       for (Map.Entry<String, QuadrupedJointName> entry : quadrupedJointNameMap.entrySet())
       {
@@ -77,10 +78,10 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
          jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(getLegJointName(robotQuadrant, LegJointName.HIP_ROLL), shoulderContactOffset));
       }
 
-      jointNamesBeforeFeet[0] = getLegJointName(RobotQuadrant.FRONT_LEFT, LegJointName.KNEE);
-      jointNamesBeforeFeet[1] = getLegJointName(RobotQuadrant.FRONT_RIGHT, LegJointName.KNEE);
-      jointNamesBeforeFeet[2] = getLegJointName(RobotQuadrant.HIND_LEFT, LegJointName.KNEE);
-      jointNamesBeforeFeet[3] = getLegJointName(RobotQuadrant.HIND_RIGHT, LegJointName.KNEE);
+      jointNamesBeforeFeet[0] = getLegJointName(RobotQuadrant.FRONT_LEFT, LegJointName.KNEE_PITCH);
+      jointNamesBeforeFeet[1] = getLegJointName(RobotQuadrant.FRONT_RIGHT, LegJointName.KNEE_PITCH);
+      jointNamesBeforeFeet[2] = getLegJointName(RobotQuadrant.HIND_LEFT, LegJointName.KNEE_PITCH);
+      jointNamesBeforeFeet[3] = getLegJointName(RobotQuadrant.HIND_RIGHT, LegJointName.KNEE_PITCH);
    }
 
    public Collection<QuadrupedJointName> getQuadrupedJointNames()
@@ -201,7 +202,7 @@ public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
    public String getJointBeforeFootName(RobotQuadrant robotQuadrant)
    {
       HashMap<LegJointName, String> legJointMap = mapFromLegJointNameToJointId.get(robotQuadrant);
-      return legJointMap.get(LegJointName.KNEE);
+      return legJointMap.get(LegJointName.KNEE_PITCH);
    }
 
    @Override

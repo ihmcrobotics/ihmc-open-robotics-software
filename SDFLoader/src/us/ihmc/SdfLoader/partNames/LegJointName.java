@@ -24,14 +24,40 @@ import javax.vecmath.Vector3d;
  */
 public enum LegJointName
 {
-   // M2V2: HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL;
-   // R2: HIP_PITCH, HIP_ROLL, HIP_YAW, KNEE, ANKLE_ROLL, ANKLE_PITCH;
-// HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL;
-
-   FUTURE_EXPANSION_TEST1, HIP_PITCH, HIP_ROLL, FUTURE_EXPANSION_TEST2, HIP_YAW, KNEE, ANKLE_ROLL, ANKLE_PITCH, FUTURE_EXPANSION_TEST3;
+   FUTURE_EXPANSION_TEST1, HIP_PITCH, HIP_ROLL, FUTURE_EXPANSION_TEST2, HIP_YAW, KNEE_PITCH, KNEE_ROLL, ANKLE_ROLL, ANKLE_PITCH, FUTURE_EXPANSION_TEST3;
    
+   /**
+    * @deprecated Do not use this!
+    */
    public static final LegJointName[] values = values();
+   
+   public String getUnderBarName()
+   {
+      switch (this)
+      {
+         case HIP_YAW :
+            return "hip_yaw";
 
+         case HIP_ROLL :
+            return "hip_roll";
+
+         case HIP_PITCH :
+            return "hip_pitch";
+
+         case KNEE_PITCH :
+            return "knee_pitch";
+
+         case ANKLE_PITCH :
+            return "ankle_pitch";
+
+         case ANKLE_ROLL :
+            return "ankle_roll";
+
+         default :
+            return "unknown";
+      }
+   }
+   
    public String getShortUnderBarName()
    {
       switch (this)
@@ -45,8 +71,8 @@ public enum LegJointName
          case HIP_PITCH :
             return "h_pitch";
 
-         case KNEE :
-            return "k";
+         case KNEE_PITCH :
+            return "k_pitch";
 
          case ANKLE_PITCH :
             return "a_pitch";
@@ -72,8 +98,8 @@ public enum LegJointName
          case HIP_PITCH :
             return "hipPitch";
 
-         case KNEE :
-            return "knee";
+         case KNEE_PITCH :
+            return "kneePitch";
 
          case ANKLE_ROLL :
             return "ankleRoll";
@@ -107,8 +133,8 @@ public enum LegJointName
          case HIP_PITCH :
             return "HipPitch";
 
-         case KNEE :
-            return "Knee";
+         case KNEE_PITCH :
+            return "KneePitch";
 
          case ANKLE_ROLL :
             return "AnkleRoll";
@@ -142,7 +168,7 @@ public enum LegJointName
          case HIP_PITCH :
             return yAxis();
 
-         case KNEE :
+         case KNEE_PITCH :
             return yAxis();
 
          case ANKLE_PITCH :

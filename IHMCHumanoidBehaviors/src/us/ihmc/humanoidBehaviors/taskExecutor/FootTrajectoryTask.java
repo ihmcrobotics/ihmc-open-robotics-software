@@ -18,20 +18,15 @@ public class FootTrajectoryTask extends BehaviorTask
    public FootTrajectoryTask(RobotSide robotSide, Point3d position, Quat4d orientation, DoubleYoVariable yoTime, FootTrajectoryBehavior behavior,
          double trajectoryTime)
    {
-      this(robotSide, position, orientation, yoTime, behavior, trajectoryTime, 0.0);
-   }
-
-   public FootTrajectoryTask(RobotSide robotSide, Point3d position, Quat4d orientation, DoubleYoVariable yoTime, FootTrajectoryBehavior behavior,
-         double trajectoryTime, double sleepTime)
-   {
-      super(behavior, yoTime, sleepTime);
+     
+      super(behavior, yoTime);
       this.footPoseBehavior = behavior;
       footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, position, orientation);
    }
 
-   public FootTrajectoryTask(RobotSide robotSide, FramePose pose, DoubleYoVariable yoTime, FootTrajectoryBehavior behavior, double trajectoryTime, double sleepTime)
+   public FootTrajectoryTask(RobotSide robotSide, FramePose pose, DoubleYoVariable yoTime, FootTrajectoryBehavior behavior, double trajectoryTime)
    {
-      super(behavior, yoTime, sleepTime);
+      super(behavior, yoTime);
       this.footPoseBehavior = behavior;
 
       pose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());

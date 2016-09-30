@@ -10,6 +10,7 @@ public class EnableLidarBehavior extends AbstractBehavior
 {
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private DepthDataStateCommand enableLidarPacket;
+   private LidarState lidarState;
 
    public EnableLidarBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
@@ -20,17 +21,29 @@ public class EnableLidarBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      enableLidarPacket = new DepthDataStateCommand(LidarState.ENABLE);
-
-      if (!packetHasBeenSent.getBooleanValue() && (enableLidarPacket != null))
+      if (hasInputBeenSet())
       {
-         sendPacketToNetworkProcessor();
+         enableLidarPacket = new DepthDataStateCommand(lidarState);
+
+         if (!packetHasBeenSent.getBooleanValue() && (enableLidarPacket != null))
+         {
+            sendPacketToNetworkProcessor();
+         }
       }
+      else
+      {
+         setLidarState(LidarState.ENABLE);
+      }
+   }
+
+   public void setLidarState(LidarState lidarState)
+   {
+      this.lidarState = lidarState;
    }
 
    private void sendPacketToNetworkProcessor()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          sendPacketToNetworkProcessor(enableLidarPacket);
          packetHasBeenSent.set(true);
@@ -43,7 +56,7 @@ public class EnableLidarBehavior extends AbstractBehavior
       packetHasBeenSent.set(false);
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
    }
 
    @Override
@@ -52,25 +65,7 @@ public class EnableLidarBehavior extends AbstractBehavior
       packetHasBeenSent.set(false);
 
       isPaused.set(false);
-      isStopped.set(false);
-   }
-
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
-
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
+      isAborted.set(false);
    }
 
    @Override
@@ -80,24 +75,9 @@ public class EnableLidarBehavior extends AbstractBehavior
    }
 
    @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
    public boolean hasInputBeenSet()
    {
-      if (enableLidarPacket != null)
+      if (lidarState != null)
          return true;
       else
          return false;

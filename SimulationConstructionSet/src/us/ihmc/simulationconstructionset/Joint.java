@@ -61,7 +61,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    protected ArrayList<LidarMount> lidarMounts;
    protected ArrayList<IMUMount> imuMounts;
    protected ArrayList<WrenchCalculatorInterface> forceSensors;
-   
+
    public ArrayList<Joint> childrenJoints;
 
    private final ArrayList<SimulatedSensor> sensors = new ArrayList<SimulatedSensor>();
@@ -159,7 +159,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    {
       return this.cameraMounts;
    }
-   
+
    protected ArrayList<LidarMount> getLidarMounts()
    {
       return this.lidarMounts;
@@ -238,7 +238,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    {
       physics.addGroundContactPoint(groupIdentifier,point);
    }
-   
+
    public void addJointWrenchSensor(JointWrenchSensor jointWrenchSensor)
    {
       physics.addJointWrenchSensor(jointWrenchSensor);
@@ -248,7 +248,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    {
       return physics.getJointWrenchSensor();
    }
-   
+
    /**
     * Adds the specified KinematicPoint to this joint.  These points allow external forces
     * and effects to be applied while also providing a means to monitor position and velocity.
@@ -385,8 +385,8 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
       }
 
    }
-   
-   
+
+
    protected void recursiveUpdateJointsIMUMountAccelerations()
    {
       this.updateIMUMountsAcceleration(this.transformToNext);
@@ -423,7 +423,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
          }
       }
    }
-   
+
    protected void updateLidarMounts(RigidBodyTransform tToHere)
    {
       if (lidarMounts != null)
@@ -447,7 +447,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
          }
       }
    }
-   
+
    protected void updateIMUMountsAcceleration(RigidBodyTransform tToHere)
    {
       if (imuMounts != null)
@@ -563,7 +563,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
       cameraMounts.add(mount);
       mount.setParentJoint(this);
    }
-   
+
    public void addLidarMount(LidarMount mount)
    {
       if (lidarMounts == null)
@@ -585,20 +585,20 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
       imuMounts.add(mount);
       mount.setParentJoint(this);
    }
-   
+
    /**
     * Adds the specified force sensor to this joint.
-    * 
+    *
     * @param forceSensor forceSensor to add
     */
    public void addForceSensor(WrenchCalculatorInterface forceSensor)
    {
       if(forceSensors == null)
          forceSensors = new ArrayList<WrenchCalculatorInterface>();
-      
+
       forceSensors.add(forceSensor);
    }
-   
+
    /**
     * Retrieves the link associated with this joint.  Every joint has a member link which handels
     * the physical and graphical properties of the space between this joint and its children.  This includes
@@ -680,7 +680,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
          child.recursiveGetCameraMounts(list);
       }
    }
-   
+
    protected void recursiveGetLidarMounts(ArrayList<LidarMount> list)
    {
       if (lidarMounts != null)
@@ -694,7 +694,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
          child.recursiveGetLidarMounts(list);
       }
    }
-   
+
    protected void recursiveGetForceSensors(ArrayList<WrenchCalculatorInterface> list)
    {
       if (forceSensors != null)
@@ -750,7 +750,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    {
       physics.recursiveGetAllGroundContactPoints(groundContactPoints);
    }
-   
+
    /**
     * Sets ret to the transform between world space and this joint space.
     *
@@ -804,16 +804,6 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    public void getTranslationToWorld(Vector3d translation)
    {
       transformToNext.getTranslation(translation);
-   }
-
-   /**
-    * Method for debugging which will force the transform between world space and joint space to be the following.
-    * Just the transform is updated and this is likely to be inconsistent with other parameters.
-    *
-    * @param transform The new transform to world
-    */
-   public void _setTransformToWorld( RigidBodyTransform transform ) {
-      transformToNext.set(transform);
    }
 
    private Vector3d tempVector3d = new Vector3d();
@@ -909,7 +899,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    {
       return physics.getGroundContactPointGroup();
    }
-   
+
    public GroundContactPointGroup getGroundContactPointGroup(int groupIdentifier)
    {
       return physics.getGroundContactPointGroup(groupIdentifier);

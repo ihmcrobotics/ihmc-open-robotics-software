@@ -70,7 +70,7 @@ public class HumanoidJointPoseList
          legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW));
          legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL));
          legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH));
-         legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE));
+         legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH));
          legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH));
          legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL));
          

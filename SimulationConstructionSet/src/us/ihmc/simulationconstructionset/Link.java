@@ -562,20 +562,9 @@ public class Link implements java.io.Serializable
       return parentJoint;
    }
 
-   /**
-    * Debug function for setting parent joint
-    */
-   public void _setParentJoint( Joint parent )
-   {
-      this.parentJoint = parent;
-   }
-
-
    public void computePrincipalMomentsOfInertia()
    {
       InertiaTools.computePrincipalMomentsOfInertia(Inertia, principalAxesRotation, principalMomentsOfInertia);
    }
-
-
 
 }

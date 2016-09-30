@@ -78,6 +78,11 @@ public class PushRobotController implements RobotController
       return forceVisualizer;
    }
 
+   public int getPushNumber()
+   {
+      return pushNumber.getIntegerValue();
+   }
+
    public void setPushDuration(double duration)
    {
       pushDuration.set(duration);
@@ -179,6 +184,7 @@ public class PushRobotController implements RobotController
       {
          isBeingPushed.set(true);
          pushForce.get(forceVector);
+         pushNumber.decrement();
       }
       else
       {

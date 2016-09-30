@@ -193,7 +193,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       }
       else
       {
-         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(false, lidarSensorName, multisense_near_Scan, multisense_height_map,
+         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(false, lidarSensorName, multisense_laser_topic_string, multisense_laser_topic_string,
                lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
          cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, left_camera_name, left_camera_compressed_topic, left_info_camera_topic, multisenseHandoffFrame, baseTfName,
                left_frame_name, MULTISENSE_SL_LEFT_CAMERA_ID);

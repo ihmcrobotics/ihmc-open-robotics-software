@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior.WalkingOrientation;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior.WalkingOrientation;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose2d;
 
@@ -17,16 +17,12 @@ public class WalkToLocationTask extends BehaviorTask
    private double transferTime;
    private double swingTime;
 
-   public WalkToLocationTask(FramePose2d targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double orientationRelativeToPathDirection,
-         double footstepLength, DoubleYoVariable yoTime)
-   {
-      this(targetPoseInWorld, walkToLocationBehavior, orientationRelativeToPathDirection, footstepLength, yoTime, 0.0);
-   }
+  
 
    public WalkToLocationTask(FramePose2d targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double orientationRelativeToPathDirection,
-         double footstepLength, double swingTime, double transferTime, DoubleYoVariable yoTime, double sleepTime)
+         double footstepLength, double swingTime, double transferTime, DoubleYoVariable yoTime)
    {
-      super(walkToLocationBehavior, yoTime, sleepTime);
+      super(walkToLocationBehavior, yoTime);
       this.targetPoseInWorld = new FramePose2d(targetPoseInWorld);
       this.walkToLocationBehavior = walkToLocationBehavior;
       this.orientationRelativeToPathDirection = orientationRelativeToPathDirection;
@@ -36,22 +32,17 @@ public class WalkToLocationTask extends BehaviorTask
       this.transferTime = transferTime;
    }
    
-   public WalkToLocationTask(FramePose2d targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double orientationRelativeToPathDirection,
-         double footstepLength, double swingTime, double transferTime, DoubleYoVariable yoTime)
-   {
-      this(targetPoseInWorld, walkToLocationBehavior, orientationRelativeToPathDirection, footstepLength, swingTime, transferTime, yoTime, 0.0);
-   }
    
    public WalkToLocationTask(FramePose2d targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double orientationRelativeToPathDirection,
-         double footstepLength, DoubleYoVariable yoTime, double sleepTime)
+         double footstepLength, DoubleYoVariable yoTime)
    {
-      this(targetPoseInWorld, walkToLocationBehavior, orientationRelativeToPathDirection, footstepLength, Double.NaN, Double.NaN, yoTime, sleepTime);
+      this(targetPoseInWorld, walkToLocationBehavior, orientationRelativeToPathDirection, footstepLength, Double.NaN, Double.NaN, yoTime);
    }
 
    public WalkToLocationTask(FramePose2d targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, WalkingOrientation walkingOrientation,
-         double footstepLength, DoubleYoVariable yoTime, double sleepTime)
+         double footstepLength, DoubleYoVariable yoTime)
    {
-      super(walkToLocationBehavior, yoTime, sleepTime);
+      super(walkToLocationBehavior, yoTime);
       this.targetPoseInWorld = new FramePose2d(targetPoseInWorld);
       this.walkToLocationBehavior = walkToLocationBehavior;
       this.orientationRelativeToPathDirection = 0.0;

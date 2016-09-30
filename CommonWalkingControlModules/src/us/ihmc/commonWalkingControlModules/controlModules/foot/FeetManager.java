@@ -324,9 +324,15 @@ public class FeetManager
          footControlModules.get(robotSide).resetHeightCorrectionParametersForSingularityAvoidance();
    }
 
-   public void requestSwingSpeedUp(RobotSide robotSide, double speedUpFactor)
+   /**
+    * Request the swing trajectory to speed up using the given speed up factor.
+    * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
+    * @param speedUpFactor
+    * @return the current swing time remaining for the swing foot trajectory
+    */
+   public double requestSwingSpeedUp(RobotSide robotSide, double speedUpFactor)
    {
-      footControlModules.get(robotSide).requestSwingSpeedUp(speedUpFactor);
+      return footControlModules.get(robotSide).requestSwingSpeedUp(speedUpFactor);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotSide robotSide)

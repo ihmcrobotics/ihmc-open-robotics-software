@@ -1,10 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
@@ -49,7 +46,7 @@ public class GeometryToolsTest
    {
    }
 
-   private static double EPSILON = 1e-6;
+   private static final double EPSILON = 1e-6;
 
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -1532,6 +1529,33 @@ public class GeometryToolsTest
       }
    }
 
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testGetAngleFromFirstToSecondVector() throws Exception
+   {
+      Random random = new Random(51651L);
+
+      for (int i = 0; i<1000; i++)
+      {
+         double firstVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         double secondVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         Vector2d firstVector = RandomTools.generateRandomVector2d(random, firstVectorLength);
+         Vector2d secondVector = new Vector2d();
+
+         for (double yaw = -Math.PI; yaw <= Math.PI; yaw += Math.PI / 100.0)
+         {
+            double c = Math.cos(yaw);
+            double s = Math.sin(yaw);
+            secondVector.setX(firstVector.getX() * c - firstVector.getY() * s);
+            secondVector.setY(firstVector.getX() * s + firstVector.getY() * c);
+            secondVector.scale(secondVectorLength / firstVectorLength);
+            double computedYaw = GeometryTools.getAngleFromFirstToSecondVector(firstVector, secondVector);
+            double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(yaw, computedYaw);
+            assertEquals(0.0, yawDifference, EPSILON);
+         }
+      }
+   }
+
    private void assertPolygons(double[] p1, double[] p2, double[] expectedSolution, double epsilon)
    {
       if (expectedSolution.length != 4)
@@ -1565,5 +1589,4 @@ public class GeometryToolsTest
 
       return new ConvexPolygon2d(list);
    }
-
 }
