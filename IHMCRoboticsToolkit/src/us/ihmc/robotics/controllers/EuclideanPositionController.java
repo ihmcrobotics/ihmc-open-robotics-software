@@ -3,6 +3,7 @@ package us.ihmc.robotics.controllers;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -168,6 +169,7 @@ public class EuclideanPositionController implements PositionController
       proportionalGainMatrix.transform(proportionalTerm.getVector());
    }
 
+   private final Matrix3d tempMatrix = new Matrix3d();
    private void computeDerivativeTerm(FrameVector desiredVelocity, FrameVector currentVelocity)
    {
       desiredVelocity.changeFrame(bodyFrame);
@@ -185,9 +187,10 @@ public class EuclideanPositionController implements PositionController
 
       velocityError.set(derivativeTerm);
 
-      tangentialDampingCalculator.compute(positionError, derivativeGainMatrix);
+      tempMatrix.set(derivativeGainMatrix);
+      tangentialDampingCalculator.compute(positionError, tempMatrix);
 
-      derivativeGainMatrix.transform(derivativeTerm.getVector());
+      tempMatrix.transform(derivativeTerm.getVector());
    }
 
    private void computeIntegralTerm()
