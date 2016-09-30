@@ -427,6 +427,122 @@ public class RotationTools
       yawPitchRollToPack[2] = computeRoll(rotationMatrix);
    }
 
+   static double closest(double org, double ref) {
+      double result = org;
+      double min_diff = Math.abs(result-ref);
+      for(int i=1; true; i++) {
+         double my_angle = org + i*Math.PI;
+         double my_diff = Math.abs(my_angle-ref);
+         if(my_diff < min_diff) {
+            result = my_angle;
+            min_diff = my_diff;
+         }
+         else break;
+      }
+      for(int i=-1; true; i--) {
+         double my_angle = org + i*Math.PI;
+         double my_diff = Math.abs(my_angle-ref);
+         if(my_diff < min_diff) {
+            result = my_angle;
+            min_diff = my_diff;
+         }
+         else break;
+      }
+      return result;
+   }
+
+   public static void convertMatrixToClosestYawPitchRoll(Matrix3d rotationMatrix, double[] yawPitchRollRef, double[] yawPitchRollToPack) {
+      double yawRef = yawPitchRollRef[0];
+      double pitchRef = yawPitchRollRef[1];
+      double rollRef = yawPitchRollRef[2];
+      double m20 = rotationMatrix.getM20();
+      m20 = Math.min(m20, 1.0);
+      m20 = Math.max(m20, -1.0);
+      double pitch = Math.asin(-m20);
+      if (Double.isNaN(pitch))
+      {
+         throw new RuntimeException("Pitch is NaN! rotationMatrix = " + rotationMatrix);
+      }
+      pitch = closest(pitch, pitchRef);
+      double cosp = Math.cos(pitch);
+      double sinp = Math.sin(pitch);
+
+      double yaw = Math.atan2(rotationMatrix.getM10()*cosp, rotationMatrix.getM00()*cosp);
+      double roll = Math.atan2(rotationMatrix.getM21()*cosp, rotationMatrix.getM22()*cosp);
+
+      // close to singularity
+//      if(Math.abs(cosp) < 1e-2) {
+         double m01 = rotationMatrix.getM01();
+         double m02 = rotationMatrix.getM02();
+         double m11 = rotationMatrix.getM11();
+         double m12 = rotationMatrix.getM12();
+
+         double c00 = m01*m01 + m02*m02 - sinp*sinp;
+         double c01 = m11*m01 + m12*m02;
+         double c10 = c01;
+         double c11 = m11*m11 + m12*m12 - sinp*sinp;
+
+         double a00 = m12*m12 + m02*m02 - sinp*sinp;
+         double a01 = m01*m02 + m11*m12;
+         double a10 = a01;
+         double a11 = m01*m01* m11*m11 - sinp*sinp;
+
+         int index = 0;
+         double max_value = Math.abs(c00);
+         if(Math.abs(c11) > max_value) {
+            max_value = Math.abs(c11);
+            index = 1;
+         }
+         if(Math.abs(a00) > max_value) {
+            max_value = Math.abs(a00);
+            index = 2;
+         }
+         if(Math.abs(a11) > max_value) {
+            max_value = Math.abs(a11);
+            index = 3;
+         }
+         double yaw0 = 0.0, roll0 = 0.0;
+         if (index == 0 || index == 1) {
+            if (index == 0) {
+               yaw0 = closest(Math.atan2(c00, -c01), yawRef);
+            } else if (index == 1) {
+               yaw0 = closest(Math.atan2(c10, -c11), yawRef);
+            }
+            double sinc = Math.sin(yaw0);
+            double cosc = Math.cos(yaw0);
+            double sina = (cosc * m01 + sinc * m11) / sinp;
+            double cosa = (cosc * m02 + sinc * m12) / sinp;
+            roll0 = closest(Math.atan2(sina, cosa), rollRef);
+         }
+         else {
+            if (index == 2) {
+               roll0 = closest(Math.atan2(a00, -a01), rollRef);
+            } else if (index == 3) {
+               roll0 = closest(Math.atan2(a10, -a11), rollRef);
+            }
+            double sina = Math.sin(roll0);
+            double cosa = Math.cos(roll0);
+            double sinc = (sina*m11 + cosa*m12) / sinp;
+            double cosc = (sina*m01 + cosa*m02) / sinp;
+            yaw0 = closest(Math.atan2(sinc, cosc), yawRef);
+         }
+         yaw = yaw0;
+         roll = roll0;
+//      }
+
+      if (Double.isNaN(yaw))
+      {
+         throw new RuntimeException("Yaw is NaN! rotationMatrix = " + rotationMatrix);
+      }
+      if (Double.isNaN(roll))
+      {
+         throw new RuntimeException("Roll is NaN! rotationMatrix = " + rotationMatrix);
+      }
+      yawPitchRollToPack[0] = yaw;
+      yawPitchRollToPack[1] = pitch;
+      yawPitchRollToPack[2] = roll;
+   }
+
    public static void convertQuaternionToYawPitchRoll(double qx, double qy, double qz, double qw, double[] yawPitchRollToPack)
    {
       double qxqx = qx * qx;
@@ -500,6 +616,13 @@ public class RotationTools
       Matrix3d rotationMatrix = rotationMatrixForYawPitchRollConvertor.get();
       transform.getRotation(rotationMatrix);
       convertMatrixToYawPitchRoll(rotationMatrix, yawPitchRollToPack);
+   }
+
+   public static void convertTransformToClosestYawPitchRoll(RigidBodyTransform transform, double[] yawPitchRollRef, double[] yawPitchRollToPack)
+   {
+      Matrix3d rotationMatrix = rotationMatrixForYawPitchRollConvertor.get();
+      transform.getRotation(rotationMatrix);
+      convertMatrixToClosestYawPitchRoll(rotationMatrix, yawPitchRollRef, yawPitchRollToPack);
    }
 
    /**

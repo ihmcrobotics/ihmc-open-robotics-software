@@ -10,7 +10,10 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
+import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.WalkToLocationBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
+import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
@@ -75,6 +78,8 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
    private double minDistanceThresholdForWalking, minYawThresholdForWalking;
 
+   private WalkToLocationBehaviorCoactiveElementBehaviorSide coactiveElement;
+
    public WalkToLocationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
          HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
    {
@@ -86,7 +91,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
       this.swingTime = walkingControllerParameters.getDefaultSwingTime();
       this.transferTime = walkingControllerParameters.getDefaultTransferTime();
 
-      this.pathType = new SimplePathParameters(walkingControllerParameters.getMaxStepLength()/2, walkingControllerParameters.getInPlaceWidth(), 0.0,
+      this.pathType = new SimplePathParameters(walkingControllerParameters.getMaxStepLength() / 2, walkingControllerParameters.getInPlaceWidth(), 0.0,
             Math.toRadians(20.0), Math.toRadians(10.0), 0.4); // 10 5 0.4
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
 
@@ -95,6 +100,18 @@ public class WalkToLocationBehavior extends AbstractBehavior
          feet.put(robotSide, fullRobotModel.getFoot(robotSide));
          soleFrames.put(robotSide, fullRobotModel.getSoleFrame(robotSide));
       }
+
+      coactiveElement = new WalkToLocationBehaviorCoactiveElementBehaviorSide();
+      coactiveElement.setWalkToBehavior(this);
+      registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
+      registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
+
+   }
+
+   @Override
+   public CoactiveElement getCoactiveElement()
+   {
+      return coactiveElement;
    }
 
    public void setTarget(FramePose2d targetPose2dInWorld)
@@ -304,7 +321,6 @@ public class WalkToLocationBehavior extends AbstractBehavior
       isAborted.set(true);
    }
 
-   
    @Override
    public void pause()
    {

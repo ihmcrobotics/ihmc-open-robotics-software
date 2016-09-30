@@ -493,4 +493,10 @@ public class SkippyRobot extends Robot
       return SHOULDER_MASS+LEG_MASS+TORSO_MASS;
    }
 
+   public DoubleYoVariable getQdd_z()
+   {
+      // TODO Auto-generated method stub
+      return rootJointIfSkippy.qdd_z;
+   }
+
 }

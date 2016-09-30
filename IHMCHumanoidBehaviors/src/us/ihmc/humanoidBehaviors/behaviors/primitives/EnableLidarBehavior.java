@@ -10,6 +10,7 @@ public class EnableLidarBehavior extends AbstractBehavior
 {
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
    private DepthDataStateCommand enableLidarPacket;
+   private LidarState lidarState;
 
    public EnableLidarBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
    {
@@ -20,12 +21,24 @@ public class EnableLidarBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      enableLidarPacket = new DepthDataStateCommand(LidarState.ENABLE);
-
-      if (!packetHasBeenSent.getBooleanValue() && (enableLidarPacket != null))
+      if (hasInputBeenSet())
       {
-         sendPacketToNetworkProcessor();
+         enableLidarPacket = new DepthDataStateCommand(lidarState);
+
+         if (!packetHasBeenSent.getBooleanValue() && (enableLidarPacket != null))
+         {
+            sendPacketToNetworkProcessor();
+         }
       }
+      else
+      {
+         setLidarState(LidarState.ENABLE);
+      }
+   }
+
+   public void setLidarState(LidarState lidarState)
+   {
+      this.lidarState = lidarState;
    }
 
    private void sendPacketToNetworkProcessor()
@@ -55,18 +68,16 @@ public class EnableLidarBehavior extends AbstractBehavior
       isAborted.set(false);
    }
 
-
    @Override
    public boolean isDone()
    {
       return packetHasBeenSent.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-
    @Override
    public boolean hasInputBeenSet()
    {
-      if (enableLidarPacket != null)
+      if (lidarState != null)
          return true;
       else
          return false;

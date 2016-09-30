@@ -80,7 +80,6 @@ public abstract class AbstractBehavior implements RobotController
    protected void addChildBehavior(AbstractBehavior childBehavior)
    {
       childBehaviors.add(childBehavior);
-      registry.addChild(childBehavior.getYoVariableRegistry());
    }
    
    public void sendPacketToController(Packet<?> obj)
