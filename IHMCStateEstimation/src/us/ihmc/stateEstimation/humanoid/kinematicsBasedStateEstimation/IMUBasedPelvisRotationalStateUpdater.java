@@ -219,7 +219,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
       rotationFromRootJointFrameToWorld.mul(rotationFrozenOffset, rotationFromRootJointFrameToWorld);
 
-      if (imuBiasProvider != null)
+      if (yawDriftProvider != null)
       {
          yawBiasMatrix.rotZ(yawDriftProvider.getYawBiasInWorldFrame());
          yawBiasMatrix.transpose();
