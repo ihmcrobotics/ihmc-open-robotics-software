@@ -19,7 +19,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -44,18 +43,13 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
    private final List<YoFrameVector> angularVelocityBiasesInWorld = new ArrayList<>();
    private final List<YoFrameVector> linearAccelerationBiasesInWorld = new ArrayList<>();
 
-   private final List<AlphaFilteredYoVariable> yawRateBiasesInWorld = new ArrayList<>();
-   private final List<DoubleYoVariable> yawBiasesInWorld = new ArrayList<>();
-
    private final List<YoFrameVector> angularVelocitiesInWorld = new ArrayList<>();
    private final List<YoFrameVector> linearAccelerationsInWorld = new ArrayList<>();
    private final List<DoubleYoVariable> linearAccelerationMagnitudes = new ArrayList<>();
 
    private final BooleanYoVariable enableIMUBiasCompensation = new BooleanYoVariable("enableIMUBiasCompensation", registry);
-   private final BooleanYoVariable enableYawDriftCompensation = new BooleanYoVariable("enableYawDriftCompensation", registry);
    private final DoubleYoVariable imuBiasEstimationThreshold = new DoubleYoVariable("imuBiasEstimationThreshold", registry);
    private final DoubleYoVariable biasAlphaFilter = new DoubleYoVariable("imuBiasAlphaFilter", registry);
-   private final DoubleYoVariable yawBiasAlphaFilter = new DoubleYoVariable("imuYawBiasAlphaFilter", registry);
 
    private final List<DoubleYoVariable> feetToIMUAngularVelocityMagnitudes = new ArrayList<>();
    private final List<DoubleYoVariable> feetToIMULinearVelocityMagnitudes = new ArrayList<>();
@@ -85,7 +79,6 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
       imuBiasEstimationThreshold.set(0.015);
       biasAlphaFilter.set(0.99995);
-      yawBiasAlphaFilter.set(0.9997);
 
       gravityVectorInWorld.set(0.0, 0.0, -Math.abs(gravitationalAcceleration));
       zUpVector.set(0.0, 0.0, 1.0);
@@ -115,11 +108,6 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          orientationBias.update();
          orientationBiases.add(orientationBias);
 
-         AlphaFilteredYoVariable yawRateBiasInWorld = new AlphaFilteredYoVariable("estimated" + sensorName + "YawRateBiasWorld", registry, yawBiasAlphaFilter);
-         yawRateBiasInWorld.update(0.0);
-         yawRateBiasesInWorld.add(yawRateBiasInWorld);
-         yawBiasesInWorld.add(new DoubleYoVariable("estimated" + sensorName + "YawBiasWorld", registry));
-
          angularVelocitiesInWorld.add(new YoFrameVector("unprocessed" + sensorName + "AngularVelocityInWorld", worldFrame, registry));
          
          linearAccelerationsInWorld.add(new YoFrameVector("unprocessed" + sensorName + "LinearAccelerationWorld", worldFrame, registry));
@@ -145,10 +133,6 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
       double biasFilterBreakFrequency = stateEstimatorParameters.getIMUBiasFilterFreqInHertz();
       biasAlphaFilter.set(computeAlphaGivenBreakFrequencyProperly(biasFilterBreakFrequency, updateDT));
 
-      enableYawDriftCompensation.set(stateEstimatorParameters.enableIMUYawDriftCompensation());
-      double yawBiasFilterBreakFrequency = stateEstimatorParameters.getIMUYawDriftFilterFreqInHertz();
-      yawBiasAlphaFilter.set(computeAlphaGivenBreakFrequencyProperly(yawBiasFilterBreakFrequency, updateDT));
-
       imuBiasEstimationThreshold.set(stateEstimatorParameters.getIMUBiasVelocityThreshold());
    }
 
@@ -163,9 +147,6 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          linearAccelerationBiases.get(imuIndex).setToZero();
          angularVelocityBiasesInWorld.get(imuIndex).setToZero();
          linearAccelerationBiasesInWorld.get(imuIndex).setToZero();
-
-         yawRateBiasesInWorld.get(imuIndex).set(0.0);
-         yawBiasesInWorld.get(imuIndex).set(0.0);
       }
    }
 
@@ -254,7 +235,6 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
 
             orientationMeasurement.transform(measurement, measurementInWorld);
             angularVelocitiesInWorld.get(imuIndex).set(measurementInWorld);
-            yawRateBiasesInWorld.get(imuIndex).update(measurementInWorld.getZ());
 
             imuSensor.getLinearAccelerationMeasurement(measurement);
             orientationMeasurement.transform(measurement, measurementInWorld);
@@ -299,10 +279,6 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
             orientationMeasurement.transform(measurementBias);
             linearAccelerationBiasesInWorld.get(imuIndex).set(measurementBias);
          }
-
-         // Always update the yaw bias
-         if (enableYawDriftCompensation.getBooleanValue())
-            yawBiasesInWorld.get(imuIndex).add(updateDT * yawRateBiasesInWorld.get(imuIndex).getDoubleValue());
       }
    }
 
@@ -384,15 +360,5 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          linearAccelerationBiasToPack.setToZero(worldFrame);
       else
          linearAccelerationBiasesInWorld.get(imuIndex.intValue()).getFrameTupleIncludingFrame(linearAccelerationBiasToPack);
-   }
-
-   @Override
-   public double getYawBiasInWorldFrame(IMUSensorReadOnly imu)
-   {
-      Integer imuIndex = imuToIndexMap.get(imu);
-      if (imuIndex == null)
-         return 0.0;
-      else
-         return yawBiasesInWorld.get(imuIndex.intValue()).getDoubleValue();
    }
 }
