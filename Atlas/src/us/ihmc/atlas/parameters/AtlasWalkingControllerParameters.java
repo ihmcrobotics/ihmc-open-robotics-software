@@ -610,7 +610,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double maxOrientationAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxOrientationJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      double kdReductionRatio = 0.2;
+      double kdReductionRatio = 0.1;
       double parallelDampingDeadband = 0.1;
 
       gains.setPositionProportionalGains(kpXY, kpZ);
