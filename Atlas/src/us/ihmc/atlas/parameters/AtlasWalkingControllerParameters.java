@@ -612,6 +612,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       double kdReductionRatio = 0.1;
       double parallelDampingDeadband = 0.1;
+      double positionErrorForMinimumKd = 0.4;
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
@@ -619,7 +620,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
-      gains.setTangentialDampingGains(kdReductionRatio, parallelDampingDeadband);
+      gains.setTangentialDampingGains(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
       gains.createDerivativeGainUpdater(true);
 
       return gains;

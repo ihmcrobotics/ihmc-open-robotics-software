@@ -97,9 +97,9 @@ public class YoFootSE3Gains implements YoSE3PIDGainsInterface
       orientationGains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
-   public void setTangentialDampingGains(double kdReductionRatio, double dampingParallelDeadband)
+   public void setTangentialDampingGains(double kdReductionRatio, double dampingParallelDeadband, double positionErrorForMinimumKd)
    {
-      positionGains.setTangentialDampingGains(kdReductionRatio, dampingParallelDeadband);
+      positionGains.setTangentialDampingGains(kdReductionRatio, dampingParallelDeadband, positionErrorForMinimumKd);
    }
 
    public void setTangentialDampingGains(YoTangentialDampingGains tangentialDampingGains)

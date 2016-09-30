@@ -73,7 +73,7 @@ public class EuclideanPositionController implements PositionController
       rateLimitedFeedbackLinearAction = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAction", "",
             registry, gains.getYoMaximumFeedbackRate(), dt, feedbackLinearAction);
 
-      tangentialDampingCalculator = new EuclideanTangentialDampingCalculator(prefix, bodyFrame, gains.getTangentialDampingGains(), gains.getYoMaximumProportionalError());
+      tangentialDampingCalculator = new EuclideanTangentialDampingCalculator(prefix, bodyFrame, gains.getTangentialDampingGains());
 
       parentRegistry.addChild(registry);
    }
