@@ -21,6 +21,8 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    private final DoubleYoVariable maximumFeedback;
    private final DoubleYoVariable maximumFeedbackRate;
 
+   private final YoTangentialDampingGains tangentialDampingGains;
+
    public YoSymmetricSE3PIDGains(String suffix, YoVariableRegistry registry)
    {
       proportionalGain = new DoubleYoVariable("kp" + suffix, registry);
@@ -34,6 +36,8 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
 
       maximumFeedback = new DoubleYoVariable("maximumFeedback" + suffix, registry);
       maximumFeedbackRate = new DoubleYoVariable("maximumFeedbackRate" + suffix, registry);
+
+      tangentialDampingGains = new YoTangentialDampingGains(suffix, registry);
 
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -121,6 +125,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setTangentialDampingGains(gains.getTangentialDampingGains());
       setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
       setMaxProportionalError(gains.getMaximumProportionalError());
@@ -239,6 +244,18 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
+   public void setTangentialDampingGains(TangentialDampingGains tangentialDampingGains)
+   {
+      this.tangentialDampingGains.set(tangentialDampingGains);
+   }
+
+   @Override
+   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinKd)
+   {
+      this.tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband, positionErrorForMinKd);
+   }
+
+   @Override
    public void setMaxDerivativeError(double maxDerivativeError)
    {
       this.maxDerivativeError.set(maxDerivativeError);
@@ -248,6 +265,18 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    public void setMaxProportionalError(double maxProportionalError)
    {
       this.maxProportionalError.set(maxProportionalError);
+   }
+
+   @Override
+   public TangentialDampingGains getTangentialDampingGains()
+   {
+      return tangentialDampingGains;
+   }
+
+   @Override
+   public YoTangentialDampingGains getYoTangentialDampingGains()
+   {
+      return tangentialDampingGains;
    }
 
    @Override

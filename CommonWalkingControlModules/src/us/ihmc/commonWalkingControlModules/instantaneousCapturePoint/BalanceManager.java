@@ -1,11 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Beige;
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Black;
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.BlueViolet;
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.DarkRed;
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Purple;
-import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Yellow;
+import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.*;
 
 import javax.vecmath.Vector3d;
 
@@ -16,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -72,6 +66,8 @@ public class BalanceManager
 
    private final YoFramePoint2d yoPerfectCMP = new YoFramePoint2d("perfectCMP", worldFrame, registry);
    private final YoFramePoint2d yoDesiredCMP = new YoFramePoint2d("desiredCMP", worldFrame, registry);
+   // TODO It seems that the achieved CMP can be off sometimes.
+   // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
    private final YoFramePoint2d yoAchievedCMP = new YoFramePoint2d("achievedCMP", worldFrame, registry);
 
    private final DoubleYoVariable yoTime;

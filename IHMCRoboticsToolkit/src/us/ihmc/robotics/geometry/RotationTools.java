@@ -458,20 +458,40 @@ public class RotationTools
       double m20 = rotationMatrix.getM20();
       m20 = Math.min(m20, 1.0);
       m20 = Math.max(m20, -1.0);
-      double pitch = Math.asin(-m20);
-      if (Double.isNaN(pitch))
+      double pitch1 = Math.asin(-m20);
+      if (Double.isNaN(pitch1))
       {
          throw new RuntimeException("Pitch is NaN! rotationMatrix = " + rotationMatrix);
       }
-      pitch = closest(pitch, pitchRef);
-      double cosp = Math.cos(pitch);
-      double sinp = Math.sin(pitch);
+      double pitch2 = Math.PI - pitch1;
+      double sinp = -m20;
+      double cosp1 = Math.cos(pitch1);
+      double cosp2 = Math.cos(pitch2);
 
-      double yaw = Math.atan2(rotationMatrix.getM10()*cosp, rotationMatrix.getM00()*cosp);
-      double roll = Math.atan2(rotationMatrix.getM21()*cosp, rotationMatrix.getM22()*cosp);
+      double pitch = 0.0;
+      double yaw = 0.0;
+      double roll = 0.0;
 
-      // close to singularity
-//      if(Math.abs(cosp) < 1e-2) {
+      if(Math.abs(cosp1) > 0.1) {
+         double yaw1 = Math.atan2(rotationMatrix.getM10()/cosp1, rotationMatrix.getM00()/cosp1);
+         double roll1 = Math.atan2(rotationMatrix.getM21()/cosp1, rotationMatrix.getM22()/cosp1);
+         double diff1 = (yaw1-yawRef)*(yaw1-yawRef) + (pitch1-pitchRef)*(pitch1-pitchRef) + (roll1-rollRef)*(roll1-rollRef);
+         double yaw2 = Math.atan2(rotationMatrix.getM10()/cosp2, rotationMatrix.getM00()/cosp2);
+         double roll2 = Math.atan2(rotationMatrix.getM21()/cosp2, rotationMatrix.getM22()/cosp2);
+         double diff2 = (yaw2-yawRef)*(yaw2-yawRef) + (pitch2-pitchRef)*(pitch2-pitchRef) + (roll2-rollRef)*(roll2-rollRef);
+         if(diff1 < diff2) {
+            yaw = yaw1;
+            pitch = pitch1;
+            roll = roll1;
+         }
+         else {
+            yaw = yaw2;
+            pitch = pitch2;
+            roll = roll2;
+         }
+      }
+      else {
+         // close to singularity
          double m01 = rotationMatrix.getM01();
          double m02 = rotationMatrix.getM02();
          double m11 = rotationMatrix.getM11();
@@ -488,20 +508,20 @@ public class RotationTools
          double a11 = m01*m01* m11*m11 - sinp*sinp;
 
          int index = 0;
-         double max_value = Math.abs(c00);
+         double max_value = Math.abs(c01);
          if(Math.abs(c11) > max_value) {
             max_value = Math.abs(c11);
             index = 1;
          }
-         if(Math.abs(a00) > max_value) {
-            max_value = Math.abs(a00);
+         if(Math.abs(a01) > max_value) {
+            max_value = Math.abs(a01);
             index = 2;
          }
          if(Math.abs(a11) > max_value) {
             max_value = Math.abs(a11);
             index = 3;
          }
-         double yaw0 = 0.0, roll0 = 0.0;
+         double pitch0 = 0.0, yaw0 = 0.0, roll0 = 0.0;
          if (index == 0 || index == 1) {
             if (index == 0) {
                yaw0 = closest(Math.atan2(c00, -c01), yawRef);
@@ -526,9 +546,44 @@ public class RotationTools
             double cosc = (sina*m01 + cosa*m02) / sinp;
             yaw0 = closest(Math.atan2(sinc, cosc), yawRef);
          }
+         {
+            double sina = Math.sin(roll0);
+            double cosa = Math.cos(roll0);
+            double sinc = Math.sin(yaw0);
+            double cosc = Math.cos(yaw0);
+            int index0 = 0;
+            double max_val = Math.abs(sina);
+            if(Math.abs(cosa) > max_val) {
+               index0 = 1;
+               max_val = Math.abs(cosa);
+            }
+            if(Math.abs(sinc) > max_val) {
+               index0 = 2;
+               max_val = Math.abs(sinc);
+            }
+            if(Math.abs(cosc) > max_val) {
+               index0 = 3;
+               max_val = Math.abs(cosc);
+            }
+            double cosp = 0.0;
+            if(index0 == 0) {
+               cosp = rotationMatrix.getM21() / sina;
+            }
+            else if(index0 == 1) {
+               cosp = rotationMatrix.getM22() / cosa;
+            }
+            else if(index0 == 3) {
+               cosp = rotationMatrix.getM00() / cosc;
+            }
+            else {
+               cosp = rotationMatrix.getM10() / sinc;
+            }
+            pitch0 = Math.atan2(-rotationMatrix.getM20(), cosp);
+         }
          yaw = yaw0;
          roll = roll0;
-//      }
+         pitch = pitch0;
+      }
 
       if (Double.isNaN(yaw))
       {

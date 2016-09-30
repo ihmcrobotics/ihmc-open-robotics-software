@@ -17,8 +17,8 @@ import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSelectorAndDataConverter;
@@ -53,14 +53,22 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
    private final IMUSensorReadOnly imuProcessedOutput;
    private final IMUBiasProvider imuBiasProvider;
+   private final IMUYawDriftEstimator imuYawDriftEstimator;
 
    private final ReferenceFrame measurementFrame;
    private final RigidBody measurementLink;
 
-   public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs, IMUBiasProvider imuBiasProvider, double dt,
-         YoVariableRegistry parentRegistry)
+   public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+         double dt, YoVariableRegistry parentRegistry)
+   {
+      this(inverseDynamicsStructure, imuProcessedOutputs, null, null, dt, parentRegistry);
+   }
+
+   public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
+         IMUBiasProvider imuBiasProvider, IMUYawDriftEstimator imuYawDriftEstimator, double dt, YoVariableRegistry parentRegistry)
    {
       this.imuBiasProvider = imuBiasProvider;
+      this.imuYawDriftEstimator = imuYawDriftEstimator;
       checkNumberOfSensors(imuProcessedOutputs);
 
       imuProcessedOutput = imuProcessedOutputs.get(0);
@@ -211,9 +219,13 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
       rotationFromRootJointFrameToWorld.mul(rotationFrozenOffset, rotationFromRootJointFrameToWorld);
 
-      if (imuBiasProvider != null)
+      rootJoint.setRotation(rotationFromRootJointFrameToWorld);
+      rootJointFrame.update();
+
+      if (imuYawDriftEstimator != null)
       {
-         yawBiasMatrix.rotZ(imuBiasProvider.getYawBiasInWorldFrame(imuProcessedOutput));
+         imuYawDriftEstimator.update();
+         yawBiasMatrix.rotZ(imuYawDriftEstimator.getYawBiasInWorldFrame());
          yawBiasMatrix.transpose();
          rotationFromRootJointFrameToWorld.mul(yawBiasMatrix, rotationFromRootJointFrameToWorld);
       }
