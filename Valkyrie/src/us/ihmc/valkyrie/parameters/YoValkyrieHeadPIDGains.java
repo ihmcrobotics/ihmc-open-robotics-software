@@ -274,6 +274,7 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
       return tempDerivativeGains;
    }
 
+
    private double[] tempIntegralGains = new double[3];
 
    @Override
