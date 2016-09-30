@@ -11,7 +11,6 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
 {
    private final DoubleYoVariable proportionalGain;
    private final DoubleYoVariable derivativeGain;
-   private final DoubleYoVariable derivativeCorrectionGain;
    private final DoubleYoVariable dampingRatio;
    private final DoubleYoVariable integralGain;
 
@@ -22,11 +21,12 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    private final DoubleYoVariable maximumFeedback;
    private final DoubleYoVariable maximumFeedbackRate;
 
+   private final YoTangentialDampingGains tangentialDampingGains;
+
    public YoSymmetricSE3PIDGains(String suffix, YoVariableRegistry registry)
    {
       proportionalGain = new DoubleYoVariable("kp" + suffix, registry);
       derivativeGain = new DoubleYoVariable("kd" + suffix, registry);
-      derivativeCorrectionGain = new DoubleYoVariable("kv" + suffix, registry);
       dampingRatio = new DoubleYoVariable("zeta" + suffix, registry);
       integralGain = new DoubleYoVariable("ki" + suffix, registry);
 
@@ -36,6 +36,8 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
 
       maximumFeedback = new DoubleYoVariable("maximumFeedback" + suffix, registry);
       maximumFeedbackRate = new DoubleYoVariable("maximumFeedbackRate" + suffix, registry);
+
+      tangentialDampingGains = new YoTangentialDampingGains(suffix, registry);
 
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -48,7 +50,6 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    {
       proportionalGain.set(0.0);
       derivativeGain.set(0.0);
-      derivativeCorrectionGain.set(0.0);
       dampingRatio.set(0.0);
       integralGain.set(0.0);
 
@@ -82,11 +83,6 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       this.derivativeGain.set(derivativeGain);
    }
 
-   public void setDerivativeCorrectionGain(double derivativeCorrectionGain)
-   {
-      this.derivativeCorrectionGain.set(derivativeCorrectionGain);
-   }
-
    public void setDampingRatio(double dampingRatio)
    {
       this.dampingRatio.set(dampingRatio);
@@ -116,7 +112,6 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    public void set(OrientationPIDGainsInterface gains)
    {
       setProportionalGains(gains.getProportionalGains());
-      setDerivativeCorrectionGains(gains.getDerivativeCorrectionGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
       setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
@@ -130,6 +125,7 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setTangentialDampingGains(gains.getTangentialDampingGains());
       setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
       setMaxProportionalError(gains.getMaximumProportionalError());
@@ -188,19 +184,6 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       return derivativeGainMatrix;
    }
 
-   @Override public Matrix3d createDerivativeCorrectionGainMatrix()
-   {
-      Matrix3d derivativeCorrectionGainMatrix = new Matrix3d();
-
-      for (int i = 0; i < 3; i++)
-      {
-         derivativeCorrectionGain.addVariableChangedListener(new MatrixUpdater(i, i, derivativeCorrectionGainMatrix));
-      }
-
-      derivativeCorrectionGain.notifyVariableChangedListeners();
-      return derivativeCorrectionGainMatrix;
-   }
-
    @Override
    public Matrix3d createIntegralGainMatrix()
    {
@@ -227,11 +210,6 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       derivativeGain.set(derivativeGainX);
    }
 
-   @Override public void setDerivativeCorrectionGains(double correctionGainX, double correctionGainY, double correctionGainZ)
-   {
-      derivativeCorrectionGain.set(correctionGainX);
-   }
-
    @Override
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
    {
@@ -251,11 +229,6 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       derivativeGain.set(derivativeGains[0]);
    }
 
-   @Override public void setDerivativeCorrectionGains(double[] derivativeCorrectionGains)
-   {
-      derivativeCorrectionGain.set(derivativeCorrectionGains[0]);
-   }
-
    @Override
    public void setIntegralGains(double[] integralGains, double maxIntegralError)
    {
@@ -271,6 +244,18 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
+   public void setTangentialDampingGains(TangentialDampingGains tangentialDampingGains)
+   {
+      this.tangentialDampingGains.set(tangentialDampingGains);
+   }
+
+   @Override
+   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband)
+   {
+      this.tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband);
+   }
+
+   @Override
    public void setMaxDerivativeError(double maxDerivativeError)
    {
       this.maxDerivativeError.set(maxDerivativeError);
@@ -280,6 +265,18 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    public void setMaxProportionalError(double maxProportionalError)
    {
       this.maxProportionalError.set(maxProportionalError);
+   }
+
+   @Override
+   public TangentialDampingGains getTangentialDampingGains()
+   {
+      return tangentialDampingGains;
+   }
+
+   @Override
+   public YoTangentialDampingGains getYoTangentialDampingGains()
+   {
+      return tangentialDampingGains;
    }
 
    @Override
@@ -324,16 +321,6 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
       for (int i = 0; i < 3; i++)
          tempDerivativeGains[i] = derivativeGain.getDoubleValue();
       return tempDerivativeGains;
-   }
-
-   private double[] tempDerivativeCorrectionGains = new double[3];
-
-   @Override
-   public double[] getDerivativeCorrectionGains()
-   {
-      for (int i = 0; i < 3; i++)
-         tempDerivativeCorrectionGains[i] = derivativeCorrectionGain.getDoubleValue();
-      return tempDerivativeCorrectionGains;
    }
 
    private double[] tempIntegralGains = new double[3];

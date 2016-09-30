@@ -2,10 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import javax.vecmath.Matrix3d;
 
-import us.ihmc.robotics.controllers.GainCalculator;
-import us.ihmc.robotics.controllers.MatrixUpdater;
-import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.*;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -15,7 +12,6 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
 {
    private final DoubleYoVariable proportionalXYGain, proportionalZGain;
    private final DoubleYoVariable derivativeXYGain, derivativeZGain;
-   private final DoubleYoVariable derivativeCorrectionXYGain, derivativeCorrectionZGain;
    private final DoubleYoVariable dampingRatio;
 
    private final DoubleYoVariable maximumFeedback;
@@ -23,20 +19,22 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    private final DoubleYoVariable maxDerivativeError;
    private final DoubleYoVariable maxProportionalError;
 
+   private final YoTangentialDampingGains tangentialDampingGains;
+
    public YoFootPositionGains(String suffix, YoVariableRegistry registry)
    {
       proportionalXYGain = new DoubleYoVariable("kpXYLinear" + suffix, registry);
       proportionalZGain = new DoubleYoVariable("kpZLinear" + suffix, registry);
       derivativeXYGain = new DoubleYoVariable("kdXYLinear" + suffix, registry);
       derivativeZGain = new DoubleYoVariable("kdZLinear" + suffix, registry);
-      derivativeCorrectionXYGain = new DoubleYoVariable("kvXYLinear" + suffix, registry);
-      derivativeCorrectionZGain = new DoubleYoVariable("kvZLinear" + suffix, registry);
       dampingRatio = new DoubleYoVariable("zetaLinear" + suffix, registry);
 
       maximumFeedback = new DoubleYoVariable("maximumLinearFeedback" + suffix, registry);
       maximumFeedbackRate = new DoubleYoVariable("maximumLinearFeedbackRate" + suffix, registry);
       maxDerivativeError = new DoubleYoVariable("maximumLinearDerivativeError" + suffix, registry);
       maxProportionalError = new DoubleYoVariable("maximumLinearProportionalError" + suffix, registry);
+
+      tangentialDampingGains = new YoTangentialDampingGains(suffix, registry);
 
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -51,8 +49,6 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       proportionalZGain.set(0.0);
       derivativeXYGain.set(0.0);
       derivativeZGain.set(0.0);
-      derivativeCorrectionXYGain.set(0.0);
-      derivativeCorrectionZGain.set(0.0);
       dampingRatio.set(0.0);
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -88,21 +84,6 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       derivativeZGain.notifyVariableChangedListeners();
 
       return derivativeGainMatrix;
-   }
-
-   @Override
-   public Matrix3d createDerivativeCorrectionGainMatrix()
-   {
-      Matrix3d derivativeCorrectionGainMatrix = new Matrix3d();
-
-      derivativeCorrectionXYGain.addVariableChangedListener(new MatrixUpdater(0, 0, derivativeCorrectionGainMatrix));
-      derivativeCorrectionXYGain.addVariableChangedListener(new MatrixUpdater(1, 1, derivativeCorrectionGainMatrix));
-      derivativeCorrectionZGain.addVariableChangedListener(new MatrixUpdater(2, 2, derivativeCorrectionGainMatrix));
-
-      derivativeCorrectionXYGain.notifyVariableChangedListeners();
-      derivativeCorrectionZGain.notifyVariableChangedListeners();
-
-      return derivativeCorrectionGainMatrix;
    }
 
    @Override
@@ -170,19 +151,6 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       derivativeZGain.set(derivativeGainZ);
    }
 
-   @Override
-   public void setDerivativeCorrectionGains(double derivativeCorrectionGainX, double derivativeCorrectionGainY, double derivativeCorrectionGainZ)
-   {
-      derivativeCorrectionXYGain.set(derivativeCorrectionGainX);
-      derivativeCorrectionZGain.set(derivativeCorrectionGainZ);
-   }
-
-   public void setDerivativeCorrectionGains(double derivativeCorrectionGainXY, double derivativeCorrectionGainZ)
-   {
-      derivativeCorrectionXYGain.set(derivativeCorrectionGainXY);
-      derivativeCorrectionZGain.set(derivativeCorrectionGainZ);
-   }
-
    public void setDampingRatio(double dampingRatio)
    {
       this.dampingRatio.set(dampingRatio);
@@ -203,12 +171,6 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    public void setDerivativeGains(double[] derivativeGains)
    {
       setDerivativeGains(derivativeGains[0], derivativeGains[1], derivativeGains[2]);
-   }
-
-   @Override
-   public void setDerivativeCorrectionGains(double[] derivativeCorrectionGains)
-   {
-      setDerivativeCorrectionGains(derivativeCorrectionGains[0], derivativeCorrectionGains[1], derivativeCorrectionGains[2]);
    }
 
    @Override
@@ -236,12 +198,24 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
+   public void setTangentialDampingGains(TangentialDampingGains tangentialDampingGains)
+   {
+      this.tangentialDampingGains.set(tangentialDampingGains);
+   }
+
+   @Override
+   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband)
+   {
+      tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband);
+   }
+
+   @Override
    public void set(PositionPIDGainsInterface gains)
    {
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
-      setDerivativeCorrectionGains(gains.getDerivativeCorrectionGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setTangentialDampingGains(gains.getTangentialDampingGains());
       setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
       setMaxProportionalError(gains.getMaximumProportionalError());
@@ -271,16 +245,28 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       return maxProportionalError;
    }
 
-   private double[] tempPropotionalGains = new double[3];
+   @Override
+   public YoTangentialDampingGains getYoTangentialDampingGains()
+   {
+      return tangentialDampingGains;
+   }
+
+   @Override
+   public TangentialDampingGains getTangentialDampingGains()
+   {
+      return tangentialDampingGains;
+   }
+
+   private double[] tempProportionalGains = new double[3];
 
    @Override
    public double[] getProportionalGains()
    {
-      tempPropotionalGains[0] = proportionalXYGain.getDoubleValue();
-      tempPropotionalGains[1] = proportionalXYGain.getDoubleValue();
-      tempPropotionalGains[2] = proportionalZGain.getDoubleValue();
+      tempProportionalGains[0] = proportionalXYGain.getDoubleValue();
+      tempProportionalGains[1] = proportionalXYGain.getDoubleValue();
+      tempProportionalGains[2] = proportionalZGain.getDoubleValue();
 
-      return tempPropotionalGains;
+      return tempProportionalGains;
    }
 
    private double[] tempDerivativeGains = new double[3];
@@ -293,18 +279,6 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       tempDerivativeGains[2] = derivativeZGain.getDoubleValue();
 
       return tempDerivativeGains;
-   }
-
-   private double[] tempDerivativeCorrectionGains = new double[3];
-
-   @Override
-   public double[] getDerivativeCorrectionGains()
-   {
-      tempDerivativeCorrectionGains[0] = derivativeCorrectionXYGain.getDoubleValue();
-      tempDerivativeCorrectionGains[1] = derivativeCorrectionXYGain.getDoubleValue();
-      tempDerivativeCorrectionGains[2] = derivativeCorrectionZGain.getDoubleValue();
-
-      return tempDerivativeCorrectionGains;
    }
 
    private double[] tempIntegralGains = new double[3];

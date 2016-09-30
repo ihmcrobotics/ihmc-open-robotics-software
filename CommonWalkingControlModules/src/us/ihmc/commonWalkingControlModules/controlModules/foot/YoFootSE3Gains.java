@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.*;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class YoFootSE3Gains implements YoSE3PIDGainsInterface
@@ -50,11 +47,6 @@ public class YoFootSE3Gains implements YoSE3PIDGainsInterface
       positionGains.setDerivativeGains(derivativeGainXY, derivativeGainZ);
    }
 
-   public void setPositionDerivativeCorrectionGains(double derivativeCorrectionGainXY, double derivativeCorrectionGainZ)
-   {
-      positionGains.setDerivativeCorrectionGains(derivativeCorrectionGainXY, derivativeCorrectionGainZ);
-   }
-
    public void setPositionDampingRatio(double dampingRatio)
    {
       positionGains.setDampingRatio(dampingRatio);
@@ -90,11 +82,6 @@ public class YoFootSE3Gains implements YoSE3PIDGainsInterface
       orientationGains.setDerivativeGains(derivativeGainXY, derivativeGainZ);
    }
 
-   public void setOrientationDerivativeCorrectionGains(double derivativeCorrectionGainXY, double derivativeCorrectionGainZ)
-   {
-      orientationGains.setDerivativeGains(derivativeCorrectionGainXY, derivativeCorrectionGainZ);
-   }
-
    public void setOrientationDampingRatio(double dampingRatio)
    {
       orientationGains.setDampingRatio(dampingRatio);
@@ -108,6 +95,16 @@ public class YoFootSE3Gains implements YoSE3PIDGainsInterface
    public void setOrientationMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
       orientationGains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
+   }
+
+   public void setTangentialDampingGains(double kdReductionRatio, double dampingParallelDeadband)
+   {
+      positionGains.setTangentialDampingGains(kdReductionRatio, dampingParallelDeadband);
+   }
+
+   public void setTangentialDampingGains(YoTangentialDampingGains tangentialDampingGains)
+   {
+      positionGains.setTangentialDampingGains(tangentialDampingGains);
    }
 
    public void setOrientationMaxDerivativeError(double maxDerivativeError)

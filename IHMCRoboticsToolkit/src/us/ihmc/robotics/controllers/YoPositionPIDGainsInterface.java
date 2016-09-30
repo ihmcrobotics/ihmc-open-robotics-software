@@ -12,15 +12,11 @@ public interface YoPositionPIDGainsInterface extends PositionPIDGainsInterface
 
    public abstract Matrix3d createDerivativeGainMatrix();
 
-   public abstract Matrix3d createDerivativeCorrectionGainMatrix();
-
    public abstract Matrix3d createIntegralGainMatrix();
 
    public abstract void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ);
 
    public abstract void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ);
-
-   public abstract void setDerivativeCorrectionGains(double correctionGainX, double correctionGainY, double correctionGainZ);
 
    public abstract void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError);
 
@@ -28,9 +24,11 @@ public interface YoPositionPIDGainsInterface extends PositionPIDGainsInterface
 
    public abstract void setDerivativeGains(double[] derivativeGains);
 
-   public abstract void setDerivativeCorrectionGains(double[] derivativeCorrectionGains);
-
    public abstract void setIntegralGains(double[] integralGains, double maxIntegralError);
+
+   public abstract void setTangentialDampingGains(TangentialDampingGains tangentialDampingGains);
+
+   public abstract void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband);
 
    public abstract void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate);
 
@@ -45,4 +43,6 @@ public interface YoPositionPIDGainsInterface extends PositionPIDGainsInterface
    public abstract DoubleYoVariable getYoMaximumDerivativeError();
 
    public abstract DoubleYoVariable getYoMaximumProportionalError();
+
+   public abstract YoTangentialDampingGains getYoTangentialDampingGains();
 }

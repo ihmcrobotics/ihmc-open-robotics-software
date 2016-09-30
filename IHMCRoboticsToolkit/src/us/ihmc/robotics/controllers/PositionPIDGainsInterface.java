@@ -8,8 +8,6 @@ public interface PositionPIDGainsInterface
 
    public abstract double[] getDerivativeGains();
 
-   public abstract double[] getDerivativeCorrectionGains();
-
    public abstract double[] getIntegralGains();
 
    public abstract double getMaximumIntegralError();
@@ -21,4 +19,6 @@ public interface PositionPIDGainsInterface
    public abstract double getMaximumFeedback();
 
    public abstract double getMaximumFeedbackRate();
+
+   public abstract TangentialDampingGains getTangentialDampingGains();
 }

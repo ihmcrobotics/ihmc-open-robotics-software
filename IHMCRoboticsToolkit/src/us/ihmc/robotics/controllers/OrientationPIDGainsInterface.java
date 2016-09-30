@@ -8,8 +8,6 @@ public interface OrientationPIDGainsInterface
 
    public abstract double[] getDerivativeGains();
 
-   public abstract double[] getDerivativeCorrectionGains();
-
    public abstract double[] getIntegralGains();
 
    public abstract double getMaximumIntegralError();

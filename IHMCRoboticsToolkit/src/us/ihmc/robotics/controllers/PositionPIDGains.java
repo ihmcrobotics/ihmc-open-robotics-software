@@ -4,7 +4,6 @@ public class PositionPIDGains implements PositionPIDGainsInterface
 {
    private double[] positionProportionalGains = new double[3];
    private double[] positionDerivativeGains = new double[3];
-   private double[] positionDerivativeCorrectionGains = new double[3];
    private double[] positionIntegralGains = new double[3];
 
    private double positionMaxIntegralError = 0.0;
@@ -14,6 +13,8 @@ public class PositionPIDGains implements PositionPIDGainsInterface
    private double positionMaximumFeedback = Double.POSITIVE_INFINITY;
    private double positionMaximumFeedbackRate = Double.POSITIVE_INFINITY;
 
+   private TangentialDampingGains tangentialDampingGains;
+
    @Override
    public void set(PositionPIDGainsInterface gains)
    {
@@ -21,7 +22,6 @@ public class PositionPIDGains implements PositionPIDGainsInterface
       {
          positionProportionalGains[i] = gains.getProportionalGains()[i];
          positionDerivativeGains[i] = gains.getDerivativeGains()[i];
-         positionDerivativeCorrectionGains[i] = gains.getDerivativeGains()[i];
          positionIntegralGains[i] = gains.getIntegralGains()[i];
       }
 
@@ -31,29 +31,27 @@ public class PositionPIDGains implements PositionPIDGainsInterface
 
       positionMaximumFeedback = gains.getMaximumFeedback();
       positionMaximumFeedbackRate = gains.getMaximumFeedbackRate();
+
+      tangentialDampingGains = gains.getTangentialDampingGains();
    }
 
    public void setGains(double proportionalGain, double derivativeGain)
    {
-      setGains(proportionalGain, derivativeGain, 0.0, 0.0, 0.0);
-   }
-
-   public void setGains(double proportionalGain, double derivativeGain, double derivativeCorrectionGain)
-   {
-      setGains(proportionalGain, derivativeGain, derivativeCorrectionGain, 0.0, 0.0);
+      setGains(proportionalGain, derivativeGain, 0.0, 0.0);
    }
 
    public void setGains(double proportionalGain, double derivativeGain, double integralGain, double maxIntegralError)
    {
-      setGains(proportionalGain, derivativeGain, 0.0, integralGain, maxIntegralError);
+      setGains(proportionalGain, derivativeGain, integralGain, maxIntegralError, 1.0, Double.POSITIVE_INFINITY);
    }
 
-   public void setGains(double proportionalGain, double derivativeGain, double derivativeCorrectionGain, double integralGain, double maxIntegralError)
+   public void setGains(double proportionalGain, double derivativeGain, double integralGain, double maxIntegralError, double kdReductionRatio,
+         double parallelDampingDeadband)
    {
       setProportionalGains(proportionalGain, proportionalGain, proportionalGain);
       setDerivativeGains(derivativeGain, derivativeGain, derivativeGain);
-      setDerivativeCorrectionGains(derivativeCorrectionGain, derivativeCorrectionGain, derivativeCorrectionGain);
       setIntegralGains(integralGain, integralGain, integralGain, maxIntegralError);
+      setTangentialDampingGains(kdReductionRatio, parallelDampingDeadband);
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
@@ -70,19 +68,17 @@ public class PositionPIDGains implements PositionPIDGainsInterface
       this.positionDerivativeGains[2] = derivativeGainZ;
    }
 
-   public void setDerivativeCorrectionGains(double derivativeCorrectionGainX, double derivativeCorrectionGainY, double derivativeCorrectionGainZ)
-   {
-      this.positionDerivativeCorrectionGains[0] = derivativeCorrectionGainX;
-      this.positionDerivativeCorrectionGains[1] = derivativeCorrectionGainY;
-      this.positionDerivativeCorrectionGains[2] = derivativeCorrectionGainZ;
-   }
-
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
    {
       this.positionIntegralGains[0] = integralGainX;
       this.positionIntegralGains[1] = integralGainY;
       this.positionIntegralGains[2] = integralGainZ;
       this.positionMaxIntegralError = maxIntegralError;
+   }
+
+   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband)
+   {
+      tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband);
    }
 
    public void setMaximumFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
@@ -111,12 +107,6 @@ public class PositionPIDGains implements PositionPIDGainsInterface
    public double[] getDerivativeGains()
    {
       return positionDerivativeGains;
-   }
-
-   @Override
-   public double[] getDerivativeCorrectionGains()
-   {
-      return positionDerivativeCorrectionGains;
    }
 
    @Override
@@ -153,5 +143,11 @@ public class PositionPIDGains implements PositionPIDGainsInterface
    public double getMaximumProportionalError()
    {
       return positionMaxProportionalError;
+   }
+
+   @Override
+   public TangentialDampingGains getTangentialDampingGains()
+   {
+      return tangentialDampingGains;
    }
 }
