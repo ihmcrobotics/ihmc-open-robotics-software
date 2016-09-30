@@ -269,7 +269,6 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
             List<RigidBody> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
             imuBiasStateEstimator.compute(trustedFeet);
-            imuYawDriftEstimator.update();
             break;
       }
 
