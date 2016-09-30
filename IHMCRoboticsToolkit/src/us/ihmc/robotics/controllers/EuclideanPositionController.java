@@ -159,7 +159,7 @@ public class EuclideanPositionController implements PositionController
       // Limit the maximum position error considered for control action
       double maximumError = gains.getMaximumProportionalError();
       double errorMagnitude = positionError.length();
-      proportionalTerm.set(positionError.getFrameTuple());
+      positionError.getFrameTuple(proportionalTerm);
       if (errorMagnitude > maximumError)
       {
          proportionalTerm.scale(maximumError / errorMagnitude);

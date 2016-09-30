@@ -20,15 +20,8 @@ public class YoFootOrientationGains implements YoOrientationPIDGainsInterface
    private final DoubleYoVariable maximumFeedback;
    private final DoubleYoVariable maximumFeedbackRate;
 
-   private YoTangentialDampingGains tangentialDampingGains;
-
-   private final String suffix;
-   private final YoVariableRegistry registry;
-
    public YoFootOrientationGains(String suffix, YoVariableRegistry registry)
    {
-      this.suffix = suffix;
-      this.registry = registry;
       proportionalXYGain = new DoubleYoVariable("kpXYAngular" + suffix, registry);
       proportionalZGain = new DoubleYoVariable("kpZAngular" + suffix, registry);
       derivativeXYGain = new DoubleYoVariable("kdXYAngular" + suffix, registry);
