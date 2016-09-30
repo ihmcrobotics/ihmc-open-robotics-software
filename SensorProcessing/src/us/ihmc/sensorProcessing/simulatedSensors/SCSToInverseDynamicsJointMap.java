@@ -96,19 +96,22 @@ public class SCSToInverseDynamicsJointMap
       
       
 
-      if (inverseDynamicsJointsByName.size() < oneDegreeOfFreedomJoints.size())
-      {
-         throw new RuntimeException("oneDoFJoints.length < oneDegreeOfFreedomJoints.size()");
-      }
+//      if (inverseDynamicsJointsByName.size() < oneDegreeOfFreedomJoints.size())
+//      {
+//         throw new RuntimeException("oneDoFJoints.length < oneDegreeOfFreedomJoints.size()");
+//      }
 
       scsToInverseDynamicsJointMap.addLinkedJoints(floatingRootJoint, sixDoFRootJoint);
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
          String name = oneDegreeOfFreedomJoint.getName();
-         OneDoFJoint oneDoFJoint = inverseDynamicsJointsByName.get(name);
-
-         scsToInverseDynamicsJointMap.addLinkedJoints(oneDegreeOfFreedomJoint, oneDoFJoint);
+         if(inverseDynamicsJointsByName.containsKey(name))
+         {
+            OneDoFJoint oneDoFJoint = inverseDynamicsJointsByName.get(name);
+   
+            scsToInverseDynamicsJointMap.addLinkedJoints(oneDegreeOfFreedomJoint, oneDoFJoint);
+         }
       }
 
       return scsToInverseDynamicsJointMap;

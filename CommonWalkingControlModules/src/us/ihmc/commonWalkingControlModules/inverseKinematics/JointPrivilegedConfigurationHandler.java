@@ -50,6 +50,7 @@ public class JointPrivilegedConfigurationHandler
 
    private final int numberOfDoFs;
 
+   // TODO During toe off, this guy behaves differently and tends to corrupt the CMP. Worst part is that the achieved CMP appears to not show that. (Sylvain)
    public JointPrivilegedConfigurationHandler(OneDoFJoint[] oneDoFJoints, YoVariableRegistry parentRegistry)
    {
       this.oneDoFJoints = oneDoFJoints;

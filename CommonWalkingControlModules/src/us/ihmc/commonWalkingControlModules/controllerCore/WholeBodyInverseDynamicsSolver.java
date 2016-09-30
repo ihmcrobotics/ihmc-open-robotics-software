@@ -65,6 +65,8 @@ public class WholeBodyInverseDynamicsSolver
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
 
    private final YoFrameVector yoDesiredMomentumRateLinear;
+   // TODO It seems that the achieved CMP (computed from this guy) can be off sometimes.
+   // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
    private final YoFrameVector yoAchievedMomentumRateLinear;
    private final FrameVector achievedMomentumRateLinear = new FrameVector();
 

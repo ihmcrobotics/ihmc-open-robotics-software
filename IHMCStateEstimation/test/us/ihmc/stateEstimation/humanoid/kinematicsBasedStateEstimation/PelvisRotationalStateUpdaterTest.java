@@ -59,7 +59,7 @@ public class PelvisRotationalStateUpdaterTest
       
       try
       {
-         new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, null, 1.0e-3, registry);
+         new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, 1.0e-3, registry);
       }
       catch (Exception e)
       {
@@ -86,7 +86,7 @@ public class PelvisRotationalStateUpdaterTest
       PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater;
       try
       {
-         pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, null, 1.0e-3, registry);
+         pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, 1.0e-3, registry);
       }
       catch (Exception e)
       {
@@ -114,7 +114,7 @@ public class PelvisRotationalStateUpdaterTest
       
       SensorProcessing jointAndIMUSensorDataSource = buildSensorConfigurations(stateEstimatorSensorDefinitions, registry);
 
-      PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, null, 1.0e-3, registry);
+      PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, 1.0e-3, registry);
 
       
       Quat4d rotationExpected = new Quat4d();
