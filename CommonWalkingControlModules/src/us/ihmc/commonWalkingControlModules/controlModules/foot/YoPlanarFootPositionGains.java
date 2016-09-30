@@ -12,7 +12,6 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
 {
    private final DoubleYoVariable proportionalXGain, proportionalZGain;
    private final DoubleYoVariable derivativeXGain, derivativeZGain;
-   private final DoubleYoVariable derivativeCorrectionXGain, derivativeCorrectionZGain;
    private final DoubleYoVariable dampingRatio;
 
    private final DoubleYoVariable maximumFeedback;
@@ -20,20 +19,22 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
    private final DoubleYoVariable maxDerivativeError;
    private final DoubleYoVariable maxProportionalError;
 
+   private final YoTangentialDampingGains tangentialDampingGains;
+
    public YoPlanarFootPositionGains(String suffix, YoVariableRegistry registry)
    {
       proportionalXGain = new DoubleYoVariable("kpXLinear" + suffix, registry);
       proportionalZGain = new DoubleYoVariable("kpZLinear" + suffix, registry);
       derivativeXGain = new DoubleYoVariable("kdXLinear" + suffix, registry);
       derivativeZGain = new DoubleYoVariable("kdZLinear" + suffix, registry);
-      derivativeCorrectionXGain = new DoubleYoVariable("kvXLinear" + suffix, registry);
-      derivativeCorrectionZGain = new DoubleYoVariable("kvZLinear" + suffix, registry);
       dampingRatio = new DoubleYoVariable("zetaLinear" + suffix, registry);
 
       maximumFeedback = new DoubleYoVariable("maximumLinearFeedback" + suffix, registry);
       maximumFeedbackRate = new DoubleYoVariable("maximumLinearFeedbackRate" + suffix, registry);
       maxDerivativeError = new DoubleYoVariable("maximumLinearDerivativeError" + suffix, registry);
       maxProportionalError = new DoubleYoVariable("maximumLinearProportionalError" + suffix, registry);
+
+      tangentialDampingGains = new YoTangentialDampingGains(suffix, registry);
 
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -48,8 +49,6 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
       proportionalZGain.set(0.0);
       derivativeXGain.set(0.0);
       derivativeZGain.set(0.0);
-      derivativeCorrectionXGain.set(0.0);
-      derivativeCorrectionZGain.set(0.0);
       dampingRatio.set(0.0);
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -83,20 +82,6 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
       derivativeZGain.notifyVariableChangedListeners();
 
       return derivativeGainMatrix;
-   }
-
-   @Override
-   public Matrix3d createDerivativeCorrectionGainMatrix()
-   {
-      Matrix3d derivativeCorrectionGainMatrix = new Matrix3d();
-
-      derivativeCorrectionXGain.addVariableChangedListener(new MatrixUpdater(0, 0, derivativeCorrectionGainMatrix));
-      derivativeCorrectionZGain.addVariableChangedListener(new MatrixUpdater(2, 2, derivativeCorrectionGainMatrix));
-
-      derivativeCorrectionXGain.notifyVariableChangedListeners();
-      derivativeCorrectionZGain.notifyVariableChangedListeners();
-
-      return derivativeCorrectionGainMatrix;
    }
 
    @Override
@@ -157,21 +142,9 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
       derivativeZGain.set(derivativeGainZ);
    }
 
-   @Override
-   public void setDerivativeCorrectionGains(double derivativeCorrectionGainX, double derivativeCorrectionGainY, double derivativeCorrectionGainZ)
-   {
-      derivativeCorrectionXGain.set(derivativeCorrectionGainX);
-      derivativeCorrectionZGain.set(derivativeCorrectionGainZ);
-   }
-
    public void setDerivativeGains(double derivativeGainX, double derivativeGainZ)
    {
       setDerivativeGains(derivativeGainX, 0.0, derivativeGainZ);
-   }
-
-   public void setDerivativeCorrectionGains(double derivativeCorrectionGainX, double derivativeCorrectionGainZ)
-   {
-      setDerivativeCorrectionGains(derivativeCorrectionGainX, 0.0, derivativeCorrectionGainZ);
    }
 
    public void setDampingRatio(double dampingRatio)
@@ -195,12 +168,6 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
    public void setDerivativeGains(double[] derivativeGains)
    {
       setDerivativeGains(derivativeGains[0], derivativeGains[1]);
-   }
-
-   @Override
-   public void setDerivativeCorrectionGains(double[] derivativeCorrectionGains)
-   {
-      setDerivativeCorrectionGains(derivativeCorrectionGains[0], derivativeCorrectionGains[1]);
    }
 
    @Override
@@ -228,12 +195,24 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
+   public void setTangentialDampingGains(TangentialDampingGains tangentialDampingGains)
+   {
+      this.tangentialDampingGains.set(tangentialDampingGains);
+   }
+
+   @Override
+   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband)
+   {
+      tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband);
+   }
+
+   @Override
    public void set(PositionPIDGainsInterface gains)
    {
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
-      setDerivativeCorrectionGains(gains.getDerivativeCorrectionGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setTangentialDampingGains(gains.getTangentialDampingGains());
       setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
       setMaxProportionalError(gains.getMaximumProportionalError());
@@ -263,6 +242,18 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
       return maxProportionalError;
    }
 
+   @Override
+   public YoTangentialDampingGains getYoTangentialDampingGains()
+   {
+      return tangentialDampingGains;
+   }
+
+   @Override
+   public TangentialDampingGains getTangentialDampingGains()
+   {
+      return tangentialDampingGains;
+   }
+
    private double[] tempPropotionalGains = new double[2];
 
    @Override
@@ -283,17 +274,6 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
       tempDerivativeGains[1] = derivativeZGain.getDoubleValue();
 
       return tempDerivativeGains;
-   }
-
-   private double[] tempDerivativeCorrectionGains = new double[2];
-
-   @Override
-   public double[] getDerivativeCorrectionGains()
-   {
-      tempDerivativeCorrectionGains[0] = derivativeCorrectionXGain.getDoubleValue();
-      tempDerivativeCorrectionGains[1] = derivativeCorrectionZGain.getDoubleValue();
-
-      return tempDerivativeCorrectionGains;
    }
 
    private double[] tempIntegralGains = new double[2];

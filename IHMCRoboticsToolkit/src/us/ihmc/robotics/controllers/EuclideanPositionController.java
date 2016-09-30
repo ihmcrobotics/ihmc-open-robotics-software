@@ -20,13 +20,11 @@ public class EuclideanPositionController implements PositionController
    private final YoFrameVector velocityError;
 
    private final Matrix3d proportionalGainMatrix;
-   private final Matrix3d derivativeCorrectionGainMatrix;
    private final Matrix3d derivativeGainMatrix;
    private final Matrix3d integralGainMatrix;
 
    private final ReferenceFrame bodyFrame;
    private final FrameVector proportionalTerm;
-   private final FrameVector derivativeCorrectionTerm;
    private final FrameVector derivativeTerm;
    private final FrameVector integralTerm;
    
@@ -37,8 +35,8 @@ public class EuclideanPositionController implements PositionController
 
    private final YoFrameVector feedbackLinearAction;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAction;
-   
 
+   private final EuclideanTangentialDampingCalculator tangentialDampingCalculator;
    private final double dt;
 
    private final YoPositionPIDGainsInterface gains;
@@ -60,7 +58,6 @@ public class EuclideanPositionController implements PositionController
 
       this.gains = gains;
       proportionalGainMatrix = gains.createProportionalGainMatrix();
-      derivativeCorrectionGainMatrix = gains.createDerivativeCorrectionGainMatrix();
       derivativeGainMatrix = gains.createDerivativeGainMatrix();
       integralGainMatrix = gains.createIntegralGainMatrix();
 
@@ -69,13 +66,14 @@ public class EuclideanPositionController implements PositionController
       velocityError = new YoFrameVector(prefix + "LinearVelocityError", bodyFrame, registry);
 
       proportionalTerm = new FrameVector(bodyFrame);
-      derivativeCorrectionTerm = new FrameVector(bodyFrame);
       derivativeTerm = new FrameVector(bodyFrame);
       integralTerm = new FrameVector(bodyFrame);
 
       feedbackLinearAction = new YoFrameVector(prefix + "FeedbackLinearAction", bodyFrame, registry);
       rateLimitedFeedbackLinearAction = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAction", "",
             registry, gains.getYoMaximumFeedbackRate(), dt, feedbackLinearAction);
+
+      tangentialDampingCalculator = new EuclideanTangentialDampingCalculator(prefix, bodyFrame, gains.getTangentialDampingGains(), gains.getYoMaximumProportionalError());
 
       parentRegistry.addChild(registry);
    }
@@ -95,10 +93,8 @@ public class EuclideanPositionController implements PositionController
    {
       computeProportionalTerm(desiredPosition);
       if (currentVelocity != null)
-      {
-         computeDerivativeCorrectionTerm(desiredPosition);
          computeDerivativeTerm(desiredVelocity, currentVelocity);
-      }
+
       computeIntegralTerm();
       output.setToNaN(bodyFrame);
       output.add(proportionalTerm, derivativeTerm);
@@ -172,23 +168,6 @@ public class EuclideanPositionController implements PositionController
       proportionalGainMatrix.transform(proportionalTerm.getVector());
    }
 
-   private void computeDerivativeCorrectionTerm(FramePoint desiredPosition)
-   {
-      desiredPosition.changeFrame(bodyFrame);
-      positionError.set(desiredPosition);
-
-      // Limit the maximum position error considered for control action
-      double maximumError = gains.getMaximumProportionalError();
-      double errorMagnitude = positionError.length();
-      derivativeCorrectionTerm.set(positionError.getFrameTuple());
-      if (errorMagnitude > maximumError)
-      {
-         derivativeCorrectionTerm.scale(maximumError / errorMagnitude);
-      }
-
-      derivativeCorrectionGainMatrix.transform(derivativeCorrectionTerm.getVector());
-   }
-
    private void computeDerivativeTerm(FrameVector desiredVelocity, FrameVector currentVelocity)
    {
       desiredVelocity.changeFrame(bodyFrame);
@@ -204,9 +183,10 @@ public class EuclideanPositionController implements PositionController
          derivativeTerm.scale(maximumVelocityError / velocityErrorMagnitude);
       }
 
-      derivativeTerm.add(derivativeCorrectionTerm);
-
       velocityError.set(derivativeTerm);
+
+      tangentialDampingCalculator.compute(positionError, derivativeGainMatrix);
+
       derivativeGainMatrix.transform(derivativeTerm.getVector());
    }
 

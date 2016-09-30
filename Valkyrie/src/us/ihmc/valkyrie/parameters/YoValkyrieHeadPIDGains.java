@@ -15,7 +15,6 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
 {
    private final DoubleYoVariable proportionalXGain, proportionalYZGain;
    private final DoubleYoVariable derivativeXGain, derivativeYZGain;
-   private final DoubleYoVariable derivativeCorrectionXGain, derivativeCorrectionYZGain;
    private final DoubleYoVariable dampingRatioX, dampingRatioYZ;
 
    private final DoubleYoVariable maxDerivativeError;
@@ -30,8 +29,6 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
       proportionalYZGain = new DoubleYoVariable("kpYZAngular" + suffix, registry);
       derivativeXGain = new DoubleYoVariable("kdXAngular" + suffix, registry);
       derivativeYZGain = new DoubleYoVariable("kdYZAngular" + suffix, registry);
-      derivativeCorrectionXGain = new DoubleYoVariable("kvXAngular" + suffix, registry);
-      derivativeCorrectionYZGain = new DoubleYoVariable("kvYZAngular" + suffix, registry);
       dampingRatioX = new DoubleYoVariable("zetaXAngular" + suffix, registry);
       dampingRatioYZ = new DoubleYoVariable("zetaYZAngular" + suffix, registry);
 
@@ -52,8 +49,6 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
       proportionalYZGain.set(0.0);
       derivativeXGain.set(0.0);
       derivativeYZGain.set(0.0);
-      derivativeCorrectionXGain.set(0.0);
-      derivativeCorrectionYZGain.set(0.0);
       dampingRatioX.set(0.0);
       dampingRatioYZ.set(0.0);
       maximumFeedback.set(Double.POSITIVE_INFINITY);
@@ -90,21 +85,6 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
       derivativeYZGain.notifyVariableChangedListeners();
 
       return derivativeGainMatrix;
-   }
-
-   @Override
-   public Matrix3d createDerivativeCorrectionGainMatrix()
-   {
-      Matrix3d derivativeCorrectionGainMatrix = new Matrix3d();
-
-      derivativeCorrectionXGain.addVariableChangedListener(new MatrixUpdater(0, 0, derivativeCorrectionGainMatrix));
-      derivativeCorrectionYZGain.addVariableChangedListener(new MatrixUpdater(1, 1, derivativeCorrectionGainMatrix));
-      derivativeCorrectionYZGain.addVariableChangedListener(new MatrixUpdater(2, 2, derivativeCorrectionGainMatrix));
-
-      derivativeCorrectionXGain.notifyVariableChangedListeners();
-      derivativeCorrectionYZGain.notifyVariableChangedListeners();
-
-      return derivativeCorrectionGainMatrix;
    }
 
    @Override
@@ -172,19 +152,6 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
       derivativeYZGain.set(derivativeGainYZ);
    }
 
-   @Override
-   public void setDerivativeCorrectionGains(double derivativeCorrectionGainX, double derivativeCorrectionGainY, double derivativeCorrectionGainZ)
-   {
-      derivativeCorrectionXGain.set(derivativeCorrectionGainX);
-      derivativeCorrectionYZGain.set(derivativeCorrectionGainY);
-   }
-
-   public void setDerivativeCorrectionGains(double derivativeCorrectionGainX, double derivativeCorrectionGainYZ)
-   {
-      derivativeCorrectionXGain.set(derivativeCorrectionGainX);
-      derivativeCorrectionYZGain.set(derivativeCorrectionGainYZ);
-   }
-
    public void setDampingRatio(double dampingRatio)
    {
       dampingRatioX.set(dampingRatio);
@@ -212,12 +179,6 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    public void setDerivativeGains(double[] derivativeGains)
    {
       setDerivativeGains(derivativeGains[0], derivativeGains[1], derivativeGains[2]);
-   }
-
-   @Override
-   public void setDerivativeCorrectionGains(double[] derivativeCorrectionGains)
-   {
-      setDerivativeCorrectionGains(derivativeCorrectionGains[0], derivativeCorrectionGains[1], derivativeCorrectionGains[2]);
    }
 
    @Override
@@ -259,7 +220,6 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
    {
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
-      setDerivativeCorrectionGains(gains.getDerivativeCorrectionGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
       setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
@@ -314,17 +274,6 @@ public class YoValkyrieHeadPIDGains implements YoOrientationPIDGainsInterface
       return tempDerivativeGains;
    }
 
-   private double[] tempDerivativeCorrectionGains = new double[3];
-
-   @Override
-   public double[] getDerivativeCorrectionGains()
-   {
-      tempDerivativeCorrectionGains[0] = derivativeCorrectionXGain.getDoubleValue();
-      tempDerivativeCorrectionGains[1] = derivativeCorrectionYZGain.getDoubleValue();
-      tempDerivativeCorrectionGains[2] = derivativeCorrectionYZGain.getDoubleValue();
-
-      return tempDerivativeCorrectionGains;
-   }
 
    private double[] tempIntegralGains = new double[3];
 
