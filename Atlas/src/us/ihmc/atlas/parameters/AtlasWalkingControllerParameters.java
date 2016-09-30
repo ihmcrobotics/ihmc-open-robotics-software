@@ -595,9 +595,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 150.0;
+      double kpXY = 150.0; // Robert: 200.0
       double kpZ = 200.0;
-      double zetaXYZ = realRobot ? 0.7 : 0.7;
+      double zetaXYZ = realRobot ? 0.7 : 0.7; // Robert: 0.4
 
       double kpXYOrientation = 200.0;
       double kpZOrientation = 200.0;
@@ -1051,6 +1051,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getSwingFootVelocityAdjustmentDamping()
    {
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
-      return realRobot ? 0.8 : 0.5;
+      return realRobot ? 0.8 : 0.5; // Robert: 0.8
    }
 }
