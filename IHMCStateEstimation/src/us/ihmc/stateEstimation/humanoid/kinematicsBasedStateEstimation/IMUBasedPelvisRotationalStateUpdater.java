@@ -17,8 +17,8 @@ import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSelectorAndDataConverter;
@@ -53,7 +53,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
    private final IMUSensorReadOnly imuProcessedOutput;
    private final IMUBiasProvider imuBiasProvider;
-   private final YawDriftProvider yawDriftProvider;
+   private final IMUYawDriftEstimator imuYawDriftEstimator;
 
    private final ReferenceFrame measurementFrame;
    private final RigidBody measurementLink;
@@ -65,10 +65,10 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    }
 
    public IMUBasedPelvisRotationalStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure, List<? extends IMUSensorReadOnly> imuProcessedOutputs,
-         IMUBiasProvider imuBiasProvider, YawDriftProvider yawDriftProvider, double dt, YoVariableRegistry parentRegistry)
+         IMUBiasProvider imuBiasProvider, IMUYawDriftEstimator imuYawDriftEstimator, double dt, YoVariableRegistry parentRegistry)
    {
       this.imuBiasProvider = imuBiasProvider;
-      this.yawDriftProvider = yawDriftProvider;
+      this.imuYawDriftEstimator = imuYawDriftEstimator;
       checkNumberOfSensors(imuProcessedOutputs);
 
       imuProcessedOutput = imuProcessedOutputs.get(0);
@@ -219,9 +219,13 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
       rotationFromRootJointFrameToWorld.mul(rotationFrozenOffset, rotationFromRootJointFrameToWorld);
 
-      if (yawDriftProvider != null)
+      rootJoint.setRotation(rotationFromRootJointFrameToWorld);
+      rootJointFrame.update();
+
+      if (imuYawDriftEstimator != null)
       {
-         yawBiasMatrix.rotZ(yawDriftProvider.getYawBiasInWorldFrame());
+         imuYawDriftEstimator.update();
+         yawBiasMatrix.rotZ(imuYawDriftEstimator.getYawBiasInWorldFrame());
          yawBiasMatrix.transpose();
          rotationFromRootJointFrameToWorld.mul(yawBiasMatrix, rotationFromRootJointFrameToWorld);
       }
