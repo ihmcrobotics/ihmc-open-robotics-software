@@ -56,9 +56,10 @@ dependencies {
 	compile group: 'org.ejml', name: 'core', version: '0.28'
 	compile group: 'junit', name: 'junit', version: '4.11'
 	compile group: 'xml-apis', name: 'xml-apis', version: '2.0.2'
-	compile group: 'com.badlogicgames.gdx', name: 'gdx-bullet', version: '1.0.1'
-	compile group: 'com.badlogicgames.gdx', name: 'gdx', version: '1.0.1'
+	compile group: 'com.badlogicgames.gdx', name: 'gdx-bullet', version: '1.9.4'
+	compile group: 'com.badlogicgames.gdx', name: 'gdx', version: '1.9.4'
 	compile group: 'com.google.guava', name: 'guava', version: '18.0'
+	compile group: 'org.ejml', name: 'dense64', version: '0.28'
 
 	compile group: 'org.easytesting', name: 'fest', version: '1.0.3'
 	compile('org.easytesting:fest-swing:1.2.1' )
@@ -66,8 +67,9 @@ dependencies {
 		exclude group: 'org.easytesting', module: 'fest'
 	}
 
-    runtime group: 'com.badlogicgames.gdx', name: 'gdx-bullet-platform', version: '1.0.1', classifier: 'natives-desktop' // runtime?
+    runtime group: 'com.badlogicgames.gdx', name: 'gdx-bullet-platform', version: '1.9.4', classifier: 'natives-desktop' // runtime?
 
+    compile ihmc.getProjectDependency(":ConvexOptimizationAdapter")
     compile ihmc.getProjectDependency(":Plotting")
 	compile ihmc.getProjectDependency(":Graphics3DAdapter")
 	compile ihmc.getProjectDependency(":IHMCRobotDescription")
@@ -75,7 +77,8 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-   compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+    compile ihmc.getProjectDependency(":IHMCGeometry")
 
     testCompile group: 'org.ejml', name: 'dense64', version: '0.28'
     testCompile group: 'gov.nist.math', name: 'jama', version: '1.0.3'

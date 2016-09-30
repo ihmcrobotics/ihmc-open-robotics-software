@@ -18,7 +18,7 @@ public class SimulatedOneDoFJointPositionSensor extends SimulatedSensor<MutableD
 
    public void startComputation()
    {
-      jointPosition.setValue(joint.getQ().getDoubleValue());
+      jointPosition.setValue(joint.getQYoVariable().getDoubleValue());
       corrupt(jointPosition);
       jointPositionOutputPort.setData(jointPosition);
    }

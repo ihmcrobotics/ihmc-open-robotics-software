@@ -166,7 +166,6 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.v2Exoskeleton.communication.PilotInterfacePacket;
 
 public class IHMCCommunicationKryoNetClassList extends NetClassList
 {   
@@ -477,8 +476,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(TextToSpeechPacket.class);
       registerPacketField(VideoSource.class);
 
-      //Exoskeleton
-      registerPacketClass(PilotInterfacePacket.class);
       
    }
 }

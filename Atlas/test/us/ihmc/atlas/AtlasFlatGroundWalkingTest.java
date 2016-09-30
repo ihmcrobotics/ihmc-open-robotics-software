@@ -1,6 +1,7 @@
 package us.ihmc.atlas;
 
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.internal.AssumptionViolatedException;
 
@@ -19,21 +20,17 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
 
-	@DeployableTestMethod(estimatedDuration = 189.1)
-	@Test(timeout = 950000)
+   @DeployableTestMethod(estimatedDuration = 189.1)
+   @Test(timeout = 950000)
    public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
-
-      String runName = "AtlasFlatGroundWalkingTest";
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
-
-      boolean doPelvisYawWarmup = true;
-      setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
+      super.testFlatGroundWalking(robotModel, true);
    }
 
 	@DeployableTestMethod(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
+	@Ignore // Not working because of multithreading. Should be switched over to use the DRCSimulationTestHelper.
    public void testFlatGroundWalkingRunsSameWayTwice() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       try

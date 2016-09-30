@@ -49,7 +49,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
 
    private DoubleYoVariable swingTime;
 
-   private static final double doubleSupportPushMagnitude = 1100.0;
+   private static final double doubleSupportPushMagnitude = 1000.0;
    private static final double doubleSupportPushDuration = 0.05;
 
    private static final double singleSupportPushMagnitude = 600.0;
@@ -224,7 +224,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       };
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, className, startingLocation, simulationTestingParameters, robotModel);
-      pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), drcSimulationTestHelper.getRobot().getRootJoint().getName(), new Vector3d(0.0, 0.0, 0.15));
+      Vector3d forcePointOffset = new Vector3d(0.0, 0.0, 0.1);
+      pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), drcSimulationTestHelper.getRobot().getRootJoint().getName(), forcePointOffset);
 
       allowUpperBodyMomentumInSingleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
       allowUpperBodyMomentumInDoubleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");

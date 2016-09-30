@@ -1,7 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,8 +28,10 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
-import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior.DiagnosticTask;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
@@ -52,9 +53,11 @@ import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -71,6 +74,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestInterface
 {
@@ -91,7 +95,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       {
          ThreadTools.sleepForever();
       }
-      
+
       behaviorCommunicatorClient.close();
       behaviorCommunicatorServer.close();
 
@@ -109,7 +113,6 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
          walkingControllerParameters = null;
          robotDataReceiver = null;
          behaviorDispatcher = null;
-         yoDoubleSupport = null;
       }
 
       GlobalTimer.clearTimers();
@@ -132,19 +135,20 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    private WalkingControllerParameters walkingControllerParameters;
 
    private HumanoidRobotDataReceiver robotDataReceiver;
-   private BehaviorDispatcher behaviorDispatcher;
-
-   private BooleanYoVariable yoDoubleSupport;
+   private BehaviorDispatcher<HumanoidBehaviorType> behaviorDispatcher;
 
    private PacketCommunicator behaviorCommunicatorServer;
 
    private PacketCommunicator behaviorCommunicatorClient;
 
+   private YoGraphicsListRegistry yoGraphicsListRegistry;
+   private YoVariableRegistry registry;
+
    @Before
    public void setUp()
    {
       PacketRouter<PacketDestination> networkProcessor = new PacketRouter<>(PacketDestination.class);
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      registry = new YoVariableRegistry(getClass().getSimpleName());
       this.yoTime = new DoubleYoVariable("yoTime", registry);
 
       behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(
@@ -161,10 +165,10 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       {
          throw new RuntimeException(e);
       }
-      
-      
+
+
       this.communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer, registry);
-      
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(new DRCDemo01NavigationEnvironment(), getSimpleRobotName(),
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
 
@@ -175,7 +179,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       robot = drcSimulationTestHelper.getRobot();
       fullRobotModel = getRobotModel().createFullRobotModel();
       walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, communicationBridge, yoGraphicsListRegistry, behaviorCommunicatorServer, registry);
 
@@ -204,7 +208,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       return ret;
    }
 
-   private BehaviorDispatcher setupBehaviorDispatcher(FullHumanoidRobotModel fullRobotModel, BehaviorCommunicationBridge communicationBridge,
+   private BehaviorDispatcher<HumanoidBehaviorType> setupBehaviorDispatcher(FullHumanoidRobotModel fullRobotModel, BehaviorCommunicationBridge communicationBridge,
          YoGraphicsListRegistry yoGraphicsListRegistry, PacketCommunicator behaviorCommunicatorServer, YoVariableRegistry registry)
    {
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
@@ -280,12 +284,12 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
             walkingControllerParameters);
-      behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToLocationBehavior);
+      behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, walkToLocationBehavior);
 
       behaviorDispatcher.start();
 
 
-      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_OBJECT);
+      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
       PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
@@ -326,6 +330,59 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
    @DeployableTestMethod(estimatedDuration = 0.1)
    @Test(timeout = 300000)
+   public void testDispatchKarateKidDiagnosticBehavior() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      EnumYoVariable<RobotSide> supportLeg = new EnumYoVariable<>("supportLeg", registry, RobotSide.class);
+      supportLeg.set(RobotSide.LEFT);
+
+      YoFrameConvexPolygon2d yoSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", ReferenceFrame.getWorldFrame(), 10, registry);
+
+      WholeBodyControllerParameters wholeBodyControllerParameters = this.getRobotModel();
+
+      BooleanYoVariable yoDoubleSupport = new BooleanYoVariable("doubleSupport", registry);
+
+      DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, supportLeg, referenceFrames, yoTime, yoDoubleSupport, communicationBridge,
+            wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
+
+
+      behaviorDispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
+
+      behaviorDispatcher.start();
+
+      HumanoidBehaviorTypePacket requestDiagnosticBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.DIAGNOSTIC);
+      behaviorCommunicatorClient.send(requestDiagnosticBehaviorPacket);
+      PrintTools.debug(this, "Requesting DiagnosticBehavior");
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      diagnosticBehavior.requestDiagnosticBehavior(DiagnosticTask.KARATE_KID);
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      assertFalse(diagnosticBehavior.isDone());
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+      assertTrue(success);
+
+      assertFalse(diagnosticBehavior.isDone());
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(32.0);
+      assertTrue(success);
+
+      assertTrue(diagnosticBehavior.isDone());
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   @DeployableTestMethod(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testDispatchWalkToLocationBehaviorAndStop() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -335,12 +392,12 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
             walkingControllerParameters);
-      behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToLocationBehavior);
+      behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, walkToLocationBehavior);
 
       behaviorDispatcher.start();
 
 
-      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_OBJECT);
+      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
       PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
@@ -384,12 +441,12 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
             walkingControllerParameters);
-      behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToLocationBehavior);
+      behaviorDispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, walkToLocationBehavior);
 
       behaviorDispatcher.start();
 
 
-      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_OBJECT);
+      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
       PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 

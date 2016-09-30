@@ -9,10 +9,10 @@ class SliderJointRobotSensor implements SensorInterface
 
    public SliderJointRobotSensor(SliderJoint joint)
    {
-      q = joint.getQ();
-      qd = joint.getQD();
-      qdd = joint.getQDD();
-      tau_actual = joint.getTau();
+      q = joint.getQYoVariable();
+      qd = joint.getQDYoVariable();
+      qdd = joint.getQDDYoVariable();
+      tau_actual = joint.getTauYoVariable();
 
    }
 

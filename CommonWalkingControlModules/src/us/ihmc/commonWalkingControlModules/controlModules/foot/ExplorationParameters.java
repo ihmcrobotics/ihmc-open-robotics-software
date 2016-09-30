@@ -19,7 +19,7 @@ public class ExplorationParameters
    /** Parameters for the geometric foothold detection */
    private final DoubleYoVariable geometricDetectionAngleThreshold;
    private final DoubleYoVariable geometricDetectionPlanePointAlpha;
-   private final static double defaultGeometricDetectionAngleThreshold = 15.0 * Math.PI/180.0;
+   private final static double defaultGeometricDetectionAngleThreshold = 10.0 * Math.PI/180.0;
    private final static double defaultGeometricDetectionPlanePointAlpha = 0.99;
 
    /** Parameters for the cop occupancy grid */
@@ -39,7 +39,7 @@ public class ExplorationParameters
    private static final int defaultThresholdForCoPRegionOccupancy = 2;
    private static final double defaultDistanceFromLineOfRotationToComputeCoPOccupancy = 0.02;
    private static final int defaultShrinkMaxLimit = 6;
-   private static final RotationCalculatorType defaultRotationCalculatorType = RotationCalculatorType.BOTH;
+   private static final RotationCalculatorType defaultRotationCalculatorType = RotationCalculatorType.GEOMETRY;
    private static final double defaultMinAreaToConsider = 0.0;
 
    /** Parameters for the cop based rotation verification */

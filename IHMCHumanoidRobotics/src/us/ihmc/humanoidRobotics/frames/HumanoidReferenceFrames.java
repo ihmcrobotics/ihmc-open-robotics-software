@@ -273,7 +273,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    public ReferenceFrame getKneeFrame(RobotSide robotSide)
    {
-      return getLegJointFrame(robotSide, LegJointName.KNEE);
+      return getLegJointFrame(robotSide, LegJointName.KNEE_PITCH);
    }
 
    public ReferenceFrame getAnkleRollFrame(RobotSide robotSide)

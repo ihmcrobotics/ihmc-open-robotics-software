@@ -41,7 +41,7 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 
@@ -52,7 +52,7 @@ public class WholeBodyInverseDynamicsSolver
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final InverseDynamicsOptimizationControlModule optimizationControlModule;
 
-   private final SixDoFJoint rootJoint;
+   private final FloatingInverseDynamicsJoint rootJoint;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
    private final Map<OneDoFJoint, DoubleYoVariable> jointAccelerationsSolution = new HashMap<>();
@@ -65,6 +65,8 @@ public class WholeBodyInverseDynamicsSolver
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
 
    private final YoFrameVector yoDesiredMomentumRateLinear;
+   // TODO It seems that the achieved CMP (computed from this guy) can be off sometimes.
+   // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
    private final YoFrameVector yoAchievedMomentumRateLinear;
    private final FrameVector achievedMomentumRateLinear = new FrameVector();
 

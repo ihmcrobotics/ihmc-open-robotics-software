@@ -26,11 +26,8 @@ public class BonoFlatGroundWalkingKinematicFootSwitchTest extends DRCFlatGroundW
 	@Test(timeout = 77000)
    public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
-
-      String runName = "BONOFlatGroundWalkingTest";
       final boolean runningOnRealRobot = false;
-      
+
       //create a subclass of standard DRCRobot model but overrides FootSwitchType for both WalkingControl/StateEstimation parameters.
       robotModel = new BonoRobotModel(runningOnRealRobot, false)
       {
@@ -62,8 +59,7 @@ public class BonoFlatGroundWalkingKinematicFootSwitchTest extends DRCFlatGroundW
          }
       };
 
-      boolean doPelvisYawWarmup = false;
-      setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
+      super.testFlatGroundWalking(robotModel, false);
    }
 
    @Override

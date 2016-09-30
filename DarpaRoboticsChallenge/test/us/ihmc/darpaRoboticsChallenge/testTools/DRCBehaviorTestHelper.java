@@ -545,7 +545,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
             {
                for (AbstractBehavior behavior : behaviors)
                {
-                  behavior.stop();
+                  behavior.abort();
                }
                currentControlMode = BehaviorControlModeEnum.STOP;
             }

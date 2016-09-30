@@ -1,12 +1,10 @@
 package us.ihmc.simulationconstructionset.physics;
 
-import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.Link;
 
 /**
  * Factory for creating collision shapes
- *
- * @author Peter Abeles
  */
 public interface CollisionShapeFactory
 {
@@ -32,15 +30,12 @@ public interface CollisionShapeFactory
     */
    public CollisionShapeDescription createBox(double radiusX, double radiusY, double radiusZ);
 
-   // not fully supported yet
    public CollisionShapeDescription createCylinder(double radius, double height);
 
-   // not fully supported yet
    public CollisionShapeDescription createSphere(double radius);
 
-
    /**
-    * Creates a box shape.
+    * Adds a shape.
     *
     * Also  which shapes a shape can collide against.  By default a shape will collide with all other shapes.
     * A shape will collide with another shape if (shapeGroup & collisionMask) != 0.
@@ -54,8 +49,5 @@ public interface CollisionShapeFactory
     */
    public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription description, boolean isGround, int collisionGroup, int collisionMask);
 
-   /**
-    * Adds a 3-DOF force sensor at the specified location
-    */
-   public ScsForceSensor addForceSensor(String name, CollisionShape shape, RigidBodyTransform sensorToShape);
-}
+   public CollisionShape addShape(CollisionShapeDescription description);
+ }

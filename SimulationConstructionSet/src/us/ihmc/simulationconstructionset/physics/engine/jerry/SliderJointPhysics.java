@@ -27,7 +27,7 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
     */
    protected void jointDependentChangeVelocity(double delta_qd)
    {
-      owner.qd.set(owner.qd.getDoubleValue() + delta_qd);
+      owner.getQDYoVariable().set(owner.getQDYoVariable().getDoubleValue() + delta_qd);
    }
 
    /**
@@ -48,20 +48,20 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
     */
    protected void jointDependentFeatherstonePassOne()
    {
-      Q_i = owner.doPDControl() + owner.tau.getDoubleValue();
+      Q_i = owner.doPDControl() + owner.getTauYoVariable().getDoubleValue();
 
       // Limit stops:
       if (owner.tauJointLimit != null)
       {
-         if (owner.q.getDoubleValue() < owner.q_min)
+         if (owner.getQYoVariable().getDoubleValue() < owner.q_min)
          {
-            double limitTorque = owner.k_limit * (owner.q_min - owner.q.getDoubleValue()) - owner.b_limit * owner.qd.getDoubleValue();
+            double limitTorque = owner.k_limit * (owner.q_min - owner.getQYoVariable().getDoubleValue()) - owner.b_limit * owner.getQDYoVariable().getDoubleValue();
             if (limitTorque < 0.0) limitTorque = 0.0;
             owner.tauJointLimit.set(limitTorque);
          }
-         else if (owner.q.getDoubleValue() > owner.q_max)
+         else if (owner.getQYoVariable().getDoubleValue() > owner.q_max)
          {
-            double limitTorque = owner.k_limit * (owner.q_max - owner.q.getDoubleValue()) - owner.b_limit * owner.qd.getDoubleValue();
+            double limitTorque = owner.k_limit * (owner.q_max - owner.getQYoVariable().getDoubleValue()) - owner.b_limit * owner.getQDYoVariable().getDoubleValue();
             if (limitTorque > 0.0) limitTorque = 0.0;
             owner.tauJointLimit.set(limitTorque);
          }
@@ -75,17 +75,17 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
 
       if (owner.tauDamping != null)
       {
-         if (owner.qd.getDoubleValue() > 0.0)
+         if (owner.getQDYoVariable().getDoubleValue() > 0.0)
          {
-            owner.tauDamping.set(-owner.f_stiction - owner.b_damp * owner.qd.getDoubleValue());
+            owner.tauDamping.set(-owner.f_stiction - owner.b_damp * owner.getQDYoVariable().getDoubleValue());
          }
-         else if (owner.qd.getDoubleValue() < -0.0)
+         else if (owner.getQDYoVariable().getDoubleValue() < -0.0)
          {
-            owner.tauDamping.set(owner.f_stiction - owner.b_damp * owner.qd.getDoubleValue());
+            owner.tauDamping.set(owner.f_stiction - owner.b_damp * owner.getQDYoVariable().getDoubleValue());
          }
          else
          {
-            owner.tauDamping.set(0.0 - owner.b_damp * owner.qd.getDoubleValue());
+            owner.tauDamping.set(0.0 - owner.b_damp * owner.getQDYoVariable().getDoubleValue());
          }
 
          Q_i = Q_i + owner.tauDamping.getDoubleValue();
@@ -93,9 +93,9 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
 
       // v_i <- v_i + q_i_dot u_i
 
-      v_i.setX(v_i.getX() + owner.qd.getDoubleValue() * u_i.getX());
-      v_i.setY(v_i.getY() + owner.qd.getDoubleValue() * u_i.getY());
-      v_i.setZ(v_i.getZ() + owner.qd.getDoubleValue() * u_i.getZ());
+      v_i.setX(v_i.getX() + owner.getQDYoVariable().getDoubleValue() * u_i.getX());
+      v_i.setY(v_i.getY() + owner.getQDYoVariable().getDoubleValue() * u_i.getY());
+      v_i.setZ(v_i.getZ() + owner.getQDYoVariable().getDoubleValue() * u_i.getZ());
 
    }
 
@@ -106,7 +106,7 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
    protected void jointDependentSet_d_i()
    {
       d_i.set(u_i);
-      d_i.scale(owner.q.getDoubleValue());
+      d_i.scale(owner.getQYoVariable().getDoubleValue());
       d_i.add(owner.getLink().getComOffset());
    }
 
@@ -123,7 +123,7 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
       // Coriolis Forces:
 
       vel_i.set(u_i);
-      vel_i.scale(owner.qd.getDoubleValue());
+      vel_i.scale(owner.getQDYoVariable().getDoubleValue());
 
       c_hat_i.top.set(0.0, 0.0, 0.0);
 
@@ -152,9 +152,9 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
     */
    protected void jointDependentFeatherstonePassFour(double Q, int passNumber)
    {
-      owner.qdd.set(Q);
+      owner.getQDDYoVariable().set(Q);
       k_qdd[passNumber] = Q;
-      k_qd[passNumber] = owner.qd.getDoubleValue();
+      k_qd[passNumber] = owner.getQDYoVariable().getDoubleValue();
    }
 
    /**
@@ -165,8 +165,8 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
     */
    protected void jointDependentRecordK(int passNumber)
    {
-      k_qdd[passNumber] = owner.qdd.getDoubleValue();
-      k_qd[passNumber] = owner.qd.getDoubleValue();
+      k_qdd[passNumber] = owner.getQDDYoVariable().getDoubleValue();
+      k_qd[passNumber] = owner.getQDYoVariable().getDoubleValue();
 
    }
 
@@ -179,8 +179,8 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
     */
    public void recursiveEulerIntegrate(double stepSize)
    {
-      owner.q.set(q_n + stepSize * owner.qd.getDoubleValue());
-      owner.qd.set(qd_n + stepSize * owner.qdd.getDoubleValue());
+      owner.getQYoVariable().set(q_n + stepSize * owner.getQDYoVariable().getDoubleValue());
+      owner.getQDYoVariable().set(qd_n + stepSize * owner.getQDDYoVariable().getDoubleValue());
 
       // Recurse over the children:
 
@@ -200,8 +200,8 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
     */
    public void recursiveRungeKuttaSum(double stepSize)
    {
-      owner.q.set(q_n + stepSize * (k_qd[0] / 6.0 + k_qd[1] / 3.0 + k_qd[2] / 3.0 + k_qd[3] / 6.0));
-      owner.qd.set(qd_n + stepSize * (k_qdd[0] / 6.0 + k_qdd[1] / 3.0 + k_qdd[2] / 3.0 + k_qdd[3] / 6.0));
+      owner.getQYoVariable().set(q_n + stepSize * (k_qd[0] / 6.0 + k_qd[1] / 3.0 + k_qd[2] / 3.0 + k_qd[3] / 6.0));
+      owner.getQDYoVariable().set(qd_n + stepSize * (k_qdd[0] / 6.0 + k_qdd[1] / 3.0 + k_qdd[2] / 3.0 + k_qdd[3] / 6.0));
 
       // Recurse over the children:
       for (int i = 0; i < owner.childrenJoints.size(); i++)
@@ -218,8 +218,8 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
     */
    public void recursiveSaveTempState()
    {
-      q_n = owner.q.getDoubleValue();
-      qd_n = owner.qd.getDoubleValue();
+      q_n = owner.getQYoVariable().getDoubleValue();
+      qd_n = owner.getQDYoVariable().getDoubleValue();
 
       // Recurse over the children:
 
@@ -238,8 +238,8 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
     */
    public void recursiveRestoreTempState()
    {
-      owner.q.set(q_n);
-      owner.qd.set(qd_n);
+      owner.getQYoVariable().set(q_n);
+      owner.getQDYoVariable().set(qd_n);
 
       // Recurse over the children:
 
@@ -259,7 +259,7 @@ public class SliderJointPhysics extends JointPhysics<SliderJoint>
     */
    protected boolean jointDependentVerifyReasonableAccelerations()
    {
-      if (Math.abs(owner.qdd.getDoubleValue()) > Joint.MAX_TRANS_ACCEL)
+      if (Math.abs(owner.getQDDYoVariable().getDoubleValue()) > Joint.MAX_TRANS_ACCEL)
       {
          return false;
       }

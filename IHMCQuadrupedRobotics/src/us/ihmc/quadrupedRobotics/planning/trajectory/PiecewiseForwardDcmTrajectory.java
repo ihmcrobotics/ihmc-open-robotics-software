@@ -72,7 +72,7 @@ public class PiecewiseForwardDcmTrajectory
       // compute dcm position at start of each step assuming a piecewise constant vrp trajectory
       for (int i = 0; i < numSteps; i++)
       {
-         this.timeAtSoS[i] = timeAtSoS.get(i).getValue();
+         this.timeAtSoS[i] = timeAtSoS.get(i).doubleValue();
          this.vrpPositionAtSoS[i].setIncludingFrame(cmpPositionAtSoS.get(i));
          this.vrpPositionAtSoS[i].changeFrame(worldFrame);
          this.vrpPositionAtSoS[i].add(0, 0, comHeight);
@@ -164,7 +164,7 @@ public class PiecewiseForwardDcmTrajectory
       FramePoint dcmPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       for (int i = 0; i < timeAtSoS.size(); i++)
       {
-         dcmTrajectory.computeTrajectory(timeAtSoS.get(i).getValue());
+         dcmTrajectory.computeTrajectory(timeAtSoS.get(i).doubleValue());
          dcmTrajectory.getPosition(dcmPosition);
          System.out.println("dcm position at start of step " + i + " : " + dcmPosition);
       }

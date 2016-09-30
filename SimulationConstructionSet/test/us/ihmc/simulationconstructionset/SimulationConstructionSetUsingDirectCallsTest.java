@@ -62,6 +62,8 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
+import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
+import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
@@ -85,7 +87,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private static final long THREAD_SLEEP_TIME = 1000;
    private static final String SCS_VERSION = "12.06.22";
    private static final String TEST_DIRECTORY = "testResources/us/ihmc/simulationconstructionset/simulationConstructionSetUsingDirectCallsTest/";
-   
+
    private static double epsilon = 1e-10;
 
    private final int recordFrequency = 10;
@@ -164,8 +166,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private final String simpleRobotRegistryNameSpace = getRegistryNameSpaceFromRobot(simpleRobot);
    private final String[] regularExpressions = new String[] { "gc.*.fs" };
    private final Dimension dimension = new Dimension(250, 350);
-   
-   
+
+
    private NameSpace simpleRegistryNameSpace;
    private YoVariableRegistry simpleRegistry;
    private YoVariableRegistry dummyRegistry;
@@ -216,7 +218,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       cameraConfiguration = createCameraConfiguration(cameraConfigurationName);
       viewportConfiguration = createViewportConfiguration(viewportConfigurationName);
       viewportConfiguration.addCameraView("Back View", 0, 0, 1, 1);
-      
+
       graphConfigurations = createGraphConfigurations(graphConfigurationNames);
       realTimeRateInSCS = new DoubleYoVariable("realTimeRate", dummyRegistry);
       processDataHasBeenCalled = new BooleanYoVariable("processDataHasBeenCalled", dummyRegistry);
@@ -237,7 +239,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       ThreadTools.sleep(CLOSING_SLEEP_TIME);
       scs.closeAndDispose();
       scs = null;
-      
+
       simpleRegistryNameSpace = null;
       simpleRegistry = null;
       dummyRegistry = null;
@@ -306,33 +308,33 @@ public class SimulationConstructionSetUsingDirectCallsTest
       NewDataListener newDataListener = createNewDataListener();
       RobotSocketConnection robotSocketConnectionFromSCS2 = scs.allowTCPConnectionToHost("host2", newDataListener);
       assertNotNull(robotSocketConnectionFromSCS2);
-      
+
       boolean initialKeyPointStatus = scs.isKeyPointModeToggled();
       scs.toggleKeyPointMode();
       boolean finalKeyPointStatus = scs.isKeyPointModeToggled();
       assertBooleansAreOpposite(initialKeyPointStatus, finalKeyPointStatus);
-      
+
       scs.setRunName(runningName);
       String runningNameFromSCS = scs.getRunningName();
       assertEquals(runningName, runningNameFromSCS);
-      
+
       String scsVersion = scs.getVersion();
       assertEquals(SCS_VERSION, scsVersion);
-      
+
       scs.disableSystemExit();
       scs.enableSystemExit();
       boolean systemExitDisabledFromSCS = scs.systemExitDisabled();
       assertFalse(systemExitDisabledFromSCS);
-      
+
       scs.enableSystemExit();
       scs.disableSystemExit();
       boolean systemExitDisabledFromSCS2 = scs.systemExitDisabled();
       assertTrue(systemExitDisabledFromSCS2);
-      
+
       scs.initPhysics(simpleScsPhysics);
       ScsPhysics scsPhysicsFromSCS = scs.getPhysics();
       assertEquals(simpleScsPhysics, scsPhysicsFromSCS);
-      
+
       scs.addForceSensor(simpleWrenchContactPoint);
       ArrayList<WrenchContactPoint> forceSensorsFromSCS = scs.getForceSensors();
       assertArrayOfObjectsContainsTheObject(forceSensorsFromSCS, simpleWrenchContactPoint);
@@ -459,7 +461,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    public void testFrameMethods()
    {
       ThreadTools.sleep(THREAD_SLEEP_TIME);
-      
+
       scs.createNewGraphWindow();
       ThreadTools.sleep(THREAD_SLEEP_TIME);
       GraphArrayWindow graphArrayWindowFromSCS = scs.getGraphArrayWindow("Unnamed");
@@ -501,7 +503,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       ThreadTools.sleep(THREAD_SLEEP_TIME);
       boolean isViewportHidden2 = scs.isViewportHidden();
       assertFalse(isViewportHidden2);
-      
+
       Component component = new Button();
       scs.addExtraJpanel(component, simpleComponentName);
       ThreadTools.sleep(THREAD_SLEEP_TIME);
@@ -669,7 +671,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.previousCameraKey();
       double[] cameraFixXYZValuesFromSCS3 = getCameraFixXYZValues(scs);
       assertArrayEquals(cameraFixXYZValues, cameraFixXYZValuesFromSCS3, epsilon);
-      
+
       boolean initialCameraKeyModeStatus = getCameraKeyMode(scs);
       scs.toggleCameraKeyMode();
       boolean finalCameraKeyModeStatus = getCameraKeyMode(scs);
@@ -681,13 +683,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
    public void test3DGraphicsMethods()
    {
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      
+
       Graphics3DNode graphics3DNodeFromSCS = scs.addStaticLinkGraphics(staticLinkGraphics);
       assertNotNull(graphics3DNodeFromSCS);
 
       Graphics3DNode graphics3DNodeFromSCS2 = scs.addStaticLinkGraphics(staticLinkGraphics, graphics3DNodeType);
       assertNotNull(graphics3DNodeFromSCS2);
-      
+
       Graphics3DNode graphics3DNodeFromSCS3 = scs.addStaticLink(staticLink);
       assertNotNull(graphics3DNodeFromSCS3);
 
@@ -710,24 +712,24 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
       ArrayList<YoGraphicsListRegistry> yoGraphicListRegistriesFromSCS = scs.getDynamicGraphicObjectsListRegistries();
       assertArrayOfObjectsContainsTheObject(yoGraphicListRegistriesFromSCS, yoGraphicsListRegistry);
-      
+
       scs.setDynamicGraphicObjectsListVisible(yoGraphicsListName, true);
       scs.hideAllDynamicGraphicObjects();
       boolean yoGraphicsAreShowing = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
       assertFalse(yoGraphicsAreShowing);
-      
+
       scs.hideAllDynamicGraphicObjects();
       scs.setDynamicGraphicObjectsListVisible(yoGraphicsListName, true);
       boolean yoGraphicsAreShowing2 = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
       assertTrue(yoGraphicsAreShowing2);
-      
+
 //      scs.setDynamicGraphicMenuManager(dynamicGraphicMenuManager);
 //      DynamicGraphicMenuManager dynamicGraphicMenuManagerFromSCS =  scs.getDynamicGraphicMenuManager();
 //      assertEquals(dynamicGraphicMenuManager, dynamicGraphicMenuManagerFromSCS);
-      
+
       scs.disableGUIComponents();
       assertIfGUIComponentsAreDisableOrEnabled(scs, false);
-      
+
       scs.enableGUIComponents();
       assertIfGUIComponentsAreDisableOrEnabled(scs, true);
    }
@@ -813,7 +815,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       int ticksPerCycle = computeTicksPerPlayCycle(simulateDT, recordFreq, realTimeRate, frameRate);
       double ticksPerCycleFromSCS = scs.getTicksPerPlayCycle();
       assertEquals(ticksPerCycle, ticksPerCycleFromSCS, epsilon);
-      
+
       scs.setTime(Math.PI);
       double timeFromSCS = scs.getTime();
       assertEquals(Math.PI, timeFromSCS, epsilon);
@@ -886,7 +888,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       double currentSCSIndex8 = scs.getIndex();
       assertFalse(simulationRewoundListenerHasBeenNotified.getBooleanValue());
       assertEquals(1.0, currentSCSIndex8, epsilon);
-      
+
       scs.setIndex(0);
       simulationRewoundListenerHasBeenNotified.set(false);
       scs.setIndexButDoNotNotifySimulationRewoundListeners(ticksIncrease);
@@ -1114,7 +1116,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.applyDataProcessingFunction(dataProcessingFunction);
       ThreadTools.sleep(THREAD_SLEEP_TIME);
       assertTrue(processDataHasBeenCalled.getBooleanValue());
-      
+
       toggleKeyPointModeCommandListenerHasBeenCalled.set(false);
       scs.toggleKeyPointMode();
       ThreadTools.sleep(THREAD_SLEEP_TIME);
@@ -1232,7 +1234,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    }
 
    // local methods
-   
+
    private void assertIfGUIComponentsAreDisableOrEnabled(SimulationConstructionSet scs, boolean assertAreEnabled)
    {
       StandardGUIActions standardGUIActions = scs.getStandardGUIActions();
@@ -1241,81 +1243,82 @@ public class SimulationConstructionSetUsingDirectCallsTest
       {
          AbstractAction guiAction = guiActions.get(i);
          boolean guiActionStatus = guiAction.isEnabled();
-         
+
          if(assertAreEnabled)
             assertTrue(guiActionStatus);
          else
             assertFalse(guiActionStatus);
       }
    }
-   
+
    private ScsPhysics createScsPhysics()
    {
       ScsCollisionConfigure collisionConfigure = createScsCollisionConfigure();
       ScsCollisionDetector collisionDetector = createScsCollisionDetector();
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize();
-      ScsPhysics physics = new ScsPhysics(collisionConfigure, collisionDetector, visualize);
-      
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.3, 0.3);
+      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(0.1, 0.1, scs, 100);
+      ScsPhysics physics = new ScsPhysics(collisionConfigure, collisionDetector, collisionHandler, visualize);
+
       return physics;
    }
-   
+
    private ScsCollisionDetector createScsCollisionDetector()
    {
       ScsCollisionDetector scsCollisionDetector = new ScsCollisionDetector()
       {
-         
+
          public void removeShape(Link link)
          {
-            
+
          }
-         
-         public void performCollisionDetection()
-         {
-            
-         }
-         
+
          public CollisionShape lookupCollisionShape(Link link)
          {
             return null;
          }
-         
-         public void initialize(CollisionHandler handler)
+
+         public void initialize()
          {
-            
+
          }
-         
+
          public CollisionShapeFactory getShapeFactory()
          {
             return null;
          }
+
+         @Override
+         public void performCollisionDetection(CollisionDetectionResult result)
+         {
+         }
       };
-      
+
       return scsCollisionDetector;
    }
-   
+
    private ScsCollisionConfigure createScsCollisionConfigure()
    {
       ScsCollisionConfigure scsCollisionConfigure = new ScsCollisionConfigure()
       {
-         public void setup(Robot robot, ScsCollisionDetector collisionDetector)
+         @Override
+         public void setup(Robot robot, ScsCollisionDetector collisionDetector, CollisionHandler collisionHandler)
          {
-            
          }
       };
-      
+
       return scsCollisionConfigure;
    }
-   
+
    private YoGraphicsListRegistry createDynamicGraphicObjectsListRegistryWithObject()
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoGraphicsList yoGraphicsList = new YoGraphicsList(yoGraphicsListName);
       yoGraphicsList.add(yoGraphic);
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
-      
+
       return yoGraphicsListRegistry;
    }
-   
+
    private ToggleKeyPointModeCommandListener createToggleKeyPointModeCommandListener()
    {
       ToggleKeyPointModeCommandListener toggleKeyPointModeCommandListener = new ToggleKeyPointModeCommandListener()
@@ -1326,13 +1329,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
          }
 
          public void closeAndDispose()
-         {            
+         {
          }
       };
-      
+
       return toggleKeyPointModeCommandListener;
    }
-   
+
    private void assertBooleansAreOpposite(boolean one, boolean two)
    {
       if (one)
@@ -1340,7 +1343,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       else
          assertTrue(two);
    }
-   
+
    private SelectedListener createSelectedListener()
    {
       SelectedListener selectedListener = new SelectedListener()
@@ -1348,13 +1351,13 @@ public class SimulationConstructionSetUsingDirectCallsTest
          public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation,
                Quat4d cameraRotation)
          {
-            
+
          }
       };
-      
+
       return selectedListener;
    }
-   
+
    private DataProcessingFunction createDataProcessingFunction()
    {
       DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
@@ -1368,10 +1371,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
          public void initializeProcessing()
          {
             // TODO Auto-generated method stub
-            
+
          }
       };
-      
+
       return dataProcessingFunction;
    }
 
@@ -1381,7 +1384,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       {
          public void update(int tick)
          {
-            
+
          }
       };
 
@@ -1524,12 +1527,12 @@ public class SimulationConstructionSetUsingDirectCallsTest
       {
          public void newDataHasBeenSent()
          {
-            
+
          }
 
          public void newDataHasBeenReceived()
          {
-            
+
          }
       };
 
@@ -1648,7 +1651,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       {
          public void indexChanged(int newIndex, double newTime)
          {
-            
+
          }
 
          public void play(double realTimeRate)
@@ -1658,7 +1661,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
          public void stop()
          {
-            
+
          }
       };
 
@@ -1689,7 +1692,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
          public void simulationDoneWithException(Throwable throwable)
          {
-            
+
          }
       };
 
@@ -1945,7 +1948,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
       return ret;
    }
-   
+
    private boolean getCameraKeyMode(SimulationConstructionSet scs)
    {
       ClassicCameraController classicCameraController = getClassicCameraController(scs);

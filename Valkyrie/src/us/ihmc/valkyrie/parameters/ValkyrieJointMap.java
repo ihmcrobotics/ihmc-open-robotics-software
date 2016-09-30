@@ -33,10 +33,10 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private final String fullPelvisNameInSdf = pelvisName;
    private final String headName = "upperNeckPitchLink";
 
-   private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
+   private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
    private final ArmJointName[] armJoints;
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_YAW, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL };
-   private final NeckJointName[] neckJoints = { NeckJointName.LOWER_NECK_PITCH, NeckJointName.NECK_YAW, NeckJointName.UPPER_NECK_PITCH };
+   private final NeckJointName[] neckJoints = { NeckJointName.PROXIMAL_NECK_PITCH, NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH };
 
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
    private final LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>>();
@@ -76,7 +76,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipYaw], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipRoll], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipPitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftKneePitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
+         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftKneePitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE_PITCH));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnklePitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnkleRoll], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
 
@@ -103,9 +103,9 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       spineJointNames.put(jointNames[ValkyrieOrderedJointMap.TorsoPitch], SpineJointName.SPINE_PITCH);
       spineJointNames.put(jointNames[ValkyrieOrderedJointMap.TorsoRoll], SpineJointName.SPINE_ROLL);
 
-      neckJointNames.put(jointNames[ValkyrieOrderedJointMap.LowerNeckPitch], NeckJointName.LOWER_NECK_PITCH);
-      neckJointNames.put(jointNames[ValkyrieOrderedJointMap.NeckYaw], NeckJointName.NECK_YAW);
-      neckJointNames.put(jointNames[ValkyrieOrderedJointMap.UpperNeckPitch], NeckJointName.UPPER_NECK_PITCH);
+      neckJointNames.put(jointNames[ValkyrieOrderedJointMap.LowerNeckPitch], NeckJointName.PROXIMAL_NECK_PITCH);
+      neckJointNames.put(jointNames[ValkyrieOrderedJointMap.NeckYaw], NeckJointName.DISTAL_NECK_YAW);
+      neckJointNames.put(jointNames[ValkyrieOrderedJointMap.UpperNeckPitch], NeckJointName.DISTAL_NECK_PITCH);
 
       for (String legJointString : legJointNames.keySet())
       {
@@ -377,9 +377,9 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    {
       String[] ret = new String[]
       {
-            getNeckJointName(NeckJointName.UPPER_NECK_PITCH),
-            getNeckJointName(NeckJointName.LOWER_NECK_PITCH),
-            getNeckJointName(NeckJointName.NECK_YAW),
+            getNeckJointName(NeckJointName.DISTAL_NECK_PITCH),
+            getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH),
+            getNeckJointName(NeckJointName.DISTAL_NECK_YAW),
             getArmJointName(RobotSide.LEFT, ArmJointName.ELBOW_ROLL),
             getArmJointName(RobotSide.LEFT, ArmJointName.WRIST_ROLL),
             getArmJointName(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH),

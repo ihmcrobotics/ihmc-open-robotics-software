@@ -9,12 +9,7 @@ public class ArmTrajectoryTask extends BehaviorTask
    private final ArmTrajectoryMessage armTrajectoryMessage;
    private final ArmTrajectoryBehavior armTrajectoryBehavior;
 
-   public ArmTrajectoryTask(ArmTrajectoryMessage armTrajectoryMessage, ArmTrajectoryBehavior armTrajectoryBehavior, DoubleYoVariable yoTime, double sleepTime)
-   {
-      super(armTrajectoryBehavior, yoTime, sleepTime);
-      this.armTrajectoryBehavior = armTrajectoryBehavior;
-      this.armTrajectoryMessage = armTrajectoryMessage;
-   }
+
 
    public ArmTrajectoryTask(ArmTrajectoryMessage armTrajectoryMessage, ArmTrajectoryBehavior armTrajectoryBehavior, DoubleYoVariable yoTime)
    {

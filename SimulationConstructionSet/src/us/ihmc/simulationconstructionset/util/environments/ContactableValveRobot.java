@@ -180,13 +180,13 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
 
       yoGraphicsListRegistries.add(graphListRegistry);
       
-      valvePinJoint.getQ().addVariableChangedListener(new VariableChangedListener()
+      valvePinJoint.getQYoVariable().addVariableChangedListener(new VariableChangedListener()
       {
          
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            valveClosePercentage.set(valvePinJoint.getQ().getDoubleValue()/(2*Math.PI)*100/valveNumberOfPossibleTurns);
+            valveClosePercentage.set(valvePinJoint.getQYoVariable().getDoubleValue()/(2*Math.PI)*100/valveNumberOfPossibleTurns);
          }
       });
    }
@@ -196,7 +196,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    {
       RigidBodyTransform pinJointTransform = new RigidBodyTransform();
       RigidBodyTransform newValvePose = new RigidBodyTransform();
-      pinJointTransform.setRotationRollAndZeroTranslation(valvePinJoint.getQ().getDoubleValue());
+      pinJointTransform.setRotationRollAndZeroTranslation(valvePinJoint.getQYoVariable().getDoubleValue());
       newValvePose.multiply(originalValvePose, pinJointTransform);
       valveFrame.setPoseAndUpdate(newValvePose);
 

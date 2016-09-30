@@ -166,7 +166,7 @@ public class PiecewiseReverseDcmTrajectory
       FramePoint dcmPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       for (int i = 0; i < timeAtSoS.size(); i++)
       {
-         dcmTrajectory.computeTrajectory(timeAtSoS.get(i).getValue());
+         dcmTrajectory.computeTrajectory(timeAtSoS.get(i).doubleValue());
          dcmTrajectory.getPosition(dcmPosition);
          System.out.println("dcm position at start of step " + i + " : " + dcmPosition);
       }

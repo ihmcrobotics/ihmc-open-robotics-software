@@ -69,14 +69,14 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    private final YoFramePoint swingTarget = new YoFramePoint("swingTarget", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector finalDesiredVelocity = new YoFrameVector("finalDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition targetViz = new YoGraphicPosition("swingTarget", swingTarget, 0.01, YoAppearance.Red());
-   
+
    private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint temporaryCentroid = new FramePoint();
    private final YoGraphicPosition centroidViz = new YoGraphicPosition("centroidViz", centroid, 0.01, YoAppearance.BurlyWood());
    private final YoGraphicLineSegment nominalYawGraphic;
    private final YoFrameLineSegment2d nominalYawLineSegment = new YoFrameLineSegment2d("nominalYawLineSegment", "", ReferenceFrame.getWorldFrame(), registry);
    private final YoArtifactLineSegment2d nominalYawArtifact = new YoArtifactLineSegment2d("nominalYawArtifact", nominalYawLineSegment, Color.YELLOW, 0.02, 0.02);
-   
+
    private final DoubleYoVariable nominalYaw = new DoubleYoVariable("nominalYaw", registry);
    YoFramePoint nominalYawEndpoint = new YoFramePoint("nominalYawEndpoint", ReferenceFrame.getWorldFrame(), registry);
 
@@ -93,7 +93,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    private final YoFrameConvexPolygon2d currentTriplePolygon = new YoFrameConvexPolygon2d("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final QuadrupedSupportPolygon quadrupedSupportPolygon = new QuadrupedSupportPolygon();
    private final DoubleYoVariable robotTimestamp;
-   
+
    public MidFootZUpSwingTargetGeneratorVisualizer(QuadrupedReferenceFrames referenceFrames)
    {
       desiredVelocity.setX(0.24);
@@ -112,9 +112,9 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       leftMidZUpFrameViz = new YoGraphicReferenceFrame(referenceFrames.getSideDependentMidFeetZUpFrame(RobotSide.LEFT), registry, 0.2);
       rightMidZUpFrameViz = new YoGraphicReferenceFrame(referenceFrames.getSideDependentMidFeetZUpFrame(RobotSide.RIGHT), registry, 0.2);
 
-      
-      nominalYawGraphic = new YoGraphicLineSegment("nominalYaw", centroid, nominalYawEndpoint, 0.2, YoAppearance.Yellow(), true, 0.02);
-      
+      nominalYawGraphic = new YoGraphicLineSegment("nominalYaw", centroid, nominalYawEndpoint, 0.2, YoAppearance.Yellow(), true);
+      nominalYawGraphic.setLineRadiusWhenOneMeterLong(0.02);
+
       boolean showOverheadView = true;
       desiredSwingTime.set(0.4);
       cartesianTrajectoryGenerator = new ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator("swingLegTraj", ReferenceFrame.getWorldFrame(), registry);
@@ -156,21 +156,21 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       scs.startOnAThread();
       scs.simulate();
    }
-   
+
    private void createGraphicsAndArtifacts(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       yoGraphicsListRegistry.registerYoGraphic("Frames", leftMidZUpFrameViz);
       yoGraphicsListRegistry.registerYoGraphic("Frames", rightMidZUpFrameViz);
-      
+
       yoGraphicsListRegistry.registerYoGraphic("target", targetViz);
       yoGraphicsListRegistry.registerArtifact("target", targetViz.createArtifact());
-      
+
       yoGraphicsListRegistry.registerArtifact("centroidViz", centroidViz.createArtifact());
       yoGraphicsListRegistry.registerYoGraphic("nominalYaw", nominalYawGraphic);
 
       YoArtifactPolygon supportPolygonArtifact = new YoArtifactPolygon("quadSupportPolygonArtifact", supportPolygon, Color.blue, false);
       YoArtifactPolygon currentTriplePolygonArtifact = new YoArtifactPolygon("currentTriplePolygonArtifact", currentTriplePolygon, Color.GREEN, false);
-      
+
       yoGraphicsListRegistry.registerArtifact("nominalYawArtifact", nominalYawArtifact);
 
       yoGraphicsListRegistry.registerArtifact("supportPolygon", supportPolygonArtifact);
@@ -249,14 +249,14 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
 
          FramePoint initialPosition = new FramePoint(yoFootPositions.get(robotQuadrant).getFramePointCopy());
          FramePoint desiredFootPosition = new FramePoint();
-         
+
          swingTimeTrajectoryTimeStart.set(robotTimestamp.getDoubleValue());
          swingTargetGenerator.getSwingTarget(quadrupedSupportPolygon, robotQuadrant, desiredVelocity.getFrameTuple(), desiredFootPosition, desiredYawRate.getDoubleValue());
          cartesianTrajectoryGenerator.setTrajectoryParameters(desiredSwingTime.getDoubleValue(), initialPosition, swingHeight.getDoubleValue(), desiredFootPosition, finalDesiredVelocity.getFrameTuple());
          cartesianTrajectoryGenerator.initialize();
          swingTarget.set(desiredFootPosition);
       }
-      
+
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          YoFramePoint yoFootPosition = yoFootPositions.get(robotQuadrant);
@@ -264,21 +264,21 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          fourFootSupportPolygon.setFootstep(robotQuadrant, footPosition);
       }
-      
+
       fourFootSupportPolygon.getCentroid(temporaryCentroid);
       centroid.set(temporaryCentroid);
       nominalYaw.set(fourFootSupportPolygon.getNominalYaw());
-      
+
       FramePoint endPoint = new FramePoint(temporaryCentroid);
       endPoint.add(0.4,0.0,0.0);
       endPoint.yawAboutPoint(temporaryCentroid, endPoint, nominalYaw.getDoubleValue());
       nominalYawEndpoint.set(endPoint);
-      
+
       FramePoint2d endpointTwoD = new FramePoint2d();
       endPoint.getFramePoint2d(endpointTwoD);
       nominalYawLineSegment.set(centroid.getFramePoint2dCopy(), endpointTwoD);
       nominalYawGraphic.update();
-      
+
       rootJoint.setPosition(temporaryCentroid.getPoint());
       drawSupportPolygon(fourFootSupportPolygon, supportPolygon);
       leftMidZUpFrameViz.update();

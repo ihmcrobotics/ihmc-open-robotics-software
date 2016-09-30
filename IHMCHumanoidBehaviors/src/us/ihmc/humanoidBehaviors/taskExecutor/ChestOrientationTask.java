@@ -14,24 +14,15 @@ public class ChestOrientationTask extends BehaviorTask
 
    public ChestOrientationTask(ChestTrajectoryMessage chestTrajectoryMessage, DoubleYoVariable yoTime, ChestTrajectoryBehavior chestOrientationBehavior)
    {
-      this(chestTrajectoryMessage, yoTime, chestOrientationBehavior, 0.0);
-   }
-
-   public ChestOrientationTask(ChestTrajectoryMessage chestTrajectoryMessage, DoubleYoVariable yoTime, ChestTrajectoryBehavior chestOrientationBehavior, double sleepTime)
-   {
-      super(chestOrientationBehavior, yoTime, sleepTime);
+      super(chestOrientationBehavior, yoTime);
       this.chestOrientationBehavior = chestOrientationBehavior;
       this.chestOrientationPacket = chestTrajectoryMessage;
    }
    
    public ChestOrientationTask(FrameOrientation desiredChestOrientation, DoubleYoVariable yoTime, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime)
    {
-      this(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime, 0.0);
-   }
-
-   public ChestOrientationTask(FrameOrientation desiredChestOrientation, DoubleYoVariable yoTime, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime, double sleepTime)
-   {
-      super(chestOrientationBehavior, yoTime, sleepTime);
+   
+      super(chestOrientationBehavior, yoTime);
       this.chestOrientationBehavior = chestOrientationBehavior;
       Quat4d chestOrientation = new Quat4d();
       desiredChestOrientation.getQuaternion(chestOrientation);

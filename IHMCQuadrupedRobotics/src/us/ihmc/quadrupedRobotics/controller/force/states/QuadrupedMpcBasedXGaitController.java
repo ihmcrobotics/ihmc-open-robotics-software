@@ -282,7 +282,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       }
 
       // compute cmp position and step adjustment
-      if (timedStepController.getStepDequeSize() > 0)
+      if (timedStepController.getStepSequenceSize() > 0)
       {
          computeStepAdjustmentAndCmpPosition();
       }
@@ -293,14 +293,14 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       double currentTime = robotTimestamp.getDoubleValue();
 
       // solve for step adjustment and cmp position
-      mpcOptimization.compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getStepDeque(), taskSpaceEstimates.getSolePosition(),
+      mpcOptimization.compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getStepSequence(), taskSpaceEstimates.getSolePosition(),
             taskSpaceControllerSettings.getContactState(), taskSpaceEstimates.getComPosition(), taskSpaceEstimates.getComVelocity(), currentTime, mpcSettings);
 
       // adjust goal positions in step controller queue
       stepAdjustmentVector.changeFrame(worldFrame);
-      for (int i = 0; i < timedStepController.getStepDeque().size(); i++)
+      for (int i = 0; i < timedStepController.getStepSequence().size(); i++)
       {
-         QuadrupedTimedStep step = timedStepController.getStepDeque().get(i);
+         QuadrupedTimedStep step = timedStepController.getStepSequence().get(i);
          step.getGoalPosition().add(stepAdjustmentVector.getVector());
          if (step.getTimeInterval().getStartTime() <= currentTime)
          {
@@ -360,6 +360,9 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       }
       taskSpaceController.reset();
 
+      // initialize mpc optimization
+      mpcOptimization.initialize();
+
       // initialize body yaw trajectory
       taskSpaceEstimates.getBodyOrientation().changeFrame(worldFrame);
       bodyYawSetpoint = taskSpaceEstimates.getBodyOrientation().getYaw();
@@ -397,7 +400,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    @Override
    public ControllerEvent process()
    {
-      if (timedStepController.getStepDequeSize() == 0)
+      if (timedStepController.getStepSequenceSize() == 0)
       {
          return ControllerEvent.DONE;
       }

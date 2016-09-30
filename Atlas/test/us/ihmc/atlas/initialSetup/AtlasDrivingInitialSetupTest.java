@@ -52,7 +52,7 @@ public class AtlasDrivingInitialSetupTest
          
          for (RobotSide robotSide : RobotSide.values())
          {
-            for (LegJointName jointName : LegJointName.values())
+            for (LegJointName jointName : LegJointName.values)
             {
                String key = jointMap.getLegJointName(robotSide, jointName);
                if (key == null)

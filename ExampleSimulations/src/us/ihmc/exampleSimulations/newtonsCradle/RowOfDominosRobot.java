@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 
 public class RowOfDominosRobot extends Robot
 {
@@ -24,26 +24,29 @@ public class RowOfDominosRobot extends Robot
    public RowOfDominosRobot()
    {
       super("RowOfDominosRobot");
-      
-      final YoFrameVector yoLinearMomentum = new YoFrameVector("linearMomentum", null, this.getRobotsYoVariableRegistry()); 
+
+      final YoFrameVector yoLinearMomentum = new YoFrameVector("linearMomentum", null, this.getRobotsYoVariableRegistry());
       final DoubleYoVariable potentialEnergy = new DoubleYoVariable("potentialEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable kineticEnergy = new DoubleYoVariable("kineticEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", this.getRobotsYoVariableRegistry());
-      
+
       int numberOfDominos = 10;
 
-      collisionDetector = new GdxCollisionDetector(this.getRobotsYoVariableRegistry(), 10000);
+//            collisionDetector = new GdxCollisionDetector(1000.0);
+      collisionDetector = new SimpleCollisionDetector();
+      ((SimpleCollisionDetector) collisionDetector).setObjectSmoothingRadius(0.00001);
+
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
-      collisionShapeFactory.setMargin(0.002);
+      collisionShapeFactory.setMargin(0.001);
 
       double dominoWidth = 0.024;
       double dominoDepth = 0.0075;
       double dominoHeight = 0.048;
-      
+
       double dominoMass = 0.2;
       RigidBodyTransform nextDominoTransform = new RigidBodyTransform();
       nextDominoTransform.setTranslation(new Vector3d(0.0, 0.0, dominoHeight/2.0 + 0.006));
-      
+
       Vector3d dominoTranslation = new Vector3d(dominoHeight * 0.6, 0.0, 0.0);
       RigidBodyTransform tempTransform = new RigidBodyTransform();
       RigidBodyTransform tempTransform2 = new RigidBodyTransform();
@@ -71,21 +74,21 @@ public class RowOfDominosRobot extends Robot
          floatingJoint.setLink(link);
          this.addRootJoint(floatingJoint);
 
-         
+
          floatingJoint.setRotationAndTranslation(nextDominoTransform);
-         
+
          tempTransform.setIdentity();
          tempTransform.setRotationYawAndZeroTranslation(0.15);
          tempTransform.setTranslation(dominoTranslation);
-         
+
          tempTransform2.setIdentity();
          tempTransform2.multiply(tempTransform, nextDominoTransform);
          nextDominoTransform.set(tempTransform2);
-         
+
          if (i==0)
          {
             floatingJoint.setAngularVelocityInBody(new Vector3d(0.0, 10.0, 0.0));
-         }         
+         }
       }
 
 
@@ -95,15 +98,15 @@ public class RowOfDominosRobot extends Robot
       Link baseLink = new Link("base");
       baseLink.setMassAndRadiiOfGyration(1000000000.0, 100.0, 100.0, 100.0);
       Graphics3DObject baseLinkGraphics = new Graphics3DObject();
-      baseLinkGraphics.translate(0.0, 0.0, -0.01);
-      baseLinkGraphics.addCube(100.0, 100.0, 0.01, YoAppearance.Green());
+      baseLinkGraphics.translate(0.0, 0.0, -0.01/2.0);
+      baseLinkGraphics.addCube(1.0, 1.0, 0.01, YoAppearance.Green());
       baseLink.setLinkGraphics(baseLinkGraphics);
       baseLink.enableCollisions(100.0, this.getRobotsYoVariableRegistry());
 
       CollisionShapeDescription shapeDesc = collisionShapeFactory.createBox(100.0, 100.0, 0.01/2.0);
 
       RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-      shapeToLinkTransform.setTranslation(new Vector3d(-0.005, 0.0, 0.0));
+      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
       collisionShapeFactory.addShape(baseLink, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
 
 //    baseJoint.setVelocity(0.0, 0.0, 1.0);

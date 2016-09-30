@@ -21,20 +21,20 @@ public class SDFLinkHolder
    private double mass;
    private final RigidBodyTransform inertialFrameWithRespectToLinkFrame;
    private final Matrix3d inertia;
-   
+
    private double contactKp = 0.0;
    private double contactKd = 0.0;
    private double contactMaxVel = 0.0;;
-   
+
    private final List<SDFVisual> visuals;
    private final List<SDFSensor> sensors;
    private final List<Collision> collisions;
-   
+
    // Set by loader
    private SDFJointHolder joint = null;
    private final ArrayList<SDFJointHolder> childeren = new ArrayList<SDFJointHolder>();
 
-   
+
    // Calculated
    private final Vector3d CoMOffset = new Vector3d();
 
@@ -42,12 +42,12 @@ public class SDFLinkHolder
    {
      name = SDFConversionsHelper.sanitizeJointName(sdfLink.getName());
      transformToModelReferenceFrame = SDFConversionsHelper.poseToTransform(sdfLink.getPose());
-     
+
      if(sdfLink.getInertial() != null)
      {
         inertialFrameWithRespectToLinkFrame = SDFConversionsHelper.poseToTransform(sdfLink.getInertial().getPose());
         mass = Double.parseDouble(sdfLink.getInertial().getMass());
-        inertia = SDFConversionsHelper.sdfInertiaToMatrix3d(sdfLink.getInertial().getInertia());        
+        inertia = SDFConversionsHelper.sdfInertiaToMatrix3d(sdfLink.getInertial().getInertia());
      }
      else
      {
@@ -56,12 +56,12 @@ public class SDFLinkHolder
         inertia = new Matrix3d();
      }
      visuals = sdfLink.getVisuals();
-     
+
      sensors = sdfLink.getSensors();
      if(sdfLink.getCollisions() != null)
      {
         collisions = sdfLink.getCollisions();
-        
+
         if((sdfLink.getCollisions().get(0) != null) && (sdfLink.getCollisions().get(0).getSurface() != null)
                  && (sdfLink.getCollisions().get(0).getSurface().getContact() != null)
                  && (sdfLink.getCollisions().get(0).getSurface().getContact().getOde() != null))
@@ -84,10 +84,10 @@ public class SDFLinkHolder
    {
       return transformToModelReferenceFrame;
    }
-   
+
    public void calculateCoMOffset()
    {
-      
+
       RigidBodyTransform modelFrameToJointFrame = new RigidBodyTransform();
       if(joint != null)
       {
@@ -96,15 +96,15 @@ public class SDFLinkHolder
       RigidBodyTransform jointFrameToModelFrame = new RigidBodyTransform();    // H_3^4
       jointFrameToModelFrame.invert(modelFrameToJointFrame);
       RigidBodyTransform modelFrameToInertialFrame = inertialFrameWithRespectToLinkFrame;    // H_4^5
-      
+
       RigidBodyTransform jointFrameToInertialFrame = new RigidBodyTransform();
       jointFrameToInertialFrame.multiply(jointFrameToModelFrame, modelFrameToInertialFrame);
-      
+
       Vector3d CoMOffset = new Vector3d();
       Matrix3d inertialFrameRotation = new Matrix3d();
-      
+
       jointFrameToInertialFrame.get(inertialFrameRotation, CoMOffset);
-      
+
       if(!inertialFrameRotation.epsilonEquals(MatrixTools.IDENTITY, 1e-5))
       {
          inertialFrameRotation.transpose();
@@ -124,22 +124,22 @@ public class SDFLinkHolder
    {
       return childeren;
    }
-   
+
    public void addChild(SDFJointHolder child)
    {
       childeren.add(child);
    }
-   
+
    public SDFJointHolder getJoint()
    {
       return joint;
    }
-   
+
    public void setJoint(SDFJointHolder joint)
    {
       this.joint = joint;
    }
-   
+
    public String toString()
    {
       return name;
@@ -203,5 +203,10 @@ public class SDFLinkHolder
    public void setInertialFrameWithRespectToLinkFrame(RigidBodyTransform newTransform)
    {
       this.inertialFrameWithRespectToLinkFrame.set(newTransform);
+   }
+
+   public void setInertia(Matrix3d inertia)
+   {
+      this.inertia.set(inertia);
    }
 }

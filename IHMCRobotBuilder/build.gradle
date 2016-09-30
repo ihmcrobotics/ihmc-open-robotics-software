@@ -43,12 +43,12 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
 	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
-	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-	compile group: 'com.google.guava', name: 'guava', version: '18.0'
 	compile group: 'io.javaslang', name: 'javaslang', version: '2.0.3'
 	compile ihmc.getProjectDependency(":IHMCJavaFXToolkit")
 	compile ihmc.getProjectDependency(":IHMCRobotDescription")
 	compile ihmc.getProjectDependency(":SDFLoader")
+	compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+	compile ihmc.getProjectDependency(":Graphics3DAdapter")
 
 
 	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")

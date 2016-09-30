@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import junit.framework.AssertionFailedError;
+import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
@@ -16,6 +17,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
@@ -32,6 +34,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      ParameterRegistry.destroyAndRecreateInstance();
    }
    
    @After
@@ -52,7 +55,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
-      pushOnShoulder(quadrupedTestFactory, "front_right_hip_roll");
+      pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.FRONT_RIGHT_HIP_ROLL.getUnderBarName());
    }
    
    @DeployableTestMethod(estimatedDuration = 10.0)
@@ -63,7 +66,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
-      pushOnShoulder(quadrupedTestFactory, "hind_left_hip_roll");
+      pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.HIND_LEFT_HIP_ROLL.getUnderBarName());
    }
    
    @DeployableTestMethod(estimatedDuration = 10.0)
@@ -74,7 +77,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
-      pushOnShoulder(quadrupedTestFactory, "hind_right_hip_roll");
+      pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.HIND_RIGHT_HIP_ROLL.getUnderBarName());
    }
    
    @DeployableTestMethod(estimatedDuration = 10.0)
@@ -85,7 +88,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
       quadrupedTestFactory.setUsePushRobotController(true);
-      pushOnShoulder(quadrupedTestFactory, "front_left_hip_roll");
+      pushOnShoulder(quadrupedTestFactory, QuadrupedJointName.FRONT_LEFT_HIP_ROLL.getUnderBarName());
    }
 
    private void pushOnShoulder(QuadrupedTestFactory quadrupedTestFactory, String jointToPushOn) throws IOException, AssertionFailedError
@@ -95,6 +98,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       pusher = new PushRobotTestConductor(conductor.getScs(), jointToPushOn);
       
       QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.squareUp(conductor, variables);
       
       pusher.applyForce(new Vector3d(0.0, 1.0, 0.0), 30.0, 1.0);
       
@@ -160,6 +164,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       pusher = new PushRobotTestConductor(conductor.getScs(), "head_roll");
       
       QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.squareUp(conductor, variables);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
@@ -187,6 +192,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       pusher = new PushRobotTestConductor(conductor.getScs(), "body");
       
       QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.squareUp(conductor, variables);
       
       pusher.applyForce(new Vector3d(0.0, 1.0, 0.0), 30.0, 1.0);
       
@@ -232,6 +238,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       
       QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.squareUp(conductor, variables);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));

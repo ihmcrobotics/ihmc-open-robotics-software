@@ -21,8 +21,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class FallingSphereRobot extends Robot
 {
-   private static final long serialVersionUID = -2136782463667249055L;
-
    private static final double EPSILON = 0.2; // Coefficient of Restitution
    private static final double MU = 0.5; // Coefficient of Friction
    

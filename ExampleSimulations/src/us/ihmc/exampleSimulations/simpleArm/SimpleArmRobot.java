@@ -228,8 +228,8 @@ public class SimpleArmRobot extends Robot
       {
          OneDoFJoint idJoint = jointMap.get(joint);
          OneDegreeOfFreedomJoint scsJoint = scsJointMap.get(joint);
-         idJoint.setQ(scsJoint.getQ().getDoubleValue());
-         idJoint.setQd(scsJoint.getQD().getDoubleValue());
+         idJoint.setQ(scsJoint.getQYoVariable().getDoubleValue());
+         idJoint.setQd(scsJoint.getQDYoVariable().getDoubleValue());
       }
       bodyMap.get(ArmBody.ELEVATOR).updateFramesRecursively();
    }

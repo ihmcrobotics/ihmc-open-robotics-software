@@ -12,6 +12,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
@@ -81,7 +82,7 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
       solutionQuality = other.solutionQuality;
    }
 
-   public void setDesiredJointState(SixDoFJoint rootJoint, OneDoFJoint[] newJointData)
+   public void setDesiredJointState(FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] newJointData)
    {
       if (newJointData.length != desiredJointAngles.length)
          throw new RuntimeException("Array size does not match");

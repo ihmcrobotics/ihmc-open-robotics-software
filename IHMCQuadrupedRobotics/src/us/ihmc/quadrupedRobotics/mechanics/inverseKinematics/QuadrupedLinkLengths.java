@@ -22,7 +22,7 @@ public class QuadrupedLinkLengths
          ReferenceFrame legAttachmentFrame = quadrupedReferenceFrames.getLegAttachmentFrame(robotQuadrant);
          ReferenceFrame beforeHipPitchFrame = quadrupedReferenceFrames.getFrameBeforeLegJoint(robotQuadrant, LegJointName.HIP_PITCH);
          ReferenceFrame hipPitchFrame = quadrupedReferenceFrames.getHipPitchFrame(robotQuadrant);
-         ReferenceFrame beforeKneePitchFrame = quadrupedReferenceFrames.getFrameBeforeLegJoint(robotQuadrant, LegJointName.KNEE);
+         ReferenceFrame beforeKneePitchFrame = quadrupedReferenceFrames.getFrameBeforeLegJoint(robotQuadrant, LegJointName.KNEE_PITCH);
          ReferenceFrame kneePitchFrame = quadrupedReferenceFrames.getKneeFrame(robotQuadrant);
          ReferenceFrame footFrame = quadrupedReferenceFrames.getFootFrame(robotQuadrant);
 

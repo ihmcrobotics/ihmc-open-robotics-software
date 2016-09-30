@@ -24,7 +24,7 @@ public abstract class StopThreadUpdatable implements Updatable
 
    private boolean stopBehaviorThread = false;
 
-   private BehaviorControlModeEnum requestedControlMode = BehaviorControlModeEnum.ENABLE_ACTIONS;
+   private BehaviorControlModeEnum requestedControlMode = BehaviorControlModeEnum.RESUME;
 
    protected LinkedHashMap<BehaviorControlModeEnum, BehaviorStatus> behaviorStatus = new LinkedHashMap<BehaviorControlModeEnum, BehaviorStatus>();
    protected LinkedHashMap<BehaviorControlModeEnum, RigidBodyTransform> testFrameTransformToWorld = new LinkedHashMap<BehaviorControlModeEnum, RigidBodyTransform>();

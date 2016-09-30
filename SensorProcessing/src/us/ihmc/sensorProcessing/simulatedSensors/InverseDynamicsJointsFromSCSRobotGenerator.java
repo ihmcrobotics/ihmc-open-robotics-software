@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -17,13 +18,6 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.Twist;
 
 public class InverseDynamicsJointsFromSCSRobotGenerator
 {   
@@ -64,7 +58,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          {
             FloatingJoint currentJoint = (FloatingJoint) polledJoint;
 
-            SixDoFJoint currentIDJoint = new SixDoFJoint(currentJoint.getName(), elevator, ReferenceFrame.getWorldFrame());            
+            FloatingInverseDynamicsJoint currentIDJoint = new SixDoFJoint(currentJoint.getName(), elevator, ReferenceFrame.getWorldFrame());
             ScrewTools.addRigidBody(currentJoint.getName(), currentIDJoint, momentOfInertia, mass, comOffset);
 
             scsToInverseDynamicsJointMap.addLinkedJoints(currentJoint, currentIDJoint);
@@ -109,7 +103,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    }
    
    
-   private SixDoFJoint getRootSixDoFJoint()
+   private FloatingInverseDynamicsJoint getRootSixDoFJoint()
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1) throw new RuntimeException("Only works with one root joint");
@@ -158,9 +152,9 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          {
             OneDoFJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint); //pinToRevoluteJointMap.get(pinJoint);
 
-            double jointPosition = pinJoint.getQ().getDoubleValue();
-            double jointVelocity = pinJoint.getQD().getDoubleValue();
-            double jointAcceleration = pinJoint.getQDD().getDoubleValue();
+            double jointPosition = pinJoint.getQYoVariable().getDoubleValue();
+            double jointVelocity = pinJoint.getQDYoVariable().getDoubleValue();
+            double jointAcceleration = pinJoint.getQDDYoVariable().getDoubleValue();
             revoluteJoint.setQ(jointPosition);
             revoluteJoint.setQd(jointVelocity);
 
@@ -176,7 +170,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          Collection<? extends FloatingJoint> floatingJoints = scsToInverseDynamicsJointMap.getFloatingJoints(); //floatingToSixDofToJointMap.keySet();
          for (FloatingJoint floatingJoint : floatingJoints)
          {
-            SixDoFJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint); //floatingToSixDofToJointMap.get(floatingJoint);
+            FloatingInverseDynamicsJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint); //floatingToSixDofToJointMap.get(floatingJoint);
 
             floatingJoint.getTransformToWorld(positionAndRotation);
             sixDoFJoint.setPositionAndRotation(positionAndRotation);
@@ -192,7 +186,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          Collection<? extends FloatingJoint> floatingJoints = scsToInverseDynamicsJointMap.getFloatingJoints(); 
          for (FloatingJoint floatingJoint : floatingJoints)
          {
-            SixDoFJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
+            FloatingInverseDynamicsJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
             //                     referenceFrames.updateFrames();
 
             ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
@@ -231,7 +225,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    {
       RigidBody elevator = getElevator();
 
-      SixDoFJoint rootInverseDynamicsJoint = getRootSixDoFJoint();
+      FloatingInverseDynamicsJoint rootInverseDynamicsJoint = getRootSixDoFJoint();
       RigidBody estimationLink = getRootBody();
 
       return new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);

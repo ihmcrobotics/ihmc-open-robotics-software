@@ -34,7 +34,7 @@ public class ClearLidarBehavior extends AbstractBehavior
 
    private void sendPacketToNetworkProcessor()
    {
-      if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          sendPacketToNetworkProcessor(clearLidarPacket);
          packetHasBeenSent.set(true);
@@ -45,9 +45,7 @@ public class ClearLidarBehavior extends AbstractBehavior
    public void initialize()
    {
       packetHasBeenSent.set(false);
-      
-      isPaused.set(false);
-      isStopped.set(false);
+      super.initialize();
    }
 
    @Override
@@ -55,26 +53,7 @@ public class ClearLidarBehavior extends AbstractBehavior
    {
       packetHasBeenSent.set(false);
 
-      isPaused.set(false);
-      isStopped.set(false);
-   }
-
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
-
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
+        super.doPostBehaviorCleanup();
    }
 
    @Override
@@ -83,20 +62,6 @@ public class ClearLidarBehavior extends AbstractBehavior
       return packetHasBeenSent.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
 
    public boolean hasInputBeenSet()
    {

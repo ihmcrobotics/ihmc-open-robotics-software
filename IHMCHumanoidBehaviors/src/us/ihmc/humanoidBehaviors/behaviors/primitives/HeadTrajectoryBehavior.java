@@ -52,7 +52,7 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
 
    private void sendHeadOrientationPacketToController()
    {
-      if (!isPaused.getBooleanValue() &&!isStopped.getBooleanValue())
+      if (!isPaused.getBooleanValue() &&!isAborted.getBooleanValue())
       {
          outgoingHeadTrajectoryMessage.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(outgoingHeadTrajectoryMessage);
@@ -70,7 +70,7 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
       packetHasBeenSent.set(false);
       
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
       
       hasBeenInitialized.set(true);
    }
@@ -82,28 +82,11 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
       outgoingHeadTrajectoryMessage = null;
 
       isPaused.set(false);
-      isStopped.set(false);
+      isAborted.set(false);
       
       trajectoryTime.set(Double.NaN);      
    }
 
-   @Override
-   public void stop()
-   {
-      isStopped.set(true);
-   }
-
-   @Override
-   public void pause()
-   {
-      isPaused.set(true);
-   }
-
-   @Override
-   public void resume()
-   {
-      isPaused.set(false);
-   }
 
    @Override
    public boolean isDone()
@@ -113,20 +96,8 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
       return trajectoryTimeElapsed && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public void enableActions()
-   {
-   }
+   
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-   }
    
    public boolean hasInputBeenSet() {
 	   if (outgoingHeadTrajectoryMessage != null)

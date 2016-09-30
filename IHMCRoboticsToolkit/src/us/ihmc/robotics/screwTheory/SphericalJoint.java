@@ -15,7 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SphericalJoint extends AbstractInverseDynamicsJoint
 {
-   private final SixDoFJointReferenceFrame afterJointFrame;
+   private final FloatingInverseDynamicsJointReferenceFrame afterJointFrame;
    private final Quat4d jointRotation = new Quat4d();
    private final FrameVector jointAngularVelocity;
    private final FrameVector jointAngularAcceleration;
@@ -25,7 +25,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    public SphericalJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
    {
       super(name, predecessor, beforeJointFrame);
-      this.afterJointFrame = new SixDoFJointReferenceFrame(name, beforeJointFrame);
+      this.afterJointFrame = new FloatingInverseDynamicsJointReferenceFrame(name, beforeJointFrame);
       this.jointAngularVelocity = new FrameVector(afterJointFrame);
       this.jointAngularAcceleration = new FrameVector(afterJointFrame);
       this.jointAngularAccelerationDesired = new FrameVector(afterJointFrame);

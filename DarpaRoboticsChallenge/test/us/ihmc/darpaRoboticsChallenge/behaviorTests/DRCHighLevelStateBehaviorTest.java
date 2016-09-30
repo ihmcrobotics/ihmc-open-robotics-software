@@ -91,7 +91,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       for (OneDegreeOfFreedomJoint joint : oneDofJoints)
       {
          String jointName = joint.getName();
-         double tau = joint.getTau().getDoubleValue();
+         double tau = joint.getTauYoVariable().getDoubleValue();
 
          if (!jointName.contains("hokuyo"))
          {

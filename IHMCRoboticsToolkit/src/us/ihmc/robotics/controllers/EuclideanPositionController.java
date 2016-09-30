@@ -35,8 +35,8 @@ public class EuclideanPositionController implements PositionController
 
    private final YoFrameVector feedbackLinearAction;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAction;
-   
 
+   private final EuclideanTangentialDampingCalculator tangentialDampingCalculator;
    private final double dt;
 
    private final YoPositionPIDGainsInterface gains;
@@ -73,6 +73,8 @@ public class EuclideanPositionController implements PositionController
       rateLimitedFeedbackLinearAction = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAction", "",
             registry, gains.getYoMaximumFeedbackRate(), dt, feedbackLinearAction);
 
+      tangentialDampingCalculator = new EuclideanTangentialDampingCalculator(prefix, bodyFrame, gains.getTangentialDampingGains());
+
       parentRegistry.addChild(registry);
    }
 
@@ -92,6 +94,7 @@ public class EuclideanPositionController implements PositionController
       computeProportionalTerm(desiredPosition);
       if (currentVelocity != null)
          computeDerivativeTerm(desiredVelocity, currentVelocity);
+
       computeIntegralTerm();
       output.setToNaN(bodyFrame);
       output.add(proportionalTerm, derivativeTerm);
@@ -156,12 +159,12 @@ public class EuclideanPositionController implements PositionController
       // Limit the maximum position error considered for control action
       double maximumError = gains.getMaximumProportionalError();
       double errorMagnitude = positionError.length();
+      positionError.getFrameTuple(proportionalTerm);
       if (errorMagnitude > maximumError)
       {
-         derivativeTerm.scale(maximumError / errorMagnitude);
+         proportionalTerm.scale(maximumError / errorMagnitude);
       }
 
-      proportionalTerm.set(desiredPosition);
       proportionalGainMatrix.transform(proportionalTerm.getVector());
    }
 
@@ -181,6 +184,9 @@ public class EuclideanPositionController implements PositionController
       }
 
       velocityError.set(derivativeTerm);
+
+      tangentialDampingCalculator.compute(positionError, derivativeGainMatrix);
+
       derivativeGainMatrix.transform(derivativeTerm.getVector());
    }
 

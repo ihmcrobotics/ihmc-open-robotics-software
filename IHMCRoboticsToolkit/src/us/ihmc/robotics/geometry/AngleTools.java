@@ -164,17 +164,31 @@ public class AngleTools
     */
    public static double shiftAngleToStartOfRange(double angleToShift, double startOfAngleRange)
    {
+      return shiftAngleToStartOfRange(angleToShift, startOfAngleRange, TwoPI);
+   }
+
+   /**
+    * This will shift an angle to be in the range [<i>startOfAngleRange</i>,
+    *  (<i>startOfAngleRange + endOfAngleRange</i>)
+    *
+    * @param angleToShift the angle to shift
+    * @param startOfAngleRange start of the range.
+    * @param endOfAngleRange end of the range.
+    * @return the shifted angle
+    */
+   public static double shiftAngleToStartOfRange(double angleToShift, double startOfAngleRange, double endOfAngleRange)
+   {
       double ret = angleToShift;
       startOfAngleRange = startOfAngleRange - EPSILON;
 
       if (angleToShift < startOfAngleRange)
       {
-         ret = angleToShift + Math.ceil((startOfAngleRange - angleToShift) / TwoPI) * TwoPI;
+         ret = angleToShift + Math.ceil((startOfAngleRange - angleToShift) / endOfAngleRange) * endOfAngleRange;
       }
 
-      if (angleToShift >= (startOfAngleRange + TwoPI))
+      if (angleToShift >= (startOfAngleRange + endOfAngleRange))
       {
-         ret = angleToShift - Math.floor((angleToShift - startOfAngleRange) / TwoPI) * TwoPI;
+         ret = angleToShift - Math.floor((angleToShift - startOfAngleRange) / endOfAngleRange) * endOfAngleRange;
       }
 
       return ret;

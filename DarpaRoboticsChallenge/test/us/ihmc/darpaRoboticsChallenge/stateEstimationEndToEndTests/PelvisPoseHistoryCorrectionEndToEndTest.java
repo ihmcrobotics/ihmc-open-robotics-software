@@ -983,7 +983,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
          for (OneDegreeOfFreedomJoint joint : oneDegreeOfFreedomJoints)
          {
-            qDesireds.put(joint, joint.getQ().getDoubleValue());
+            qDesireds.put(joint, joint.getQYoVariable().getDoubleValue());
          }
       }
 
@@ -1052,7 +1052,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
             hipYaw.setKp(100.0);
             hipYaw.setKd(10.0);
             hipYaw.setqDesired(qDesireds.get(hipYaw));
-            OneDegreeOfFreedomJoint knee = robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE));
+            OneDegreeOfFreedomJoint knee = robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH));
             knee.setKp(5000.0);
             knee.setKd(300.0);
             knee.setqDesired(qDesireds.get(knee));

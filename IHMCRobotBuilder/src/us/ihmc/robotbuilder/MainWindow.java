@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -15,8 +16,12 @@ import javafx.scene.transform.Translate;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javaslang.control.Option;
+import us.ihmc.javaFXToolkit.cameraControllers.SimpleCameraKeyboardEventHandler;
 import us.ihmc.javaFXToolkit.cameraControllers.SimpleCameraMouseEventHandler;
 import us.ihmc.robotbuilder.model.Loader;
+import us.ihmc.robotbuilder.util.JavaFX3DInstructionExecutor;
+import us.ihmc.robotbuilder.util.Tree;
+import us.ihmc.robotbuilder.util.TreeAdapter;
 import us.ihmc.robotbuilder.util.Util;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -76,7 +81,12 @@ public class MainWindow extends Application {
             return Option.ofOptional(dialog.showAndWait());
         })).flatMap(robotDescription -> Util.runLaterInUI(() -> {
             robotDescription.peek(description -> {
-                treeView.setRoot(constructTreeView(description));
+                TreeAdapter<RobotDescriptionNode> tree = Tree.of(description, RobotDescriptionNode::getChildrenJoints);
+                treeView.setRoot(Tree.map(tree, (node, children) -> {
+                    TreeItem<String> item = new TreeItem<>(node.getValue().getName());
+                    item.getChildren().addAll(children);
+                    return item;
+                }));
                 populate3DView(description);
             });
             return null;
@@ -87,48 +97,46 @@ public class MainWindow extends Application {
         }));
     }
 
-    private TreeItem<String> constructTreeView(RobotDescriptionNode description) {
-        TreeItem<String> rootItem = new TreeItem<>(description.getName());
-        description.getChildrenJoints().stream()
-                .map(this::constructTreeView)
-                .forEach(rootItem.getChildren()::add);
-        return rootItem;
-    }
-
     private void populate3DView(RobotDescription description) {
         Group group = new Group();
         description.getChildrenJoints().stream().map(this::create3DNodes).forEach(group.getChildren()::add);
-        AmbientLight light = new AmbientLight(Color.WHITE);
-        group.getChildren().add(light);
 
         SubScene scene3d = new SubScene(group, view3D.getWidth(), view3D.getHeight(), true, SceneAntialiasing.DISABLED);
         scene3d.setFill(Color.BLACK);
         PerspectiveCamera camera = Util.lookAtNodeFromDirection(group, 60, new Vector3d(1, 0, 0), new Vector3d(0, 1, 0));
         scene3d.setCamera(camera);
 
-        //FocusBasedCameraMouseEventHandler cameraController = new FocusBasedCameraMouseEventHandler(scene3d.widthProperty(), scene3d.heightProperty(), camera, new Vector3d(0, 1, 0));
-        //scene3d.addEventHandler(Event.ANY, cameraController);
-        SimpleCameraMouseEventHandler cameraController = new SimpleCameraMouseEventHandler(camera);
-        scene3d.addEventHandler(MouseEvent.ANY, cameraController);
+        SimpleCameraMouseEventHandler mouseController = new SimpleCameraMouseEventHandler(camera);
+        SimpleCameraKeyboardEventHandler keyboardController = new SimpleCameraKeyboardEventHandler(camera);
+        scene3d.addEventHandler(MouseEvent.ANY, mouseController);
+        scene3d.addEventHandler(KeyEvent.ANY, keyboardController);
+        scene3d.setFocusTraversable(true);
+        scene3d.requestFocus();
 
         view3D.getChildren().add(scene3d);
     }
 
     private Node create3DNodes(JointDescription description) {
-        Group jointGroup = new Group();
-        Vector3d offset = new Vector3d();
-        description.getOffsetFromParentJoint(offset);
-        jointGroup.getTransforms().add(new Translate(offset.x, offset.y, offset.z));
+        TreeAdapter<JointDescription> tree = Tree.of(description, JointDescription::getChildrenJoints);
+        return Tree.map(tree, (node, children) -> {
+                Group jointGroup = new Group();
+                Vector3d offset = new Vector3d();
+                node.getValue().getOffsetFromParentJoint(offset);
+                jointGroup.getTransforms().add(new Translate(offset.x, offset.y, offset.z));
 
-        final PhongMaterial redMaterial = new PhongMaterial();
-        redMaterial.setDiffuseColor(Color.DARKRED);
-        redMaterial.setSpecularColor(Color.RED);
+                final PhongMaterial redMaterial = new PhongMaterial();
+                redMaterial.setDiffuseColor(Color.DARKRED);
+                redMaterial.setSpecularColor(Color.RED);
 
-        Sphere graphics = new Sphere(0.01);
-        graphics.setMaterial(redMaterial);
-        jointGroup.getChildren().add(graphics);
+                Sphere graphics = new Sphere(0.05);
+                graphics.setMaterial(redMaterial);
+                jointGroup.getChildren().add(graphics);
 
-        description.getChildrenJoints().stream().map(this::create3DNodes).forEach(jointGroup.getChildren()::add);
-        return jointGroup;
+                JavaFX3DInstructionExecutor executor = new JavaFX3DInstructionExecutor(node.getValue().getLink().getLinkGraphics().getGraphics3DInstructions());
+                jointGroup.getChildren().add(executor.getResult());
+
+                jointGroup.getChildren().addAll(children);
+                return jointGroup;
+        });
     }
 }

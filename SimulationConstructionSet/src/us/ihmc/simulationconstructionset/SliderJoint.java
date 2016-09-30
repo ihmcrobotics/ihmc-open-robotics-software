@@ -23,7 +23,8 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
 {
    private static final long serialVersionUID = 1364230363983913667L;
    private final YoVariableRegistry registry;
-   public DoubleYoVariable q, qd, qdd, tau, tauJointLimit, tauDamping;
+   protected DoubleYoVariable q, qd, qdd, tau;
+   public DoubleYoVariable tauJointLimit, tauDamping;
 
    // private int axis;
    public Vector3d vTranslate = new Vector3d();
@@ -223,9 +224,20 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the current position
     */
-   public DoubleYoVariable getQ()
+   public DoubleYoVariable getQYoVariable()
    {
       return q;
+   }
+   
+   /**
+    * Retrieves the current position of this joint.
+    *
+    * @return YoVariable representing the current position
+    */
+   @Override
+   public double getQ()
+   {
+      return q.getDoubleValue();
    }
 
    /**
@@ -233,9 +245,20 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the current velocity
     */
-   public DoubleYoVariable getQD()
+   public DoubleYoVariable getQDYoVariable()
    {
       return qd;
+   }
+   
+   /**
+    * Retrieves the current velocity of this joint.
+    *
+    * @return YoVariable representing the current velocity
+    */
+   @Override
+   public double getQD()
+   {
+      return qd.getDoubleValue();
    }
 
    /**
@@ -243,9 +266,20 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the current acceleration
     */
-   public DoubleYoVariable getQDD()
+   public DoubleYoVariable getQDDYoVariable()
    {
       return qdd;
+   }
+   
+   /**
+    * Retrieves the current acceleration of this joint.
+    *
+    * @return YoVariable representing the current acceleration
+    */
+   @Override
+   public double getQDD()
+   {
+      return qdd.getDoubleValue();
    }
 
    /**
@@ -253,9 +287,20 @@ public class SliderJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the currently applied torque
     */
-   public DoubleYoVariable getTau()
+   public DoubleYoVariable getTauYoVariable()
    {
       return tau;
+   }
+   
+   /**
+    * Retrieves the torque currently applied at this joint.
+    *
+    * @return YoVariable representing the currently applied torque.
+    */
+   @Override
+   public double getTau()
+   {
+      return tau.getDoubleValue();
    }
 
    /*
