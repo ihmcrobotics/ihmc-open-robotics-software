@@ -195,11 +195,13 @@ public class WholeBodyVirtualModelControlSolver
       // submit virtual wrenches for bodies not in contact
       for (int i = 0; i < virtualWrenchCommandList.getNumberOfCommands(); i++)
       {
-         virtualWrenchCommand.set(virtualWrenchCommandList.getCommand(i));
+         VirtualWrenchCommand virtualWrenchCommand = virtualWrenchCommandList.getCommand(i);
          if (!bodiesInContact.contains(virtualWrenchCommand.getControlledBody()))
          {
             if (controlledBodies.contains(virtualWrenchCommand.getControlledBody()))
+            {
                virtualModelController.submitControlledBodyVirtualWrench(virtualWrenchCommand);
+            }
             else
                PrintTools.warn(this, "Received a command for " + virtualWrenchCommand.getControlledBody().getName() + ", which is not registered. Skipping this body.");
          }
