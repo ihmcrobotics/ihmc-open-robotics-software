@@ -31,7 +31,7 @@ public class EuclideanTangentialDampingCalculator
     * @param bodyFrame frame to perform control in
     * @param tangentialDampingGains gains to use for the reduction
     */
-   public EuclideanTangentialDampingCalculator(String prefix, ReferenceFrame bodyFrame, TangentialDampingGains tangentialDampingGains)
+   public EuclideanTangentialDampingCalculator(String prefix, final ReferenceFrame bodyFrame, TangentialDampingGains tangentialDampingGains)
    {
       this.bodyFrame = bodyFrame;
       this.tangentialDampingGains = tangentialDampingGains;
