@@ -28,7 +28,7 @@ public interface YoPositionPIDGainsInterface extends PositionPIDGainsInterface
 
    public abstract void setTangentialDampingGains(TangentialDampingGains tangentialDampingGains);
 
-   public abstract void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband);
+   public abstract void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinKd);
 
    public abstract void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate);
 

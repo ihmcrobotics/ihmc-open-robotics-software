@@ -201,9 +201,9 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband)
+   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinimumKd)
    {
-      tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband);
+      tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
    }
 
    @Override

@@ -205,9 +205,9 @@ public class YoEuclideanPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
-   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband)
+   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinimumKd)
    {
-      this.tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband);
+      this.tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
    }
 
    @Override

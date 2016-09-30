@@ -250,9 +250,9 @@ public class YoSymmetricSE3PIDGains implements YoSE3PIDGainsInterface, YoPositio
    }
 
    @Override
-   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband)
+   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinKd)
    {
-      this.tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband);
+      this.tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband, positionErrorForMinKd);
    }
 
    @Override

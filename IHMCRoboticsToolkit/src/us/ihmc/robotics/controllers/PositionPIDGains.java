@@ -42,16 +42,16 @@ public class PositionPIDGains implements PositionPIDGainsInterface
 
    public void setGains(double proportionalGain, double derivativeGain, double integralGain, double maxIntegralError)
    {
-      setGains(proportionalGain, derivativeGain, integralGain, maxIntegralError, 1.0, Double.POSITIVE_INFINITY);
+      setGains(proportionalGain, derivativeGain, integralGain, maxIntegralError, 1.0, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    }
 
    public void setGains(double proportionalGain, double derivativeGain, double integralGain, double maxIntegralError, double kdReductionRatio,
-         double parallelDampingDeadband)
+         double parallelDampingDeadband, double positionErrorForMinimumKd)
    {
       setProportionalGains(proportionalGain, proportionalGain, proportionalGain);
       setDerivativeGains(derivativeGain, derivativeGain, derivativeGain);
       setIntegralGains(integralGain, integralGain, integralGain, maxIntegralError);
-      setTangentialDampingGains(kdReductionRatio, parallelDampingDeadband);
+      setTangentialDampingGains(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
@@ -76,9 +76,9 @@ public class PositionPIDGains implements PositionPIDGainsInterface
       this.positionMaxIntegralError = maxIntegralError;
    }
 
-   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband)
+   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinimumKd)
    {
-      tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband);
+      tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
    }
 
    public void setMaximumFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
