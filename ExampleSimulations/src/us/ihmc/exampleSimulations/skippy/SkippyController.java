@@ -727,15 +727,15 @@ public class SkippyController implements RobotController
       /*
        * Apply torques
        */
-//      robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue());
-//      robot.getShoulderJoint().setTau(-tauOnShoulderJointAxis.getDoubleValue());
+      robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue());
+      robot.getShoulderJoint().setTau(-tauOnShoulderJointAxis.getDoubleValue());
 
       // } else {
       /*
        * Apply torques from actual controller on Skippy
        */
-//                  applyTorqueToHip(q_d_hip.getDoubleValue());
-//                  applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
+                  applyTorqueToHip(q_d_hip.getDoubleValue());
+                  applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
       // }
    }
 
