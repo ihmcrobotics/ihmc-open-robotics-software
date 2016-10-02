@@ -372,14 +372,14 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       DenseMatrix64F extractedCMPSum_Aeq = new DenseMatrix64F(numberOfVertices, 1);
       DenseMatrix64F extractedCMPSum_beq = new DenseMatrix64F(1, 1);
 
-      CommonOps.extract(solverInput_Aeq, 0, 4 + 2 * numberOffootstepsToConsider + numberOfVertices, 0, 2, extractedDynamics_Aeq, 0, 0);
-      CommonOps.extract(solverInput_beq, 0, 2, 0, 1, extractedDynamics_beq, 0, 0);
+      CommonOps.extract(solverInput_Aeq, 0, 4 + 2 * numberOffootstepsToConsider + numberOfVertices, 3, 5, extractedDynamics_Aeq, 0, 0);
+      CommonOps.extract(solverInput_beq, 3, 5, 0, 1, extractedDynamics_beq, 0, 0);
 
-      CommonOps.extract(solverInput_Aeq, 2 * numberOffootstepsToConsider, 2 * numberOffootstepsToConsider + numberOfVertices + 4, 2, 4, extractedCMPDynamics_Aeq, 0, 0);
-      CommonOps.extract(solverInput_beq, 2, 4, 0, 1, extractedCMPDynamics_beq, 0, 0);
+      CommonOps.extract(solverInput_Aeq, 2 * numberOffootstepsToConsider, 2*numberOffootstepsToConsider + numberOfVertices, 0, 2, extractedCMPDynamics_Aeq, 0, 0);
+      CommonOps.extract(solverInput_beq, 0, 2, 0, 1, extractedCMPDynamics_beq, 0, 0);
 
-      CommonOps.extract(solverInput_Aeq, 2 * numberOffootstepsToConsider + 4, 2 * numberOffootstepsToConsider + numberOfVertices + 4, 4, 5, extractedCMPSum_Aeq, 0, 0);
-      CommonOps.extract(solverInput_beq, 4, 5, 0, 1, extractedCMPSum_beq, 0, 0);
+      CommonOps.extract(solverInput_Aeq, 2 * numberOffootstepsToConsider + 4, 2 * numberOffootstepsToConsider + numberOfVertices + 4, 2, 3, extractedCMPSum_Aeq, 0, 0);
+      CommonOps.extract(solverInput_beq, 2, 3, 0, 1, extractedCMPSum_beq, 0, 0);
 
       JUnitTools.assertMatrixEquals(dynamics_Aeq, extractedDynamics_Aeq, epsilon);
       JUnitTools.assertMatrixEquals(dynamics_beq, extractedDynamics_beq, epsilon);
