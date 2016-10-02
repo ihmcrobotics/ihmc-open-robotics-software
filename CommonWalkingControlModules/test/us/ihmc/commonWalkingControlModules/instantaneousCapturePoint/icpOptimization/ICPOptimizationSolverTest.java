@@ -82,7 +82,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
    private void testDimension(int numberOfFootstepsToConsider, int numberOfVertices, boolean useStepAdjustment, boolean useFeedback, boolean useTwoCMPs)
    {
-      super.setNumberOfVertices(numberOfVertices);
+      super.setNumberOfCMPVertices(numberOfVertices);
       super.submitProblemConditions(numberOfFootstepsToConsider, useStepAdjustment, useFeedback, useTwoCMPs);
 
       int numberOfLagrangeMultipliers = 2;
@@ -121,7 +121,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       assertEquals(name, numberOfFootstepVariables, this.numberOfFootstepVariables, epsilon);
       assertEquals(name, numberOfLagrangeMultipliers, this.numberOfLagrangeMultipliers, epsilon);
       assertEquals(name, totalNumberOfFreeVariables, this.numberOfFreeVariables, epsilon);
-      assertEquals(name, numberOfVertices, this.numberOfVertices, epsilon);
+      assertEquals(name, numberOfVertices, this.numberOfCMPVertices, epsilon);
 
       assertEquals(name, feedbackTaskIndex, this.feedbackCMPIndex, epsilon);
       assertEquals(name, dynamicRelaxationIndex, this.dynamicRelaxtionIndex, epsilon);
@@ -145,8 +145,8 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
       if (useFeedback)
       {
-         assertEquals(name, this.numberOfVertices, stanceCMPCost_G.numRows, epsilon);
-         assertEquals(name, this.numberOfVertices, stanceCMPCost_G.numCols, epsilon);
+         assertEquals(name, this.numberOfCMPVertices, stanceCMPCost_G.numRows, epsilon);
+         assertEquals(name, this.numberOfCMPVertices, stanceCMPCost_G.numCols, epsilon);
       }
 
       assertEquals(name, 2, feedbackCost_H.numRows, epsilon);
@@ -325,7 +325,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       int numberOffootstepsToConsider = 2;
       int numberOfVertices = 4;
 
-      super.setNumberOfVertices(numberOfVertices);
+      super.setNumberOfCMPVertices(numberOfVertices);
       super.submitProblemConditions(numberOffootstepsToConsider, true, true, false);
       super.setFeedbackConditions(0.001, feedbackGain, 1000.0);
 
