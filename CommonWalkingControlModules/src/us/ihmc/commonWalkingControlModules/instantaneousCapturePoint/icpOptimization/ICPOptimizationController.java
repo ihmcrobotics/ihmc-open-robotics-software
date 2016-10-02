@@ -259,6 +259,8 @@ public class ICPOptimizationController
       footstepRecursionMultiplierCalculator.resetTimes();
 
       cmpConstraintHandler.updateCMPConstraintForDoubleSupport(solver);
+      reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
+
       speedUpTime.set(0.0);
    }
 
