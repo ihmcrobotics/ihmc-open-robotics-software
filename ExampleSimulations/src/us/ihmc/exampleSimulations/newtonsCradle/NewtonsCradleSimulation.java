@@ -9,7 +9,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
+import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class NewtonsCradleSimulation
@@ -22,11 +22,11 @@ public class NewtonsCradleSimulation
       scs.setDT(0.0001, 100);
       scs.startOnAThread();
 
-//      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
-//      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
-      CollisionHandler handler = new DefaultCollisionHandler(0.99, 0.3);
+      //      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
+      //      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
+      CollisionHandler handler = new DefaultCollisionHandler(0.99, 0.15);
 
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(4.0, 4.0, scs, 100);
+      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(4.0, 4.0, scs, 100);
 
       handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
@@ -39,14 +39,16 @@ public class NewtonsCradleSimulation
    {
       SpinningCoinRobot robot = new SpinningCoinRobot();
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-      scs.setDT(0.0000001, 100);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(100000);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
+      scs.setDT(0.0001, 1);
+      scs.setGroundVisible(false);
       scs.startOnAThread();
 
       double epsilon = 0.3;
-      double mu = 0.15;
+      double mu = 0.7;
       CollisionHandler handler = new DefaultCollisionHandler(epsilon, mu);
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(10.0, 10.0, scs, 100);
+      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(10.0, 10.0, scs, 100);
 
       handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
@@ -54,7 +56,7 @@ public class NewtonsCradleSimulation
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
 
-      scs.setSimulateDuration(0.19);
+      scs.setSimulateDuration(60.0);
       scs.simulate();
    }
 
@@ -66,14 +68,13 @@ public class NewtonsCradleSimulation
       scs.setDT(0.0001, 100);
       scs.startOnAThread();
 
-
-//      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
-//      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
-//      CollisionHandler handler = new DefaultCollisionHandler(0.98, 0.1, robot);
+      //      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
+      //      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
+      //      CollisionHandler handler = new DefaultCollisionHandler(0.98, 0.1, robot);
       CollisionHandler handler = new DefaultCollisionHandler(1.0, 0.0);
-//      CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7, robot);
+      //      CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7, robot);
 
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(0.1, 0.1, scs, 100);
+      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, scs, 100);
 
       handler.addListener(visualize);
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
@@ -91,18 +92,48 @@ public class NewtonsCradleSimulation
       scs.setGroundVisible(false);
       scs.startOnAThread();
 
-
-//      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
-//      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
-//      CollisionHandler handler = new DefaultCollisionHandler(0.98, 0.1, robot);
+      //      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
+      //      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
+      //      CollisionHandler handler = new DefaultCollisionHandler(0.98, 0.1, robot);
       CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
 
-//      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
-//
-//      handler.addListener(visualize);
-    DefaultCollisionVisualize visualize = null;
+      //      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
+      //
+      //      handler.addListener(visualize);
+      DefaultCollisionVisualizer visualize = null;
 
       ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
+      collisionDetector.initialize();
+
+      scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
+   }
+
+   public static void createStackOfBlocksSimulation()
+   {
+      StackOfBlocksRobot stackOfBlocksRobot = new StackOfBlocksRobot();
+      ArrayList<Robot> robots = stackOfBlocksRobot.getRobots();
+
+      boolean showGUI = true;
+
+      Robot[] robotArray = new Robot[robots.size()];
+      robots.toArray(robotArray);
+
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setCreateGUI(showGUI);
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
+      scs.setDT(0.00025, 1);
+      scs.setFastSimulate(false);
+      scs.setGroundVisible(false);
+      scs.startOnAThread();
+
+      CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
+
+      //    DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(100.0, 100.0, scs, 1000);
+      DefaultCollisionVisualizer visualize = null;
+      //      handler.addListener(visualize);
+
+      ScsCollisionDetector collisionDetector = stackOfBlocksRobot.getCollisionDetector();
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
@@ -119,6 +150,7 @@ public class NewtonsCradleSimulation
       robots.toArray(robotArray);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(16000);
       parameters.setCreateGUI(showGUI);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
@@ -129,19 +161,19 @@ public class NewtonsCradleSimulation
 
       CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
 
-    DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(100.0, 100.0, scs, 1000);
-//    DefaultCollisionVisualize visualize = null;
-      handler.addListener(visualize);
+      //    DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(100.0, 100.0, scs, 1000);
+      DefaultCollisionVisualizer visualize = null;
+      //      handler.addListener(visualize);
 
       ScsCollisionDetector collisionDetector = pileOfRandomObjectsRobot.getCollisionDetector();
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
 
-//      scs.simulate();
+      //      scs.simulate();
 
       long wallStartTime = System.currentTimeMillis();
-      while(true)
+      while (true)
       {
          ThreadTools.sleep(5000);
 
@@ -156,10 +188,11 @@ public class NewtonsCradleSimulation
 
    public static void main(String[] args)
    {
-//      createNewtonsCradleSimulation();
-//      createStackOfBouncyBallsSimulation();
-//      createRowOfDominosSimulation();
-      createPileOfRandomObjectsSimulation();
-//      createSpinningCoinSimulation();
+//            createNewtonsCradleSimulation();
+      //      createStackOfBouncyBallsSimulation();
+//            createRowOfDominosSimulation();
+//      createPileOfRandomObjectsSimulation();
+            createSpinningCoinSimulation();
+//      createStackOfBlocksSimulation();
    }
 }

@@ -13,15 +13,16 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.collision.simple.PolytopeShapeDescription;
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 
 public class SpinningCoinRobot extends Robot
 {
    private final ScsCollisionDetector collisionDetector;
-   private final double coinWidth = 0.00175; //quarter
-   private final double coinRadius = 0.01213;
-   private final double coinMass = 0.00567;
-   private double spinningAngularVelocity = 30.0 * 2.0 * Math.PI;
+   private final double coinWidth = 0.00175; //quarter //0.1
+   private final double coinRadius = 0.01213; //0.5; //
+   private final double coinMass = 0.00567; //1.0; //
+   private double spinningAngularVelocity = 0.0 * 2.0 * Math.PI;
 
    private final double margin = 0.0002;
 
@@ -29,7 +30,8 @@ public class SpinningCoinRobot extends Robot
    {
       super("SpinningCoin");
 
-      collisionDetector = new GdxCollisionDetector(100.0);
+//      collisionDetector = new GdxCollisionDetector(100.0);
+      collisionDetector = new SimpleCollisionDetector();
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(margin);
 
@@ -43,11 +45,11 @@ public class SpinningCoinRobot extends Robot
 
       double x = 0.1;
       double y = 0.1;
-      double z = 0.04;
+      double z = coinRadius + 0.04; //0.04;
 
       double yaw = 0.0;
-      double pitch = 0.0;
-      double roll = Math.PI/2.0; //1.2;
+      double pitch = 0.2;//0.0;
+      double roll = 0.0;//1.2; //Math.PI/2.0; //1.2;
 
       floatingJoint.setPosition(x, y, z);
       floatingJoint.setYawPitchRoll(yaw, pitch, roll);
@@ -65,15 +67,17 @@ public class SpinningCoinRobot extends Robot
       Link baseLink = new Link("base");
       baseLink.setMassAndRadiiOfGyration(1000000000.0, 100.0, 100.0, 100.0);
       Graphics3DObject baseLinkGraphics = new Graphics3DObject();
-      baseLinkGraphics.addCube(100.0, 100.0, 0.01);
+      baseLinkGraphics.translate(0.0, 0.0, -0.01 - 0.01/2.0);
+      baseLinkGraphics.addCube(5.0, 5.0, 0.01, YoAppearance.Yellow());
       baseLink.setLinkGraphics(baseLinkGraphics);
       baseLink.enableCollisions(100.0, this.getRobotsYoVariableRegistry());
 
-      CollisionShapeDescription shapeDesc = collisionShapeFactory.createBox(100.0, 100.0, 0.01);
+      PolytopeShapeDescription groundBox = (PolytopeShapeDescription) (collisionShapeFactory.createBox(5.0, 5.0, 0.01));
+      groundBox.setSmoothingRadius(0.0);//0.01);
 
       RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
       shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
-      collisionShapeFactory.addShape(baseLink, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
+      collisionShapeFactory.addShape(baseLink, shapeToLinkTransform, groundBox, false, 0xFFFFFFFF, 0xFFFFFFFF);
 
       baseJoint.setLink(baseLink);
       this.addRootJoint(baseJoint);
@@ -98,7 +102,7 @@ public class SpinningCoinRobot extends Robot
       linkGraphics.translate(0.0, 0.0, -coinWidth - coinWidth/4.0 );
       linkGraphics.addCube(coinRadius/3.0, coinRadius/3.0, coinWidth/4.0, YoAppearance.Gold());
 
-      link.addEllipsoidFromMassProperties(YoAppearance.DarkGreen());
+//      link.addEllipsoidFromMassProperties(YoAppearance.DarkGreen());
       CollisionShapeDescription shapeDesc = collisionShapeFactory.createCylinder(coinRadius, coinWidth);
 
       RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();

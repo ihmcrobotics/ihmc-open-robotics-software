@@ -128,5 +128,67 @@ public class ExpandingPolytopeEntryTest
 
 
    }
+   
+   
+   @Test
+   public void testTroublesomeTetrahedron()
+   {         
+      Point3d pointOne = new Point3d(-0.9490913237594096, 0.30106983928716424, 3.560641277995469);
+      Point3d pointTwo = new Point3d(-0.9895570462032808, -0.7156529059809014, -1.2414394231490622);
+      Point3d pointThree = new Point3d(1.3112536912820332, 1.1824049227088569, 1.3675055136001983);
+      Point3d pointFour = new Point3d(-0.799289825570983, -2.2676996322425795, 0.9981915411767837);
+
+      ExpandingPolytopeEntry entry123 = new ExpandingPolytopeEntry(pointOne, pointTwo, pointThree);
+      ExpandingPolytopeEntry entry324 = new ExpandingPolytopeEntry(pointThree, pointTwo, pointFour);
+      ExpandingPolytopeEntry entry421 = new ExpandingPolytopeEntry(pointFour, pointTwo, pointOne);
+      ExpandingPolytopeEntry entry134 = new ExpandingPolytopeEntry(pointOne, pointThree, pointFour);
+
+      entry123.setAdjacentTriangleIfPossible(entry123);
+      entry123.setAdjacentTriangleIfPossible(entry324);
+      entry123.setAdjacentTriangleIfPossible(entry421);
+      entry123.setAdjacentTriangleIfPossible(entry134);
+
+      entry324.setAdjacentTriangleIfPossible(entry123);
+      entry324.setAdjacentTriangleIfPossible(entry324);
+      entry324.setAdjacentTriangleIfPossible(entry421);
+      entry324.setAdjacentTriangleIfPossible(entry134);
+
+      entry421.setAdjacentTriangleIfPossible(entry123);
+      entry421.setAdjacentTriangleIfPossible(entry324);
+      entry421.setAdjacentTriangleIfPossible(entry421);
+      entry421.setAdjacentTriangleIfPossible(entry134);
+
+      entry134.setAdjacentTriangleIfPossible(entry123);
+      entry134.setAdjacentTriangleIfPossible(entry324);
+      entry134.setAdjacentTriangleIfPossible(entry421);
+      entry134.setAdjacentTriangleIfPossible(entry134);
+
+      assertFalse(entry123.isAdjacentTo(entry123));
+      assertTrue(entry123.isAdjacentTo(entry324));
+      assertTrue(entry123.isAdjacentTo(entry421));
+      assertTrue(entry123.isAdjacentTo(entry134));
+
+      assertTrue(entry324.isAdjacentTo(entry123));
+      assertFalse(entry324.isAdjacentTo(entry324));
+      assertTrue(entry324.isAdjacentTo(entry421));
+      assertTrue(entry324.isAdjacentTo(entry134));
+
+      assertTrue(entry421.isAdjacentTo(entry123));
+      assertTrue(entry421.isAdjacentTo(entry324));
+      assertFalse(entry421.isAdjacentTo(entry421));
+      assertTrue(entry421.isAdjacentTo(entry134));
+
+      assertTrue(entry134.isAdjacentTo(entry123));
+      assertTrue(entry134.isAdjacentTo(entry324));
+      assertTrue(entry134.isAdjacentTo(entry421));
+      assertFalse(entry134.isAdjacentTo(entry134));
+
+      entry123.checkConsistency();
+      entry324.checkConsistency();
+      entry421.checkConsistency();
+      entry134.checkConsistency();
+
+
+   }
 
 }

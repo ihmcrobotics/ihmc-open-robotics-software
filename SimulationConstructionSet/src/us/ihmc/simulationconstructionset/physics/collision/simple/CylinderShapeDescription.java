@@ -1,32 +1,38 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.geometry.polytope.CylinderSupportingVertexHolder;
 import us.ihmc.geometry.polytope.SupportingVertexHolder;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.shapes.Cylinder3d;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
-public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> implements CollisionShapeDescription<T>, SupportingVertexHolder
+public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> implements CollisionShapeDescription<T>
 {
+   private final CylinderSupportingVertexHolder supportingVertexHolder;
    private double radius;
    private double height;
    private double smoothingRadius = 0.0;
 
    private final RigidBodyTransform transform = new RigidBodyTransform();
 
+   private final RigidBodyTransform cylinderConsistencyTransform = new RigidBodyTransform();
+
+   //TODO: Get rid of this redundancy. Make cylinder definitions consistent...
+   private final Cylinder3d cylinder3d;
+
    public CylinderShapeDescription(double radius, double height)
    {
+      supportingVertexHolder = new CylinderSupportingVertexHolder(radius, height);
+
       this.radius = radius;
       this.height = height;
-   }
 
-   @Override
-   public CylinderShapeDescription<T> copy()
-   {
-      CylinderShapeDescription<T> copy = new CylinderShapeDescription<T>(radius, height);
-      copy.transform.set(this.transform);
-      return copy;
+      cylinder3d = new Cylinder3d(height, radius);
+
+      cylinderConsistencyTransform.setTranslation(0.0, 0.0, -height / 2.0);
+      cylinder3d.setTransform(cylinderConsistencyTransform);
    }
 
    public double getRadius()
@@ -39,20 +45,42 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
       return height;
    }
 
-   public double getSmoothingRadius()
-   {
-      return smoothingRadius;
-   }
-
    public void getTransform(RigidBodyTransform transformToPack)
    {
       transformToPack.set(transform);
    }
 
    @Override
+   public CylinderShapeDescription<T> copy()
+   {
+      CylinderShapeDescription<T> copy = new CylinderShapeDescription<T>(radius, height);
+      copy.smoothingRadius = this.smoothingRadius;
+      copy.setTransform(this.transform);
+      return copy;
+   }
+
+   public void setTransform(RigidBodyTransform transform2)
+   {
+      this.transform.set(this.transform);
+      this.supportingVertexHolder.setTransform(transform);
+
+      this.cylinder3d.setTransform(cylinderConsistencyTransform);
+      this.cylinder3d.applyTransform(transform);
+   }
+
+   public double getSmoothingRadius()
+   {
+      return smoothingRadius;
+   }
+
+   @Override
    public void applyTransform(RigidBodyTransform transformToWorld)
    {
       transform.multiply(transformToWorld, transform);
+      supportingVertexHolder.setTransform(transform);
+
+      this.cylinder3d.setTransform(cylinderConsistencyTransform);
+      this.cylinder3d.applyTransform(transform);
    }
 
    @Override
@@ -62,53 +90,20 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
       this.height = cylinder.getHeight();
 
       cylinder.getTransform(this.transform);
+      supportingVertexHolder.setTransform(transform);
+
+      this.cylinder3d.setTransform(cylinderConsistencyTransform);
+      this.cylinder3d.applyTransform(transform);
    }
 
    public SupportingVertexHolder getSupportingVertexHolder()
    {
-      return this;
+      return supportingVertexHolder;
    }
 
-   private final Vector3d tempVectorForSupportingVertex = new Vector3d();
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-
-   @Override
-   public Point3d getSupportingVertex(Vector3d supportDirection)
+   public void getProjection(Point3d centerOfSphere, Point3d closestPointOnCylinderToPack)
    {
-      tempVectorForSupportingVertex.set(supportDirection);
-      transform.transform(tempVectorForSupportingVertex);
-
-      boolean up = tempVectorForSupportingVertex.getZ() > 0.0;
-
-      tempVectorForSupportingVertex.setZ(0.0);
-      double lengthSquared = tempVectorForSupportingVertex.lengthSquared();
-
-      if (lengthSquared > 1e-10)
-      {
-         tempVectorForSupportingVertex.normalize();
-      }
-      else
-      {
-         tempVectorForSupportingVertex.set(1.0, 0.0, 0.0);
-      }
-
-      tempVectorForSupportingVertex.scale(radius);
-
-      if (up)
-      {
-         tempVectorForSupportingVertex.setZ(height / 2.0);
-      }
-      else
-      {
-         tempVectorForSupportingVertex.setZ(-height / 2.0);
-      }
-
-      Point3d supportingVertex = new Point3d(tempVectorForSupportingVertex);
-
-      tempTransform.set(transform);
-      tempTransform.invert();
-      tempTransform.transform(supportingVertex);
-      return supportingVertex;
+      closestPointOnCylinderToPack.set(centerOfSphere);
+      cylinder3d.orthogonalProjection(closestPointOnCylinderToPack);
    }
-
 }

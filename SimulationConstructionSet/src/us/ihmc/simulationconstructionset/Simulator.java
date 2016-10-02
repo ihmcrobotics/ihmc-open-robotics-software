@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
+import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 
@@ -21,7 +21,7 @@ public class Simulator implements java.io.Serializable
 
    private ScsCollisionDetector collisionDetector;
    private CollisionHandler collisionHandler;
-   private DefaultCollisionVisualize collisionVisualize;
+   private DefaultCollisionVisualizer collisionVisualize;
    protected ArrayList<WrenchContactPoint> forceSensor = new ArrayList<WrenchContactPoint>();
 
    // private final YoVariable time;
@@ -152,7 +152,7 @@ public class Simulator implements java.io.Serializable
       //
    }
 
-   public void setCollisions(ScsCollisionDetector collisionDetector, CollisionHandler collisionHandler, DefaultCollisionVisualize visulize)
+   public void setCollisions(ScsCollisionDetector collisionDetector, CollisionHandler collisionHandler, DefaultCollisionVisualizer visulize)
    {
       this.collisionDetector = collisionDetector;
       this.collisionHandler = collisionHandler;
