@@ -417,12 +417,17 @@ public class SwingState extends AbstractUnconstrainedState
    public void replanTrajectory(Footstep newFootstep, double swingTime)
    {
       setFootstep(newFootstep, swingTime);
+      computeSwingTimeRemaining();
+
+      this.replanTrajectory.set(true);
+   }
+
+   private void computeSwingTimeRemaining()
+   {
       if (!currentTimeWithSwingSpeedUp.isNaN())
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - currentTimeWithSwingSpeedUp.getDoubleValue());
       else
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - getTimeInCurrentState());
-
-      this.replanTrajectory.set(true);
    }
 
    /**
@@ -433,10 +438,8 @@ public class SwingState extends AbstractUnconstrainedState
     */
    public double requestSwingSpeedUp(double speedUpFactor)
    {
-      if (isSwingSpeedUpEnabled.getBooleanValue())
+      if (isSwingSpeedUpEnabled.getBooleanValue() && (speedUpFactor > 1.1 && speedUpFactor > swingTimeSpeedUpFactor.getDoubleValue()))
       {
-         if (speedUpFactor <= 1.1 || speedUpFactor <= swingTimeSpeedUpFactor.getDoubleValue())
-            return swingTimeRemaining.getValue();
          speedUpFactor = MathTools.clipToMinMax(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
 
          //         speedUpFactor = MathTools.clipToMinMax(speedUpFactor, 0.7, maxSwingTimeSpeedUpFactor.getDoubleValue());
@@ -446,6 +449,8 @@ public class SwingState extends AbstractUnconstrainedState
          if (currentTimeWithSwingSpeedUp.isNaN())
             currentTimeWithSwingSpeedUp.set(currentTime.getDoubleValue());
       }
+
+      computeSwingTimeRemaining();
       return swingTimeRemaining.getValue();
    }
 
