@@ -12,10 +12,11 @@ import us.ihmc.simulationconstructionset.ExternalTorque;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionHandlerListener;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class DefaultCollisionVisualize implements CollisionHandlerListener
+public class DefaultCollisionVisualizer implements CollisionHandlerListener
 {
    private SimulationConstructionSet scs;
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -23,6 +24,7 @@ public class DefaultCollisionVisualize implements CollisionHandlerListener
    private List<YoGraphicVector> activeRedYoGraphicVectors = new ArrayList<YoGraphicVector>();
    private List<YoGraphicVector> activeBlueYoGraphicVectors = new ArrayList<YoGraphicVector>();
 
+   private BagOfBalls collisionPositionsVizOne, collisionPositionsVizTwo;
    private int total;
 
    private YoVariableRegistry registry;
@@ -30,20 +32,23 @@ public class DefaultCollisionVisualize implements CollisionHandlerListener
    private double impulseScale = 0.1;
    private double forceScale = 0.005;
 
-   public DefaultCollisionVisualize(double forceScale, double impulseScale, SimulationConstructionSet scs, int numberOfVectorsToCreate)
+   public DefaultCollisionVisualizer(double forceScale, double impulseScale, SimulationConstructionSet scs, int numberOfVectorsToCreate)
    {
       this.forceScale = forceScale;
       this.impulseScale = impulseScale;
-      init(scs, numberOfVectorsToCreate);
+      initialize(scs, numberOfVectorsToCreate);
    }
 
-   private void init(SimulationConstructionSet scs, int numberOfVectorsToCreate)
+   private void initialize(SimulationConstructionSet scs, int numberOfVectorsToCreate)
    {
       this.scs = scs;
 
-      YoVariableRegistry registryRoot = scs.getRootRegistry();
-      registry = new YoVariableRegistry("DefaultCollisionVisualize");
-      registryRoot.addChild(registry);
+      YoVariableRegistry rootRegistry = scs.getRootRegistry();
+      registry = new YoVariableRegistry(getClass().getSimpleName());
+      rootRegistry.addChild(registry);
+
+      collisionPositionsVizOne = new BagOfBalls(50, 0.01, "CollisionOne", YoAppearance.Red(), registry, yoGraphicsListRegistry);
+      collisionPositionsVizTwo = new BagOfBalls(50, 0.01, "CollisionTwo", YoAppearance.Blue(), registry, yoGraphicsListRegistry);
 
       for (int i = 0; i < numberOfVectorsToCreate; i++)
       {
@@ -56,6 +61,8 @@ public class DefaultCollisionVisualize implements CollisionHandlerListener
 
    public void callBeforeCollisionDetection()
    {
+//      collisionPositionsViz.reset();
+      
       //      System.out.println("CallBeforeCollision");
       //      for (int i = 0; i < total; i++)
       //      {
@@ -88,6 +95,9 @@ public class DefaultCollisionVisualize implements CollisionHandlerListener
       //      System.out.println("Visualizing Collision. forceB.getYoPosition() = " + forceB.getYoPosition());
       //      System.out.println("Visualizing Collision. forceB.getYoImpulse() = " + forceB.getYoImpulse());
 
+      collisionPositionsVizOne.setBallLoop(forceA.getYoPosition().getFrameTuple());
+      collisionPositionsVizTwo.setBallLoop(forceB.getYoPosition().getFrameTuple());
+
       yoGraphicVectorA.set(forceA.getYoPosition(), forceA.getYoImpulse());
       yoGraphicVectorB.set(forceB.getYoPosition(), forceB.getYoImpulse());
       total++;
@@ -109,7 +119,7 @@ public class DefaultCollisionVisualize implements CollisionHandlerListener
       YoGraphicVector yoGraphicVector = new YoGraphicVector(name, yo0, yo1, yo2, yo3, yo4, yo5, scale, appearance);
       yoGraphicVector.setLineRadiusWhenOneMeterLong(0.005);
       yoGraphicVector.setMinAndMaxScaleFactors(0.01, 1.5);
-      
+
       yoGraphicsListRegistry.registerYoGraphic("CollisionVectors", yoGraphicVector);
 
       //      scs.addYoGraphic(yoGraphicVector, true);

@@ -17,6 +17,7 @@ public class ExpandingPolytopeAlgorithm
    private final THashMap<Point3d, Point3d> correspondingPointsOnA = new THashMap<>();
    private final THashMap<Point3d, Point3d> correspondingPointsOnB = new THashMap<>();
 
+   private boolean polytopeIsRightHanded;
    private SupportingVertexHolder polytopeA;
    private SupportingVertexHolder polytopeB;
 
@@ -25,6 +26,11 @@ public class ExpandingPolytopeAlgorithm
    private ExpandingPolytopeAlgorithmListener listener;
 
    private final RecyclingArrayList<ExpandingPolytopeEntry> polytopeEntryPool = new RecyclingArrayList<>(ExpandingPolytopeEntry.class);
+
+   private final Vector3d tempVector12 = new Vector3d();
+   private final Vector3d tempVector13 = new Vector3d();
+   private final Vector3d tempVector14 = new Vector3d();
+   private final Vector3d tempVector12Cross13 = new Vector3d();
 
    public ExpandingPolytopeAlgorithm(double epsilonRelative)
    {
@@ -57,6 +63,27 @@ public class ExpandingPolytopeAlgorithm
       Point3d pointThree = simplex.getPoint(2);
       Point3d pointFour = simplex.getPoint(3);
 
+      tempVector12.sub(pointTwo, pointOne);
+      tempVector13.sub(pointThree, pointOne);
+      tempVector14.sub(pointFour, pointOne);
+      tempVector12Cross13.cross(tempVector12, tempVector13);
+      double tripleProduct = tempVector12Cross13.dot(tempVector14);
+      
+      if (tripleProduct >= 0.0)
+      {
+         polytopeIsRightHanded = true;
+      }
+      else
+      {
+         polytopeIsRightHanded = false;
+      }
+
+      //TODO: Get rid of this if you can...
+      if (Math.abs(tripleProduct) < 1e-10)
+      {
+         throw new RuntimeException("tripleProduct < 1e-10");
+      }
+      
       correspondingPointsOnA.put(pointOne, simplex.getCorrespondingPointOnPolytopeA(pointOne));
       correspondingPointsOnA.put(pointTwo, simplex.getCorrespondingPointOnPolytopeA(pointTwo));
       correspondingPointsOnA.put(pointThree, simplex.getCorrespondingPointOnPolytopeA(pointThree));
@@ -135,8 +162,27 @@ public class ExpandingPolytopeAlgorithm
             closestPointToOrigin = triangleEntryToExpand.getClosestPointToOrigin();
             closestTriangleToOrigin = triangleEntryToExpand;
 
-            supportDirection.set(closestPointToOrigin);
-
+            if (closestPointToOrigin.lengthSquared() < 1e-6)
+            {
+               // Create the support direction based on the normal of the triangle in case the closestPoint is slightly on the wrong side
+               // to be robust to numerical round off errors.
+               tempVector12.sub(triangleEntryToExpand.getVertex(1), triangleEntryToExpand.getVertex(0));
+               tempVector13.sub(triangleEntryToExpand.getVertex(2), triangleEntryToExpand.getVertex(0));
+               
+               if (polytopeIsRightHanded) 
+               {
+                  supportDirection.cross(tempVector13, tempVector12);                  
+               }
+               else
+               {
+                  supportDirection.cross(tempVector12, tempVector13);                  
+               }
+            }
+            else
+            {
+               supportDirection.set(closestPointToOrigin);
+            }
+            
             Point3d supportingVertexA = polytopeA.getSupportingVertex(supportDirection);
             supportDirection.negate();
             Point3d supportingVertexB = polytopeB.getSupportingVertex(supportDirection);

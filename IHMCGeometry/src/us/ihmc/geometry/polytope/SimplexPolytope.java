@@ -111,20 +111,37 @@ public class SimplexPolytope
       if (alreadyHaveThatOne)
          return false;
 
+      //TODO: Magic Number here!
+      double epsilon = 1e-4;
+
       if (pointOne == null)
       {
          pointOne = simplexPointToAdd;
       }
       else if (pointTwo == null)
       {
+         if (simplexPointToAdd.epsilonEquals(pointOne, epsilon))
+            return false;
          pointTwo = simplexPointToAdd;
       }
       else if (pointThree == null)
       {
+         if (simplexPointToAdd.epsilonEquals(pointOne, epsilon))
+            return false;
+         if (simplexPointToAdd.epsilonEquals(pointTwo, epsilon))
+            return false;
+
          pointThree = simplexPointToAdd;
       }
       else if (pointFour == null)
       {
+         if (simplexPointToAdd.epsilonEquals(pointOne, epsilon))
+            return false;
+         if (simplexPointToAdd.epsilonEquals(pointTwo, epsilon))
+            return false;
+         if (simplexPointToAdd.epsilonEquals(pointThree, epsilon))
+            return false;
+
          pointFour = simplexPointToAdd;
       }
       else
@@ -340,7 +357,7 @@ public class SimplexPolytope
          {
 
             // TODO: Should not have to check the lambdas with lambdasAreOK() call!
-            // Not sure why some of the harder, nearly coplanar are such that tow of these
+            // Not sure why some of the harder, nearly coplanar are such that two of these
             // Face Voronoi region checks are true. Only one should be true if
             // the edges and vertices are not Voronoi regions.
             // Or maybe I have something wrong with the math?
@@ -602,7 +619,14 @@ public class SimplexPolytope
 
    public boolean wereMostRecentlyDiscared(Point3d checkOnA, Point3d checkOnB)
    {
-      return ((discardedOnA == checkOnA) && (discardedOnB == checkOnB));
+      if ((discardedOnA == null) || (discardedOnB == null)) return false;
+
+      //TODO: Magic number.
+      //TODO: Use == when the points are pointers. Need to be able to ask the shape if pointers or values...
+      double epsilon = 1e-10;
+      
+      return ((discardedOnA.distanceSquared(checkOnA) < epsilon) && (discardedOnB.distanceSquared(checkOnB) < epsilon));
+//      return ((discardedOnA == checkOnA) && (discardedOnB == checkOnB));
    }
 
    public boolean isInVoronoiRegionOfVertex(Point3d pointToCheck, Point3d otherPoint)
@@ -840,11 +864,14 @@ public class SimplexPolytope
 
       tempVector4.cross(tempVector1, tempVector3);
       double lambdaThree = tempVector4.dot(tempNormalVector1) * oneOver4ASquared;
+      lambdaThree = cleanLambda(lambdaThree);
 
       tempVector4.cross(tempVector3, tempVector2);
       double lambdaTwo = tempVector4.dot(tempNormalVector1) * oneOver4ASquared;
+      lambdaTwo = cleanLambda(lambdaTwo);
 
       double lambdaOne = 1.0 - lambdaTwo - lambdaThree;
+      lambdaOne = cleanLambda(lambdaOne);
 
       lambdas.clear();
       setLambda(vertexOne, lambdaOne);
@@ -864,6 +891,23 @@ public class SimplexPolytope
       tempVector1.set(vertexThree);
       tempVector1.scale(lambdaThree);
       closestPointToOrigin.add(tempVector1);
+   }
+
+   public double cleanLambda(double lambda)
+   {
+      //TODO: Magic Number here...
+      double epsilon = 1e-7;
+
+      if ((lambda < 0.0) && (lambda > -epsilon))
+      {
+         lambda = 0.0;
+      }
+      if ((lambda > 1.0) && (lambda < 1.0 + epsilon))
+      {
+         lambda = 1.0;
+      }
+
+      return lambda;
    }
 
    public Point3d getCorrespondingPointOnPolytopeA(Point3d simplexPoint)

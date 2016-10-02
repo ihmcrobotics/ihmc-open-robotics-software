@@ -19,6 +19,7 @@ public class PolytopeShapeDescription<T extends PolytopeShapeDescription<T>> imp
    {
       ConvexPolytope polytopeCopy = new ConvexPolytope(polytope);
       PolytopeShapeDescription<T> copy = new PolytopeShapeDescription<T>(polytopeCopy);
+      copy.setSmoothingRadius(smoothingRadius);
       return copy;
    }
 

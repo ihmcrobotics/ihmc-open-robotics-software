@@ -64,7 +64,7 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
+import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
@@ -1256,7 +1256,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       ScsCollisionConfigure collisionConfigure = createScsCollisionConfigure();
       ScsCollisionDetector collisionDetector = createScsCollisionDetector();
       CollisionHandler collisionHandler = new DefaultCollisionHandler(0.3, 0.3);
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(0.1, 0.1, scs, 100);
+      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, scs, 100);
       ScsPhysics physics = new ScsPhysics(collisionConfigure, collisionDetector, collisionHandler, visualize);
 
       return physics;

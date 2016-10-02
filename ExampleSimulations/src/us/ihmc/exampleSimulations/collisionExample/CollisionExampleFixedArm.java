@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
+import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 
 public class CollisionExampleFixedArm
 {
@@ -224,7 +224,7 @@ public class CollisionExampleFixedArm
       sim.setGroundVisible(false);
       sim.setCameraPosition(0, -40.0, 0);
 
-      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(0.1, 0.1, sim, 100);
+      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, sim, 100);
 
       CollisionHandler collisionHandler = doublePendulum.getCollisionHandler();
       collisionHandler.addListener(visualize);

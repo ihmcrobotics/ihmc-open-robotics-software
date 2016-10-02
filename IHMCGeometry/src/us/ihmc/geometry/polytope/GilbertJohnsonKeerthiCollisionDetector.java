@@ -12,7 +12,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
  */
 public class GilbertJohnsonKeerthiCollisionDetector
 {
-   private static final double LAMBDA_STOPPING_DELTA = 1e-9;
+   private static final double LAMBDA_STOPPING_DELTA = 1e-6;
 
    private final Vector3d supportDirection = new Vector3d();
    private final Vector3d negativeSupportDirection = new Vector3d();
@@ -94,6 +94,10 @@ public class GilbertJohnsonKeerthiCollisionDetector
          // Step 2) Compute closest point to origin in the simplex. 4) Reduce points of Q not used in determining P.
          simplex.getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(closestPointToOrigin);
 
+         if (Double.isNaN(closestPointToOrigin.getX()))
+         {
+            throw new RuntimeException("NaN!");
+         }
          if (listener != null)
          {
             listener.foundClosestPointOnSimplex(simplex, closestPointToOrigin);

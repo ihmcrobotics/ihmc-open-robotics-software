@@ -119,7 +119,7 @@ public class DefaultCollisionHandler implements CollisionHandler
 
          // TODO handle the case where the object is embedded inside the object and the normal is invalid
          if (Double.isNaN(normal.getX()))
-            throw new RuntimeException("Normal is invalid");
+            throw new RuntimeException("Normal is invalid. Contains NaN!");
 
          negative_normal.set(normal);
          negative_normal.scale(-1.0);
