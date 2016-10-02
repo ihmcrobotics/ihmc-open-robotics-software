@@ -223,7 +223,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround = 0.625;
    private double nominalHeightAboveGround = 0.705;
-   private final double maximumHeightAboveGround = 0.765;
+   private final double maximumHeightAboveGround = 0.765 + 0.08;
 
 // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
 //   private final double minimumHeightAboveGround = 0.785;
@@ -595,24 +595,24 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kpXY = 150.0; // Robert: 200.0
+      double kpXY = 150.0;
       double kpZ = 200.0;
-      double zetaXYZ = realRobot ? 0.7 : 0.7; // Robert: 0.4
+      double zetaXYZ = realRobot ? 0.7 : 0.7;
 
       double kpXYOrientation = 200.0;
       double kpZOrientation = 200.0;
       double zetaOrientation = 0.7;
 
       // Reduce maxPositionAcceleration from 30 to 6 to prevent too high acceleration when hitting joint limits.
-      double maxPositionAcceleration = realRobot ? 6.0 : Double.POSITIVE_INFINITY;
+      double maxPositionAcceleration = realRobot ? 20.0 : Double.POSITIVE_INFINITY;
 //      double maxPositionAcceleration = realRobot ? 30.0 : Double.POSITIVE_INFINITY;
-      double maxPositionJerk = realRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxPositionJerk = realRobot ? 300.0 : Double.POSITIVE_INFINITY;
       double maxOrientationAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxOrientationJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
       double kdReductionRatio = 0.1;
-      double parallelDampingDeadband = 0.1;
-      double positionErrorForMinimumKd = 0.4;
+      double parallelDampingDeadband = 0.03;
+      double positionErrorForMinimumKd = 0.10;
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
