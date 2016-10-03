@@ -23,6 +23,7 @@ import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.robotics.robotDescription.SpringPinJointDescription;
 import us.ihmc.simulationconstructionset.simulatedSensors.FeatherStoneJointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
@@ -353,6 +354,34 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
             pinJointDescription.getJointAxis(jointAxis);
             joint = new DummyOneDegreeOfFreedomJoint(jointDescription.getName(), offset, this, jointAxis);
          }
+      }
+      else if (jointDescription instanceof SpringPinJointDescription)
+      {
+         SpringPinJointDescription pinJointDescription = (SpringPinJointDescription) jointDescription;
+         Vector3d offset = new Vector3d();
+         pinJointDescription.getOffsetFromParentJoint(offset);
+         
+         Vector3d jointAxis = new Vector3d();
+         pinJointDescription.getJointAxis(jointAxis);
+         joint = new SpringPinJoint(jointDescription.getName(), offset, this, jointAxis);
+         
+         SpringPinJoint pinJoint = (SpringPinJoint) joint;
+         
+         if (pinJointDescription.containsLimitStops())
+         {
+            double[] limitStopParameters = pinJointDescription.getLimitStopParameters();
+            
+            double qMin = limitStopParameters[0];
+            double qMax = limitStopParameters[1];
+            double kLimit = limitStopParameters[2];
+            double bLimit = limitStopParameters[3];
+            
+            pinJoint.setLimitStops(qMin, qMax, kLimit, bLimit);
+         }
+         
+         pinJoint.setDamping(pinJointDescription.getDamping());
+         pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
+         pinJoint.setStiction(pinJointDescription.getStiction());
       }
       else if (jointDescription instanceof SliderJointDescription)
       {

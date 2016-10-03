@@ -112,6 +112,7 @@ public class ICPOptimizationController
    private final ICPOptimizationParameters icpOptimizationParameters;
 
    private final ICPOptimizationCMPConstraintHandler cmpConstraintHandler;
+   private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
    private final ICPOptimizationSolutionHandler solutionHandler;
    private final ICPOptimizationInputHandler inputHandler;
 
@@ -190,6 +191,7 @@ public class ICPOptimizationController
             doubleSupportSplitFraction, maximumNumberOfFootstepsToConsider, registry);
 
       cmpConstraintHandler = new ICPOptimizationCMPConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, registry);
+      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, registry);
       solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, footstepRecursionMultiplierCalculator, VISUALIZE, registry, yoGraphicsListRegistry);
       inputHandler = new ICPOptimizationInputHandler(icpPlannerParameters, bipedSupportPolygons, contactableFeet, maximumNumberOfFootstepsToConsider,
             footstepRecursionMultiplierCalculator, doubleSupportDuration, singleSupportDuration, exitCMPDurationInPercentOfStepTime, doubleSupportSplitFraction,
@@ -257,6 +259,8 @@ public class ICPOptimizationController
       footstepRecursionMultiplierCalculator.resetTimes();
 
       cmpConstraintHandler.updateCMPConstraintForDoubleSupport(solver);
+      reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
+
       speedUpTime.set(0.0);
    }
 
@@ -294,6 +298,7 @@ public class ICPOptimizationController
          solver.resetFeedbackRegularization();
 
       cmpConstraintHandler.updateCMPConstraintForDoubleSupport(solver);
+      reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
 
       speedUpTime.set(0.0);
    }
@@ -330,6 +335,7 @@ public class ICPOptimizationController
          solver.resetFeedbackRegularization();
 
       cmpConstraintHandler.updateCMPConstraintForSingleSupport(supportSide, solver);
+      reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide, solver);
 
       speedUpTime.set(0.0);
    }
@@ -442,9 +448,15 @@ public class ICPOptimizationController
    private int setConditionsForSteppingControl(int numberOfFootstepsToConsider, double omega0)
    {
       if (isInTransfer.getBooleanValue())
+      {
          cmpConstraintHandler.updateCMPConstraintForDoubleSupport(solver);
+         reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
+      }
       else
+      {
          cmpConstraintHandler.updateCMPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
+         reachabilityConstraintHandler.updateReachabilityConstraintForSingleSupport(supportSide.getEnumValue(), solver);
+      }
 
       solver.submitProblemConditions(numberOfFootstepsToConsider, localUseStepAdjustment, localUseFeedback, localUseTwoCMPs);
 
