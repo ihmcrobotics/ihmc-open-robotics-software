@@ -28,6 +28,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.simulationconstructionset.physics.collision.gdx.GdxUtilTest.class,
    us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetectorTest.class,
    us.ihmc.simulationconstructionset.RobotTest.class,
+   us.ihmc.simulationconstructionset.CollisionResolutionTest.class,
    us.ihmc.simulationconstructionset.RobotToolsTest.class,
    us.ihmc.simulationconstructionset.screwTheory.CentroidalMomentumRateADotVTermSCSTest.class,
    us.ihmc.simulationconstructionset.screwTheory.CentroidalMomentumRateTermCalculatorSCSTest.class,

@@ -66,7 +66,7 @@ public class DefaultCollisionHandler implements CollisionHandler
 
       Collections.shuffle(shapesInContactList, random);
 
-      System.out.println("Resolving " + numberOfCollisions + " collisions....");
+      if (DEBUG) System.out.println("Resolving " + numberOfCollisions + " collisions....");
       for (int i = 0; i < numberOfCollisions; i++)
       {
          Contacts shapesInContact = shapesInContactList.get(i);
