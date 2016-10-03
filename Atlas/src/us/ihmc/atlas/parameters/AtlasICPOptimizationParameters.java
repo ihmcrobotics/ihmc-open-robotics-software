@@ -37,7 +37,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackWeight()
    {
-      return 0.05;
+      return 0.5;
    }
 
    /** {@inheritDoc} */
@@ -170,7 +170,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getMaxCMPForwardExit()
    {
-      return 0.01;
+      return -0.01;
    }
 
    /** {@inheritDoc} */
@@ -205,7 +205,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getLateralReachabilityOuterLimit()
    {
-      return 0.5;
+      return 0.75;
    }
 
    /** {@inheritDoc} */
@@ -219,7 +219,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getForwardReachabilityLimit()
    {
-      return 0.8;
+      return 0.9;
    }
 
    /** {@inheritDoc} */
