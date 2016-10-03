@@ -1,4 +1,4 @@
-package us.ihmc.SdfLoader.partNames;
+package us.ihmc.robotics.partNames;
 
 /**
  * Classes implementing the {@code RobotSpecificJointNames} provide the enum values of the legs ({@code LegJointName}), arms ({@code ArmJointName}), spine ({@code SpineJointName}), and neck ({@code NeckJointName}) available for a specific robot.

@@ -1,4 +1,4 @@
-package us.ihmc.SdfLoader.partNames;
+package us.ihmc.robotics.partNames;
 
 import org.apache.commons.lang3.StringUtils;
 

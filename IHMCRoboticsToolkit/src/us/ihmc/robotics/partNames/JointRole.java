@@ -1,4 +1,4 @@
-package us.ihmc.SdfLoader.partNames;
+package us.ihmc.robotics.partNames;
 
 public enum JointRole
 {

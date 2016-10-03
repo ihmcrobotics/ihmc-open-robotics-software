@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import optiTrack.MocapRigidBody;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;

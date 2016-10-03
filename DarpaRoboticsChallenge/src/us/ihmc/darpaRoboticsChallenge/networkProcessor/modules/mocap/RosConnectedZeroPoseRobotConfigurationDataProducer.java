@@ -18,7 +18,7 @@ import org.ros.node.topic.Subscriber;
 
 import sensor_msgs.JointState;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;

@@ -2,7 +2,7 @@ package us.ihmc.robotModels;
 
 import java.util.List;
 
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.kinematics.JointLimit;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

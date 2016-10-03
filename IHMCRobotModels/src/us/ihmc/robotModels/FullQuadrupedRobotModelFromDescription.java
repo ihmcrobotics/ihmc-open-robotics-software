@@ -10,8 +10,8 @@ import com.google.common.collect.HashBiMap;
 
 import us.ihmc.SdfLoader.SDFQuadrupedJointNameMap;
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.partNames.JointRole;
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.kinematics.JointLimit;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
