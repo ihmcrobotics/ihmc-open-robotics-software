@@ -5,7 +5,7 @@ import java.util.Collection;
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.FullQuadrupedRobotModelFactory;
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 
 public abstract class QuadrupedModelFactory implements FullQuadrupedRobotModelFactory
 {

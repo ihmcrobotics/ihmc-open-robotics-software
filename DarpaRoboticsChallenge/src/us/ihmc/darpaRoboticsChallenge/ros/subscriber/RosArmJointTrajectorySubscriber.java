@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import trajectory_msgs.JointTrajectory;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;

@@ -1,9 +1,9 @@
 package us.ihmc.atlas.sensors;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.collisions.SDFCollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;

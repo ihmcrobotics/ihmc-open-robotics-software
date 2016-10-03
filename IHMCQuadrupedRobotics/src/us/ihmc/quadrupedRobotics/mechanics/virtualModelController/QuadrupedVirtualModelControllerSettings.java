@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.mechanics.virtualModelController;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 
 public class QuadrupedVirtualModelControllerSettings
 {

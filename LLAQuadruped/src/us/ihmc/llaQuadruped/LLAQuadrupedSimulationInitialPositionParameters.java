@@ -2,7 +2,7 @@ package us.ihmc.llaQuadruped;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 
 public class LLAQuadrupedSimulationInitialPositionParameters implements QuadrupedSimulationInitialPositionParameters

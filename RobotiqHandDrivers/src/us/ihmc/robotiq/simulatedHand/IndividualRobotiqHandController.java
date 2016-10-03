@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.partNames.FingerName;
+import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
