@@ -21,7 +21,7 @@ public class Simulator implements java.io.Serializable
 
    private ScsCollisionDetector collisionDetector;
    private CollisionHandler collisionHandler;
-   private DefaultCollisionVisualizer collisionVisualize;
+   private DefaultCollisionVisualizer collisionVisualizer;
    protected ArrayList<WrenchContactPoint> forceSensor = new ArrayList<WrenchContactPoint>();
 
    // private final YoVariable time;
@@ -71,7 +71,7 @@ public class Simulator implements java.io.Serializable
 
    private final CollisionDetectionResult results = new CollisionDetectionResult();
 
-   protected void updateState()
+   private void updateState()
    {
       synchronized (simulationSynchronizer)
       {
@@ -106,8 +106,8 @@ public class Simulator implements java.io.Serializable
 
          if (collisionDetector != null)
          {
-            if (collisionVisualize != null)
-               collisionVisualize.callBeforeCollisionDetection();
+            if (collisionVisualizer != null)
+               collisionVisualizer.callBeforeCollisionDetection();
 
             results.clear();
             collisionDetector.performCollisionDetection(results);
@@ -117,8 +117,8 @@ public class Simulator implements java.io.Serializable
 
       for (int i = 0; i < forceSensor.size(); i++)
       {
-         WrenchContactPoint wcp = forceSensor.get(i);
-         wcp.updateForce();
+         WrenchContactPoint wrenchContactPoint = forceSensor.get(i);
+         wrenchContactPoint.updateForce();
       }
    }
 
@@ -156,6 +156,6 @@ public class Simulator implements java.io.Serializable
    {
       this.collisionDetector = collisionDetector;
       this.collisionHandler = collisionHandler;
-      this.collisionVisualize = visulize;
+      this.collisionVisualizer = visulize;
    }
 }

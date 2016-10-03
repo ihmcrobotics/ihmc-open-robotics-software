@@ -418,11 +418,6 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       }
    }
 
-   protected void updateState()
-   {
-      mySimulator.updateState();
-   }
-
    protected void doControl()
    {
       mySimulator.doControl();

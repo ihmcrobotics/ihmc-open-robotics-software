@@ -22,9 +22,7 @@ import us.ihmc.simulationconstructionset.SpatialTransformationMatrix;
 import us.ihmc.simulationconstructionset.SpatialVector;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 
-/**
- * @author Peter Abeles
- */
+
 public abstract class JointPhysics< J extends Joint>
 {
    protected J owner;

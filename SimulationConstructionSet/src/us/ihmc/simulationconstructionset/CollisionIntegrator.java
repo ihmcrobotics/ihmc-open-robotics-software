@@ -15,9 +15,6 @@ public class CollisionIntegrator implements java.io.Serializable
     * private static final double UZ_OVERSHOOT = 0.00001;
     */
 
-   /**
-    *
-    */
    private static final long serialVersionUID = -6083539629185172597L;
    private static final double U_STUCK_THRESH = 0.0001;    // U_STUCK_THRESH = 0.0001;
    private static final double ACCURACY = 0.0001;
@@ -249,7 +246,8 @@ public class CollisionIntegrator implements java.io.Serializable
       // hadBadCompression = false;
    }
 
-   Vector3d u_final = new Vector3d(), delta_u = new Vector3d();
+   private final Vector3d u_final = new Vector3d();
+   private final Vector3d delta_u = new Vector3d();
 
    public void computeImpulse(Vector3d impulse)
    {
@@ -433,7 +431,7 @@ public class CollisionIntegrator implements java.io.Serializable
          }
          else
          {
-            // System.out.println("Un-stable Stickng during compression and restitution!");
+            // System.out.println("Unstable Sticking during compression and restitution!");
             // Mirtich p.76
 
             if (uz > 0.0)
@@ -555,7 +553,7 @@ public class CollisionIntegrator implements java.io.Serializable
    private double solveBeta(Matrix3d K, double mu)
    {
       // Mirtich p. 83;
-      @SuppressWarnings("unused")
+//      @SuppressWarnings("unused")
       double a = K.getM00(), b = K.getM11(), c = K.getM22(), d = K.getM12(), e = K.getM02(), f = K.getM01();
 
       coeffs[0] = -f * mu + d;
@@ -785,11 +783,7 @@ public class CollisionIntegrator implements java.io.Serializable
 
    private class CompressionDerivativeVector implements CollisionDerivativeVector
    {
-      /**
-       *
-       */
       private static final long serialVersionUID = -4133081308328360568L;
-
 
       public CompressionDerivativeVector()
       {
@@ -827,9 +821,7 @@ public class CollisionIntegrator implements java.io.Serializable
             deriv[1] = Ky.dot(zeta) * Kz_zeta_inv;
             deriv[2] = uz * Kz_zeta_inv;
          }
-
       }
-
 
       public boolean isStuck(double[] state)
       {
@@ -839,32 +831,22 @@ public class CollisionIntegrator implements java.io.Serializable
          if (utot < U_STUCK_THRESH)
          {
             amStuck = true;
-
             return true;
          }
-
          // System.out.println("Checking if stuck during compression.  (ux, uy): ("+ux+","+uy+")");
 
          return false;
-
-
       }
-
    }
 
 
    private class RestitutionDerivativeVector implements CollisionDerivativeVector
    {
-      /**
-       *
-       */
       private static final long serialVersionUID = 4537460728198035585L;
-
 
       public RestitutionDerivativeVector()
       {
       }
-
 
       public void derivs(double Wz, double[] state, double[] deriv)
       {
@@ -882,9 +864,7 @@ public class CollisionIntegrator implements java.io.Serializable
             deriv[2] = Kz.dot(zeta) / uz;    // uz_dot  = Ky dot  zeta/uz;
 
          }
-
       }
-
 
       public boolean isStuck(double[] state)
       {
@@ -894,18 +874,11 @@ public class CollisionIntegrator implements java.io.Serializable
          if (utot < U_STUCK_THRESH)
          {
             amStuck = true;
-
             return true;
          }
 
          // System.out.println("Checking if stuck during restitution");
          return false;
-
-
       }
-
    }
-
-
-
 }

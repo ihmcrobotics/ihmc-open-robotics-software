@@ -37,10 +37,10 @@ public class NewtonsCradleSimulation
 
    public static void createSpinningCoinSimulation()
    {
-      SpinningCoinRobot robot = new SpinningCoinRobot();
+      SpinningCoinRobot spinningCoinRobot = new SpinningCoinRobot();
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(100000);
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
+      SimulationConstructionSet scs = new SimulationConstructionSet(spinningCoinRobot.getRobots(), parameters);
       scs.setDT(0.0001, 1);
       scs.setGroundVisible(false);
       scs.startOnAThread();
@@ -51,7 +51,7 @@ public class NewtonsCradleSimulation
       DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(10.0, 10.0, scs, 100);
 
       handler.addListener(visualize);
-      ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
+      ScsCollisionDetector collisionDetector = spinningCoinRobot.getCollisionDetector();
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
@@ -191,8 +191,8 @@ public class NewtonsCradleSimulation
 //            createNewtonsCradleSimulation();
       //      createStackOfBouncyBallsSimulation();
 //            createRowOfDominosSimulation();
-      createPileOfRandomObjectsSimulation();
-//            createSpinningCoinSimulation();
+//      createPileOfRandomObjectsSimulation();
+            createSpinningCoinSimulation();
 //      createStackOfBlocksSimulation();
    }
 }

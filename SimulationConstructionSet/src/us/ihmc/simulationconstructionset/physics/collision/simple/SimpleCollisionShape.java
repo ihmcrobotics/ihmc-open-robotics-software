@@ -11,6 +11,8 @@ public class SimpleCollisionShape implements CollisionShape
    private final CollisionShapeDescription transformedCollisionShapeDescription;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
+   private boolean isGround = false;
+
    public SimpleCollisionShape(CollisionShapeDescription collisionShapeDescription)
    {
       this.collisionShapeDescription = collisionShapeDescription;
@@ -20,7 +22,12 @@ public class SimpleCollisionShape implements CollisionShape
    @Override
    public boolean isGround()
    {
-      return false;
+      return isGround;
+   }
+   
+   public void setIsGround(boolean isGround)
+   {
+      this.isGround = isGround;
    }
 
    @Override
