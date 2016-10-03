@@ -18,6 +18,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CollisionResolutionTest
 {
+   
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCollisionResolutionOne() throws UnreasonableAccelerationException
