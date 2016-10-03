@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.newtonsCradle;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -28,7 +29,7 @@ public class SpinningCoinRobot
    private final double coinWidth = 0.00175; //quarter //0.1
    private final double coinRadius = 0.01213; //0.5; //
    private final double coinMass = 0.00567; //1.0; //
-   private double spinningAngularVelocity = 0.0 * 2.0 * Math.PI;
+   private double spinningAngularVelocity = 10.0 * 2.0 * Math.PI;
 
    private final double margin = 0.0002;
 
@@ -64,8 +65,8 @@ public class SpinningCoinRobot
       double z = coinRadius + 0.04; //0.04;
 
       double yaw = 0.0;
-      double pitch = 0.2;//0.0;
-      double roll = 0.0;//1.2; //Math.PI/2.0; //1.2;
+      double pitch = 0.0;//0.0;
+      double roll = 1.2; //Math.PI/2.0; //1.2;
 
       floatingJoint.setPosition(x, y, z);
       floatingJoint.setYawPitchRoll(yaw, pitch, roll);
@@ -148,6 +149,11 @@ public class SpinningCoinRobot
    {
       Link link = new Link("coin");
       link.setMassAndRadiiOfGyration(coinMass, coinRadius / 2.0, coinRadius / 2.0, coinWidth / 2.0);
+
+      Matrix3d momentOfInertiaMatrix = new Matrix3d();
+      link.getMomentOfInertia(momentOfInertiaMatrix);
+      System.out.println("momentOfInertia = " + momentOfInertiaMatrix);
+
       link.setComOffset(0.0, 0.0, 0.0);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();

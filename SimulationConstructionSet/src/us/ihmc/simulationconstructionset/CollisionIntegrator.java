@@ -17,7 +17,7 @@ public class CollisionIntegrator implements java.io.Serializable
 
    private static final long serialVersionUID = -6083539629185172597L;
    private static final double U_STUCK_THRESH = 0.0001;    // U_STUCK_THRESH = 0.0001;
-   private static final double ACCURACY = 0.0001;
+   private static final double ACCURACY = 1e-7;
    private static final double
       H_MIN = 1.0E-10, H_START = 0.001;    // H_MIN = 1.0E-10, H_START = 0.001; //H_MIN = 0.00000001, H_START = 0.001; //H_MIN = 0.000001, H_START = 0.001;
    private static final double UZ_OVERSHOOT = 0.0005;    // 0.001
@@ -205,6 +205,7 @@ public class CollisionIntegrator implements java.io.Serializable
 
       if (Math.abs(K_inv.determinant()) < 0.0001)
       {
+         System.err.println("Warning: K is not invertible in " + getClass().getSimpleName());
          // Cheesy Solution for now.  Look at the diagonal entries and if any are zero, assume that they are the null space and add a little to the other columns:
          // System.out.println("Having trouble inverting K.  Using cheesy inverse.");
 
@@ -313,7 +314,7 @@ public class CollisionIntegrator implements java.io.Serializable
       {
          nn++;
 
-         // System.out.println("Kz.dot(zeta)<0.0!!!!!!  Need to do integration with respect to pz first!!!!");
+//          System.out.println("Kz.dot(zeta)<0.0!!!!!!  Need to do integration with respect to pz first!!!!");
 
          // if (nn>20)System.out.println("Before pz integration (ux, uy, uz, Wz) = (" + ux + ", " + uy + ", " + uz + ", " + Wz + ")");
 
@@ -431,7 +432,7 @@ public class CollisionIntegrator implements java.io.Serializable
          }
          else
          {
-            // System.out.println("Unstable Sticking during compression and restitution!");
+//             System.out.println("Unstable Sticking during compression and restitution!");
             // Mirtich p.76
 
             if (uz > 0.0)

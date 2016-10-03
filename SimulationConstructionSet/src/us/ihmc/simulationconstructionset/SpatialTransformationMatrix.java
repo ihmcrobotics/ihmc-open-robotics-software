@@ -3,26 +3,11 @@ package us.ihmc.simulationconstructionset;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-/**
- * Title:        Yobotics! Simulation Construction Set<p>
- * Description:  Package for Simulating Dynamic Robots and Mechanisms<p>
- * Copyright:    Copyright (c) Jerry Pratt<p>
- * Company:      Yobotics, Inc. <p>
- * @author Jerry Pratt
- * @version Beta 1.0
- */
-
-
 public final class SpatialTransformationMatrix implements java.io.Serializable
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = -1437839453250728870L;
-   Matrix3d R = new Matrix3d();
-   Matrix3d r_Twidle = new Matrix3d();
-
-   // Vector3d r = new Vector3d();
+   private final Matrix3d R = new Matrix3d();
+   private final Matrix3d r_Twidle = new Matrix3d();
 
    public SpatialTransformationMatrix()
    {
@@ -33,7 +18,6 @@ public final class SpatialTransformationMatrix implements java.io.Serializable
       String ret = "R = " + R + "\n" + "r_Twidle = " + r_Twidle;
 
       return ret;
-
    }
 
    public void setFromOffsetAndRotation(Vector3d r_i, Matrix3d Rin)
@@ -53,13 +37,15 @@ public final class SpatialTransformationMatrix implements java.io.Serializable
       r_Twidle.setM22(0.0);
 
       /*
-       * r_Twidle.setElement(0,0, 0.0)   ;  r_Twidle.setElement(0,1, -r_i.z); r_Twidle.setElement(0,2, r_i.y);
-       * r_Twidle.setElement(1,0, r_i.z) ;  r_Twidle.setElement(1,1, 0.0)   ; r_Twidle.setElement(1,2, -r_i.x);
-       * r_Twidle.setElement(2,0, -r_i.y);  r_Twidle.setElement(2,1, r_i.x) ; r_Twidle.setElement(2,2, 0.0);
+       * r_Twidle.setElement(0,0, 0.0) ; r_Twidle.setElement(0,1, -r_i.z);
+       * r_Twidle.setElement(0,2, r_i.y); r_Twidle.setElement(1,0, r_i.z) ;
+       * r_Twidle.setElement(1,1, 0.0) ; r_Twidle.setElement(1,2, -r_i.x);
+       * r_Twidle.setElement(2,0, -r_i.y); r_Twidle.setElement(2,1, r_i.x) ;
+       * r_Twidle.setElement(2,2, 0.0);
        */
    }
 
-   Vector3d temp1 = new Vector3d();
+   private final Vector3d temp1 = new Vector3d();
 
    public void set(SpatialTransformationMatrix Min)
    {
@@ -70,8 +56,7 @@ public final class SpatialTransformationMatrix implements java.io.Serializable
 
    }
 
-
-   Matrix3d x_Twidle = new Matrix3d();
+   private final Matrix3d x_Twidle = new Matrix3d();
 
    public void invert()
    {
@@ -87,8 +72,6 @@ public final class SpatialTransformationMatrix implements java.io.Serializable
       r_Twidle.set(x_Twidle);
    }
 
-
-
    public void transform(SpatialVector v1)
    {
       R.transform(v1.top);
@@ -100,11 +83,10 @@ public final class SpatialTransformationMatrix implements java.io.Serializable
       v1.bottom.add(temp1);
    }
 
-
-   private Matrix3d Rt = new Matrix3d();
-   private Matrix3d R_IA_Rt = new Matrix3d(), R_IB_Rt = new Matrix3d(), R_IC_Rt = new Matrix3d();
-   private Matrix3d R_IB_Rt_r_Twidle = new Matrix3d(), r_Twidle_R_IA_Rt = new Matrix3d(), r_Twidle_R_IB_Rt = new Matrix3d(),
-                    r_Twidle_R_IB_Rt_r_Twidle = new Matrix3d();
+   private final Matrix3d Rt = new Matrix3d();
+   private final Matrix3d R_IA_Rt = new Matrix3d(), R_IB_Rt = new Matrix3d(), R_IC_Rt = new Matrix3d();
+   private final Matrix3d R_IB_Rt_r_Twidle = new Matrix3d(), r_Twidle_R_IA_Rt = new Matrix3d(), r_Twidle_R_IB_Rt = new Matrix3d(),
+         r_Twidle_R_IB_Rt_r_Twidle = new Matrix3d();
 
    public void transformSpatialInertia(SpatialInertiaMatrix I)
    {
@@ -138,68 +120,37 @@ public final class SpatialTransformationMatrix implements java.io.Serializable
    }
 
    /*
-    * private Matrix3d r_twidle_RIA = new Matrix3d(), r_twidle_RIB = new Matrix3d();
-    * private Matrix3d IA_temp = new Matrix3d(), IB_temp = new Matrix3d(), IC_temp = new Matrix3d(), ID_temp = new Matrix3d();
-    *
-    * public void multiplySpatialInertia(SpatialInertiaMatrix I)
-    * {
+    * private Matrix3d r_twidle_RIA = new Matrix3d(), r_twidle_RIB = new
+    * Matrix3d(); private Matrix3d IA_temp = new Matrix3d(), IB_temp = new
+    * Matrix3d(), IC_temp = new Matrix3d(), ID_temp = new Matrix3d(); public
+    * void multiplySpatialInertia(SpatialInertiaMatrix I) {
     * IA_temp.set(I.A);I.A.set(R);I.A.mul(IA_temp);
     * IB_temp.set(I.B);I.B.set(R);I.B.mul(IB_temp);
     * IC_temp.set(I.C);I.C.set(R);I.C.mul(IC_temp);
-    * ID_temp.set(I.D);I.D.set(R);I.D.mul(ID_temp);
-    *
-    * r_twidle_RIA.set(r_Twidle);
-    * r_twidle_RIA.mul(I.A);
-    * I.C.sub(r_twidle_RIA);
-    *
-    * r_twidle_RIB.set(r_Twidle);
-    * r_twidle_RIB.mul(I.B);
-    * I.D.sub(r_twidle_RIB);
-    *
-    * }
+    * ID_temp.set(I.D);I.D.set(R);I.D.mul(ID_temp); r_twidle_RIA.set(r_Twidle);
+    * r_twidle_RIA.mul(I.A); I.C.sub(r_twidle_RIA); r_twidle_RIB.set(r_Twidle);
+    * r_twidle_RIB.mul(I.B); I.D.sub(r_twidle_RIB); }
     */
 
    /*
-    * private Matrix3d r_twidle_R = new Matrix3d(), IB_r_twidle_R = new Matrix3d(), ID_r_twidle_R = new Matrix3d();
-    * private Matrix3d IA_R = new Matrix3d(),  IB_R = new Matrix3d(),  IC_R = new Matrix3d(),  ID_R = new Matrix3d();
-    * public void postMultiplySpatialInertia(SpatialInertiaMatrix I)
-    * {
-    * I.A.mul(R);
-    * I.C.mul(R);
-    *
-    * r_twidle_R.set(r_Twidle);
-    * r_twidle_R.mul(R);
-    *
-    * IB_r_twidle_R.set(I.B);
-    * IB_r_twidle_R.mul(r_twidle_R);
-    * I.A.sub(IB_r_twidle_R);
-    *
-    * ID_r_twidle_R.set(I.D);
-    * ID_r_twidle_R.mul(r_twidle_R);
-    * I.C.sub(ID_r_twidle_R);
-    *
-    * I.B.mul(R);
-    * I.D.mul(R);
-    * }
+    * private Matrix3d r_twidle_R = new Matrix3d(), IB_r_twidle_R = new
+    * Matrix3d(), ID_r_twidle_R = new Matrix3d(); private Matrix3d IA_R = new
+    * Matrix3d(), IB_R = new Matrix3d(), IC_R = new Matrix3d(), ID_R = new
+    * Matrix3d(); public void postMultiplySpatialInertia(SpatialInertiaMatrix I)
+    * { I.A.mul(R); I.C.mul(R); r_twidle_R.set(r_Twidle); r_twidle_R.mul(R);
+    * IB_r_twidle_R.set(I.B); IB_r_twidle_R.mul(r_twidle_R);
+    * I.A.sub(IB_r_twidle_R); ID_r_twidle_R.set(I.D);
+    * ID_r_twidle_R.mul(r_twidle_R); I.C.sub(ID_r_twidle_R); I.B.mul(R);
+    * I.D.mul(R); }
     */
-
 
    /*
-    *  private Vector3d Rtop = new Vector3d(), Rbot = new Vector3d(), r_Twidle_Rtop = new Vector3d();
-    *
-    * public void transformSpatialZeroAccel(SpatialVector Z)
-    * {
-    *  Rtop.set(Z.top); R.transform(Rtop);
-    *  Rbot.set(Z.bottom); R.transform(Rbot);
-    *
-    *  r_Twidle_Rtop.set(Rtop);
-    *  r_Twidle.transform(r_Twidle_Rtop);
-    *
-    *  Z.top.set(Rtop);
-    *  Z.bottom.sub(Rbot, r_Twidle_Rtop);
-    * }
+    * private Vector3d Rtop = new Vector3d(), Rbot = new Vector3d(),
+    * r_Twidle_Rtop = new Vector3d(); public void
+    * transformSpatialZeroAccel(SpatialVector Z) { Rtop.set(Z.top);
+    * R.transform(Rtop); Rbot.set(Z.bottom); R.transform(Rbot);
+    * r_Twidle_Rtop.set(Rtop); r_Twidle.transform(r_Twidle_Rtop);
+    * Z.top.set(Rtop); Z.bottom.sub(Rbot, r_Twidle_Rtop); }
     */
-
-
 
 }
