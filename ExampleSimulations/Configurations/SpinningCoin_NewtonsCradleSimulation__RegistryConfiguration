@@ -1,5 +1,7 @@
 root*false*false
 root.SpinningCoin*false*false
+root.SpinningCoin.SpinningCoinRobot*false*false
+root.GroundRobot*false*false
 root.DefaultCollisionVisualizer*false*false
 root.DefaultCollisionVisualizer.CollisionOneBalls*false*false
 root.DefaultCollisionVisualizer.CollisionTwoBalls*false*false

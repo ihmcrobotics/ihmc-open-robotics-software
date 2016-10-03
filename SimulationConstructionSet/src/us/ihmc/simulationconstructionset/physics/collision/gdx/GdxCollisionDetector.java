@@ -286,7 +286,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    {
       private final BulletShapeDescription description;
       private final Link link;
-      private final boolean isGround;
+      private boolean isGround;
 
       // transform from shapeToLink coordinate system
       private final RigidBodyTransform shapeToLink = new RigidBodyTransform();
@@ -380,6 +380,12 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       {
          // TODO Auto-generated method stub
 
+      }
+
+      @Override
+      public void setIsGround(boolean isGround)
+      {
+         this.isGround = isGround;
       }
    }
 

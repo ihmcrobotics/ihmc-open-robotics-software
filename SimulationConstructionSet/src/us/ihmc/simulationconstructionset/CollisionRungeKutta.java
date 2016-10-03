@@ -2,27 +2,21 @@ package us.ihmc.simulationconstructionset;
 
 class ODEException extends Exception implements java.io.Serializable
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = -9101473542052720197L;
 
    public ODEException()
    {
    }
 
-   public ODEException(String msg)
+   public ODEException(String message)
    {
-      super(msg);
+      super(message);
    }
 }
 
 
 public class CollisionRungeKutta implements java.io.Serializable
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = 8085611439415747376L;
 
    private static final boolean REPORT = false;    // false; //true;

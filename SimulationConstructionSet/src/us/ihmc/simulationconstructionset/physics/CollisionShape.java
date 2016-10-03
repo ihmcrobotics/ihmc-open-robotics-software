@@ -12,6 +12,12 @@ public interface CollisionShape
     * Returns true if the shape is not mobile and part of the environment.
     */
    public abstract boolean isGround();
+   
+   /**
+    * Set whether or not this collision shape is not mobile and part of the environment.
+    * @param isGround
+    */
+   public abstract void setIsGround(boolean isGround);
 
    /**
     * Bit field indicating which groups the shape belongs to

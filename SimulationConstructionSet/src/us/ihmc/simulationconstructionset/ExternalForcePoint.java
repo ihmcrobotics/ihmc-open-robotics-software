@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.physics.engine.jerry.JointPhysics;
 
 public class ExternalForcePoint extends KinematicPoint
 {
@@ -91,6 +92,8 @@ public class ExternalForcePoint extends KinematicPoint
 
    public boolean resolveCollision(ExternalForcePoint externalForcePoint, Vector3d normal_world, double epsilon, double mu, Vector3d p_world)
    {      
+//      System.out.println("Resolving collision with other object");
+
       computeRotationFromNormalVector(R0_coll, normal_world);
       Rcoll_0.set(R0_coll);
       Rcoll_0.transpose();
@@ -122,7 +125,9 @@ public class ExternalForcePoint extends KinematicPoint
 
       parentJoint.physics.applyImpulse(p_world);
       p_world.scale(-1.0);
-      externalForcePoint.parentJoint.physics.applyImpulse(p_world);    // Equal and opposite impulses;
+      JointPhysics<?> jointPhysics = externalForcePoint.parentJoint.physics;
+      
+      jointPhysics.applyImpulse(p_world);    // Equal and opposite impulses;
 
       // Rotate into world coordinates:
       R0_coll.transform(p_world);
@@ -138,7 +143,12 @@ public class ExternalForcePoint extends KinematicPoint
 
    public boolean resolveCollision(Vector3d vel_world, Vector3d normal_world, double epsilon, double mu, Vector3d p_world)
    {
+//      System.out.println("Resolving collision with ground");
+//      System.out.println("Normal Vector = " + normal_world);
+      
       computeRotationFromNormalVector(R0_coll, normal_world);
+//      System.out.println("R0_coll = " + R0_coll);
+
       Rcoll_0.set(R0_coll);
       Rcoll_0.transpose();
 
@@ -171,6 +181,8 @@ public class ExternalForcePoint extends KinematicPoint
 
    public void resolveMicroCollision(double penetration_squared, Vector3d vel_world, Vector3d normal_world, double epsilon, double mu, Vector3d p_world)
    {
+//      System.out.println("Resolving micro collision");
+
       computeRotationFromNormalVector(R0_coll, normal_world);
       Rcoll_0.set(R0_coll);
       Rcoll_0.transpose();

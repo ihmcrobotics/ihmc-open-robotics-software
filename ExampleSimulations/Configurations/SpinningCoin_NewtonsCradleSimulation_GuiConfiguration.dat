@@ -133,7 +133,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SpinningCoin.baseef_collision_x,root.SpinningCoin.baseef_collision_y,root.SpinningCoin.baseef_collision_z</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -174,12 +174,12 @@ Tab0
 <Graph Array Window Size>1</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>0</ScreenID>
-<WindowLocation>1912.0, -8.0</WindowLocation>
-<WindowSize>1936.0, 1102.0</WindowSize>
+<WindowLocation>1911.0, -9.0</WindowLocation>
+<WindowSize>1938.0, 1098.0</WindowSize>
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.angularMomentumX</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -191,7 +191,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.angularMomentumY,root.SpinningCoin.SpinningCoinRobot.angularMomentumX</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -203,7 +203,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.angularMomentumZ</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -215,7 +215,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.linearMomentumX</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -227,7 +227,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.linearMomentumY</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -239,9 +239,45 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.linearMomentumZ</Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.potentialEnergy</Variables>
+		<GraphConfiguration>
+			<Name>config20</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.translationalKineticEnergy,root.SpinningCoin.SpinningCoinRobot.rotationalKineticEnergy</Variables>
+		<GraphConfiguration>
+			<Name>config21</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.totalEnergy</Variables>
+		<GraphConfiguration>
+			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -260,9 +296,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-0.1727608607492958</Camera X>
- <Camera Y>-1.239935078669606</Camera Y>
- <Camera Z>4.409596823885791E-4</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -286,8 +322,8 @@ Tab0
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.0501938034672047</Fix X>
-<Fix Y>-0.11295952438401824</Fix Y>
-<Fix Z>-0.0031107386732519005</Fix Z>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
 </Fix Position>
 </Canvas 1>
