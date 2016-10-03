@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.Skippy.SkippyController.centerOfMassVelocityX,root.Skippy.SkippyController.centerOfMassVelocityY</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -110,9 +110,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>40.0</Camera X>
- <Camera Y>0.0</Camera Y>
- <Camera Z>0.2</Camera Z>
+ <Camera X>3.0916536124157776</Camera X>
+ <Camera Y>3.8651543194057667</Camera Y>
+ <Camera Z>3.681299212527178</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -136,8 +136,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.0</Fix X>
-<Fix Y>0.0</Fix Y>
-<Fix Z>0.6</Fix Z>
+<Fix X>-0.4679202392081869</Fix X>
+<Fix Y>-0.26426695842177717</Fix Y>
+<Fix Z>2.4650640294065163</Fix Z>
 </Fix Position>
 </Canvas 1>
