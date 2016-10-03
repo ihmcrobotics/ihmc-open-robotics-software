@@ -3,7 +3,6 @@ package us.ihmc.robotics.generatedTestSuites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
-import us.ihmc.robotics.kinematics.fourbar.ConstantSideFourBarCalculatorWithDerivativesTest;
 import us.ihmc.tools.testing.TestPlanSuite;
 import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
 import us.ihmc.tools.testing.TestPlanTarget;
@@ -96,9 +95,10 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.robotics.hyperCubeTree.SphericalLinearResolutionProviderTest.class,
    us.ihmc.robotics.kinematics.AverageQuaternionCalculatorTest.class,
    us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculatorTest.class,
+   us.ihmc.robotics.kinematics.fourbar.ConstantSideFourBarCalculatorWithDerivativesTest.class,
    us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorsComparisonTest.class,
    us.ihmc.robotics.kinematics.fourbar.FourBarCalculatorTest.class,
-   ConstantSideFourBarCalculatorWithDerivativesTest.class,
+   us.ihmc.robotics.kinematics.fourbar.YoVariableSideFourbarCalculatorWithDerivativesTest.class,
    us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculatorTest.class,
    us.ihmc.robotics.kinematics.TimeStampedTransform3DTest.class,
    us.ihmc.robotics.kinematics.TransformInterpolationCalculatorTest.class,

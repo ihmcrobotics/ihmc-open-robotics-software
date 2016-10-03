@@ -82,7 +82,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
    private void testDimension(int numberOfFootstepsToConsider, int numberOfVertices, boolean useStepAdjustment, boolean useFeedback, boolean useTwoCMPs)
    {
-      super.setNumberOfVertices(numberOfVertices);
+      super.setNumberOfCMPVertices(numberOfVertices);
       super.submitProblemConditions(numberOfFootstepsToConsider, useStepAdjustment, useFeedback, useTwoCMPs);
 
       int numberOfLagrangeMultipliers = 2;
@@ -121,7 +121,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       assertEquals(name, numberOfFootstepVariables, this.numberOfFootstepVariables, epsilon);
       assertEquals(name, numberOfLagrangeMultipliers, this.numberOfLagrangeMultipliers, epsilon);
       assertEquals(name, totalNumberOfFreeVariables, this.numberOfFreeVariables, epsilon);
-      assertEquals(name, numberOfVertices, this.numberOfVertices, epsilon);
+      assertEquals(name, numberOfVertices, this.numberOfCMPVertices, epsilon);
 
       assertEquals(name, feedbackTaskIndex, this.feedbackCMPIndex, epsilon);
       assertEquals(name, dynamicRelaxationIndex, this.dynamicRelaxtionIndex, epsilon);
@@ -145,8 +145,8 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
 
       if (useFeedback)
       {
-         assertEquals(name, this.numberOfVertices, stanceCMPCost_G.numRows, epsilon);
-         assertEquals(name, this.numberOfVertices, stanceCMPCost_G.numCols, epsilon);
+         assertEquals(name, this.numberOfCMPVertices, stanceCMPCost_G.numRows, epsilon);
+         assertEquals(name, this.numberOfCMPVertices, stanceCMPCost_G.numCols, epsilon);
       }
 
       assertEquals(name, 2, feedbackCost_H.numRows, epsilon);
@@ -325,7 +325,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       int numberOffootstepsToConsider = 2;
       int numberOfVertices = 4;
 
-      super.setNumberOfVertices(numberOfVertices);
+      super.setNumberOfCMPVertices(numberOfVertices);
       super.submitProblemConditions(numberOffootstepsToConsider, true, true, false);
       super.setFeedbackConditions(0.001, feedbackGain, 1000.0);
 
@@ -372,14 +372,14 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       DenseMatrix64F extractedCMPSum_Aeq = new DenseMatrix64F(numberOfVertices, 1);
       DenseMatrix64F extractedCMPSum_beq = new DenseMatrix64F(1, 1);
 
-      CommonOps.extract(solverInput_Aeq, 0, 4 + 2 * numberOffootstepsToConsider + numberOfVertices, 0, 2, extractedDynamics_Aeq, 0, 0);
-      CommonOps.extract(solverInput_beq, 0, 2, 0, 1, extractedDynamics_beq, 0, 0);
+      CommonOps.extract(solverInput_Aeq, 0, 4 + 2 * numberOffootstepsToConsider + numberOfVertices, 3, 5, extractedDynamics_Aeq, 0, 0);
+      CommonOps.extract(solverInput_beq, 3, 5, 0, 1, extractedDynamics_beq, 0, 0);
 
-      CommonOps.extract(solverInput_Aeq, 2 * numberOffootstepsToConsider, 2 * numberOffootstepsToConsider + numberOfVertices + 4, 2, 4, extractedCMPDynamics_Aeq, 0, 0);
-      CommonOps.extract(solverInput_beq, 2, 4, 0, 1, extractedCMPDynamics_beq, 0, 0);
+      CommonOps.extract(solverInput_Aeq, 2 * numberOffootstepsToConsider, 2*numberOffootstepsToConsider + numberOfVertices, 0, 2, extractedCMPDynamics_Aeq, 0, 0);
+      CommonOps.extract(solverInput_beq, 0, 2, 0, 1, extractedCMPDynamics_beq, 0, 0);
 
-      CommonOps.extract(solverInput_Aeq, 2 * numberOffootstepsToConsider + 4, 2 * numberOffootstepsToConsider + numberOfVertices + 4, 4, 5, extractedCMPSum_Aeq, 0, 0);
-      CommonOps.extract(solverInput_beq, 4, 5, 0, 1, extractedCMPSum_beq, 0, 0);
+      CommonOps.extract(solverInput_Aeq, 2 * numberOffootstepsToConsider + 4, 2 * numberOffootstepsToConsider + numberOfVertices + 4, 2, 3, extractedCMPSum_Aeq, 0, 0);
+      CommonOps.extract(solverInput_beq, 2, 3, 0, 1, extractedCMPSum_beq, 0, 0);
 
       JUnitTools.assertMatrixEquals(dynamics_Aeq, extractedDynamics_Aeq, epsilon);
       JUnitTools.assertMatrixEquals(dynamics_beq, extractedDynamics_beq, epsilon);
