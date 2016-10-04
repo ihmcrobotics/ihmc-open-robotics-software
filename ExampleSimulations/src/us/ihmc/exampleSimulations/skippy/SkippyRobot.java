@@ -293,7 +293,7 @@ public class SkippyRobot extends Robot
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -LEG_LENGTH);
-      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Crimson());
+      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Glass(0.75));
 
       // associate the linkGraphics object with the link object
       leg.setLinkGraphics(linkGraphics);
@@ -314,7 +314,7 @@ public class SkippyRobot extends Robot
       torso.setMomentOfInertia(TORSO_MOI, TORSO_MOI, 0.0001);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.LightSkyBlue());
+      linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.Glass(0.75));
       linkGraphics.addSphere(0.10, YoAppearance.White());
 
       torso.setLinkGraphics(linkGraphics);
