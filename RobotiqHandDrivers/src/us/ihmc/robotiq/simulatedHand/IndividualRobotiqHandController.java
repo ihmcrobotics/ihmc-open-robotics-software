@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.MathTools;

@@ -1,30 +1,30 @@
-package us.ihmc.SdfLoader;
+package us.ihmc.robotModels;
 
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
-public class SDFPerfectSimulatedOutputWriter implements OutputWriter
+public class PerfectSimulatedOutputWriter implements OutputWriter
 {
    private final String name;
    protected final FloatingRootJointRobot robot;
    protected ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint> rootJointPair;
    protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
    
-   public SDFPerfectSimulatedOutputWriter(FloatingRootJointRobot robot)
+   public PerfectSimulatedOutputWriter(FloatingRootJointRobot robot)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
    }
    
-   public SDFPerfectSimulatedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel)
+   public PerfectSimulatedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel)
    {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;

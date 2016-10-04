@@ -14,7 +14,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;

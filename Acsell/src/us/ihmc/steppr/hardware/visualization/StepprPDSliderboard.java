@@ -2,7 +2,7 @@ package us.ihmc.steppr.hardware.visualization;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;

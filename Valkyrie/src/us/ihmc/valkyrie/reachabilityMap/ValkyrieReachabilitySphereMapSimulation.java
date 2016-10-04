@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.reachabilityMap;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.ReachabilityMapListener;
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.ReachabilitySphereMapCalculator;

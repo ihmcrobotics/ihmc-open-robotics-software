@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 

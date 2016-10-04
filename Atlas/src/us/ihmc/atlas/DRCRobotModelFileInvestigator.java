@@ -3,7 +3,7 @@ package us.ihmc.atlas;
 import java.io.File;
 import java.io.PrintWriter;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 public class DRCRobotModelFileInvestigator
