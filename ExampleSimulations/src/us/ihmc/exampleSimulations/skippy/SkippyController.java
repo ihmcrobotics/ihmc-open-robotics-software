@@ -243,13 +243,13 @@ public class SkippyController implements RobotController
 
       if (skippyToDo.getEnumValue() == SkippyToDo.BALANCE)
       {
-//         q_d_hip.set(0.6);
-//         q_d_shoulder.set(0.0);
+         q_d_hip.set(0.6);
+         q_d_shoulder.set(0.0);
       }
       else if (skippyToDo.getEnumValue() == SkippyToDo.JUMP_FORWARD)
       {
-//         q_d_hip.set(0.6);
-//         q_d_shoulder.set(0.0);
+         q_d_hip.set(0.6);
+         q_d_shoulder.set(0.0);
       }
 
       planarDistanceYZPlane = new DoubleYoVariable("planarDistanceYZPlane", registry);
@@ -276,34 +276,34 @@ public class SkippyController implements RobotController
        * CoM
        */
       YoGraphicPosition comPositionYoGraphic = new YoGraphicPosition("CoM", centerOfMass, 0.01, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
-      yoGraphicsListRegistries.registerYoGraphic("actualICP", comPositionYoGraphic);
-      yoGraphicsListRegistries.registerArtifact("actualICP", comPositionYoGraphic.createArtifact());
+      yoGraphicsListRegistries.registerYoGraphic("allGraphics", comPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("allGraphics", comPositionYoGraphic.createArtifact());
       /*
        * ICP
        */
       YoGraphicPosition icpPositionYoGraphic = new YoGraphicPosition("ICP", actualICP, 0.01, YoAppearance.Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
-      yoGraphicsListRegistries.registerYoGraphic("actualICP", icpPositionYoGraphic);
-      yoGraphicsListRegistries.registerArtifact("actualICP", icpPositionYoGraphic.createArtifact());
+      yoGraphicsListRegistries.registerYoGraphic("allGraphics", icpPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("allGraphics", icpPositionYoGraphic.createArtifact());
       /*
        * Foot
        */
       YoGraphicPosition footPositionYoGraphic = new YoGraphicPosition("Foot", footLocation, 0.01, YoAppearance.DarkBlue(), GraphicType.BALL);
-      yoGraphicsListRegistries.registerYoGraphic("actualICP", footPositionYoGraphic);
-      yoGraphicsListRegistries.registerArtifact("actualICP", footPositionYoGraphic.createArtifact());
+      yoGraphicsListRegistries.registerYoGraphic("allGraphics", footPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("allGraphics", footPositionYoGraphic.createArtifact());
       /*
        * CMP from definition
        */
       YoGraphicPosition cmpPositionYoGraphic = new YoGraphicPosition("CMP from definition", actualCMPFromDefinition, 0.01, YoAppearance.Red(),
                                                                      GraphicType.BALL_WITH_ROTATED_CROSS);
-      yoGraphicsListRegistries.registerYoGraphic("actualICP", cmpPositionYoGraphic);
-      yoGraphicsListRegistries.registerArtifact("actualICP", cmpPositionYoGraphic.createArtifact());
+      yoGraphicsListRegistries.registerYoGraphic("allGraphics", cmpPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("allGraphics", cmpPositionYoGraphic.createArtifact());
       /*
        * CMP from ICP
        */
       YoGraphicPosition cmpFromIcpPositionYoGraphic = new YoGraphicPosition("CMP from ICP", desiredCMPFromICP, 0.0125, YoAppearance.DarkMagenta(),
                                                                             GraphicType.BALL_WITH_ROTATED_CROSS);
-      yoGraphicsListRegistries.registerYoGraphic("actualICP", cmpFromIcpPositionYoGraphic);
-      yoGraphicsListRegistries.registerArtifact("actualICP", cmpFromIcpPositionYoGraphic.createArtifact());
+      yoGraphicsListRegistries.registerYoGraphic("actuallGraphicsalICP", cmpFromIcpPositionYoGraphic);
+      yoGraphicsListRegistries.registerArtifact("allGraphics", cmpFromIcpPositionYoGraphic.createArtifact());
       /*
        * Desired reaction force
        */
@@ -323,6 +323,12 @@ public class SkippyController implements RobotController
                                                                             YoAppearance.LightBlue(), true);
       yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), cmpToComPositionVectorYoGraphic);
       /*
+       * Foot to hip joint position vector
+       */
+      YoGraphicVector footToHipPositionVectorYoGraphic = new YoGraphicVector("footToHipPositionVectorYoGraphic", footLocation, footToHipPositionVector, 1.0,
+                                                                            YoAppearance.Red(), true);
+      yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), footToHipPositionVectorYoGraphic);
+      /*
        * Hip joint axis
        */
       YoGraphicVector hipJointAxisYoGraphic = new YoGraphicVector("hipJointAxisYoGraphic", hipJointPosition, hipJointUnitVector, 0.5, YoAppearance.AliceBlue(),
@@ -334,6 +340,12 @@ public class SkippyController implements RobotController
       YoGraphicVector tauHipJointAxisYoGraphic = new YoGraphicVector("tauHipJointAxisYoGraphic", hipJointPosition, tauHipJoint, 0.05, YoAppearance.MediumSlateBlue(),
                                                                   true);
       yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), tauHipJointAxisYoGraphic);
+      /*
+       * Foot to shoulder joint position vector
+       */
+      YoGraphicVector footToShoulderPositionVectorYoGraphic = new YoGraphicVector("footToShoulderPositionVectorYoGraphic", footLocation, footToShoulderPositionVector, 1.0,
+                                                                             YoAppearance.Red(), true);
+      yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), footToShoulderPositionVectorYoGraphic);
       /*
        * Shoulder joint axis
        */
@@ -383,6 +395,7 @@ public class SkippyController implements RobotController
       virtualMassOnFoot.set(actualGroundReactionForce.getZ() / robot.getQdd_z().getDoubleValue());
       linearAndAngularMomentumRateOfChange();
       cmpFromDefinition();
+//      cmpFromIcpDynamics();
       setParametersForControlModes();
       computeFootToCenterOfMassLocation();
       if (skippyToDo.getEnumValue() == SkippyToDo.BALANCE)
@@ -561,14 +574,8 @@ public class SkippyController implements RobotController
     */
    public void positionVectorFomCmpToCom()
    {
-      /*
-       * CoM position vector to CMP
-       */
-      //      actualCoMAndCoMVelocity();
-      Vector3d tempCmpToComPositionVector = new Vector3d();
-      centerOfMass.get(tempCmpToComPositionVector);
-      cmpToComPositionVector.setVector(tempCmpToComPositionVector);
-      cmpToComPositionVector.sub(desiredCMPFromICP.getFrameTuple().getPoint());
+      cmpToComPositionVector.set(centerOfMass);
+      cmpToComPositionVector.sub(desiredCMPFromICP);
    }
 
    /**
@@ -591,11 +598,14 @@ public class SkippyController implements RobotController
    {
       Point3d tempCMP = new Point3d();
       Point3d tempFootLocation = new Point3d();
-      actualICP.get(tempCMP);
-      tempFootLocation = robot.computeFootLocation();
-      tempCMP.sub(tempFootLocation);
-      tempCMP.scale(kCapture.getDoubleValue());
-      tempCMP.add(actualICP.getPoint3dCopy());
+      /*
+       * CPM from ICP dynamics, Equation 3
+       */
+      actualICP.get(tempCMP); //                         Get actual ICP on tempCMP
+      tempFootLocation = robot.computeFootLocation(); // Get foot location on tempFootLocation
+      tempCMP.sub(tempFootLocation);   //                Get ICP-foot error on tempCMP
+      tempCMP.scale(kCapture.getDoubleValue()); //       Multiply ICP-foot error by kCapture 
+      tempCMP.add(actualICP.getPoint3dCopy());  //       Add actual ICP to complete Equation 3
       tempCMP.setZ(0.0);
       desiredCMPFromICP.set(tempCMP);
    }
@@ -719,15 +729,12 @@ public class SkippyController implements RobotController
        * Actual ICP
        */
       formerICP.set(actualICP);
-      //      actualICP.set(footLocation);
-      //      actualICP.add(actualIcpToFootError);
       /*
        * Compute CMP
        */
       desiredCMPFromICP.set(actualIcpToFootError);
       desiredCMPFromICP.scale(-kCapture.getDoubleValue());
       desiredCMPFromICP.add(actualICP);
-      //      desiredCMPFromICP.add(actualIcpToFootError);
       /*
        * Compute position vector from CMP to COM
        */
@@ -1318,12 +1325,12 @@ public class SkippyController implements RobotController
 
       public void doAction()
       {
-         //         q_d_hip.set(0.6);
+         q_d_hip.set(0.6);
       }
 
       public void doTransitionIntoAction()
       {
-//         q_d_hip.set(0.6);
+         q_d_hip.set(0.6);
       }
 
       public void doTransitionOutOfAction()
@@ -1351,7 +1358,7 @@ public class SkippyController implements RobotController
       {
          if (direction == SkippyToDo.JUMP_FORWARD)
          {
-//            q_d_hip.set(1.6);
+            q_d_hip.set(1.6);
          }
       }
 
@@ -1380,7 +1387,7 @@ public class SkippyController implements RobotController
          if (direction == SkippyToDo.JUMP_FORWARD)
          {
             hipPlaneControlMode.set(SkippyPlaneControlMode.POSITION);
-//            q_d_hip.set(1.4);
+            q_d_hip.set(1.4);
 
          }
       }
@@ -1409,7 +1416,7 @@ public class SkippyController implements RobotController
 
       public void doTransitionIntoAction()
       {
-//         q_d_hip.set(0.45);
+         q_d_hip.set(0.45);
       }
 
       public void doTransitionOutOfAction()
@@ -1435,7 +1442,7 @@ public class SkippyController implements RobotController
 
       public void doTransitionIntoAction()
       {
-//         q_d_hip.set(-1.3);
+         q_d_hip.set(-1.3);
       }
 
       public void doTransitionOutOfAction()
@@ -1464,9 +1471,9 @@ public class SkippyController implements RobotController
          hipPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
          shoulderPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
 
-//         q_d_hip.set(-0.9);
-//         q_d_shoulder.set(0.0);
-         // robot.glueDownToGroundPoint.setForce(0.0, 0.0, -1450.0);
+         q_d_hip.set(-0.9);
+         q_d_shoulder.set(0.0);
+         robot.glueDownToGroundPoint.setForce(0.0, 0.0, -1450.0);
       }
 
       public void doTransitionOutOfAction()

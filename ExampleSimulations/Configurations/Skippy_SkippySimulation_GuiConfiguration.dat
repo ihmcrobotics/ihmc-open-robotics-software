@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.centerOfMassVelocityX,root.Skippy.SkippyController.centerOfMassVelocityY</Variables>
+		<Variables>root.Skippy.gc_foot_fs,root.Skippy.SkippyController.stateMachine,root.Skippy.SkippyController.SkippyToDo</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,21 +25,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.gc_foot_fs,root.Skippy.SkippyController.stateMachine,root.Skippy.SkippyController.SkippyToDo</Variables>
+		<Variables>root.Skippy.SkippyController.tauHipJointX,root.Skippy.SkippyController.tauHipJointY</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.desiredGroundReactionForceZ,root.Skippy.SkippyController.actualGroundReactionForceZ</Variables>
-		<GraphConfiguration>
-			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -67,7 +55,7 @@
 	<Graph>
 		<Variables>root.Skippy.tau_shoulderJoint,root.Skippy.SkippyController.tauOnShoulderJointAxis</Variables>
 		<GraphConfiguration>
-			<Name>config5</Name>
+			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -79,7 +67,7 @@
 	<Graph>
 		<Variables>root.Skippy.tau_hip,root.Skippy.SkippyController.tauOnHipJointAxis</Variables>
 		<GraphConfiguration>
-			<Name>config6</Name>
+			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -91,7 +79,7 @@
 	<Graph>
 		<Variables>root.Skippy.SkippyController.actualGroundReactionForceX,root.Skippy.SkippyController.actualGroundReactionForceY,root.Skippy.SkippyController.actualGroundReactionForceZ,root.Skippy.SkippyController.desiredGroundReactionForceZ,root.Skippy.qdd_z</Variables>
 		<GraphConfiguration>
-			<Name>config7</Name>
+			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -110,9 +98,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>3.0916536124157776</Camera X>
- <Camera Y>3.8651543194057667</Camera Y>
- <Camera Z>3.681299212527178</Camera Z>
+ <Camera X>0.8726147150891643</Camera X>
+ <Camera Y>1.2300958506348287</Camera Y>
+ <Camera Z>5.03820154715856</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -136,8 +124,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.4679202392081869</Fix X>
-<Fix Y>-0.26426695842177717</Fix Y>
-<Fix Z>2.4650640294065163</Fix Z>
+<Fix X>0.7969852803927537</Fix X>
+<Fix Y>1.2869397536324736</Fix Y>
+<Fix Z>5.07058918831218</Fix Z>
 </Fix Position>
 </Canvas 1>
