@@ -1,14 +1,13 @@
 package us.ihmc.robotDataCommunication.logger;
 
-import java.io.IOException;
-
-import javax.vecmath.Point3d;
-
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+
+import javax.vecmath.Point3d;
+import java.io.IOException;
 
 public class LogVisualizerListenerDemo implements YoVariableLogPlaybackListener
 {
@@ -25,7 +24,7 @@ public class LogVisualizerListenerDemo implements YoVariableLogPlaybackListener
    private DoubleYoVariable desiredCoMHeight;
 
    @Override
-   public void setRobot(HumanoidFloatingRootJointRobot robot)
+   public void setRobot(FloatingRootJointRobot robot)
    {
       joints = robot.getOneDegreeOfFreedomJoints();
       origin = robot.getRootJoint();
