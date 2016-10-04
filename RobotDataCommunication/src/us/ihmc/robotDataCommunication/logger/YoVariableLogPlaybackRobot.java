@@ -60,7 +60,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
          List<JointState<? extends Joint>> jointStates, List<YoVariable<?>> variables, LogPropertiesReader logProperties, SimulationConstructionSet scs)
          throws IOException
    {
-      super(robotDescription, null);
+      super(robotDescription);
 
       this.timestamp = new LongYoVariable("timestamp", getRobotsYoVariableRegistry());
       this.robotTime = new DoubleYoVariable("robotTime", getRobotsYoVariableRegistry());

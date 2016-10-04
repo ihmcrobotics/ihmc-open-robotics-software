@@ -62,7 +62,7 @@ public class SDFModelLoader implements LogModelLoader
       GeneralizedSDFRobotModel generalizedSDFRobotModel = createJaxbSDFLoader().getGeneralizedSDFRobotModel(modelName);
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
       RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
-      return new VisualizerRobot(description, null);
+      return new VisualizerRobot(description);
    }
 
    public JaxbSDFLoader createJaxbSDFLoader()
