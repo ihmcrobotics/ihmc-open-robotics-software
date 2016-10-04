@@ -1,4 +1,4 @@
-package us.ihmc.SdfLoader;
+package us.ihmc.simulationconstructionset;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;

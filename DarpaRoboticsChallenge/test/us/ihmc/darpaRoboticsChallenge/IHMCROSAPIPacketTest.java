@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.ros.RosCore;
 import org.ros.internal.message.Message;
 import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;

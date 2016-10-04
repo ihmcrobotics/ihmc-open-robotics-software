@@ -7,7 +7,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.QuadrupedJointName;

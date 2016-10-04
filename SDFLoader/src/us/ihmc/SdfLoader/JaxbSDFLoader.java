@@ -22,6 +22,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.sensors.ContactSensorType;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 
 public class JaxbSDFLoader
 {

@@ -2,7 +2,7 @@ package us.ihmc.llaQuadruped;
 
 import java.io.IOException;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.OutputWriter;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;

@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.initialSetup;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.GroundContactPoint;

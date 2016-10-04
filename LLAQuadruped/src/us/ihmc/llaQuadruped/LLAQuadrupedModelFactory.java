@@ -6,7 +6,7 @@ import java.util.Collection;
 
 import javax.xml.bind.JAXBException;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;

@@ -1,6 +1,4 @@
-package us.ihmc.SdfLoader;
-
-import us.ihmc.SdfLoader.models.FullRobotModel;
+package us.ihmc.robotModels;
 
 public interface OutputWriter
 {
