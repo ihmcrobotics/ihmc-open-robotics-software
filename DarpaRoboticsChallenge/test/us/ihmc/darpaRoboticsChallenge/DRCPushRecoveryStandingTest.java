@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;

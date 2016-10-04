@@ -4,7 +4,7 @@ import java.io.Reader;
 import java.io.StringReader;
 
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;

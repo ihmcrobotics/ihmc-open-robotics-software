@@ -8,7 +8,7 @@ import java.util.Properties;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;

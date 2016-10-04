@@ -20,7 +20,7 @@ import us.ihmc.SdfLoader.SDFContactSensor;
 import us.ihmc.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.SdfLoader.SDFForceSensor;
 import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.SDFJointHolder;
 import us.ihmc.SdfLoader.SDFLinkHolder;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;

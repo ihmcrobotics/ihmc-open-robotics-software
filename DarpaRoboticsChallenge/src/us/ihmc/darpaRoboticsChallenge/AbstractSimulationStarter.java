@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.net.LocalObjectCommunicator;

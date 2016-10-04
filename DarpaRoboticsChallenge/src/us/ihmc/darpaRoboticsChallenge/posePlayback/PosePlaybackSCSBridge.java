@@ -7,7 +7,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.vecmath.Point3d;
 
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;

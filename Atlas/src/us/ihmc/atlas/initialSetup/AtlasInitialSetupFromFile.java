@@ -7,7 +7,7 @@ import java.util.Properties;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
