@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing;
 
 import java.util.HashMap;
 
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.sensorProcessing.sensors.FingerForceSensors;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
