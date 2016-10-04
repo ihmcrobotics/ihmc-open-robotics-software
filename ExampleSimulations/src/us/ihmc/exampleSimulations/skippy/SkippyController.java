@@ -356,6 +356,7 @@ public class SkippyController implements RobotController
       /*
        * ICP_X
        */
+      double somethingToDo=0.0;
       controllerCmpX = new PIDController("icpX", registry);
       controllerCmpX.setProportionalGain(0.6);// 3);
       controllerCmpX.setDerivativeGain(0.01);// 05);
