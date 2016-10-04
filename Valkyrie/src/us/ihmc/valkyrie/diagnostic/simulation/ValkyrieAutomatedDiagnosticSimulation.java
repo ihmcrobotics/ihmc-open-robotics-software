@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.diagnostics.AutomatedDiagnosticConfiguration;
 import us.ihmc.darpaRoboticsChallenge.diagnostics.AutomatedDiagnosticSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;

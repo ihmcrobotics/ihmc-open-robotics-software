@@ -4,7 +4,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
