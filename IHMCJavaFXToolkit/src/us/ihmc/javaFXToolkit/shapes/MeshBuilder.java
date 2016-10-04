@@ -278,6 +278,9 @@ public class MeshBuilder
 
    public void addMultiLineMesh(Point3d[] points, double lineWidth, boolean close)
    {
+      if (points.length < 2)
+         return;
+
       for (int i = 1; i < points.length; i++)
       {
          Point3d start = points[i-1];
@@ -295,6 +298,9 @@ public class MeshBuilder
 
    public void addMultiLineMesh(List<Point3d> points, double lineWidth, boolean close)
    {
+      if (points.size() < 2)
+         return;
+
       for (int i = 1; i < points.size(); i++)
       {
          Point3d start = points.get(i-1);
@@ -349,6 +355,9 @@ public class MeshBuilder
 
    public Mesh generateMesh()
    {
+      if (points.isEmpty() || faces.isEmpty())
+         return null;
+
       TriangleMesh mesh = new TriangleMesh();
       mesh.getPoints().addAll(points.toArray());
       mesh.getTexCoords().addAll(texCoords.toArray());
