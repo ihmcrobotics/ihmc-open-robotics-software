@@ -68,7 +68,7 @@ public class DesiredFootstepTest
     * @throws IOException 
     */
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.6)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6, targetsOverride = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testPassingFootstepData() throws IOException
    {
