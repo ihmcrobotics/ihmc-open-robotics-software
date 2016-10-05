@@ -14,12 +14,12 @@ import us.ihmc.robotics.math.trajectories.YoParabolicTrajectoryGenerator;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class YoParabolicTrajectoryGeneratorTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConditions()
    {
@@ -47,7 +47,7 @@ public class YoParabolicTrajectoryGeneratorTest
       JUnitTools.assertTuple3dEquals(finalPosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testIllegalParameter1()
    {
@@ -61,7 +61,7 @@ public class YoParabolicTrajectoryGeneratorTest
       trajectoryGenerator.initialize(initialPosition, intermediatePosition, finalPosition, intermediateParameter);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testIllegalParameter2()
    {
@@ -75,7 +75,7 @@ public class YoParabolicTrajectoryGeneratorTest
       trajectoryGenerator.initialize(initialPosition, intermediatePosition, finalPosition, intermediateParameter);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testIllegalParameter3()
    {
@@ -101,7 +101,7 @@ public class YoParabolicTrajectoryGeneratorTest
       trajectoryGenerator.getPosition(positionToPack, 1.1);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApex()
    {
@@ -134,7 +134,7 @@ public class YoParabolicTrajectoryGeneratorTest
       assertTrue(smallestDifference >= 0.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testVelocity()
    {
@@ -173,7 +173,7 @@ public class YoParabolicTrajectoryGeneratorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInitialVelocity()
    {

@@ -8,12 +8,12 @@ import org.junit.Test;
 import us.ihmc.tools.taskExecutor.NullTask;
 import us.ihmc.tools.taskExecutor.ParallelTask;
 import us.ihmc.tools.taskExecutor.TaskExecutor;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ParallelTaskTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOneSerialTask()
    {
@@ -51,7 +51,7 @@ public class ParallelTaskTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTwoSerialTasks()
    {
@@ -107,7 +107,7 @@ public class ParallelTaskTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTwoParallelTasks()
    {
@@ -157,7 +157,7 @@ public class ParallelTaskTest
       assertTrue(exampleTaskB0.checkNumberOfCalls(1, 3, 1));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testABunchOfParallelAndSeriesTasks()
    {

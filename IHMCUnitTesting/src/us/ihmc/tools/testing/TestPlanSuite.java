@@ -13,8 +13,8 @@ import org.junit.runners.Suite;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.RunnerBuilder;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class TestPlanSuite extends Suite
 {
@@ -109,12 +109,12 @@ public class TestPlanSuite extends Suite
       
       private TestPlanTarget[] getDirectTargets(Description description)
       {
-         DeployableTestMethod deployableTestMethod = description.getAnnotation(DeployableTestMethod.class);
-         if (deployableTestMethod != null && deployableTestMethod.targets().length > 0)
+         ContinuousIntegrationTest deployableTestMethod = description.getAnnotation(ContinuousIntegrationTest.class);
+         if (deployableTestMethod != null && deployableTestMethod.targetsOverride().length > 0)
          {
-            return deployableTestMethod.targets();
+            return deployableTestMethod.targetsOverride();
          }
-         DeployableTestClass deployableTestClass = description.getAnnotation(DeployableTestClass.class);
+         ContinuousIntegrationPlan deployableTestClass = description.getAnnotation(ContinuousIntegrationPlan.class);
          if (deployableTestClass != null && deployableTestClass.targets().length > 0)
          {
             return deployableTestClass.targets();

@@ -6,10 +6,10 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.stateEstimationEndToEndTests.PelvisPoseHistoryCorrectionEndToEndTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.InDevelopment})
 public class AtlasPelvisPoseHistoryCorrectorTest extends PelvisPoseHistoryCorrectionEndToEndTest
 {
 

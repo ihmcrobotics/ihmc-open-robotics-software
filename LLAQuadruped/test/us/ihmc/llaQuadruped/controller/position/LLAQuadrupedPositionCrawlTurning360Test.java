@@ -9,11 +9,11 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionCrawlTurning360Test;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
 public class LLAQuadrupedPositionCrawlTurning360Test extends QuadrupedPositionCrawlTurning360Test
 {
    @Override
@@ -23,7 +23,7 @@ public class LLAQuadrupedPositionCrawlTurning360Test extends QuadrupedPositionCr
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 120.0)
+   @ContinuousIntegrationTest(estimatedDuration = 120.0)
    @Test(timeout = 800000)
    public void rotate360InPlaceRight() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -31,7 +31,7 @@ public class LLAQuadrupedPositionCrawlTurning360Test extends QuadrupedPositionCr
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 120.0)
+   @ContinuousIntegrationTest(estimatedDuration = 120.0)
    @Test(timeout = 800000)
    public void rotate360InPlaceLeft() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

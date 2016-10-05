@@ -20,7 +20,7 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRobotTestInterface
 {
@@ -60,7 +60,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testWalkingForwardFastWithPush()
    {

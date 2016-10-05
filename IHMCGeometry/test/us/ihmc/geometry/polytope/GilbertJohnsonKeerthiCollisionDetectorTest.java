@@ -16,13 +16,13 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.MutationTestingTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class GilbertJohnsonKeerthiCollisionDetectorTest
 {
    private static boolean VERBOSE = false;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeSupportPointOnMinkowskiDifference()
    {
@@ -51,7 +51,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       JUnitTools.assertPoint3dEquals("", new Point3d(2.0, 2.0, 0.0), supportPoint, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsIntersecting()
    {
@@ -98,7 +98,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       polytope.applyTransform(transform);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIntersectingOnARotatingCube()
    {
@@ -136,7 +136,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 10.0)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 30000)
    public void testExtensivelyPointToPolytope()
    {
@@ -307,7 +307,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       //      System.out.println("numberOutside = " + numberOutside);
    }
 
-   @DeployableTestMethod(estimatedDuration = 10.0)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 30000)
    public void testExtensivelyPolytopeToPolytope()
    {
@@ -450,7 +450,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTroublesomePointToLineSegments()
    {
@@ -492,7 +492,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTroublesomePointToTriangle()
    {
@@ -504,7 +504,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       doPointToTriangleProjectionTest(trianglePointA, trianglePointB, trianglePointC, pointToProject, false);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTroublesomePointToTetragon()
    {

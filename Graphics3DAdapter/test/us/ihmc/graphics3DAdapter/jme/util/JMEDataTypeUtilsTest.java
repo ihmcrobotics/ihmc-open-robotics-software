@@ -5,12 +5,12 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class JMEDataTypeUtilsTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTransforms()
    {

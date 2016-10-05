@@ -6,15 +6,15 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
 public class RobotiqReadResponseTest
 {
    @Test(timeout = 30000)
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testSetAll()
    {
       final int ITERATIONS = 1000;

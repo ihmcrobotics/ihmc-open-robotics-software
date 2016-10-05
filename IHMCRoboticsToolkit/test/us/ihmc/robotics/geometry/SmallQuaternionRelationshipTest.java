@@ -2,7 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;
@@ -14,7 +14,7 @@ public class SmallQuaternionRelationshipTest
 {
    // Test for some relationships that are used in QuaternionOrientation estimation.
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSmallAngleQuaternionDifferences()
    { 

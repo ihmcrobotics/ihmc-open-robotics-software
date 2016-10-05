@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.random.RandomTools;
@@ -22,7 +22,7 @@ public class YoFramePointControlFlowOutputPortTest
 
    private static final double EPS = 1e-17;
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void simpleWritingReadingTest()
    {

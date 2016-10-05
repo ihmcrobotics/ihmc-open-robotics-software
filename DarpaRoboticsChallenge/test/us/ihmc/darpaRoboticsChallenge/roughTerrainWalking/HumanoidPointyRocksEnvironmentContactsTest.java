@@ -37,7 +37,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -68,7 +68,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
    protected abstract DRCRobotModel getRobotModel(int xContactPoints, int yContactPoints, boolean createOnlyEdgePoints);
 
-   @DeployableTestMethod(estimatedDuration = 137.5, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 137.5, targetsOverride = {TestPlanTarget.Slow, TestPlanTarget.Video})
    @Test(timeout = 690000)
    public void testWalkingOnLinesInEnvironment() throws SimulationExceededMaximumTimeException
    {
@@ -141,7 +141,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       drcSimulationTestHelper.checkNothingChanged();
    }
 
-   @DeployableTestMethod(estimatedDuration = 69.7, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 69.7, targetsOverride = {TestPlanTarget.Slow, TestPlanTarget.Video})
    @Test(timeout = 350000)
    public void testWalkingOnPointInEnvironment() throws SimulationExceededMaximumTimeException
    {

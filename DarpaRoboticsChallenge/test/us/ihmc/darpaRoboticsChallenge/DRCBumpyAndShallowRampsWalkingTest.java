@@ -34,7 +34,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -79,7 +79,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 84.2)
+	@ContinuousIntegrationTest(estimatedDuration = 84.2)
 	@Test(timeout = 420000)
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -163,7 +163,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    }
 
 	// This has never worked. Would be nice if we can get it to work.")
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -293,7 +293,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       return new ImmutablePair<CombinedTerrainObject3D, Double>(combinedTerrainObject, xMax);
    }
 
-	@DeployableTestMethod(estimatedDuration = 104.6)
+	@ContinuousIntegrationTest(estimatedDuration = 104.6)
 	@Test(timeout = 520000)
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

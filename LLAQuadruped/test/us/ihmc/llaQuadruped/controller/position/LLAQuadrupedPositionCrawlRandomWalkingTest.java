@@ -9,11 +9,11 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionCrawlRandomWalkingTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
 public class LLAQuadrupedPositionCrawlRandomWalkingTest extends QuadrupedPositionCrawlRandomWalkingTest
 {
    @Override
@@ -23,7 +23,7 @@ public class LLAQuadrupedPositionCrawlRandomWalkingTest extends QuadrupedPositio
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 300.0)
+   @ContinuousIntegrationTest(estimatedDuration = 300.0)
    @Test(timeout = 1000000)
    public void testWalkingRandomly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -31,7 +31,7 @@ public class LLAQuadrupedPositionCrawlRandomWalkingTest extends QuadrupedPositio
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 200.0)
+   @ContinuousIntegrationTest(estimatedDuration = 200.0)
    @Test(timeout = 1000000)
    public void testWalkingAtRandomSpeedsWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -39,7 +39,7 @@ public class LLAQuadrupedPositionCrawlRandomWalkingTest extends QuadrupedPositio
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 300.0)
+   @ContinuousIntegrationTest(estimatedDuration = 300.0)
    @Test(timeout = 1000000)
    public void testWalkingRandomVelocitiesStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

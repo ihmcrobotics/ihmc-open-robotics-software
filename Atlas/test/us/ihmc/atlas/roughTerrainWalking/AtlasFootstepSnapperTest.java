@@ -24,7 +24,7 @@ import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -32,7 +32,7 @@ import us.ihmc.tools.thread.ThreadTools;
  */
 public class AtlasFootstepSnapperTest extends FootstepSnapperTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {

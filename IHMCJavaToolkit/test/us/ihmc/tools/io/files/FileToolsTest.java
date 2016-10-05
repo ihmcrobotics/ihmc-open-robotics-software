@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class FileToolsTest
 {
@@ -82,7 +82,7 @@ public class FileToolsTest
       }
    }
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testReadAllLines()
    {
@@ -93,7 +93,7 @@ public class FileToolsTest
       assertTrue(lines.get(2).equals("line3"));
    }
 	
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testReadAllBytesAndReadLinesFromBytesAndReplaceLine()
    {
@@ -112,7 +112,7 @@ public class FileToolsTest
       assertTrue(lines.get(2).equals("line3"));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTemporaryDirectoryPath()
    {
@@ -121,7 +121,7 @@ public class FileToolsTest
       assertNotNull("Java temp directory is null.", tempPath);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConcatenateFilesTogether()
    {      
@@ -212,7 +212,7 @@ public class FileToolsTest
    // START DEPRECATED TESTS HERE
    
 	@SuppressWarnings("deprecation")
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetBufferedReader()
    {
@@ -239,7 +239,7 @@ public class FileToolsTest
    }
 
 	@SuppressWarnings("deprecation")
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = FileNotFoundException.class)
    public void testGetBufferedReaderWithFileNotFoundException() throws FileNotFoundException
    {
@@ -247,7 +247,7 @@ public class FileToolsTest
    }
 
 	@SuppressWarnings("deprecation")
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFileWriter()
    {
@@ -277,7 +277,7 @@ public class FileToolsTest
    }
 
 	@SuppressWarnings("deprecation")
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFileWriterWithAppend()
    {
@@ -307,7 +307,7 @@ public class FileToolsTest
    }
 
 	@SuppressWarnings("deprecation")
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFileDataOutputStream()
    {
@@ -337,7 +337,7 @@ public class FileToolsTest
    }
 
 	@SuppressWarnings("deprecation")
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFileDataInputStream()
    {
@@ -364,7 +364,7 @@ public class FileToolsTest
    }
 
 	@SuppressWarnings("deprecation")
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = FileNotFoundException.class)
    public void testGetFileDataInputStreamWithFileNotFoundException() throws FileNotFoundException, IOException
    {
@@ -373,7 +373,7 @@ public class FileToolsTest
    }
 
 	@SuppressWarnings("deprecation")
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllFilesInDirectoryRecursive()
    {
@@ -408,7 +408,7 @@ public class FileToolsTest
    }
 
 	@SuppressWarnings("deprecation")
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAllFilesInDirectoryWithSuffix()
    {

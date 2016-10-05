@@ -14,7 +14,7 @@ import us.ihmc.sensorProcessing.signalCorruption.OrientationConstantAccelerating
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalkingWithIMUDriftTest
@@ -28,7 +28,7 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
     * @throws ControllerFailureException
     */
    @Ignore
-	@DeployableTestMethod(estimatedDuration = 50.3)
+	@ContinuousIntegrationTest(estimatedDuration = 50.3)
 	@Test(timeout = 150919)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

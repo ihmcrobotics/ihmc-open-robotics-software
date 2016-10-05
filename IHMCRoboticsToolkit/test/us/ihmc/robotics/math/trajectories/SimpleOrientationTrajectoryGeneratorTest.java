@@ -18,7 +18,7 @@ import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class SimpleOrientationTrajectoryGeneratorTest
 {
@@ -30,7 +30,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
 
    private static final double EPSILON = 1.0e-10;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRuntimeExceptions()
    {
@@ -79,7 +79,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCompareWithSingleFrameTrajectoryGenerator()
    {
@@ -127,7 +127,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegativeTime()
    {
@@ -161,7 +161,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
       assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTooBigTime()
    {
@@ -195,7 +195,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
       assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testMultipleFramesWithSingleFrameTrajectoryGenerators()
    {

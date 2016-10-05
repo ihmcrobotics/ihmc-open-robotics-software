@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class DatagramOutputStreamTest
@@ -18,7 +18,7 @@ public class DatagramOutputStreamTest
    private static final boolean VERBOSE = false;
    
    //works half of the time.
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
    public void testDatagramOutputStreamThrowOutStalePackets() throws IOException
    {
       boolean throwOutStalePackets = true;
@@ -31,7 +31,7 @@ public class DatagramOutputStreamTest
       runATest(1776, throwOutStalePackets, expectedMessagesToReceive);
    }
 
-	@DeployableTestMethod(estimatedDuration = 8.6)
+	@ContinuousIntegrationTest(estimatedDuration = 8.6)
 	@Test(timeout = 43000)
    public void testDatagramOutputStreamDoNotThrowOutStalePackets() throws IOException
    {

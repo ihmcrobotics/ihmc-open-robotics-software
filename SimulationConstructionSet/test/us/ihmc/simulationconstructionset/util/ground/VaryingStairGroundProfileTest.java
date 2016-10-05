@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.util.ground.VaryingStairGroundProfile;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class VaryingStairGroundProfileTest
 {
@@ -24,7 +24,7 @@ public class VaryingStairGroundProfileTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void test()
    {

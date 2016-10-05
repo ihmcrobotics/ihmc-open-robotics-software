@@ -9,13 +9,13 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.BetaFilteredYoVariable;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class BetaFilteredYoVariableTest
 {
    private final Random rng = new Random();
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void testBetaFilteredYoVariable()
    {

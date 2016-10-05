@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -77,7 +77,7 @@ public class SimulatedIMURawSensorReaderTest
       simulatedIMURawSensorReader.initialize();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void testRead()
    {

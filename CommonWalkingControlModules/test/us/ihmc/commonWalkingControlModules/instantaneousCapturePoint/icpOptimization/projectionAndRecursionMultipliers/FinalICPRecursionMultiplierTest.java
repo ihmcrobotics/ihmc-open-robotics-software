@@ -5,7 +5,7 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.FinalICPRecursionMultiplier;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -14,7 +14,7 @@ public class FinalICPRecursionMultiplierTest
 {
    private static final double epsilon = 0.0001;
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testCalculation()
    {

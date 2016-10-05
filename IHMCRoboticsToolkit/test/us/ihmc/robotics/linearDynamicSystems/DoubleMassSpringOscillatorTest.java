@@ -9,13 +9,13 @@ import org.junit.Test;
 import Jama.Matrix;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.dataStructures.Polynomial;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class DoubleMassSpringOscillatorTest
 {
    private static final boolean VERBOSE = true;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDecomposerGotEigenvaluesRight()
    {

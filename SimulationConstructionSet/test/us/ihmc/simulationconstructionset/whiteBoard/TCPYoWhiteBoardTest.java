@@ -6,15 +6,15 @@ import java.io.IOException;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets=TestPlanTarget.Flaky)
+@ContinuousIntegrationPlan(targets=TestPlanTarget.Flaky)
 
 public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 3.9)
+	@ContinuousIntegrationTest(estimatedDuration = 3.9)
 	@Test(timeout = 30000)
    public void testTCPWhiteBoardOne() throws IOException
    {
@@ -31,7 +31,7 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 501, 1001);
    }
 
-	@DeployableTestMethod(estimatedDuration = 5.6)
+	@ContinuousIntegrationTest(estimatedDuration = 5.6)
 	@Test(timeout = 30000)
    public void testTCPWhiteBoardTwo() throws IOException
    {

@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class PolynomialSplineTest
 {
@@ -21,7 +21,7 @@ public class PolynomialSplineTest
       registry = new YoVariableRegistry("test");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetPosition()
    {
@@ -37,7 +37,7 @@ public class PolynomialSplineTest
       assertEquals(yCheck, y, 1e-12);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetVelocity()
    {
@@ -58,7 +58,7 @@ public class PolynomialSplineTest
       assertEquals(dydxNumerical, dydx, 1e-6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetAcceleration()
    {
@@ -79,7 +79,7 @@ public class PolynomialSplineTest
       assertEquals(d2ydx2Numerical, d2ydx2, 1e-6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetIntegral()
    {
@@ -95,7 +95,7 @@ public class PolynomialSplineTest
       assertEquals(expected, actual, 1e-12);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetBasedOnMidPoint()
    {
@@ -124,7 +124,7 @@ public class PolynomialSplineTest
       assertEquals(zdFinal, spline.getVelocity(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetBasedOnFinalAcceleration()
    {
@@ -150,7 +150,7 @@ public class PolynomialSplineTest
       assertEquals(zddFinal, spline.getAcceleration(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstant()
    {

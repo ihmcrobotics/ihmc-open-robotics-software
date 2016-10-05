@@ -12,11 +12,11 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.DelayedDoubleYoVariable;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class DelayEstimatorBetweenTwoSignalsTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.8)
+   @ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testPerfectSignal() throws Exception
    {
@@ -58,7 +58,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testWithShiftedSignal() throws Exception
    {
@@ -102,7 +102,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testNoisySignal() throws Exception
    {

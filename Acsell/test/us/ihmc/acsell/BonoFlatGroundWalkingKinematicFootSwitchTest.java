@@ -13,16 +13,16 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
 import us.ihmc.steppr.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.steppr.parameters.BonoRobotModel;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
 public class BonoFlatGroundWalkingKinematicFootSwitchTest extends DRCFlatGroundWalkingTest
 {
    private BonoRobotModel robotModel;
 
-	@DeployableTestMethod(estimatedDuration = 15.4)
+	@ContinuousIntegrationTest(estimatedDuration = 15.4)
 	@Test(timeout = 77000)
    public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

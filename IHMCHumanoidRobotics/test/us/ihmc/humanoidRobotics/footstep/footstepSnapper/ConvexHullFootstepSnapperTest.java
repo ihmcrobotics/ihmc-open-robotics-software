@@ -11,7 +11,7 @@ import javax.vecmath.Point2d;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapper;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.GenericFootstepSnappingParameters;
@@ -26,7 +26,7 @@ import us.ihmc.robotics.random.RandomTools;
 public class ConvexHullFootstepSnapperTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testBasicCropping()
 	{
@@ -45,7 +45,7 @@ public class ConvexHullFootstepSnapperTest
       assertEquals(4.0, endPolygon.getArea(), 1e-15);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testRandomCropping()
 	{

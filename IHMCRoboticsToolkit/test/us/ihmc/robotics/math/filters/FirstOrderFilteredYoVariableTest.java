@@ -9,7 +9,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.FirstOrderBandPassFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class FirstOrderFilteredYoVariableTest
 {
@@ -18,7 +18,7 @@ public class FirstOrderFilteredYoVariableTest
 
    private final double DT = 0.001;
 
-	@DeployableTestMethod(estimatedDuration = 1.0)
+	@ContinuousIntegrationTest(estimatedDuration = 1.0)
 	@Test(timeout=300000)
    public void testHighPassAttenuationForSinusoidalInput()
    {
@@ -42,7 +42,7 @@ public class FirstOrderFilteredYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void testLowPassAttenuationForSinusoidalInput()
    {
@@ -66,7 +66,7 @@ public class FirstOrderFilteredYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testBandPassAttenuationForSinusoidalInput()
    {

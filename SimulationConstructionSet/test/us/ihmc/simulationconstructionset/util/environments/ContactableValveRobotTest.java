@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -46,7 +46,7 @@ public class ContactableValveRobotTest
 
    private YoVariableRegistry valveTestRegistry;
 
-   @DeployableTestMethod(estimatedDuration = 2.3)
+   @ContinuousIntegrationTest(estimatedDuration = 2.3)
    @Test(timeout = 30000)
    public void testValveIsClosing()
    {
@@ -89,7 +89,7 @@ public class ContactableValveRobotTest
       blockingSimulationRunner.destroySimulation();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testGetValveTransformToWorld()
    {

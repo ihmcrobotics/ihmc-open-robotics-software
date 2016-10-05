@@ -19,7 +19,7 @@ import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class OrientationInterpolationTrajectoryGeneratorTest
 {
@@ -62,7 +62,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
       parentRegistry = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructor()
    {
@@ -76,7 +76,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
       generator = new OrientationInterpolationTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, parentRegistry);    
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsDone()
    {
@@ -90,7 +90,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
       assertTrue(generator.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGet()
    {
@@ -102,7 +102,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPackAngularVelocity()
    {      
@@ -119,7 +119,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
      assertSame(referenceFrame, angularVelocityToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPackAngularAcceleration()
    {      
@@ -136,7 +136,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
       assertSame(referenceFrame, angularAccelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPackAngularData()
    {

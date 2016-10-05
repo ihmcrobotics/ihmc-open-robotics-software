@@ -12,7 +12,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.providers.YoPositionProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 
 public class YoPositionProviderTest
@@ -47,7 +47,7 @@ public class YoPositionProviderTest
       yoFramePoint = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructor()
    {
@@ -55,7 +55,7 @@ public class YoPositionProviderTest
       provider = new YoPositionProvider(yoFramePoint);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetAndGet()
    {

@@ -16,12 +16,12 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class RobotConfigurationDataBufferTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testAddingStuff()
    {
@@ -57,7 +57,7 @@ public abstract class RobotConfigurationDataBufferTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 100.0)
+	@ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 300000)
    public void waitForTimestampTest()
    {

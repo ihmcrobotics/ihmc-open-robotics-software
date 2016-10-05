@@ -28,7 +28,7 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class DataFileWriterTest
 {
@@ -37,7 +37,7 @@ public class DataFileWriterTest
    @Rule
    public ExpectedException expectedException = ExpectedException.none();
 
-	@DeployableTestMethod(estimatedDuration = 0.7)
+	@ContinuousIntegrationTest(estimatedDuration = 0.7)
 	@Test(timeout=300000)
    public void testDataFileWriterAndReader() throws IOException, RepeatDataBufferEntryException
    {
@@ -149,7 +149,7 @@ public class DataFileWriterTest
 
    @SuppressWarnings("deprecation")
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFileReadAndWriteWithDataOutputStreamAndDataInputStream() throws IOException, FileNotFoundException, NullPointerException
    {
@@ -175,7 +175,7 @@ public class DataFileWriterTest
       assertTrue(testInteger == integerReadBack);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFileReadAndWriteWithDataOutputStreamAndBufferedReader() throws FileNotFoundException, IOException
    {
@@ -211,7 +211,7 @@ public class DataFileWriterTest
       assertTrue(integerReadBack == -testInteger);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFileReadAndWriteBackWithDataOutputStreamAndDeferredBufferedReaderCreation() throws IOException
    {
@@ -245,7 +245,7 @@ public class DataFileWriterTest
       assertTrue(testInteger == integerReadBack);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFileReadAndWriteBackWithDataOutputStreamAndBufferedReaderStringsOnly() throws IOException
    {
@@ -281,7 +281,7 @@ public class DataFileWriterTest
       assertTrue(string3.equals(readBack3));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testWritingAndReadingALongStateFile() throws IOException
    {
@@ -323,7 +323,7 @@ public class DataFileWriterTest
       fileOne.delete();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testWritingAndReadingADataFileWithLotsOfVariables() throws IOException, RepeatDataBufferEntryException
    {

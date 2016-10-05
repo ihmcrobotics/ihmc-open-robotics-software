@@ -12,11 +12,11 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class YoMatrixTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleYoMatrixExample()
    {
@@ -45,7 +45,7 @@ public class YoMatrixTest
       assertEquals(registry.getVariable("testMatrix_0_0").getValueAsDouble(), checkMatrix.get(0, 0), 1e-10);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testYoMatrixDimensioning()
    {
@@ -104,7 +104,7 @@ public class YoMatrixTest
       checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(name, maxNumberOfRows, maxNumberOfColumns, checkMatrix2, registry);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testYoMatrixSetToZero()
    {
@@ -128,7 +128,7 @@ public class YoMatrixTest
       checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(name, maxNumberOfRows, maxNumberOfColumns, zeroMatrix, registry);  
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testYoMatrixSetTooBig()
    {

@@ -13,18 +13,18 @@ import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Fast})
 public class MultipleWaypointsPositionTrajectoryGeneratorTest
 {
 
  private final double EPSILON = 1e-3;
    
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void test()
    {

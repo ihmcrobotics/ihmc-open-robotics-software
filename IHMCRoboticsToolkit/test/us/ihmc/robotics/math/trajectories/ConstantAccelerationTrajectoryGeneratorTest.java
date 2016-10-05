@@ -12,7 +12,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.trajectories.ConstantAccelerationTrajectoryGenerator;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ConstantAccelerationTrajectoryGeneratorTest
 {
@@ -40,7 +40,7 @@ public class ConstantAccelerationTrajectoryGeneratorTest
       initialVelocityProvider = new ConstantDoubleProvider(INITIALVELOCITY);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructor()
    {
@@ -59,7 +59,7 @@ public class ConstantAccelerationTrajectoryGeneratorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsDone()
    {
@@ -76,7 +76,7 @@ public class ConstantAccelerationTrajectoryGeneratorTest
       assertTrue(generator.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //s = c * t ^ 2 + v0 * t
    public void testIncreasing()
@@ -97,7 +97,7 @@ public class ConstantAccelerationTrajectoryGeneratorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //s = -c * t ^ 2 + v0 * t
    public void testDecreasing()

@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 public class YoMiniJerkUpAndDownAlphaToAlphaTest
 {
    private double EPSILON = 1e-6;
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.1)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testInvalidYoVariables()
    {
@@ -46,7 +46,7 @@ public class YoMiniJerkUpAndDownAlphaToAlphaTest
 
 
 
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.1)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testValidYoVariables()
    {
@@ -115,7 +115,7 @@ public class YoMiniJerkUpAndDownAlphaToAlphaTest
       assertEquals(value, 0.0, EPSILON);
    }
 
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.1)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testHalfWay()
    {
@@ -159,7 +159,7 @@ public class YoMiniJerkUpAndDownAlphaToAlphaTest
    }
 
 
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.1)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSmallDifferences()
    {

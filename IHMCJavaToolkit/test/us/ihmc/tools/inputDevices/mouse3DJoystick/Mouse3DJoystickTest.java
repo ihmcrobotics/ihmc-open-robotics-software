@@ -9,14 +9,14 @@ import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystick;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
 public class Mouse3DJoystickTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testMouse3DJoystick()
    {

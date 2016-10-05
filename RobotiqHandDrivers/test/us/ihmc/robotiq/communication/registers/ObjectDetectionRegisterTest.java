@@ -4,10 +4,10 @@ import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister.gDTA;
 import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister.gDTB;
 import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister.gDTC;
 import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister.gDTS;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
 public class ObjectDetectionRegisterTest extends RobotiqInputRegisterTest
 {
 
