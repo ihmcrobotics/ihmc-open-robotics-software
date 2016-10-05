@@ -1,6 +1,5 @@
 package us.ihmc.tools.io.files;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.file.FileSystems;
@@ -33,18 +32,11 @@ public class PathToolsTest
    @Test(timeout = 30000)
    public void testFindAllPathsRecursivelyThatMatchRegex()
    {
-      List<Path> matchingPaths = PathTools.findAllPathsRecursivelyThatMatchRegex(Paths.get("src"), ".*[\\\\/]PathTools\\.java$");
+      List<Path> matchingPaths = PathTools.findAllPathsRecursivelyThatMatchRegex(Paths.get("testResources"), ".*[\\\\/]PathTools\\.java\\.fake$");
       
       PrintTools.info(this, "Matched " + matchingPaths.size() + " file(s).");
       
       assertTrue("Didn't match exactly one file.", matchingPaths.size() == 1);
-      
-      String path0 = matchingPaths.get(0).toString();
-      String clazzSlashes = path0.substring(path0.indexOf("src") + 4, path0.lastIndexOf('.'));
-      String className = clazzSlashes.replaceAll("\\\\|/", ".");
-      PrintTools.info(this, "Matching class name: " + className);
-      
-      assertEquals("Matching path not correct.", PathTools.class.getName(), className);
    }
    
 	@DeployableTestMethod(estimatedDuration = 0.0)
