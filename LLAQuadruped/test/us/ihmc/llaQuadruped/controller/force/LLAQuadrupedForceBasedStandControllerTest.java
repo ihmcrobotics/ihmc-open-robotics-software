@@ -7,11 +7,11 @@ import org.junit.Test;
 import us.ihmc.llaQuadruped.LLAQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceBasedStandControllerTest;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
 public class LLAQuadrupedForceBasedStandControllerTest extends QuadrupedForceBasedStandControllerTest
 {
    @Override
@@ -21,7 +21,7 @@ public class LLAQuadrupedForceBasedStandControllerTest extends QuadrupedForceBas
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 100000)
    public void testStandingUpAndAdjustingCoM() throws IOException
    {
@@ -29,7 +29,7 @@ public class LLAQuadrupedForceBasedStandControllerTest extends QuadrupedForceBas
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 100000)
    public void testStandingAndResistingPushesOnBody() throws IOException
    {
@@ -37,7 +37,7 @@ public class LLAQuadrupedForceBasedStandControllerTest extends QuadrupedForceBas
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 100000)
    public void testStandingAndResistingPushesOnFrontLeftHipRoll() throws IOException
    {
@@ -45,7 +45,7 @@ public class LLAQuadrupedForceBasedStandControllerTest extends QuadrupedForceBas
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 100000)
    public void testStandingAndResistingPushesOnFrontRightHipRoll() throws IOException
    {
@@ -53,7 +53,7 @@ public class LLAQuadrupedForceBasedStandControllerTest extends QuadrupedForceBas
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 100000)
    public void testStandingAndResistingPushesOnHindLeftHipRoll() throws IOException
    {
@@ -61,7 +61,7 @@ public class LLAQuadrupedForceBasedStandControllerTest extends QuadrupedForceBas
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 100000)
    public void testStandingAndResistingPushesOnHindRightHipRoll() throws IOException
    {

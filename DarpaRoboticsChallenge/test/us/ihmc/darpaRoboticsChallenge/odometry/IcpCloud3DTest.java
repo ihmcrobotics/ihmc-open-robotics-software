@@ -17,7 +17,7 @@ import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 /**
  * @author Peter Abeles
@@ -26,7 +26,7 @@ public class IcpCloud3DTest {
 
    Random rand = new Random(234);
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void perfect_nomotion() {
 
@@ -57,7 +57,7 @@ public class IcpCloud3DTest {
       assertTrue(found.getT().normSq()<=1e-8);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void perfect_translation() {
 
@@ -93,7 +93,7 @@ public class IcpCloud3DTest {
       assertEquals(expected.getT().z,found.getT().z,1e-8);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void perfect_tran_rot() {
 

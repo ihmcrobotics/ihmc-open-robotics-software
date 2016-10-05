@@ -11,14 +11,14 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class BambooToolsTest
 {
    private static final boolean SHOW_GUI = true;
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetClassAndMethodName()
    {
@@ -29,7 +29,7 @@ public class BambooToolsTest
       assertEquals("BambooToolsTest.testGetClassAndMethodName", classAndMethodName);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = { TestPlanTarget.UI })
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = { TestPlanTarget.UI })
 	@Test(timeout=300000)
    public void testLogMessagesToFile() throws IOException
    {

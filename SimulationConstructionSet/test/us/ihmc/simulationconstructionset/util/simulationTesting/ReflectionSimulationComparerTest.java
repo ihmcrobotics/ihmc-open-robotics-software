@@ -28,7 +28,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.ReflectionSimula
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimpleRewindabilityComparisonScript;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationComparisonScript;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ReflectionSimulationComparerTest
 {
@@ -45,7 +45,7 @@ public class ReflectionSimulationComparerTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testTwoEmptySimulations()
    {
@@ -96,7 +96,7 @@ public class ReflectionSimulationComparerTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.8)
+	@ContinuousIntegrationTest(estimatedDuration = 0.8)
 	@Test(timeout = 30000)
    public void testTwoRewindableSimulationsWithAScript() throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException, UnreasonableAccelerationException
    {      
@@ -137,7 +137,7 @@ public class ReflectionSimulationComparerTest
       return robot0;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.8)
+	@ContinuousIntegrationTest(estimatedDuration = 0.8)
 	@Test(timeout = 30000)
    public void testTwoNonRewindableSimulationsWithAScript() throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException, UnreasonableAccelerationException
    {      

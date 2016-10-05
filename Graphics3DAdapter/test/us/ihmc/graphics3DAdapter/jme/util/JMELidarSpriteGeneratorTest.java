@@ -11,8 +11,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.graphics3DAdapter.jme.JMERenderer;
 import us.ihmc.graphics3DAdapter.jme.util.JMELidarSpriteGenerator;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -21,7 +21,7 @@ import javax.vecmath.Point3f;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@DeployableTestClass(targets = { TestPlanTarget.UI })
+@ContinuousIntegrationPlan(targets = { TestPlanTarget.UI })
 /**
  * Tests for point cloud collision stuff in JMELidarSpriteGenerator 
  *
@@ -60,7 +60,7 @@ public class JMELidarSpriteGeneratorTest
     * Not sure if we actually want this
     */
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testCollideWithSimple()
    {
@@ -84,7 +84,7 @@ public class JMELidarSpriteGeneratorTest
     * Tests intersection against zero points.
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testEmptyCollide()
    {
@@ -102,7 +102,7 @@ public class JMELidarSpriteGeneratorTest
     * Not sure if we actually want this
     */
    @Ignore
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testMultiplePointsOneLine()
    {
@@ -124,7 +124,7 @@ public class JMELidarSpriteGeneratorTest
     * Tests a case when there is no intersection with the point cloud. 
     */
 
-	@DeployableTestMethod(estimatedDuration = 1.4)
+	@ContinuousIntegrationTest(estimatedDuration = 1.4)
    @Test(timeout = 30000)
    public void testMultiplePointsNoMatch()
    {

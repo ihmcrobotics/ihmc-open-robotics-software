@@ -9,11 +9,11 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionCrawlWalkingWithStopsTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
 public class LLAQuadrupedPositionCrawlWalkingWithStopsTest extends QuadrupedPositionCrawlWalkingWithStopsTest
 {
    @Override
@@ -23,7 +23,7 @@ public class LLAQuadrupedPositionCrawlWalkingWithStopsTest extends QuadrupedPosi
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 150.0)
+   @ContinuousIntegrationTest(estimatedDuration = 150.0)
    @Test(timeout = 600000)
    public void testWalkingForwardFastWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -31,7 +31,7 @@ public class LLAQuadrupedPositionCrawlWalkingWithStopsTest extends QuadrupedPosi
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 120.0)
+   @ContinuousIntegrationTest(estimatedDuration = 120.0)
    @Test(timeout = 600000)
    public void testWalkingForwardSlowWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -39,7 +39,7 @@ public class LLAQuadrupedPositionCrawlWalkingWithStopsTest extends QuadrupedPosi
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 150.0)
+   @ContinuousIntegrationTest(estimatedDuration = 150.0)
    @Test(timeout = 600000)
    public void testWalkingBackwardSlowWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -47,7 +47,7 @@ public class LLAQuadrupedPositionCrawlWalkingWithStopsTest extends QuadrupedPosi
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 150.0)
+   @ContinuousIntegrationTest(estimatedDuration = 150.0)
    @Test(timeout = 600000)
    public void testWalkingBackwardFastWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

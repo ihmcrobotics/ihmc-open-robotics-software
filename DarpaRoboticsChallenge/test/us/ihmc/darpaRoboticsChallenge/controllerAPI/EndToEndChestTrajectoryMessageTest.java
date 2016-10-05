@@ -44,7 +44,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTestInterface
@@ -54,7 +54,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 22.8)
+   @ContinuousIntegrationTest(estimatedDuration = 22.8)
    @Test (timeout = 110000)
    public void testSingleTrajectoryPoint() throws Exception
    {
@@ -104,7 +104,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertSingleWaypointExecuted(desiredRandomChestOrientation, scs);
    }
 
-   @DeployableTestMethod(estimatedDuration = 19.0)
+   @ContinuousIntegrationTest(estimatedDuration = 19.0)
    @Test(timeout = 95000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
@@ -193,7 +193,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 25.4)
+   @ContinuousIntegrationTest(estimatedDuration = 25.4)
    @Test(timeout = 130000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
@@ -303,7 +303,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 23.6)
+   @ContinuousIntegrationTest(estimatedDuration = 23.6)
    @Test(timeout = 120000)
    public void testQueuedMessages() throws Exception
    {
@@ -425,7 +425,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 15.3)
+   @ContinuousIntegrationTest(estimatedDuration = 15.3)
    @Test(timeout = 77000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
@@ -515,7 +515,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertNumberOfWaypoints(1, scs);
    }
 
-   @DeployableTestMethod(estimatedDuration = 16.8)
+   @ContinuousIntegrationTest(estimatedDuration = 16.8)
    @Test(timeout = 84000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
@@ -637,7 +637,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 21.8)
+   @ContinuousIntegrationTest(estimatedDuration = 21.8)
    @Test (timeout = 110000)
    public void testStopAllTrajectory() throws Exception
    {

@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements QuadrupedMultiRobotTestInterface
@@ -56,7 +56,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 150.0)
+   @ContinuousIntegrationTest(estimatedDuration = 150.0)
    @Test(timeout = 600000)
    public void testWalkingForwardFastWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -80,7 +80,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 120.0)
+   @ContinuousIntegrationTest(estimatedDuration = 120.0)
    @Test(timeout = 600000)
    public void testWalkingForwardSlowWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -104,7 +104,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 150.0)
+   @ContinuousIntegrationTest(estimatedDuration = 150.0)
    @Test(timeout = 600000)
    public void testWalkingBackwardSlowWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -128,7 +128,7 @@ public abstract class QuadrupedPositionCrawlWalkingWithStopsTest implements Quad
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 150.0, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 150.0, targetsOverride = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
    @Test(timeout = 600000)
    public void testWalkingBackwardFastWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

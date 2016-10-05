@@ -22,7 +22,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class RigidBodyInertiaTest
 {
@@ -86,7 +86,7 @@ public class RigidBodyInertiaTest
       inertia = new RigidBodyInertia(frameB, getRandomSymmetricPositiveDefiniteMatrix(), getRandomPositiveNumber());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeKineticCoEnergyNoFrameChange()
    {
@@ -94,7 +94,7 @@ public class RigidBodyInertiaTest
       assertKineticCoEnergyFrameIndependent(twist, inertia);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeKineticCoEnergyWithFrameChange()
    {
@@ -105,7 +105,7 @@ public class RigidBodyInertiaTest
       assertKineticCoEnergyFrameIndependent(twist, inertia);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrame()
    {
@@ -126,7 +126,7 @@ public class RigidBodyInertiaTest
       JUnitTools.assertMatrixEquals(inertiaCheap, inertiaExpensive.getMatrix(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameKineticCoEnergyConsistency()
    {
@@ -144,7 +144,7 @@ public class RigidBodyInertiaTest
       assertEquals(kineticCoEnergyFrameB, kineticCoEnergyFrameC, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSantiyIfChangeFramePurelyRotational()
    {

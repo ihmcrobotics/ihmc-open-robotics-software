@@ -8,12 +8,12 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class GlobalTimerTest
 {
    private static final long RANDOM_SEED = 1976L;
-   @DeployableTestMethod(estimatedDuration = 0.8)
+   @ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testgetElapsedTime()
    {
@@ -42,7 +42,7 @@ public class GlobalTimerTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 5.2)
+   @ContinuousIntegrationTest(estimatedDuration = 5.2)
    @Test(timeout = 30000)
    public void testgetElapsedTime2()
    {

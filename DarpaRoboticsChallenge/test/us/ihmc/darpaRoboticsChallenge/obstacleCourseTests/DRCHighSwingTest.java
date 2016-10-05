@@ -33,7 +33,7 @@ import us.ihmc.simulationconstructionset.util.dataProcessors.ValueDataCheckerPar
 import us.ihmc.simulationconstructionset.util.dataProcessors.YoVariableValueDataChecker;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -70,7 +70,7 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 81.8)
+	@ContinuousIntegrationTest(estimatedDuration = 81.8)
    @Test(timeout = 410000)
    public void testWalkingWithHighSteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {

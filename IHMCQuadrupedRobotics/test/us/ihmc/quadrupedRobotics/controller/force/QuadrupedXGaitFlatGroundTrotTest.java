@@ -18,7 +18,7 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMultiRobotTestInterface
 {
@@ -54,14 +54,14 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testTrottingForwardFast()
    {
       trotFast(1.0);
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testTrottingBackwardsFast()
    {
@@ -91,14 +91,14 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testTrottingForwardSlow()
    {
       trotSlow(1.0);
    }
 
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testTrottingBackwardsSlow()
    {
@@ -131,28 +131,28 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 30000)
    public void testTrottingInAForwardLeftCircle()
    {
       trotInACircle(1.0, 1.0);
    }
    
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 30000)
    public void testTrottingInAForwardRightCircle()
    {
       trotInACircle(1.0, -1.0);
    }
    
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 30000)
    public void testTrottingInABackwardLeftCircle()
    {
       trotInACircle(-1.0, 1.0);
    }
    
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 30000)
    public void testTrottingInABackwardRightCircle()
    {

@@ -7,12 +7,12 @@ import javax.vecmath.Point3d;
 import org.junit.Test;
 
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class PointCloudWorldPacketGeneratorTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.6)
+	@ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testGeneratePointCloudWorldPacket() throws InterruptedException
    {

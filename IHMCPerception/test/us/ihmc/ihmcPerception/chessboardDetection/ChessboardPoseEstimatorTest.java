@@ -17,16 +17,16 @@ import javax.imageio.ImageIO;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
 public class ChessboardPoseEstimatorTest
 {
    static final boolean DEBUG = false;
 
-   @DeployableTestMethod(estimatedDuration = 2.6)
+   @ContinuousIntegrationTest(estimatedDuration = 2.6)
    @Test(timeout = 30000)
    public void testOpenCVRegression4x7() throws IOException
    {
@@ -44,7 +44,7 @@ public class ChessboardPoseEstimatorTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testOpenCVRegression4x5() throws IOException
          {
@@ -65,7 +65,7 @@ public class ChessboardPoseEstimatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testSimpleAlmostFrontChessboard() throws IOException
    {
@@ -77,7 +77,7 @@ public class ChessboardPoseEstimatorTest
       testSingleImage(image, squareNumRow, squareNumCol, gridWidth, 1e-2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.2)
+   @ContinuousIntegrationTest(estimatedDuration = 1.2)
    @Test(timeout = 30000)
    public void testDrivingSimCheckerBoard() throws IOException
    {
@@ -90,7 +90,7 @@ public class ChessboardPoseEstimatorTest
    }
 
    //boofCV can't find checker board
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
    @Test(timeout = 5000)
    public void testImage3() throws IOException
    {
@@ -103,7 +103,7 @@ public class ChessboardPoseEstimatorTest
    }
 
    //boofcv found checkerboard but pose estimated poorly
-   @DeployableTestMethod(estimatedDuration = 1.6)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testImage1() throws IOException
    {

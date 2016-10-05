@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class ExperimentalSOCPSolverUsingJOptimizerTest
@@ -19,7 +19,7 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
    public static final boolean VERBOSE = false;
 
    // At time of test writing JOptimizer wasn't working for SOCPs...
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testASimpleSecondOrderConeProblem()
    {
@@ -52,7 +52,7 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
    }
    
    //At time of test writing JOptimizer wasn't working for SOCPs...
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testARotatedSecondOrderConeProblem()
    {

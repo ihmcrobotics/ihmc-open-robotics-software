@@ -100,11 +100,11 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.ResizeViewportDi
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveConfigurationDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveGraphConfigurationDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveRobotConfigurationDialogConstructor;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = { TestPlanTarget.UI})
+@ContinuousIntegrationPlan(targets = { TestPlanTarget.UI})
 public class ActionsTest
 {
    /**
@@ -150,7 +150,7 @@ public class ActionsTest
       }
    };
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testSimpleActions()
    {
@@ -160,7 +160,7 @@ public class ActionsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testCreateNewGraphWindowAction()
    {
@@ -179,7 +179,7 @@ public class ActionsTest
               .assertMethodNotCalled("getGraphArrayWindow", String.class);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testCreateNewViewportWindowAction()
    {
@@ -198,7 +198,7 @@ public class ActionsTest
               .assertMethodNotCalled("getViewportWindow", String.class);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testHideShowViewportAction()
    {
@@ -263,7 +263,7 @@ public class ActionsTest
               );
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testSimulateAction()
    {
@@ -279,7 +279,7 @@ public class ActionsTest
               .assertMethodCalled("simulate");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testToggleKeyPointModeAction()
    {
@@ -336,7 +336,7 @@ public class ActionsTest
               );
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testZoomInAction()
    {
@@ -353,7 +353,7 @@ public class ActionsTest
               .assertMethodNotCalled("zoomOut");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testZoomOutAction()
    {
@@ -370,7 +370,7 @@ public class ActionsTest
               .assertMethodNotCalled("zoomIn");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectGraphConfigurationAction()
    {
@@ -386,7 +386,7 @@ public class ActionsTest
               .assertMethodCalled("selectGraphConfiguration", "Test");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectGraphGroupAction()
    {
@@ -402,7 +402,7 @@ public class ActionsTest
               .assertMethodCalled("selectGraphGroup", "Test");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectVarGroupAction()
    {
@@ -418,7 +418,7 @@ public class ActionsTest
               .assertMethodCalled("selectVarGroup", "Test");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectViewportAction()
    {
@@ -435,7 +435,7 @@ public class ActionsTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testCameraPropertiesAction()
    {
@@ -462,7 +462,7 @@ public class ActionsTest
               .assertAllInterfaceMethodsCalled();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectEntryBoxGroupAction()
    {
@@ -479,7 +479,7 @@ public class ActionsTest
               .assertAllInterfaceMethodsCalled();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectExtraPanelAction()
    {
@@ -496,14 +496,14 @@ public class ActionsTest
               .assertAllInterfaceMethodsCalled();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testThinBufferAction()
    {
       testActionCallingAllInterfaceMethods(ThinBufferCommandExecutor.class, ThinBufferAction.class);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectCameraAction()
    {
@@ -519,7 +519,7 @@ public class ActionsTest
               .assertMethodCalled("selectCamera", "Test");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectGUIConfigFromFileAction()
    {

@@ -17,11 +17,11 @@ import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 import com.joptimizer.optimizers.OptimizationResponse;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Exclude}) // Revisit JOptimzer some day and see if they ever got their act in gear...
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Exclude}) // Revisit JOptimzer some day and see if they ever got their act in gear...
 public class SimpleJOptimizerTest
 {
    private static final boolean VERBOSE = true;
@@ -31,7 +31,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout = 300000)
    public void testReallyReallySimpleOptimizationProblem() throws Exception
    {
@@ -58,7 +58,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testASimpleRedundantEqualityCase() throws Exception
    {
@@ -83,7 +83,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testAnotherReallySimpleOptimizationProblem() throws Exception
    {
@@ -101,7 +101,7 @@ public class SimpleJOptimizerTest
       assertEquals(2.0, solution[0], 1e-5);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 3000)
    public void testReallySimpleOptimizationProblem() throws Exception
    {
@@ -121,7 +121,7 @@ public class SimpleJOptimizerTest
       assertEquals(5.0, solution[0], 1e-5);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 3000)
    public void testLinearCostQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -151,7 +151,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testLinearCostFullyLinearConstrainedEqualityOptimizationProblem() throws Exception
    {
@@ -170,7 +170,7 @@ public class SimpleJOptimizerTest
       assertEquals(1.0, solution[1], 1e-5);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 3000)
    public void testZeroCostLinearEqualityOptimizationProblem() throws Exception
    {
@@ -188,7 +188,7 @@ public class SimpleJOptimizerTest
       assertEquals(4.0, solution[0] + solution[1], 1e-5);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 3000)
    public void testLinearCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -221,7 +221,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testQuadraticCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -304,7 +304,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testASecondOrderLorenzConeProblemUsingSquaring() throws Exception
    {
@@ -380,7 +380,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {

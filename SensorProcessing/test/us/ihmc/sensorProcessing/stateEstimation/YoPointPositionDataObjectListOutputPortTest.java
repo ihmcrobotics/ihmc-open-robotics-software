@@ -12,7 +12,7 @@ import org.junit.Test;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -27,7 +27,7 @@ import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 public class YoPointPositionDataObjectListOutputPortTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 1.0)
+	@ContinuousIntegrationTest(estimatedDuration = 1.0)
 	@Test(timeout = 30000)
    public void testRandom()
    {

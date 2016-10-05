@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class PathToolsTest
 {
@@ -28,7 +28,7 @@ public class PathToolsTest
       FileTools.ensureDirectoryExists(TEST_RESOURCES_PATH);
    }
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindAllPathsRecursivelyThatMatchRegex()
    {
@@ -39,7 +39,7 @@ public class PathToolsTest
       assertTrue("Didn't match exactly one file.", matchingPaths.size() == 1);
    }
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetBaseName()
    {
@@ -52,7 +52,7 @@ public class PathToolsTest
       assertTrue("Base name not correct.", baseName.equals(PathToolsTest.class.getSimpleName()));
    }
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetExtension()
    {
@@ -65,7 +65,7 @@ public class PathToolsTest
       assertTrue("Extension name not correct.", extensionName.equals("java"));
    }
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFirstPathMatchingGlob()
    {
@@ -86,7 +86,7 @@ public class PathToolsTest
       assertTrue("First path not correct.", firstPath.getFileName().toString().equals(camelCasedClassSimpleName));
    }
 	
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWalkTreeFlat()
    {

@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 /**
  * Tests compliance to the {@link us.ihmc.simulationconstructionset.physics.ScsCollisionDetector}
@@ -31,7 +31,7 @@ public abstract class SCSCollisionDetectorTest
    /**
     * Make a small object and see if it detects the collision correctly.  Small objects aren't already handled correctly
     */
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testSmallBox()
    {
@@ -87,7 +87,7 @@ public abstract class SCSCollisionDetectorTest
       result.clear();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testUnitBox()
    {
@@ -138,7 +138,7 @@ public abstract class SCSCollisionDetectorTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testBoxCloseButNoCollisions()
    {
@@ -181,7 +181,7 @@ public abstract class SCSCollisionDetectorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testBoxBarelyCollisions()
    {
@@ -236,7 +236,7 @@ public abstract class SCSCollisionDetectorTest
 
 
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void collisionMask_hit()
    {
@@ -264,7 +264,7 @@ public abstract class SCSCollisionDetectorTest
     * Makes sure the offset from the link is handled correctly
     */
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void checkCollisionShape_offset()
    {

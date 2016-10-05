@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobotTestInterface
 {
@@ -55,7 +55,7 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 80.0)
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 200000)
    public void rotate720InPlaceRight() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -84,7 +84,7 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 80.0)
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 200000)
    public void rotate720InPlaceLeft() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

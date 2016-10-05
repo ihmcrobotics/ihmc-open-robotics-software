@@ -10,7 +10,7 @@ import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 /**
@@ -20,7 +20,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 public class ActiveSearchQuadraticProgramOptimizerTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUnconstrained()
    {
@@ -43,7 +43,7 @@ public class ActiveSearchQuadraticProgramOptimizerTest
       assertTrue(MatrixFeatures.isConstantVal(axMinusB, 0.0, 1e-12));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstrainedSimple()
    {
@@ -83,7 +83,7 @@ public class ActiveSearchQuadraticProgramOptimizerTest
 	/**
 	 * Not working, but probably not critical right now. Get this to work some day TODO
 	 */
-	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout = 525)
    public void testFullyConstrained()
    {	   

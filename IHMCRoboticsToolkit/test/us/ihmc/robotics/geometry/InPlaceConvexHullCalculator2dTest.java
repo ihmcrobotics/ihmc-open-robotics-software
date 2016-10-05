@@ -12,7 +12,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.util.ShapeUtilities;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.swing.*;
 import javax.vecmath.Point2d;
@@ -27,7 +27,7 @@ public class InPlaceConvexHullCalculator2dTest
    private static final boolean DEBUG = true;
    Random rand = new Random(100l);
 
-	@DeployableTestMethod(estimatedDuration = 2.6)
+	@ContinuousIntegrationTest(estimatedDuration = 2.6)
 	@Test(timeout = 30000)
    public void testRandomV1()
    {
@@ -73,7 +73,7 @@ public class InPlaceConvexHullCalculator2dTest
       System.out.println(optClock / 1000000 + " " + inPlaceClock / 1000000);
    }
 
-	@DeployableTestMethod(estimatedDuration = 2.1)
+	@ContinuousIntegrationTest(estimatedDuration = 2.1)
 	@Test(timeout = 30000)
    public void testRandomV2()
    {
@@ -173,7 +173,7 @@ public class InPlaceConvexHullCalculator2dTest
       return xySeriesCollection;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConvexCounterclockwise()
    {
@@ -191,7 +191,7 @@ public class InPlaceConvexHullCalculator2dTest
       assertTrue(ConvexHullCalculator2d.isConvexAndClockwise(points, newSize));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFirstPointSelection()
    {

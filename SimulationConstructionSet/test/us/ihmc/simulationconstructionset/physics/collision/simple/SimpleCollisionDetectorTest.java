@@ -16,13 +16,13 @@ import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class SimpleCollisionDetectorTest
 {
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSphereToSphereCollisions()
    {
@@ -146,7 +146,7 @@ public class SimpleCollisionDetectorTest
       assertEquals(-0.013845853834199007, distance, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.InDevelopment)
    @Test(timeout = 30000)
    public void testBoxToBoxCollisions()
    {

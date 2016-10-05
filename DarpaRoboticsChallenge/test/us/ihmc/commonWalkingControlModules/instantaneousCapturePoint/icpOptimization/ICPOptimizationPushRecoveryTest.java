@@ -28,7 +28,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 import javax.vecmath.Point3d;
@@ -89,7 +89,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationNoPush() throws SimulationExceededMaximumTimeException
    {
@@ -102,7 +102,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -126,7 +126,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -150,7 +150,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -206,7 +206,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationRandomPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -234,7 +234,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationLongForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -258,7 +258,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationLongBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -282,7 +282,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationLongInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -306,7 +306,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationOutwardPushInTransfer() throws SimulationExceededMaximumTimeException
    {
@@ -336,7 +336,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -360,7 +360,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationInwardPushInTransfer() throws SimulationExceededMaximumTimeException
    {
@@ -390,7 +390,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -414,7 +414,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -438,7 +438,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationOutwardPushOnEachStep() throws SimulationExceededMaximumTimeException
    {

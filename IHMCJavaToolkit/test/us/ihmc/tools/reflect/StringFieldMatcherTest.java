@@ -8,12 +8,12 @@ import java.lang.reflect.Field;
 import org.junit.Test;
 
 import us.ihmc.tools.reflect.StringFieldMatcher;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class StringFieldMatcherTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testStringFieldMatcher() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException
    {     
@@ -43,7 +43,7 @@ public class StringFieldMatcherTest
      assertTrue(matcher.matches(mitt));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCombine() throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException
    {

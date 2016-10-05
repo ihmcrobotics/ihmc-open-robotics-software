@@ -12,12 +12,12 @@ import org.junit.Test;
 
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class FrameLineTest
 {
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testChangeFrameCopy()
    {
@@ -77,7 +77,7 @@ public class FrameLineTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFrameVector()
    {
@@ -105,7 +105,7 @@ public class FrameLineTest
       assertTrue(line.getDirectionInFrame(target2).epsilonEquals(vector, 1e-12));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFramePoint()
    {
@@ -133,7 +133,7 @@ public class FrameLineTest
       assertTrue(line.getDirectionInFrame(target2).epsilonEquals(vector, 1e-12));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testConstructorA()
    {
@@ -143,7 +143,7 @@ public class FrameLineTest
       new FrameLine(ReferenceFrame.getWorldFrame(), origin, direction);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testConstructorB()
    {
@@ -153,7 +153,7 @@ public class FrameLineTest
       new FrameLine(origin, direction);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testConstructorC()
    {
