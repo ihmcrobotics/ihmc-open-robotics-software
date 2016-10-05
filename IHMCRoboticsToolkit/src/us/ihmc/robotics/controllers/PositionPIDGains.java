@@ -78,7 +78,8 @@ public class PositionPIDGains implements PositionPIDGainsInterface
 
    public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinimumKd)
    {
-      tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
+      if (tangentialDampingGains != null)
+         tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
    }
 
    public void setMaximumFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
