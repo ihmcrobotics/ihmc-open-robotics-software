@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest implements QuadrupedMultiRobotTestInterface
 {
@@ -55,7 +55,7 @@ public abstract class QuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 700.0)
+   @ContinuousIntegrationTest(estimatedDuration = 700.0)
    @Test(timeout = 2000000)
    public void testWalkingForwardStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

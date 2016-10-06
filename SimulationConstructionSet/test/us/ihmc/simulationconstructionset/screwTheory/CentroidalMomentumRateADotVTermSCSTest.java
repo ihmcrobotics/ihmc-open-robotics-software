@@ -25,7 +25,7 @@ import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class CentroidalMomentumRateADotVTermSCSTest
 {
@@ -44,7 +44,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
    private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
    private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void chainTest() throws UnreasonableAccelerationException
    {
@@ -64,7 +64,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
       assertADotV(random, joints, elevator, robot,numberOfJoints);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void treeTest() throws UnreasonableAccelerationException
    {
@@ -84,7 +84,7 @@ public class CentroidalMomentumRateADotVTermSCSTest
       assertADotV(random, joints, elevator, robot, numberOfJoints);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void floatingChainTest() throws UnreasonableAccelerationException
    {

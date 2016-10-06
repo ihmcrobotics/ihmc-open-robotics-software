@@ -17,7 +17,7 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
@@ -53,7 +53,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testWalkingForwardFast()
    {
@@ -70,7 +70,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testWalkingForwardSlow()
    {
@@ -87,7 +87,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testWalkingBackwardsFast()
    {
@@ -104,7 +104,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testWalkingBackwardsSlow()
    {
@@ -121,7 +121,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 45.0)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 30000)
    public void testWalkingInAForwardLeftCircle()
    {
@@ -142,7 +142,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 30000)
    public void testWalkingInAForwardRightCircle()
    {
@@ -163,7 +163,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 30000)
    public void testWalkingInABackwardLeftCircle()
    {
@@ -184,7 +184,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 30000)
    public void testWalkingInABackwardRightCircle()
    {

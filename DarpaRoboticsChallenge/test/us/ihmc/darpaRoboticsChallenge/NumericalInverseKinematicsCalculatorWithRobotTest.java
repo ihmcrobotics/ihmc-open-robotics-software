@@ -38,7 +38,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
@@ -195,7 +195,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCase()
    {
@@ -215,7 +215,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
 
 
-	@DeployableTestMethod(estimatedDuration = 13.2)
+	@ContinuousIntegrationTest(estimatedDuration = 13.2)
    @Test(timeout = 66000)
    public void testRandomFeasibleRobotPoses()
    {

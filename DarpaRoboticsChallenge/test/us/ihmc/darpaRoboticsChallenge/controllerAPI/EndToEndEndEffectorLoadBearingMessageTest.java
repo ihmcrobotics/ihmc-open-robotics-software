@@ -29,7 +29,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndEndEffectorLoadBearingMessageTest implements MultiRobotTestInterface
@@ -39,7 +39,7 @@ public abstract class EndToEndEndEffectorLoadBearingMessageTest implements Multi
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @SuppressWarnings("unchecked")
-   @DeployableTestMethod(estimatedDuration = 41.3)
+   @ContinuousIntegrationTest(estimatedDuration = 41.3)
    @Test(timeout = 210000)
    public void testSwitchFootToLoadBearing() throws Exception
    {

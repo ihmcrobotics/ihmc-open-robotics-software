@@ -12,7 +12,7 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.MatrixYoVariableConversionTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 /**
  * @author twan
@@ -21,7 +21,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 public class MatrixYoVariableConversionToolsTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testBackAndForthVector()
    {
@@ -42,7 +42,7 @@ public class MatrixYoVariableConversionToolsTest
       EjmlUnitTests.assertEquals(matrix, matrixBack, 1e-12);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout=300000)
    public void testBackAndForthMatrix()
    {
@@ -64,7 +64,7 @@ public class MatrixYoVariableConversionToolsTest
       EjmlUnitTests.assertEquals(matrix, matrixBack, 1e-12);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testBackAndForthSymmetricMatrix()
    {

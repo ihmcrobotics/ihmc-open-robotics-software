@@ -15,12 +15,12 @@ import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.testing.TestPlanAnnotations;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
 
-@DeployableTestClass(targets = Fast)
+@ContinuousIntegrationPlan(targets = Fast)
 public class QuadrupedXGaitPlannerTest
 {
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testInitialForwardVelocityPlan()
    {
@@ -81,7 +81,7 @@ public class QuadrupedXGaitPlannerTest
       }
    }
 
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testOnlineForwardVelocityPlan()
    {

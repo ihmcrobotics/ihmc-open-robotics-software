@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.MutationTestingTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
@@ -17,7 +17,7 @@ public class BoundingBox2dTest
 {
    double epsilon = 0.00001;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMinPoint()
    {
@@ -33,7 +33,7 @@ public class BoundingBox2dTest
       assertEquals(minPoint, lowerLeftPoint);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMinPoint_2()
    {
@@ -49,7 +49,7 @@ public class BoundingBox2dTest
       assertEquals(minPoint, lowerLeftPoint);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMinPoint_3()
    {
@@ -66,7 +66,7 @@ public class BoundingBox2dTest
       assertEquals(minPoint, lowerLeftPoint);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected=RuntimeException.class)
    public void testGetMinPoint_4()
    {
@@ -76,7 +76,7 @@ public class BoundingBox2dTest
       boundingBox2d.set(4.0, lowerLeftPoint.getY(), upperRightPoint.getX(), upperRightPoint.getY());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected=RuntimeException.class)
    public void testGetMinPoint_5()
    {
@@ -86,7 +86,7 @@ public class BoundingBox2dTest
       boundingBox2d.set(lowerLeftPoint.getX(), 4.0, upperRightPoint.getX(), upperRightPoint.getY());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMaxPoint()
    {
@@ -102,7 +102,7 @@ public class BoundingBox2dTest
       assertEquals(maxPoint, upperRightPoint);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetCenterPointCopy()
    {
@@ -129,7 +129,7 @@ public class BoundingBox2dTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsFullyAbove()
    {
@@ -142,7 +142,7 @@ public class BoundingBox2dTest
       assertTrue(boundingBox2d.isBoxAtOrAbove(0.0));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsFullyBelow()
    {
@@ -155,7 +155,7 @@ public class BoundingBox2dTest
       assertFalse(boundingBox2d.isBoxAtOrBelow(1.0));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsFullyLeft()
    {
@@ -168,7 +168,7 @@ public class BoundingBox2dTest
       assertFalse(boundingBox2d.isBoxAtOrLeftOf(1.0));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsFullyRight() throws Exception
    {
@@ -181,7 +181,7 @@ public class BoundingBox2dTest
       assertFalse(boundingBox2d.isBoxAtOrRightOf(1.0));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsInside()
    {
@@ -233,7 +233,7 @@ public class BoundingBox2dTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIntersects()
    {
@@ -278,7 +278,7 @@ public class BoundingBox2dTest
       assertFalse(boundingBox2dA.intersects(boundingBox2dG));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructors()
    {
@@ -319,7 +319,7 @@ public class BoundingBox2dTest
 //    BoundingBox2d boundingBox2dA = new BoundingBox2d(lowerLeftPoint, upperRightPoint);
 // }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetPointGivenParameters()
    {
@@ -351,7 +351,7 @@ public class BoundingBox2dTest
       assertTrue(average.epsilonEquals(point, 0.0));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSet()
    {
@@ -372,7 +372,7 @@ public class BoundingBox2dTest
       assertEquals(maxPoint, upperRightPoint);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetDiagonalDistanceSquared()
    {

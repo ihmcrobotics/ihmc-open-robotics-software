@@ -13,12 +13,12 @@ import net.java.games.input.test.ControllerReadTest;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.inputDevices.joystick.virtualJoystick.VirtualJoystick;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class JoystickTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.8)
+   @ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testCreateJoystick()
    {
@@ -50,7 +50,7 @@ public class JoystickTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCreateVirtualJoystick()
    {
@@ -99,7 +99,7 @@ public class JoystickTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindNonExistentJoystick()
    {
@@ -116,7 +116,7 @@ public class JoystickTest
    boolean madCatz5Status = false;
    boolean madCatz1Status = false;
 
-   @DeployableTestMethod(estimatedDuration = 10.0, targets = Manual)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, targetsOverride = Manual)
    @Test(timeout = 300000)
    public void testCreateTwoJoysticks()
    {

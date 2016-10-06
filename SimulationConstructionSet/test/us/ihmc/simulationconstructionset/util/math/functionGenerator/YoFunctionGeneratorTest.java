@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class YoFunctionGeneratorTest
 {
@@ -24,7 +24,7 @@ public class YoFunctionGeneratorTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testZeroFrequencyDC()
    {
@@ -41,7 +41,7 @@ public class YoFunctionGeneratorTest
 	   }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOutputContinuityDuringFrequencyChange()
    {
@@ -78,7 +78,7 @@ public class YoFunctionGeneratorTest
 	   assertEquals("|"+output0+"-"+output1+"|<" + tolerance,0,output1-output0, tolerance);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testZeroFrequencySine()
    {
@@ -96,7 +96,7 @@ public class YoFunctionGeneratorTest
 	   }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testTriangle()
    {

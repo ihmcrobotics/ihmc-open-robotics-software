@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -15,7 +15,7 @@ public class LineSegment3dTest
 {
    private static Random ran = new Random(100L);
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLenght()
    {
@@ -35,7 +35,7 @@ public class LineSegment3dTest
       assertEquals(3.0, segment.length(), 1e-14);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceToPoint()
    {
@@ -72,7 +72,7 @@ public class LineSegment3dTest
       assertEquals(segment.length(), segment.distanceToAPoint(point), 1e-14);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testProjection()
    {
@@ -99,7 +99,7 @@ public class LineSegment3dTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRandom()
    {
@@ -169,7 +169,7 @@ public class LineSegment3dTest
       return returnPoint;
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void directionTest()
    {

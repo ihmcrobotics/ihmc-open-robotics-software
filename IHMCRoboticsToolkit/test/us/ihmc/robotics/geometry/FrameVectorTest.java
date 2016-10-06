@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 /**
  * <p>Title: </p>
@@ -57,7 +57,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       return new FrameVector(referenceFrame, x, y, z, name);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void allConstructorsWork() //Brett
    {
@@ -114,7 +114,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       //      FrameVector frameXYZString = new FrameVector(referenceFrame, x, y, z name);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFrameChanges()
    {
@@ -137,7 +137,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       frameVector.checkReferenceFrameMatch(theFrame);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetVector()
    {
@@ -147,7 +147,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       assertEquals("These should be equal", 20.0, expected.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testToFrameVector2d() //Brett was here
    {
@@ -157,7 +157,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       assertEquals("These should be equal", 22.0, expected.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testDot() //Brett
    {
@@ -172,7 +172,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       frameVector1.dot(frameVector3);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testAngle() //Brett
    {
@@ -193,7 +193,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       frameVector1.angle(frameVector3);
    }
 	
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsParallel()
    {
@@ -207,7 +207,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       assertTrue(errorMsg, randomFrameVector.isEpsilonParallel(parallelVector, 1e-7));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLength() //Brett was here
    {
@@ -222,7 +222,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLengthSquared() //Brett was here
    {
@@ -230,7 +230,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       assertEquals("These should be equal", 25.0, frameVector.lengthSquared(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransform() //Brett was here
    {
@@ -247,7 +247,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       }      
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCrosses() //Brett
    {
@@ -302,7 +302,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCrossWithVector3d()
    {
@@ -324,7 +324,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNormalize() //Brett
    {

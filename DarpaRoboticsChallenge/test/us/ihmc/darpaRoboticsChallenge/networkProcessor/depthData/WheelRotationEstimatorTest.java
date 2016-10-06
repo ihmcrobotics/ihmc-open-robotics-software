@@ -8,13 +8,13 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class WheelRotationEstimatorTest
 {
    private static final double eps = 1e-7;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAngleDefinitions()
    {
@@ -34,7 +34,7 @@ public class WheelRotationEstimatorTest
       
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIndexBounds()
    {
@@ -56,7 +56,7 @@ public class WheelRotationEstimatorTest
       
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAngleTautology()
    {

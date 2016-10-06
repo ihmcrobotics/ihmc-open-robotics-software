@@ -9,11 +9,11 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedXGaitBumpyTerrainWalkingTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
 public class LLAQuadrupedXGaitBumpyTerrainWalkingTest extends QuadrupedXGaitBumpyTerrainWalkingTest
 {
    @Override
@@ -23,7 +23,7 @@ public class LLAQuadrupedXGaitBumpyTerrainWalkingTest extends QuadrupedXGaitBump
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 120000)
    public void testWalkingOverShallowBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -31,7 +31,7 @@ public class LLAQuadrupedXGaitBumpyTerrainWalkingTest extends QuadrupedXGaitBump
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 120000)
    public void testWalkingOverMediumBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -39,7 +39,7 @@ public class LLAQuadrupedXGaitBumpyTerrainWalkingTest extends QuadrupedXGaitBump
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 120000)
    public void testWalkingOverAggressiveBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

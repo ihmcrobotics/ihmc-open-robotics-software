@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class RobotiqOutputRegisterTest
 {
@@ -12,7 +12,7 @@ public abstract class RobotiqOutputRegisterTest
    protected abstract RobotiqOutputRegister getOutputRegister();
    
    @Test(timeout = 30000)
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testGetRegisterValue()
    {
       byte expectedValue = getExpectedByteValue();

@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.Skippy.gc_foot_fs,root.Skippy.SkippyController.stateMachine,root.Skippy.SkippyController.SkippyToDo</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.gc_foot_fs,root.Skippy.SkippyController.stateMachine,root.Skippy.SkippyController.SkippyToDo</Variables>
+		<Variables>root.Skippy.qdd_z</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.desiredGroundReactionForceZ,root.Skippy.SkippyController.actualGroundReactionForceZ</Variables>
+		<Variables>root.Skippy.SkippyController.outOfPlane,root.Skippy.SkippyController.alphaBalance</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -57,51 +57,8 @@
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>1</Graph Array Window Size>
-<Graph Array Window1>
-<ScreenID>1</ScreenID>
-<WindowLocation>-1927.0, 95.0</WindowLocation>
-<WindowSize>1932.0, 1165.0</WindowSize>
-<GraphGroup>
-	<Cols>1</Cols>
-	<Graph>
-		<Variables>root.Skippy.tau_shoulderJoint,root.Skippy.SkippyController.tauOnShoulderJointAxis</Variables>
-		<GraphConfiguration>
-			<Name>config5</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.tau_hip,root.Skippy.SkippyController.tauOnHipJointAxis</Variables>
-		<GraphConfiguration>
-			<Name>config6</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.actualGroundReactionForceX,root.Skippy.SkippyController.actualGroundReactionForceY,root.Skippy.SkippyController.actualGroundReactionForceZ,root.Skippy.SkippyController.desiredGroundReactionForceZ,root.Skippy.qdd_z</Variables>
-		<GraphConfiguration>
-			<Name>config7</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-</GraphGroup>
-</Graph Array Window1>
+<Graph Array Window Size>0</Graph Array Window Size>
+
 
 <Extra Panels>
 <Main Viewport>
@@ -110,9 +67,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>40.0</Camera X>
+ <Camera X>10.0</Camera X>
  <Camera Y>0.0</Camera Y>
- <Camera Z>0.2</Camera Z>
+ <Camera Z>2.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicSplineCoefficientMatrix;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import java.util.Random;
 
@@ -11,7 +11,7 @@ public class CubicSplineCoefficientMatrixTest
 {
    private static final double epsilon = 0.00005;
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testCreationSize()
    {
@@ -21,7 +21,7 @@ public class CubicSplineCoefficientMatrixTest
       Assert.assertEquals("", 4, cubicSplineMatrix.numRows);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testDurationSetting()
    {
@@ -57,7 +57,7 @@ public class CubicSplineCoefficientMatrixTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testDurationCreation()
    {

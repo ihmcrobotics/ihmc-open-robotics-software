@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedPositionCrawlRandomWalkingTest implements QuadrupedMultiRobotTestInterface
 {
@@ -70,7 +70,7 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
       return random.nextDouble() * 10.0 + 5.0;
    }
    
-   @DeployableTestMethod(estimatedDuration = 300.0)
+   @ContinuousIntegrationTest(estimatedDuration = 300.0)
    @Test(timeout = 1000000)
    public void testWalkingRandomly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -99,7 +99,7 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 200.0)
+   @ContinuousIntegrationTest(estimatedDuration = 200.0)
    @Test(timeout = 1000000)
    public void testWalkingAtRandomSpeedsWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -129,7 +129,7 @@ public abstract class QuadrupedPositionCrawlRandomWalkingTest implements Quadrup
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 300.0)
+   @ContinuousIntegrationTest(estimatedDuration = 300.0)
    @Test(timeout = 1000000)
    public void testWalkingRandomVelocitiesStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

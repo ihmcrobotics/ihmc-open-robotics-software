@@ -44,7 +44,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInterface
@@ -104,7 +104,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       robotDataReceiver = drcBehaviorTestHelper.getRobotDataReceiver();
    }
 
-   @DeployableTestMethod(estimatedDuration = 31.2)
+   @ContinuousIntegrationTest(estimatedDuration = 31.2)
    @Test(timeout = 160000)
    public void testTwoStepsForwards() throws SimulationExceededMaximumTimeException
    {
@@ -160,7 +160,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 31.9)
+   @ContinuousIntegrationTest(estimatedDuration = 31.9)
    @Test(timeout = 160000)
    public void testSideStepping() throws SimulationExceededMaximumTimeException
    {
@@ -217,7 +217,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @DeployableTestMethod(estimatedDuration = 26.1)
+   @ContinuousIntegrationTest(estimatedDuration = 26.1)
    @Test(timeout = 130000)
    public void testStepLongerThanMaxStepLength() throws SimulationExceededMaximumTimeException
    {
@@ -289,7 +289,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       return footStepsAreTooFarApart;
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.1)
+   @ContinuousIntegrationTest(estimatedDuration = 50.1)
    @Test(timeout = 250000)
    public void testStop() throws SimulationExceededMaximumTimeException
    {

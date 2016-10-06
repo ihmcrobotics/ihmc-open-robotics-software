@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class SimulationRewindabilityVerifierTest
 {
@@ -23,7 +23,7 @@ public class SimulationRewindabilityVerifierTest
    private static final boolean VERBOSE = false;
    private final double DT = 0.01;
 
-	@DeployableTestMethod(estimatedDuration = 4.2)
+	@ContinuousIntegrationTest(estimatedDuration = 4.2)
 	@Test(timeout=300000)
    public void testRewindableSimulation() throws UnreasonableAccelerationException
    {
@@ -44,7 +44,7 @@ public class SimulationRewindabilityVerifierTest
       scs2.closeAndDispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 4.2)
+	@ContinuousIntegrationTest(estimatedDuration = 4.2)
 	@Test(timeout=300000)
    public void testEasilyDetectableNonRewindableSimulation() throws UnreasonableAccelerationException
    {
@@ -71,7 +71,7 @@ public class SimulationRewindabilityVerifierTest
       scs2.closeAndDispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 8.5)
+	@ContinuousIntegrationTest(estimatedDuration = 8.5)
 	@Test(timeout=300000)
    public void testDifficultToDetectNonRewindableSimulation() throws UnreasonableAccelerationException
    {

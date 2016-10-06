@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.dataStructures.Polynomial;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import java.util.Random;
 
@@ -43,7 +43,7 @@ public class LinearDynamicSystemTest
       massSpringDamperSystem = null;
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testException()
    {
@@ -169,7 +169,7 @@ public class LinearDynamicSystemTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMCSExampleOne()
    {
@@ -273,7 +273,7 @@ public class LinearDynamicSystemTest
       // assertTrue(passed);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMCSExampleTwo()
    {
@@ -367,7 +367,7 @@ public class LinearDynamicSystemTest
       //      }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimulateInitialConditions()
    {
@@ -410,7 +410,7 @@ public class LinearDynamicSystemTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetTransferFunctionMatrix()
    {
@@ -425,21 +425,21 @@ public class LinearDynamicSystemTest
       assertTrue(transferFunction.epsilonEquals(expectedTransferFunction, 1e-7));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleDecaySystem()
    {
       verifyLinearDynamicSystem(simpleDecaySystem, simpleDecayMatrixA);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMassSpringDamperSystem()
    {
       verifyLinearDynamicSystem(massSpringDamperSystem, massSpringDamperMatrixA);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testRandomLinearDynamicSystems()
    {
@@ -499,7 +499,7 @@ public class LinearDynamicSystemTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testStateFeedbackMethods()
    {

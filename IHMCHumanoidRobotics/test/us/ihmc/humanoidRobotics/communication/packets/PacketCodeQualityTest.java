@@ -4,8 +4,8 @@ import org.junit.Test;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 import java.lang.reflect.Constructor;
@@ -18,10 +18,10 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-@DeployableTestClass(targets = TestPlanTarget.CodeQuality)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.CodeQuality)
 public class PacketCodeQualityTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAllPacketFieldsArePublic()
    {
@@ -38,7 +38,7 @@ public class PacketCodeQualityTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAllRosExportedPacketsHaveRandomConstructor()
    {

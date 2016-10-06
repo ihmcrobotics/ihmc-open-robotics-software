@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import com.badlogic.gdx.math.Matrix4;
 
@@ -15,7 +15,7 @@ import com.badlogic.gdx.math.Matrix4;
 public class GdxUtilTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void convert_t2m()
 	{
@@ -46,7 +46,7 @@ public class GdxUtilTest
       assertEquals(m[15],a[15],1e-6f);
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void convert_m2t()
 	{

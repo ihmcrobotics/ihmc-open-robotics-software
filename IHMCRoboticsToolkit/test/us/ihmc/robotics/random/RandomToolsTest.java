@@ -10,11 +10,11 @@ import javax.vecmath.Point3f;
 import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class RandomToolsTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomFloatArray()
    {
@@ -35,7 +35,7 @@ public class RandomToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomIntArray()
    {
@@ -56,7 +56,7 @@ public class RandomToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomPoint3f()
    {
@@ -76,7 +76,7 @@ public class RandomToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomPoint3fCloud()
    {
@@ -94,7 +94,7 @@ public class RandomToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomPoint3d()
    {
@@ -105,7 +105,7 @@ public class RandomToolsTest
       RandomTools.generateRandomPoint3d(random, range1, range2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomDoubleInRange()
    {
@@ -120,7 +120,7 @@ public class RandomToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomFloatInRange()
    {
@@ -135,7 +135,7 @@ public class RandomToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomBoolean()
    {

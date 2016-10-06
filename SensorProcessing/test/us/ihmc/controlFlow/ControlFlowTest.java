@@ -12,12 +12,12 @@ import org.junit.Test;
 
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ControlFlowTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSimpleControlFlowWithOneNodeAndNoInput()
    {
@@ -64,7 +64,7 @@ public class ControlFlowTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSimpleControlFlowWithOneNode()
    {
@@ -122,7 +122,7 @@ public class ControlFlowTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSimpleControlFlowWithTwoNodes()
    {
@@ -167,7 +167,7 @@ public class ControlFlowTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSimpleControlFlowWithThreeNodesAndNoInput()
    {
@@ -224,7 +224,7 @@ public class ControlFlowTest
 //    }
 // }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSimpleMultiportControlFlow()
    {
@@ -285,7 +285,7 @@ public class ControlFlowTest
       assertTrue(expectedString.equals(dataTypeFive.getString()));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testMultiportControlFlow()
    {
@@ -363,7 +363,7 @@ public class ControlFlowTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testMultiportControlFlowTwo()
    {
@@ -460,7 +460,7 @@ public class ControlFlowTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCreatingAPortAfterConnectingOtherPorts()
    {
@@ -480,7 +480,7 @@ public class ControlFlowTest
       controlFlowGraph.connectElements(elementOneOutputPortTwo, elementTwoInputPortTwo);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCreatingAnUnconnectedInputPortAfterConnectingTwoPorts()
    {
@@ -507,7 +507,7 @@ public class ControlFlowTest
       } 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConnectingAPortThatIsNotRegistered()
    {
@@ -529,7 +529,7 @@ public class ControlFlowTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRegisterPortWithTheWrongElement()
    {
@@ -548,7 +548,7 @@ public class ControlFlowTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCreatingAPortAfterConnectingOtherPortsAndSendData()
    {

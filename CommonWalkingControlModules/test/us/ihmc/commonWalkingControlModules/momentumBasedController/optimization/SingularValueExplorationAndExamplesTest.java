@@ -10,7 +10,7 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class SingularValueExplorationAndExamplesTest
 {
@@ -20,7 +20,7 @@ public class SingularValueExplorationAndExamplesTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleCase()
    {
@@ -57,7 +57,7 @@ public class SingularValueExplorationAndExamplesTest
       JUnitTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void showIMinusNNTransposeJDoesntMakeSense()
    {
@@ -149,7 +149,7 @@ public class SingularValueExplorationAndExamplesTest
       return ret;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void foo2()
    {

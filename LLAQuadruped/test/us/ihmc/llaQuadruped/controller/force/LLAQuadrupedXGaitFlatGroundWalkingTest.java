@@ -5,11 +5,11 @@ import org.junit.Test;
 import us.ihmc.llaQuadruped.LLAQuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedXGaitFlatGroundWalkingTest;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
 public class LLAQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFlatGroundWalkingTest
 {
    @Override
@@ -19,7 +19,7 @@ public class LLAQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFlatGr
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testWalkingForwardFast()
    {
@@ -27,7 +27,7 @@ public class LLAQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFlatGr
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testWalkingForwardSlow()
    {
@@ -35,7 +35,7 @@ public class LLAQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFlatGr
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testWalkingBackwardsFast()
    {
@@ -43,7 +43,7 @@ public class LLAQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFlatGr
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 15.0)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
    @Test(timeout = 30000)
    public void testWalkingBackwardsSlow()
    {
@@ -51,7 +51,7 @@ public class LLAQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFlatGr
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 30000)
    public void testWalkingInAForwardLeftCircle()
    {
@@ -59,7 +59,7 @@ public class LLAQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFlatGr
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 30000)
    public void testWalkingInAForwardRightCircle()
    {
@@ -67,7 +67,7 @@ public class LLAQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFlatGr
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 30000)
    public void testWalkingInABackwardLeftCircle()
    {
@@ -75,7 +75,7 @@ public class LLAQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFlatGr
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 30000)
    public void testWalkingInABackwardRightCircle()
    {

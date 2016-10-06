@@ -21,7 +21,7 @@ import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 //import us.ihmc.robotics.MathTools;
@@ -82,7 +82,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       childFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", theFrame, theFrameToChildFrame, false, true, true);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testName()
    {
@@ -96,7 +96,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertSame("Strings should be the same", test, frameTuple.getName());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSetXYZ()
    {
@@ -120,7 +120,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       testGetters(frameTuple, x, y, z);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class) //Brett was here
    public final void testSetTuple()
    {
@@ -144,7 +144,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       ft1.set(ft2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSetFrameTuple()
    {
@@ -247,7 +247,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
 
    // Tests copied from FramePointTest and FrameVectorTest
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testChangeFrameCopy()
    {
@@ -308,7 +308,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSets() //Brett was here
    {
@@ -343,7 +343,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals("This should be equal", 50.0, alpha.getX(), 1e-10);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class) //Brett was here
    public final void testSetXY()
    {
@@ -363,7 +363,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
 
    // NaN was found in beta, commented out for further testing
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testCheckForNaN()
    {
@@ -374,7 +374,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       beta.checkForNaN();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testGets()
    {
@@ -385,7 +385,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       beta.getZ();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testAddTuple3d()
    {
@@ -396,7 +396,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(alpha.epsilonEquals(expected, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testAddTuple3dTuple3d()
    {
@@ -409,7 +409,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(alpha.epsilonEquals(expected, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class)
    public final void testAddFrameTuple() //Brett
    {
@@ -426,7 +426,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       frameTuple1.add(frameTuple2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testAddFrameTupleFrameTuple() //Brett
    {
@@ -461,7 +461,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testReferenceFramesAreCheckedOnSet()
    {
@@ -471,7 +471,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePointOne.set(framePointTwo);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testEpsilonEqualsTuple()
    {
@@ -484,7 +484,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(tupleResult == framePointResult);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class)
    public final void testEpsilonEqualsFrameTuple()
    {
@@ -518,7 +518,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals("return value", expectedReturn, actualReturn);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testGetPointCopy()
    {
@@ -535,7 +535,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals(3.0, actualReturn.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testGetVectorCopy()
    {
@@ -546,7 +546,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(tuple3d.epsilonEquals(vector3dCopy, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testGetTuple3d()
    {
@@ -557,7 +557,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(frameTuple.epsilonEquals(tuple3d, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSetToZero()
    {
@@ -567,7 +567,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(frameTuple.epsilonEquals(frameTupleZero, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSetToZeroReferenceFrame()
    {
@@ -577,7 +577,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(frameTuple.epsilonEquals(frameTupleZero, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSetToNaN()
    {
@@ -588,7 +588,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(Double.isNaN(frameTuple.getZ()));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSetToNaNReferenceFrame()
    {
@@ -600,7 +600,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(Double.isNaN(frameTuple.getZ()));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testGetReferenceFrame()
    {
@@ -611,7 +611,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals("return value", expectedReturn, actualReturn);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testGetX()
    {
@@ -622,7 +622,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals("return value", expectedReturn, actualReturn, Double.MIN_VALUE);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testGetY()
    {
@@ -633,7 +633,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals("return value", expectedReturn, actualReturn, Double.MIN_VALUE);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testGetZ()
    {
@@ -644,7 +644,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals("return value", expectedReturn, actualReturn, Double.MIN_VALUE);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = NullPointerException.class)
    public final void testSet()
    {
@@ -654,7 +654,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePoint1.set(framePoint);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = NullPointerException.class)
    public final void testSet1()
    {
@@ -664,7 +664,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePoint.set(frameVector);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSet2()
    {
@@ -680,7 +680,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals(z, framePoint.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSetX()
    {
@@ -692,7 +692,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals(x, framePoint.getX(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSetY()
    {
@@ -704,7 +704,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals(y, framePoint.getY(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSetZ()
    {
@@ -716,7 +716,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals(z, framePoint.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSubTuple3d()
    {
@@ -729,7 +729,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(frameTuple1.epsilonEquals(tuple1, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSubTuple3dTuple3d()
    {
@@ -746,7 +746,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(expectedFrameTuple.epsilonEquals(expectedTuple, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSubFrameTuple()
    {
@@ -774,7 +774,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSubFrameTupleFrameTuple()
    {
@@ -820,7 +820,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class)
    public final void testCheckReferenceFrameMatch() throws ReferenceFrameMismatchException
    {
@@ -830,7 +830,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePoint.checkReferenceFrameMatch(frame);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = NullPointerException.class)
    public final void testCheckReferenceFrameMatch1() throws ReferenceFrameMismatchException
    {
@@ -840,7 +840,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePoint1.checkReferenceFrameMatch(framePoint);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = NullPointerException.class)
    public final void testCheckReferenceFrameMatch2() throws ReferenceFrameMismatchException
    {
@@ -850,7 +850,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePoint.checkReferenceFrameMatch(frameVector);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = NullPointerException.class)
    public final void testWeightedAverageNullPointerException()
    {
@@ -862,7 +862,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePoint.interpolate(point1, point2, weightedAverage);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testFramePoint()
    {
@@ -872,7 +872,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       createFrameTuple(referenceFrame);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testFramePoint1()
    {
@@ -883,7 +883,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       createFrameTuple(referenceFrame, point);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testFramePoint2()
    {
@@ -896,7 +896,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       createFrameTuple(referenceFrame, x, y, z);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testFramePoint3()
    {
@@ -906,7 +906,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       createFrameTuple(framePoint);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testFramePoint4()
    {
@@ -916,7 +916,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       createFrameTuple(frameVector);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testGetDirection()
    {
@@ -927,7 +927,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals(5.0, framePoint.get(Direction.Z), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class) //Brett was here
    public final void testScale()
    {
@@ -951,7 +951,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePoint.scale(scaleFactor, tuple1);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testScaleVector()
    {
@@ -966,7 +966,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals(-4.6, framePoint.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScaleVectorException()
    {
@@ -977,7 +977,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePoint.scale(scale, frameVector);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testScalePoint()
    {
@@ -992,7 +992,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals(-4.6, framePoint.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScalePointException()
    {
@@ -1003,7 +1003,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePoint.scale(scale, framePoint2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testScaleAddVectorVector() //Brett was here
    {
@@ -1039,7 +1039,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testScaleAddVectorScaleVector() //Brett was here
    {
@@ -1057,7 +1057,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScaleAddVectorVectorException1()
    {
@@ -1069,7 +1069,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePoint.scaleAdd(scale, frameVector1, frameVector2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScaleAddVectorVectorException2()
    {
@@ -1081,7 +1081,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePoint.scaleAdd(scale, frameVector1, frameVector2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testScaleAddVectorPoint()
    {
@@ -1106,7 +1106,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(framePointResult1.epsilonEquals(framePointResult2, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScaleAddVectorPointException1()
    {
@@ -1122,7 +1122,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePointResult1.scaleAdd(scale, frameVector1, framePoint1);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScaleAddVectorPointException2()
    {
@@ -1138,7 +1138,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePointResult1.scaleAdd(scale, frameVector1, framePoint1);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScaleAddPointVectorException1()
    {
@@ -1154,7 +1154,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePointResult1.scaleAdd(scale, framePoint1, frameVector1);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScaleAddPointVectorException2()
    {
@@ -1170,7 +1170,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePointResult1.scaleAdd(scale, framePoint1, frameVector1);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testScaleAddPointPoint()
    {
@@ -1186,7 +1186,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals(2.3 * -2.0 + 3.6, framePointResult.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScaleAddPointPointException1()
    {
@@ -1198,7 +1198,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePointResult.scaleAdd(scale, framePoint1, framePoint2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScaleAddPointPointException2()
    {
@@ -1210,7 +1210,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePointResult.scaleAdd(scale, framePoint1, framePoint2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class) //Brett was here
    public final void testScaleAddScaleTuple()
    {
@@ -1229,7 +1229,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       ft1.scaleAdd(scale, frameVector);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScaleAddVectorException()
    {
@@ -1240,7 +1240,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePointResult.scaleAdd(scale, frameVector);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testScaleAddPoint()
    {
@@ -1255,7 +1255,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals(2.3 * -2.0 + 3.6, framePointResult.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public final void testScaleAddPointException()
    {
@@ -1266,7 +1266,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       framePointResult.scaleAdd(scale, framePoint);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testChangeFrameUsingTransform()
    {
@@ -1294,7 +1294,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
    //      assertTrue(framePointCopy.epsilonEquals(framePointTransformedCopy, epsilon));
    //   }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSubFramePoint()
    {
@@ -1306,7 +1306,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(expectedResult.epsilonEquals(framePoint1, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSubFrameVector()
    {
@@ -1318,7 +1318,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(expectedResult.epsilonEquals(framePoint, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSubPointPoint()
    {
@@ -1331,7 +1331,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(expectedResult.epsilonEquals(actualResult, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSubPointVector()
    {
@@ -1344,7 +1344,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(expectedResult.epsilonEquals(actualResult, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSubVectorPoint()
    {
@@ -1357,7 +1357,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(expectedResult.epsilonEquals(actualResult, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testSetNaN()
    {
@@ -1375,7 +1375,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(Double.isNaN(frameVector2.getZ()));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testCheckForNaNAndContainsNaN()
    {
@@ -1430,7 +1430,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertFalse(framePoint.containsNaN());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testInterpolate()
    {
@@ -1453,7 +1453,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals((1.0 - alpha) * frameTuple4.getZ() + alpha * frameTuple5.getZ(), resultTuple.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testNameField()
    {
@@ -1506,7 +1506,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertTrue(name.equals(point1.getName()));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testPackMatrix() //Brett was here
    {
@@ -1542,7 +1542,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testClipToMinMax() //Brett was here
    {
@@ -1553,7 +1553,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals("Should be equal", 10, frameTuple.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testNegate() //Brett was here
    {
@@ -1565,7 +1565,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals("Should be equal", frameTuple.getZ(), frameTupleToNegate.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testAbsolute()
    {
@@ -1584,7 +1584,7 @@ public abstract class FrameTupleTest<T extends Tuple3d & GeometryObject<T>>
       assertEquals("Should be equal", expectedFrameTuple.getZ(), actualFrameTuple.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testToArray() //Brett was here
    {

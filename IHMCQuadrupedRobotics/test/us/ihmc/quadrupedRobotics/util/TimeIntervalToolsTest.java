@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class TimeIntervalToolsTest
 {
 
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSortMethods()
    {
@@ -60,7 +60,7 @@ public class TimeIntervalToolsTest
       }
    }
 
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRemoveMethods()
    {

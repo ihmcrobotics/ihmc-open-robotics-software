@@ -19,7 +19,7 @@ import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
 /**
@@ -48,7 +48,7 @@ public class GeometryToolsTest
 
    private static final double EPSILON = 1e-6;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAveragePoints()
    {
@@ -92,7 +92,7 @@ public class GeometryToolsTest
       assertEquals("return value", expectedReturn23, actualReturn23, EPSILON);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAveragePoints1()
    {
@@ -142,7 +142,7 @@ public class GeometryToolsTest
       assertEquals("return value", expectedReturn22, actualReturn22, EPSILON);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAveragePoints2()
    {
@@ -184,7 +184,7 @@ public class GeometryToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPoints()
    {
@@ -225,7 +225,7 @@ public class GeometryToolsTest
       assertEquals("return value", expectedReturn5, actualReturn5, Double.MIN_VALUE);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceFromPointToLine()
    {
@@ -261,7 +261,7 @@ public class GeometryToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceFromPointToLine1()
    {
@@ -288,7 +288,7 @@ public class GeometryToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceFromPointToLineSegment()
    {
@@ -331,7 +331,7 @@ public class GeometryToolsTest
    }
 */
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetDistanceBetweenPointAndPlane()
    {
@@ -385,7 +385,7 @@ public class GeometryToolsTest
       assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsLineIntersectingPlane()
    {
@@ -420,7 +420,7 @@ public class GeometryToolsTest
       assertFalse(GeometryTools.isLineIntersectingPlane(pointOnPlane, planeNormal, lineStart, lineEnd));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDoLineSegmentsIntersect()
    {
@@ -458,7 +458,7 @@ public class GeometryToolsTest
       assertTrue(intersect);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetLineSegmentPercentagesIfIntersecting()
    {
@@ -494,7 +494,7 @@ public class GeometryToolsTest
       });
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetIntersectionBetweenLineAndPlane()
    {
@@ -601,7 +601,7 @@ public class GeometryToolsTest
    // What happens if to lines are the same line??????
    // Parallel lines returns something.....but not the right something
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetIntersectionBetweenTwoLines()
    {
@@ -634,7 +634,7 @@ public class GeometryToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetNormalToPlane()
    {
@@ -669,7 +669,7 @@ public class GeometryToolsTest
        */
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetPerpendicularBisector()
    {
@@ -681,7 +681,7 @@ public class GeometryToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetPerpendicularVector()
    {
@@ -693,7 +693,7 @@ public class GeometryToolsTest
       /** @todo fill in the test code */
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetPerpendicularVectorFromLineToPoint()
    {
@@ -758,7 +758,7 @@ public class GeometryToolsTest
        */
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetPlaneNormalGivenThreePoints()
    {
@@ -821,7 +821,7 @@ public class GeometryToolsTest
       assertTrue("Test Failed", expectedReturn3.epsilonEquals(actualReturn3, EPSILON));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetPlaneNormalGivenThreePoints1()
    {
@@ -911,7 +911,7 @@ public class GeometryToolsTest
    }
 */
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetTopVertexOfIsoscelesTriangle()
    {
@@ -948,7 +948,7 @@ public class GeometryToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetPerpendicularToLine()
    {
@@ -979,7 +979,7 @@ public class GeometryToolsTest
       assertEquals(errorMsg, 0.0, bisectorEnd.distance(bisectorEndComputed), 1e-9);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetZPlanePerpendicularBisector()
    {
@@ -995,7 +995,7 @@ public class GeometryToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsPointOnLeftSideOfLine()
    {
@@ -1011,7 +1011,7 @@ public class GeometryToolsTest
       /** @todo fill in the test code */
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsPointOnLeftSideOfLine1()
    {
@@ -1046,7 +1046,7 @@ public class GeometryToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(
       timeout = 30000,
       expected = RuntimeException.class
@@ -1057,7 +1057,7 @@ public class GeometryToolsTest
       GeometryTools.getUnknownTriangleAngleByLawOfCosine(-a, a, a);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(
       timeout = 30000,
       expected = RuntimeException.class
@@ -1068,7 +1068,7 @@ public class GeometryToolsTest
       GeometryTools.getUnknownTriangleAngleByLawOfCosine(a, -a, a);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(
       timeout = 30000,
       expected = RuntimeException.class
@@ -1079,7 +1079,7 @@ public class GeometryToolsTest
       GeometryTools.getUnknownTriangleAngleByLawOfCosine(a, a, -a);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAngleByLawOfCosineWithEqualLengthTriangle()
    {
@@ -1089,7 +1089,7 @@ public class GeometryToolsTest
       assertEquals(expected_alpha, alpha, 1e-10);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(
       timeout = 30000,
       expected = RuntimeException.class
@@ -1101,7 +1101,7 @@ public class GeometryToolsTest
       GeometryTools.getUnknownTriangleSideLengthByLawOfCosine(-a, a, gamma);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(
       timeout = 30000,
       expected = RuntimeException.class
@@ -1113,7 +1113,7 @@ public class GeometryToolsTest
       GeometryTools.getUnknownTriangleSideLengthByLawOfCosine(a, -a, gamma);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(
       timeout = 30000,
       expected = RuntimeException.class
@@ -1125,7 +1125,7 @@ public class GeometryToolsTest
       GeometryTools.getUnknownTriangleSideLengthByLawOfCosine(a, a, gamma);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSideLengthByLawOfCosineWithEqualLengthTriangle()
    {
@@ -1135,7 +1135,7 @@ public class GeometryToolsTest
       assertEquals(a, c, 1e-10);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSideLengthByLawOfCosineWithEqualLengthTriangleNegativeAngle()
    {
@@ -1145,7 +1145,7 @@ public class GeometryToolsTest
       assertEquals(a, c, 1e-10);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void isFormingTriangleFailTest()
    {
@@ -1155,7 +1155,7 @@ public class GeometryToolsTest
       assertEquals(false, actual);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void isFormingTriangleSameSidedTest()
    {
@@ -1164,7 +1164,7 @@ public class GeometryToolsTest
       assertEquals(true, actual);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(
       timeout = 30000,
       expected = RuntimeException.class
@@ -1178,7 +1178,7 @@ public class GeometryToolsTest
 
    private Random random = new Random(1176L);
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceLineSegment2dLineSegment2d()
    {
@@ -1210,7 +1210,7 @@ public class GeometryToolsTest
 //    }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCombine()
    {
@@ -1260,7 +1260,7 @@ public class GeometryToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMovePointInsidePolygonAlongVector()
    {
@@ -1325,7 +1325,7 @@ public class GeometryToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsNegativeAngle()
    {
@@ -1338,7 +1338,7 @@ public class GeometryToolsTest
       }, new double[] {2, 0, 46.0 / 17, 6.0 / 34}, .001);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsThirdQuadrant()
    {
@@ -1351,7 +1351,7 @@ public class GeometryToolsTest
       }, new double[] {-1.5, -1.5, -2, -2}, .001);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsNegativeAngleAndTwoVisibleVerticesOnPolygon1()
    {
@@ -1364,7 +1364,7 @@ public class GeometryToolsTest
       }, new double[] {1, 2, 1.2, 2.4}, .001);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsParalellEdges()
    {
@@ -1377,7 +1377,7 @@ public class GeometryToolsTest
       }, new double[] {1, 2, 1, 3}, .001);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsMultiplePossibleAnswers()
    {
@@ -1390,7 +1390,7 @@ public class GeometryToolsTest
       }, new double[] {1, 2, 2, 3}, .001);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsTwoVisiblePoints()
    {
@@ -1403,7 +1403,7 @@ public class GeometryToolsTest
       }, new double[] {2, 1, 3, 2}, .001);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsTwoVisiblePoints2()
    {
@@ -1416,7 +1416,7 @@ public class GeometryToolsTest
       }, new double[] {2, 1, 194.0 / 61, 121.0 / 61}, .001);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsOneOfTheAnglesIsZero()
    {
@@ -1429,7 +1429,7 @@ public class GeometryToolsTest
       }, new double[] {.9, 1.9, .8, 2}, .001);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsTriangles()
    {
@@ -1454,7 +1454,7 @@ public class GeometryToolsTest
       }, new double[] {1, 2, 1, 2}, .001);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsPointOnEdge()
    {
@@ -1467,7 +1467,7 @@ public class GeometryToolsTest
       }, new double[] {.5, 1.5, .5, 1.5}, .001);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsNegativeAngle2()
    {
@@ -1480,7 +1480,7 @@ public class GeometryToolsTest
       }, new double[] {.45, 1.45, .4, 1.5}, .001);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsSolutionIsTwoVertices()
    {
@@ -1493,7 +1493,7 @@ public class GeometryToolsTest
       }, new double[] {2, 2, 4, 3}, 0);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceBetweenPolygonsIntersectingPolygons()
    {
@@ -1529,7 +1529,7 @@ public class GeometryToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testGetAngleFromFirstToSecondVector() throws Exception
    {

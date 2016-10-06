@@ -17,8 +17,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -90,7 +90,7 @@ public class AccelerationLimitedYoVariableSCSTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
          public void makeSureGUIIsNotUpWhenRunning()
          {
@@ -118,7 +118,7 @@ public class AccelerationLimitedYoVariableSCSTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void test_ZeroVelocity()
    {
@@ -167,7 +167,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void test_ConstantVelocity()
    {
@@ -205,7 +205,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void test_ConstantAcceleration_PlusInitialize()
    {
@@ -254,7 +254,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void test_Sine_Plus_Reset_Plus_Update()
    {
@@ -307,7 +307,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void test_RiseTimeSquareWave()
    {
@@ -361,7 +361,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void test_SquareWaves()
    {
@@ -404,7 +404,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void test_Chirp_Plus_UpdateWithoutNoArguments()
    {
@@ -460,7 +460,7 @@ public class AccelerationLimitedYoVariableSCSTest
       shutdownSCSStuff(scs);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetAndGetGainsByPolePlacement()
    {
@@ -483,7 +483,7 @@ public class AccelerationLimitedYoVariableSCSTest
       assertEquals(velocityGainResult, processed.getVelocityGain().getDoubleValue(), EPSILON);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdate()
    {
@@ -507,7 +507,7 @@ public class AccelerationLimitedYoVariableSCSTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetAndSetMaximumRateaAndAcceleration()
    {
@@ -534,7 +534,7 @@ public class AccelerationLimitedYoVariableSCSTest
       assertEquals(maxAcceleration, processed.getMaximumAcceleration(), EPSILON);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testDump()
    {
@@ -598,7 +598,7 @@ public class AccelerationLimitedYoVariableSCSTest
       ThreadTools.sleepForever();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testErrorTooHigh()
    {

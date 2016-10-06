@@ -26,7 +26,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class PelvisRotationalStateUpdaterTest
 {
@@ -40,7 +40,7 @@ public class PelvisRotationalStateUpdaterTest
 
    private final List<IMUSensorReadOnly> imuSensors = new ArrayList<>();
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructorWithOneIMU()
    {
@@ -68,7 +68,7 @@ public class PelvisRotationalStateUpdaterTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructorWithZeroIMUSensor()
    {
@@ -97,7 +97,7 @@ public class PelvisRotationalStateUpdaterTest
          fail("RuntimeException expected, no orientation sensor attached to the sensor map.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testInitializeAndReadWithOneIMU()
    {

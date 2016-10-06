@@ -5,7 +5,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import java.util.Random;
 
@@ -13,7 +13,7 @@ public class CubicProjectionDerivativeMatrixTest
 {
    private static final double epsilon = 0.00005;
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testCreationSize()
    {
@@ -23,7 +23,7 @@ public class CubicProjectionDerivativeMatrixTest
       Assert.assertEquals("", 1, cubicProjectionMatrix.numRows);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testSegmentDuration()
    {
@@ -42,7 +42,7 @@ public class CubicProjectionDerivativeMatrixTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testCalculation()
    {

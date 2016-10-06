@@ -6,7 +6,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point2d;
 import java.util.Random;
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class Pose2dReferenceFrameTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAsynchronousUpdatesOne()
    {
@@ -53,7 +53,7 @@ public class Pose2dReferenceFrameTest
       assertTrue(framePointInWorldThree.epsilonEquals(framePointInWorldTwo, 1e-7));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testLongChainEfficiency()
    {
@@ -89,7 +89,7 @@ public class Pose2dReferenceFrameTest
       finalPosition3.changeFrame(worldFrame);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAsynchronousUpdatesTwo()
    {

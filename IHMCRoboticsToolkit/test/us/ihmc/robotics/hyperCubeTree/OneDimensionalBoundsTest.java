@@ -2,7 +2,7 @@ package us.ihmc.robotics.hyperCubeTree;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,7 +10,7 @@ public class OneDimensionalBoundsTest
 {
    private static final double eps = 1e-14;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersection()
    {

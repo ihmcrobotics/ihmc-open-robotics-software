@@ -30,7 +30,10 @@ public class YoTangentialDampingGains implements TangentialDampingGains
 
    public void set(TangentialDampingGains tangentialDampingGains)
    {
-      set(tangentialDampingGains.getKdReductionRatio(), tangentialDampingGains.getParallelDampingDeadband(), tangentialDampingGains.getPositionErrorForMinimumKd());
+      if (tangentialDampingGains != null)
+      {
+         set(tangentialDampingGains.getKdReductionRatio(), tangentialDampingGains.getParallelDampingDeadband(), tangentialDampingGains.getPositionErrorForMinimumKd());
+      }
    }
 
    /** {@inheritDoc} */

@@ -1,6 +1,5 @@
 package us.ihmc.tools.io.files;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.file.FileSystems;
@@ -15,7 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class PathToolsTest
 {
@@ -29,25 +28,18 @@ public class PathToolsTest
       FileTools.ensureDirectoryExists(TEST_RESOURCES_PATH);
    }
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindAllPathsRecursivelyThatMatchRegex()
    {
-      List<Path> matchingPaths = PathTools.findAllPathsRecursivelyThatMatchRegex(Paths.get("src"), ".*[\\\\/]PathTools\\.java$");
+      List<Path> matchingPaths = PathTools.findAllPathsRecursivelyThatMatchRegex(Paths.get("testResources"), ".*[\\\\/]PathTools\\.java\\.fake$");
       
       PrintTools.info(this, "Matched " + matchingPaths.size() + " file(s).");
       
       assertTrue("Didn't match exactly one file.", matchingPaths.size() == 1);
-      
-      String path0 = matchingPaths.get(0).toString();
-      String clazzSlashes = path0.substring(path0.indexOf("src") + 4, path0.lastIndexOf('.'));
-      String className = clazzSlashes.replaceAll("\\\\|/", ".");
-      PrintTools.info(this, "Matching class name: " + className);
-      
-      assertEquals("Matching path not correct.", PathTools.class.getName(), className);
    }
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetBaseName()
    {
@@ -60,7 +52,7 @@ public class PathToolsTest
       assertTrue("Base name not correct.", baseName.equals(PathToolsTest.class.getSimpleName()));
    }
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetExtension()
    {
@@ -73,7 +65,7 @@ public class PathToolsTest
       assertTrue("Extension name not correct.", extensionName.equals("java"));
    }
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFirstPathMatchingGlob()
    {
@@ -94,7 +86,7 @@ public class PathToolsTest
       assertTrue("First path not correct.", firstPath.getFileName().toString().equals(camelCasedClassSimpleName));
    }
 	
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWalkTreeFlat()
    {

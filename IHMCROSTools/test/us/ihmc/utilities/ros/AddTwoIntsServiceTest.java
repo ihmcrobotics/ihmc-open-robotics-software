@@ -15,13 +15,13 @@ import org.ros.node.service.ServiceResponseListener;
 import test_rosmaster.AddTwoInts;
 import test_rosmaster.AddTwoIntsRequest;
 import test_rosmaster.AddTwoIntsResponse;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.utilities.ros.service.AddTwoIntsClient;
 import us.ihmc.utilities.ros.service.AddTwoIntsServer;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
 public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
 {
    final static boolean USE_JAVA_ROSCORE = true;
@@ -33,7 +33,7 @@ public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
       super.setUp(USE_JAVA_ROSCORE);
    }
 
-   @DeployableTestMethod(estimatedDuration = 2.2)
+   @ContinuousIntegrationTest(estimatedDuration = 2.2)
    @Test(timeout = 30000)
    public void lowlevelRosServiceClientTest() throws URISyntaxException, InterruptedException
    {
@@ -78,7 +78,7 @@ public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
       assertTrue(latch.await(1, TimeUnit.SECONDS));
    }
 
-   @DeployableTestMethod(estimatedDuration = 2.7)
+   @ContinuousIntegrationTest(estimatedDuration = 2.7)
    @Test(timeout = 30000)
    public void highLevelRosServiceClientTest() throws InterruptedException
    {

@@ -16,11 +16,11 @@ import org.junit.Test;
 
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class InterprocessObjectCommunicatorTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOpeningAndClosingALotOfPorts() throws IOException
    {
@@ -44,7 +44,7 @@ public class InterprocessObjectCommunicatorTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.4)
+	@ContinuousIntegrationTest(estimatedDuration = 1.4)
    @Test(timeout = 30000)
    public void testSendingObjectsToClients() throws IOException
    {

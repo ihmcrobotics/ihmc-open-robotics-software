@@ -10,12 +10,12 @@ import org.junit.Test;
 import us.ihmc.tools.taskExecutor.NullTask;
 import us.ihmc.tools.taskExecutor.Task;
 import us.ihmc.tools.taskExecutor.TaskExecutor;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class TaskExecutorTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testEmptyExecutor()
    {
@@ -33,7 +33,7 @@ public class TaskExecutorTest
       assertNull(lastTask);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithOneNullTask()
    {
@@ -60,7 +60,7 @@ public class TaskExecutorTest
       assertTrue(taskExecutor.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithSeveralNullTasks()
    {
@@ -121,7 +121,7 @@ public class TaskExecutorTest
       assertTrue(taskExecutor.getCurrentTask() instanceof NullTask);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeTasks()
    {
@@ -142,7 +142,7 @@ public class TaskExecutorTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAddingTasksOnTheFly()
    {

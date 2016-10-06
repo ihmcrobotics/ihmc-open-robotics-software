@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
 public class DataObjectTransponderTest
 {
    private static final int MAXIMUM_INTER_PACKET_DELAY_MILLIS = 300;
@@ -71,7 +71,7 @@ public class DataObjectTransponderTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testBidirectionalCommunication() throws InterruptedException
    {
@@ -83,7 +83,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-   @DeployableTestMethod(estimatedDuration = 8.3, targets = TestPlanTarget.Flaky)
+   @ContinuousIntegrationTest(estimatedDuration = 8.3, targetsOverride = TestPlanTarget.Flaky)
    @Test(timeout = 42000)
    public void testDoubleBidirectionalCommunication() throws InterruptedException
    {
@@ -97,7 +97,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSerializabilityOfInteger() throws IOException
    {
@@ -105,7 +105,7 @@ public class DataObjectTransponderTest
       JUnitTools.assertSerializable(integer);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSerializabilityOfIntPacket() throws IOException
    {
@@ -113,7 +113,7 @@ public class DataObjectTransponderTest
       JUnitTools.assertSerializable(intPacket);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSerializabilityOfStringPacket() throws IOException
    {
@@ -121,7 +121,7 @@ public class DataObjectTransponderTest
       JUnitTools.assertSerializable(packet);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testServerClientIntPacketCommunication() throws InterruptedException
    {
@@ -132,7 +132,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testServerClientStringPacketCommunication() throws InterruptedException
    {
@@ -143,7 +143,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTwoPacketTypesAtTheSameTime() throws InterruptedException
    {
@@ -155,7 +155,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testUnhandledPackets() throws InterruptedException
    {

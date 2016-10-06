@@ -7,7 +7,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -18,7 +18,7 @@ public class MirroredYoVariableRegistryTest
 {
     private static final int TEST_VARIABLE_COUNT = 10;
 
-    @DeployableTestMethod(estimatedDuration = 0.0)
+    @ContinuousIntegrationTest(estimatedDuration = 0.0)
     @Test(timeout = 30000)
     public void testMirroredRegistryIsTheSameAsOriginalAfterCreation()
     {
@@ -30,7 +30,7 @@ public class MirroredYoVariableRegistryTest
     }
 
 
-    @DeployableTestMethod(estimatedDuration = 0.0)
+    @ContinuousIntegrationTest(estimatedDuration = 0.0)
     @Test(timeout = 30000)
     public void testYoVariableRegistryChildren()
     {
@@ -48,7 +48,7 @@ public class MirroredYoVariableRegistryTest
 
     }
 
-    @DeployableTestMethod(estimatedDuration = 0.0)
+    @ContinuousIntegrationTest(estimatedDuration = 0.0)
     @Test(timeout = 30000)
     public void testChangesArePropagatedFromOriginal()
     {
@@ -68,7 +68,7 @@ public class MirroredYoVariableRegistryTest
         assertTrue(areRegistryVariablesAreEqual(originalRegistry, mirroredYoVariableRegistry));
     }
 
-    @DeployableTestMethod(estimatedDuration = 0.0)
+    @ContinuousIntegrationTest(estimatedDuration = 0.0)
     @Test(timeout = 30000)
     public void testChangesArePropagatedFromMirror()
     {
@@ -88,7 +88,7 @@ public class MirroredYoVariableRegistryTest
         assertTrue(areRegistryVariablesAreEqual(originalRegistry, mirroredYoVariableRegistry));
     }
 
-    @DeployableTestMethod(estimatedDuration = 0.0)
+    @ContinuousIntegrationTest(estimatedDuration = 0.0)
     @Test(timeout = 30000)
     public void testMirrorValuesArePreferredWhenConflict()
     {
@@ -121,7 +121,7 @@ public class MirroredYoVariableRegistryTest
         }
     }
 
-    @DeployableTestMethod(estimatedDuration = 0.0)
+    @ContinuousIntegrationTest(estimatedDuration = 0.0)
     @Test(timeout = 30000)
     public void testOriginalListenersAreCalledWhenMirrorChanges()
     {
@@ -144,7 +144,7 @@ public class MirroredYoVariableRegistryTest
         assertEquals(listenerCounter.callCount, originalRegistry.getAllVariables().size());
     }
 
-    @DeployableTestMethod(estimatedDuration = 0.0)
+    @ContinuousIntegrationTest(estimatedDuration = 0.0)
     @Test(timeout = 30000)
     public void testMirrorListenersAreCalledWhenOriginalChanges()
     {

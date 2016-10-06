@@ -41,7 +41,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 {
@@ -81,7 +81,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
    private static final boolean DO_ASSERTS = true;
    private static final boolean DO_TWIST_ASSERTS = true;
 
-	@DeployableTestMethod(estimatedDuration = 1.6)
+	@ContinuousIntegrationTest(estimatedDuration = 1.6)
 	@Test(timeout = 30000)
    public void testSinglePinJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -117,7 +117,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       assertTrue(success);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.6)
+	@ContinuousIntegrationTest(estimatedDuration = 1.6)
 	@Test(timeout = 30000)
    public void testTwoPinJoints() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -172,7 +172,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       assertTrue(success);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.5)
+	@ContinuousIntegrationTest(estimatedDuration = 1.5)
 	@Test(timeout = 30000)
    public void testSingleFloatingJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -212,7 +212,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       assertTrue(success);
    }
 
-	@DeployableTestMethod(estimatedDuration = 3.9)
+	@ContinuousIntegrationTest(estimatedDuration = 3.9)
 	@Test(timeout = 30000)
    public void testRandomLinearChainRobot() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

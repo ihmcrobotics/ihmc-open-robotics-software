@@ -21,7 +21,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterface
@@ -55,7 +55,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 51.6)
+	@ContinuousIntegrationTest(estimatedDuration = 51.6)
 	@Test(timeout = 260000)
    public void testWalkingOntoRocks() throws SimulationExceededMaximumTimeException
    {

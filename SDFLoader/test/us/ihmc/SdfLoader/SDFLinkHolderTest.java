@@ -10,13 +10,13 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFInertia;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 
 public class SDFLinkHolderTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void noInertialPose()
    {
@@ -55,7 +55,7 @@ public class SDFLinkHolderTest
       assertTrue("Inertia matrix should not change values", inertiaMatrix.equals(expectedInertia));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void inertialPoseTranslationOnly()
    {
@@ -94,7 +94,7 @@ public class SDFLinkHolderTest
       assertTrue("Inertia matrix should not change values", inertiaMatrix.equals(expectedInertia));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void inertialPoseWithRotationOnly()//This one should have right COM, but inertia will have to change.
    {
@@ -153,7 +153,7 @@ public class SDFLinkHolderTest
       //assertTrue("Inertia matrix should be changed to link frame. " + helpMessage, inertiaEqual);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void inertialPoseProximaliRobotWithRotationAndTranslation()
    {      
@@ -219,7 +219,7 @@ public class SDFLinkHolderTest
       assertArrayEquals(new double[] {Ixx, Ixy, Ixz, Iyy, Iyz, Izz}, new double[] {inertiaMatrix.getM00(), inertiaMatrix.getM01(), inertiaMatrix.getM02(), inertiaMatrix.getM11(), inertiaMatrix.getM12(), inertiaMatrix.getM22()}, 3e-9);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void inertialPoseDistaliRobotWithRotationAndTranslation()
    {      

@@ -18,12 +18,12 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = {TestPlanTarget.Flaky})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Flaky})
 public class NetworkProcessorTest
 {
    private static final boolean DEBUG = false;
@@ -124,7 +124,7 @@ public class NetworkProcessorTest
       
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.3)
+   @ContinuousIntegrationTest(estimatedDuration = 1.3)
    @Test (timeout = 30000)
    public void testSendPackets() throws IOException
    {
@@ -171,7 +171,7 @@ public class NetworkProcessorTest
       disconnectCommunicators();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testDetatchObjectCommunicator() throws IOException
    {
@@ -210,7 +210,7 @@ public class NetworkProcessorTest
       disconnectCommunicators();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testForwarder() throws IOException
    {
@@ -236,7 +236,7 @@ public class NetworkProcessorTest
       disconnectCommunicators();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testDoubleForwarder() throws IOException
    {
@@ -255,7 +255,7 @@ public class NetworkProcessorTest
       assertTrue(threwException);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testDisconnectDoesNotFail() throws IOException
    {
