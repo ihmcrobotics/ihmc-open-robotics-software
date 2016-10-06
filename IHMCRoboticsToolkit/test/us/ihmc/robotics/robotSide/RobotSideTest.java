@@ -2,7 +2,7 @@ package us.ihmc.robotics.robotSide;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -10,7 +10,7 @@ import static org.junit.Assert.fail;
 public class RobotSideTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRobotSide()
    {
@@ -59,7 +59,7 @@ public class RobotSideTest
       assertEquals(numberToTest, leftRobotSide.negateIfRightSide(numberToTest), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCheckRobotSideMatch()
    {

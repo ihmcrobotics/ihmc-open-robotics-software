@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point2d;
 import java.util.ArrayList;
@@ -77,7 +77,7 @@ public class ConvexHullCalculator2dTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsConvexAndClockwiseBadCase()
    {
@@ -96,7 +96,7 @@ public class ConvexHullCalculator2dTest
          assertTrue(points.size() > convexHull.size());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConvexAndClockwiseVersusConvexHull()
    {
@@ -121,7 +121,7 @@ public class ConvexHullCalculator2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimplified7PointProblem()
    {
@@ -167,7 +167,7 @@ public class ConvexHullCalculator2dTest
       return (point2.getY() - point1.getY()) / (point2.getX() - point1.getX());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void test7PointProblem()
    {
@@ -194,7 +194,7 @@ public class ConvexHullCalculator2dTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testThreePointProblem()
    {
@@ -221,7 +221,7 @@ public class ConvexHullCalculator2dTest
 //    }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testEqualXProblem()
    {
@@ -261,7 +261,7 @@ public class ConvexHullCalculator2dTest
 //    }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetUpperHull()
    {
@@ -305,7 +305,7 @@ public class ConvexHullCalculator2dTest
        */
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetLowerHull()
    {
@@ -351,7 +351,7 @@ public class ConvexHullCalculator2dTest
        */
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetConvexHull()
    {

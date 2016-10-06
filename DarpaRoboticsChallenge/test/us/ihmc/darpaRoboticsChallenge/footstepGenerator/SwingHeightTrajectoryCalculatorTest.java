@@ -31,7 +31,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -41,7 +41,7 @@ public class SwingHeightTrajectoryCalculatorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testHeightFromPose()
    {
@@ -73,7 +73,7 @@ public class SwingHeightTrajectoryCalculatorTest
       assertTrue(swingHeight >= boxHeight + verticalBuffer);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testHeightFromOffsetBox()
    {
@@ -109,7 +109,7 @@ public class SwingHeightTrajectoryCalculatorTest
       assertTrue(swingHeight >= boxHeight + verticalBuffer);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithBoxOutOfRange()
    {
@@ -144,7 +144,7 @@ public class SwingHeightTrajectoryCalculatorTest
       assertTrue(swingHeight < boxHeight + verticalBuffer);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithMultipleBoxes()
    {
@@ -223,7 +223,7 @@ public class SwingHeightTrajectoryCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSmallXAxisDistanceWithoutHeightMap()
    {
@@ -264,7 +264,7 @@ public class SwingHeightTrajectoryCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testBigXAxisDistanceWithoutHeightMap()
    {

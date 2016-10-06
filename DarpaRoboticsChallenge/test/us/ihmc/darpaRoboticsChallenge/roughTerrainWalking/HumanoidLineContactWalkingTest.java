@@ -61,7 +61,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -94,7 +94,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    private BooleanYoVariable allowUsingHighMomentumWeight;
    private BooleanYoVariable doToeOffIfPossible;
 
-   @DeployableTestMethod(estimatedDuration = 100.0, targets = {TestPlanTarget.InDevelopment})
+   @ContinuousIntegrationTest(estimatedDuration = 100.0, targetsOverride = {TestPlanTarget.InDevelopment})
    @Test(timeout = 300000)
    public void testWalkingOnStraightSidewayLines() throws SimulationExceededMaximumTimeException
    {
@@ -149,7 +149,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 100.0, targets = {TestPlanTarget.InDevelopment})
+   @ContinuousIntegrationTest(estimatedDuration = 100.0, targetsOverride = {TestPlanTarget.InDevelopment})
    @Test(timeout = 300000)
    public void testWalkingOnStraightForwardLines() throws SimulationExceededMaximumTimeException
    {
@@ -204,7 +204,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 100.0, targets = {TestPlanTarget.InDevelopment})
+   @ContinuousIntegrationTest(estimatedDuration = 100.0, targetsOverride = {TestPlanTarget.InDevelopment})
    @Test(timeout = 300000)
    public void testWalkingOnLines() throws SimulationExceededMaximumTimeException
    {

@@ -5,10 +5,10 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCChestTrajectoryBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Flaky, TestPlanTarget.Video})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Flaky, TestPlanTarget.Video})
 public class AtlasChestTrajectoryBehaviorTest extends DRCChestTrajectoryBehaviorTest
 {
    private final AtlasRobotModel robotModel;

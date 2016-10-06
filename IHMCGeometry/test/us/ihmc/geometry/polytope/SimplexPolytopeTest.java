@@ -9,12 +9,12 @@ import javax.vecmath.Point3d;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class SimplexPolytopeTest
 {
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetClosestPointToOriginOnConvexHull()
    {
@@ -155,8 +155,13 @@ public class SimplexPolytopeTest
       assertTrue(simplex.containsPoint(pointFour));
    }
 
+<<<<<<< HEAD
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+=======
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test //(timeout = 30000)
+>>>>>>> refs/heads/develop
    public void testVornoiRegionChecks()
    {
       SimplexPolytope simplex = new SimplexPolytope();
@@ -336,8 +341,13 @@ public class SimplexPolytopeTest
       assertTrue(simplex.isInVoronoiRegionOfFace(pointTwo, pointThree, pointFour, pointOne));
    }
 
+<<<<<<< HEAD
    @DeployableTestMethod(estimatedDuration = 0.0)
    @Test//(timeout = 30000)
+=======
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+>>>>>>> refs/heads/develop
    public void testTroublesomeOnes()
    {
       SimplexPolytope simplex = new SimplexPolytope();

@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import Jama.Matrix;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class MatrixStatisticsTest
@@ -41,7 +41,7 @@ public class MatrixStatisticsTest
       return random.nextDouble() * MAXDOUBLE * 2.0 - MAXDOUBLE;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIndecesOfMaxElement()
    {
@@ -67,7 +67,7 @@ public class MatrixStatisticsTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetCovarianceMatrix()
    {
@@ -121,7 +121,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSubtractAverageColumnFromEachRow()
    {
@@ -157,7 +157,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSumAllElements()
    {
@@ -183,7 +183,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDivideEachRowByStdDevOfRow()
    {
@@ -216,7 +216,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetVarianceOfEachRow()
    {
@@ -259,7 +259,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetAverageColumnVector()
    {
@@ -291,7 +291,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCreateColumnVectorIntDouble()
    {
@@ -312,7 +312,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCreateRowVectorIntDouble()
    {
@@ -333,7 +333,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCreateColumnVectorInt()
    {
@@ -353,7 +353,7 @@ public class MatrixStatisticsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCreateRowVectorInt()
    {
@@ -373,14 +373,14 @@ public class MatrixStatisticsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testGetRowNumber()
    {
       fail("Not yet implemented");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testGetColumnNumber()
    {

@@ -26,12 +26,12 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import Jama.Matrix;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class JUnitToolsTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDeriveTestResourcePath()
    {
@@ -41,7 +41,7 @@ public class JUnitToolsTest
       assertTrue(path.compareTo(derivedPath) == 0);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertExceptionThrown()
    {
@@ -54,7 +54,7 @@ public class JUnitToolsTest
       });
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertExceptionNotThrown()
    {
@@ -73,7 +73,7 @@ public class JUnitToolsTest
       });
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertPoint3dEquals()
    {
@@ -95,7 +95,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertPoint3fEquals()
    {
@@ -117,7 +117,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertPoint2dEquals()
    {
@@ -141,7 +141,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertTuple2fEquals()
    {
@@ -161,7 +161,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testAssertJamaMatrixEquals()
    {
@@ -188,7 +188,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testAssertDenseMatrix64FEquals()
    {
@@ -215,7 +215,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAssertMatrixEqualsZero()
    {
@@ -234,7 +234,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertMatrix3dEquals()
    {
@@ -253,7 +253,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertMatrix3fEquals()
    {
@@ -272,7 +272,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertMatrix4dEquals()
    {
@@ -292,7 +292,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertMatrix4fEquals()
    {
@@ -311,7 +311,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertVector3dEquals()
    {
@@ -333,7 +333,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertVector3fEquals()
    {
@@ -355,7 +355,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertVector4dEquals()
    {
@@ -374,7 +374,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertVector4fEquals()
    {
@@ -393,7 +393,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertSkewSymmetric()
    {
@@ -411,7 +411,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAssertDoubleArrayEquals()
    {
@@ -431,7 +431,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertQuat4fEquals()
    {
@@ -450,7 +450,7 @@ public class JUnitToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertQuat4dEquals()
    {

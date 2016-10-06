@@ -6,12 +6,12 @@ import org.junit.Test;
 
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.processManagement.ProcessTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ProcessToolsTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetAllSystemProcesses()
    {

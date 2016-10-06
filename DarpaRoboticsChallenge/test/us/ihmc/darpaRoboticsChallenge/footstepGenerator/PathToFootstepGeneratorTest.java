@@ -47,7 +47,7 @@ import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeH
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -57,7 +57,7 @@ public class PathToFootstepGeneratorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-   @DeployableTestMethod(estimatedDuration = 1.4)
+   @ContinuousIntegrationTest(estimatedDuration = 1.4)
    @Test (timeout=300000)
    public void testStraightLinePathToFootstepGeneratorNoHeightMap()
    {
@@ -104,7 +104,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.6)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6)
    @Test (timeout=300000)
    public void testStraightLinePathToFootstepGenerator()
    {
@@ -151,7 +151,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.4)
+   @ContinuousIntegrationTest(estimatedDuration = 1.4)
    @Test (timeout=300000)
    public void testStraightLinePathToFootstepGeneratorOnRandomTerrain()
    {
@@ -199,7 +199,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.3)
+   @ContinuousIntegrationTest(estimatedDuration = 3.3)
    @Test (timeout=300000)
    public void testTurnStraightTurnOnRandomTerrain()
    {
@@ -247,7 +247,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 2.5)
+   @ContinuousIntegrationTest(estimatedDuration = 2.5)
    @Test (timeout=300000)
    public void testTurnStraightTurnOnFlatGround()
    {
@@ -295,7 +295,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.8)
+   @ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test (timeout=300000)
    public void testTurnInPlacePathOnFlatGround()
    {
@@ -349,7 +349,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.9)
+   @ContinuousIntegrationTest(estimatedDuration = 0.9)
    @Test (timeout=300000)
    public void testTurnSideStepTurnOnFlatGround()
    {
@@ -398,7 +398,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.5)
+   @ContinuousIntegrationTest(estimatedDuration = 1.5)
    @Test (timeout=300000)
    public void testTurnSideStepOtherWayTurnOnFlatGround()
    {
@@ -447,7 +447,7 @@ public class PathToFootstepGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.6)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6)
    @Test (timeout=300000)
    public void testTurnBackwardsTurnOnFlatGround()
    {

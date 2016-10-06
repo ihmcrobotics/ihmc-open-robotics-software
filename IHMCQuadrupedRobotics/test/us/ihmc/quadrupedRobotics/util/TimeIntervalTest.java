@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 public class TimeIntervalTest
 {
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAccessors()
    {
@@ -34,7 +34,7 @@ public class TimeIntervalTest
       assertTrue(timeInterval.epsilonEquals(other, epsilon));
    }
 
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testShiftInterval()
    {

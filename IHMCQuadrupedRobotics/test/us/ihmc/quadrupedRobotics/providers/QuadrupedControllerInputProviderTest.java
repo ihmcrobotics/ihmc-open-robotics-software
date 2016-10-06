@@ -30,12 +30,12 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class QuadrupedControllerInputProviderTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testNoVariablesAreMixedUpWhenSendingTeleOpPacket() throws IOException
    {
@@ -131,7 +131,7 @@ public class QuadrupedControllerInputProviderTest
       assertTrue(randomPlanarVelocity.epsilonEquals(planarVelocityInput, epsilon));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testYoVariableNamesAreCorrectAndUpdateInputs() throws IOException
    {

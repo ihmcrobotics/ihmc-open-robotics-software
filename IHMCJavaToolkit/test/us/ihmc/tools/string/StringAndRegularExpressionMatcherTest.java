@@ -6,12 +6,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.tools.string.StringAndRegularExpressionMatcher;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class StringAndRegularExpressionMatcherTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleExactMatch()
    {
@@ -23,7 +23,7 @@ public class StringAndRegularExpressionMatcherTest
       assertFalse(matcher.matches("banana"));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCaseInsensitiveExactMatch()
    {
@@ -35,7 +35,7 @@ public class StringAndRegularExpressionMatcherTest
       assertFalse(matcher.matches("banana"));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRegularExpression()
    {
@@ -54,7 +54,7 @@ public class StringAndRegularExpressionMatcherTest
       assertTrue(matcher.matches("helloworld"));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRegularExpressionsAndStrings()
    {

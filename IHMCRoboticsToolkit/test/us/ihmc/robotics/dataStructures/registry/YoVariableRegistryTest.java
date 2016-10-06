@@ -18,7 +18,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 
 public class YoVariableRegistryTest
@@ -92,7 +92,7 @@ public class YoVariableRegistryTest
       lastClearedRegistry = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantAddChildWithSameName()
    {
@@ -104,7 +104,7 @@ public class YoVariableRegistryTest
       testRegistry.addChild(child2);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetName()
    {      
@@ -113,7 +113,7 @@ public class YoVariableRegistryTest
       assertEquals("testRegistry", testRegistry.getName());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCreateVarList()
    {
@@ -122,7 +122,7 @@ public class YoVariableRegistryTest
       assertTrue(varList.getName() == testRegistry.getNameSpace().getName());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetAllVariables()
    {
@@ -130,7 +130,7 @@ public class YoVariableRegistryTest
       assertTrue(allVars.size() == 4);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetNameSpace()
    {
@@ -141,7 +141,7 @@ public class YoVariableRegistryTest
    
    @SuppressWarnings("deprecation")
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariable()
    {
@@ -193,7 +193,7 @@ public class YoVariableRegistryTest
    
    @SuppressWarnings("deprecation")
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCaseInsensitivityToNameButNotNamespace()
    {
@@ -238,7 +238,7 @@ public class YoVariableRegistryTest
       assertNull(variableFour);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariable1()
    {
@@ -304,7 +304,7 @@ public class YoVariableRegistryTest
       assertTrue(testPassed);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariables1()
    {
@@ -339,7 +339,7 @@ public class YoVariableRegistryTest
       assertTrue(variables.size() == 0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariables2()
    {
@@ -384,7 +384,7 @@ public class YoVariableRegistryTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHasUniqueVariable()
    {
@@ -401,7 +401,7 @@ public class YoVariableRegistryTest
       assertFalse(testRegistry.hasUniqueVariable("robot.controller", "variableTwo"));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHasUniqueVariable1()
    {
@@ -414,7 +414,7 @@ public class YoVariableRegistryTest
       /** @todo fill in the test code */
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRegisterVariable()
    {
@@ -435,7 +435,7 @@ public class YoVariableRegistryTest
       assertTrue(testRegistry.hasUniqueVariable("variableFive"));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCannotRegisterSameVariableName()
    {
@@ -447,7 +447,7 @@ public class YoVariableRegistryTest
       testRegistry.registerVariable(variableFiveTwice);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetAllVariablesInThisListOnly()
    {
@@ -460,7 +460,7 @@ public class YoVariableRegistryTest
       assertEquals(4, testRegistryVariablesOnly.size());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAddChildAndGetParentAndGetChildren()
    {
@@ -486,7 +486,7 @@ public class YoVariableRegistryTest
       assertTrue(testPassed);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testDontLetAChildGetAddedToTwoRegistries()
    {
@@ -498,28 +498,28 @@ public class YoVariableRegistryTest
       root2.addChild(child);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testIllegalName1()
    {
       testRegistry = new YoVariableRegistry("foo..foo");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testIllegalName2()
    {
       testRegistry = new YoVariableRegistry("foo.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testNoDotsAllowed()
    {
       testRegistry = new YoVariableRegistry("foo.bar");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testIllegalAddChild()
    {
@@ -527,7 +527,7 @@ public class YoVariableRegistryTest
       childOne.addChild(childOne);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetAllVariablesIncludingDescendants()
    {
@@ -552,7 +552,7 @@ public class YoVariableRegistryTest
       assertEquals(nVarsChildTwo, childTwo.getAllVariablesIncludingDescendants().size());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFamilyRelations()
    {
@@ -574,7 +574,7 @@ public class YoVariableRegistryTest
       assertTrue(children.contains(childTwo));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantAddDuplicateSubnames()
    {
@@ -585,7 +585,7 @@ public class YoVariableRegistryTest
       childOne.addChild(grandChildOne);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testNullChild()
    {
@@ -599,7 +599,7 @@ public class YoVariableRegistryTest
 
    @SuppressWarnings("deprecation")
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRegistryTree()
    {
@@ -687,7 +687,7 @@ public class YoVariableRegistryTest
       assertEquals(4, root.getVariables("repeatedVariable").size());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testDontAllowRepeatRegistryNames()
    {
@@ -711,7 +711,7 @@ public class YoVariableRegistryTest
    
    @SuppressWarnings("deprecation")
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetOrCreateAndAddRegistry()
    {
@@ -736,7 +736,7 @@ public class YoVariableRegistryTest
       assertEquals(registry010, root.getOrCreateAndAddRegistry(new NameSpace("root.registry0.registry01.registry010")));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testNullNameSpace()
    {
@@ -748,7 +748,7 @@ public class YoVariableRegistryTest
       assertEquals(new NameSpace("root.registry0.registry00.registry000"), nameSpaceCheck);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantAddAChildWithANullNamespace()
    {
@@ -758,7 +758,7 @@ public class YoVariableRegistryTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCreateVarListIncludingChildren()
    {
@@ -787,7 +787,7 @@ public class YoVariableRegistryTest
       assertEquals(1, containsName);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetAllRegistriesIncludingChildren()
    {
@@ -799,7 +799,7 @@ public class YoVariableRegistryTest
       assertTrue(registries.contains(testRegistry));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000) 
    public void testGetRegistry()
    {
@@ -819,7 +819,7 @@ public class YoVariableRegistryTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testLoggingAndSending()
    {
@@ -864,7 +864,7 @@ public class YoVariableRegistryTest
       assertTrue(testRegistry.isSent());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetNumberOfVariables()
    {
@@ -873,7 +873,7 @@ public class YoVariableRegistryTest
       assertEquals(4, testRegistry.getNumberOfYoVariables());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testListenersOne()
    {
@@ -893,14 +893,14 @@ public class YoVariableRegistryTest
       assertEquals(testRegistry, lastClearedRegistry);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testThrowExceptionIfAttachListenerToNonRoot()
    {
       this.controllerRegistry.attachYoVariableRegistryChangedListener(listener);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testThrowExceptionIfAddChildRegistryWithAListener()
    {

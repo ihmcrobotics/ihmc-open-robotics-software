@@ -39,12 +39,12 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
 public class DesiredFootstepTest
 {
    private static final RobotSide robotSide = RobotSide.LEFT;
@@ -68,7 +68,7 @@ public class DesiredFootstepTest
     * @throws IOException 
     */
 
-   @DeployableTestMethod(estimatedDuration = 1.6)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6, targetsOverride = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testPassingFootstepData() throws IOException
    {
@@ -103,7 +103,7 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.4)
+   @ContinuousIntegrationTest(estimatedDuration = 1.4)
    @Test(timeout = 30000)
    public void testPassingFootstepPath() throws IOException
    {
@@ -133,7 +133,7 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.6, targets = TestPlanTarget.Flaky)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6, targetsOverride = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testPassingPauseCommand() throws IOException
    {
@@ -174,7 +174,7 @@ public class DesiredFootstepTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 2.6)
+   @ContinuousIntegrationTest(estimatedDuration = 2.6)
    @Test(timeout = 30000)
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
@@ -245,7 +245,7 @@ public class DesiredFootstepTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.6)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testPassingFootstepStatus() throws IOException
    {

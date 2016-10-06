@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -43,7 +43,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       return createFrameTuple(referenceFrame, x, y, null);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testChangeFrame()
    {
@@ -120,7 +120,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       childFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", theFrame, theFrameToChildFrame, false, true, true);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSet_doubledouble()
    {
@@ -131,7 +131,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertArrayEquals(expecteds1, actuals1, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetIncludingFrame_ReferenceFrame_double_double()
    {
@@ -154,7 +154,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSet_FrameTuple2d()
    {
@@ -190,7 +190,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetIncludingFrame_FrameTuple2d()
    {
@@ -215,7 +215,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertArrayEquals(expecteds1, results1, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetX_double()
    {
@@ -225,7 +225,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("These should be equal", x, frameTuple.getX(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetY_double()
    {
@@ -235,7 +235,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("These should be equal", y, frameTuple.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testScale_double()
    {
@@ -248,7 +248,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("These should be equal", y, frameTuple.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testScale_doubledouble()
    {
@@ -261,7 +261,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("These should be equal", y, frameTuple.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetPointCopy()
    {
@@ -271,7 +271,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("These should be equal", point.getY(), frameTuple.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetVectorCopy()
    {
@@ -281,7 +281,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("These should be equal", point.getY(), frameTuple.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGet_Tuple2d()
    {
@@ -293,7 +293,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("These should be equal", values[1], tuple2dToPack.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGet_Tuple3d()
    {
@@ -306,7 +306,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("These should be equal", 0.0, tuple3dToPack.getZ(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetToZero()
    {
@@ -319,7 +319,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("These should be equal", 0.0, frameTuple.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetToZero_ReferenceFrame()
    {
@@ -344,7 +344,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetToNaN()
    {
@@ -357,7 +357,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertTrue(Double.isNaN(frameTuple.getY()));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetToNaN_ReferenceFrame()
    {
@@ -386,7 +386,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCheckForNaN()
    {
@@ -407,7 +407,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testContainsNaN()
    {
@@ -424,7 +424,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertTrue(bothNaN.containsNaN());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testScale_double_Tuple2d()
    {
@@ -438,7 +438,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("Should be equal doubles", scaleFactor * values[1], frameTuple.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testScaleAdd_double_Tuple2d_Tuple2d()
    {
@@ -454,7 +454,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("Should be equal doubles", scaleFactor * values1[1] + values2[1], frameTuple.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testScaleAdd_double_Tuple2d_double_Tuple2d()
    {
@@ -470,7 +470,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("Should be equal doubles", scaleFactor1 * values1[1] + scaleFactor2 * values2[1], frameTuple.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testScaleAdd_double_Tuple2d()
    {
@@ -485,7 +485,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("Should be equal doubles", scaleFactor1 * frameTuple2dValues[1] + tuple2dValues[1], frameTuple.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testScale_double_FrameTuple2d()
    {
@@ -509,7 +509,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testScaleAdd_double_FrameTuple2d_FrameTuple2d()
    {
@@ -543,7 +543,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testScaleAdd_double_FrameTuple2d()
    {
@@ -567,7 +567,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }      
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAdd_double_Tuple2d_Tuple2d()
    {
@@ -580,7 +580,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals(original.getY(), tuple1.getY() + tuple2.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAdd_FrameTuple2d()
    {
@@ -603,7 +603,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAdd_FrameTuple2d_FrameTuple2d()
    {
@@ -635,7 +635,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSub_Tuple2d()
    {
@@ -647,7 +647,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("These should be equal: ", originalValues[1] - tuple1.getY(), original.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSub_Tuple2d_Tuple2d()
    {
@@ -682,7 +682,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSub_FrameTuple2d()
    {
@@ -705,7 +705,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSub_FrameTuple2d_FrameTuple2d()
    {
@@ -737,7 +737,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInterpolate_Tuple2d_Tuple2d_double()
    {
@@ -752,7 +752,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("Should be equal", (1-alpha) * tuple1.getY() + alpha * tuple2.getY(), original.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInterpolate_FrameTuple2d_FrameTuple2d_double()
    {
@@ -792,7 +792,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testClipToMinMax_double_double()
    {
@@ -804,7 +804,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertTrue(frameTuple.getY() >= minValue && frameTuple.getY() <= maxValue); 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegate()
    {
@@ -815,7 +815,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertEquals("Should be negated", - originalValues[1], holder.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testEpsilonEquals_Tuple2d_double()
    {
@@ -829,7 +829,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertFalse(frameTuple.epsilonEquals(tuple3, threshold));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testEpsilonEquals_FrameTuple2d_double()
    {
@@ -844,7 +844,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       assertFalse(frameTuple.epsilonEquals(tuple3, threshold));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCheckReferenceFrameMatch_ReferenceFrameHolder()
    {
@@ -863,7 +863,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCheckReferenceFrameMatch_ReferenceFrame()
    {
@@ -880,7 +880,7 @@ public abstract class FrameTuple2dTest<T extends FrameTuple2d<?, ?>>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testToArray()
    {

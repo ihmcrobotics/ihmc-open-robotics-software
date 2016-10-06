@@ -14,7 +14,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -33,7 +33,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       rootRegistry.clear();
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 2000)
    public void testSetFeedbackConditions()
    {
@@ -60,7 +60,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       assertEquals("", feedbackGain, this.feedbackGain.get(1, 1), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 2000)
    public void testDimensions()
    {
@@ -207,7 +207,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 2000)
    public void testConditionError()
    {
@@ -234,7 +234,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       Assert.assertTrue(hasError);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testDynamicConstraint()
    {
@@ -310,7 +310,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       JUnitTools.assertMatrixEquals(expectedDynamics_beq, extracted_beq, epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testConstraintAssembly()
    {
@@ -391,7 +391,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       JUnitTools.assertMatrixEquals(stanceCMPSum_beq, extractedCMPSum_beq, epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testAddFeedbackTask()
    {
@@ -420,7 +420,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testSetFootstepAdjustmentConditions()
    {
@@ -476,7 +476,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testSetFootstepRegularizationConditions()
    {
@@ -551,7 +551,7 @@ public class ICPOptimizationSolverTest extends ICPOptimizationSolver
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testRegularization()
    {

@@ -19,11 +19,11 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Fast})
 public class VelocityConstrainedPoseTrajectoryGeneratorTest
 {
    private static final Random random = new Random(1516351L);
@@ -34,7 +34,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
 
    private static final double EPSILON = 1e-10;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRuntimeExceptions()
    {
@@ -83,7 +83,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCompareWithStraightLinePoseTrajectoryGeneratorPositionOnly()
    {
@@ -143,7 +143,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPositionAndVelocityConsistencyWithInitialVelocity()
    {
@@ -251,7 +251,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
     * 
     **/
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPositionAndVelocityConsistencyWithInitialAndFinalVelocity()
    {
@@ -376,7 +376,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       return ret;
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTooBigTime()
    {

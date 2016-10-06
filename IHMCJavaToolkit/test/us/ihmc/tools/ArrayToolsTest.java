@@ -24,12 +24,12 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ArrayToolsTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromMATLABString()
    {
@@ -53,7 +53,7 @@ public class ArrayToolsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromMATLABBufferedReader()
    {
@@ -78,7 +78,7 @@ public class ArrayToolsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromDataInputStream()
    {
@@ -105,7 +105,7 @@ public class ArrayToolsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testParseIntegerArrayFromString()
    {
@@ -125,7 +125,7 @@ public class ArrayToolsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testParseIntegerArrayFromBufferedReader()
    {
@@ -146,7 +146,7 @@ public class ArrayToolsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testParseIntegerArrayFromDataInputStream()
    {
@@ -174,7 +174,7 @@ public class ArrayToolsTest
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDeltaEquals()
    {
@@ -192,7 +192,7 @@ public class ArrayToolsTest
       assertFalse(ArrayTools.deltaEquals(array1, array2, largestDifference - 1));
    }
 	
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testDeltaEqualsWithNull()
 	{
@@ -208,7 +208,7 @@ public class ArrayToolsTest
 
 
 
-	@DeployableTestMethod(estimatedDuration = 1.4)
+	@ContinuousIntegrationTest(estimatedDuration = 1.4)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromString() throws IOException
    {
@@ -234,7 +234,7 @@ public class ArrayToolsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromBufferedReader()
    {
@@ -271,7 +271,7 @@ public class ArrayToolsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000 , expected = IOException.class)
    public void testParseDoubleArrayFromBufferedReaderWithIOException() throws IOException
    {
@@ -348,7 +348,7 @@ public class ArrayToolsTest
       return array;
    }
 	
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetRearrangedArrayList()
    {
@@ -373,7 +373,7 @@ public class ArrayToolsTest
    }
 
 	
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetMaximumAbsoluteChangeBetweenTicks()
    {
@@ -398,7 +398,7 @@ public class ArrayToolsTest
       assertEquals(0.02, maxChange, 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsContinuous()
    {

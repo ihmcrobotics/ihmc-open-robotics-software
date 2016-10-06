@@ -7,18 +7,18 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = TestPlanTarget.Exclude)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.Exclude)
 public class SimulationRewoundListenerTest
 {
    /**
     * Hang forever
     */
    @Ignore
-	@DeployableTestMethod(estimatedDuration = 30.0)
+	@ContinuousIntegrationTest(estimatedDuration = 30.0)
 	@Test(timeout=300000)
    public void testSimulationRewoundListener()
    {

@@ -5,12 +5,12 @@ import org.junit.Test;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.pushRecovery.DRCPushRecoveryTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
 public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
@@ -19,7 +19,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 16.3, targets = TestPlanTarget.Fast)
+   @ContinuousIntegrationTest(estimatedDuration = 16.3, targetsOverride = TestPlanTarget.Fast)
    @Test(timeout = 81000)
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
    {
@@ -27,7 +27,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 26.0, targets = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 26.0, targetsOverride = TestPlanTarget.InDevelopment)
    @Test(timeout = 130000)
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
@@ -35,7 +35,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 16.4, targets = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 16.4, targetsOverride = TestPlanTarget.InDevelopment)
    @Test(timeout = 82000)
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
@@ -43,7 +43,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 15.7, targets = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 15.7, targetsOverride = TestPlanTarget.InDevelopment)
    @Test(timeout = 78000)
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
@@ -51,7 +51,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 17.2, targets = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 17.2, targetsOverride = TestPlanTarget.InDevelopment)
    @Test(timeout = 86000)
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
@@ -59,7 +59,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 46.3, targets = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 46.3, targetsOverride = TestPlanTarget.InDevelopment)
    @Test(timeout = 230000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -67,7 +67,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 22.2, targets = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 22.2, targetsOverride = TestPlanTarget.InDevelopment)
    @Test(timeout = 110000)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
@@ -75,7 +75,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 14.7, targets = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 14.7, targetsOverride = TestPlanTarget.InDevelopment)
    @Test(timeout = 73000)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
@@ -83,7 +83,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 14.4, targets = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 14.4, targetsOverride = TestPlanTarget.InDevelopment)
    @Test(timeout = 72000)
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
@@ -91,7 +91,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 14.3, targets = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 14.3, targetsOverride = TestPlanTarget.InDevelopment)
    @Test(timeout = 71000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -99,7 +99,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 23.4, targets = TestPlanTarget.Fast)
+   @ContinuousIntegrationTest(estimatedDuration = 23.4, targetsOverride = TestPlanTarget.Fast)
    @Test(timeout = 120000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {

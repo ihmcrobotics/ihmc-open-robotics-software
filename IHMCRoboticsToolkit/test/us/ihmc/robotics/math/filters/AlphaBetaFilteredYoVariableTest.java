@@ -7,13 +7,13 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaBetaFilteredYoVariable;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class AlphaBetaFilteredYoVariableTest
 {
    private static final double DT = 0.1;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAlphaBetaFilteredVelocityAndPositionEstimatesWithNoVelocity()
    {
@@ -41,7 +41,7 @@ public class AlphaBetaFilteredYoVariableTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.9)
+	@ContinuousIntegrationTest(estimatedDuration = 1.9)
 	@Test(timeout=300000)
    public void testAlphaBetaFilteredVelocityAndPositionEstimatesWithConstantVelocity()
    {

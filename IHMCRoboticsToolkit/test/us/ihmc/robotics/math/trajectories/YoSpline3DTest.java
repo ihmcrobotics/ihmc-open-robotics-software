@@ -12,14 +12,14 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.YoSpline3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class YoSpline3DTest
 {
    private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static double EPSILON = 1e-6;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCubic()
    {
@@ -46,7 +46,7 @@ public class YoSpline3DTest
       
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testQuintic()
    {
@@ -74,7 +74,7 @@ public class YoSpline3DTest
 	   }   
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetVelocity()
    {
@@ -94,7 +94,7 @@ public class YoSpline3DTest
 	   assertEquals(numerical.getZ(), actual.getZ(), 1e-5);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetAcceleration()
    {
@@ -137,7 +137,7 @@ public class YoSpline3DTest
 	   return spline;
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testArcLengthMethods()
    {

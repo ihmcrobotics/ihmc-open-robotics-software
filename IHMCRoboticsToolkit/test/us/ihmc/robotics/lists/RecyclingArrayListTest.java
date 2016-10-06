@@ -10,11 +10,11 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class RecyclingArrayListTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor()
    {
@@ -35,7 +35,7 @@ public class RecyclingArrayListTest
       assertTrue(list.getLast() == null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAddAndGet()
    {
@@ -109,7 +109,7 @@ public class RecyclingArrayListTest
       assertTrue(list.getLast() == expectedList.get(finalSize - 1));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAndGrowIfNeeded()
    {
@@ -165,7 +165,7 @@ public class RecyclingArrayListTest
       assertTrue(list.getLast() == lastObject);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void growByOne()
    {
@@ -190,7 +190,7 @@ public class RecyclingArrayListTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void growByN()
    {
@@ -225,7 +225,7 @@ public class RecyclingArrayListTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFastRemove()
    {
@@ -261,7 +261,7 @@ public class RecyclingArrayListTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRemove()
    {
@@ -308,7 +308,7 @@ public class RecyclingArrayListTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSwap()
    {
@@ -358,7 +358,7 @@ public class RecyclingArrayListTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInsertAtIndex()
    {
@@ -400,7 +400,7 @@ public class RecyclingArrayListTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testShuffle()
    {

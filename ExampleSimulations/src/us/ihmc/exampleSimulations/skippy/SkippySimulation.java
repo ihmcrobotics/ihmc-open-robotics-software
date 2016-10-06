@@ -9,7 +9,7 @@ public class SkippySimulation
 {
    public static final double DT = 0.0001;
    public static final double controlDT = 0.0001;
-   public static final double TIME = 10.0;//6.0;// 5;//25.0;//15;//60.0;
+   public static final double TIME = 5.0;//6.0;//2.5;//10.0;// 25.0;//15.0;//60.0;
    private static SimulationConstructionSet sim;
 
    public SkippySimulation()
@@ -23,7 +23,7 @@ public class SkippySimulation
       sim.setGroundVisible(true);
       sim.setDT(DT, 100);
       sim.setSimulateDuration(TIME);
-      sim.setCameraPosition(40.0, 0.0, 0.2);
+      sim.setCameraPosition(10.0,   0.0, 2.0);
 
       boolean showOverheadView = true;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();

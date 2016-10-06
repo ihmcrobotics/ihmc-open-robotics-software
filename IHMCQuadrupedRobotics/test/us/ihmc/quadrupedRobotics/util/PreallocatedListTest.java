@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 
 public class PreallocatedListTest
 {
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCapacity()
    {
@@ -23,7 +23,7 @@ public class PreallocatedListTest
       assertEquals(doubleList.capacity(), 10);
    }
 
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAddRemove()
    {
