@@ -75,12 +75,19 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    //   private final THashMap<CollisionShapeFactory, ArrayList<CollisionShape>> collidingPairs = new THashMap<>();
    private boolean[][] haveCollided = null;
 
+   private boolean useSimpleSpeedupMethod = false;
+   
+   public void setUseSimpleSpeedupMethod()
+   {
+      this.useSimpleSpeedupMethod = true;
+   }
+   
    @Override
    public void performCollisionDetection(CollisionDetectionResult result)
    {
       int numberOfObjects = collisionObjects.size();
 
-      if (haveCollided == null)
+      if (useSimpleSpeedupMethod && (haveCollided == null))
       {
          haveCollided = new boolean[numberOfObjects][numberOfObjects];
       }
@@ -98,7 +105,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
 
          for (int j = i + 1; j < numberOfObjects; j++)
          {
-            if ((!haveCollided[i][j]) && (random.nextDouble() < 0.9))
+            if ((useSimpleSpeedupMethod) && (!haveCollided[i][j]) && (random.nextDouble() < 0.9))
                continue;
 
             CollisionShape objectTwo = collisionObjects.get(j);
@@ -204,7 +211,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
 
             if (areColliding)
             {
-               haveCollided[i][j] = true;
+               if (useSimpleSpeedupMethod) haveCollided[i][j] = true;
                //               ArrayList<CollisionShape> arrayList = collidingPairs.get(objectOne);
                //               if (arrayList == null)
                //               {

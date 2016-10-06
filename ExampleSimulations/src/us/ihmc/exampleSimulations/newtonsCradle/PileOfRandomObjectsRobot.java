@@ -14,6 +14,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.NullJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
@@ -29,8 +30,9 @@ public class PileOfRandomObjectsRobot
    {
       int numberOfObjects = 200;
 
-//      collisionDetector = new GdxCollisionDetector(100.0);
+      //      collisionDetector = new GdxCollisionDetector(100.0);
       collisionDetector = new SimpleCollisionDetector();
+      ((SimpleCollisionDetector) collisionDetector).setUseSimpleSpeedupMethod();
 
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(0.002);
@@ -38,7 +40,7 @@ public class PileOfRandomObjectsRobot
       Random random = new Random(1886L);
 
       createFallingObjects(numberOfObjects, collisionShapeFactory, random);
-//      createBoardFrame(collisionShapeFactory, random);
+      //      createBoardFrame(collisionShapeFactory, random);
       createGroundAsABox(collisionShapeFactory);
    }
 
@@ -79,7 +81,7 @@ public class PileOfRandomObjectsRobot
          double y = RandomTools.generateRandomDouble(random, -xyExtents, xyExtents);
          double z = RandomTools.generateRandomDouble(random, 0.2, 6.0);
 
-         double angleExtents = Math.PI/2.0;
+         double angleExtents = Math.PI / 2.0;
          double yaw = RandomTools.generateRandomDouble(random, -angleExtents, angleExtents);
          double pitch = RandomTools.generateRandomDouble(random, -angleExtents, angleExtents);
          double roll = RandomTools.generateRandomDouble(random, -angleExtents, angleExtents);
@@ -96,22 +98,23 @@ public class PileOfRandomObjectsRobot
       Robot baseRobot = new Robot("BaseRobot");
       NullJoint baseJoint = new NullJoint("base", new Vector3d(), baseRobot);
 
-//    FloatingJoint baseJoint = new FloatingJoint("base", new Vector3d(), this);
+      //    FloatingJoint baseJoint = new FloatingJoint("base", new Vector3d(), this);
       Link baseLink = new Link("base");
       baseLink.setMassAndRadiiOfGyration(1000000000.0, 100.0, 100.0, 100.0);
       Graphics3DObject baseLinkGraphics = new Graphics3DObject();
-      baseLinkGraphics.translate(0.0, 0.0, -0.01 / 2.0);
-      baseLinkGraphics.addCube(4.0, 4.0, 0.01, YoAppearance.Green());
+      baseLinkGraphics.translate(0.0, 0.0, -0.05 / 2.0);
+      baseLinkGraphics.addCube(4.0, 4.0, 0.05, YoAppearance.Green());
       baseLink.setLinkGraphics(baseLinkGraphics);
       baseLink.enableCollisions(100.0, baseRobot.getRobotsYoVariableRegistry());
 
-      CollisionShapeDescription<?> shapeDesc = collisionShapeFactory.createBox(4.0 / 2.0, 4.0 / 2.0, 0.01 / 2.0);
+      CollisionShapeDescription<?> shapeDesc = collisionShapeFactory.createBox(4.0 / 2.0, 4.0 / 2.0, 0.05 / 2.0);
 
       RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-      shapeToLinkTransform.setTranslation(new Vector3d(-0.005, 0.0, 0.0));
-      collisionShapeFactory.addShape(baseLink, shapeToLinkTransform, shapeDesc, true, 0xFFFFFFFF, 0xFFFFFFFF);
+      shapeToLinkTransform.setTranslation(new Vector3d(-0.0, 0.0, 0.0));
+      CollisionShape groundShape = collisionShapeFactory.addShape(baseLink, shapeToLinkTransform, shapeDesc, true, 0xFFFFFFFF, 0xFFFFFFFF);
+      groundShape.setIsGround(true);
 
-//    baseJoint.setVelocity(0.0, 0.0, 1.0);
+      //    baseJoint.setVelocity(0.0, 0.0, 1.0);
 
       baseJoint.setLink(baseLink);
       baseRobot.addRootJoint(baseJoint);
@@ -126,7 +129,7 @@ public class PileOfRandomObjectsRobot
 
       FloatingJoint board0 = createContainerBoard("board0", collisionShapeFactory, random);
       board0.setPosition(0.51, 0.0, boardZ);
-      board0.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
+      board0.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
 
       FloatingJoint board1 = createContainerBoard("board1", collisionShapeFactory, random);
       board1.setPosition(0.0, 0.35, boardZ);
@@ -138,7 +141,7 @@ public class PileOfRandomObjectsRobot
 
       FloatingJoint board3 = createContainerBoard("board3", collisionShapeFactory, random);
       board3.setPosition(-0.51, 0.0, boardZ);
-      board3.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
+      board3.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
    }
 
    private FloatingJoint createContainerBoard(String name, CollisionShapeFactory collisionShapeFactory, Random random)
@@ -231,7 +234,7 @@ public class PileOfRandomObjectsRobot
       link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
       return link;
    }
-   
+
    private Link createRandomCapsule(CollisionShapeFactory collisionShapeFactory, Random random, int i, Robot robot)
    {
       double objectRadius = RandomTools.generateRandomDouble(random, 0.01, 0.05);

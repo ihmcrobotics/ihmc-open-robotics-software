@@ -778,14 +778,7 @@ public abstract class JointPhysics< J extends Joint>
    public void resolveMicroCollision(double penetration_squared, Vector3d offsetFromCOM, Matrix3d Rk_coll, Vector3d u_coll, double epsilon, double mu,
                                      Vector3d p_coll)
    {
-      tempVector.set(offsetFromCOM);
-      tempVector.scale(-1.0);
-
-      k_X_hat_coll.setFromOffsetAndRotation(tempVector, Rk_coll);
-
-      // Compute Ki
-      computeMultibodyKi(k_X_hat_coll, Ki);    // Ki is in collision coordinates.
-
+      computeKiCollision(offsetFromCOM, Rk_coll);      
       collisionIntegrator.setup(Ki, u_coll, epsilon, mu);
       collisionIntegrator.computeMicroImpulse(p_coll);    // impulse is in collision coordinates.  Need to rotate into joint com coordinates:
 
@@ -978,8 +971,8 @@ public abstract class JointPhysics< J extends Joint>
 
    }
 
-   public SpatialVector Y_hat_i = new SpatialVector();
-   SpatialVector Y_hat_parent = new SpatialVector();
+   protected final  SpatialVector Y_hat_i = new SpatialVector();
+   private final SpatialVector Y_hat_parent = new SpatialVector();
 
    // SpatialVector delta_v_hat_i = new SpatialVector();
 
@@ -1067,7 +1060,7 @@ public abstract class JointPhysics< J extends Joint>
 
    }
 
-   SpatialVector delta_v_temp1 = new SpatialVector(), delta_v_temp2 = new SpatialVector();
+   private final SpatialVector delta_v_temp1 = new SpatialVector(), delta_v_temp2 = new SpatialVector();
 
    /**
     * Compute the change in velocity for this joint as described in Mirtich p. 141.
@@ -1164,7 +1157,7 @@ public abstract class JointPhysics< J extends Joint>
       }
    }
 
-   Point3d tempCOMPoint = new Point3d();
+   private final Point3d tempCOMPoint = new Point3d();
 
    /**
     * Calculates center of mass position as well as the total mass of all joints beginning with
@@ -1361,7 +1354,7 @@ public abstract class JointPhysics< J extends Joint>
       return translationalKineticEnergy;
    }
 
-   private Point3d tempPE_COMPoint = new Point3d();
+   private final Point3d tempPE_COMPoint = new Point3d();
 
    private boolean doFreezeFrame = false;
 

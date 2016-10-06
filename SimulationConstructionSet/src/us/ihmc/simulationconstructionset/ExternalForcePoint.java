@@ -181,7 +181,7 @@ public class ExternalForcePoint extends KinematicPoint
 
    public void resolveMicroCollision(double penetration_squared, Vector3d vel_world, Vector3d normal_world, double epsilon, double mu, Vector3d p_world)
    {
-//      System.out.println("Resolving micro collision");
+//      System.out.println("External force point: Resolving micro collision");
 
       computeRotationFromNormalVector(R0_coll, normal_world);
       Rcoll_0.set(R0_coll);
