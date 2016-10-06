@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.physics.collision;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -14,12 +14,12 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.physics.engine.jerry.JointPhysics;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class CollisionResolutionTest
 {
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCollisionResolutionOne() throws UnreasonableAccelerationException
    {
