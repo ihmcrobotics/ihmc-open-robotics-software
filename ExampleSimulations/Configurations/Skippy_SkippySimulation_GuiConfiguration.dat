@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.Skippy.qd_hip,root.Skippy.qdd_hip</Variables>
+		<Variables>root.Skippy.gc_foot_fX,root.Skippy.gc_foot_fY,root.Skippy.gc_foot_fZ,root.Skippy.t</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.qd_shoulderJoint,root.Skippy.qdd_shoulderJoint</Variables>
+		<Variables>root.Skippy.qdd_z</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -50,12 +50,6 @@
 	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
-<EntryBoxTab>
-<Title>
-Tab0
-</Title>
-<Entry Boxes>root.Skippy.SkippyController.alphaBalance</Entry Boxes>
-</EntryBoxTab>
 </Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
@@ -73,9 +67,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>2.169912702767458</Camera X>
- <Camera Y>-9.14762658859961</Camera Y>
- <Camera Z>4.284074735657979</Camera Z>
+ <Camera X>10.0</Camera X>
+ <Camera Y>0.0</Camera Y>
+ <Camera Z>2.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
