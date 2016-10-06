@@ -108,7 +108,7 @@ public class SkippyController implements RobotController
    private final ExternalForcePoint forceToCOM;
    private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector centerOfMassVelocity = new YoFrameVector("centerOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector desiredGroundReactionForce = new YoFrameVector("desiredGroundReactionForce", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector desiredReactionForce = new YoFrameVector("desiredReactionForce", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector actualGroundReactionForce = new YoFrameVector("actualGroundReactionForce", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector angularMomentum = new YoFrameVector("angularMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector lastAngularMomentum = new YoFrameVector("lastAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
@@ -116,6 +116,15 @@ public class SkippyController implements RobotController
    private final YoFrameVector lastLinearMomentum = new YoFrameVector("lastLinearMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector rateOfChangeOfLinearMomentum = new YoFrameVector("rateOfChangeOfLinearMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector rateOfChangeOfAngularMomentum = new YoFrameVector("rateOfChangeOfAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
+   
+   private final YoFrameVector strongForceUnitVector = new YoFrameVector("strongForceUnitVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector strongForceVector = new YoFrameVector("strongForceVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector outOfPlaneReaction = new YoFrameVector("outOfPlaneReaction", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector inPlaneReaction = new YoFrameVector("inPlaneReaction", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector inPlaneReactionUnitVector = new YoFrameVector("inPlaneReactionUnitVector", ReferenceFrame.getWorldFrame(), registry);
+   private final DoubleYoVariable outOfPlane = new DoubleYoVariable("outOfPlane", registry);
+
+
 
    private final YoFrameVector tauOnCoM = new YoFrameVector("tauOnCoM", ReferenceFrame.getWorldFrame(), registry);
 
@@ -293,10 +302,10 @@ public class SkippyController implements RobotController
       /*
        * CMP from definition
        */
-      YoGraphicPosition cmpPositionYoGraphic = new YoGraphicPosition("CMP from definition", actualCMPFromDefinition, 0.01, YoAppearance.Red(),
-                                                                     GraphicType.BALL_WITH_ROTATED_CROSS);
-      yoGraphicsListRegistries.registerYoGraphic("allGraphics", cmpPositionYoGraphic);
-      yoGraphicsListRegistries.registerArtifact("allGraphics", cmpPositionYoGraphic.createArtifact());
+//      YoGraphicPosition cmpPositionYoGraphic = new YoGraphicPosition("CMP from definition", actualCMPFromDefinition, 0.01, YoAppearance.Red(),
+//                                                                     GraphicType.BALL_WITH_ROTATED_CROSS);
+//      yoGraphicsListRegistries.registerYoGraphic("allGraphics", cmpPositionYoGraphic);
+//      yoGraphicsListRegistries.registerArtifact("allGraphics", cmpPositionYoGraphic.createArtifact());
       /*
        * CMP from ICP
        */
@@ -307,7 +316,7 @@ public class SkippyController implements RobotController
       /*
        * Desired reaction force
        */
-      YoGraphicVector desiredGRFYoGraphic = new YoGraphicVector("desiredGRFYoGraphic", footLocation, desiredGroundReactionForce, 0.05, YoAppearance.Orange(),
+      YoGraphicVector desiredGRFYoGraphic = new YoGraphicVector("desiredGRFYoGraphic", footLocation, desiredReactionForce, 0.05, YoAppearance.Orange(),
                                                                 true);
       yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), desiredGRFYoGraphic);
       /*
@@ -319,15 +328,15 @@ public class SkippyController implements RobotController
       /*
        * CMP to CoM position vector
        */
-      YoGraphicVector cmpToComPositionVectorYoGraphic = new YoGraphicVector("cmpToComPositionVectorYoGraphic", desiredCMPFromICP, cmpToComPositionVector, 1.0,
-                                                                            YoAppearance.LightBlue(), true);
-      yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), cmpToComPositionVectorYoGraphic);
+//      YoGraphicVector cmpToComPositionVectorYoGraphic = new YoGraphicVector("cmpToComPositionVectorYoGraphic", desiredCMPFromICP, cmpToComPositionVector, 1.0,
+//                                                                            YoAppearance.LightBlue(), true);
+//      yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), cmpToComPositionVectorYoGraphic);
       /*
        * Foot to hip joint position vector
        */
-      YoGraphicVector footToHipPositionVectorYoGraphic = new YoGraphicVector("footToHipPositionVectorYoGraphic", footLocation, footToHipPositionVector, 1.0,
-                                                                            YoAppearance.Red(), true);
-      yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), footToHipPositionVectorYoGraphic);
+//      YoGraphicVector footToHipPositionVectorYoGraphic = new YoGraphicVector("footToHipPositionVectorYoGraphic", footLocation, footToHipPositionVector, 1.0,
+//                                                                            YoAppearance.Red(), true);
+//      yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), footToHipPositionVectorYoGraphic);
       /*
        * Hip joint axis
        */
@@ -343,9 +352,9 @@ public class SkippyController implements RobotController
       /*
        * Foot to shoulder joint position vector
        */
-      YoGraphicVector footToShoulderPositionVectorYoGraphic = new YoGraphicVector("footToShoulderPositionVectorYoGraphic", footLocation, footToShoulderPositionVector, 1.0,
-                                                                             YoAppearance.Red(), true);
-      yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), footToShoulderPositionVectorYoGraphic);
+//      YoGraphicVector footToShoulderPositionVectorYoGraphic = new YoGraphicVector("footToShoulderPositionVectorYoGraphic", footLocation, footToShoulderPositionVector, 1.0,
+//                                                                             YoAppearance.Red(), true);
+//      yoGraphicsListRegistries.registerYoGraphic(getClass().getSimpleName(), footToShoulderPositionVectorYoGraphic);
       /*
        * Shoulder joint axis
        */
@@ -371,8 +380,8 @@ public class SkippyController implements RobotController
       double somethingToDo=0.0;
       controllerCmpX = new PIDController("icpX", registry);
       controllerCmpX.setProportionalGain(0.6);// 3);
-      controllerCmpX.setDerivativeGain(0.01);// 05);
-      controllerCmpX.setIntegralGain(0.02);// 01);
+      controllerCmpX.setDerivativeGain(0.0);// 05);
+      controllerCmpX.setIntegralGain(0.0);// 01);
       // desiredBodyZ = new DoubleYoVariable("desiredBodyZ", registry);
       // desiredBodyZ.set(1.5);
       /*
@@ -380,8 +389,8 @@ public class SkippyController implements RobotController
        */
       controllerCmpY = new PIDController("icpY", registry);
       controllerCmpY.setProportionalGain(0.6);// 3);
-      controllerCmpY.setDerivativeGain(0.01);// 05);
-      controllerCmpY.setIntegralGain(0.02);// 01);
+      controllerCmpY.setDerivativeGain(0.0);// 05);
+      controllerCmpY.setIntegralGain(0.0);// 01);
       // desiredBodyZ = new DoubleYoVariable("desiredBodyZ", registry);
       // desiredBodyZ.set(1.5);
    }
@@ -462,7 +471,7 @@ public class SkippyController implements RobotController
     */
    public void tauOnShoulderJoint()
    {
-      tauShoulderJoint.cross(footToShoulderPositionVector, desiredGroundReactionForce);
+      tauShoulderJoint.cross(footToShoulderPositionVector, desiredReactionForce);
       /*
        * Shoulder joint torque projection modulus
        */
@@ -475,7 +484,7 @@ public class SkippyController implements RobotController
     */
    public void tauOnHipJoint()
    {
-      tauHipJoint.cross(footToHipPositionVector, desiredGroundReactionForce);
+      tauHipJoint.cross(footToHipPositionVector, desiredReactionForce);
       /*
        * Hip joint torque projection modulus
        */
@@ -655,8 +664,8 @@ public class SkippyController implements RobotController
    private void computeICP()
    {
       double w0 = Math.sqrt(z0.getDoubleValue() / Math.abs(robot.getGravityt()));
-      actualICP.set(centerOfMassVelocity);
-      actualICP.scaleAdd(w0, centerOfMass);
+      actualICP.set(centerOfMass);
+      actualICP.scaleAdd(w0, centerOfMassVelocity);
       actualICP.setZ(0.0);
    }
 
@@ -718,15 +727,15 @@ public class SkippyController implements RobotController
       /*
        * ICP to Foot error
        */
-      double icpToFootErrorX = controllerCmpX.compute(actualICP.getX(), footLocation.getX(), rateOfChangeIcpX, 0.0, deltaT);
-      double icpToFootErrorY = controllerCmpY.compute(actualICP.getY(), footLocation.getY(), rateOfChangeIcpY, 0.0, deltaT);
+      double icpToFootErrorX = controllerCmpX.compute(actualICP.getX(), footLocation.getX(), 0.0, 0.0, deltaT);
+      double icpToFootErrorY = controllerCmpY.compute(actualICP.getY(), footLocation.getY(), 0.0, 0.0, deltaT);
       /*
        * Actualize formerIcpToFootError
        */
       formerIcpToFootError.set(actualIcpToFootError);
       actualIcpToFootError.set(icpToFootErrorX, icpToFootErrorY, 0.0);
       /*
-       * Actual ICP
+       * Actualize ICP
        */
       formerICP.set(actualICP);
       /*
@@ -750,13 +759,45 @@ public class SkippyController implements RobotController
       double reactionModulus = robot.getMass() * Math.abs(robot.getGravityZ()) / cmpToComUnitVector.getZ();
 //      if (Math.abs(actualGroundReactionForce.getZ()) - Math.abs(robotWeight.getDoubleValue()) > 10)
 //         reactionModulus = Math.abs(actualGroundReactionForce.getZ());
-      desiredGroundReactionForce.set(cmpToComUnitVector);
-      desiredGroundReactionForce.scale(reactionModulus);
+      desiredReactionForce.set(cmpToComUnitVector);
+      desiredReactionForce.scale(reactionModulus);
       /*
        * Compute foot to joints position vectors
        */
       footToJointsPositionVectors();
       hipAndShoulderUnitVectors();
+      /*
+       * Out off plane desired reaction force direction unit vector
+       */
+      outOfPlane.set(desiredReactionForce.dot(hipJointUnitVector));
+      outOfPlaneReaction.set(hipJointUnitVector);
+      outOfPlaneReaction.scale(outOfPlane.getDoubleValue());
+      /*
+       * In plane desired reaction force direction unit vector
+       */
+      inPlaneReaction.set(desiredReactionForce);
+      inPlaneReaction.sub(outOfPlaneReaction);
+      inPlaneReactionUnitVector.set(inPlaneReaction);
+      inPlaneReactionUnitVector.normalize();
+     
+      /*
+       * Strong force direction unit vector
+       */
+      strongForceUnitVector.cross(footToHipPositionVector, hipJointUnitVector);
+      strongForceUnitVector.normalize();
+      /*
+       * Strong force unit vector projection on in plane desired reaction force direction unit vector
+       */
+      //STOPPED HERE
+      double rho = Math.abs(strongForceUnitVector.dot(inPlaneReactionUnitVector));
+      ;
+        /*
+       * Strong force modulus
+       */
+      double strongForceModulus = inPlaneReaction.length()/rho;
+      
+      strongForceVector.set(strongForceUnitVector);
+      strongForceVector.scale(strongForceModulus);
       /*
        * Torque on hip and shoulder joints
        */
@@ -767,8 +808,8 @@ public class SkippyController implements RobotController
        */
       //      double tempTauHip = tauOnHipJointAxis.getDoubleValue();
       //      tauOnHipJointAxis.set(-tempTauHip);
-      double tempTauShoulder = tauOnShoulderJointAxis.getDoubleValue();
-      tauOnShoulderJointAxis.set(-tempTauShoulder);
+//      double tempTauShoulder = tauOnShoulderJointAxis.getDoubleValue();
+//      tauOnShoulderJointAxis.set(-tempTauShoulder);
       /*
        * Apply torques
        */
@@ -781,8 +822,8 @@ public class SkippyController implements RobotController
       /*
        * Apply torques from actual controller on Skippy
        */
-      //      applyTorqueToHip(q_d_hip.getDoubleValue());
-      //      applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
+//            applyTorqueToHip(q_d_hip.getDoubleValue());
+//            applyTorqueToShoulder(q_d_shoulder.getDoubleValue());
       // }
    }
 
