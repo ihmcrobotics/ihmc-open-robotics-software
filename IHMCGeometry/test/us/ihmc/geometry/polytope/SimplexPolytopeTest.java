@@ -155,13 +155,8 @@ public class SimplexPolytopeTest
       assertTrue(simplex.containsPoint(pointFour));
    }
 
-<<<<<<< HEAD
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-=======
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test //(timeout = 30000)
->>>>>>> refs/heads/develop
+   @Test(timeout = 30000)
    public void testVornoiRegionChecks()
    {
       SimplexPolytope simplex = new SimplexPolytope();
@@ -341,13 +336,9 @@ public class SimplexPolytopeTest
       assertTrue(simplex.isInVoronoiRegionOfFace(pointTwo, pointThree, pointFour, pointOne));
    }
 
-<<<<<<< HEAD
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
-=======
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
->>>>>>> refs/heads/develop
    public void testTroublesomeOnes()
    {
       SimplexPolytope simplex = new SimplexPolytope();
