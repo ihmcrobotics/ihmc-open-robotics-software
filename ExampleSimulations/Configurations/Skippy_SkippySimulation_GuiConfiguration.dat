@@ -89,7 +89,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.actualGroundReactionForceX,root.Skippy.SkippyController.actualGroundReactionForceY,root.Skippy.SkippyController.actualGroundReactionForceZ,root.Skippy.SkippyController.desiredGroundReactionForceZ,root.Skippy.qdd_z</Variables>
+		<Variables>root.Skippy.SkippyController.actualGroundReactionForceX,root.Skippy.SkippyController.actualGroundReactionForceY,root.Skippy.SkippyController.actualGroundReactionForceZ,root.Skippy.qdd_z</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -110,9 +110,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>40.0</Camera X>
- <Camera Y>0.0</Camera Y>
- <Camera Z>0.2</Camera Z>
+ <Camera X>6.074841492393717</Camera X>
+ <Camera Y>1.6399467620712695</Camera Y>
+ <Camera Z>2.1985780544895612</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
