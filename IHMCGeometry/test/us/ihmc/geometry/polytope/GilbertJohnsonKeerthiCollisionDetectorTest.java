@@ -411,7 +411,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       assertTrue("numberNotColliding = " + numberNotColliding, numberNotColliding > 1000);
    }
 
-   @DeployableTestMethod(estimatedDuration = 10.0)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test (timeout = 30000)
    public void testExtensivelyCylinderToPolytope()
    {

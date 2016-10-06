@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -16,7 +17,6 @@ import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
 
 public class SimpleCollisionDetectorTest
 {
@@ -146,7 +146,8 @@ public class SimpleCollisionDetectorTest
    }
 
    //TODO: Get this one to work. ExpandingPolytopeAlgorithm when simplex is not a Quadrahedron to start...
-   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment) 
+   @Ignore
+   @ContinuousIntegrationTest(estimatedDuration = 0.0) 
    @Test(timeout = 30000)
    public void testBoxToBoxCollisions()
    {
