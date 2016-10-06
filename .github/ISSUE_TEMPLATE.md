@@ -1,5 +1,6 @@
 | Required Info ||
 |---|---|
+|Version or commit hash||
 |Sim or Real Robot||
 |Operating System||
 |JDK||
