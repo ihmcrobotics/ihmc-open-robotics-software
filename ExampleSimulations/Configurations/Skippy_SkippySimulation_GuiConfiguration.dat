@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.gc_foot_fs,root.Skippy.SkippyController.stateMachine,root.Skippy.SkippyController.SkippyToDo</Variables>
+		<Variables>root.Skippy.SkippyController.rateOfChangeOfLinearMomentumY,root.Skippy.SkippyController.rateOfChangeOfLinearMomentumX</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.qdd_z</Variables>
+		<Variables>root.Skippy.SkippyController.centerOfMassVelocityX,root.Skippy.SkippyController.centerOfMassVelocityY</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,33 +37,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.qd_hip,root.Skippy.qd_shoulderJoint</Variables>
+		<Variables>root.Skippy.qd_hip</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.centerOfMassVelocityX</Variables>
-		<GraphConfiguration>
-			<Name>config5</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.centerOfMassVelocityY</Variables>
-		<GraphConfiguration>
-			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -91,9 +67,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>10.0</Camera X>
- <Camera Y>0.0</Camera Y>
- <Camera Z>2.0</Camera Z>
+ <Camera X>5.297876467408492</Camera X>
+ <Camera Y>-0.5190217243457098</Camera Y>
+ <Camera Z>1.1474156529395714</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
