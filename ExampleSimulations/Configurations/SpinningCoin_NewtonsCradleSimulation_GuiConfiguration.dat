@@ -173,7 +173,7 @@ Tab0
 
 <Graph Array Window Size>1</Graph Array Window Size>
 <Graph Array Window1>
-<ScreenID>0</ScreenID>
+<ScreenID>1</ScreenID>
 <WindowLocation>-9.0, -9.0</WindowLocation>
 <WindowSize>1938.0, 1050.0</WindowSize>
 <GraphGroup>
@@ -296,9 +296,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-0.04130781294781059</Camera X>
- <Camera Y>-0.862237501398735</Camera Y>
- <Camera Z>0.20208677232640965</Camera Z>
+ <Camera X>0.17685513595350544</Camera X>
+ <Camera Y>-0.5930402991924913</Camera Y>
+ <Camera Z>0.21531005576825887</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -322,8 +322,8 @@ Tab0
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.034705868798040426</Fix X>
-<Fix Y>-0.1573431679759365</Fix Y>
-<Fix Z>0.09524224165458023</Fix Z>
+<Fix X>0.17685513595350544</Fix X>
+<Fix Y>-0.16415172590808003</Fix Y>
+<Fix Z>0.12142944831131222</Fix Z>
 </Fix Position>
 </Canvas 1>

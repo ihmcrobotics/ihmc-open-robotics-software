@@ -171,18 +171,41 @@ public class DefaultCollisionHandler implements CollisionHandler
             System.out.println("externalForcePointOne = " + externalForcePointOne);
             System.out.println("externalForcePointTwo = " + externalForcePointTwo);
          }
-
+         
+         double velocityForMicrocollision = 0.01;
          if (shapeTwoIsGround)
          {
-            //            System.out.println("shapeTwoIsGround");
+//            System.out.println("shapeTwoIsGround");
             Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
-            collisionOccurred = externalForcePointOne.resolveCollision(velocityWorld, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
+            
+            if (externalForcePointOne.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
+            {
+               collisionOccurred = externalForcePointOne.resolveCollision(velocityWorld, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
+            }
+        
+            else
+            {
+               double penetrationSquared = point1.distanceSquared(point2);
+               externalForcePointOne.resolveMicroCollision(penetrationSquared, velocityWorld, negative_normal, epsilon, mu, p_world);
+               collisionOccurred = true;
+            }
          }
          else if (shapeOneIsGround)
          {
-            //            System.out.println("shapeOneIsGround");
+//            System.out.println("shapeOneIsGround");
             Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
-            collisionOccurred = externalForcePointTwo.resolveCollision(velocityWorld, normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
+            if (externalForcePointTwo.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
+            {
+               collisionOccurred = externalForcePointTwo.resolveCollision(velocityWorld, normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);               
+            }
+
+            else
+            {
+               double penetrationSquared = point1.distanceSquared(point2);
+               externalForcePointTwo.resolveMicroCollision(penetrationSquared, velocityWorld, normal, epsilon, mu, p_world);
+               collisionOccurred = true;
+            }
+
          }
          else
          {
