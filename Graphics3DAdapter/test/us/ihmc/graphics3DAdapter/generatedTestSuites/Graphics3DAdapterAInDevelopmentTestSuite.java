@@ -9,14 +9,13 @@ import us.ihmc.tools.testing.TestPlanTarget;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@TestSuiteTarget(TestPlanTarget.InDevelopment)
 @SuiteClasses
 ({
-   us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtilsTest.class,
-   us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtilsTest.class
+   us.ihmc.graphics3DAdapter.stlLoader.STLReaderTest.class
 })
 
-public class Graphics3DAdapterAFastTestSuite
+public class Graphics3DAdapterAInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {
