@@ -185,6 +185,7 @@ public class DefaultCollisionHandler implements CollisionHandler
         
             else
             {
+//               System.out.println("Microcollision");
                double penetrationSquared = point1.distanceSquared(point2);
                externalForcePointOne.resolveMicroCollision(penetrationSquared, velocityWorld, negative_normal, epsilon, mu, p_world);
                collisionOccurred = true;
@@ -201,6 +202,7 @@ public class DefaultCollisionHandler implements CollisionHandler
 
             else
             {
+//               System.out.println("Microcollision");
                double penetrationSquared = point1.distanceSquared(point2);
                externalForcePointTwo.resolveMicroCollision(penetrationSquared, velocityWorld, normal, epsilon, mu, p_world);
                collisionOccurred = true;

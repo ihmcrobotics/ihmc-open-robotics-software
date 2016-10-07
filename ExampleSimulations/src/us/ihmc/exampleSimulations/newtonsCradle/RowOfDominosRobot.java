@@ -12,6 +12,7 @@ import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.NullJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
@@ -107,8 +108,9 @@ public class RowOfDominosRobot extends Robot
 
       RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
       shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
-      collisionShapeFactory.addShape(baseLink, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
-
+      CollisionShape groundShape = collisionShapeFactory.addShape(baseLink, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
+      groundShape.setIsGround(true);
+      
 //    baseJoint.setVelocity(0.0, 0.0, 1.0);
 
       baseJoint.setLink(baseLink);
