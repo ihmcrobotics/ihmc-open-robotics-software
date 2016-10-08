@@ -2828,15 +2828,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    }
 
    /**
-    * Updates the state of the robots contained in the underlying Simulator. Step 1/3 of Simulator.simulate().
-    * Should only be used for testing purposes.
-    */
-   public void updateState()
-   {
-      mySimulation.updateState();
-   }
-
-   /**
     * Calls the doControl() method of the robots contained in the underlying Simulator. Step 2/3 of Simulator.simulate().
     * Should only be used for testing purposes.
     */

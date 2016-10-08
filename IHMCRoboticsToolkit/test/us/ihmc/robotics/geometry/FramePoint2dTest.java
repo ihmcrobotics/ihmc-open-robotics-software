@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -28,7 +28,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOne()
    {
@@ -41,7 +41,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals(2.0, point.getY(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFramePoint2d_ReferenceFrame_double_double_String()
    {
@@ -63,7 +63,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals(2.0, point.getY(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFramePoint2d_FrameTuple2d()
    {
@@ -87,7 +87,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals(2.0, point.getY(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFramePoint2d_ReferenceFrame()
    {
@@ -108,7 +108,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals(0.0, point.getY(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFramePoint2d()
    {
@@ -130,7 +130,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals(0.0, point.getY(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFramePoint2d_ReferenceFrame_double_double()
    {
@@ -141,7 +141,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals(2.0, point.getY(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFramePoint2d_ReferenceFrame_double()
    {
@@ -153,7 +153,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals(2.0, point.getY(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFramePoint2d_ReferenceFrame_double_String()
    {
@@ -165,7 +165,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals(2.0, point.getY(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFramePoint2d_ReferenceFrame_String()
    {
@@ -176,7 +176,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals(0.0, point.getY(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFramePoint2d_ReferenceFrame_Tuple2d()
    {
@@ -187,7 +187,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals(2.0, point.getY(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFramePoint2d_ReferenceFrame_Tuple2d_String()
    {
@@ -199,7 +199,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals(2.0, point.getY(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDistance_FramePoint2d()
    {
@@ -224,7 +224,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDistanceSquared_FramePoint2d()
    {
@@ -249,7 +249,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetPoint()
    {
@@ -259,7 +259,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals("Should be equal", point1.getY(), point2d.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testToFramePoint()
    {
@@ -282,7 +282,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals("Should be equal", 0.0, framePoint.getZ(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransform_Transform3D_boolean()
    {
@@ -323,7 +323,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       assertEquals("Should be equal", pointToTransform2.getY(), pointToTest2.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransform_Transform3D()
    {
@@ -371,7 +371,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
 //      assertEquals("Should be equal", pointToTransform2.getY(), copy.getY(), epsilon);
 //   }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrame_ReferenceFrame()
    {
@@ -391,7 +391,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameAndProjectToXYPlane_ReferenceFrame()
    {
@@ -411,7 +411,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameAndProjectToXYPlaneCopy_ReferenceFrame()
    {
@@ -431,7 +431,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameUsingTransform_ReferenceFrame_Transform3D()
    {
@@ -442,7 +442,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       frame.checkReferenceFrameMatch(theFrame);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testYawAboutPoint_FramePoint2d_double()
    {

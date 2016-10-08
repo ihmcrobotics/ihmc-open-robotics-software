@@ -462,9 +462,15 @@ public class FootControlModule
       legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();
    }
 
-   public void requestSwingSpeedUp(double speedUpFactor)
+   /**
+    * Request the swing trajectory to speed up using the given speed up factor.
+    * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
+    * @param speedUpFactor
+    * @return the current swing time remaining for the swing foot trajectory
+    */
+   public double requestSwingSpeedUp(double speedUpFactor)
    {
-      swingState.requestSwingSpeedUp(speedUpFactor);
+      return swingState.requestSwingSpeedUp(speedUpFactor);
    }
 
    public void setExitCMPForToeOff(FramePoint exitCMP)

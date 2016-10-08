@@ -29,6 +29,8 @@ public class Link implements java.io.Serializable
 {
    private static final long serialVersionUID = 5447931499263283994L;
 
+   private static final double minimumValidInertia = 2e-7;
+
    private final String name;
 
    protected Joint parentJoint;    // Needed for collisions.
@@ -565,6 +567,10 @@ public class Link implements java.io.Serializable
    public void computePrincipalMomentsOfInertia()
    {
       InertiaTools.computePrincipalMomentsOfInertia(Inertia, principalAxesRotation, principalMomentsOfInertia);
+      if ((principalMomentsOfInertia.getX() < minimumValidInertia) || (principalMomentsOfInertia.getX() < minimumValidInertia) || (principalMomentsOfInertia.getX() < minimumValidInertia))
+      {
+         System.err.println("Warning: Inertia may be too small for Link " + getName() + " for stable simulation. principalMomentsOfInertia = " + principalMomentsOfInertia);
+      }
    }
 
 }

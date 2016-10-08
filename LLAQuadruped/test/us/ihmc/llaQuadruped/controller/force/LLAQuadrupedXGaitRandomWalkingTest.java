@@ -9,11 +9,11 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedXGaitRandomWalkingTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
 public class LLAQuadrupedXGaitRandomWalkingTest extends QuadrupedXGaitRandomWalkingTest
 {
    @Override
@@ -23,7 +23,7 @@ public class LLAQuadrupedXGaitRandomWalkingTest extends QuadrupedXGaitRandomWalk
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 100.0)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 500000)
    public void testExtremeRandomWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -31,7 +31,7 @@ public class LLAQuadrupedXGaitRandomWalkingTest extends QuadrupedXGaitRandomWalk
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 100.0)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 500000)
    public void testWalkingRandomly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -39,7 +39,7 @@ public class LLAQuadrupedXGaitRandomWalkingTest extends QuadrupedXGaitRandomWalk
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 75.0)
+   @ContinuousIntegrationTest(estimatedDuration = 75.0)
    @Test(timeout = 600000)
    public void testWalkingAtRandomSpeedsWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -47,7 +47,7 @@ public class LLAQuadrupedXGaitRandomWalkingTest extends QuadrupedXGaitRandomWalk
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 100.0)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 600000)
    public void testWalkingRandomVelocitiesStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

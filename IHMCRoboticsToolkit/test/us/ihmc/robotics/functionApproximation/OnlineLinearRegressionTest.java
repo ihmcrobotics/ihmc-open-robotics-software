@@ -2,7 +2,7 @@ package us.ihmc.robotics.functionApproximation;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import java.util.Random;
 
@@ -10,7 +10,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 public class OnlineLinearRegressionTest {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	   public void toyExample()
 	   {

@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.robotics.statistics.OnePassMeanAndStandardDeviation.InsufficientMeasurementsException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import static org.junit.Assert.assertEquals;
 
@@ -23,7 +23,7 @@ public class OnePassMeanAndStandardDeviationTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCalculateMeanAndStandardDeviationExample()
    {
@@ -44,7 +44,7 @@ public class OnePassMeanAndStandardDeviationTest
       assertEquals(9.730769230769189, meanAndStandardDeviation.getSampleVariance(), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCalculateMeanAndStandardDeviationSingleValue()
    {
@@ -56,7 +56,7 @@ public class OnePassMeanAndStandardDeviationTest
       assertEquals(0.0, meanAndStandardDeviation.getStandardDeviation(), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = InsufficientMeasurementsException.class)
    public void testCalculateSampleVarianceSingleValue()
    {
@@ -65,7 +65,7 @@ public class OnePassMeanAndStandardDeviationTest
       assertEquals(0.0, meanAndStandardDeviation.getSampleVariance(), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = InsufficientMeasurementsException.class)
    public void testCalculateAverageNoValue()
    {
@@ -73,7 +73,7 @@ public class OnePassMeanAndStandardDeviationTest
       assertEquals(0.0, meanAndStandardDeviation.getAverage(), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = InsufficientMeasurementsException.class)
    public void testCalculateVarianceNoValue()
    {

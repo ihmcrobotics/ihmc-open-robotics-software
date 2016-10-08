@@ -53,7 +53,7 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
          valueDataCheckerParameters.setErrorThresholdOnDerivativeComparison(DEFAULT_VELOCITY_ERROR_THRESHOLD);
          
          
-         YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, joint.getQ(), robot.getYoTime(), valueDataCheckerParameters, joint.getQD());
+         YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, joint.getQYoVariable(), robot.getYoTime(), valueDataCheckerParameters, joint.getQDYoVariable());
          
          //PDN: Joints don't have acceleration limits. Not sure what to do
          //yoVariableValueDataChecker.setMaximumSecondDerivate((1.0 * TOLERACE_FACTOR)* joint.get());

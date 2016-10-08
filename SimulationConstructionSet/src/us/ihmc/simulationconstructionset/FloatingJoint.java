@@ -22,7 +22,7 @@ import us.ihmc.robotics.geometry.RotationTools;
  * @author Jerry Pratt
  * @version Beta 1.0
  */
-public class FloatingJoint extends Joint
+public class FloatingJoint extends Joint implements FloatingSCSJoint
 {
    private static final long serialVersionUID = 6863566500545068060L;
 

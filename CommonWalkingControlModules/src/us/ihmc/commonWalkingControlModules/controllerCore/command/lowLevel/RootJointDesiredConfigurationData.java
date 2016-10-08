@@ -9,6 +9,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class RootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataReadOnly
@@ -50,7 +51,7 @@ public class RootJointDesiredConfigurationData implements RootJointDesiredConfig
          desiredAcceleration.set(other.desiredAcceleration);
    }
 
-   public void setDesiredAccelerationFromJoint(SixDoFJoint sixDoFJoint)
+   public void setDesiredAccelerationFromJoint(FloatingInverseDynamicsJoint sixDoFJoint)
    {
       desiredAcceleration.reshape(6, 1);
       sixDoFJoint.getDesiredAccelerationMatrix(desiredAcceleration, 0);

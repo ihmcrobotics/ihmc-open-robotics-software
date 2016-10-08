@@ -34,17 +34,17 @@ import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
-@DeployableTestClass(targets = Fast)
+@ContinuousIntegrationPlan(targets = Fast)
 @VmOptions("-XX:-TieredCompilation")
 public class QuadrupedSupportPolygonTest
 {
    private static final ReferenceFrame WORLD = ReferenceFrame.getWorldFrame();
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructorsGettersAndSetters()
    {
@@ -96,7 +96,7 @@ public class QuadrupedSupportPolygonTest
       quadrupedSupportPolygon.changeFrame(ReferenceFrame.getWorldFrame());
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testVariousMethodsForCodeCoverage()
    {
@@ -143,7 +143,7 @@ public class QuadrupedSupportPolygonTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetLegPairs()
    {
@@ -180,7 +180,7 @@ public class QuadrupedSupportPolygonTest
       });
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceInside()
    {
@@ -208,7 +208,7 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not -1.0 inside", -1.0, simplePolygon.getDistanceInside2d(new FramePoint(WORLD, 0.0,  1.0, 0.0)), 1e-7);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetInCircleRadius()
    {
@@ -236,7 +236,7 @@ public class QuadrupedSupportPolygonTest
       });
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSizeMethods()
    {
@@ -268,7 +268,7 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not size 0", 0, variableSizedPolygon.size());
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPolygonOrdering()
    {
@@ -289,7 +289,7 @@ public class QuadrupedSupportPolygonTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCentroid()
    {
@@ -302,7 +302,7 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not equal expected " + expected + " actual " + centroid, expected.epsilonEquals(centroid, 1e-7));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInCircle()
    {
@@ -314,7 +314,7 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not correct radius", 0.5, radius, 1e-7);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMatchingFootsteps()
    {
@@ -344,7 +344,7 @@ public class QuadrupedSupportPolygonTest
       assertEquals("0 legs don't match", 3, match1.getNumberOfEqualFootsteps(match2));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetNextCounterClockwiseSupportingQuadrant()
    {
@@ -382,7 +382,7 @@ public class QuadrupedSupportPolygonTest
       });
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetOrCreateFootstep()
    {
@@ -393,7 +393,7 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not same ref", footstep1 == footstep2);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetWhichFootstepHasMoved()
    {
@@ -450,7 +450,7 @@ public class QuadrupedSupportPolygonTest
       });
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testContainsSameQuadrants()
    {
@@ -469,7 +469,7 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not same feet", poly1.containsSameQuadrants(poly2));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAndReplaceFootstep()
    {
@@ -480,7 +480,7 @@ public class QuadrupedSupportPolygonTest
       assertFalse("equal", footstep.epsilonEquals(replaceFootstep.getFootstep(RobotQuadrant.FRONT_LEFT), 0.1));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAndRemoveFootstep()
    {
@@ -491,7 +491,7 @@ public class QuadrupedSupportPolygonTest
       assertNull("not null", removeFootstep.getFootstep(RobotQuadrant.FRONT_LEFT));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetAndSwapSameSideFootsteps()
    {
@@ -504,7 +504,7 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not equal", footstepHL.epsilonEquals(pack.getFootstep(RobotQuadrant.FRONT_LEFT), 1e-7));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTranslatePolygon()
    {
@@ -518,7 +518,7 @@ public class QuadrupedSupportPolygonTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testYawAboutCentroid()
    {
@@ -561,7 +561,7 @@ public class QuadrupedSupportPolygonTest
       polygon.yawAboutCentroid(Math.PI / 4);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetLowestAndHighestFootstep()
    {
@@ -578,7 +578,7 @@ public class QuadrupedSupportPolygonTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetClosestFootstep()
    {
@@ -591,7 +591,7 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not closest", RobotQuadrant.FRONT_RIGHT, poly.getClosestFootstep(new FramePoint(ReferenceFrame.getWorldFrame(), 2.0, 2.0, 0.0)));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetCentroid()
    {
@@ -610,7 +610,7 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not centroid", centroid2dToPack2d.epsilonEquals(new Point2d(2.5, -1.5), 1e-7));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetShrunkenPolygon()
    {
@@ -672,7 +672,7 @@ public class QuadrupedSupportPolygonTest
       assertTrue("not shrunk correctly", poly3.getFootstep(RobotQuadrant.HIND_LEFT).epsilonEquals(new Vector3d(0.070710, 0.029289, 0.0), 1e-5));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetShrunkenCommonPolygon2d()
    {
@@ -791,7 +791,7 @@ public class QuadrupedSupportPolygonTest
       });
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDistanceFromP1ToTrotLine()
    {
@@ -805,7 +805,7 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not 0.25", 0.25, distance, 1e-7);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetBounds()
    {
@@ -828,7 +828,7 @@ public class QuadrupedSupportPolygonTest
       assertEquals("not correct", maxToPack.getY(), 1.0, 1e-7);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsInside()
    {
@@ -841,7 +841,7 @@ public class QuadrupedSupportPolygonTest
       assertFalse("not correct", poly.isInside(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.5, -0.5)));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetNominalYawPitchRoll()
    {
@@ -947,7 +947,7 @@ public class QuadrupedSupportPolygonTest
       });
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFootstepMidpoints()
    {
@@ -993,7 +993,7 @@ public class QuadrupedSupportPolygonTest
       });
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testStanceLength()
    {
@@ -1018,7 +1018,7 @@ public class QuadrupedSupportPolygonTest
       });
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testEpsilonEquals()
    {
@@ -1029,7 +1029,7 @@ public class QuadrupedSupportPolygonTest
       assertFalse("not correct", createSimplePolygon.epsilonEquals(null));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAreLegsCrossing()
    {
@@ -1047,7 +1047,7 @@ public class QuadrupedSupportPolygonTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testValidTrotPolygon()
    {
@@ -1084,7 +1084,7 @@ public class QuadrupedSupportPolygonTest
       assertFalse("trot", side.isValidTrotPolygon());
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetCenterOfCircleOfRadiusInCornerOfPolygon()
    {
@@ -1142,7 +1142,7 @@ public class QuadrupedSupportPolygonTest
 
    private Random random = new Random(9123090L);
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPackPointIntoMultipleStructuresAndCompare()
    {
@@ -1188,7 +1188,7 @@ public class QuadrupedSupportPolygonTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPackYoFrameConvexPolygon2d()
    {

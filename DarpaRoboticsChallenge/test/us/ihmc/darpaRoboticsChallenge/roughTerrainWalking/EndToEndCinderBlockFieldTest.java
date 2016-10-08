@@ -30,7 +30,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInterface
@@ -63,7 +63,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 167.7)
+   @ContinuousIntegrationTest(estimatedDuration = 167.7)
    @Test(timeout = 840000)
    public void testWalkingOverCinderBlockField() throws Exception
    {

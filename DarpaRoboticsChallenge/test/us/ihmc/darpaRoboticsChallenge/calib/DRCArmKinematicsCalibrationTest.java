@@ -11,13 +11,13 @@ import org.junit.Test;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.se.Se3_F64;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class DRCArmKinematicsCalibrationTest
 {
    // @jesper mailed Peter A about the failure, due to the new version of BoofCV  
-	@DeployableTestMethod(estimatedDuration = 0.7, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.7, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout = 30000)
    public void estimateCameraPose()
    {

@@ -10,7 +10,7 @@ import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 
 //TODO: update this test class to access poses via resource directory and undelete old pose files from svn
@@ -18,7 +18,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
 {
    private static final boolean SHOW_GUI = false;
 
-	@DeployableTestMethod(estimatedDuration = 4.0)
+	@ContinuousIntegrationTest(estimatedDuration = 4.0)
 	@Test(timeout = 30000)
    public void testMoveElbowExample()
    {
@@ -42,7 +42,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       });
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.2)
+	@ContinuousIntegrationTest(estimatedDuration = 1.2)
 	@Test(timeout = 30000)
    public void testRandomExample()
    {
@@ -82,7 +82,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
 //      playASequence(sdfRobot, sequence);
 //   }
 
-	@DeployableTestMethod(estimatedDuration = 3.8)
+	@ContinuousIntegrationTest(estimatedDuration = 3.8)
 	@Test(timeout = 30000)
    public void testLoadingAndPlayingASequence()
    {
@@ -103,7 +103,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       });
    }
 
-	@DeployableTestMethod(estimatedDuration = 4.6)
+	@ContinuousIntegrationTest(estimatedDuration = 4.6)
 	@Test(timeout = 30000)
    public void testLoadingAndPlayingAnotherSequence()
    {

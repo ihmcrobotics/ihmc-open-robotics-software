@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedPositionCrawlTurningTest implements QuadrupedMultiRobotTestInterface
 {
@@ -54,7 +54,7 @@ public abstract class QuadrupedPositionCrawlTurningTest implements QuadrupedMult
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 42.0)
+   @ContinuousIntegrationTest(estimatedDuration = 42.0)
    @Test(timeout = 800000)
    public void testYawingRightFastNinetyDegrees() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -69,7 +69,7 @@ public abstract class QuadrupedPositionCrawlTurningTest implements QuadrupedMult
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 42.0)
+   @ContinuousIntegrationTest(estimatedDuration = 42.0)
    @Test(timeout = 800000)
    public void testYawingLeftFastNinetyDegrees() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -84,7 +84,7 @@ public abstract class QuadrupedPositionCrawlTurningTest implements QuadrupedMult
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 80.0)
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 800000)
    public void testYawingRightSlowNinetyDegrees() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -99,7 +99,7 @@ public abstract class QuadrupedPositionCrawlTurningTest implements QuadrupedMult
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 80.0)
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 800000)
    public void testYawingLeftSlowNinetyDegrees() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

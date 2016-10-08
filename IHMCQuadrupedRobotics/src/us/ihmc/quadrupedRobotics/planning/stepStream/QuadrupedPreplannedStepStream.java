@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedTimedStepInputProvider;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -14,15 +14,15 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
 {
    private static int MAXIMUM_STEP_QUEUE_SIZE = 100;
 
-   private final QuadrupedTimedStepInputProvider timedStepInputProvider;
+   private final QuadrupedPreplannedStepInputProvider preplannedStepProvider;
    private final QuadrupedReferenceFrames referenceFrames;
    private final DoubleYoVariable timestamp;
    private final PreallocatedList<QuadrupedTimedStep> stepSequence;
    private final FrameOrientation bodyOrientation;
 
-   public QuadrupedPreplannedStepStream(QuadrupedTimedStepInputProvider timedStepInputProvider, QuadrupedReferenceFrames referenceFrames, DoubleYoVariable timestamp)
+   public QuadrupedPreplannedStepStream(QuadrupedPreplannedStepInputProvider preplannedStepProvider, QuadrupedReferenceFrames referenceFrames, DoubleYoVariable timestamp)
    {
-      this.timedStepInputProvider = timedStepInputProvider;
+      this.preplannedStepProvider = preplannedStepProvider;
       this.referenceFrames = referenceFrames;
       this.timestamp = timestamp;
       this.stepSequence = new PreallocatedList<>(QuadrupedTimedStep.class, MAXIMUM_STEP_QUEUE_SIZE);
@@ -33,7 +33,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    public void onEntry()
    {
       double currentTime = timestamp.getDoubleValue();
-      ArrayList<QuadrupedTimedStep> steps = timedStepInputProvider.get();
+      ArrayList<QuadrupedTimedStep> steps = preplannedStepProvider.getAndClearStepPlan();
       stepSequence.clear();
       for (int i = 0; i < steps.size(); i++)
       {
@@ -65,7 +65,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    @Override
    public void onExit()
    {
-
+      stepSequence.clear();
    }
 
    @Override

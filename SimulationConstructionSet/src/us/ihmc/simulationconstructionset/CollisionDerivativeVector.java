@@ -2,9 +2,6 @@ package us.ihmc.simulationconstructionset;
 
 class CollisionDerivativeException extends Exception implements java.io.Serializable
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = 2874294625173771625L;
 
    public CollisionDerivativeException()
@@ -15,14 +12,11 @@ class CollisionDerivativeException extends Exception implements java.io.Serializ
    {
       super(msg);
    }
-
 }
 
 
 public interface CollisionDerivativeVector extends java.io.Serializable
 {
-   public void derivs(double x, double[] y, double[] dydx) throws CollisionDerivativeException;
-
-   public boolean isStuck(double[] y);
-
+   public abstract void derivs(double x, double[] y, double[] dydx) throws CollisionDerivativeException;
+   public abstract boolean isStuck(double[] y);
 }

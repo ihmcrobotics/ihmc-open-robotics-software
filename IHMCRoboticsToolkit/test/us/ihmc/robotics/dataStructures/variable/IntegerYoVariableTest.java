@@ -9,7 +9,7 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableType;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -36,7 +36,7 @@ public class IntegerYoVariableTest
       integerYoVariable = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetAndGet()
    {
@@ -48,7 +48,7 @@ public class IntegerYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIncrementDecrementAddSubtract()
    {
@@ -68,7 +68,7 @@ public class IntegerYoVariableTest
       assertEquals(value, integerYoVariable.getIntegerValue());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testLargeValue()
    {
@@ -77,7 +77,7 @@ public class IntegerYoVariableTest
       assertEquals(value, integerYoVariable.getIntegerValue());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testValueEquals()
    {
@@ -85,7 +85,7 @@ public class IntegerYoVariableTest
       assertTrue(result);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetFinal()
    {
@@ -98,7 +98,7 @@ public class IntegerYoVariableTest
       assertEquals(value, integerYoVariable.getIntegerValue());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetValueFromDouble()
    {
@@ -109,7 +109,7 @@ public class IntegerYoVariableTest
       assertEquals(intValue, integerYoVariable.getIntegerValue());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValueAsDouble()
    {
@@ -120,14 +120,14 @@ public class IntegerYoVariableTest
       assertEquals(15.0, result, EPSILON);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 public void testToString()
 {
    assertEquals(integerYoVariable.getName() + ": " + integerYoVariable.getIntegerValue(), integerYoVariable.toString());
 }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 public void testGetValueString()
 {
@@ -139,7 +139,7 @@ public void testGetValueString()
    assertEquals("" + value, stringBuffer.toString());
 }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 public void testGetValueStringFromDouble()
 {
@@ -152,14 +152,14 @@ public void testGetValueStringFromDouble()
    assertEquals("" + value, stringBuffer.toString()); 
 }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 public void testGetYoVariableType()
 {
    assertEquals(YoVariableType.INTEGER, integerYoVariable.getYoVariableType());
 }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 public void testGetAndSetValueAsLongBits()
 {
@@ -174,7 +174,7 @@ public void testGetAndSetValueAsLongBits()
    assertEquals(longValue, integerYoVariable.getValueAsLongBits());
 }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 public void testDuplicate()
 {
@@ -187,7 +187,7 @@ public void testDuplicate()
    assertEquals(integerYoVariable2.getManualScalingMax(), duplicate.getManualScalingMax(), EPSILON);
 }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 public void testSetValue()
 {

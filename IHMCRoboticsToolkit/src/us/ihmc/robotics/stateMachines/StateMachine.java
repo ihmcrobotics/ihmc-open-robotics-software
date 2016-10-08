@@ -11,6 +11,7 @@ public class StateMachine<E extends Enum<E>> extends GenericStateMachine<E, Stat
       super(name, switchTimeName, enumType, timeVariable, registry);
    }
 
+
    public StateMachine(String name, String switchTimeName, Class<E> enumType, DoubleProvider timeProvider, YoVariableRegistry registry)
    {
       super(name, switchTimeName, enumType, timeProvider, registry);

@@ -9,13 +9,6 @@ public class GoHomeTask extends BehaviorTask
    private final GoHomeMessage goHomeMessage;
    private final GoHomeBehavior goHomeBehavior;
 
-   public GoHomeTask(GoHomeMessage goHomeMessage, GoHomeBehavior goHomeBehavior, DoubleYoVariable yoTime, double sleepTime)
-   {
-      super(goHomeBehavior, yoTime, sleepTime);
-      this.goHomeBehavior = goHomeBehavior;
-      this.goHomeMessage = goHomeMessage;
-   }
-
    public GoHomeTask(GoHomeMessage goHomeMessage, GoHomeBehavior goHomeBehavior, DoubleYoVariable yoTime)
    {
       super(goHomeBehavior, yoTime);

@@ -19,7 +19,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class DataBufferTest
 {
@@ -70,7 +70,7 @@ public class DataBufferTest
       registry = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetBufferSize()
    {
@@ -79,7 +79,7 @@ public class DataBufferTest
       assertTrue(expectedBufferSize == testBufferSize);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetMaxBufferSize()
    {
@@ -88,7 +88,7 @@ public class DataBufferTest
       assertTrue(expectedMaxBufferSize == testMaxBufferSize);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetAndSetWrapBuffer()
    {
@@ -100,7 +100,7 @@ public class DataBufferTest
       assertTrue(testBoolean); 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAddAndGetEntry()
    {
@@ -135,7 +135,7 @@ public class DataBufferTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAddNewEntry() throws RepeatDataBufferEntryException
    {
@@ -155,7 +155,7 @@ public class DataBufferTest
       assertTrue(enumDataBufferEntryTest.getVariable() == dataBuffer.getEntry(enumYoVariable).getVariable());    
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAddVariable() throws RepeatDataBufferEntryException
    {
@@ -171,7 +171,7 @@ public class DataBufferTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAddVariableWithArrayList() throws RepeatDataBufferEntryException
    {
@@ -192,7 +192,7 @@ public class DataBufferTest
    
    //add dataBuffer listener?
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariablesThatContain() throws RepeatDataBufferEntryException
    {
@@ -233,7 +233,7 @@ public class DataBufferTest
       
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariablesThatStartWith() throws RepeatDataBufferEntryException
    {
@@ -257,7 +257,7 @@ public class DataBufferTest
       
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetEntries() throws RepeatDataBufferEntryException
    {
@@ -280,7 +280,7 @@ public class DataBufferTest
       assertEquals(expectedDataEntries, dataBuffer.getEntries());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariables() throws RepeatDataBufferEntryException
    {
@@ -347,7 +347,7 @@ public class DataBufferTest
 //   }
   */   
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testEmptyBufferIncreaseBufferSize()
    {
@@ -359,7 +359,7 @@ public class DataBufferTest
       assertEquals(newBufferSize, dataBuffer.getBufferSize());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testEmptyBufferDecreaseBufferSize()
    {
@@ -371,7 +371,7 @@ public class DataBufferTest
       assertEquals(newBufferSize, dataBuffer.getBufferSize());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testEnlargeBufferSize()
    {
@@ -386,7 +386,7 @@ public class DataBufferTest
       assertEquals(newBufferSize, dataBuffer.getBufferSize());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDecreaseBufferSize()
    {
@@ -401,7 +401,7 @@ public class DataBufferTest
       assertEquals(newBufferSize, dataBuffer.getBufferSize());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testTick()
    {
@@ -434,7 +434,7 @@ public class DataBufferTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsIndexBetweenInAndOutPoint()
    {
@@ -514,7 +514,7 @@ public class DataBufferTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetSafeToChangeIndex() //Luke Morris
    {
@@ -528,7 +528,7 @@ public class DataBufferTest
       assertTrue(isFinallySafe);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVariablesTwo() //Luke Morris
    {
@@ -537,7 +537,7 @@ public class DataBufferTest
       //    return variables.toString();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVars() //Luke Morris
 
@@ -594,7 +594,7 @@ public class DataBufferTest
       assertFalse(neither.contains(c));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetVarsFromGroup()
    {
@@ -645,7 +645,7 @@ public class DataBufferTest
       assertTrue(cRegExpVarsFromGroup.contains(c));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetMaxBufferSize()
 
@@ -669,14 +669,14 @@ public class DataBufferTest
       
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testClearAll()
    {
       
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
     public void testResetDataBuffer()
     {       

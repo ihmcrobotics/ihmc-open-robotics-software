@@ -31,7 +31,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInterface
@@ -49,13 +49,13 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
 
    private DoubleYoVariable swingTime;
 
-   private static final double doubleSupportPushMagnitude = 1100.0;
+   private static final double doubleSupportPushMagnitude = 1000.0;
    private static final double doubleSupportPushDuration = 0.05;
 
    private static final double singleSupportPushMagnitude = 600.0;
    private static final double singleSupportPushDuration = 0.05;
 
-   @DeployableTestMethod(estimatedDuration = 30.6)
+   @ContinuousIntegrationTest(estimatedDuration = 30.6)
    @Test(timeout = 150000)
    /**
     * End to end test that makes sure the robot can recover from a push using upper body momentum
@@ -71,7 +71,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertTrue(standAndPush());
    }
 
-   @DeployableTestMethod(estimatedDuration = 21.5)
+   @ContinuousIntegrationTest(estimatedDuration = 21.5)
    @Test(timeout = 110000)
    /**
     * End to end test that makes sure the robot falls during test if momentum is disabled
@@ -87,7 +87,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertFalse(standAndPush());
    }
 
-   @DeployableTestMethod(estimatedDuration = 34.3)
+   @ContinuousIntegrationTest(estimatedDuration = 34.3)
    @Test(timeout = 170000)
    /**
     * End to end test that makes sure the robot can recover from a push using upper body momentum
@@ -103,7 +103,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertTrue(stepAndPush());
    }
 
-   @DeployableTestMethod(estimatedDuration = 23.2)
+   @ContinuousIntegrationTest(estimatedDuration = 23.2)
    @Test(timeout = 120000)
    /**
     * End to end test that makes sure the robot falls during test if momentum is disabled
@@ -119,7 +119,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertFalse(stepAndPush());
    }
 
-   @DeployableTestMethod(estimatedDuration = 37.9)
+   @ContinuousIntegrationTest(estimatedDuration = 37.9)
    @Test(timeout = 190000)
    /**
     * End to end test that makes sure the momentum recovery does not get triggered during
@@ -224,7 +224,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       };
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, className, startingLocation, simulationTestingParameters, robotModel);
-      pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), drcSimulationTestHelper.getRobot().getRootJoint().getName(), new Vector3d(0.0, 0.0, 0.15));
+      Vector3d forcePointOffset = new Vector3d(0.0, 0.0, 0.1);
+      pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), drcSimulationTestHelper.getRobot().getRootJoint().getName(), forcePointOffset);
 
       allowUpperBodyMomentumInSingleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInSingleSupport");
       allowUpperBodyMomentumInDoubleSupport = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("allowUpperBodyMomentumInDoubleSupport");

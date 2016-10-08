@@ -21,7 +21,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.geometry.InsufficientDataException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class DoubleHashHeightMapTest extends AbstractHeightMapTest
 {
@@ -33,7 +33,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
    private static final double eps = 1e-7;
    private static final double NaN = Double.NaN;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSinglePointOld()
    {
@@ -64,7 +64,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       assertSinglePointGridHandlesPoint(x, y, xIndex, yIndex, z);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGettingAreasOld()
    {
@@ -116,7 +116,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUnhandledPointsOld()
    {
@@ -150,7 +150,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGrabCellsOld()
    {
@@ -184,7 +184,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       assertEquals(z, simpleMap.getHeightAtPoint(xIndex * RESOLUTION, yIndex * RESOLUTION), eps);
    }
 
-	@DeployableTestMethod(estimatedDuration = 2.0)
+	@ContinuousIntegrationTest(estimatedDuration = 2.0)
 	@Test(timeout = 30000)
    public void rowModificationSynchronizationTestOld()
    {
@@ -212,7 +212,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUnhandledPoints()
    {
@@ -289,7 +289,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testKernelMaskingOld() throws InsufficientDataException
    {

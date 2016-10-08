@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -14,15 +15,13 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
-import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class SimpleCollisionDetectorTest
 {
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSphereToSphereCollisions()
    {
@@ -32,8 +31,8 @@ public class SimpleCollisionDetectorTest
       CollisionShapeFactory shapeFactory = detector.getShapeFactory();
 
       double radiusOne = 0.5;
-      CollisionShapeDescription sphereOne = shapeFactory.createSphere(radiusOne);
-      CollisionShapeDescription sphereTwo = shapeFactory.createSphere(radiusOne);
+      CollisionShapeDescription<?> sphereOne = shapeFactory.createSphere(radiusOne);
+      CollisionShapeDescription<?> sphereTwo = shapeFactory.createSphere(radiusOne);
 
       CollisionShape collideableObjectOne = shapeFactory.addShape(sphereOne);
       CollisionShape collideableObjectTwo = shapeFactory.addShape(sphereTwo);
@@ -146,23 +145,25 @@ public class SimpleCollisionDetectorTest
       assertEquals(-0.013845853834199007, distance, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.InDevelopment)
+   //TODO: Get this one to work. ExpandingPolytopeAlgorithm when simplex is not a Quadrahedron to start...
+   @Ignore
+   @ContinuousIntegrationTest(estimatedDuration = 0.0) 
    @Test(timeout = 30000)
    public void testBoxToBoxCollisions()
    {
-//      SimpleCollisionDetector detector = new SimpleCollisionDetector();
-      GdxCollisionDetector detector = new GdxCollisionDetector(10.0);
+      SimpleCollisionDetector detector = new SimpleCollisionDetector();
+//      GdxCollisionDetector detector = new GdxCollisionDetector(10.0);
 
       CollisionShapeFactory shapeFactory = detector.getShapeFactory();
 
       double halfLengthX = 0.5;
       double halfWidthY = 0.6;
       double halfHeightZ = 0.7;
-      CollisionShapeDescription sphereOne = shapeFactory.createBox(halfLengthX, halfWidthY, halfHeightZ);
-      CollisionShapeDescription sphereTwo = shapeFactory.createBox(halfLengthX, halfWidthY, halfHeightZ);
+      CollisionShapeDescription<?> boxOne = shapeFactory.createBox(halfLengthX, halfWidthY, halfHeightZ);
+      CollisionShapeDescription<?> boxTwo = shapeFactory.createBox(halfLengthX, halfWidthY, halfHeightZ);
 
-      CollisionShape collideableObjectOne = shapeFactory.addShape(sphereOne);
-      CollisionShape collideableObjectTwo = shapeFactory.addShape(sphereTwo);
+      CollisionShape collideableObjectOne = shapeFactory.addShape(boxOne);
+      CollisionShape collideableObjectTwo = shapeFactory.addShape(boxTwo);
 
       RigidBodyTransform transformOne = new RigidBodyTransform();
       RigidBodyTransform transformTwo = new RigidBodyTransform();
@@ -170,7 +171,7 @@ public class SimpleCollisionDetectorTest
       double delta = 0.01;
 
       transformOne.setTranslation(0.0, 0.0, 0.0);
-      transformOne.setTranslation(1.0 + delta, 0.0, 0.0);
+      transformTwo.setTranslation(1.0 + delta, 0.0, 0.0);
 
       collideableObjectOne.setTransformToWorld(transformOne);
       collideableObjectTwo.setTransformToWorld(transformTwo);
@@ -181,7 +182,7 @@ public class SimpleCollisionDetectorTest
       assertEquals(0, result.getNumberOfCollisions());
 
       transformOne.setTranslation(0.0, 0.0, 0.0);
-      transformOne.setTranslation(1.0 - delta, 0.0, 0.0);
+      transformTwo.setTranslation(1.0 - delta, 0.0, 0.0);
 
       collideableObjectOne.setTransformToWorld(transformOne);
       collideableObjectTwo.setTransformToWorld(transformTwo);

@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -54,7 +54,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       generator = new ConstantPoseTrajectoryGenerator(positionYoFramePoint, orientationQuaternion);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructors()
    {
@@ -119,7 +119,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //TODO: Find a way to test this.
    public void testRegisterNewTrajectoryFrame()
@@ -130,7 +130,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       //      System.out.println(generator2);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //TODO: Find a way to test this.
    public void testChangeFrame()
@@ -138,7 +138,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //TODO: Find a way to test this.
    public void testSwitchTrajectoryFrame()
@@ -146,7 +146,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //TODO: Find a way to test this.
    public void testRegisterAndSwitchFrame()
@@ -154,7 +154,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    //TODO: Find a way to test this.
    public void testSetConstantPose()
@@ -162,7 +162,7 @@ public class ConstantPoseTrajectoryGeneratorTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsDone()
    {
@@ -170,7 +170,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertTrue(generator1.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGet()
    {
@@ -183,7 +183,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackVelocity()
    {
@@ -199,7 +199,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertSame(referenceFrame, velocityToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackAcceleration()
    {
@@ -215,7 +215,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertSame(referenceFrame, accelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackAngularVelocity()
    {
@@ -231,7 +231,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertSame(referenceFrame, angularVelocityToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackAngularAcceleration()
    {
@@ -247,7 +247,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertSame(referenceFrame, angularAccelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackLinearData()
    {
@@ -289,7 +289,7 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertSame(referenceFrame, accelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackAngularData()
    {
@@ -331,21 +331,21 @@ public class ConstantPoseTrajectoryGeneratorTest
       assertSame(referenceFrame, angularAccelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testInitialize()
    {
       generator.initialize();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCompute()
    {
       generator.compute(0.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testToString()
    {

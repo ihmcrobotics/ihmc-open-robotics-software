@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2016-Oct-02 18:15" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20151019-2113">
+        <filterScript>
+
+// no filter script yet defined for this class diagram
+// use CTRL+SPACE for completion suggestions
+hide all fields
+hide all methods
+
+</filterScript>
+        <class className="us.ihmc.simulationconstructionset.CollisionIntegrator" project="SimulationConstructionSet" xLocation="3" yLocation="33"/>
+        <class className="us.ihmc.simulationconstructionset.physics.engine.jerry.JointPhysics" project="SimulationConstructionSet" xLocation="620" yLocation="31"/>
+        <class className="us.ihmc.simulationconstructionset.CollisionDerivativeException" project="SimulationConstructionSet" xLocation="638" yLocation="441"/>
+        <class className="us.ihmc.simulationconstructionset.CollisionDerivativeVector" project="SimulationConstructionSet" xLocation="1100" yLocation="473"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler" project="SimulationConstructionSet" xLocation="1096" yLocation="-26"/>
+        <class className="us.ihmc.simulationconstructionset.CollisionRungeKutta" project="SimulationConstructionSet" xLocation="295" yLocation="564"/>
+        <class className="us.ihmc.simulationconstructionset.ExternalForcePoint" project="SimulationConstructionSet" xLocation="682" yLocation="171"/>
+    </diagram>
+</ajsv>

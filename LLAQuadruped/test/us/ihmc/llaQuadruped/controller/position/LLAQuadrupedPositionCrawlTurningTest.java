@@ -9,11 +9,11 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionCrawlTurningTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
 public class LLAQuadrupedPositionCrawlTurningTest extends QuadrupedPositionCrawlTurningTest
 {
    @Override
@@ -23,7 +23,7 @@ public class LLAQuadrupedPositionCrawlTurningTest extends QuadrupedPositionCrawl
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 42.0)
+   @ContinuousIntegrationTest(estimatedDuration = 42.0)
    @Test(timeout = 800000)
    public void testYawingRightFastNinetyDegrees() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -31,7 +31,7 @@ public class LLAQuadrupedPositionCrawlTurningTest extends QuadrupedPositionCrawl
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 42.0)
+   @ContinuousIntegrationTest(estimatedDuration = 42.0)
    @Test(timeout = 800000)
    public void testYawingLeftFastNinetyDegrees() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -39,7 +39,7 @@ public class LLAQuadrupedPositionCrawlTurningTest extends QuadrupedPositionCrawl
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 80.0)
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 800000)
    public void testYawingRightSlowNinetyDegrees() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -47,7 +47,7 @@ public class LLAQuadrupedPositionCrawlTurningTest extends QuadrupedPositionCrawl
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 80.0)
+   @ContinuousIntegrationTest(estimatedDuration = 80.0)
    @Test(timeout = 800000)
    public void testYawingLeftSlowNinetyDegrees() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

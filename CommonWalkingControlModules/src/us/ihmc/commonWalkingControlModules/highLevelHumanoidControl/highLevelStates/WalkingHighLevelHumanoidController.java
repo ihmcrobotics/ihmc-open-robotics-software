@@ -58,7 +58,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.stateMachines.DoneWithFinishableStateTransitionCondition;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateChangedListener;
@@ -432,7 +431,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       {
          manipulationControlModule.holdCurrentArmConfiguration();
       }
-      chestOrientationManager.holdCurrentOrientation();
+
+      chestOrientationManager.goToHomeFromCurrent(1.0);
 
       balanceManager.initialize();
       feetManager.initialize();

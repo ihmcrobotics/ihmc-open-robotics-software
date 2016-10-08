@@ -17,7 +17,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class RotatableConvexPolygonTerrainObjectTest
 {
@@ -50,7 +50,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       inclinedTopFaceOctagon3dSecond = new RotatableConvexPolygonTerrainObject(normalYZVector, convexPolygon, 3.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAt()
    {
@@ -66,7 +66,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       assertEquals(0.0, flatTopFaceOctagon3d.heightAt(5.0, 5.0, 5.0), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsClose()
    {
@@ -80,7 +80,7 @@ public class RotatableConvexPolygonTerrainObjectTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testClosestIntersectionTo()
    {
@@ -157,7 +157,7 @@ public class RotatableConvexPolygonTerrainObjectTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsInsideTheFace()
    {
@@ -181,7 +181,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       assertFalse(flatTopFaceOctagon3d.isInsideTheFace(facePlane, faceVertices3d, pointToCheck));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSurfaceNormalAt()
    {
@@ -200,7 +200,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       JUnitTools.assertTuple3dEquals(expected, normalToPack, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testClosestIntersectionAndNormalAt()
    {
@@ -326,28 +326,28 @@ public class RotatableConvexPolygonTerrainObjectTest
       JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetXMin()
    {
       assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getXMin(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetXMax()
    {
       assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getXMax(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetYMin()
    {
       assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getYMin(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetYMax()
    {

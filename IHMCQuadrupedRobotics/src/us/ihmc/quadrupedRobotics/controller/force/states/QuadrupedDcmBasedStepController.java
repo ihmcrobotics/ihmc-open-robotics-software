@@ -105,9 +105,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
    private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
    private final FramePoint dcmPositionWaypoint;
-   private final YoFrameVector stepAdjustmentForControl;
-   private final YoFrameVector stepAdjustmentForPlanning;
-   private final YoFrameVector accumulatedStepAdjustmentForPlanning;
+   private final YoFrameVector instantaneousStepAdjustmentForOngoingSteps;
+   private final YoFrameVector instantaneousStepAdjustmentForPlannedSteps;
+   private final YoFrameVector accumulatedStepAdjustment;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final PreallocatedList<QuadrupedTimedStep> stepPlan;
    private final FrameOrientation bodyOrientationReference;
@@ -167,9 +167,9 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(timedStepController.getStepSequenceCapacity(), gravity, postureProvider.getComPositionInput().getZ());
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
       dcmPositionWaypoint = new FramePoint();
-      stepAdjustmentForControl = new YoFrameVector("stepAdjustmentForControl", worldFrame, registry);
-      stepAdjustmentForPlanning = new YoFrameVector("stepAdjustmentForPlanning", worldFrame, registry);
-      accumulatedStepAdjustmentForPlanning = new YoFrameVector("accumulatedStepAdjustmentForPlanning", worldFrame, registry);
+      instantaneousStepAdjustmentForOngoingSteps = new YoFrameVector("instantaneousStepAdjustmentForOngoingSteps", worldFrame, registry);
+      instantaneousStepAdjustmentForPlannedSteps = new YoFrameVector("instantaneousStepAdjustmentForPlannedSteps", worldFrame, registry);
+      accumulatedStepAdjustment = new YoFrameVector("accumulatedStepAdjustment", worldFrame, registry);
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
       stepPlan = new PreallocatedList<>(QuadrupedTimedStep.class, MAXIMUM_STEP_QUEUE_SIZE);
@@ -251,11 +251,11 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
 
-      // update absolute step adjustment
-      computeAbsoluteStepAdjustment();
+      // update step plan
+      computeStepPlan();
 
-      // update relative step adjustment
-      computeRelativeStepAdjustment();
+      // update step adjustment
+      computeInstantaneousStepAdjustment();
 
       // update dcm trajectory
       computeDcmTrajectory();
@@ -268,8 +268,8 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       if (onTouchDownTriggered.getBooleanValue())
       {
          onTouchDownTriggered.set(false);
-         accumulatedStepAdjustmentForPlanning.add(stepAdjustmentForPlanning.getFrameTuple().getVector());
-         accumulatedStepAdjustmentForPlanning.setZ(0);
+         accumulatedStepAdjustment.add(instantaneousStepAdjustmentForPlannedSteps.getFrameTuple().getVector());
+         accumulatedStepAdjustment.setZ(0);
       }
    }
 
@@ -309,7 +309,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       }
    }
 
-   private void computeAbsoluteStepAdjustment()
+   private void computeStepPlan()
    {
       // update step plan
       stepPlan.clear();
@@ -319,30 +319,31 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
          {
             stepPlan.add();
             stepPlan.get(stepPlan.size() - 1).set(stepStream.getSteps().get(i));
-            stepPlan.get(stepPlan.size() - 1).getGoalPosition().add(accumulatedStepAdjustmentForPlanning.getFrameTuple().getVector());
+            stepPlan.get(stepPlan.size() - 1).getGoalPosition().add(accumulatedStepAdjustment.getFrameTuple().getVector());
          }
       }
    }
 
 
-   private void computeRelativeStepAdjustment()
+   private void computeInstantaneousStepAdjustment()
    {
       if (robotTimestamp.getDoubleValue() > dcmTransitionTrajectory.getEndTime())
       {
          // compute step adjustment for ongoing steps (proportional to dcm tracking error)
          FramePoint dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
-         dcmPositionSetpoint.changeFrame(stepAdjustmentForControl.getReferenceFrame());
-         dcmPositionEstimate.changeFrame(stepAdjustmentForControl.getReferenceFrame());
-         stepAdjustmentForControl.set(dcmPositionEstimate);
-         stepAdjustmentForControl.sub(dcmPositionSetpoint);
-         stepAdjustmentForControl.scale(dcmPositionStepAdjustmentGainParameter.get());
-         stepAdjustmentForControl.setZ(0);
+         dcmPositionSetpoint.changeFrame(instantaneousStepAdjustmentForOngoingSteps.getReferenceFrame());
+         dcmPositionEstimate.changeFrame(instantaneousStepAdjustmentForOngoingSteps.getReferenceFrame());
+         instantaneousStepAdjustmentForOngoingSteps.set(dcmPositionEstimate);
+         instantaneousStepAdjustmentForOngoingSteps.sub(dcmPositionSetpoint);
+         instantaneousStepAdjustmentForOngoingSteps.scale(dcmPositionStepAdjustmentGainParameter.get());
+         instantaneousStepAdjustmentForOngoingSteps.setZ(0);
 
          // compute step adjustment for upcoming steps (apply horizontal deadband to reduce drift)
          for (Direction direction : Direction.values2D())
          {
             double deadband = dcmPositionStepAdjustmentDeadbandParameter.get();
-            stepAdjustmentForPlanning.set(direction, MathTools.applyDeadband(stepAdjustmentForControl.get(direction), deadband));
+            instantaneousStepAdjustmentForPlannedSteps
+                  .set(direction, MathTools.applyDeadband(instantaneousStepAdjustmentForOngoingSteps.get(direction), deadband));
          }
 
          // adjust nominal step goal positions and update step controller queue
@@ -359,7 +360,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
                if (adjustedStep != null)
                {
                   adjustedStep.getGoalPosition().set(stepPlan.get(i).getGoalPosition());
-                  adjustedStep.getGoalPosition().add(stepAdjustmentForControl.getFrameTuple().getVector());
+                  adjustedStep.getGoalPosition().add(instantaneousStepAdjustmentForOngoingSteps.getFrameTuple().getVector());
                   crossoverProjection.project(adjustedStep, taskSpaceEstimates.getSolePosition());
                   groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
                }
@@ -367,7 +368,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
             else if (timedStepController.addStep(stepPlan.get(i)))
             {
                QuadrupedTimedStep adjustedStep = timedStepController.getStepSequence().get(timedStepController.getStepSequenceSize() - 1);
-               adjustedStep.getGoalPosition().add(stepAdjustmentForPlanning.getFrameTuple().getVector());
+               adjustedStep.getGoalPosition().add(instantaneousStepAdjustmentForPlannedSteps.getFrameTuple().getVector());
                groundPlaneEstimator.projectZ(adjustedStep.getGoalPosition());
             }
          }
@@ -401,7 +402,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       haltFlag.set(false);
       onLiftOffTriggered.set(false);
       onTouchDownTriggered.set(false);
-      accumulatedStepAdjustmentForPlanning.setToZero();
+      accumulatedStepAdjustment.setToZero();
 
       // initialize estimates
       lipModel.setComHeight(postureProvider.getComPositionInput().getZ());
@@ -437,11 +438,11 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       // initialize timed contact sequence
       timedContactSequence.initialize();
 
-      // compute absolute step adjustment
-      computeAbsoluteStepAdjustment();
+      // compute step plan
+      computeStepPlan();
 
-      // compute relative step adjustment
-      computeRelativeStepAdjustment();
+      // compute step adjustment
+      computeInstantaneousStepAdjustment();
 
       if (timedStepController.getStepSequenceSize() > 0)
       {

@@ -7,12 +7,12 @@ import java.awt.event.KeyEvent;
 import org.junit.Test;
 
 import us.ihmc.tools.inputDevices.ghostMouse.GhostMouseStringToChar;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class GhostMouseStringToCharTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConvertStringToKeycode()
    {
@@ -28,7 +28,7 @@ public class GhostMouseStringToCharTest
       assertEquals(KeyEvent.VK_9, GhostMouseStringToChar.convertStringToKeycode("9"));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConvertKeycodeToString()
    {

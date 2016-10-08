@@ -44,7 +44,7 @@ public class LogVisualizerListenerDemo implements YoVariableLogPlaybackListener
       System.out.println("pos: " + position.getX() + " " + position.getY() + " " + position.getZ() + " - {");
       for(OneDegreeOfFreedomJoint joint : joints)
       {
-         System.out.print(joint.getQ().getDoubleValue() + ",");
+         System.out.print(joint.getQYoVariable().getDoubleValue() + ",");
       }
       System.out.println("}. height: " + desiredCoMHeight.getDoubleValue());
 

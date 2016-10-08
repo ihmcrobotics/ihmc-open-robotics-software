@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestInterface
@@ -84,7 +84,7 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
-	@DeployableTestMethod(estimatedDuration = 32.5)
+	@ContinuousIntegrationTest(estimatedDuration = 32.5)
    @Test(timeout = 160000)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {

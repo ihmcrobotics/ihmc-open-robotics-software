@@ -42,7 +42,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTestInterface
@@ -53,7 +53,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 21.2)
+   @ContinuousIntegrationTest(estimatedDuration = 21.2)
    @Test(timeout = 110000)
    public void testSingleTrajectoryPoint() throws Exception
    {
@@ -106,7 +106,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 24.7)
+   @ContinuousIntegrationTest(estimatedDuration = 24.7)
    @Test(timeout = 120000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
@@ -188,7 +188,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 33.7)
+   @ContinuousIntegrationTest(estimatedDuration = 33.7)
    @Test(timeout = 170000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
@@ -320,7 +320,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 52.0)
+   @ContinuousIntegrationTest(estimatedDuration = 52.0)
    @Test(timeout = 260000)
    public void testQueuedMessages() throws Exception
    {
@@ -451,7 +451,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 10.7)
+   @ContinuousIntegrationTest(estimatedDuration = 10.7)
    @Test(timeout = 53000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
@@ -564,7 +564,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 13.3)
+   @ContinuousIntegrationTest(estimatedDuration = 13.3)
    @Test(timeout = 66000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
@@ -695,7 +695,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 22.8)
+   @ContinuousIntegrationTest(estimatedDuration = 22.8)
    @Test(timeout = 110000)
    public void testStopAllTrajectory() throws Exception
    {

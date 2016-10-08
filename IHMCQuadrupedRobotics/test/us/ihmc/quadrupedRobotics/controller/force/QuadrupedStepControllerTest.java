@@ -20,7 +20,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobotTestInterface
 {
@@ -56,7 +56,7 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 10.0)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 200000)
    public void testTakingAStep()
    {

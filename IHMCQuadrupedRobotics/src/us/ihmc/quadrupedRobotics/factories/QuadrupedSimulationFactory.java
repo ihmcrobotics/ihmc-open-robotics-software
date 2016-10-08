@@ -25,6 +25,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
 import us.ihmc.quadrupedRobotics.controller.forceDevelopment.QuadrupedForceDevelopmentControllerManager;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerManager;
+import us.ihmc.quadrupedRobotics.controller.position.SpringJointOutputWriter;
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.controller.positionDevelopment.QuadrupedPositionDevelopmentControllerManager;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -42,7 +43,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParamet
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -55,6 +56,7 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.sensorProcessing.stateEstimation.SimulatedElasticityParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -103,6 +105,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
    private final RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
 
+   private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
@@ -155,7 +158,7 @@ public class QuadrupedSimulationFactory
    {
       if (useStateEstimator.get())
       {
-         SixDoFJoint rootInverseDynamicsJoint = fullRobotModel.get().getRootJoint();
+         FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.get().getRootJoint();
          IMUDefinition[] imuDefinitions = fullRobotModel.get().getIMUDefinitions();
          ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.get().getForceSensorDefinitions();
          ContactSensorHolder contactSensorHolder = null;
@@ -422,6 +425,7 @@ public class QuadrupedSimulationFactory
       createGroundContactModel();
       createSimulationController();
       setupSDFRobot();
+      setupJointElasticity();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot.get(), scsParameters.get());
       if (groundContactModelType.hasBeenSet() && groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE)
@@ -448,6 +452,16 @@ public class QuadrupedSimulationFactory
    }
 
    // OPTIONS
+
+   private void setupJointElasticity()
+   {
+      if(simulatedElasticityParameters.hasBeenSet())
+      {
+         FloatingRootJointRobot floatingRootJointRobot = sdfRobot.get();
+         SpringJointOutputWriter springJointOutputWriter = new SpringJointOutputWriter(floatingRootJointRobot, simulatedElasticityParameters.get(), simulationDT.get());
+         floatingRootJointRobot.setController(springJointOutputWriter, 1);
+      }
+   }
 
    public void setSimulationDT(double simulationDT)
    {
@@ -492,6 +506,11 @@ public class QuadrupedSimulationFactory
    public void setGroundContactModelType(QuadrupedGroundContactModelType groundContactModelType)
    {
       this.groundContactModelType.set(groundContactModelType);
+   }
+   
+   public void setSimulatedElasticityParameters(SimulatedElasticityParameters simulatedElasticityParameters)
+   {
+      this.simulatedElasticityParameters.set(simulatedElasticityParameters);
    }
 
    public void setGroundContactParameters(GroundContactParameters groundContactParameters)

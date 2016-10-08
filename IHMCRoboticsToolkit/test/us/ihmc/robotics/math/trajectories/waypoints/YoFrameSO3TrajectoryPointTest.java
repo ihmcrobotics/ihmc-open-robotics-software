@@ -26,12 +26,12 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPoin
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class YoFrameSO3TrajectoryPointTest
 {
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCommonUsageExample()
    {
@@ -81,7 +81,7 @@ public class YoFrameSO3TrajectoryPointTest
       assertTrue(expectedYoFrameSO3TrajectoryPoint.epsilonEquals(yoFrameSO3TrajectoryPoint, 1e-10));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor()
    {
@@ -102,7 +102,7 @@ public class YoFrameSO3TrajectoryPointTest
             testedYoFrameSO3TrajectoryPoint, epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetters()
    {
@@ -158,7 +158,7 @@ public class YoFrameSO3TrajectoryPointTest
             testedYoFrameSO3TrajectoryPoint.getAngularVelocity().getFrameVectorCopy(), testedYoFrameSO3TrajectoryPoint, epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testChangeFrame() throws Exception
    {
@@ -197,7 +197,7 @@ public class YoFrameSO3TrajectoryPointTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToZero() throws Exception
    {
@@ -242,7 +242,7 @@ public class YoFrameSO3TrajectoryPointTest
             testedYoFrameSO3TrajectoryPoint, epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaN() throws Exception
    {
@@ -328,7 +328,7 @@ public class YoFrameSO3TrajectoryPointTest
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeSetsAngGets()
    {
@@ -424,7 +424,7 @@ public class YoFrameSO3TrajectoryPointTest
       assertEquals(expectedString, string);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeMoreSettersAndGetters()
    {

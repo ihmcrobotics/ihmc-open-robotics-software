@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -61,6 +62,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       minimizeAngularMomentumRateZDuringSwing.set(walkingControllerParameters.minimizeAngularMomentumRateZDuringSwing());
    }
 
+
    @Override
    public void doAction()
    {
@@ -68,7 +70,23 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       boolean icpErrorIsTooLarge = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
 
-      if (balanceManager.isPushRecoveryEnabled())
+      // todo figure out a way of combining these two modules
+      boolean footstepIsBeingAdjusted = false;
+      if (balanceManager.useICPOptimization())
+      {
+         footstepIsBeingAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
+
+         if (footstepIsBeingAdjusted)
+         {
+            failureDetectionControlModule.setNextFootstep(nextFootstep);
+            updateFootstepParameters();
+
+            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getSwingTime());
+
+            balanceManager.updateICPPlanForSingleSupportDisturbances();
+         }
+      }
+      else if (balanceManager.isPushRecoveryEnabled())
       {
          boolean footstepHasBeenAdjusted = balanceManager.checkAndUpdateFootstep(nextFootstep);
          if (footstepHasBeenAdjusted)
@@ -88,9 +106,10 @@ public class WalkingSingleSupportState extends SingleSupportState
          }
       }
 
-      if (icpErrorIsTooLarge || balanceManager.isRecovering())
+      if (icpErrorIsTooLarge || balanceManager.isRecovering() || footstepIsBeingAdjusted)
       {
-         requestSwingSpeedUpIfNeeded();
+         double swingTimeRemaining = requestSwingSpeedUpIfNeeded();
+         balanceManager.updateSwingTimeRemaining(swingTimeRemaining);
       }
 
       walkingMessageHandler.clearFootTrajectory();
@@ -174,7 +193,13 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
    }
 
-   private void requestSwingSpeedUpIfNeeded()
+   /**
+    * Request the swing trajectory to speed up using {@link ICPPlanner#estimateTimeRemainingForStateUnderDisturbance(double, FramePoint2d)}.
+    * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
+    * @param speedUpFactor
+    * @return the current swing time remaining for the swing foot trajectory
+    */
+   private double requestSwingSpeedUpIfNeeded()
    {
       remainingSwingTimeAccordingToPlan.set(balanceManager.getTimeRemainingInCurrentState());
       estimatedRemainingSwingTimeUnderDisturbance.set(balanceManager.estimateTimeRemainingForSwingUnderDisturbance());
@@ -182,12 +207,13 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (estimatedRemainingSwingTimeUnderDisturbance.getDoubleValue() > 1.0e-3)
       {
          double swingSpeedUpFactor = remainingSwingTimeAccordingToPlan.getDoubleValue() / estimatedRemainingSwingTimeUnderDisturbance.getDoubleValue();
-         feetManager.requestSwingSpeedUp(swingSide, swingSpeedUpFactor);
+         return feetManager.requestSwingSpeedUp(swingSide, swingSpeedUpFactor);
       }
       else if (remainingSwingTimeAccordingToPlan.getDoubleValue() > 1.0e-3)
       {
-         feetManager.requestSwingSpeedUp(swingSide, Double.POSITIVE_INFINITY);
+         return feetManager.requestSwingSpeedUp(swingSide, Double.POSITIVE_INFINITY);
       }
+      return remainingSwingTimeAccordingToPlan.getDoubleValue();
    }
 
    private void updateFootstepParameters()

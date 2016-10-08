@@ -2,14 +2,16 @@ package us.ihmc.simulationconstructionset;
 
 //import Jama.*;
 
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.*;
 
 import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.physics.engine.jerry.FloatingPlanarJointPhysics;
 
 /**
@@ -20,7 +22,7 @@ import us.ihmc.simulationconstructionset.physics.engine.jerry.FloatingPlanarJoin
  * @author Jerry Pratt
  * @version Beta 1.0
  */
-public class FloatingPlanarJoint extends Joint
+public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
 {
    private static final long serialVersionUID = -1627814016079577790L;
 
@@ -78,9 +80,20 @@ public class FloatingPlanarJoint extends Joint
       physics = new FloatingPlanarJointPhysics(this);
    }
 
+   public FloatingPlanarJoint(String jname, Vector3d offset, Robot rob)
+   {
+      this(jname, offset, rob, Plane.XZ);
+      physics = new FloatingPlanarJointPhysics(this);
+   }
+
    public FloatingPlanarJoint(String jname, Robot rob, Plane type)
    {
-      super(jname, new Vector3d(), rob, 3);
+      this(jname, new Vector3d(), rob, type);
+   }
+
+   public FloatingPlanarJoint(String jname, Vector3d offset, Robot rob, Plane type)
+   {
+      super(jname, offset, rob, 3);
       physics = new FloatingPlanarJointPhysics(this);
 
       this.type = type;
@@ -129,10 +142,15 @@ public class FloatingPlanarJoint extends Joint
       physics.u_i = null;
    }
 
-
    public FloatingPlanarJoint(String jname, String varName, Robot rob, Plane type)
    {
-      super(jname, new Vector3d(), rob, 6);
+      this(jname, varName, new Vector3d(), rob, type);
+   }
+
+
+   public FloatingPlanarJoint(String jname, String varName, Vector3d offset, Robot rob, Plane type)
+   {
+      super(jname, offset, rob, 6);
       physics = new FloatingPlanarJointPhysics(this);
 
       this.type = type;
@@ -210,6 +228,12 @@ public class FloatingPlanarJoint extends Joint
       qd_t2.set(velocity.getY());
    }
 
+   public void setCartesianVelocity(double t1Dot, double t2Dot)
+   {
+      qd_t1.set(t1Dot);
+      qd_t2.set(t2Dot);
+   }
+
    public void setRotation(double theta)
    {
       this.q_rot.set(theta);
@@ -267,4 +291,95 @@ public class FloatingPlanarJoint extends Joint
       return type;
    }
 
+   private final double[] yawPitchRoll = new double[3];
+   @Override public void setRotationAndTranslation(RigidBodyTransform transform)
+   {
+      Quat4d rotation = new Quat4d();
+      transform.getRotation(rotation);
+
+      RotationTools.convertQuaternionToYawPitchRoll(rotation, yawPitchRoll);
+
+      Vector3d translation = new Vector3d();
+      transform.getTranslation(translation);
+
+      switch (type)
+      {
+      case XY:
+         setRotation(yawPitchRoll[2]);
+         setCartesianPosition(translation.getX(), translation.getY());
+         break;
+      case XZ:
+         setRotation(yawPitchRoll[1]);
+         setCartesianPosition(translation.getX(), translation.getZ());
+         break;
+      default:
+         setRotation(yawPitchRoll[0]);
+         setCartesianPosition(translation.getY(), translation.getZ());
+         break;
+      }
+   }
+
+   @Override public void setVelocity(Tuple3d velocity)
+   {
+      switch (type)
+      {
+      case XY:
+         setCartesianVelocity(velocity.getX(), velocity.getY());
+         break;
+      case XZ:
+         setCartesianVelocity(velocity.getX(), velocity.getZ());
+         break;
+      default:
+         setCartesianVelocity(velocity.getY(), velocity.getZ());
+         break;
+      }
+   }
+
+   @Override public void setAngularVelocityInBody(Vector3d angularVelocityInBody)
+   {
+      switch (type)
+      {
+      case XY:
+         setRotationalVelocity(angularVelocityInBody.getZ());
+         break;
+      case XZ:
+         setRotationalVelocity(angularVelocityInBody.getY());
+         break;
+      default:
+         setRotationalVelocity(angularVelocityInBody.getX());
+         break;
+      }
+   }
+
+   @Override public void getVelocity(FrameVector linearVelocityToPack)
+   {
+      switch (type)
+      {
+      case XY:
+         linearVelocityToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), qd_t1.getDoubleValue(), qd_t2.getDoubleValue(), 0.0);
+         break;
+      case XZ:
+         linearVelocityToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), qd_t1.getDoubleValue(), 0.0, qd_t2.getDoubleValue());
+         break;
+      default:
+         linearVelocityToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, qd_t1.getDoubleValue(), qd_t2.getDoubleValue());
+         break;
+      }
+   }
+
+   @Override public void getAngularVelocity(FrameVector angularVelocityToPack, ReferenceFrame bodyFrame)
+   {
+      switch (type)
+      {
+      case XY:
+         angularVelocityToPack.setIncludingFrame(bodyFrame, 0.0, 0.0, qd_rot.getDoubleValue());
+         break;
+      case XZ:
+         angularVelocityToPack.setIncludingFrame(bodyFrame, 0.0, qd_rot.getDoubleValue(), 0.0);
+         break;
+      default:
+         angularVelocityToPack.setIncludingFrame(bodyFrame, qd_rot.getDoubleValue(), 0.0, 0.0);
+         break;
+      }
+   }
 }

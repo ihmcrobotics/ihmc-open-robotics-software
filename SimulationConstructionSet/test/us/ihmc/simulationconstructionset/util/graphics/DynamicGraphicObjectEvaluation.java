@@ -28,11 +28,11 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class DynamicGraphicObjectEvaluation
 {
    public static void main(String[] args)
-   {      
+   {
       Graphics3DAdapter jmeGraphics3dAdapter = new JMEGraphics3DAdapter();
       evaluate(jmeGraphics3dAdapter);
    }
-   
+
 
 
    public static void evaluate(Graphics3DAdapter graphicsAdapter)
@@ -41,7 +41,7 @@ public class DynamicGraphicObjectEvaluation
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(100);
-      
+
       final SimulationConstructionSet scs = new SimulationConstructionSet(robot, graphicsAdapter, parameters);
       scs.setDT(0.1, 1);
 
@@ -112,7 +112,7 @@ public class DynamicGraphicObjectEvaluation
       yoGraphicsList.add(dynamicGraphicBoxGhost);
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
-      
+
       yoGraphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(dynamicGraphicPolygon);
       yoGraphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(dynamicGraphicYoFramePolygon);
 
@@ -147,15 +147,15 @@ public class DynamicGraphicObjectEvaluation
                ConvexPolygon2d newYoPolygon = new ConvexPolygon2d(pointList);
                yoFramePolygon.setConvexPolygon2d(newYoPolygon);
                dynamicGraphicYoFramePolygon.update();
-               
+
                Vector3d eulerAngles = new Vector3d();
                yoFramePolygonOrientation.getEulerAngles(eulerAngles);
                eulerAngles.setY(eulerAngles.getY() + 0.1);
                yoFramePolygonOrientation.setEulerAngles(eulerAngles);
-               
+
                dynamicGraphicText.setText("Hello");
                dynamicGraphicText.update();
-               
+
                scs.tickAndUpdate();
 
                quickPause();
@@ -168,7 +168,7 @@ public class DynamicGraphicObjectEvaluation
 
                dynamicGraphicText.setText("GoodBye");
                dynamicGraphicText.update();
-               
+
                scs.tickAndUpdate();
 
             }

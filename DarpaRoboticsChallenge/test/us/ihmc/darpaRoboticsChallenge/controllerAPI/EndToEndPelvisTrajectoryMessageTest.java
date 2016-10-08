@@ -51,7 +51,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotTestInterface
@@ -64,7 +64,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 16.9)
+   @ContinuousIntegrationTest(estimatedDuration = 16.9)
    @Test(timeout = 84000)
    public void testSingleWaypoint() throws Exception
    {
@@ -139,7 +139,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
    }
 
-   @DeployableTestMethod(estimatedDuration = 14.3)
+   @ContinuousIntegrationTest(estimatedDuration = 14.3)
    @Test(timeout = 72000)
    public void testMultipleWaypoints() throws Exception
    {
@@ -269,7 +269,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getAngularVelocityCopy(), controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
    }
 
-   @DeployableTestMethod(estimatedDuration = 31.7)
+   @ContinuousIntegrationTest(estimatedDuration = 31.7)
    @Test(timeout = 160000)
    public void testMessageWithTooManyWaypoints() throws Exception
    {
@@ -440,7 +440,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       JUnitTools.assertTuple3dEquals(expectedTrajectoryPoint.getAngularVelocityCopy(), controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
    }
 
-   @DeployableTestMethod(estimatedDuration = 16.5)
+   @ContinuousIntegrationTest(estimatedDuration = 16.5)
    @Test(timeout = 83000)
    public void testStopAllTrajectory() throws Exception
    {

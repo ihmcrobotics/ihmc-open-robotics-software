@@ -27,14 +27,14 @@ import org.junit.Test;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class StateSpaceSystemDiscretizerTest
 {
    private static final boolean DEBUG = false;
    private static final boolean DISPLAY_GRAPHS_AND_SLEEP_FOREVER = false;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testWithSimpleSpringDamperSystem()
    {
@@ -192,7 +192,7 @@ public class StateSpaceSystemDiscretizerTest
          }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testCompareDifferentImplementations()
    {

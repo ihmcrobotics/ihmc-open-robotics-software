@@ -9,11 +9,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
 public class RotatableRampTerrainObjectTest
 {
    private RotatableRampTerrainObject simpleRamp, simpleRampDown, ramp90;
@@ -82,28 +82,28 @@ public class RotatableRampTerrainObjectTest
       ramp90Translated = new RotatableRampTerrainObject(transX, transY, 1, 2, 1, 90);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAt()
    {
       testHeightAtRampForAnyRamp(pointsOnSimpleRamp, simpleRamp);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtForRampDown()
    {
       testHeightAtRampForAnyRamp(strictlyInternalPointsOnSimpleRampDown, simpleRampDown);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSurfaceNormalAt()
    {
       testSurfaceNormalsForAnyRampFace(simpleRamp, expectedSimpleSurfaceNormal, pointsOnSimpleRamp);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOtherSurfaceNormalAt()
    {
@@ -111,7 +111,7 @@ public class RotatableRampTerrainObjectTest
             expectedSimpleSurfaceNormalOnOtherFaces, pointsOnOtherRampFaces);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSurfaceNormalAtForSlopedDown()
    {
@@ -119,7 +119,7 @@ public class RotatableRampTerrainObjectTest
             expectedSimpleSurfaceNormalSlopeDown, strictlyInternalPointsOnSimpleRampDown);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOtherSurfaceNormalAtForSlopedDown()
    {
@@ -127,7 +127,7 @@ public class RotatableRampTerrainObjectTest
             expectedSimpleSurfaceNormalOnOtherFacesSlopeDown, pointsOnOtherRampFacesSlopeDown);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtRamp90()
    {
@@ -135,14 +135,14 @@ public class RotatableRampTerrainObjectTest
       testHeightAtRampForAnyRamp(pointsOnRamp90PassingHeightCornerCases, ramp90);      
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void HeightAtRamp90EdgeCasesFailDueToNumericalErrorTest()
    {
       testHeightAtRampForAnyRamp(pointsOnRamp90withNumericalRotationError, ramp90);
    }   
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)   
    public void testSurfaceNormalForRamp90()
    {
@@ -150,7 +150,7 @@ public class RotatableRampTerrainObjectTest
             expectedSurfaceNormalRamp90, pointsOnRamp90);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)   
    public void testOtherSurfaceNormalForRamp90()
    {
@@ -177,14 +177,14 @@ public class RotatableRampTerrainObjectTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtTranslation()
    {
       testHeightAtRampForAnyRampWithTranslation(pointsOnSimpleRamp, simpleRampTranslated, new Vector3d(transX,transY,0));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAt90Translation()
    {

@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -32,7 +32,7 @@ public class TransformInterpolationCalculatorTest
 {
    public TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationOne() throws Exception
    {
@@ -51,7 +51,7 @@ public class TransformInterpolationCalculatorTest
       assertTrue(t2.equals(t3));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationForTranslation() throws Exception
    {
@@ -87,7 +87,7 @@ public class TransformInterpolationCalculatorTest
       assertTrue(expectedVector.epsilonEquals(interpolatedVector, 1e-8));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationForRotationYaw() throws Exception
    {
@@ -150,7 +150,7 @@ public class TransformInterpolationCalculatorTest
       assertEquals(yawPitchRoll[0], (alpha-1)*yaw1 + alpha * yaw2, 1e-6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationForRotationRoll() throws Exception
    {
@@ -188,7 +188,7 @@ public class TransformInterpolationCalculatorTest
       assertEquals(yawPitchRoll[2], (alpha-1)*roll1 + alpha * roll2, 1e-6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationForRotationPitch() throws Exception
    {
@@ -226,7 +226,7 @@ public class TransformInterpolationCalculatorTest
       assertEquals(yawPitchRoll[1], (alpha-1)*pitch1 + alpha * pitch2, 1e-6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationForRotationYawEdgeCases() throws Exception
    {
@@ -303,7 +303,7 @@ public class TransformInterpolationCalculatorTest
       assertEquals(yawPitchRoll[0], (alpha-1)*yaw1 + alpha * yaw2, 1e-6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationForRotationCombined() throws Exception
    {
@@ -385,7 +385,7 @@ public class TransformInterpolationCalculatorTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInterpolationWithFramePoses()
    {
@@ -433,7 +433,7 @@ public class TransformInterpolationCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInterpolationForTimeStampedTransform()
    {

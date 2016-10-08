@@ -9,18 +9,14 @@ public class FootstepListTask extends BehaviorTask
    private final FootstepListBehavior footstepListBehavior;
    private final FootstepDataListMessage footStepList;
    
-   public FootstepListTask(FootstepListBehavior footstepListBehavior,FootstepDataListMessage footStepList ,DoubleYoVariable yoTime,double sleepTime)
+   public FootstepListTask(FootstepListBehavior footstepListBehavior,FootstepDataListMessage footStepList ,DoubleYoVariable yoTime)
    {
-      super(footstepListBehavior, yoTime, sleepTime);
+      super(footstepListBehavior, yoTime);
       this.footstepListBehavior = footstepListBehavior;
       this.footStepList= footStepList;
    }
 
-   public FootstepListTask(FootstepListBehavior footstepListBehavior, FootstepDataListMessage footStepList, DoubleYoVariable yoTime)
-   {
-      this(footstepListBehavior,footStepList, yoTime, 0.0);
-   }
-
+   
    @Override
    protected void setBehaviorInput()
    {

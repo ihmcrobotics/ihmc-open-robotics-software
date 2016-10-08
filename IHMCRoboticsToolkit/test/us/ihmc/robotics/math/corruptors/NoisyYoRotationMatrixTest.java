@@ -11,12 +11,12 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.corruptors.NoiseType;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class NoisyYoRotationMatrixTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void testNoNoise()
    {

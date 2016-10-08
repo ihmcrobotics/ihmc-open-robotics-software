@@ -1,3 +1,5 @@
 root*false*false
 root.NewtonsCradle*false*false
-root.DefaultCollisionVisualize*false*false
+root.DefaultCollisionVisualizer*false*false
+root.DefaultCollisionVisualizer.CollisionOneBalls*false*false
+root.DefaultCollisionVisualizer.CollisionTwoBalls*false*false

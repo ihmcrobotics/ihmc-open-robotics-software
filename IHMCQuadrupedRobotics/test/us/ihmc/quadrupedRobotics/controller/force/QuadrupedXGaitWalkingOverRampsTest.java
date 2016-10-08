@@ -13,12 +13,13 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
+import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.InclinedGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RampsGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMultiRobotTestInterface
 {
@@ -41,7 +42,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 100000)
    public void testWalkingOverShallowRamps() throws IOException
    {
@@ -50,7 +51,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       walkOverRamps(groundProfile);
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 100000)
    public void testWalkingOverAggressiveRamps() throws IOException
    {
@@ -98,14 +99,14 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 100000)
    public void testWalkingDownSlope() throws IOException
    {
       walkSlope(0.2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 100000)
    public void testWalkingUpSlope() throws IOException
    {
@@ -117,6 +118,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       InclinedGroundProfile groundProfile = new InclinedGroundProfile(slope);
       
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
+      quadrupedTestFactory.setParameterSet(QuadrupedParameterSet.SIMULATION_REAL);
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setUseStateEstimator(false);

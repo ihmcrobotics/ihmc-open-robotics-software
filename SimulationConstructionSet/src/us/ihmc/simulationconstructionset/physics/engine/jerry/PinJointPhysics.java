@@ -35,7 +35,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     */
    protected void jointDependentChangeVelocity(double delta_qd)
    {
-      owner.qd.set(owner.qd.getDoubleValue() + delta_qd);
+      owner.getQDYoVariable().set(owner.getQDYoVariable().getDoubleValue() + delta_qd);
    }
 
    /**
@@ -48,7 +48,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
    {
       Rh_i.setIdentity();    // We probably can rely on Rh_i not changing its 1 and 0 elements but let's just be safe.
 
-      double cosQ = Math.cos(owner.q.getDoubleValue()), sinQ = Math.sin(owner.q.getDoubleValue());
+      double cosQ = Math.cos(owner.getQYoVariable().getDoubleValue()), sinQ = Math.sin(owner.getQYoVariable().getDoubleValue());
       @SuppressWarnings("unused") double
             one_cosQ = 1.0 - cosQ, one_sinQ = 1.0 - sinQ;
       double ux_sinQ = u_i.getX() * sinQ, uy_sinQ = u_i.getY() * sinQ, uz_sinQ = u_i.getZ() * sinQ;
@@ -80,30 +80,30 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
       // User torque-speed curve:
       if (owner.torqueSpeedCurve != null)
       {
-         owner.tau.set(owner.torqueSpeedCurve.limitTorque(owner.tau.getDoubleValue(), owner.qd.getDoubleValue()));
+         owner.getTauYoVariable().set(owner.torqueSpeedCurve.limitTorque(owner.getTau(), owner.getQDYoVariable().getDoubleValue()));
       }
 
       // Torque Limits
       if (owner.tau_max != null)
       {
          double maxTorque = owner.tau_max.getDoubleValue();
-         owner.tau.set(MathTools.clipToMinMax(owner.tau.getDoubleValue(), -maxTorque, maxTorque));
+         owner.getTauYoVariable().set(MathTools.clipToMinMax(owner.getTau(), -maxTorque, maxTorque));
       }
 
-      Q_i = owner.doPDControl() + owner.tau.getDoubleValue();
+      Q_i = owner.doPDControl() + owner.getTau();
 
       // Limit stops:
       if (owner.tauJointLimit != null)
       {
-         if (owner.q.getDoubleValue() < owner.qLowerLimit.getDoubleValue())
+         if (owner.getQYoVariable().getDoubleValue() < owner.qLowerLimit.getDoubleValue())
          {
-            double limitTorque = owner.kLimit.getDoubleValue() * (owner.qLowerLimit.getDoubleValue() - owner.q.getDoubleValue()) - owner.bLimit.getDoubleValue() * owner.qd.getDoubleValue();
+            double limitTorque = owner.kLimit.getDoubleValue() * (owner.qLowerLimit.getDoubleValue() - owner.getQYoVariable().getDoubleValue()) - owner.bLimit.getDoubleValue() * owner.getQDYoVariable().getDoubleValue();
             if (limitTorque < 0.0) limitTorque = 0.0;
             owner.tauJointLimit.set(limitTorque);
          }
-         else if (owner.q.getDoubleValue() > owner.qUpperLimit.getDoubleValue())
+         else if (owner.getQYoVariable().getDoubleValue() > owner.qUpperLimit.getDoubleValue())
          {
-            double limitTorque = owner.kLimit.getDoubleValue() * (owner.qUpperLimit.getDoubleValue() - owner.q.getDoubleValue()) - owner.bLimit.getDoubleValue() * owner.qd.getDoubleValue();
+            double limitTorque = owner.kLimit.getDoubleValue() * (owner.qUpperLimit.getDoubleValue() - owner.getQYoVariable().getDoubleValue()) - owner.bLimit.getDoubleValue() * owner.getQDYoVariable().getDoubleValue();
             if (limitTorque > 0.0) limitTorque = 0.0;
             owner.tauJointLimit.set(limitTorque);
          }
@@ -118,13 +118,13 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
       // Velocity Limits:
       if (owner.tauVelocityLimit != null)
       {
-         if (owner.qd.getDoubleValue() < -owner.qd_max.getDoubleValue())
+         if (owner.getQDYoVariable().getDoubleValue() < -owner.qd_max.getDoubleValue())
          {
-            owner.tauVelocityLimit.set(-owner.b_vel_limit.getDoubleValue() * (owner.qd.getDoubleValue() + owner.qd_max.getDoubleValue()));
+            owner.tauVelocityLimit.set(-owner.b_vel_limit.getDoubleValue() * (owner.getQDYoVariable().getDoubleValue() + owner.qd_max.getDoubleValue()));
          }
-         else if (owner.qd.getDoubleValue() > owner.qd_max.getDoubleValue())
+         else if (owner.getQDYoVariable().getDoubleValue() > owner.qd_max.getDoubleValue())
          {
-            owner.tauVelocityLimit.set(-owner.b_vel_limit.getDoubleValue() * (owner.qd.getDoubleValue() - owner.qd_max.getDoubleValue()));
+            owner.tauVelocityLimit.set(-owner.b_vel_limit.getDoubleValue() * (owner.getQDYoVariable().getDoubleValue() - owner.qd_max.getDoubleValue()));
          }
          else
          {
@@ -136,31 +136,31 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
 
       if (owner.tauDamping != null)
       {
-         if (owner.qd.getDoubleValue() > 0.0)
+         if (owner.getQDYoVariable().getDoubleValue() > 0.0)
          {
-            owner.tauDamping.set(-owner.getJointStiction() -owner.getDamping() * owner.qd.getDoubleValue());
+            owner.tauDamping.set(-owner.getJointStiction() -owner.getDamping() * owner.getQDYoVariable().getDoubleValue());
          }
-         else if (owner.qd.getDoubleValue() < -0.0)
+         else if (owner.getQDYoVariable().getDoubleValue() < -0.0)
          {
-            owner.tauDamping.set(owner.getJointStiction() - owner.getDamping() * owner.qd.getDoubleValue());
+            owner.tauDamping.set(owner.getJointStiction() - owner.getDamping() * owner.getQDYoVariable().getDoubleValue());
          }
          else
          {
-            owner.tauDamping.set(0.0 -owner.getDamping() * owner.qd.getDoubleValue());
+            owner.tauDamping.set(0.0 -owner.getDamping() * owner.getQDYoVariable().getDoubleValue());
          }
 
          Q_i = Q_i + owner.tauDamping.getDoubleValue();
       }
 
       // w_i <- w_i + q_i_dot u_i
-      w_i.setX(w_i.getX() + owner.qd.getDoubleValue() * u_i.getX());
-      w_i.setY(w_i.getY() + owner.qd.getDoubleValue() * u_i.getY());
-      w_i.setZ(w_i.getZ() + owner.qd.getDoubleValue() * u_i.getZ());
+      w_i.setX(w_i.getX() + owner.getQDYoVariable().getDoubleValue() * u_i.getX());
+      w_i.setY(w_i.getY() + owner.getQDYoVariable().getDoubleValue() * u_i.getY());
+      w_i.setZ(w_i.getZ() + owner.getQDYoVariable().getDoubleValue() * u_i.getZ());
 
       // v_i <- v_i + q_i_dot (u_i X d_i)
-      v_i.setX(v_i.getX() + owner.qd.getDoubleValue() * u_iXd_i.getX());
-      v_i.setY(v_i.getY() + owner.qd.getDoubleValue() * u_iXd_i.getY());
-      v_i.setZ(v_i.getZ() + owner.qd.getDoubleValue() * u_iXd_i.getZ());
+      v_i.setX(v_i.getX() + owner.getQDYoVariable().getDoubleValue() * u_iXd_i.getX());
+      v_i.setY(v_i.getY() + owner.getQDYoVariable().getDoubleValue() * u_iXd_i.getY());
+      v_i.setZ(v_i.getZ() + owner.getQDYoVariable().getDoubleValue() * u_iXd_i.getZ());
    }
 
    /**
@@ -181,7 +181,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
    {
       // Coriolis Forces:
       vel_i.set(u_i);
-      vel_i.scale(owner.qd.getDoubleValue());
+      vel_i.scale(owner.getQDYoVariable().getDoubleValue());
       c_hat_i.top.cross(w_h, vel_i);
       vel_iXd_i.cross(vel_i, d_i);
       w_hXr_i.cross(w_h, r_i);
@@ -209,9 +209,9 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     */
    protected void jointDependentFeatherstonePassFour(double Q, int passNumber)
    {
-      owner.qdd.set(Q);
+      owner.getQDDYoVariable().set(Q);
       k_qdd[passNumber] = Q;
-      k_qd[passNumber] = owner.qd.getDoubleValue();
+      k_qd[passNumber] = owner.getQDYoVariable().getDoubleValue();
    }
 
    /**
@@ -222,8 +222,8 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     */
    protected void jointDependentRecordK(int passNumber)
    {
-      k_qdd[passNumber] = owner.qdd.getDoubleValue();
-      k_qd[passNumber] = owner.qd.getDoubleValue();
+      k_qdd[passNumber] = owner.getQDDYoVariable().getDoubleValue();
+      k_qd[passNumber] = owner.getQDYoVariable().getDoubleValue();
    }
 
    /**
@@ -235,8 +235,8 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     */
    public void recursiveEulerIntegrate(double stepSize)
    {
-      owner.q.set(q_n + stepSize * owner.qd.getDoubleValue());
-      owner.qd.set(qd_n + stepSize * owner.qdd.getDoubleValue());
+      owner.getQYoVariable().set(q_n + stepSize * owner.getQDYoVariable().getDoubleValue());
+      owner.getQDYoVariable().set(qd_n + stepSize * owner.getQDDYoVariable().getDoubleValue());
 
       // Recurse over the children:
       for (int i = 0; i < owner.childrenJoints.size(); i++)
@@ -255,8 +255,8 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     */
    public void recursiveRungeKuttaSum(double stepSize)
    {
-      owner.q.set(q_n + stepSize * (k_qd[0] / 6.0 + k_qd[1] / 3.0 + k_qd[2] / 3.0 + k_qd[3] / 6.0));
-      owner.qd.set(qd_n + stepSize * (k_qdd[0] / 6.0 + k_qdd[1] / 3.0 + k_qdd[2] / 3.0 + k_qdd[3] / 6.0));
+      owner.getQYoVariable().set(q_n + stepSize * (k_qd[0] / 6.0 + k_qd[1] / 3.0 + k_qd[2] / 3.0 + k_qd[3] / 6.0));
+      owner.getQDYoVariable().set(qd_n + stepSize * (k_qdd[0] / 6.0 + k_qdd[1] / 3.0 + k_qdd[2] / 3.0 + k_qdd[3] / 6.0));
 
       // Recurse over the children:
       for (int i = 0; i < owner.childrenJoints.size(); i++)
@@ -273,8 +273,8 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     */
    public void recursiveSaveTempState()
    {
-      q_n = owner.q.getDoubleValue();
-      qd_n = owner.qd.getDoubleValue();
+      q_n = owner.getQYoVariable().getDoubleValue();
+      qd_n = owner.getQDYoVariable().getDoubleValue();
 
       // Recurse over the children:
       for (int i = 0; i < owner.childrenJoints.size(); i++)
@@ -291,8 +291,8 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     */
    public void recursiveRestoreTempState()
    {
-      owner.q.set(q_n);
-      owner.qd.set(qd_n);
+      owner.getQYoVariable().set(q_n);
+      owner.getQDYoVariable().set(qd_n);
 
       // Recurse over the children:
       for (int i = 0; i < owner.childrenJoints.size(); i++)
@@ -311,7 +311,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     */
    protected boolean jointDependentVerifyReasonableAccelerations()
    {
-      if (Math.abs(owner.qdd.getDoubleValue()) > Joint.MAX_ROT_ACCEL)
+      if (Math.abs(owner.getQDDYoVariable().getDoubleValue()) > Joint.MAX_ROT_ACCEL)
       {
          return false;
       }

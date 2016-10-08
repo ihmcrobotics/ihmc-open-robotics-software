@@ -14,11 +14,7 @@ import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -36,7 +32,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 {
    private final String name;
    private final FloatingRootJointRobot robot;
-   private final SixDoFJoint rootJoint;
+   private final FloatingInverseDynamicsJoint rootJoint;
    private final ReferenceFrames referenceFrames;
 
    private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
@@ -61,7 +57,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       this(robot, fullRobotModel.getRootJoint(), forceSensorDataHolderToUpdate, referenceFrames);
    }
 
-   public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, SixDoFJoint rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
+   public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FloatingInverseDynamicsJoint rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
          ReferenceFrames referenceFrames)
    {
       name = robot.getName() + "SimulatedSensorReader";
@@ -187,9 +183,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
          if (pinJoint == null) continue;
 
-         revoluteJoint.setQ(pinJoint.getQ().getDoubleValue());
-         revoluteJoint.setQd(pinJoint.getQD().getDoubleValue());
-         revoluteJoint.setQdd(pinJoint.getQDD().getDoubleValue());
+         revoluteJoint.setQ(pinJoint.getQYoVariable().getDoubleValue());
+         revoluteJoint.setQd(pinJoint.getQDYoVariable().getDoubleValue());
+         revoluteJoint.setQdd(pinJoint.getQDDYoVariable().getDoubleValue());
       }
    }
 

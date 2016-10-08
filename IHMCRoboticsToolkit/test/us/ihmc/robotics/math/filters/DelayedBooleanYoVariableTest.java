@@ -9,7 +9,7 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.math.filters.DelayedBooleanYoVariable;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 
 public class DelayedBooleanYoVariableTest
@@ -33,7 +33,7 @@ public class DelayedBooleanYoVariableTest
       variableToDelay = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDelayedYoVariableMultipleTickDelays()
    {
@@ -74,7 +74,7 @@ public class DelayedBooleanYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDelayedYoVariableOneTickDelay()
    {
@@ -106,7 +106,7 @@ public class DelayedBooleanYoVariableTest
       assertEquals(delayedYoVariable.getBooleanValue(), true);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDelayedYoVariableZeroTickDelay()
    {
@@ -138,7 +138,7 @@ public class DelayedBooleanYoVariableTest
       assertEquals(delayedYoVariable.getBooleanValue(), true);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdateWithZero()
    {
@@ -156,7 +156,7 @@ public class DelayedBooleanYoVariableTest
       assertEquals(delayedYoVariable.getBooleanValue(), true);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testReset()
    {  

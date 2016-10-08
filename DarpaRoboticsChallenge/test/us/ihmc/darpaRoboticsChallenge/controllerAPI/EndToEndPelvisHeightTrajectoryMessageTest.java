@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements MultiRobotTestInterface
@@ -35,7 +35,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 15.2)
+   @ContinuousIntegrationTest(estimatedDuration = 15.2)
    @Test(timeout = 76000)
    public void testSingleWaypoint() throws Exception
    {
