@@ -6,10 +6,10 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Fast})
 public class RobotAllJointsDataCheckerTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -24,7 +24,7 @@ public class RobotAllJointsDataCheckerTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 4.9)
+   @ContinuousIntegrationTest(estimatedDuration = 4.9)
    @Test(timeout = 30000)
    public void test()
    {

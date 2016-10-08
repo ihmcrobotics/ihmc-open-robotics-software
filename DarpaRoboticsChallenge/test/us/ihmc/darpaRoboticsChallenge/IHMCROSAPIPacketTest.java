@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
@@ -41,7 +42,7 @@ import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotCo
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
@@ -101,7 +102,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 8.7)
+   @ContinuousIntegrationTest(estimatedDuration = 8.7)
    @Test(timeout = 43000)
    public void testFuzzyPacketsUsingRos()
    {
@@ -217,7 +218,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
    private DRCSimulationFactory drcSimulation;
 
-   @DeployableTestMethod(estimatedDuration = 2.7)
+   @ContinuousIntegrationTest(estimatedDuration = 2.7)
    @Test(timeout = 30000)
    public void testFuzzyPacketsWithoutRos()
    {
@@ -340,6 +341,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
       final HighLevelState initialBehavior;
       initialBehavior = HighLevelState.DO_NOTHING_BEHAVIOR; // HERE!!
 
@@ -350,6 +352,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
             feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
             initialBehavior);
+      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), packetCommunicator);
 

@@ -17,7 +17,7 @@ import us.ihmc.robotics.math.trajectories.ProviderBasedConstantOrientationTrajec
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
 {
@@ -48,7 +48,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
       orientationProvider = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructor()
    {
@@ -80,7 +80,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsDone()
    {
@@ -93,7 +93,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
       assertTrue(provider.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGet()
    {
@@ -105,7 +105,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPackAngularVelocity()
    {      
@@ -122,7 +122,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
      assertSame(referenceFrame, angularVelocityToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPackAngularAcceleration()
    {      
@@ -139,7 +139,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
       assertSame(referenceFrame, angularAccelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPackAngularData()
    {

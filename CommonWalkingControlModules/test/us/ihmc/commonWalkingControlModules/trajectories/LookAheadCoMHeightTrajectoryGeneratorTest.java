@@ -40,7 +40,7 @@ import us.ihmc.simulationconstructionset.ViewportConfiguration;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.ArrayTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class LookAheadCoMHeightTrajectoryGeneratorTest
@@ -57,7 +57,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
    private boolean makeAssertions = true;
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testLookAheadCoMHeightTrajectoryGenerator()
    {

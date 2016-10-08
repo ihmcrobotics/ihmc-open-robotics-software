@@ -17,11 +17,11 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets={TestPlanTarget.UI})
+@ContinuousIntegrationPlan(targets={TestPlanTarget.UI})
 public class SpringFlamingoSimulationTest
 {
    private SimulationGUITestFixture testFixture;
@@ -46,7 +46,7 @@ public class SpringFlamingoSimulationTest
       testFixture = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 8.5)
+	@ContinuousIntegrationTest(estimatedDuration = 8.5)
 	@Test(timeout = 42000)
    public void testSpringFlamingoSimulationAndGUI() throws SimulationExceededMaximumTimeException
    {
@@ -117,7 +117,7 @@ public class SpringFlamingoSimulationTest
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 3.6)
+	@ContinuousIntegrationTest(estimatedDuration = 3.6)
 	@Test(timeout = 30000)
 	public void testRewindability() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
 	{

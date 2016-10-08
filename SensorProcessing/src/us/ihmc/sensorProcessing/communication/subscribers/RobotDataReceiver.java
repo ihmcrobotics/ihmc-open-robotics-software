@@ -9,8 +9,8 @@ import javax.vecmath.Vector3f;
 
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.tools.gui.GraphicsUpdatable;
@@ -22,7 +22,7 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
    private final Object lock = new Object();
    private final ArrayList<GraphicsUpdatable> graphicsToUpdate = new ArrayList<GraphicsUpdatable>();
    private final AtomicLong simTime = new AtomicLong(-1);
-   protected final SixDoFJoint rootJoint;
+   protected final FloatingInverseDynamicsJoint rootJoint;
    private boolean frameshaveBeenSetUp = false;
    private final ForceSensorDataHolder forceSensorDataHolder;
    private final OneDoFJoint[] allJoints;

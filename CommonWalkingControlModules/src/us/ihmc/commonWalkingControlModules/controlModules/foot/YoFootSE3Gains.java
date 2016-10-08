@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.*;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public class YoFootSE3Gains implements YoSE3PIDGainsInterface
@@ -98,6 +95,16 @@ public class YoFootSE3Gains implements YoSE3PIDGainsInterface
    public void setOrientationMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
       orientationGains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
+   }
+
+   public void setTangentialDampingGains(double kdReductionRatio, double dampingParallelDeadband, double positionErrorForMinimumKd)
+   {
+      positionGains.setTangentialDampingGains(kdReductionRatio, dampingParallelDeadband, positionErrorForMinimumKd);
+   }
+
+   public void setTangentialDampingGains(YoTangentialDampingGains tangentialDampingGains)
+   {
+      positionGains.setTangentialDampingGains(tangentialDampingGains);
    }
 
    public void setOrientationMaxDerivativeError(double maxDerivativeError)

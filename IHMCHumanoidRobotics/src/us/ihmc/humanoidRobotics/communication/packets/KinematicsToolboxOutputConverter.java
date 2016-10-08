@@ -26,14 +26,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 
 public class KinematicsToolboxOutputConverter
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final FullHumanoidRobotModel fullRobotModelToUseForConversion;
-   private final SixDoFJoint rootJoint;
+   private final FloatingInverseDynamicsJoint rootJoint;
    private final OneDoFJoint[] oneDoFJoints;
    private final int jointsHashCode;
 

@@ -9,11 +9,11 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
 public class LLAQuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest extends QuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest
 {
    @Override
@@ -23,7 +23,7 @@ public class LLAQuadrupedPositionCrawlWalkingForwardStoppingAndTurningTest exten
    }
    
    @Override
-   @DeployableTestMethod(estimatedDuration = 700.0)
+   @ContinuousIntegrationTest(estimatedDuration = 700.0)
    @Test(timeout = 2000000)
    public void testWalkingForwardStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

@@ -77,12 +77,12 @@ public class JointLimitsRobot extends Robot
 
    public double getQ()
    {
-      return joint.getQ().getDoubleValue();
+      return joint.getQYoVariable().getDoubleValue();
    }
 
    public double getQd()
    {
-      return joint.getQD().getDoubleValue();
+      return joint.getQDYoVariable().getDoubleValue();
    }
 
    public double getLowerLimit()

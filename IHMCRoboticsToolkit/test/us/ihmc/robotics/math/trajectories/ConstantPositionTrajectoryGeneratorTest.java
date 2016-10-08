@@ -17,7 +17,7 @@ import us.ihmc.robotics.math.trajectories.ConstantPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ConstantPositionTrajectoryGeneratorTest
 {
@@ -50,7 +50,7 @@ public class ConstantPositionTrajectoryGeneratorTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructor()
    {
@@ -66,7 +66,7 @@ public class ConstantPositionTrajectoryGeneratorTest
       generator = new ConstantPositionTrajectoryGenerator(namePrefix, referenceFrame, positionProvider, finalTime, parentRegistry);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIsDone()
    {
@@ -79,7 +79,7 @@ public class ConstantPositionTrajectoryGeneratorTest
       assertTrue(generator.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGet()
    {
@@ -91,7 +91,7 @@ public class ConstantPositionTrajectoryGeneratorTest
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackVelocity()
    {
@@ -108,7 +108,7 @@ public class ConstantPositionTrajectoryGeneratorTest
       assertSame(referenceFrame, velocityToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackAcceleration()
    {
@@ -125,7 +125,7 @@ public class ConstantPositionTrajectoryGeneratorTest
       assertSame(referenceFrame, angularAccelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testPackLinearData()
    {

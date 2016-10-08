@@ -15,13 +15,13 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 {
    private static boolean DEBUG = true;
 
-   @DeployableTestMethod(estimatedDuration = 2.2)
+   @ContinuousIntegrationTest(estimatedDuration = 2.2)
    @Test(timeout = 30000)
    public void testDerivativesConsistency() throws Exception
    {
@@ -84,7 +84,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testLimitConditions() throws Exception
    {
@@ -145,7 +145,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testContinuityForSlowTrajectory() throws Exception
    {
@@ -247,7 +247,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testContinuityForFastishTrajectory() throws Exception
    {

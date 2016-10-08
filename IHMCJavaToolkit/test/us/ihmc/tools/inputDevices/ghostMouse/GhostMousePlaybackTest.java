@@ -6,16 +6,16 @@ import java.awt.AWTException;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.TestPlanAnnotations;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.UI})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.UI})
 public class GhostMousePlaybackTest
 {
    private final boolean PLAY_IT_BACK = false;    // Keep false in SVN so we don't mess up Bamboo. Set to true when manually testing...
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGhostMousePlayback() throws AWTException
    {
@@ -405,7 +405,7 @@ public class GhostMousePlaybackTest
          playback.playback();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testLoad() throws AWTException
    {

@@ -7,7 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -18,7 +18,7 @@ public class ElasticityCompensatorYoVariableTest
 {
    private static final double EPSILON = 1e-10;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testZeroJointTau1()
    {
@@ -52,7 +52,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testZeroJointTau2()
    {
@@ -84,7 +84,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testZeroJointTau3()
    {
@@ -108,7 +108,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testZeroJointTau4()
    {
@@ -131,7 +131,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testZeroStiffness4()
    {
@@ -162,7 +162,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testZeroMaximumDeflection4()
    {
@@ -187,7 +187,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDefaultMaximumDeflection4()
    {
@@ -214,7 +214,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInfiniteMaximumDeflection4()
    {
@@ -240,7 +240,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRandomMaximumDeflection4()
    {

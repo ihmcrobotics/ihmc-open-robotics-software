@@ -20,11 +20,11 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
 public class CapturabilityBasedStatusTest
 {
    private static final Path TEST_ROOT_PATH = JUnitTools.deriveTestResourcesPath(CapturabilityBasedStatusTest.class);
@@ -35,7 +35,7 @@ public class CapturabilityBasedStatusTest
       FileTools.ensureDirectoryExists(TEST_ROOT_PATH);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testSerializeAndDeserialize() throws IOException
    {
@@ -56,7 +56,7 @@ public class CapturabilityBasedStatusTest
       assertPacketsEqual(cbs, cbsOut);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSerializeToFileAndDeserialize() throws IOException
    {

@@ -25,7 +25,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class CenterOfPressureResolverTest
 {
@@ -43,7 +43,7 @@ public class CenterOfPressureResolverTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testCenterOfPressureResolverSimpleCaseWithNoTorque()
    {
@@ -63,7 +63,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testCenterOfPressureResolverSimpleCaseWithVerticalForce()
    {
@@ -83,7 +83,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testCenterOfPressureResolverNoForceInZ()
    {
@@ -103,7 +103,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testRandomExamples()
    {

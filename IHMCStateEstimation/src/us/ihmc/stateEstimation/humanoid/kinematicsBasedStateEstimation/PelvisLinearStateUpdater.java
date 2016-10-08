@@ -29,7 +29,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -124,7 +124,7 @@ public class PelvisLinearStateUpdater
    private final PelvisKinematicsBasedLinearStateCalculator kinematicsBasedLinearStateCalculator;
    private final PelvisIMUBasedLinearStateCalculator imuBasedLinearStateCalculator;
 
-   private final SixDoFJoint rootJoint;
+   private final FloatingInverseDynamicsJoint rootJoint;
 
    private boolean initializeToActual = false;
 

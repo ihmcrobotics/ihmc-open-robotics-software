@@ -5,13 +5,13 @@ import static us.ihmc.tools.testing.TestPlanTarget.Fast;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = Fast)
+@ContinuousIntegrationPlan(targets = Fast)
 public class QuadrantDependentListTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMultipleIterations()
    {
@@ -33,7 +33,7 @@ public class QuadrantDependentListTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIteratorOrdering()
    {

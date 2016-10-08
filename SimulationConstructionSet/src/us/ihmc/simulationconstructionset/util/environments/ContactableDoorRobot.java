@@ -331,12 +331,12 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    
    public double getHingeYaw()
    {
-      return doorHingePinJoint.getQ().getDoubleValue();
+      return doorHingePinJoint.getQYoVariable().getDoubleValue();
    }
    
    public double getHandleAngle()
    {
-      return handlePinJoint.getQ().getDoubleValue();
+      return handlePinJoint.getQYoVariable().getDoubleValue();
    }
    
    public void setHandleAngle(double theta)

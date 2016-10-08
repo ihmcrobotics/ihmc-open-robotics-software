@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.physics;
 
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
+import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 
 /**
  * Data structure which contains references to high level implementations of the physics code
@@ -14,12 +14,12 @@ public class ScsPhysics
    public ScsCollisionConfigure collisionConfigure;
    public ScsCollisionDetector collisionDetector;
    public CollisionHandler collisionHandler;
-   public DefaultCollisionVisualize visualize;
+   public DefaultCollisionVisualizer visualize;
 
    public ScsPhysics(ScsCollisionConfigure collisionConfigure,
                      ScsCollisionDetector collisionDetector,
                      CollisionHandler collisionHandler,
-                     DefaultCollisionVisualize visualize )
+                     DefaultCollisionVisualizer visualize )
    {
       this.collisionConfigure = collisionConfigure;
       this.collisionDetector = collisionDetector;

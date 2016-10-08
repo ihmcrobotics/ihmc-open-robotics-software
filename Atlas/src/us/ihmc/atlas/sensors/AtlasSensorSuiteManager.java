@@ -29,6 +29,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -130,10 +131,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             robotConfigurationDataBuffer, true);
       multiSenseSensorManager.registerCameraListener(visionPoseEstimator);
 
-      blackFlyParameterSetters = new SideDependentList<BlackFlyParameterSetter>();
-      for (RobotSide side : RobotSide.values)
-         blackFlyParameterSetters.put(side, new BlackFlyParameterSetter(rosMainNode, side, "/" + side.getLowerCaseName() + "/camera/camera_nodelet",
-               sensorSuitePacketCommunicator));
+//      blackFlyParameterSetters = new SideDependentList<BlackFlyParameterSetter>();
+//      for (RobotSide side : RobotSide.values)
+//         blackFlyParameterSetters.put(side, new BlackFlyParameterSetter(rosMainNode, side, "/" + side.getLowerCaseName() + "/camera/camera_nodelet",
+//               sensorSuitePacketCommunicator));
 
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 
@@ -147,6 +148,11 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       //      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation, rosMainNode);
       rosMainNode.execute();
+      while(!rosMainNode.isStarted())
+      {
+         System.out.println("waiting for " + rosMainNode.getDefaultNodeName() + " to start. ");
+         ThreadTools.sleep(2000);
+      }
    }
 
    @Override

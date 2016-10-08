@@ -163,9 +163,15 @@ public class SmartCMPProjector extends CMPProjector
          icpToCandidateVector.setToZero(projectionArea.getReferenceFrame());
          icpToCandidateVector.sub(candidate, capturePoint);
 
+         // make sure the CMP does not get projected too far from its original position
+         double maxICPSpeedIncreaseFactor = 3.0;
+         double desiredDistance = icpToCMPVector.length();
+         double distanceAfterProjecting = icpToCandidateVector.length();
+         boolean projectionClose = distanceAfterProjecting < maxICPSpeedIncreaseFactor * desiredDistance;
+
          // make sure the ICP is pushed in the right direction
          double angle = icpToCMPVector.angle(icpToCandidateVector);
-         if (angle < 1.0e-7)
+         if (angle < 1.0e-7 && projectionClose)
          {
             projectedCMP.setIncludingFrame(candidate);
             activeProjection.set(ProjectionMethod.RAY_THROUGH_AREA);

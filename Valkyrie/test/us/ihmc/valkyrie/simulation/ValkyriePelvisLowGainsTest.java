@@ -8,12 +8,12 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 
-@DeployableTestClass(targets = {TestPlanTarget.Exclude})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Exclude})
 public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);

@@ -27,7 +27,7 @@ import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 /**
  * @author twan
@@ -73,7 +73,7 @@ public class CirclePoseTrajectoryGeneratorTest
       trajectoryGenerator = null;
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOrientation()
    {
@@ -85,7 +85,7 @@ public class CirclePoseTrajectoryGeneratorTest
       checkOrientationAtVariousPoints(trajectoryGenerator, initialOrientationProvider, trajectoryTimeProvider.getValue(), worldFrame);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCompute()
    {
@@ -117,7 +117,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertEquals(0.0, accelerationToPack.getZ(), EPSILON);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    //TODO: implement a real test
    public void testGetPosition()
@@ -128,7 +128,7 @@ public class CirclePoseTrajectoryGeneratorTest
       currentPosition.getX();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsDone()
    {
@@ -139,7 +139,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertTrue(trajectoryGenerator.isDone());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGet_FramePoint()
    {
@@ -150,7 +150,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertEquals(worldFrame, positionToPack.getReferenceFrame());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGet_FrameOrientation()
    {
@@ -161,7 +161,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertEquals(worldFrame, orientationToPack.getReferenceFrame());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPackVelocity()
    {
@@ -177,7 +177,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, velocityToPack.getReferenceFrame());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPackAcceleration()
    {
@@ -193,7 +193,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, accelerationToPack.getReferenceFrame());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPackAngularVelocity()
    {
@@ -209,7 +209,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, angularVelocityToPack.getReferenceFrame());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPackAngularAcceleration()
    {
@@ -225,7 +225,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, angularAccelerationToPack.getReferenceFrame());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPackLinearData()
    {
@@ -267,7 +267,7 @@ public class CirclePoseTrajectoryGeneratorTest
       assertSame(worldFrame, accelerationToPack.getReferenceFrame());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPackAngularData()
    {

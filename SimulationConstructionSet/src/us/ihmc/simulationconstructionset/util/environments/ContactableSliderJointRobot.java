@@ -103,12 +103,12 @@ public abstract class ContactableSliderJointRobot extends Robot implements Conta
 
    public double getVelocity()
    {
-      return getSliderJoint().getQD().getDoubleValue();
+      return getSliderJoint().getQDYoVariable().getDoubleValue();
    }
 
    public double getPosition()
    {
-      return getSliderJoint().getQ().getDoubleValue();
+      return getSliderJoint().getQYoVariable().getDoubleValue();
    }
 
 }

@@ -77,11 +77,11 @@ public class Step4Robot extends Robot
          
          if (robotSide == RobotSide.RIGHT) //Start in "splits" position
          {
-            hipJoints.get(robotSide).q.set(0.5);
+            hipJoints.get(robotSide).setQ(0.5);
          }
          else
          {
-            hipJoints.get(RobotSide.LEFT).q.set(-0.5);
+            hipJoints.get(RobotSide.LEFT).setQ(-0.5);
          }
  
          
@@ -234,12 +234,12 @@ public class Step4Robot extends Robot
    // ***************** HIP
    public void setHipTau(RobotSide robotSide, double desiredTauBody)
    {
-      hipJoints.get(robotSide).tau.set(desiredTauBody);
+      hipJoints.get(robotSide).setTau(desiredTauBody);
    }
 
    public double getLegPitch(RobotSide robotSide)
    {
-      return hipJoints.get(robotSide).q.getDoubleValue();
+      return hipJoints.get(robotSide).getQ();
    }
 
    public double getLegLength(RobotSide robotSide)
@@ -258,23 +258,23 @@ public class Step4Robot extends Robot
    
    public double getHipVelocity(RobotSide robotSide)
    {
-      return hipJoints.get(robotSide).qd.getDoubleValue();
+      return hipJoints.get(robotSide).getQD();
    }
 
    // ****************** KNEE
    public void setKneeTau(RobotSide robotSide, double desiredTauKnee)
    {
-      kneeJoints.get(robotSide).tau.set(desiredTauKnee);
+      kneeJoints.get(robotSide).setTau(desiredTauKnee);
    }
 
    public double getKneePositionZ(RobotSide robotSide)
    {
-      return kneeJoints.get(robotSide).q.getDoubleValue();
+      return kneeJoints.get(robotSide).getQ();
    }
 
    public double getKneeVelocityZ(RobotSide robotSide)
    {
-      return kneeJoints.get(robotSide).qd.getDoubleValue();
+      return kneeJoints.get(robotSide).getQD();
    }
 
    // ****************** FEET

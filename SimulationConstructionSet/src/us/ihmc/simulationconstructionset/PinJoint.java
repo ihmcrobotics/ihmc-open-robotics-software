@@ -32,7 +32,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    private static final long serialVersionUID = -8016564065453170730L;
 
    private AxisAngle4d axisAngle = new AxisAngle4d();
-   public DoubleYoVariable q, qd, qdd,  tau;
+   protected DoubleYoVariable q, qd, qdd,  tau;
 
    public DoubleYoVariable tauJointLimit, tauVelocityLimit, tauDamping;
    
@@ -42,7 +42,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    public DoubleYoVariable qd_max, b_vel_limit;
    public DoubleYoVariable tau_max;
 
-   private YoVariableRegistry registry;
+   protected YoVariableRegistry registry;
 
    public TorqueSpeedCurve torqueSpeedCurve;
 
@@ -182,9 +182,20 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the angle of this joint.
     */
-   public DoubleYoVariable getQ()
+   public DoubleYoVariable getQYoVariable()
    {
       return q;
+   }
+   
+   /**
+    * Retrieve the current angle (position) of this joint.
+    *
+    * @return YoVariable representing the angle of this joint.
+    */
+   @Override
+   public double getQ()
+   {
+      return q.getDoubleValue();
    }
 
    /**
@@ -192,9 +203,20 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the current angle of this joint.
     */
-   public DoubleYoVariable getQD()
+   public DoubleYoVariable getQDYoVariable()
    {
       return qd;
+   }
+   
+   /**
+    * Retrieves the current velocity of this joint.
+    *
+    * @return YoVariable representing the current angle of this joint.
+    */
+   @Override
+   public double getQD()
+   {
+      return qd.getDoubleValue();
    }
 
    /**
@@ -202,9 +224,20 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the current acceleration
     */
-   public DoubleYoVariable getQDD()
+   public DoubleYoVariable getQDDYoVariable()
    {
       return qdd;
+   }
+   
+   /**
+    * Retrieves the current acceleration at this joint.
+    *
+    * @return YoVariable representing the current acceleration
+    */
+   @Override
+   public double getQDD()
+   {
+      return qdd.getDoubleValue();
    }
 
    /**
@@ -212,9 +245,20 @@ public class PinJoint extends OneDegreeOfFreedomJoint
     *
     * @return YoVariable representing the currently applied torque.
     */
-   public DoubleYoVariable getTau()
+   public DoubleYoVariable getTauYoVariable()
    {
       return tau;
+   }
+   
+   /**
+    * Retrieves the torque currently applied at this joint.
+    *
+    * @return YoVariable representing the currently applied torque.
+    */
+   @Override
+   public double getTau()
+   {
+      return tau.getDoubleValue();
    }
 
    public void setQ(double q)

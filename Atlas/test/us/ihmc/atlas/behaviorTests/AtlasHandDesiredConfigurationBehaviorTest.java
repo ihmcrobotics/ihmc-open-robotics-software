@@ -8,11 +8,11 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.HumanoidHandDesiredConfigura
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Slow})
 public class AtlasHandDesiredConfigurationBehaviorTest extends HumanoidHandDesiredConfigurationBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -35,7 +35,7 @@ public class AtlasHandDesiredConfigurationBehaviorTest extends HumanoidHandDesir
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 24.8)
+   @ContinuousIntegrationTest(estimatedDuration = 24.8)
    @Test(timeout = 120000)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
@@ -43,7 +43,7 @@ public class AtlasHandDesiredConfigurationBehaviorTest extends HumanoidHandDesir
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 30.1)
+   @ContinuousIntegrationTest(estimatedDuration = 30.1)
    @Test(timeout = 150000)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {
@@ -51,7 +51,7 @@ public class AtlasHandDesiredConfigurationBehaviorTest extends HumanoidHandDesir
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 22.2)
+   @ContinuousIntegrationTest(estimatedDuration = 22.2)
    @Test(timeout = 110000)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {

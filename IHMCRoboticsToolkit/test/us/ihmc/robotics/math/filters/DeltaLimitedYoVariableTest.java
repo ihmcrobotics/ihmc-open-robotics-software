@@ -22,7 +22,7 @@ public class DeltaLimitedYoVariableTest
    private YoVariableRegistry registry;
    private DeltaLimitedYoVariable variable;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testReferenceAndInputBothNegativeNoOvershootInputGreaterThanReference()
    {
@@ -47,7 +47,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testReferenceAndInputBothNegativeNoOvershootReferenceGreaterThanInput()
    {
@@ -72,7 +72,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testReferenceAndInputBothPositiveNoOvershootReferenceGreaterThanInput()
    {
@@ -97,7 +97,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testReferenceAndInputBothPositiveNoOvershootInputGreaterThanReference()
    {
@@ -122,7 +122,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testPositiveReferenceNegativeInputNoOvershoot()
    {
@@ -147,7 +147,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testNegativeReferencePositiveInputNoOvershoot()
    {
@@ -172,7 +172,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testReferenceAndInputBothNegativeWithOvershootInputGreaterThanReference()
    {
@@ -201,7 +201,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testReferenceAndInputBothNegativeWithOvershootReferenceGreaterThanInput()
    {
@@ -230,7 +230,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testReferenceAndInputBothPositiveWithOvershootInputGreaterThanReference()
    {
@@ -259,7 +259,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testReferenceAndInputBothPositiveWithOvershootReferenceGreaterThanInput()
    {
@@ -288,7 +288,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testPositiveReferenceNegativeInputWithOvershoot()
    {
@@ -317,7 +317,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testNegativeReferencePositiveInputWithOvershoot()
    {
@@ -346,7 +346,7 @@ public class DeltaLimitedYoVariableTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout=300000)
    public void testOvershootThenNoOvershoot()
    {

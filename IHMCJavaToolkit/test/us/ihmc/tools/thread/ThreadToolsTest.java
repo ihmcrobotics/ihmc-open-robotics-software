@@ -15,7 +15,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class ThreadToolsTest
@@ -25,7 +25,7 @@ public class ThreadToolsTest
     * does not produce an error, which is the most likely
     * failure mode.
     */
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRunCommandLineStringedCommmands()
    {
@@ -50,7 +50,7 @@ public class ThreadToolsTest
    /**
     * Tests capturing the output of an echo.
     */
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
    @Test(timeout = 30000)
    public void testRunCommandLineEchoOutput()
    {
@@ -70,7 +70,7 @@ public class ThreadToolsTest
       Assert.assertTrue("Output not correct: " + commandLineOutput.toString(), commandLineOutput.toString().matches("Hi\\s*"));
    }
 
-   @DeployableTestMethod(estimatedDuration = 3.1, targets = TestPlanTarget.Flaky)
+   @ContinuousIntegrationTest(estimatedDuration = 3.1, targetsOverride = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testTimeLimitScheduler()
    {
@@ -106,7 +106,7 @@ public class ThreadToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testIterationLimitScheduler()
    {
@@ -136,7 +136,7 @@ public class ThreadToolsTest
       assertEquals(iterations, counter.get());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Flaky)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Flaky)
    @Test(timeout = 30000)
    public void testExecuteWithTimeout()
    {

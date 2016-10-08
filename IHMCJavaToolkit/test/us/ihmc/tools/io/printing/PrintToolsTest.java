@@ -8,12 +8,12 @@ import java.io.PrintStream;
 import org.junit.Test;
 
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import static us.ihmc.tools.testing.TestPlanTarget.*;
 
 public class PrintToolsTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.0, targets = Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = Exclude)
    @Test(timeout = 30000)
    public void testPrintTools() throws Exception
    {

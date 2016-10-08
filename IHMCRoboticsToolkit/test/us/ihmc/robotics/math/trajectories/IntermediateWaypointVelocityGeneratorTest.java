@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.trajectories;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class IntermediateWaypointVelocityGeneratorTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void test()
    {

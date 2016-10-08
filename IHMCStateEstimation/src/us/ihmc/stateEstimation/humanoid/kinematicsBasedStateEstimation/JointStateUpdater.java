@@ -100,7 +100,7 @@ public class JointStateUpdater
 
          if(chestIMU == null)
          {
-            PrintTools.warn("Pelvis IMU is null.");
+            PrintTools.warn("Chest IMU is null.");
          }
 
          return null;

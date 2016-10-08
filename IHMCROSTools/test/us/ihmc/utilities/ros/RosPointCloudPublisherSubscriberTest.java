@@ -16,23 +16,23 @@ import org.junit.Test;
 
 import sensor_msgs.PointCloud2;
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.utilities.ros.publisher.RosPointCloudPublisher;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.types.PointType;
 
-@DeployableTestClass(targets=TestPlanTarget.Flaky)
+@ContinuousIntegrationPlan(targets=TestPlanTarget.Flaky)
 public class RosPointCloudPublisherSubscriberTest extends IHMCRosTestWithRosCore
 {
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testPubSubSinglePointXYZICloud() throws URISyntaxException, InterruptedException
    {
       testPubSubSingleCloud(PointType.XYZI);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 2000)
    public void testPubSubSinglePointXYZRGBCloud() throws URISyntaxException, InterruptedException
    {

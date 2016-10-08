@@ -19,7 +19,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -265,7 +265,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    public static FullInverseDynamicsStructure createInverseDynamicsStructure(FullRobotModel fullRobotModel)
    {
       RigidBody elevator = fullRobotModel.getElevator();
-      SixDoFJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
       RigidBody estimationLink = fullRobotModel.getPelvis();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);

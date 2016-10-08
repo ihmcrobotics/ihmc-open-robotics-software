@@ -241,8 +241,8 @@ public class VirtualModelControllerTestHelper
 
       RevoluteJoint l_leg_hpz = ScrewTools.addRevoluteJoint("l_leg_hpz", pelvisBody, leftHipYawOffset, Z);
       RevoluteJoint r_leg_hpz = ScrewTools.addRevoluteJoint("r_leg_hpz", pelvisBody, rightHipYawOffset, Z);
-      l_leg_hpz.setQ(l_hip_yaw.getQ().getDoubleValue());
-      r_leg_hpz.setQ(r_hip_yaw.getQ().getDoubleValue());
+      l_leg_hpz.setQ(l_hip_yaw.getQYoVariable().getDoubleValue());
+      r_leg_hpz.setQ(r_hip_yaw.getQYoVariable().getDoubleValue());
       RigidBody leftHipDifferentialBody = copyLinkAsRigidBody(l_hip_differential, l_leg_hpz, "l_hip_differential");
       RigidBody rightHipDifferentialBody = copyLinkAsRigidBody(r_hip_differential, r_leg_hpz, "r_hip_differential");
       jointMap.put(l_leg_hpz, l_hip_yaw);
@@ -264,8 +264,8 @@ public class VirtualModelControllerTestHelper
 
       RevoluteJoint l_leg_hpx = ScrewTools.addRevoluteJoint("l_leg_hpx", leftHipDifferentialBody, leftHipRollOffset, X);
       RevoluteJoint r_leg_hpx = ScrewTools.addRevoluteJoint("r_leg_hpx", rightHipDifferentialBody, rightHipRollOffset, X);
-      l_leg_hpx.setQ(l_hip_roll.getQ().getDoubleValue());
-      r_leg_hpx.setQ(r_hip_roll.getQ().getDoubleValue());
+      l_leg_hpx.setQ(l_hip_roll.getQYoVariable().getDoubleValue());
+      r_leg_hpx.setQ(r_hip_roll.getQYoVariable().getDoubleValue());
       RigidBody leftHipDifferentialBody2 = copyLinkAsRigidBody(l_hip_differential2, l_leg_hpx, "l_hip_differential");
       RigidBody rightHipDifferentialBody2 = copyLinkAsRigidBody(r_hip_differential2, r_leg_hpx, "r_hip_differential");
       jointMap.put(l_leg_hpx, l_hip_roll);
@@ -287,8 +287,8 @@ public class VirtualModelControllerTestHelper
 
       RevoluteJoint l_leg_hpy = ScrewTools.addRevoluteJoint("l_leg_hpy", leftHipDifferentialBody2, leftHipPitchOffset, Y);
       RevoluteJoint r_leg_hpy = ScrewTools.addRevoluteJoint("r_leg_hpy", rightHipDifferentialBody2, rightHipPitchOffset, Y);
-      l_leg_hpy.setQ(l_hip_pitch.getQ().getDoubleValue());
-      r_leg_hpy.setQ(r_hip_pitch.getQ().getDoubleValue());
+      l_leg_hpy.setQ(l_hip_pitch.getQYoVariable().getDoubleValue());
+      r_leg_hpy.setQ(r_hip_pitch.getQYoVariable().getDoubleValue());
       RigidBody leftThighBody = copyLinkAsRigidBody(leftThigh, l_leg_hpy, "l_thigh");
       RigidBody rightThighBody = copyLinkAsRigidBody(rightThigh, r_leg_hpy, "r_thigh");
       jointMap.put(l_leg_hpy, l_hip_pitch);
@@ -310,8 +310,8 @@ public class VirtualModelControllerTestHelper
 
       RevoluteJoint l_leg_kny = ScrewTools.addRevoluteJoint("l_leg_kny", leftThighBody, leftKneePitchOffset, Y);
       RevoluteJoint r_leg_kny = ScrewTools.addRevoluteJoint("r_leg_kny", rightThighBody, rightKneePitchOffset, Y);
-      l_leg_kny.setQ(l_knee_pitch.getQ().getDoubleValue());
-      r_leg_kny.setQ(r_knee_pitch.getQ().getDoubleValue());
+      l_leg_kny.setQ(l_knee_pitch.getQYoVariable().getDoubleValue());
+      r_leg_kny.setQ(r_knee_pitch.getQYoVariable().getDoubleValue());
       RigidBody leftShinBody = copyLinkAsRigidBody(l_shin, l_leg_kny, "l_shin");
       RigidBody rightShinBody = copyLinkAsRigidBody(r_shin, r_leg_kny, "r_shin");
       jointMap.put(l_leg_kny, l_knee_pitch);
@@ -333,8 +333,8 @@ public class VirtualModelControllerTestHelper
 
       RevoluteJoint l_leg_aky = ScrewTools.addRevoluteJoint("l_leg_aky", leftShinBody, leftAnklePitchOffset, Y);
       RevoluteJoint r_leg_aky = ScrewTools.addRevoluteJoint("r_leg_aky", rightShinBody, rightAnklePitchOffset, Y);
-      l_leg_aky.setQ(l_ankle_pitch.getQ().getDoubleValue());
-      r_leg_aky.setQ(r_ankle_pitch.getQ().getDoubleValue());
+      l_leg_aky.setQ(l_ankle_pitch.getQYoVariable().getDoubleValue());
+      r_leg_aky.setQ(r_ankle_pitch.getQYoVariable().getDoubleValue());
       RigidBody leftAnkleDifferentialBody = copyLinkAsRigidBody(l_ankle_differential, l_leg_aky, "l_ankle_differential");
       RigidBody rightAnkleDifferentialBody = copyLinkAsRigidBody(r_ankle_differential, r_leg_aky, "r_ankle_differential");
       jointMap.put(l_leg_aky, l_ankle_pitch);
@@ -356,8 +356,8 @@ public class VirtualModelControllerTestHelper
 
       RevoluteJoint l_leg_akx = ScrewTools.addRevoluteJoint("l_leg_akx", leftAnkleDifferentialBody, leftAnkleRollOffset, X);
       RevoluteJoint r_leg_akx = ScrewTools.addRevoluteJoint("r_leg_akx", rightAnkleDifferentialBody, rightAnkleRollOffset, X);
-      l_leg_akx.setQ(l_ankle_roll.getQ().getDoubleValue());
-      r_leg_akx.setQ(r_ankle_roll.getQ().getDoubleValue());
+      l_leg_akx.setQ(l_ankle_roll.getQYoVariable().getDoubleValue());
+      r_leg_akx.setQ(r_ankle_roll.getQYoVariable().getDoubleValue());
       RigidBody leftFootBody = copyLinkAsRigidBody(l_foot, l_leg_akx, "l_foot");
       RigidBody rightFootBody = copyLinkAsRigidBody(r_foot, r_leg_akx, "r_foot");
       jointMap.put(l_leg_akx, l_ankle_roll);

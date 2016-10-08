@@ -14,7 +14,7 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -33,7 +33,7 @@ public class YoFramePointInMultipleFramesTest
 
    private static final ReferenceFrame[] allFrames = new ReferenceFrame[] { worldFrame, frameA, frameB, frameC };
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructor()
    {
@@ -68,7 +68,7 @@ public class YoFramePointInMultipleFramesTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRegisterFrame()
    {
@@ -106,7 +106,7 @@ public class YoFramePointInMultipleFramesTest
       assertEquals(frameA, referenceFrames.get(1));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetToZero()
    {
@@ -120,7 +120,7 @@ public class YoFramePointInMultipleFramesTest
       assertTrue(framePoint.epsilonEquals(yoFramePointInMultipleFrames.getFrameTuple(), 1e-10));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testChangeToRegisteredFrame()
    {
@@ -151,7 +151,7 @@ public class YoFramePointInMultipleFramesTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetIncludingFrame()
    {

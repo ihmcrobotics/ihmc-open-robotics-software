@@ -28,11 +28,13 @@ public interface CollisionShapeFactory
     * @param radiusZ Radius of box along z-axis
     * @return Description of the shape.
     */
-   public CollisionShapeDescription createBox(double radiusX, double radiusY, double radiusZ);
+   public abstract CollisionShapeDescription<?> createBox(double radiusX, double radiusY, double radiusZ);
 
-   public CollisionShapeDescription createCylinder(double radius, double height);
+   public abstract CollisionShapeDescription<?> createCylinder(double radius, double height);
 
-   public CollisionShapeDescription createSphere(double radius);
+   public abstract CollisionShapeDescription<?> createSphere(double radius);
+
+   public abstract CollisionShapeDescription<?> createCapsule(double radius, double objectHeight);
 
    /**
     * Adds a shape.
@@ -47,7 +49,7 @@ public interface CollisionShapeFactory
     * @param collisionMask Bit field specifying which groups it can collide against.  Set to 0xFFFFFFFF to collide against all groups
     * @return The resulting collision shape.  Already attached to the provided link.
     */
-   public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription description, boolean isGround, int collisionGroup, int collisionMask);
+   public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription<?> description, boolean isGround, int collisionGroup, int collisionMask);
 
-   public CollisionShape addShape(CollisionShapeDescription description);
+   public CollisionShape addShape(CollisionShapeDescription<?> description);
  }

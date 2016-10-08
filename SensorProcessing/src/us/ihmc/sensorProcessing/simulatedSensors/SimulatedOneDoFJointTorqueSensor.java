@@ -18,7 +18,7 @@ public class SimulatedOneDoFJointTorqueSensor extends SimulatedSensor<MutableDou
 
    public void startComputation()
    {
-      jointTorque.setValue(joint.getTau().getDoubleValue());
+      jointTorque.setValue(joint.getTauYoVariable().getDoubleValue());
       corrupt(jointTorque);
       jointTorqueOutputPort.setData(jointTorque);
    }

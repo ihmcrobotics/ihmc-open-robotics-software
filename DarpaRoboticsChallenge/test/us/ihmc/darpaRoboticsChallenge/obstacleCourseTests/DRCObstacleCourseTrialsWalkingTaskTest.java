@@ -28,7 +28,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRobotTestInterface
@@ -64,7 +64,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 38.6)
+	@ContinuousIntegrationTest(estimatedDuration = 38.6)
 	@Test(timeout = 190000)
    public void testStepOnCinderBlocks() throws SimulationExceededMaximumTimeException
    {
@@ -105,7 +105,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 47.3)
+	@ContinuousIntegrationTest(estimatedDuration = 47.3)
    @Test(timeout = 240000)
    public void testStepOnCinderBlocksSlowlyWithDisturbance() throws SimulationExceededMaximumTimeException
    {
@@ -133,8 +133,8 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       ThreadTools.sleep(0);
 
-      swingTime.set(2.0);
-      transferTime.set(2.0);
+      swingTime.set(1.6);
+      transferTime.set(0.8);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.5);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.5);

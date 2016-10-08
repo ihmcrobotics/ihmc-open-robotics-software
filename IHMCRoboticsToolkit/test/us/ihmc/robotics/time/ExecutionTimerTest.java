@@ -13,7 +13,7 @@ public class ExecutionTimerTest
 {
    private static final long RANDOM_SEED = 1976L;
 
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.8)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void test()
    {

@@ -97,7 +97,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.DefaultCollisionVisualize.locX_0,root.DefaultCollisionVisualize.locY_0,root.DefaultCollisionVisualize.locZ_0</Variables>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.totalEnergy</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -109,7 +109,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.DefaultCollisionVisualize.vecX_0,root.DefaultCollisionVisualize.vecY_0,root.DefaultCollisionVisualize.vecZ_0</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -133,9 +133,21 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SpinningCoin.baseef_collision_x,root.SpinningCoin.baseef_collision_y,root.SpinningCoin.baseef_collision_z</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.DefaultCollisionVisualizer.CollisionOneBalls.CollisionOne0X,root.DefaultCollisionVisualizer.CollisionOneBalls.CollisionOne1X,root.DefaultCollisionVisualizer.CollisionOneBalls.CollisionOne2X,root.DefaultCollisionVisualizer.CollisionOneBalls.CollisionOne3X</Variables>
+		<GraphConfiguration>
+			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -161,25 +173,13 @@ Tab0
 
 <Graph Array Window Size>1</Graph Array Window Size>
 <Graph Array Window1>
-<ScreenID>2</ScreenID>
-<WindowLocation>1912.0, -8.0</WindowLocation>
-<WindowSize>1936.0, 1176.0</WindowSize>
+<ScreenID>1</ScreenID>
+<WindowLocation>-9.0, -9.0</WindowLocation>
+<WindowSize>1938.0, 1050.0</WindowSize>
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.DefaultCollisionVisualize.locX_0</Variables>
-		<GraphConfiguration>
-			<Name>config13</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.DefaultCollisionVisualize.locY_0</Variables>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.angularMomentumX</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -191,7 +191,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.DefaultCollisionVisualize.locZ_0</Variables>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.angularMomentumY,root.SpinningCoin.SpinningCoinRobot.angularMomentumX</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -203,7 +203,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.DefaultCollisionVisualize.vecX_0</Variables>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.angularMomentumZ</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -215,7 +215,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.DefaultCollisionVisualize.vecY_0</Variables>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.linearMomentumX</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -227,9 +227,57 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.DefaultCollisionVisualize.vecZ_0</Variables>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.linearMomentumY</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.linearMomentumZ</Variables>
+		<GraphConfiguration>
+			<Name>config19</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.potentialEnergy</Variables>
+		<GraphConfiguration>
+			<Name>config20</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.translationalKineticEnergy,root.SpinningCoin.SpinningCoinRobot.rotationalKineticEnergy</Variables>
+		<GraphConfiguration>
+			<Name>config21</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.SpinningCoin.SpinningCoinRobot.totalEnergy</Variables>
+		<GraphConfiguration>
+			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -248,9 +296,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-0.4270476552520813</Camera X>
- <Camera Y>-0.2430958585143395</Camera Y>
- <Camera Z>0.15233043990611378</Camera Z>
+ <Camera X>0.17685513595350544</Camera X>
+ <Camera Y>-0.5930402991924913</Camera Y>
+ <Camera Z>0.21531005576825887</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -267,15 +315,15 @@ Tab0
  <Position Y>0.0</Position Y>
  <Position Z>0.0</Position Z>
  <Track Booleans>
-<Track>true</Track>
+<Track>false</Track>
 <Track X>true</Track X>
 <Track Y>true</Track Y>
-<Track Z>true</Track Z>
+<Track Z>false</Track Z>
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.09898161417200907</Fix X>
-<Fix Y>0.12337402671806993</Fix Y>
-<Fix Z>0.07426284901461774</Fix Z>
+<Fix X>0.17685513595350544</Fix X>
+<Fix Y>-0.16415172590808003</Fix Y>
+<Fix Z>0.12142944831131222</Fix Z>
 </Fix Position>
 </Canvas 1>

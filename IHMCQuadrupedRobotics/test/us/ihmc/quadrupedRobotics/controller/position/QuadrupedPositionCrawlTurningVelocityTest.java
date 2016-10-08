@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public abstract class QuadrupedPositionCrawlTurningVelocityTest implements QuadrupedMultiRobotTestInterface
@@ -56,7 +56,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 150.0, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 150.0, targetsOverride = {TestPlanTarget.Slow, TestPlanTarget.Video})
    @Test(timeout = 600000)
    public void testTurnInPlaceRegularSpeed() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -72,7 +72,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
    }
    
    //"Turn in place slowly still fails due to CoM shifting outside support polygon. Need to fix it..."
-   @DeployableTestMethod(estimatedDuration = 150.0, targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 150.0, targetsOverride = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
    @Test(timeout = 600000)
    public void testTurnInPlaceSlowly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
@@ -88,7 +88,7 @@ public abstract class QuadrupedPositionCrawlTurningVelocityTest implements Quadr
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 500.0)
+   @ContinuousIntegrationTest(estimatedDuration = 500.0)
    @Test(timeout = 2000000)
    public void testWalkingBackwardStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

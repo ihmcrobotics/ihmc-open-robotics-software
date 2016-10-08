@@ -3,6 +3,7 @@ package us.ihmc.robotics.controllers;
 import javax.vecmath.Matrix3d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -35,8 +36,8 @@ public class EuclideanPositionController implements PositionController
 
    private final YoFrameVector feedbackLinearAction;
    private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAction;
-   
 
+   private final EuclideanTangentialDampingCalculator tangentialDampingCalculator;
    private final double dt;
 
    private final YoPositionPIDGainsInterface gains;
@@ -73,6 +74,8 @@ public class EuclideanPositionController implements PositionController
       rateLimitedFeedbackLinearAction = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAction", "",
             registry, gains.getYoMaximumFeedbackRate(), dt, feedbackLinearAction);
 
+      tangentialDampingCalculator = new EuclideanTangentialDampingCalculator(prefix, bodyFrame, gains.getTangentialDampingGains());
+
       parentRegistry.addChild(registry);
    }
 
@@ -92,6 +95,7 @@ public class EuclideanPositionController implements PositionController
       computeProportionalTerm(desiredPosition);
       if (currentVelocity != null)
          computeDerivativeTerm(desiredVelocity, currentVelocity);
+
       computeIntegralTerm();
       output.setToNaN(bodyFrame);
       output.add(proportionalTerm, derivativeTerm);
@@ -156,15 +160,16 @@ public class EuclideanPositionController implements PositionController
       // Limit the maximum position error considered for control action
       double maximumError = gains.getMaximumProportionalError();
       double errorMagnitude = positionError.length();
+      positionError.getFrameTuple(proportionalTerm);
       if (errorMagnitude > maximumError)
       {
-         derivativeTerm.scale(maximumError / errorMagnitude);
+         proportionalTerm.scale(maximumError / errorMagnitude);
       }
 
-      proportionalTerm.set(desiredPosition);
       proportionalGainMatrix.transform(proportionalTerm.getVector());
    }
 
+   private final Matrix3d tempMatrix = new Matrix3d();
    private void computeDerivativeTerm(FrameVector desiredVelocity, FrameVector currentVelocity)
    {
       desiredVelocity.changeFrame(bodyFrame);
@@ -181,7 +186,11 @@ public class EuclideanPositionController implements PositionController
       }
 
       velocityError.set(derivativeTerm);
-      derivativeGainMatrix.transform(derivativeTerm.getVector());
+
+      tempMatrix.set(derivativeGainMatrix);
+      tangentialDampingCalculator.compute(positionError, tempMatrix);
+
+      tempMatrix.transform(derivativeTerm.getVector());
    }
 
    private void computeIntegralTerm()

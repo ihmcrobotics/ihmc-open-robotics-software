@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
-    <diagram creationDate="2016-Sep-13 13:35" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20160414-2044">
+    <diagram creationDate="2016-Sep-28 13:47" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20151019-2113">
         <filterScript>
 
 // no filter script yet defined for this class diagram
@@ -9,22 +9,24 @@ hide all methods
 hide all fields
 
 </filterScript>
-        <class className="us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector" project="SimulationConstructionSet" xLocation="-576" yLocation="-510"/>
-        <class className="us.ihmc.simulationconstructionset.physics.collision.SCSCollisionDetectorTest" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.SCSCollisionDetectorTest" project="SimulationConstructionSet" xLocation="1764" yLocation="-509"/>
-        <class className="us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler" project="SimulationConstructionSet" xLocation="1024" yLocation="-489"/>
-        <class className="us.ihmc.simulationconstructionset.util.CollisionGroundContactModel" modelMemberId="us.ihmc.simulationconstructionset.util.CollisionGroundContactModel" project="SimulationConstructionSet" xLocation="1212" yLocation="381"/>
-        <class className="us.ihmc.simulationconstructionset.physics.collision.CollisionHandlerListener" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.CollisionHandlerListener" project="SimulationConstructionSet" xLocation="1049" yLocation="-133"/>
-        <class className="us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize" modelMemberId="us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize" project="SimulationConstructionSet" xLocation="1371" yLocation="-488"/>
-        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector" project="SimulationConstructionSet" xLocation="-207" yLocation="-496"/>
-        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetectorTest" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetectorTest" project="SimulationConstructionSet" xLocation="-78" yLocation="-666"/>
-        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory" project="SimulationConstructionSet" xLocation="167" yLocation="-496"/>
-        <class className="us.ihmc.simulationconstructionset.physics.SimpleCollisionShapeWithLink" modelMemberId="us.ihmc.simulationconstructionset.physics.SimpleCollisionShapeWithLink" project="SimulationConstructionSet" xLocation="-334" yLocation="123"/>
-        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShape" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShape" project="SimulationConstructionSet" xLocation="-403" yLocation="279"/>
-        <class className="us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink" modelMemberId="us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink" project="SimulationConstructionSet" xLocation="-127" yLocation="302"/>
-        <class className="us.ihmc.simulationconstructionset.physics.CollisionShapeFactory" modelMemberId="us.ihmc.simulationconstructionset.physics.CollisionShapeFactory" project="SimulationConstructionSet" xLocation="279" yLocation="269"/>
-        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SphereShapeDescription" modelMemberId="us.ihmc.simulationconstructionset.physics.collision.simple.SphereShapeDescription" project="SimulationConstructionSet" xLocation="562" yLocation="-318"/>
-        <class className="us.ihmc.simulationconstructionset.physics.ScsCollisionDetector" modelMemberId="us.ihmc.simulationconstructionset.physics.ScsCollisionDetector" project="SimulationConstructionSet" xLocation="284" yLocation="139"/>
-        <class className="us.ihmc.simulationconstructionset.physics.CollisionHandler" modelMemberId="us.ihmc.simulationconstructionset.physics.CollisionHandler" project="SimulationConstructionSet" xLocation="1041" yLocation="-327"/>
-        <class className="com.bulletphysics.collision.shapes.CollisionShape" modelMemberId="com.bulletphysics.collision.shapes.CollisionShape" project="CARIL" xLocation="-355" yLocation="444"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector" project="SimulationConstructionSet" xLocation="-576" yLocation="-510"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.SCSCollisionDetectorTest" project="SimulationConstructionSet" xLocation="1764" yLocation="-509"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.PolytopeShapeDescription" project="SimulationConstructionSet" xLocation="435" yLocation="5"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SphereShapeDescription" project="SimulationConstructionSet" xLocation="447" yLocation="-309"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.BoxShapeDescription" project="SimulationConstructionSet" xLocation="437" yLocation="-139"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler" project="SimulationConstructionSet" xLocation="1024" yLocation="-489"/>
+        <class className="us.ihmc.simulationconstructionset.util.CollisionGroundContactModel" project="SimulationConstructionSet" xLocation="1212" yLocation="381"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.CollisionHandlerListener" project="SimulationConstructionSet" xLocation="1168" yLocation="-138"/>
+        <class className="us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize" project="SimulationConstructionSet" xLocation="1371" yLocation="-488"/>
+        <class className="us.ihmc.simulationconstructionset.physics.SimpleCollisionShapeWithLink" project="SimulationConstructionSet" xLocation="-545" yLocation="103"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory" project="SimulationConstructionSet" xLocation="514" yLocation="-514"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetectorTest" project="SimulationConstructionSet" xLocation="-103" yLocation="-673"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector" project="SimulationConstructionSet" xLocation="126" yLocation="-505"/>
+        <class className="us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink" project="SimulationConstructionSet" xLocation="-127" yLocation="302"/>
+        <class className="us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShape" project="SimulationConstructionSet" xLocation="-538" yLocation="299"/>
+        <class className="us.ihmc.simulationconstructionset.physics.CollisionShapeFactory" project="SimulationConstructionSet" xLocation="247" yLocation="436"/>
+        <class className="us.ihmc.simulationconstructionset.physics.ScsCollisionDetector" project="SimulationConstructionSet" xLocation="255" yLocation="296"/>
+        <class className="us.ihmc.simulationconstructionset.physics.CollisionHandler" project="SimulationConstructionSet" xLocation="1158" yLocation="-295"/>
+        <class className="us.ihmc.simulationconstructionset.physics.CollisionShape" project="SimulationConstructionSet" xLocation="-188" yLocation="549"/>
     </diagram>
 </ajsv>

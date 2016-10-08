@@ -11,6 +11,7 @@ import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -33,7 +34,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
 
    private SimulationConstructionSet scs;
    private YoVariableRegistry robotRegistry;
-   private SixDoFJoint rootJoint;
+   private FloatingInverseDynamicsJoint rootJoint;
    private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
   
    public FullRobotModelVisualizer(SimulationConstructionSet scs, FullRobotModel fullRobotModel, double updateDT)

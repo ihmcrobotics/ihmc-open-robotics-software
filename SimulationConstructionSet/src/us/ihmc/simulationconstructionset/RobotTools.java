@@ -7,25 +7,19 @@ import java.util.LinkedHashMap;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.RigidBodyInertia;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.*;
 
 public class RobotTools
 {
    public static class SCSRobotFromInverseDynamicsRobotModel extends Robot
    {
-      private final SixDoFJoint idFloatingJoint;
-      private final FloatingJoint scsFloatingJoint;
+      private final FloatingInverseDynamicsJoint idFloatingJoint;
+      private final FloatingSCSJoint scsFloatingJoint;
 
       private final LinkedHashMap<OneDoFJoint, OneDegreeOfFreedomJoint> idToSCSJointMap = new LinkedHashMap<OneDoFJoint, OneDegreeOfFreedomJoint>();
       private final LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJoint> scsToIDJointMap = new LinkedHashMap<OneDegreeOfFreedomJoint, OneDoFJoint>();
@@ -60,6 +54,11 @@ public class RobotTools
          {
             scsFloatingJoint = (FloatingJoint) scsRootJoint;
             idFloatingJoint = (SixDoFJoint) rootJoint;
+         }
+         else if (scsRootJoint instanceof FloatingPlanarJoint)
+         {
+            scsFloatingJoint = (FloatingPlanarJoint) scsRootJoint;
+            idFloatingJoint = (PlanarJoint) rootJoint;
          }
          else if (scsRootJoint instanceof OneDegreeOfFreedomJoint)
          {
@@ -147,7 +146,7 @@ public class RobotTools
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
             OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
-            idJoint.setQ(scsJoint.getQ().getDoubleValue());
+            idJoint.setQ(scsJoint.getQYoVariable().getDoubleValue());
          }
       }
 
@@ -167,7 +166,7 @@ public class RobotTools
          for (OneDegreeOfFreedomJoint scsJoint : allSCSOneDoFJoints)
          {
             OneDoFJoint idJoint = scsToIDJointMap.get(scsJoint);
-            idJoint.setQd(scsJoint.getQD().getDoubleValue());
+            idJoint.setQd(scsJoint.getQDYoVariable().getDoubleValue());
          }
       }
 
@@ -219,6 +218,14 @@ public class RobotTools
 
          FloatingJoint scsSixDoFJoint = new FloatingJoint(jointName, offsetVector, scsRobot);
          scsJoint = scsSixDoFJoint;
+      }
+      else if (idJoint instanceof PlanarJoint)
+      {
+         if (!isRootJoint)
+            throw new RuntimeException("Should not have a PlanarJoint in the middle of the robot.");
+
+         FloatingPlanarJoint scsPlanarJoint = new FloatingPlanarJoint(jointName, offsetVector, scsRobot, Plane.XZ);
+         scsJoint = scsPlanarJoint;
       }
       else if (idJoint instanceof RevoluteJoint)
       {

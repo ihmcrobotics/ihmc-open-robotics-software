@@ -12,7 +12,7 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class GlitchFilteredBooleanYoVariableTest
 {
@@ -37,7 +37,7 @@ public class GlitchFilteredBooleanYoVariableTest
       filteredVariable = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructors_Set_Get()
    {
@@ -64,7 +64,7 @@ public class GlitchFilteredBooleanYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdate()
    {
@@ -120,7 +120,7 @@ public class GlitchFilteredBooleanYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCounter()
    {
@@ -137,7 +137,7 @@ public class GlitchFilteredBooleanYoVariableTest
       
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFiltering()
    {

@@ -48,7 +48,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTestInterface
@@ -58,7 +58,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 41.5)
+   @ContinuousIntegrationTest(estimatedDuration = 41.5)
    @Test(timeout = 210000)
    public void testSingleWaypoint() throws Exception
    {
@@ -92,7 +92,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
          assertTrue(success);
-         
+
          // Now we can do the usual test.
          double trajectoryTime = 1.0;
          FramePose desiredRandomFootPose = new FramePose(foot.getBodyFixedFrame());
@@ -125,7 +125,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 46.8)
+   @ContinuousIntegrationTest(estimatedDuration = 46.8)
    @Test(timeout = 230000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
@@ -159,7 +159,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
          assertTrue(success);
-         
+
          // Now we can do the usual test.
          double firstTrajectoryPointTime = 0.5;
          double timePerWaypoint = 0.1;
@@ -249,7 +249,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 68.1)
+   @ContinuousIntegrationTest(estimatedDuration = 68.1)
    @Test(timeout = 340000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
@@ -283,7 +283,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
          assertTrue(success);
-         
+
          // Now we can do the usual test.
          double firstTrajectoryPointTime = 0.5;
          int numberOfTrajectoryPoints = 100;
@@ -400,7 +400,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 108.9)
+   @ContinuousIntegrationTest(estimatedDuration = 108.9)
    @Test(timeout = 540000)
    public void testQueuedMessages() throws Exception
    {
@@ -434,7 +434,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
          assertTrue(success);
-         
+
          // Now we can do the usual test.
          double firstTrajectoryPointTime = 0.5;
          int numberOfTrajectoryPoints = 20;
@@ -443,7 +443,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
          FramePoint circleCenter = new FramePoint(ankleFrame);
-         circleCenter.set(0.0, robotSide.negateIfRightSide(0.0), 0.10);
+         circleCenter.set(0.0, robotSide.negateIfRightSide(0.0), 0.15);
          double radiusXY = 0.15;
          double radiusZ = 0.08;
          FramePoint tempPoint = new FramePoint();
@@ -558,7 +558,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 32.1)
+   @ContinuousIntegrationTest(estimatedDuration = 32.1)
    @Test(timeout = 160000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
@@ -592,7 +592,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
          assertTrue(success);
-         
+
          // Now we can do the usual test.
          double firstTrajectoryPointTime = 0.5;
          int numberOfTrajectoryPoints = 20;
@@ -694,7 +694,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 38.0)
+   @ContinuousIntegrationTest(estimatedDuration = 38.0)
    @Test(timeout = 190000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
@@ -728,7 +728,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getCapturePointPlannerParameters().getDoubleSupportInitialTransferDuration());
          assertTrue(success);
-         
+
          // Now we can do the usual test.
          double firstTrajectoryPointTime = 0.5;
          int numberOfTrajectoryPoints = 20;

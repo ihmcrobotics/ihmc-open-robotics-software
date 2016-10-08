@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class AndBooleanGlobalParameterTest
 {
@@ -26,7 +26,7 @@ public class AndBooleanGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetThrowsException()
    {
@@ -55,7 +55,7 @@ public class AndBooleanGlobalParameterTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAndBooleanGlobalParameter()
    {
@@ -78,7 +78,7 @@ public class AndBooleanGlobalParameterTest
       assertEquals(valueA && valueB, multiplicativeDoubleGlobalParameter.getValue());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAndBooleanGlobalParameterUpdate()
    {
@@ -114,7 +114,7 @@ public class AndBooleanGlobalParameterTest
       assertEquals(valueA && valueB, multiplicativeDoubleGlobalParameter.getValue());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFamilyTree()
    {

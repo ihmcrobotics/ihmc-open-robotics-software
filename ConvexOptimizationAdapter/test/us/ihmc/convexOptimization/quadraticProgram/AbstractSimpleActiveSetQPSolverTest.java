@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class AbstractSimpleActiveSetQPSolverTest
 {
@@ -19,7 +19,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
 
    public abstract SimpleActiveSetQPSolverInterface createSolverToTest();
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesWithNoInequalityConstraints()
    {
@@ -130,7 +130,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(2.0, objectiveCost, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesWithInequalityConstraints()
    {
@@ -301,7 +301,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(2.0, objectiveCost, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesWithBoundsConstraints()
    {
@@ -540,7 +540,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    }
 
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testClear()
    {
@@ -780,7 +780,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(248.0, objectiveCost, 1e-7);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSolutionMethodsAreAllConsistent()
    {
@@ -893,7 +893,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(10.0, objectiveCost, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void test2DCasesWithPolygonConstraints()
    {
@@ -949,7 +949,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    }
 
    @Ignore // This should pass with a good solver. But a simple one has trouble on it.  
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testChallengingCasesWithPolygonConstraints()
    {
@@ -1010,7 +1010,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    }
 
    // This should pass with a good solver. But a simple one has trouble on it.  
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testChallengingCasesWithPolygonConstraintsCheckFailsWithSimpleSolver()
    {
@@ -1042,7 +1042,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertTrue(Double.isInfinite(lagrangeInequalityMultipliers[2]) || Double.isNaN(lagrangeInequalityMultipliers[2]));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCaseWithNoSolution()
    {
@@ -1076,7 +1076,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertTrue(Double.isInfinite(lagrangeInequalityMultipliers[0]));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testLargeRandomProblemWithInequalityConstraints()
    {
@@ -1207,7 +1207,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testLargeRandomProblemWithInequalityAndBoundsConstraints()
    {
@@ -1425,7 +1425,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    /**
     *  Test with dataset from sim that revealed a bug with the variable lower/upper bounds handling.
     */
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindValidSolutionForDataset20160319()
    {
@@ -1440,7 +1440,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertFalse(MatrixTools.containsNaN(solution));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMaxIterations()
    {
@@ -1503,7 +1503,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(248.0, objectiveCost, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeExceptions()
    {

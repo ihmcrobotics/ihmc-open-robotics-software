@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.trajectories.providers.YoSE3ConfigurationProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class YoSE3ConfigurationProviderTest
 {
@@ -38,7 +38,7 @@ public class YoSE3ConfigurationProviderTest
       registry = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructor()
    {
@@ -46,7 +46,7 @@ public class YoSE3ConfigurationProviderTest
       provider = new YoSE3ConfigurationProvider(name, referenceFrame, registry);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGet()
    {
@@ -62,7 +62,7 @@ public class YoSE3ConfigurationProviderTest
       assertEquals(referenceFrame, framePointToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPose()
    {

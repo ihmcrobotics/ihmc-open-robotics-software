@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class Sphere3dTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void testCommonShape3dFunctionality()
    {
@@ -36,7 +36,7 @@ public class Sphere3dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleConstructor()
    {
@@ -49,7 +49,7 @@ public class Sphere3dTest
       JUnitTools.assertTuple3dEquals(new Point3d(), centerCheck, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsInside()
    {
@@ -70,7 +70,7 @@ public class Sphere3dTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjection()
    {

@@ -11,12 +11,8 @@ public class PelvisHeightTrajectoryTask extends BehaviorTask
 
    public PelvisHeightTrajectoryTask(double heightInWorld, DoubleYoVariable yoTime, PelvisHeightTrajectoryBehavior pelvisHeightTrajectoryBehavior, double trajectoryTime)
    {
-      this(heightInWorld, yoTime, pelvisHeightTrajectoryBehavior, trajectoryTime, 0.0);
-   }
-
-   public PelvisHeightTrajectoryTask(double heightInWorld, DoubleYoVariable yoTime, PelvisHeightTrajectoryBehavior pelvisHeightTrajectoryBehavior, double trajectoryTime, double sleepTime)
-   {
-      super(pelvisHeightTrajectoryBehavior, yoTime, sleepTime);
+    
+      super(pelvisHeightTrajectoryBehavior, yoTime);
       this.pelvisHeightTrajectoryBehavior = pelvisHeightTrajectoryBehavior;
       pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(trajectoryTime, heightInWorld);
    }

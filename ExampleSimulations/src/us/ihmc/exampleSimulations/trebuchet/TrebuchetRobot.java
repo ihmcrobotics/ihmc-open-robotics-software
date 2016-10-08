@@ -374,8 +374,8 @@ public class TrebuchetRobot extends Robot
 
    public void applyFrictionDamping()
    {
-      xSliderJoint.setTau(-1500.0 * xSliderJoint.getQD().getDoubleValue());
-      pivotJoint.setTau(-8000.0 * pivotJoint.getQD().getDoubleValue());
+      xSliderJoint.setTau(-1500.0 * xSliderJoint.getQDYoVariable().getDoubleValue());
+      pivotJoint.setTau(-8000.0 * pivotJoint.getQDYoVariable().getDoubleValue());
    }
 
    public ExternalForcePoint getBallCenterExternalForcePoint()
@@ -390,6 +390,6 @@ public class TrebuchetRobot extends Robot
 
    public double getPivotAngle()
    {
-      return pivotJoint.getQ().getDoubleValue();
+      return pivotJoint.getQYoVariable().getDoubleValue();
    }
 }

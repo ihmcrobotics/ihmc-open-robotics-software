@@ -1,6 +1,9 @@
 package us.ihmc.geometry.polytope;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -10,12 +13,12 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.MutationTestingTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ConvexPolytopeTest
 {
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConvexPolytopeWithAUnitCube()
    {
@@ -88,16 +91,28 @@ public class ConvexPolytopeTest
       JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 0.0, 1.0), vertexSix.getPosition(), 1e-7);
 
       Vector3d supportDirection = new Vector3d(1.0, 1.0, 1.0);
-      PolytopeVertex supportingVertex = polytope.getSupportingVertex(supportDirection);
-      assertTrue(supportingVertex == vertexSeven);
+      Point3d supportingVertex = polytope.getSupportingVertex(supportDirection);
+      assertTrue(supportingVertex == vertexSeven.getPosition());
 
       supportDirection = new Vector3d(-1.0, -1.0, -1.0);
       supportingVertex = polytope.getSupportingVertex(supportDirection);
-      assertTrue(supportingVertex == vertexOne);
+      assertTrue(supportingVertex == vertexOne.getPosition());
 
       supportDirection = new Vector3d(100.0, 0.01, -0.01);
       supportingVertex = polytope.getSupportingVertex(supportDirection);
-      assertTrue(supportingVertex == vertexThree);
+      assertTrue(supportingVertex == vertexThree.getPosition());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test//(timeout = 30000)
+   public void testPolytopeConstructor()
+   {
+      ConvexPolytope cubeOne = ConvexPolytopeConstructor.constructBoxWithCenterAtZero(100.0, 100.0, 0.5);
+      assertEquals(8, cubeOne.getNumberOfVertices());
+      assertEquals(12, cubeOne.getNumberOfEdges());
+      ArrayList<PolytopeVertex[]> edges = cubeOne.getEdges();
+
+      assertEquals(12, edges.size());
    }
 
    public static void main(String[] args)

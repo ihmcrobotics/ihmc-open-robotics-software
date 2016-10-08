@@ -2,10 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import javax.vecmath.Matrix3d;
 
-import us.ihmc.robotics.controllers.GainCalculator;
-import us.ihmc.robotics.controllers.MatrixUpdater;
-import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.*;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -22,6 +19,8 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    private final DoubleYoVariable maxDerivativeError;
    private final DoubleYoVariable maxProportionalError;
 
+   private final YoTangentialDampingGains tangentialDampingGains;
+
    public YoFootPositionGains(String suffix, YoVariableRegistry registry)
    {
       proportionalXYGain = new DoubleYoVariable("kpXYLinear" + suffix, registry);
@@ -34,6 +33,8 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       maximumFeedbackRate = new DoubleYoVariable("maximumLinearFeedbackRate" + suffix, registry);
       maxDerivativeError = new DoubleYoVariable("maximumLinearDerivativeError" + suffix, registry);
       maxProportionalError = new DoubleYoVariable("maximumLinearProportionalError" + suffix, registry);
+
+      tangentialDampingGains = new YoTangentialDampingGains(suffix, registry);
 
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -197,11 +198,24 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
+   public void setTangentialDampingGains(TangentialDampingGains tangentialDampingGains)
+   {
+      this.tangentialDampingGains.set(tangentialDampingGains);
+   }
+
+   @Override
+   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinimumKd)
+   {
+      tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
+   }
+
+   @Override
    public void set(PositionPIDGainsInterface gains)
    {
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setTangentialDampingGains(gains.getTangentialDampingGains());
       setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
       setMaxProportionalError(gains.getMaximumProportionalError());
@@ -231,16 +245,28 @@ public class YoFootPositionGains implements YoPositionPIDGainsInterface
       return maxProportionalError;
    }
 
-   private double[] tempPropotionalGains = new double[3];
+   @Override
+   public YoTangentialDampingGains getYoTangentialDampingGains()
+   {
+      return tangentialDampingGains;
+   }
+
+   @Override
+   public TangentialDampingGains getTangentialDampingGains()
+   {
+      return tangentialDampingGains;
+   }
+
+   private double[] tempProportionalGains = new double[3];
 
    @Override
    public double[] getProportionalGains()
    {
-      tempPropotionalGains[0] = proportionalXYGain.getDoubleValue();
-      tempPropotionalGains[1] = proportionalXYGain.getDoubleValue();
-      tempPropotionalGains[2] = proportionalZGain.getDoubleValue();
+      tempProportionalGains[0] = proportionalXYGain.getDoubleValue();
+      tempProportionalGains[1] = proportionalXYGain.getDoubleValue();
+      tempProportionalGains[2] = proportionalZGain.getDoubleValue();
 
-      return tempPropotionalGains;
+      return tempProportionalGains;
    }
 
    private double[] tempDerivativeGains = new double[3];

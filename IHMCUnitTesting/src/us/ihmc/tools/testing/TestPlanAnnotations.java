@@ -9,20 +9,18 @@ public class TestPlanAnnotations
 {
    public static final Double defaultEstimatedDuration = 0.1;
    
-   // TODO Rename to TestPlanClass?
    @Retention(RetentionPolicy.RUNTIME)
    @Target(ElementType.TYPE)
-   public @interface DeployableTestClass
+   public @interface ContinuousIntegrationPlan
    {
       TestPlanTarget[] targets() default {TestPlanTarget.Fast};
    }
    
-   // TODO Rename to TestPlanMethod?
    @Retention(RetentionPolicy.RUNTIME)
    @Target(ElementType.METHOD)
-   public @interface DeployableTestMethod
+   public @interface ContinuousIntegrationTest
    {
       double estimatedDuration();
-      TestPlanTarget[] targets() default {};
+      TestPlanTarget[] targetsOverride() default {};
    }
 }

@@ -37,7 +37,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCPushRecoveryTest
@@ -89,9 +89,9 @@ public abstract class DRCPushRecoveryTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-   @DeployableTestMethod(estimatedDuration = 23.7)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
-   public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimiWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(script, true, false);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -109,7 +109,28 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 22.3)
+
+   @ContinuousIntegrationTest(estimatedDuration = 23.7)
+   @Test(timeout = 120000)
+   public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(script, true, false);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * swingTime;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      double magnitude = 550.0;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      assertTrue(success);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 22.3)
    @Test(timeout = 110000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -129,7 +150,7 @@ public abstract class DRCPushRecoveryTest
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 21.1)
+   @ContinuousIntegrationTest(estimatedDuration = 21.1)
    @Test(timeout = 110000)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
@@ -142,14 +163,14 @@ public abstract class DRCPushRecoveryTest
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
-      double magnitude = 500.0;
+      double magnitude = 450.0;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 21.5)
+   @ContinuousIntegrationTest(estimatedDuration = 21.5)
    @Test(timeout = 110000)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
@@ -162,14 +183,14 @@ public abstract class DRCPushRecoveryTest
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
-      double magnitude = 400.0;
+      double magnitude = 350.0;
       double duration = 0.15;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 21.4)
+   @ContinuousIntegrationTest(estimatedDuration = 21.4)
    @Test(timeout = 110000)
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
@@ -182,14 +203,14 @@ public abstract class DRCPushRecoveryTest
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
-      double magnitude = 400.0;
+      double magnitude = 350.0;
       double duration = 0.15;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 18.7)
+   @ContinuousIntegrationTest(estimatedDuration = 18.7)
    @Test(timeout = 93000)
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
@@ -204,13 +225,13 @@ public abstract class DRCPushRecoveryTest
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
       forceDirection.normalize();
       double magnitude = 100.0;
-      double duration = 2.0;
+      double duration = 1.0;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0);
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 13.8)
+   @ContinuousIntegrationTest(estimatedDuration = 13.8)
    @Test(timeout = 69000)
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
    {
@@ -223,7 +244,7 @@ public abstract class DRCPushRecoveryTest
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
-      double magnitude = 100.0;
+      double magnitude = 80.0;
       double duration = 2.0;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
 
@@ -237,7 +258,7 @@ public abstract class DRCPushRecoveryTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 27.2)
+   @ContinuousIntegrationTest(estimatedDuration = 27.2)
    @Test(timeout = 140000)
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
@@ -251,13 +272,13 @@ public abstract class DRCPushRecoveryTest
       // push parameters:
       Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
       double magnitude = 100.0;
-      double duration = 2.0;
+      double duration = 1.0;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0);
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 100000)
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
@@ -272,13 +293,13 @@ public abstract class DRCPushRecoveryTest
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
       forceDirection.normalize();
       double magnitude = 100.0;
-      double duration = 1.5; // used to be 2.0 but started failing 8/16
+      double duration = 1.0;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0);
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 18.6)
+   @ContinuousIntegrationTest(estimatedDuration = 18.6)
    @Test(timeout = 93000)
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
@@ -292,13 +313,13 @@ public abstract class DRCPushRecoveryTest
       // push parameters:
       Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
       double magnitude = 100.0;
-      double duration = 2.0;
+      double duration = 1.0;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0);
       assertTrue(success);
    }
 
-   @DeployableTestMethod(estimatedDuration = 16.9)
+   @ContinuousIntegrationTest(estimatedDuration = 16.9)
    @Test(timeout = 84000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
@@ -322,7 +343,7 @@ public abstract class DRCPushRecoveryTest
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
-      double magnitude = 200.0;
+      double magnitude = 180.0;
       double duration = 0.2;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);

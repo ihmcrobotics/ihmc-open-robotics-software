@@ -16,11 +16,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.UI})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.UI})
 public class YoEntryBoxTest
 {
    public enum BadGreekEnum {ALPHA, BETA, GAMMA}
@@ -125,7 +125,7 @@ public class YoEntryBoxTest
 
    // GT - these values are twice the minimum working values for Trogdor.
    // This test is for humans to view
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testEnumDisplay() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -139,7 +139,7 @@ public class YoEntryBoxTest
       scs.closeAndDispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 7.4)
+	@ContinuousIntegrationTest(estimatedDuration = 7.4)
 	@Test(timeout = 37000)
    public void testSwitchToEnumEntry() throws SimulationExceededMaximumTimeException, InterruptedException
    {

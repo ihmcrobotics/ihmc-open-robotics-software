@@ -9,13 +9,6 @@ public class HandTrajectoryTask extends BehaviorTask
    private final HandTrajectoryMessage handTrajectoryMessage;
    private final HandTrajectoryBehavior handTrajectoryBehavior;
 
-   public HandTrajectoryTask(HandTrajectoryMessage handTrajectoryMessage, HandTrajectoryBehavior handTrajectoryBehavior, DoubleYoVariable yoTime, double sleepTime)
-   {
-      super(handTrajectoryBehavior, yoTime, sleepTime);
-      this.handTrajectoryBehavior = handTrajectoryBehavior;
-      this.handTrajectoryMessage = handTrajectoryMessage;
-   }
-
    public HandTrajectoryTask(HandTrajectoryMessage handTrajectoryMessage, HandTrajectoryBehavior handTrajectoryBehavior, DoubleYoVariable yoTime)
    {
       super(handTrajectoryBehavior, yoTime);

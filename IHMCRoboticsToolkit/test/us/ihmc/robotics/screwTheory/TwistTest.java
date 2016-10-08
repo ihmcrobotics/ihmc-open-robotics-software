@@ -13,7 +13,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -36,7 +36,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * Basic test of constructor, getters and setters
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructionAndGettersAndSetters()
    {
@@ -73,7 +73,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * default constructor
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDefaultConstructor()
    {
@@ -89,7 +89,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * Constructing using a double array
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructUsingArray()
    {
@@ -106,7 +106,7 @@ public class TwistTest extends SpatialMotionVectorTest
       assertArrayEquals(array, arrayBack, 0.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingArrayTooSmall()
    {
@@ -114,7 +114,7 @@ public class TwistTest extends SpatialMotionVectorTest
       new Twist(frameC, frameD, frameA, array);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingArrayTooBig()
    {
@@ -126,7 +126,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * Copy constructor
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCopyConstructor()
    {
@@ -167,21 +167,21 @@ public class TwistTest extends SpatialMotionVectorTest
     * Dot product
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDotProduct()
    {
       WrenchTest.testDotProduct(frameA, frameB, frameC);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testDotProductNotAllowed1()
    {
       WrenchTest.testDotProductNotAllowed1(frameA, frameB, frameC);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testDotProductNotAllowed2()
    {
@@ -193,7 +193,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * You shouldn't be able to add two twists expressed in different frames
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testAddExpressedInDifferentFrames()
    {
@@ -207,7 +207,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * You shouldn't be able to add two twists if the second is not relative to the first
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testAddNotRelative()
    {
@@ -222,7 +222,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * (which is allowed)
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAdd()
    {
@@ -278,7 +278,7 @@ public class TwistTest extends SpatialMotionVectorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSub()
    {
@@ -299,7 +299,7 @@ public class TwistTest extends SpatialMotionVectorTest
       SpatialMotionVectorTest.assertSpatialMotionVectorEquals(twist1, twist1Back, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSubWrongExpressedInFrame()
    {
@@ -308,7 +308,7 @@ public class TwistTest extends SpatialMotionVectorTest
       twist1.sub(twist2);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSubFramesDontMatchUp()
    {
@@ -323,7 +323,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * Duindam, Port-Based Modeling and Control for Efficient Bipedal Walking Robots, page 25, lemma 2.8 (b)
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrame()
    {
@@ -364,7 +364,7 @@ public class TwistTest extends SpatialMotionVectorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameSameFrame()
    {
@@ -387,7 +387,7 @@ public class TwistTest extends SpatialMotionVectorTest
       assertEquals(twist1.getBaseFrame(), twist2.getBaseFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetMatrix()
    {
@@ -407,7 +407,7 @@ public class TwistTest extends SpatialMotionVectorTest
       assertEquals(linearVelocity1.getZ(), twistMatrix.get(5, 0), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testVelocityOfPointConsistency()
    {
@@ -428,7 +428,7 @@ public class TwistTest extends SpatialMotionVectorTest
       JUnitTools.assertTuple3dEquals(expected, actual.getVectorCopy(), 1e-6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testBodyOriginLinearPartInBaseFrameAndAngularVelocity()
    {
@@ -473,7 +473,7 @@ public class TwistTest extends SpatialMotionVectorTest
       JUnitTools.assertTuple3dEquals(angularVelocityNumerical, angularVelocityInBaseFrame, 1e-5);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testScrewConstruction()
    {

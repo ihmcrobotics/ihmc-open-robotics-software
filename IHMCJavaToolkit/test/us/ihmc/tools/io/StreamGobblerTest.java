@@ -12,13 +12,13 @@ import java.io.PrintStream;
 import org.junit.Test;
 
 import us.ihmc.tools.io.StreamGobbler;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class StreamGobblerTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testStreamGobblerWithASingleLine() throws IOException
    {
@@ -46,7 +46,7 @@ public class StreamGobblerTest
       assertEquals(0, inputStream.available());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testStreamGobblerToGobbleMultipleLines() throws IOException
    {

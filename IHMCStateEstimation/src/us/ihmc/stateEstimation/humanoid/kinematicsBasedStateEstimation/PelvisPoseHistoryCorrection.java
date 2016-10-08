@@ -21,7 +21,7 @@ import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.YoReferencePose;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 /**
@@ -36,7 +36,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final TimeStampedTransformBuffer stateEstimatorPelvisPoseBuffer;
    private PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
-   private final SixDoFJoint rootJoint;
+   private final FloatingInverseDynamicsJoint rootJoint;
    private final ReferenceFrame pelvisReferenceFrame;
    private final YoVariableRegistry registry;
    private static final double DEFAULT_BREAK_FREQUENCY = 0.015;
@@ -125,7 +125,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, externalPelvisPoseSubscriber);
    }
 
-   public PelvisPoseHistoryCorrection(SixDoFJoint sixDofJoint, final double estimatorDT, YoVariableRegistry parentRegistry, int pelvisBufferSize,
+   public PelvisPoseHistoryCorrection(FloatingInverseDynamicsJoint sixDofJoint, final double estimatorDT, YoVariableRegistry parentRegistry, int pelvisBufferSize,
          PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       this.estimatorDT = estimatorDT;

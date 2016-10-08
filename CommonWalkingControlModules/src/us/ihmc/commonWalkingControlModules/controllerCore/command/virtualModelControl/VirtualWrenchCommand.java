@@ -27,7 +27,7 @@ public class VirtualWrenchCommand implements InverseDynamicsCommand<VirtualWrenc
    public void set(RigidBody controlledBody, Wrench virtualWrench)
    {
       setRigidBody(controlledBody);
-      virtualWrenchAppliedByRigidBody = virtualWrench;
+      virtualWrenchAppliedByRigidBody.set(virtualWrench);
       virtualWrenchAppliedByRigidBody.changeFrame(controlledBody.getBodyFixedFrame());
    }
 
@@ -62,7 +62,7 @@ public class VirtualWrenchCommand implements InverseDynamicsCommand<VirtualWrenc
    {
       controlledBody = other.controlledBody;
       rigidBodyName = other.rigidBodyName;
-      virtualWrenchAppliedByRigidBody = other.virtualWrenchAppliedByRigidBody;
+      virtualWrenchAppliedByRigidBody.set(other.virtualWrenchAppliedByRigidBody);
       selectionMatrix.set(other.selectionMatrix);
    }
 

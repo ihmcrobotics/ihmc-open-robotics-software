@@ -3,12 +3,12 @@ package us.ihmc.simulationconstructionset.util.ground;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class BumpyGroundProfileTest extends GroundProfileTest
 {
    @Override
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testSurfaceNormalGridForSmoothTerrainUsingHeightMap()
    {

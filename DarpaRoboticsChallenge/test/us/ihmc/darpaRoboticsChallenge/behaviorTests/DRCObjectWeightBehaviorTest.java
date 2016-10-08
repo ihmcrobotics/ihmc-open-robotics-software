@@ -21,7 +21,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInterface
@@ -60,7 +60,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 14.6)
+   @ContinuousIntegrationTest(estimatedDuration = 14.6)
    @Test(timeout = 73000)
    public void testConstructorAndSetInput()
    {
@@ -70,7 +70,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
    }
    
    @Ignore("Needs to be reimplemented")
-   @DeployableTestMethod(estimatedDuration = 19.6)
+   @ContinuousIntegrationTest(estimatedDuration = 19.6)
    @Test(timeout = 98000)
    public void testSettingWeight() throws SimulationExceededMaximumTimeException
    {

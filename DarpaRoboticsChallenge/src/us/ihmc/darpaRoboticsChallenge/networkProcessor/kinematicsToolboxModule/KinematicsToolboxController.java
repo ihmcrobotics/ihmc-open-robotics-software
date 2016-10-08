@@ -54,7 +54,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
@@ -82,7 +82,7 @@ public class KinematicsToolboxController
    private final StatusMessageOutputManager statusOutputManager;
    private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
 
-   private final SixDoFJoint desiredRootJoint;
+   private final FloatingInverseDynamicsJoint desiredRootJoint;
    private final OneDoFJoint[] oneDoFJoints;
 
    private final AtomicReference<FramePoint2d> desiredCenterOfMassXYReference = new AtomicReference<>(null);

@@ -10,13 +10,13 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.corruptors.NoiseType;
 import us.ihmc.robotics.math.corruptors.NoisyDoubleYoVariable;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class NoisyDoubleYoVariableTest
 {
    YoVariableRegistry yoVariableRegistry = new YoVariableRegistry("testRegistry");
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSimpleConstructor()
    {
@@ -24,7 +24,7 @@ public class NoisyDoubleYoVariableTest
       noisyDoubleYoVariable.update();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSimpleConstructorDouble()
    {
@@ -33,7 +33,7 @@ public class NoisyDoubleYoVariableTest
       noisyDoubleYoVariable.update();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFullConstructor()
    {
@@ -42,7 +42,7 @@ public class NoisyDoubleYoVariableTest
       noisyDoubleYoVariable.update();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFullConstructorDouble()
    {
@@ -68,7 +68,7 @@ public class NoisyDoubleYoVariableTest
 //  }
 // }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetPerfectDoubleValue()
    {
@@ -81,7 +81,7 @@ public class NoisyDoubleYoVariableTest
       assertTrue(noisyDoubleYoVariable.getPerfectDoubleValue() == 2.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetPerfectDoubleValueDouble()
    {
@@ -95,7 +95,7 @@ public class NoisyDoubleYoVariableTest
       assertTrue(noisyDoubleYoVariable.getPerfectDoubleValue() == 3.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDiscrete()
    {
@@ -112,7 +112,7 @@ public class NoisyDoubleYoVariableTest
       assertFalse(noisy == noisy3);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRandomBound()
    {
@@ -137,7 +137,7 @@ public class NoisyDoubleYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testZeroRandomBound()
    {
@@ -159,7 +159,7 @@ public class NoisyDoubleYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testZeroRandomBoundWithPerfect()
    {
@@ -181,7 +181,7 @@ public class NoisyDoubleYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testStaticBias()
    {
@@ -199,7 +199,7 @@ public class NoisyDoubleYoVariableTest
       assertTrue(noisyDoubleYoVariable.getDoubleValue() == value + bias);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testWalkingBias()
    {
@@ -230,7 +230,7 @@ public class NoisyDoubleYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRandomBoundAndStaticBias()
    {
@@ -256,7 +256,7 @@ public class NoisyDoubleYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRandomBoundAndWalkingBias()
    {
@@ -285,7 +285,7 @@ public class NoisyDoubleYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGaussianNoise()
    {
@@ -311,7 +311,7 @@ public class NoisyDoubleYoVariableTest
       assertEquals(standardDeviation, standardDeviation(values), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGaussianNoiseAndStaticBias()
    {
