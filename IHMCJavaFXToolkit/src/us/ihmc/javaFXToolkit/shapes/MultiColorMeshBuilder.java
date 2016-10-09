@@ -128,6 +128,11 @@ public class MultiColorMeshBuilder
       addBoxMesh(size, size, size, pointsOffset, color);
    }
 
+   public void addCubeMesh(double size, double xOffset, double yOffset, double zOffset, Color color)
+   {
+      addBoxMesh(size, size, size, new Point3d(xOffset, yOffset, zOffset), color);
+   }
+
    public void addLineMesh(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth, Color color)
    {
       float lx = xf - x0;
