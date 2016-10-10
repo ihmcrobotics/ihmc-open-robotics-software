@@ -1,7 +1,6 @@
 package us.ihmc.robotModels;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.*;
@@ -36,7 +35,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
    private final SideDependentList<ReferenceFrame> attachmentPlateFrames = new SideDependentList<>();
    private final ArrayList<OneDoFJoint> oneDoFJointsExcludingHands = new ArrayList<>();
 
-   private SDFHumanoidJointNameMap humanoidJointNameMap;
+   private HumanoidJointNameMap humanoidJointNameMap;
 
    // copy constructor
    public FullHumanoidRobotModelFromDescription(FullHumanoidRobotModelFromDescription modelToCopy)
@@ -44,7 +43,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       this(modelToCopy.description, modelToCopy.humanoidJointNameMap, modelToCopy.sensorLinksToTrack);
    }
 
-   public FullHumanoidRobotModelFromDescription(RobotDescription description, SDFHumanoidJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public FullHumanoidRobotModelFromDescription(RobotDescription description, HumanoidJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       super(description, sdfJointNameMap, sensorLinksToTrack);
 
@@ -327,7 +326,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       {
          head = rigidBody;
       }
-      SDFHumanoidJointNameMap jointMap = (SDFHumanoidJointNameMap) sdfJointNameMap;
+      HumanoidJointNameMap jointMap = (HumanoidJointNameMap) sdfJointNameMap;
       ImmutablePair<RobotSide, LimbName> limbSideAndName = jointMap.getLimbName(childLink.getName());
       if (limbSideAndName != null)
       {

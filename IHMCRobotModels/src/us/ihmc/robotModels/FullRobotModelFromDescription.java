@@ -1,51 +1,24 @@
 package us.ihmc.robotModels;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.SdfLoader.SDFJointNameMap;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.robotics.partNames.JointRole;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.RobotSpecificJointNames;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotDescription.CameraSensorDescription;
-import us.ihmc.robotics.robotDescription.FloatingJointDescription;
-import us.ihmc.robotics.robotDescription.ForceSensorDescription;
-import us.ihmc.robotics.robotDescription.IMUSensorDescription;
-import us.ihmc.robotics.robotDescription.JointDescription;
-import us.ihmc.robotics.robotDescription.LidarSensorDescription;
-import us.ihmc.robotics.robotDescription.LinkDescription;
-import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
-import us.ihmc.robotics.robotDescription.PinJointDescription;
-import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.robotDescription.*;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.tools.containers.ContainerTools;
 
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+import java.util.*;
+
 public class FullRobotModelFromDescription implements FullRobotModel
 {
    protected final RobotDescription description;
 
-   protected final SDFJointNameMap sdfJointNameMap;
+   protected final JointNameMap sdfJointNameMap;
    protected final EnumMap<NeckJointName, OneDoFJoint> neckJoints = ContainerTools.createEnumMap(NeckJointName.class);
    protected final EnumMap<SpineJointName, OneDoFJoint> spineJoints = ContainerTools.createEnumMap(SpineJointName.class);
    protected final String[] sensorLinksToTrack;
@@ -71,12 +44,12 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    private final Map<Enum<?>, RigidBody> endEffectors = new HashMap<>();
 
-   public FullRobotModelFromDescription(RobotDescription description, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public FullRobotModelFromDescription(RobotDescription description, JointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       this(description, sdfJointNameMap, sensorLinksToTrack, false);
    }
 
-   public FullRobotModelFromDescription(RobotDescription description, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack, boolean makeReferenceFramesAlignWithTheJoints)
+   public FullRobotModelFromDescription(RobotDescription description, JointNameMap sdfJointNameMap, String[] sensorLinksToTrack, boolean makeReferenceFramesAlignWithTheJoints)
    {
       super();
       this.description = description;

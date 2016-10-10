@@ -8,11 +8,10 @@ import java.util.Map;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import us.ihmc.SdfLoader.SDFQuadrupedJointNameMap;
-import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.kinematics.JointLimit;
+import us.ihmc.robotics.partNames.QuadrupedJointNameMap;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -28,7 +27,7 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
 
    private QuadrantDependentList<RigidBody> feet;
 
-   public FullQuadrupedRobotModelFromDescription(RobotDescription description, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack,
+   public FullQuadrupedRobotModelFromDescription(RobotDescription description, QuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack,
          Map<QuadrupedJointName, JointLimit> jointLimits)
    {
       this(description, sdfJointNameMap, sensorLinksToTrack);
@@ -36,7 +35,7 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
       this.jointLimits.putAll(jointLimits);
    }
 
-   public FullQuadrupedRobotModelFromDescription(RobotDescription description, SDFQuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public FullQuadrupedRobotModelFromDescription(RobotDescription description, QuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       super(description, sdfJointNameMap, sensorLinksToTrack);
 
@@ -73,7 +72,7 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
 
       super.mapRigidBody(joint, inverseDynamicsJoint, rigidBody);
 
-      SDFQuadrupedJointNameMap jointMap = (SDFQuadrupedJointNameMap) sdfJointNameMap;
+      QuadrupedJointNameMap jointMap = (QuadrupedJointNameMap) sdfJointNameMap;
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String jointBeforeFootName = jointMap.getJointBeforeFootName(robotQuadrant);
