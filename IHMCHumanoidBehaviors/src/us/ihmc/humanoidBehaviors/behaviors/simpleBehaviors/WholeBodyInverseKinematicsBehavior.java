@@ -6,7 +6,7 @@ import javax.vecmath.Quat4d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxStateMessage;
 import us.ihmc.communication.packets.KinematicsToolboxStateMessage.KinematicsToolboxState;

@@ -2,9 +2,9 @@ package us.ihmc.valkyrie.simulation;
 
 import java.io.IOException;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PosePlaybackSCSBridge;
 import us.ihmc.valkyrie.ValkyrieRobotModel;

@@ -1,6 +1,6 @@
 package us.ihmc.valkyrieRosControl;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;

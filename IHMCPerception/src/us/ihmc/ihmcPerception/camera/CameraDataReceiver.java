@@ -9,8 +9,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModelFactory;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoDataServer;

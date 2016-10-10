@@ -3,9 +3,9 @@ package us.ihmc.atlas.ObstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;

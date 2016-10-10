@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.estimator.sensorProcessing.simulatedSensors;
 import java.util.ArrayList;
 
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;

@@ -5,8 +5,8 @@ import java.util.Map;
 
 import javax.vecmath.Quat4d;
 
-import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;

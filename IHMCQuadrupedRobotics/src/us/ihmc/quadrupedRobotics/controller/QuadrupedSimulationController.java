@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.controller;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.OutputWriter;
+import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;

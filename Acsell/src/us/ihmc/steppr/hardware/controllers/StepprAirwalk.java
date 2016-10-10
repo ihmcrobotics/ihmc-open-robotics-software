@@ -2,7 +2,7 @@ package us.ihmc.steppr.hardware.controllers;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

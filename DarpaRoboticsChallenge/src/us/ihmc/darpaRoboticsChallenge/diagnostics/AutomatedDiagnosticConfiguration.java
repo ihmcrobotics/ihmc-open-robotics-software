@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.diagnostics;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;

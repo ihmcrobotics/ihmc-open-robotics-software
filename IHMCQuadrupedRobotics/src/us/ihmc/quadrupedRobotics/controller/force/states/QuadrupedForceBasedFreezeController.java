@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;

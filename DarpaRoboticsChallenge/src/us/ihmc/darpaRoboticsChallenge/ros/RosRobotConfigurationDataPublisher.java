@@ -9,8 +9,8 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.ros.message.Time;
 
 import us.ihmc.robotics.partNames.JointNameMap;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModelFactory;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.IMUPacket;

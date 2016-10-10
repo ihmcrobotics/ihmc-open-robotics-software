@@ -3,12 +3,12 @@ package us.ihmc.quadrupedRobotics.controller.position;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.sensorProcessing.stateEstimation.SimulatedElasticityParameters;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 
