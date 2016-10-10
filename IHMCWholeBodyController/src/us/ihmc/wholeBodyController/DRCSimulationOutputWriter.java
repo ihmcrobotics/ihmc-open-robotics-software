@@ -17,7 +17,7 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 
-public class DRCSimulationOutputWriter extends PerfectSimulatedOutputWriter
+public class DRCSimulationOutputWriter extends PerfectSimulatedOutputWriter implements DRCOutputWriter
 {
    private static final int TICKS_TO_DELAY = 0;
 
