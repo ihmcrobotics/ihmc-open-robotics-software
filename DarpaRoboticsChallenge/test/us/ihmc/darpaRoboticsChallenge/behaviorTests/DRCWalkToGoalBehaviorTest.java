@@ -49,7 +49,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -157,7 +157,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer, robotToTest.getRobotsYoVariableRegistry());
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0, targetsOverride = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
    {

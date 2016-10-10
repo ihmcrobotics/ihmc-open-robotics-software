@@ -14,6 +14,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -25,7 +26,7 @@ import java.util.Set;
 
 public class GroundContactForceOptimizationControlModule
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
    private static final boolean VISUALIZE_RHO_BASIS_VECTORS = false;
    private static final boolean SETUP_RHO_TASKS = true;
 
@@ -47,6 +48,9 @@ public class GroundContactForceOptimizationControlModule
 
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
 
+   private final YoMatrix yoMomentumSelectionMatrix = new YoMatrix("VMCMomentumSelectionMatrix", Wrench.SIZE, Wrench.SIZE, registry);
+   private final YoMatrix yoMomentumObjective = new YoMatrix("VMCMomentumObjectiveMatrix", Wrench.SIZE, 1, registry);
+   private final YoMatrix yoMomentumWeight = new YoMatrix("VMCMomentumWeightMatrix", Wrench.SIZE, Wrench.SIZE, registry);
    private final DenseMatrix64F momentumSelectionMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F momentumObjective = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F momentumJacobian = new DenseMatrix64F(Wrench.SIZE, 1);
@@ -173,6 +177,7 @@ public class GroundContactForceOptimizationControlModule
    public void submitMomentumSelectionMatrix(DenseMatrix64F momentumSelectionMatrix)
    {
       this.momentumSelectionMatrix.set(momentumSelectionMatrix);
+      yoMomentumSelectionMatrix.set(momentumSelectionMatrix);
    }
 
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
@@ -196,7 +201,8 @@ public class GroundContactForceOptimizationControlModule
       momentumRateCommand.getWeightMatrix(tempTaskWeight);
       CommonOps.mult(momentumSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
       CommonOps.multTransB(tempTaskWeightSubspace, momentumSelectionMatrix, momentumWeight);
-
+      yoMomentumWeight.set(momentumWeight);
+      
       // Compute the task Jacobian: J = S * A
       DenseMatrix64F rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
       momentumJacobian.reshape(taskSize, rhoJacobian.numCols);
@@ -206,7 +212,8 @@ public class GroundContactForceOptimizationControlModule
       DenseMatrix64F momentumRate = momentumRateCommand.getMomentumRate();
       CommonOps.subtract(momentumRate, additionalWrench, fullMomentumObjective);
       CommonOps.mult(momentumSelectionMatrix, fullMomentumObjective, momentumObjective);
-
+      yoMomentumObjective.set(momentumObjective);
+      
       // get the selected objective back out
       CommonOps.multTransA(momentumSelectionMatrix, momentumObjective, fullMomentumObjective);
 

@@ -11,13 +11,13 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.testing.MutationTestingTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class TrajectoryPointOptimizerTest
 {
    private static final double epsilon = 10E-7;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected=RuntimeException.class)
    public void testEndPointSetters()
    {
@@ -36,7 +36,7 @@ public class TrajectoryPointOptimizerTest
       optimizer.setEndPoints(rightSize, wrongSize, rightSize, rightSize);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected=RuntimeException.class)
    public void testWaypointSetters()
    {
@@ -64,7 +64,7 @@ public class TrajectoryPointOptimizerTest
       optimizer.setWaypoints(waypoints);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testYoVariables()
    {
@@ -78,7 +78,7 @@ public class TrajectoryPointOptimizerTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleSymmetricProblem()
    {
@@ -147,7 +147,7 @@ public class TrajectoryPointOptimizerTest
       assertEquals(waypointVelocity.get(0), 1.5, epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleProblem()
    {
@@ -177,7 +177,7 @@ public class TrajectoryPointOptimizerTest
          assertEquals(coefficients.get(0).get(i), expected[i], epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTrivialProblem()
    {
@@ -207,7 +207,7 @@ public class TrajectoryPointOptimizerTest
          assertEquals(expected[i], coefficients.get(0).get(i), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTimeDescent()
    {

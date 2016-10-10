@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedPositionCrawlBumpyGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
@@ -55,7 +55,7 @@ public abstract class QuadrupedPositionCrawlBumpyGroundWalkingTest implements Qu
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 200000)
    public void testWalkingOverBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {

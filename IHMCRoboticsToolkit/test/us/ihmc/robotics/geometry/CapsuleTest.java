@@ -2,7 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -22,7 +22,7 @@ public class CapsuleTest
       assertTrue(result.epsilonEquals(exp, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void test()
    {
@@ -97,7 +97,7 @@ public class CapsuleTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOther()
    {
@@ -116,7 +116,7 @@ public class CapsuleTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOther_2()
    {

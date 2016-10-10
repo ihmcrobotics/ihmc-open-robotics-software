@@ -8,7 +8,7 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.YoSignalDerivative;
 import us.ihmc.robotics.math.YoSignalDerivative.DifferentiationMode;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 
 public class YoSignalDerivativeTest
@@ -23,7 +23,7 @@ public class YoSignalDerivativeTest
       yoSignalDerivative = new YoSignalDerivative("test", registry);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void checkConstructor()
    {
@@ -31,7 +31,7 @@ public class YoSignalDerivativeTest
       assertEquals("test", name);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void checkSetDifferentiationMode()
    {
@@ -44,7 +44,7 @@ public class YoSignalDerivativeTest
       assertEquals(DifferentiationMode.USING_DT, differentiationMode2);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void checkDTMode()
    {
@@ -65,7 +65,7 @@ public class YoSignalDerivativeTest
       assertEquals(0.0, derivative4, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void checkSignalChangeModeWithDefaultTolerance()
    {
@@ -89,7 +89,7 @@ public class YoSignalDerivativeTest
       assertEquals(3.5, derivative5, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void checkSignalChangeModeWithUserTolerance()
    {
@@ -116,7 +116,7 @@ public class YoSignalDerivativeTest
       assertEquals(0.036, derivative6, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void checkResetToZero()
    {

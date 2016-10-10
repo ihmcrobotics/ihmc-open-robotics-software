@@ -21,5 +21,5 @@ public interface GilbertJohnsonKeerthiCollisionDetectorListener
 
    public abstract void metStoppingConditionForNoIntersection(Point3d pointOnAToPack, Point3d pointOnBToPack);
 
-   public abstract void checkingIfPolytopesAreColliding(ConvexPolytope polytopeA, ConvexPolytope polytopeB);
+   public abstract void checkingIfPolytopesAreColliding(SupportingVertexHolder polytopeA, SupportingVertexHolder polytopeB);
 }

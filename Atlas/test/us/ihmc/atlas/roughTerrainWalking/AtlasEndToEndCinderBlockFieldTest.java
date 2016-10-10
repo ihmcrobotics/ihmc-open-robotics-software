@@ -6,9 +6,9 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.roughTerrainWalking.EndToEndCinderBlockFieldTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Fast, TestPlanTarget.Video})
 public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldTest
 {
 

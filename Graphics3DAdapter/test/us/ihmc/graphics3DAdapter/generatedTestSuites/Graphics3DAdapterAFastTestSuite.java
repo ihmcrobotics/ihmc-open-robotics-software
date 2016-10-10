@@ -13,8 +13,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
 @SuiteClasses
 ({
    us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtilsTest.class,
-   us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtilsTest.class,
-   us.ihmc.graphics3DAdapter.stlLoader.STLReaderTest.class
+   us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtilsTest.class
 })
 
 public class Graphics3DAdapterAFastTestSuite

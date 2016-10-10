@@ -7,6 +7,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 public class PolytopeShapeDescription<T extends PolytopeShapeDescription<T>> implements CollisionShapeDescription<T>
 {
    private final ConvexPolytope polytope;
+   private double smoothingRadius = 0.0;
 
    public PolytopeShapeDescription(ConvexPolytope polytope)
    {
@@ -18,6 +19,7 @@ public class PolytopeShapeDescription<T extends PolytopeShapeDescription<T>> imp
    {
       ConvexPolytope polytopeCopy = new ConvexPolytope(polytope);
       PolytopeShapeDescription<T> copy = new PolytopeShapeDescription<T>(polytopeCopy);
+      copy.setSmoothingRadius(smoothingRadius);
       return copy;
    }
 
@@ -36,6 +38,16 @@ public class PolytopeShapeDescription<T extends PolytopeShapeDescription<T>> imp
    public void applyTransform(RigidBodyTransform transform)
    {
       this.polytope.applyTransform(transform);
+   }
+
+   public void setSmoothingRadius(double smoothingRadius)
+   {
+      this.smoothingRadius = smoothingRadius;
+   }
+
+   public double getSmoothingRadius()
+   {
+      return smoothingRadius;
    }
 
 }

@@ -11,7 +11,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorAssertListener implements Gil
 {
 
    @Override
-   public void checkingIfPolytopesAreColliding(ConvexPolytope polytopeA, ConvexPolytope polytopeB)
+   public void checkingIfPolytopesAreColliding(SupportingVertexHolder polytopeA, SupportingVertexHolder polytopeB)
    {
       // TODO Auto-generated method stub
    }
@@ -39,8 +39,22 @@ public class GilbertJohnsonKeerthiCollisionDetectorAssertListener implements Gil
             System.err.println("\n---------------------\nlambda = " + lambda + ". Troublesome simplex for closest point:");
             System.err.println(simplex);
          }
-         assertTrue("lambda = " + lambda, lambda >= 0.0 - 1e-7);
-         assertTrue("lambda = " + lambda, lambda <= 1.0 + 1e-7);
+         
+         boolean lambdaGreaterThanZero = lambda >= 0.0 - 1e-7;
+         boolean lambdaLessThanOne = lambda <= 1.0 + 1e-7;
+
+         if (!lambdaGreaterThanZero)
+         {
+            System.err.println("lambda = " + lambda + "\nTroublesome simplex: \n" + simplex);
+         }
+
+         if (!lambdaLessThanOne)
+         {
+            System.err.println("lambda = " + lambda + "\nTroublesome simplex: \n" + simplex);
+         }
+
+         assertTrue(lambdaGreaterThanZero);
+         assertTrue(lambdaLessThanOne);
          lambdaTotal = lambdaTotal + lambda;
       }
 

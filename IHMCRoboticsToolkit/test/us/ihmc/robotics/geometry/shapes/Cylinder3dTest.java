@@ -15,13 +15,13 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class Cylinder3dTest
 {
    double eps = 1e-14;
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testCommonShape3dFunctionality()
    {
@@ -42,7 +42,7 @@ public class Cylinder3dTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testCommonShape3dFunctionality_2()
    {
@@ -63,7 +63,7 @@ public class Cylinder3dTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGettersAndSetters()
    {
@@ -115,7 +115,7 @@ public class Cylinder3dTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithNoTransform()
    {
@@ -151,7 +151,7 @@ public class Cylinder3dTest
       assertTrue(cylinder3d.isInsideOrOnSurface(pointToCheck));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithTransform()
    {
@@ -195,7 +195,7 @@ public class Cylinder3dTest
       assertTrue(cylinder3d.isInsideOrOnSurface(pointToCheck));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOrthogonalProjectionSide()
    {
@@ -210,7 +210,7 @@ public class Cylinder3dTest
       assertPointEquals(expectedProjection, pointToCheckAndPack);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOrthogonalProjectionTop()
    {
@@ -224,7 +224,7 @@ public class Cylinder3dTest
       assertPointEquals(expectedProjection, pointToCheckAndPack);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOrthogonalProjectionBottom()
    {
@@ -247,7 +247,7 @@ public class Cylinder3dTest
       assertEquals(failMessage, expectedPoint.getZ(), actualPoint.getZ(), eps);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSurfaceNormalAt_OnSide()
    {
@@ -263,7 +263,7 @@ public class Cylinder3dTest
       assertEquals(expectedNormal, normalToPack);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSurfaceNormalAt_inSide()
    {
@@ -279,7 +279,7 @@ public class Cylinder3dTest
       assertEquals(expectedNormal, normalToPack);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSurfaceNormalAt_outSide()
    {
@@ -295,7 +295,7 @@ public class Cylinder3dTest
       assertEquals(expectedNormal, normalToPack);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSurfaceNormalAt_above()
    {
@@ -311,7 +311,7 @@ public class Cylinder3dTest
       assertEquals(expectedNormal, normalToPack);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSurfaceNormalAt_below()
    {
@@ -327,7 +327,7 @@ public class Cylinder3dTest
       assertEquals(expectedNormal, normalToPack);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSurfaceNormalAt_upAndToSide()
    {
@@ -344,7 +344,7 @@ public class Cylinder3dTest
       assertEquals(expectedNormal, normalToPack);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSurfaceNormalAt_above_translated()
    {
@@ -364,7 +364,7 @@ public class Cylinder3dTest
       assertEquals(expectedNormal, normalToPack);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCheckInside()
    {

@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.StraightLineOverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurnStraightTurnOverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurnThenStraightOverheadPath;
@@ -37,7 +37,7 @@ public class OverheadPathTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void turningOverheadPath_UsageTest()
    {
@@ -67,7 +67,7 @@ public class OverheadPathTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void turningOverheadPath_PassingPiTest()
    {
@@ -99,7 +99,7 @@ public class OverheadPathTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void straightLineOverheadPath_UsageTest()
    {
@@ -139,7 +139,7 @@ public class OverheadPathTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void turnThenStraightOverheadPath_UsageAndHeadingOffsetTest()
    {
@@ -205,7 +205,7 @@ public class OverheadPathTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void turnStraightTurnOverheadPath_UsageAndHeadingOffsetTest()
    {
@@ -267,7 +267,7 @@ public class OverheadPathTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void turnStraightTurnOverheadPath_turnInPlaceTest()
    {
@@ -342,7 +342,7 @@ public class OverheadPathTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void turningPathInterpolationExtrapolationTest()
    {
@@ -365,7 +365,7 @@ public class OverheadPathTest
       assertEquals("Should extrapolate to -1.0", -1.0,poseAtS.getYaw(), eps);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void straightPathInterpolationExtrapolationTest()
    {

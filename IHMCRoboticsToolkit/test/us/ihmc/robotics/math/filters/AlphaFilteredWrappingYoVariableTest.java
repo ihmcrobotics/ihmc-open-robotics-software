@@ -11,17 +11,17 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
 public class AlphaFilteredWrappingYoVariableTest
 {
    private static final boolean DEBUG = false;
    private final Random random = new Random();
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=60000)
    public void testInputModulo()
    {
@@ -69,7 +69,7 @@ public class AlphaFilteredWrappingYoVariableTest
    }
    
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=60000)
    public void testNoisyFixedPosition()
    {
@@ -98,7 +98,7 @@ public class AlphaFilteredWrappingYoVariableTest
       assertEquals(10.0, alphaFilteredWrappingYoVariable.getDoubleValue(), 1.0);
    }
 	
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=60000)
 	public void testErrorAlwaysDecreases()
 	{
@@ -166,7 +166,7 @@ public class AlphaFilteredWrappingYoVariableTest
 	   return wrappingError;
 	}
 	
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=60000)
    public void testWrappingError()
    {
@@ -207,7 +207,7 @@ public class AlphaFilteredWrappingYoVariableTest
 	   
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=60000)
    public void testAlphaAndBreakFrequencyComputations()
    {

@@ -8,15 +8,15 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = {TestPlanTarget.Flaky})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Flaky})
 public class StreamingDataTCPServerTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 1.0)
+	@ContinuousIntegrationTest(estimatedDuration = 1.0)
 	@Test(timeout=90000)
    public void testTypicalUsage()
    {
@@ -50,7 +50,7 @@ public class StreamingDataTCPServerTest
       streamingDataTCPServer.closeAndBlockTillFullyClosed();
    }
 
-	@DeployableTestMethod(estimatedDuration = 2.2)
+	@ContinuousIntegrationTest(estimatedDuration = 2.2)
 	@Test(timeout=90000)
    public void testMultipleProducersAndConsumersRobustly()
    {
@@ -103,7 +103,7 @@ public class StreamingDataTCPServerTest
       
    }
 
-	@DeployableTestMethod(estimatedDuration = 3.1)
+	@ContinuousIntegrationTest(estimatedDuration = 3.1)
 	@Test(timeout=90000)
    public void testPersistentConsumerToServerRestart()
    {

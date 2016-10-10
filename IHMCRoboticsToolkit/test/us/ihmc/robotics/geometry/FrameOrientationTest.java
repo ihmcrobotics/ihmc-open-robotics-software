@@ -15,7 +15,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class FrameOrientationTest
 {
@@ -43,7 +43,7 @@ public class FrameOrientationTest
       testFrame = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrientationOrientation()
    {
@@ -66,7 +66,7 @@ public class FrameOrientationTest
       assertEquals(original.getReferenceFrame(), test.getReferenceFrame());
    }
 	
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
 	public void testSetOrientationFromOneToTwo()
 	{
@@ -252,7 +252,7 @@ public class FrameOrientationTest
 //      fail("Not yet implemented");    // TODO
 //   }
 
-   @DeployableTestMethod(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout=1000)
    public void testApplyTransform()
    {
@@ -299,7 +299,7 @@ public class FrameOrientationTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout=1000)
    public void testChangeFrame()
    {
@@ -346,7 +346,7 @@ public class FrameOrientationTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameCopy()
    {

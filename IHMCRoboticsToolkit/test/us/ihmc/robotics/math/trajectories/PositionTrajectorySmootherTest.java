@@ -19,7 +19,7 @@ import us.ihmc.robotics.math.trajectories.PositionTrajectorySmoother;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class PositionTrajectorySmootherTest
 {
@@ -56,7 +56,7 @@ public class PositionTrajectorySmootherTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructor()
    {
@@ -89,7 +89,7 @@ public class PositionTrajectorySmootherTest
 //      smoother.setMaxAccelerationAndJerk(maxAbsoluteAcceleration, maxAbsoluteJerk);
 //   }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsDone()
    {
@@ -102,7 +102,7 @@ public class PositionTrajectorySmootherTest
       assertTrue(smoother.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGet()
    {
@@ -114,7 +114,7 @@ public class PositionTrajectorySmootherTest
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPackVelocity()
    {
@@ -131,7 +131,7 @@ public class PositionTrajectorySmootherTest
       assertSame(referenceFrame, velocityToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPackAcceleration()
    {
@@ -148,7 +148,7 @@ public class PositionTrajectorySmootherTest
       assertSame(referenceFrame, accelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPackLinearData()
    {

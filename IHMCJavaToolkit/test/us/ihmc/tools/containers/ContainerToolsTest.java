@@ -20,7 +20,7 @@ import java.util.Vector;
 import org.junit.Test;
 
 import us.ihmc.tools.containers.ContainerTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ContainerToolsTest
 {
@@ -35,7 +35,7 @@ public class ContainerToolsTest
       ONE, TWO, THREE;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCreateEnumMap()
    {
@@ -54,7 +54,7 @@ public class ContainerToolsTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFindLargestElements()
    {
@@ -90,7 +90,7 @@ public class ContainerToolsTest
       assertEquals(3, setOfThreeLargestInts.size());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFlatten()
    {
@@ -137,7 +137,7 @@ public class ContainerToolsTest
       assertEquals(3, numberOfThrees);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testToArrayOfArrays()
    {
@@ -190,7 +190,7 @@ public class ContainerToolsTest
       assertEquals(3, numberOfThrees);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAsSortedList()
    {
@@ -209,7 +209,7 @@ public class ContainerToolsTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRemoveByReference()
    {

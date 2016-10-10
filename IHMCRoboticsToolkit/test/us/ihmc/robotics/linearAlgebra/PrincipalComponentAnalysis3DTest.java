@@ -18,7 +18,7 @@ import org.junit.Test;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class PrincipalComponentAnalysis3DTest
@@ -27,7 +27,7 @@ public class PrincipalComponentAnalysis3DTest
    private static final double EPSILON_HIGH_PRECISION = 1.0e-12;
    private static final double EPSILON_LOW_PRECISION = 2.0e-3;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWith1DData()
    {
@@ -165,7 +165,7 @@ public class PrincipalComponentAnalysis3DTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testWith2DData()
    {
@@ -349,7 +349,7 @@ public class PrincipalComponentAnalysis3DTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWith3DData()
    {
@@ -547,7 +547,7 @@ public class PrincipalComponentAnalysis3DTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Fast)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Fast)
 	@Test(timeout = 30000)
 	/**
 	 * Make sure PCA does not crap out if it gets an empty list of data points.
@@ -560,7 +560,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Fast)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Fast)
 	@Test(timeout = 30000)
 	/**
 	 * Make sure PCA does not crap out if a single data point is passed to it.
@@ -576,7 +576,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Fast)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Fast)
 	@Test(timeout = 30000)
 	/**
 	 * Make sure PCA does not crap out if two data points are passed to it.
@@ -593,7 +593,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.0, targets = TestPlanTarget.Fast)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Fast)
 	@Test(timeout = 30000)
 	/**
 	 * Edge case:

@@ -12,14 +12,14 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.trajectories.ConstantVelocityTrajectoryGenerator;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ConstantVelocityTrajectoryGeneratorTest
 {
    private final double epsilon = 1e-7;
    private ConstantVelocityTrajectoryGenerator constantVelocityTrajectoryGenerator;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSimpleTrajectory()
    {
@@ -36,7 +36,7 @@ public class ConstantVelocityTrajectoryGeneratorTest
       assertTrue(simpleLinearTrajectory.getAcceleration() == 0.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRandomTrajectories()
    {

@@ -19,4 +19,6 @@ public interface PositionPIDGainsInterface
    public abstract double getMaximumFeedback();
 
    public abstract double getMaximumFeedbackRate();
+
+   public abstract TangentialDampingGains getTangentialDampingGains();
 }

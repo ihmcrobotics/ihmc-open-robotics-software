@@ -29,7 +29,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCWallWorldTest implements MultiRobotTestInterface
@@ -63,7 +63,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
    }
 
    @Ignore("Needs to be reimplemented")
-   @DeployableTestMethod(estimatedDuration = 192.2)
+   @ContinuousIntegrationTest(estimatedDuration = 192.2)
    @Test(timeout = 960000)
    public void testVariousHandstepsOnWalls() throws SimulationExceededMaximumTimeException
    {

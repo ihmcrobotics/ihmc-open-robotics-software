@@ -56,7 +56,7 @@ public class RobotDescriptionUsingSpringFlamingoTest
    private static final double FOOT_BEHIND = FOOT_X - FOOT_FORWARD;
    private static final double HIP_OFFSET_Y = 0.12;
 
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 300)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 300)
    @Test(timeout = 1000)
    public void testUsingSpringFlamingoRobotDescription()
    {

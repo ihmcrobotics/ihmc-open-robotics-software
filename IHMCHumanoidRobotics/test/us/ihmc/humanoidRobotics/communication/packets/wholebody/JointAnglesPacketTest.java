@@ -9,14 +9,14 @@ import org.junit.Test;
 
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Fast})
 public class JointAnglesPacketTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNumberOfJoints()
    {
@@ -32,7 +32,7 @@ public class JointAnglesPacketTest
       assertEquals(numberOfWaistJoints, jointAnglesPacket.getNumberOfSpineJoints());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetAndPackWaist()
    {
@@ -79,7 +79,7 @@ public class JointAnglesPacketTest
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetAndPackArmJointAngles()
    {
@@ -129,7 +129,7 @@ public class JointAnglesPacketTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetAndPackLegJointAngles()
    {

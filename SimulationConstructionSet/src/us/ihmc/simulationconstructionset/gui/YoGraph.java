@@ -678,10 +678,10 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
 
    }
 
-   private StringBuffer stringBuffer = new StringBuffer(64);
+   private StringBuffer stringBuffer = new StringBuffer(80);
    @SuppressWarnings("unused")
    private String spaceString = "  ";
-   private char[] charArray = new char[64];
+   private char[] charArray = new char[80];
    @SuppressWarnings("unused")
    private final java.text.NumberFormat doubleFormat = new java.text.DecimalFormat(" 0.00000;-0.00000");
    private final FieldPosition fieldPosition = new FieldPosition(NumberFormat.INTEGER_FIELD);

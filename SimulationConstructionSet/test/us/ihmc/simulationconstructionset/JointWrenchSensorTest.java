@@ -14,12 +14,12 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class JointWrenchSensorTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testStaticallyHangingMasses() throws UnreasonableAccelerationException
    {
@@ -67,7 +67,7 @@ public class JointWrenchSensorTest
       assertJointWrenchEquals(jointWrenchSensorTwo, expectedJointForce, expectedJointTorque);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testJointTorquesMatchWhenSensorAtJoint() throws UnreasonableAccelerationException
    {
@@ -114,7 +114,7 @@ public class JointWrenchSensorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOffsetAtCenterOfMassWithCantileveredBeam() throws UnreasonableAccelerationException
    {

@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 /**
  * It makes sure that the four bar calculator including derivatives and the calculator used in Beast, Steppr, and Wanderer give the same result
@@ -41,7 +41,7 @@ public class FourBarCalculatorsComparisonTest
     */
    private static final double eps = 1e-7;
 
-   @DeployableTestMethod(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void equalOuputAnglesForRandomQuadrilatteralTest()
    {

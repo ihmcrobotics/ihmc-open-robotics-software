@@ -5,13 +5,13 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class SimpleActiveSetQPSolverTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleUnconstrainedOptimization()
    {
@@ -34,7 +34,7 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(2.0, solution[1], 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleEqualityConstrainedOptimization()
    {
@@ -64,7 +64,7 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(1.0, solution[1], 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleInequalityConstrainedOptimizationWithActiveConstraint()
    {
@@ -94,7 +94,7 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(-1.0, solution[1], 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleInequalityConstrainedOptimizationWithInactiveConstraint()
    {
@@ -124,7 +124,7 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(2.0, solution[1], 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNoValidSolutionDueToNonSolvableEqualityConstraints()
    {
@@ -155,7 +155,7 @@ public class SimpleActiveSetQPSolverTest
    }
 
    // Fails when conflicting constraints are active... Need to fix this case.
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testConflictingInequalityAndEqualityConstraintsIfActive()
    {

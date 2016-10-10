@@ -1,7 +1,7 @@
 package us.ihmc.tools.io.logging;
 
 import org.junit.Test;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import java.util.logging.Level;
 
@@ -11,7 +11,7 @@ public class LogToolsTest
 {
    private static final Level[] levels = new Level[]{Level.ALL, Level.CONFIG, Level.FINE, Level.FINER, Level.FINEST, Level.INFO, Level.OFF, Level.SEVERE, Level.SEVERE};
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetGlobalLogLevel()
    {

@@ -38,7 +38,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -104,7 +104,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 50.0, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void perfect() throws IOException
    {
@@ -154,7 +154,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 50.0, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void smallError() throws IOException
    {
@@ -208,7 +208,7 @@ public class KinematicCalibrationHeadLoopResidualTest
     * 
     * @throws IOException
     */
-	@DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 50.0, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void optimize() throws IOException
    {

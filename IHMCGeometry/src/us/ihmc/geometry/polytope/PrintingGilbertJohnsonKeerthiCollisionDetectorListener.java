@@ -7,7 +7,7 @@ public class PrintingGilbertJohnsonKeerthiCollisionDetectorListener implements G
 {
 
    @Override
-   public void checkingIfPolytopesAreColliding(ConvexPolytope polytopeA, ConvexPolytope polytopeB)
+   public void checkingIfPolytopesAreColliding(SupportingVertexHolder polytopeA, SupportingVertexHolder polytopeB)
    {
       System.out.println("\nChecking if Polytopes are colliding");
       System.out.println("PolytopeA = \n" + polytopeA);

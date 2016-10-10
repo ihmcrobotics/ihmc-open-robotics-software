@@ -6,14 +6,14 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 /**
  * Created by agrabertilton on 3/4/15.
  */
 public class DoubleSupportICPEquationsTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSingleSupportICPDerivatives()
    {
@@ -35,7 +35,7 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpDot - w * icp, -w * zmp, 1e-14);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCoefficientCalculations()
    {
@@ -61,7 +61,7 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpDot - w * icp, -w * zmp, 1e-10);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testZMPICPDerivatives()
    {
@@ -91,7 +91,7 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpDot - w * icp, -w * zmp, 1e-10);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSingleCoefficientDetermination()
    {
@@ -118,7 +118,7 @@ public class DoubleSupportICPEquationsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testICPSumFormula()
    {
@@ -147,7 +147,7 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpSum, matrixCalculation, 1e-10);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testICPICalculation()
    {

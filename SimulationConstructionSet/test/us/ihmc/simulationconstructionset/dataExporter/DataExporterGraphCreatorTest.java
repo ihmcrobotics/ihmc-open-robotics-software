@@ -18,14 +18,14 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.testing.TestPlanAnnotations;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.UI})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.UI})
 public class DataExporterGraphCreatorTest
 {
 
-    @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 1.0)
+    @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 1.0)
     @Test(timeout = 30000)
     public void testDataExporterGraphCreator() throws IOException
     {

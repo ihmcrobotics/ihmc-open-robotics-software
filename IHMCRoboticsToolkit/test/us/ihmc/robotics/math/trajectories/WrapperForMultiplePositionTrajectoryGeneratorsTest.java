@@ -21,7 +21,7 @@ import us.ihmc.robotics.math.trajectories.WrapperForMultiplePositionTrajectoryGe
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class WrapperForMultiplePositionTrajectoryGeneratorsTest
 {
@@ -58,7 +58,7 @@ public class WrapperForMultiplePositionTrajectoryGeneratorsTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructor()
    {
@@ -74,7 +74,7 @@ public class WrapperForMultiplePositionTrajectoryGeneratorsTest
       generator = new WrapperForMultiplePositionTrajectoryGenerators(positionTrajectoryGenerators, namePrefix, parentRegistry);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsDone()
    {
@@ -87,7 +87,7 @@ public class WrapperForMultiplePositionTrajectoryGeneratorsTest
       assertTrue(generator.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGet()
    {
@@ -99,7 +99,7 @@ public class WrapperForMultiplePositionTrajectoryGeneratorsTest
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPackVelocity()
    {
@@ -116,7 +116,7 @@ public class WrapperForMultiplePositionTrajectoryGeneratorsTest
       assertSame(referenceFrame, velocityToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPackAcceleration()
    {
@@ -133,7 +133,7 @@ public class WrapperForMultiplePositionTrajectoryGeneratorsTest
       assertSame(referenceFrame, accelerationToPack.getReferenceFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPackLinearData()
    {

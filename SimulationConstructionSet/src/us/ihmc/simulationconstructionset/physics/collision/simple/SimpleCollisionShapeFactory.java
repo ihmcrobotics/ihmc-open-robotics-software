@@ -46,6 +46,12 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    {
       return new SphereShapeDescription(radius, new Point3d());
    }
+   
+   @Override
+   public CollisionShapeDescription createCapsule(double radius, double height)
+   {
+      return new CapsuleShapeDescription(radius, height);
+   }
 
    @Override
    public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription description, boolean isGround, int collisionGroup, int collisionMask)

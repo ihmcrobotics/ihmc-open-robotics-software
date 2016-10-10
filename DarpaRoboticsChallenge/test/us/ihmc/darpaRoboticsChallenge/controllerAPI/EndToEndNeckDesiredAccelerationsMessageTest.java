@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements MultiRobotTestInterface
@@ -36,7 +36,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 14.8)
+   @ContinuousIntegrationTest(estimatedDuration = 14.8)
    @Test(timeout = 74000)
    public void testSimpleCommands() throws Exception
    {

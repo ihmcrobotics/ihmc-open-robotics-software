@@ -6,14 +6,12 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import org.ejml.data.DenseMatrix64F;
-
-import gnu.trove.map.hash.THashMap;
-import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
-import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithm;
 import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.geometry.polytope.SimplexPolytope;
+import us.ihmc.geometry.polytope.SupportingVertexHolder;
+import us.ihmc.robotics.geometry.LineSegment3d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
@@ -26,8 +24,6 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    private final ArrayList<CollisionShape> collisionObjects = new ArrayList<CollisionShape>();
 
    // Temporary variables for computation:
-//   private final RigidBodyTransform transformOne = new RigidBodyTransform();
-//   private final RigidBodyTransform transformTwo = new RigidBodyTransform();
    private final Point3d centerOne = new Point3d();
    private final Point3d centerTwo = new Point3d();
    private final Vector3d centerToCenterVector = new Vector3d();
@@ -70,20 +66,28 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    @Override
    public CollisionShape lookupCollisionShape(Link link)
    {
+      //TODO: What should we be doing here?
       return null;
    }
 
    private final Random random = new Random(1776L);
-   
-//   private final THashMap<CollisionShapeFactory, ArrayList<CollisionShape>> collidingPairs = new THashMap<>();
+
+   //   private final THashMap<CollisionShapeFactory, ArrayList<CollisionShape>> collidingPairs = new THashMap<>();
    private boolean[][] haveCollided = null;
+
+   private boolean useSimpleSpeedupMethod = false;
+   
+   public void setUseSimpleSpeedupMethod()
+   {
+      this.useSimpleSpeedupMethod = true;
+   }
    
    @Override
    public void performCollisionDetection(CollisionDetectionResult result)
    {
       int numberOfObjects = collisionObjects.size();
 
-      if (haveCollided == null) 
+      if (useSimpleSpeedupMethod && (haveCollided == null))
       {
          haveCollided = new boolean[numberOfObjects][numberOfObjects];
       }
@@ -93,208 +97,312 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
          CollisionShape collisionShape = collisionObjects.get(i);
          collisionShape.computeTransformedCollisionShape();
       }
-      
-      
+
       for (int i = 0; i < numberOfObjects; i++)
-      {         
+      {
          CollisionShape objectOne = collisionObjects.get(i);
-         CollisionShapeDescription descriptionOne = objectOne.getTransformedCollisionShapeDescription();
+         CollisionShapeDescription<?> descriptionOne = objectOne.getTransformedCollisionShapeDescription();
 
          for (int j = i + 1; j < numberOfObjects; j++)
          {
-            if ((!haveCollided[i][j]) && (random.nextDouble() < 0.9)) continue;
+            if ((useSimpleSpeedupMethod) && (!haveCollided[i][j]) && (random.nextDouble() < 0.9))
+               continue;
 
             CollisionShape objectTwo = collisionObjects.get(j);
-            CollisionShapeDescription descriptionTwo = objectTwo.getTransformedCollisionShapeDescription();
+            CollisionShapeDescription<?> descriptionTwo = objectTwo.getTransformedCollisionShapeDescription();
 
             boolean areColliding = false;
-            
+
+            //TODO: Make this shorter and more efficient...
+            //TODO: Add Plane
             if ((descriptionOne instanceof SphereShapeDescription) && (descriptionTwo instanceof SphereShapeDescription))
             {
-               doSphereSphereCollisionDetection(objectOne, (SphereShapeDescription) descriptionOne, objectTwo, (SphereShapeDescription) descriptionTwo, result);
+               areColliding = doSphereSphereCollisionDetection(objectOne, (SphereShapeDescription<?>) descriptionOne, objectTwo,
+                     (SphereShapeDescription<?>) descriptionTwo, result);
+            }
+            else if ((descriptionOne instanceof CapsuleShapeDescription) && (descriptionTwo instanceof CapsuleShapeDescription))
+            {
+               areColliding = doCapsuleCapsuleCollisionDetection(objectOne, (CapsuleShapeDescription<?>) descriptionOne, objectTwo,
+                     (CapsuleShapeDescription<?>) descriptionTwo, result);
             }
             else if ((descriptionOne instanceof PolytopeShapeDescription) && (descriptionTwo instanceof PolytopeShapeDescription))
             {
-               areColliding = doPolytopePolytopeCollisionDetection(objectOne, (PolytopeShapeDescription) descriptionOne, objectTwo, (PolytopeShapeDescription) descriptionTwo,
-                     result);
+               areColliding = doPolytopePolytopeCollisionDetection(objectOne, (PolytopeShapeDescription<?>) descriptionOne, objectTwo,
+                     (PolytopeShapeDescription<?>) descriptionTwo, result);
             }
-            else if ((descriptionOne instanceof BoxShapeDescription) && (descriptionTwo instanceof BoxShapeDescription))
+            else if ((descriptionOne instanceof CylinderShapeDescription) && (descriptionTwo instanceof CylinderShapeDescription))
             {
-               doBoxBoxCollisionDetection(objectOne, (BoxShapeDescription) descriptionOne, objectTwo, (BoxShapeDescription) descriptionTwo, result);
+               areColliding = doCylinderCylinderCollisionDetection(objectOne, (CylinderShapeDescription<?>) descriptionOne, objectTwo,
+                     (CylinderShapeDescription<?>) descriptionTwo, result);
             }
             
+            
+            else if ((descriptionOne instanceof SphereShapeDescription) && (descriptionTwo instanceof CapsuleShapeDescription))
+            {
+               areColliding = doCapsuleSphereCollisionDetection(objectTwo, (CapsuleShapeDescription<?>) descriptionTwo, objectOne,
+                     (SphereShapeDescription<?>) descriptionOne, result);
+            }
+            else if ((descriptionOne instanceof CapsuleShapeDescription) && (descriptionTwo instanceof SphereShapeDescription))
+            {
+               areColliding = doCapsuleSphereCollisionDetection(objectOne, (CapsuleShapeDescription<?>) descriptionOne, objectTwo,
+                     (SphereShapeDescription<?>) descriptionTwo, result);
+            }
+            
+            else if ((descriptionOne instanceof SphereShapeDescription) && (descriptionTwo instanceof PolytopeShapeDescription))
+            {
+               areColliding = doSpherePolytopeCollisionDetection(objectOne, (SphereShapeDescription<?>) descriptionOne, objectTwo,
+                     (PolytopeShapeDescription<?>) descriptionTwo, result);
+            }
+            else if ((descriptionOne instanceof PolytopeShapeDescription) && (descriptionTwo instanceof SphereShapeDescription))
+            {
+               areColliding = doSpherePolytopeCollisionDetection(objectTwo, (SphereShapeDescription<?>) descriptionTwo, objectOne,
+                     (PolytopeShapeDescription<?>) descriptionOne, result);
+            }
+            
+            else if ((descriptionOne instanceof SphereShapeDescription) && (descriptionTwo instanceof CylinderShapeDescription))
+            {
+               areColliding = doSphereCylinderCollisionDetection(objectOne, (SphereShapeDescription<?>) descriptionOne, objectTwo,
+                     (CylinderShapeDescription<?>) descriptionTwo, result);
+            }
+            else if ((descriptionOne instanceof CylinderShapeDescription) && (descriptionTwo instanceof SphereShapeDescription))
+            {
+               areColliding = doSphereCylinderCollisionDetection(objectTwo, (SphereShapeDescription<?>) descriptionTwo, objectOne,
+                     (CylinderShapeDescription<?>) descriptionOne, result);
+            }
+            
+            
+            else if ((descriptionOne instanceof CapsuleShapeDescription) && (descriptionTwo instanceof PolytopeShapeDescription))
+            {
+               areColliding = doCapsulePolytopeCollisionDetection(objectOne, (CapsuleShapeDescription<?>) descriptionOne, objectTwo,
+                     (PolytopeShapeDescription<?>) descriptionTwo, result);
+            }
+            else if ((descriptionOne instanceof PolytopeShapeDescription) && (descriptionTwo instanceof CapsuleShapeDescription))
+            {
+               areColliding = doCapsulePolytopeCollisionDetection(objectTwo, (CapsuleShapeDescription<?>) descriptionTwo, objectOne,
+                     (PolytopeShapeDescription<?>) descriptionOne, result);
+            }
+            else if ((descriptionOne instanceof CapsuleShapeDescription) && (descriptionTwo instanceof CylinderShapeDescription))
+            {
+               areColliding = doCapsuleCylinderCollisionDetection(objectOne, (CapsuleShapeDescription<?>) descriptionOne, objectTwo,
+                     (CylinderShapeDescription<?>) descriptionTwo, result);
+            }
+            else if ((descriptionOne instanceof CylinderShapeDescription) && (descriptionTwo instanceof CapsuleShapeDescription))
+            {
+               areColliding = doCapsuleCylinderCollisionDetection(objectTwo, (CapsuleShapeDescription<?>) descriptionTwo, objectOne,
+                     (CylinderShapeDescription<?>) descriptionOne, result);
+            }
+
+            else if ((descriptionOne instanceof PolytopeShapeDescription) && (descriptionTwo instanceof CylinderShapeDescription))
+            {
+               areColliding = doCylinderPolytopeCollisionDetection(objectTwo, (CylinderShapeDescription<?>) descriptionTwo, objectOne,
+                     (PolytopeShapeDescription<?>) descriptionOne, result);
+            }
+            else if ((descriptionOne instanceof CylinderShapeDescription) && (descriptionTwo instanceof PolytopeShapeDescription))
+            {
+               areColliding = doCylinderPolytopeCollisionDetection(objectOne, (CylinderShapeDescription<?>) descriptionOne, objectTwo,
+                     (PolytopeShapeDescription<?>) descriptionTwo, result);
+            }
+            
+            else if ((descriptionOne instanceof BoxShapeDescription) && (descriptionTwo instanceof BoxShapeDescription))
+            {
+               areColliding = doBoxBoxCollisionDetection(objectOne, (BoxShapeDescription<?>) descriptionOne, objectTwo, (BoxShapeDescription<?>) descriptionTwo,
+                     result);
+            }
+
             if (areColliding)
             {
-               haveCollided[i][j] = true;
-//               ArrayList<CollisionShape> arrayList = collidingPairs.get(objectOne);
-//               if (arrayList == null)
-//               {
-//                  arrayList = new ArrayList<>();
-//                  collidingPairs.put(objectOne, arrayList);
-//               }
-//               
-//               if (!arrayList.contains(objectTwo))
-//               {
-//                  arrayList.add(objectTwo);
-//               }
+               if (useSimpleSpeedupMethod) haveCollided[i][j] = true;
+               //               ArrayList<CollisionShape> arrayList = collidingPairs.get(objectOne);
+               //               if (arrayList == null)
+               //               {
+               //                  arrayList = new ArrayList<>();
+               //                  collidingPairs.put(objectOne, arrayList);
+               //               }
+               //               
+               //               if (!arrayList.contains(objectTwo))
+               //               {
+               //                  arrayList.add(objectTwo);
+               //               }
             }
          }
       }
    }
 
-   //   private final SimpleActiveSetQPStandaloneSolver solver = new SimpleActiveSetQPStandaloneSolver();
-   //   private final QuadProgSolver solver = new QuadProgSolver(16, 2, 16);
-   private final OASESConstrainedQPSolver solver = new OASESConstrainedQPSolver(null);
-
-   private final DenseMatrix64F GMatrix = new DenseMatrix64F(3, 8);
-   private final DenseMatrix64F HMatrix = new DenseMatrix64F(3, 8);
-
-   private final DenseMatrix64F GTransposeMatrix = new DenseMatrix64F(8, 3);
-   private final DenseMatrix64F HTransposeMatrix = new DenseMatrix64F(8, 3);
-
-   private final DenseMatrix64F GTransposeGMatrix = new DenseMatrix64F(8, 8);
-   private final DenseMatrix64F HTransposeHMatrix = new DenseMatrix64F(8, 8);
-
-   private final DenseMatrix64F HTransposeGMatrix = new DenseMatrix64F(8, 8);
-   private final DenseMatrix64F GTransposeHMatrix = new DenseMatrix64F(8, 8);
-
-   private final DenseMatrix64F quadraticCostGMatrix = new DenseMatrix64F(16, 16);
-   private final DenseMatrix64F quadraticCostFVector = new DenseMatrix64F(16, 1);
-
-   private final DenseMatrix64F linearEqualityConstraintA = new DenseMatrix64F(2, 16);
-   private final DenseMatrix64F linearEqualityConstraintB = new DenseMatrix64F(2, 1);
-
-   private final DenseMatrix64F linearInequalityConstraintA = new DenseMatrix64F(16, 16);
-   private final DenseMatrix64F linearInequalityConstraintB = new DenseMatrix64F(16, 1);
-   private final boolean[] linearInequalityActiveSet = new boolean[16];
-   private final DenseMatrix64F solutionVector = new DenseMatrix64F(16, 1);
-   private final Point3d vertex = new Point3d();
-
-   private void doBoxBoxCollisionDetection(CollisionShape objectOne, BoxShapeDescription descriptionOne, CollisionShape objectTwo,
-         BoxShapeDescription descriptionTwo, CollisionDetectionResult result)
+ 
+   private boolean doPolytopePolytopeCollisionDetection(CollisionShape objectOne, PolytopeShapeDescription<?> polytopeShapeDescriptionOne,
+         CollisionShape objectTwo, PolytopeShapeDescription<?> polytopeShapeDescriptionTwo, CollisionDetectionResult result)
    {
-////      objectOne.getTransformToWorld(transformOne);
-////      objectOne.getTransformToWorld(transformTwo);
-//
-//      populateMatrixWithBoxVertices(GMatrix, descriptionOne);
-//      populateMatrixWithBoxVertices(HMatrix, descriptionTwo);
-//
-//      CommonOps.transpose(GMatrix, GTransposeMatrix);
-//      CommonOps.transpose(HMatrix, HTransposeMatrix);
-//
-//      CommonOps.mult(GTransposeMatrix, GMatrix, GTransposeGMatrix);
-//      CommonOps.mult(HTransposeMatrix, HMatrix, HTransposeHMatrix);
-//      CommonOps.mult(HTransposeMatrix, GMatrix, HTransposeGMatrix);
-//
-//      CommonOps.transpose(HTransposeGMatrix, GTransposeHMatrix);
-//
-//      for (int i = 0; i < 8; i++)
-//      {
-//         for (int j = 0; j < 8; j++)
-//         {
-//            quadraticCostGMatrix.set(i, j, GTransposeGMatrix.get(i, j));
-//            quadraticCostGMatrix.set(i + 8, j + 8, HTransposeHMatrix.get(i, j));
-//
-//            quadraticCostGMatrix.set(i + 8, j, -HTransposeGMatrix.get(i, j));
-//            quadraticCostGMatrix.set(i, j + 8, -GTransposeHMatrix.get(i, j));
-//
-//         }
-//
-//         linearInequalityActiveSet[i] = false;
-//         linearInequalityActiveSet[i + 8] = false;
-//
-//         linearEqualityConstraintA.set(0, i, 1.0);
-//         linearEqualityConstraintA.set(1, i + 8, 1.0);
-//
-//         linearInequalityConstraintA.set(i, i, 1.0);
-//         linearInequalityConstraintB.set(i, 0, 0.0);
-//         linearInequalityConstraintA.set(i + 8, i + 8, 1.0);
-//         linearInequalityConstraintB.set(i + 8, 0, 0.0);
-//      }
-//
-//      linearEqualityConstraintB.set(0, 0, 1.0);
-//      linearEqualityConstraintB.set(1, 0, 1.0);
-//
-//      boolean initialize = false;
-//      try
-//      {
-//         solver.solve(quadraticCostGMatrix, quadraticCostFVector, linearEqualityConstraintA, linearEqualityConstraintB, linearInequalityConstraintA,
-//               linearInequalityConstraintB, solutionVector, initialize);
-//         System.out.println("solutionVector = " + solutionVector);
-//
-//      }
-//      catch (NoConvergenceException exception)
-//      {
-//
-//      }
+      SupportingVertexHolder polytopeOne = polytopeShapeDescriptionOne.getPolytope();
+      SupportingVertexHolder polytopeTwo = polytopeShapeDescriptionTwo.getPolytope();
+
+      double radiusOne = polytopeShapeDescriptionOne.getSmoothingRadius();
+      double radiusTwo = polytopeShapeDescriptionTwo.getSmoothingRadius();
+
+      return doPolytopePolytopeCollisionDetection(objectOne, polytopeOne, radiusOne, objectTwo, polytopeTwo, radiusTwo, result);
    }
 
-//   private void populateMatrixWithBoxVertices(DenseMatrix64F matrix, BoxShapeDescription descriptionOne)
-//   {
-//      double halfLengthXOne = descriptionOne.getHalfLengthX();
-//      double halfWidthYOne = descriptionOne.getHalfWidthY();
-//      double halfHeightZOne = descriptionOne.getHalfHeightZ();
-//
-//      int index = 0;
-//
-//      for (double multX = -1.0; multX < 1.1; multX += 2.0)
-//      {
-//         for (double multY = -1.0; multY < 1.1; multY += 2.0)
-//         {
-//            for (double multZ = -1.0; multZ < 1.1; multZ += 2.0)
-//            {
-//               vertex.set(halfLengthXOne * multX, halfWidthYOne * multY, halfHeightZOne * multZ);
-//               transformOne.transform(vertex);
-//               matrix.set(0, index, vertex.getX());
-//               matrix.set(1, index, vertex.getY());
-//               matrix.set(2, index, vertex.getZ());
-//
-//               index++;
-//            }
-//         }
-//      }
-//   }
+   private boolean doCylinderPolytopeCollisionDetection(CollisionShape objectOne, CylinderShapeDescription<?> descriptionOne, CollisionShape objectTwo,
+         PolytopeShapeDescription<?> descriptionTwo, CollisionDetectionResult result)
+   {
+      SupportingVertexHolder polytopeOne = descriptionOne.getSupportingVertexHolder();
+      SupportingVertexHolder polytopeTwo = descriptionTwo.getPolytope();
 
-   private void doSphereSphereCollisionDetection(CollisionShape objectOne, SphereShapeDescription descriptionOne, CollisionShape objectTwo,
-         SphereShapeDescription descriptionTwo, CollisionDetectionResult result)
+      double radiusOne = descriptionOne.getSmoothingRadius();
+      double radiusTwo = descriptionTwo.getSmoothingRadius();
+
+      return doPolytopePolytopeCollisionDetection(objectOne, polytopeOne, radiusOne, objectTwo, polytopeTwo, radiusTwo, result);
+   }
+
+   private boolean doCylinderCylinderCollisionDetection(CollisionShape objectOne, CylinderShapeDescription<?> descriptionOne, CollisionShape objectTwo,
+         CylinderShapeDescription<?> descriptionTwo, CollisionDetectionResult result)
+   {
+      SupportingVertexHolder polytopeOne = descriptionOne.getSupportingVertexHolder();
+      SupportingVertexHolder polytopeTwo = descriptionTwo.getSupportingVertexHolder();
+
+      double radiusOne = descriptionOne.getSmoothingRadius();
+      double radiusTwo = descriptionTwo.getSmoothingRadius();
+
+      return doPolytopePolytopeCollisionDetection(objectOne, polytopeOne, radiusOne, objectTwo, polytopeTwo, radiusTwo, result);
+   }
+
+   private boolean doBoxBoxCollisionDetection(CollisionShape objectOne, BoxShapeDescription<?> descriptionOne, CollisionShape objectTwo,
+         BoxShapeDescription<?> descriptionTwo, CollisionDetectionResult result)
+   {
+      return false;
+   }
+
+   private final LineSegment3d lineSegmentOne = new LineSegment3d();
+   private final LineSegment3d lineSegmentTwo = new LineSegment3d();
+   private final Point3d closestPointOnOne = new Point3d();
+   private final Point3d closestPointOnTwo = new Point3d();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+
+   private boolean doCapsuleSphereCollisionDetection(CollisionShape objectOne, CapsuleShapeDescription<?> descriptionOne, CollisionShape objectTwo,
+         SphereShapeDescription<?> descriptionTwo, CollisionDetectionResult result)
+   {
+      double capsuleRadius = descriptionOne.getRadius();
+      descriptionOne.getLineSegment(lineSegmentOne);
+
+      double sphereRadius = descriptionTwo.getRadius();
+      descriptionTwo.getCenter(centerOfSphere);
+
+      lineSegmentOne.getProjectionOntoLineSegment(centerOfSphere, closestPointOnOne);
+
+      double distanceSquared = centerOfSphere.distanceSquared(closestPointOnOne);
+
+      if (distanceSquared <= (capsuleRadius + sphereRadius) * (capsuleRadius + sphereRadius))
+      {
+         addCollisionPairToResult(closestPointOnOne, centerOfSphere, capsuleRadius, sphereRadius, distanceSquared, objectOne, objectTwo, result);
+         return true;
+      }
+
+      else
+      {
+         return false;
+      }
+   }
+   
+   private boolean doSphereCylinderCollisionDetection(CollisionShape objectOne, SphereShapeDescription<?> descriptionOne, CollisionShape objectTwo,
+         CylinderShapeDescription<?> descriptionTwo, CollisionDetectionResult result)
+   {
+      double sphereRadius = descriptionOne.getRadius();
+      descriptionOne.getCenter(centerOfSphere);
+      
+      descriptionTwo.getProjection(centerOfSphere, closestPointOnTwo);
+      double cylinderSmoothingRadius = descriptionTwo.getSmoothingRadius();
+
+      double distanceSquared = centerOfSphere.distanceSquared(closestPointOnTwo);
+
+      if (distanceSquared <= (cylinderSmoothingRadius + sphereRadius) * (cylinderSmoothingRadius + sphereRadius))
+      {
+         addCollisionPairToResult(centerOfSphere, closestPointOnTwo, sphereRadius, cylinderSmoothingRadius, distanceSquared, objectOne, objectTwo, result);
+         return true;
+      }
+
+      else
+      {
+         return false;
+      }
+   }
+   
+   private boolean doCapsuleCylinderCollisionDetection(CollisionShape capsuleShape, CapsuleShapeDescription<?> capsuleDescription, CollisionShape cylinderShape,
+         CylinderShapeDescription<?> cylinderDescription, CollisionDetectionResult result)
+   {
+      double cylinderSmoothingRadius = cylinderDescription.getSmoothingRadius();
+      SupportingVertexHolder cylinderSupportingVertexHolder = cylinderDescription.getSupportingVertexHolder();
+
+      return doCapsuleSupportingVertexHolderCollisionDetection(capsuleShape, capsuleDescription, cylinderShape, cylinderSupportingVertexHolder, cylinderSmoothingRadius, result);
+   }
+
+   private boolean doCapsuleCapsuleCollisionDetection(CollisionShape objectOne, CapsuleShapeDescription<?> descriptionOne, CollisionShape objectTwo,
+         CapsuleShapeDescription<?> descriptionTwo, CollisionDetectionResult result)
+   {
+      double radiusOne = descriptionOne.getRadius();
+      double radiusTwo = descriptionTwo.getRadius();
+
+      descriptionOne.getLineSegment(lineSegmentOne);
+      descriptionTwo.getLineSegment(lineSegmentTwo);
+
+      getClosestPointsOnLineSegments(lineSegmentOne, lineSegmentTwo, closestPointOnOne, closestPointOnTwo);
+
+      double distanceSquared = closestPointOnOne.distanceSquared(closestPointOnTwo);
+
+      if (distanceSquared <= (radiusOne + radiusTwo) * (radiusOne + radiusTwo))
+      {
+         addCollisionPairToResult(closestPointOnOne, closestPointOnTwo, radiusOne, radiusTwo, distanceSquared, objectOne, objectTwo, result);
+         return true;
+      }
+
+      return false;
+   }
+
+   private void addCollisionPairToResult(Point3d pointOne, Point3d pointTwo, double radiusOne, double radiusTwo, double distanceSquared,
+         CollisionShape objectOne, CollisionShape objectTwo, CollisionDetectionResult result)
+   {
+      Vector3d normalVector = new Vector3d();
+
+      normalVector.sub(pointTwo, pointOne);
+      
+      // TODO: Get the normal from the features if the points are close.
+      if (normalVector.lengthSquared() < 1e-10) return;
+      normalVector.normalize();
+
+      Point3d pointOnOne = new Point3d(pointOne);
+      tempVector.set(normalVector);
+      tempVector.scale(radiusOne);
+      pointOnOne.add(tempVector);
+
+      Point3d pointOnTwo = new Point3d(pointTwo);
+      tempVector.set(normalVector);
+      tempVector.scale(-radiusTwo);
+      pointOnTwo.add(tempVector);
+
+      double distance = Math.sqrt(distanceSquared) - radiusOne - radiusTwo;
+
+      SimpleContactWrapper contacts = new SimpleContactWrapper(objectOne, objectTwo);
+      contacts.addContact(pointOnOne, pointOnTwo, normalVector, distance);
+
+      result.addContact(contacts);
+   }
+
+   private boolean doSphereSphereCollisionDetection(CollisionShape objectOne, SphereShapeDescription<?> descriptionOne, CollisionShape objectTwo,
+         SphereShapeDescription<?> descriptionTwo, CollisionDetectionResult result)
    {
       double radiusOne = descriptionOne.getRadius();
       double radiusTwo = descriptionTwo.getRadius();
 
       descriptionOne.getCenter(centerOne);
       descriptionTwo.getCenter(centerTwo);
-      
-//      transformOne.getTranslation(centerOne);
-//      transformTwo.getTranslation(centerTwo);
 
       double distanceSquared = centerOne.distanceSquared(centerTwo);
 
       if (distanceSquared <= (radiusOne + radiusTwo) * (radiusOne + radiusTwo))
       {
-         Vector3d normalVector = new Vector3d();
-
-         centerToCenterVector.sub(centerTwo, centerOne);
-
-         Point3d pointOnOne = new Point3d(centerOne);
-         normalVector.set(centerToCenterVector);
-         normalVector.normalize();
-
-         tempVector.set(normalVector);
-         tempVector.scale(radiusOne);
-         pointOnOne.add(tempVector);
-
-         Point3d pointOnTwo = new Point3d(centerTwo);
-         tempVector.set(normalVector);
-         tempVector.scale(-radiusTwo);
-         pointOnTwo.add(tempVector);
-
-         double distance = Math.sqrt(distanceSquared) - radiusOne - radiusTwo;
-
-         SimpleContactWrapper contacts = new SimpleContactWrapper(objectOne, objectTwo);
-         contacts.addContact(pointOnOne, pointOnTwo, normalVector, distance);
-
-         result.addContact(contacts);
+         addCollisionPairToResult(centerOne, centerTwo, radiusOne, radiusTwo, distanceSquared, objectOne, objectTwo, result);
+         return true;
       }
+
+      return false;
    }
 
    private final GilbertJohnsonKeerthiCollisionDetector gjkCollisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
@@ -303,19 +411,84 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    private final Point3d pointOnAToPack = new Point3d();
    private final Point3d pointOnBToPack = new Point3d();
 
-   private boolean doPolytopePolytopeCollisionDetection(CollisionShape objectOne, PolytopeShapeDescription descriptionOne, CollisionShape objectTwo,
-         PolytopeShapeDescription descriptionTwo, CollisionDetectionResult result)
-   {
-      ConvexPolytope polytopeOne = descriptionOne.getPolytope();
-      ConvexPolytope polytopeTwo = descriptionTwo.getPolytope();
+   private final Point3d centerOfSphere = new Point3d();
 
-      boolean areColliding = gjkCollisionDetector.arePolytopesColliding(polytopeOne, polytopeTwo, pointOnAToPack, pointOnBToPack);
+   private boolean doSpherePolytopeCollisionDetection(CollisionShape objectOne, SphereShapeDescription<?> descriptionOne, CollisionShape objectTwo,
+         PolytopeShapeDescription<?> descriptionTwo, CollisionDetectionResult result)
+   {
+      descriptionOne.getCenter(centerOfSphere);
+      double sphereRadius = descriptionOne.getRadius();
+      double polytopeSmoothingRadius = descriptionTwo.getSmoothingRadius();
+
+      SupportingVertexHolder sphereAsSupportingVertexHolder = new SupportingVertexHolder()
+      {
+         @Override
+         public Point3d getSupportingVertex(Vector3d supportDirection)
+         {
+            return centerOfSphere;
+         }
+      };
+
+      return doPolytopePolytopeCollisionDetection(objectOne, sphereAsSupportingVertexHolder, sphereRadius, objectTwo, descriptionTwo.getPolytope(),
+            polytopeSmoothingRadius, result);
+   }
+
+   private final LineSegment3d tempLineSegment = new LineSegment3d();
+   private final Vector3d tempSegmentPointVector = new Vector3d();
+
+   private boolean doCapsulePolytopeCollisionDetection(CollisionShape objectOne, CapsuleShapeDescription<?> descriptionOne, CollisionShape objectTwo,
+         PolytopeShapeDescription<?> descriptionTwo, CollisionDetectionResult result)
+   {
+      double polytopeSmoothingRadius = descriptionTwo.getSmoothingRadius();
+
+      return doCapsuleSupportingVertexHolderCollisionDetection(objectOne, descriptionOne, objectTwo, descriptionTwo.getPolytope(), polytopeSmoothingRadius, result);
+   }
+   
+      private boolean doCapsuleSupportingVertexHolderCollisionDetection(CollisionShape objectOne, CapsuleShapeDescription<?> descriptionOne, CollisionShape objectTwo,
+            SupportingVertexHolder descriptionTwo, double smoothingRadiusTwo, CollisionDetectionResult result)
+      {
+      descriptionOne.getLineSegment(tempLineSegment);
+      final Point3d tempSegmentPointOne = tempLineSegment.getPointA();
+      final Point3d tempSegmentPointTwo = tempLineSegment.getPointB();
+
+      double capsuleRadius = descriptionOne.getRadius();
+ 
+      //TODO: Recycle object...
+      SupportingVertexHolder capsuleAsSupportingVertexHolder = new SupportingVertexHolder()
+      {
+         @Override
+         public Point3d getSupportingVertex(Vector3d supportDirection)
+         {
+            tempSegmentPointVector.set(tempSegmentPointOne);
+            double dotOne = tempSegmentPointVector.dot(supportDirection);
+
+            tempSegmentPointVector.set(tempSegmentPointTwo);
+            double dotTwo = tempSegmentPointVector.dot(supportDirection);
+
+            if (dotOne > dotTwo)
+               return tempSegmentPointOne;
+            else
+               return tempSegmentPointTwo;
+         }
+      };
+
+      return doPolytopePolytopeCollisionDetection(objectOne, capsuleAsSupportingVertexHolder, capsuleRadius, objectTwo, descriptionTwo,
+            smoothingRadiusTwo, result);
+   }
+
+   private boolean doPolytopePolytopeCollisionDetection(CollisionShape objectOne, SupportingVertexHolder supportingVertexHolderOne, double radiusOne,
+         CollisionShape objectTwo, SupportingVertexHolder supportingVertexHolderTwo, double radiusTwo, CollisionDetectionResult result)
+   {
+      boolean areColliding = gjkCollisionDetector.arePolytopesColliding(supportingVertexHolderOne, supportingVertexHolderTwo, pointOnAToPack, pointOnBToPack);
 
       if (!areColliding)
       {
+         double separationDistanceForContact = radiusOne + radiusTwo;
+
          double distanceSquared = pointOnAToPack.distanceSquared(pointOnBToPack);
          //         System.out.println(distanceSquared);
-         if (distanceSquared < objectSmoothingRadius * objectSmoothingRadius) //TODO: Consider the objects instead of one constant.
+
+         if (distanceSquared < separationDistanceForContact * separationDistanceForContact)
          {
             //TODO: Find more than one point per object...
 
@@ -328,7 +501,14 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             {
                normalVector.normalize();
                double distanceToReport = -pointOnAToPack.distance(pointOnBToPack); //0.001; //TODO: Do we even need this?
-               contacts.addContact(new Point3d(pointOnAToPack), new Point3d(pointOnBToPack), normalVector, distanceToReport);
+
+               Point3d contactOnA = new Point3d(normalVector);
+               contactOnA.scaleAdd(radiusOne, pointOnAToPack);
+
+               Point3d contactOnB = new Point3d(normalVector);
+               contactOnB.scaleAdd(-radiusTwo, pointOnBToPack);
+
+               contacts.addContact(contactOnA, contactOnB, normalVector, distanceToReport);
                result.addContact(contacts);
                return true;
             }
@@ -336,7 +516,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       }
       else
       {
-//         System.out.println("Colliding!");
+//                 System.out.println("Colliding!");
          //TODO: Deal with collision of the sharp objects...
          // Need to first compute the intersecting regions...
 
@@ -344,11 +524,11 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
          //TODO: Add points to the simplex when it is not a tetrahedral...
          //TODO: Find more than one point per object...
 
-//         System.out.println("simplex points = " + simplex.getNumberOfPoints());
+         //         System.out.println("simplex points = " + simplex.getNumberOfPoints());
 
          if (simplex.getNumberOfPoints() == 4)
          {
-            expandingPolytopeAlgorithm.setPolytopes(simplex, polytopeOne, polytopeTwo);
+            expandingPolytopeAlgorithm.setPolytopes(simplex, supportingVertexHolderOne, supportingVertexHolderTwo);
             try
             {
                //TODO: Reduce trash here...
@@ -372,12 +552,12 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
                System.err.println("simplex = ");
                System.err.println(simplex);
                System.err.println("polytopeOneCopy = ");
-               System.err.println(polytopeOne);
+               System.err.println(supportingVertexHolderOne);
                System.err.println("polytopeTwoCopy = ");
-               System.err.println(polytopeTwo);
+               System.err.println(supportingVertexHolderTwo);
             }
          }
-         
+
          return true;
       }
 
@@ -387,6 +567,108 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    public void addShape(CollisionShape collisionShape)
    {
       collisionObjects.add(collisionShape);
+   }
+
+   private final Vector3d uVector = new Vector3d();
+   private final Vector3d vVector = new Vector3d();
+   private final Vector3d w0Vector = new Vector3d();
+
+   public void getClosestPointsOnLineSegments(LineSegment3d segmentOne, LineSegment3d segmentTwo, Point3d closestPointOnOneToPack,
+         Point3d closestPointOnTwoToPack)
+   {
+      Point3d p0 = segmentOne.getPointA();
+      Point3d p1 = segmentOne.getPointB();
+      Point3d q0 = segmentTwo.getPointA();
+      Point3d q1 = segmentTwo.getPointB();
+
+      uVector.sub(p1, p0);
+      vVector.sub(q1, q0);
+
+      w0Vector.sub(p0, q0);
+
+      double a = uVector.dot(uVector);
+      double b = uVector.dot(vVector);
+      double c = vVector.dot(vVector);
+      double d = uVector.dot(w0Vector);
+      double e = vVector.dot(w0Vector);
+
+      double denominator = a * c - b * b;
+
+      double lambdaOne, numeratorOne, denominatorOne = denominator;
+      double lambdaTwo, numeratorTwo, denominatorTwo = denominator;
+
+      double smallNumber = 1e-7;
+
+      // compute the line parameters of the two closest points
+      if (denominator < smallNumber)
+      {
+         // the lines are almost parallel
+         numeratorOne = 0.0; // force using point P0 on segment S1
+         denominatorOne = 1.0; // to prevent possible division by 0.0 later
+         numeratorTwo = e;
+         denominatorTwo = c;
+      }
+      else
+      {
+         // get the closest points on the infinite lines
+         numeratorOne = (b * e - c * d);
+         numeratorTwo = (a * e - b * d);
+         if (numeratorOne < 0.0)
+         {
+            // sc < 0 => the s=0 edge is visible
+            numeratorOne = 0.0;
+            numeratorTwo = e;
+            denominatorTwo = c;
+         }
+         else if (numeratorOne > denominatorOne)
+         {
+            // sc > 1  => the s=1 edge is visible
+            numeratorOne = denominatorOne;
+            numeratorTwo = e + b;
+            denominatorTwo = c;
+         }
+      }
+
+      if (numeratorTwo < 0.0)
+      {
+         // tc < 0 => the t=0 edge is visible
+         numeratorTwo = 0.0;
+         // recompute sc for this edge
+         if (-d < 0.0)
+            numeratorOne = 0.0;
+         else if (-d > a)
+            numeratorOne = denominatorOne;
+         else
+         {
+            numeratorOne = -d;
+            denominatorOne = a;
+         }
+      }
+      else if (numeratorTwo > denominatorTwo)
+      { // tc > 1  => the t=1 edge is visible
+         numeratorTwo = denominatorTwo;
+         // recompute sc for this edge
+         if ((-d + b) < 0.0)
+            numeratorOne = 0;
+         else if ((-d + b) > a)
+            numeratorOne = denominatorOne;
+         else
+         {
+            numeratorOne = (-d + b);
+            denominatorOne = a;
+         }
+      }
+      // finally do the division to get sc and tc
+      lambdaOne = (Math.abs(numeratorOne) < smallNumber ? 0.0 : numeratorOne / denominatorOne);
+      lambdaTwo = (Math.abs(numeratorTwo) < smallNumber ? 0.0 : numeratorTwo / denominatorTwo);
+
+      // get the difference of the two closest points
+
+      closestPointOnOneToPack.set(uVector);
+      closestPointOnOneToPack.scaleAdd(lambdaOne, p0);
+
+      closestPointOnTwoToPack.set(vVector);
+      closestPointOnTwoToPack.scaleAdd(lambdaTwo, q0);
    }
 
 }

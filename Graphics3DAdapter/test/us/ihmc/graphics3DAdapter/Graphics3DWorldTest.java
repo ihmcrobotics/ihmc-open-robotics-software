@@ -8,14 +8,14 @@ import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets={TestPlanTarget.UI})
+@ContinuousIntegrationPlan(targets={TestPlanTarget.UI})
 public class Graphics3DWorldTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 1.2)
+	@ContinuousIntegrationTest(estimatedDuration = 1.2)
 	@Test(timeout = 30000)
    public void testShowGui()
    {
@@ -25,7 +25,7 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void testWithoutGui()
    {
@@ -35,7 +35,7 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void addASphere()
    {
@@ -46,7 +46,7 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void addASphereAfterGuiStarted()
    {
@@ -57,7 +57,7 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void testSetCameraPosition()
    {
@@ -69,7 +69,7 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void fixCameraOnSphere()
    {

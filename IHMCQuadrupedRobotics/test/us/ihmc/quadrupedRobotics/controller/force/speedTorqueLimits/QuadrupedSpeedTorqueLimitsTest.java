@@ -22,7 +22,7 @@ import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRobotTestInterface
 {
@@ -60,7 +60,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 30000)
    public void testStandingLowerLimit()
    {
@@ -71,7 +71,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
    
-   @DeployableTestMethod(estimatedDuration = 90.0)
+   @ContinuousIntegrationTest(estimatedDuration = 90.0)
    @Test(timeout = 300000)
    public void testStandingOnThreeLegsLowerLimit()
    {
@@ -91,7 +91,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 35.0)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 30000)
    public void testXGaitWalkingInPlaceLowerLimit()
    {
@@ -108,7 +108,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 35.0)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 30000)
    public void testXGaitTrottingInPlaceLowerLimit()
    {
@@ -127,7 +127,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       conductor.concludeTesting();
    }
 
-   @DeployableTestMethod(estimatedDuration = 35.0)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 30000)
    public void testXGaitWalkingLowerLimit()
    {

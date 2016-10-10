@@ -262,10 +262,10 @@ public class GeometryTools
    /**
     * Averages the 3D points in an Array
     *
-    * @param points ArrayList
+    * @param points List
     * @return Point3d
     */
-   public static Point3d averagePoint3ds(ArrayList<Point3d> points)
+   public static Point3d averagePoint3ds(List<Point3d> points)
    {
       Point3d totalPoint = new Point3d(0.0, 0.0, 0.0);
       for (Point3d point : points)

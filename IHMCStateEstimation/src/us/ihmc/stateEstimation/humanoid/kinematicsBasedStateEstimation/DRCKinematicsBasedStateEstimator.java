@@ -61,6 +61,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
    private final ForceSensorStateUpdater forceSensorStateUpdater;
    private final IMUBiasStateEstimator imuBiasStateEstimator;
+   private final IMUYawDriftEstimator imuYawDriftEstimator;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
@@ -132,11 +133,13 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       boolean isAccelerationIncludingGravity = stateEstimatorParameters.cancelGravityFromAccelerationMeasurement();
       imuBiasStateEstimator = new IMUBiasStateEstimator(imuProcessedOutputs, feet.keySet(), twistCalculator, gravitationalAcceleration, isAccelerationIncludingGravity, estimatorDT, registry);
       imuBiasStateEstimator.configureModuleParameters(stateEstimatorParameters);
+      imuYawDriftEstimator = new IMUYawDriftEstimator(inverseDynamicsStructure, footSwitches, feet, estimatorDT, registry);
+      imuYawDriftEstimator.configureModuleParameters(stateEstimatorParameters);
 
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
       if (imusToUse.size() > 0)
       {
-         pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, estimatorDT, registry);
+         pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imusToUse, imuBiasStateEstimator, imuYawDriftEstimator, estimatorDT, registry);
       }
       else
       {
@@ -257,6 +260,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
             {
                pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
             }
+
             if(forceSensorStateUpdater != null)
             {
                forceSensorStateUpdater.updateForceSensorState();

@@ -5,7 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import static org.junit.Assert.assertEquals;
 
@@ -54,7 +54,7 @@ public class MassSpringDamperTest
       eigenvalueDecomposerA = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testVDotWEqualsOne()
    {
@@ -68,7 +68,7 @@ public class MassSpringDamperTest
       assertEquals(0.0, dotProduct.imag(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testVDotWCongEqualsZero()
    {
@@ -82,7 +82,7 @@ public class MassSpringDamperTest
       assertEquals(0.0, dotProduct.imag(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDecomposerGotEigenvaluesRight()
    {

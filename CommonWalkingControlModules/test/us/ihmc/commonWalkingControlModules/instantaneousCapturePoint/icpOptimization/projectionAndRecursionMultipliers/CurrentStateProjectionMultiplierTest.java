@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.testing.MutationTestingTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import java.util.ArrayList;
 
@@ -22,7 +22,7 @@ public class CurrentStateProjectionMultiplierTest
 {
    private static final double epsilon = 0.0001;
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testOneCMPSS()
    {
@@ -94,7 +94,7 @@ public class CurrentStateProjectionMultiplierTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testOneCMPSSUsingInitialICP()
    {
@@ -166,7 +166,7 @@ public class CurrentStateProjectionMultiplierTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testOneCMPTransferUsingInitialICP()
    {
@@ -250,7 +250,7 @@ public class CurrentStateProjectionMultiplierTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testOneCMPTransfer()
    {
@@ -335,7 +335,7 @@ public class CurrentStateProjectionMultiplierTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testTwoCMPSSFirstSegment()
    {
@@ -413,7 +413,7 @@ public class CurrentStateProjectionMultiplierTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testTwoCMPSSFirstSegmentUsingInitialICP()
    {
@@ -482,7 +482,7 @@ public class CurrentStateProjectionMultiplierTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testTwoCMPSSThirdSegment()
    {
@@ -556,7 +556,7 @@ public class CurrentStateProjectionMultiplierTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testTwoCMPSSThirdSegmentUsingInitialICP()
    {
@@ -630,7 +630,7 @@ public class CurrentStateProjectionMultiplierTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testTwoCMPSSSecondSegment()
    {
@@ -719,7 +719,7 @@ public class CurrentStateProjectionMultiplierTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testTwoCMPSSSecondSegmentUsingInitialICP()
    {
@@ -808,7 +808,7 @@ public class CurrentStateProjectionMultiplierTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testTwoCMPTransfer()
    {
@@ -892,7 +892,7 @@ public class CurrentStateProjectionMultiplierTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
    public void testTwoCMPTransferUsingInitialICP()
    {

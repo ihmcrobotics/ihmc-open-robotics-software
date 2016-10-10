@@ -19,6 +19,8 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
    private final DoubleYoVariable maxDerivativeError;
    private final DoubleYoVariable maxProportionalError;
 
+   private final YoTangentialDampingGains tangentialDampingGains;
+
    public YoPlanarFootPositionGains(String suffix, YoVariableRegistry registry)
    {
       proportionalXGain = new DoubleYoVariable("kpXLinear" + suffix, registry);
@@ -31,6 +33,8 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
       maximumFeedbackRate = new DoubleYoVariable("maximumLinearFeedbackRate" + suffix, registry);
       maxDerivativeError = new DoubleYoVariable("maximumLinearDerivativeError" + suffix, registry);
       maxProportionalError = new DoubleYoVariable("maximumLinearProportionalError" + suffix, registry);
+
+      tangentialDampingGains = new YoTangentialDampingGains(suffix, registry);
 
       maximumFeedback.set(Double.POSITIVE_INFINITY);
       maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
@@ -191,11 +195,24 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
    }
 
    @Override
+   public void setTangentialDampingGains(TangentialDampingGains tangentialDampingGains)
+   {
+      this.tangentialDampingGains.set(tangentialDampingGains);
+   }
+
+   @Override
+   public void setTangentialDampingGains(double kdReductionRatio, double parallelDampingDeadband, double positionErrorForMinimumKd)
+   {
+      tangentialDampingGains.set(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
+   }
+
+   @Override
    public void set(PositionPIDGainsInterface gains)
    {
       setProportionalGains(gains.getProportionalGains());
       setDerivativeGains(gains.getDerivativeGains());
       setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setTangentialDampingGains(gains.getTangentialDampingGains());
       setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
       setMaxDerivativeError(gains.getMaximumDerivativeError());
       setMaxProportionalError(gains.getMaximumProportionalError());
@@ -223,6 +240,18 @@ public class YoPlanarFootPositionGains implements YoPositionPIDGainsInterface
    public DoubleYoVariable getYoMaximumProportionalError()
    {
       return maxProportionalError;
+   }
+
+   @Override
+   public YoTangentialDampingGains getYoTangentialDampingGains()
+   {
+      return tangentialDampingGains;
+   }
+
+   @Override
+   public TangentialDampingGains getTangentialDampingGains()
+   {
+      return tangentialDampingGains;
    }
 
    private double[] tempPropotionalGains = new double[2];

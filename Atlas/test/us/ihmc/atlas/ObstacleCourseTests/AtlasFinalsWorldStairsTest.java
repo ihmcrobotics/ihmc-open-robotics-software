@@ -35,12 +35,12 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
 public class AtlasFinalsWorldStairsTest
 {
    protected SimulationTestingParameters simulationTestingParameters;
@@ -71,7 +71,7 @@ public class AtlasFinalsWorldStairsTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 70.3, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+	@ContinuousIntegrationTest(estimatedDuration = 70.3, targetsOverride = {TestPlanTarget.Slow, TestPlanTarget.Video})
    @Test(timeout = 350000)
    public void testWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
@@ -119,7 +119,7 @@ public class AtlasFinalsWorldStairsTest
    }
 
 	@Ignore("Improve the feet stability.")
-   @DeployableTestMethod(estimatedDuration = 120.0)
+   @ContinuousIntegrationTest(estimatedDuration = 120.0)
    @Test(timeout = 151825)
    public void testFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
