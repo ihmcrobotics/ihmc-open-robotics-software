@@ -1,4 +1,4 @@
-package us.ihmc.SdfLoader;
+package us.ihmc.robotics.partNames;
 
 import java.util.List;
 import java.util.Set;

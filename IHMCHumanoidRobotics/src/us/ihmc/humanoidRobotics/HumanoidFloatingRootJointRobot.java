@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.SdfLoader.HumanoidJointNameMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;

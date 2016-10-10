@@ -8,7 +8,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.ros.message.Time;
 
-import us.ihmc.SdfLoader.JointNameMap;
+import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.SdfLoader.models.FullRobotModelFactory;
 import us.ihmc.communication.net.PacketConsumer;
