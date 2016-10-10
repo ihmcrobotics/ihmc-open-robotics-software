@@ -95,7 +95,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
    public AutomatedDiagnosticConfiguration createDiagnosticController(boolean startWithRobotAlive)
    {
-      simulatedRobot = robotModel.createSdfRobot(false);
+      simulatedRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       DiagnosticLoggerConfiguration.setupLogging(simulatedRobot.getYoTime(), getClass(), robotModel.getSimpleRobotName());
 
       if (robotInitialSetup == null)

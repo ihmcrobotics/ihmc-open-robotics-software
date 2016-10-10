@@ -142,7 +142,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       packetRouter.attachPacketCommunicator(PacketDestination.ROS_API, rosAPI_communicator_client);
       packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerCommunicatorClient);
 
-      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
       DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);
@@ -240,7 +240,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
          throw new RuntimeException(e);
       }
 
-      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
       DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);

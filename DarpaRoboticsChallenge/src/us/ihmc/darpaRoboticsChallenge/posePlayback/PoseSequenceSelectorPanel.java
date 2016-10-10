@@ -42,7 +42,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 
 
       fullRobotModel = robotModel.createFullRobotModel();
-      sdfRobot = robotModel.createSdfRobot(false);
+      sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       sequence = new PlaybackPoseSequence(fullRobotModel);
       

@@ -26,7 +26,7 @@ public class AtlasSDFViewer
    public static void main(String[] args)
    {
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
-      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       if (SHOW_ELLIPSOIDS)
       {

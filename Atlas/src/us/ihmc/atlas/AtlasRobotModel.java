@@ -332,7 +332,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public HumanoidFloatingRootJointRobot createSdfRobot(boolean createCollisionMeshes)
+   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
    {
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;

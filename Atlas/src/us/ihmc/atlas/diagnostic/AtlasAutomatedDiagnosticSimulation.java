@@ -49,9 +49,9 @@ public class AtlasAutomatedDiagnosticSimulation
       }
 
       @Override
-      public HumanoidFloatingRootJointRobot createSdfRobot(boolean createCollisionMeshes)
+      public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
       {
-         HumanoidFloatingRootJointRobot robot = super.createSdfRobot(createCollisionMeshes);
+         HumanoidFloatingRootJointRobot robot = super.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
 
          Joint joint = robot.getJoint("back_bkx");
 

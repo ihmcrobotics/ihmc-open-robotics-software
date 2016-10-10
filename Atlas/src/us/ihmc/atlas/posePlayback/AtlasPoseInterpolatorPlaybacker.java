@@ -21,7 +21,7 @@ public class AtlasPoseInterpolatorPlaybacker
    public AtlasPoseInterpolatorPlaybacker()
    {
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       
       StringBuffer stringBuffer = new StringBuffer();
       stringBuffer

@@ -251,7 +251,7 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HumanoidFloatingRootJointRobot createSdfRobot(boolean createCollisionMeshes)
+   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
    {
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;

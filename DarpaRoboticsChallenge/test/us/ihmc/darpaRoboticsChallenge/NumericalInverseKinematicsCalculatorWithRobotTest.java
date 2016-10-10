@@ -97,7 +97,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.PETER_SOLVER;
       DRCRobotModel robotModel = getRobotModel();
 
-      sdfRobot = robotModel.createSdfRobot(false);
+      sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       if (VISUALIZE)
       {

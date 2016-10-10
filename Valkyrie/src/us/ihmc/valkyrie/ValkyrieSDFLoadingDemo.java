@@ -33,7 +33,7 @@ public class ValkyrieSDFLoadingDemo
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
 
-      FloatingRootJointRobot valkyrieRobot = robotModel.createSdfRobot(false);
+      FloatingRootJointRobot valkyrieRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       valkyrieRobot.setPositionInWorld(new Vector3d());
 
       if (SHOW_ELLIPSOIDS)

@@ -179,7 +179,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
 
       boolean createCollisionMeshes = false;
       drcRobotModel.setEnableJointDamping(false);
-      HumanoidFloatingRootJointRobot robot = drcRobotModel.createSdfRobot(createCollisionMeshes);
+      HumanoidFloatingRootJointRobot robot = drcRobotModel.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
       robot.setGravity(gravityZ);
 
       return new DRCInverseDynamicsCalculatorTestHelper(fullRobotModel, robot, visualize, gravityZ);

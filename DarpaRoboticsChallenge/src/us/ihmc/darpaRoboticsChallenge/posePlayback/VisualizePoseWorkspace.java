@@ -34,7 +34,7 @@ public class VisualizePoseWorkspace
       this.controlDT = robotModel.getControllerDT();
       
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       interpolator = new PlaybackPoseInterpolator(registry);
 
