@@ -287,11 +287,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertTrue(exitActionListenerHasBeenNotified.getBooleanValue());
 
       scs.setGraphsUpdatedDuringPlayback(false);
-      boolean isGraphsUpdatedDuringPlaybackFromSCS = scs.isGraphsUpdatedDuringPlayback();
+      boolean isGraphsUpdatedDuringPlaybackFromSCS = scs.areGraphsUpdatedDuringPlayback();
       assertFalse(isGraphsUpdatedDuringPlaybackFromSCS);
 
       scs.setGraphsUpdatedDuringPlayback(true);
-      boolean isGraphsUpdatedDuringPlaybackFromSCS2 = scs.isGraphsUpdatedDuringPlayback();
+      boolean isGraphsUpdatedDuringPlaybackFromSCS2 = scs.areGraphsUpdatedDuringPlayback();
       assertTrue(isGraphsUpdatedDuringPlaybackFromSCS2);
 
       scs.setScrollGraphsEnabled(true);
