@@ -8,7 +8,7 @@ import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public interface SDFHumanoidJointNameMap extends SDFJointNameMap
+public interface HumanoidJointNameMap extends JointNameMap
 {
    public ImmutablePair<RobotSide, LegJointName> getLegJointName(String jointName);
 

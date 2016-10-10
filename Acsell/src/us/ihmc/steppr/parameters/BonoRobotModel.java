@@ -11,7 +11,7 @@ import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
+import us.ihmc.SdfLoader.HumanoidJointNameMap;
 import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.models.FullRobotModel;
@@ -254,7 +254,7 @@ public class BonoRobotModel implements DRCRobotModel
    {
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
-      SDFHumanoidJointNameMap jointMap = getJointMap();
+      HumanoidJointNameMap jointMap = getJointMap();
       boolean enableJointDamping = getEnableJointDamping();
       return loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
    }

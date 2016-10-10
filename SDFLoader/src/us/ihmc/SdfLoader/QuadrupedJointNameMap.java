@@ -4,7 +4,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public interface SDFQuadrupedJointNameMap extends SDFJointNameMap
+public interface QuadrupedJointNameMap extends JointNameMap
 {
    public String getLegJointName(RobotQuadrant robotQuadrant, LegJointName legJointName);
 
