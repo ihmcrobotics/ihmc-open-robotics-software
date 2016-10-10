@@ -1,7 +1,5 @@
-package us.ihmc.SdfLoader;
+package us.ihmc.robotics.partNames;
 
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public interface QuadrupedJointNameMap extends JointNameMap
