@@ -103,19 +103,19 @@ public class PlaybackPropertiesDialog extends JDialog implements ActionListener
       private double newRealTimeVal, newFrameRateVal, newSimulateDurationVal;
 
       private GridBagLayout gridBagLayout1 = new GridBagLayout();
-      private JCheckBox updateGraphsCheckbox = new JCheckBox();
+      private JCheckBox updateGraphsDuringPlaybackCheckbox = new JCheckBox();
       private JLabel realTimeRateLabel = new JLabel();
       private JLabel desiredFrameRateLabel = new JLabel();
       private JLabel simulateDurationLabel = new JLabel();
       private JTextField realTimeTextField = new JTextField();
       private JTextField frameRateTextField = new JTextField();
       private JTextField simulateDurationTextField = new JTextField();
-      
+      private JCheckBox simulateNoFasterThanRealTimeCheckbox = new JCheckBox();
+
       public PlaybackPropertiesPanel()
       {
          setLayout(gridBagLayout1);
-         updateGraphsCheckbox.setSelected(true);
-         updateGraphsCheckbox.setText("Update Graphs");
+         updateGraphsDuringPlaybackCheckbox.setText("Update Graphs");
          realTimeRateLabel.setText("Real Time Rate:");
          desiredFrameRateLabel.setText("Desired Frame Rate:");
          simulateDurationLabel.setText("Simulate Duration:");
@@ -125,30 +125,32 @@ public class PlaybackPropertiesDialog extends JDialog implements ActionListener
          frameRateTextField.setPreferredSize(new Dimension(60, 21));
          simulateDurationTextField.setMinimumSize(new Dimension(60, 21));
          simulateDurationTextField.setPreferredSize(new Dimension(60, 21));
-
+         simulateNoFasterThanRealTimeCheckbox.setText("Simulate No Faster Than Real Time");
+         
+         add(updateGraphsDuringPlaybackCheckbox,
+               new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
          add(realTimeRateLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 6, 0, 0), 6, 0));
          add(desiredFrameRateLabel,
              new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 6, 0, 0), 6, 0));
          add(simulateDurationLabel,
                new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 6, 0, 0), 6, 0));
-         add(updateGraphsCheckbox,
-             new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
          add(realTimeTextField, new GridBagConstraints(1, 1, 2, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
          add(frameRateTextField,
              new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
          add(simulateDurationTextField,
                new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-
+         add(simulateNoFasterThanRealTimeCheckbox,
+               new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
          newRealTimeVal = sim.getPlaybackRealTimeRate();
          newFrameRateVal = sim.getPlaybackFrameRate();
          newSimulateDurationVal = sim.getSimulateDuration();
 
+         updateGraphsDuringPlaybackCheckbox.setSelected(sim.areGraphsUpdatedDuringPlayback());
          realTimeTextField.setText(String.valueOf(newRealTimeVal));
          frameRateTextField.setText(String.valueOf(newFrameRateVal));
          simulateDurationTextField.setText(String.valueOf(newSimulateDurationVal));
-
-         updateGraphsCheckbox.setSelected(sim.isGraphsUpdatedDuringPlayback());
+         simulateNoFasterThanRealTimeCheckbox.setSelected(sim.getSimulateNoFasterThanRealTime());
 
          // sim.setUpdateGraphsDuringPlayback(updateGraphsCheckbox.isSelected());
 
@@ -166,10 +168,11 @@ public class PlaybackPropertiesDialog extends JDialog implements ActionListener
          updateFrameRateTextField();
          updateSimulateDurationTextField();
 
+         sim.setSimulateNoFasterThanRealTime(simulateNoFasterThanRealTimeCheckbox.isSelected());  
          sim.setPlaybackRealTimeRate(newRealTimeVal);
          sim.setPlaybackDesiredFrameRate(newFrameRateVal);
          sim.setSimulateDuration(newSimulateDurationVal);
-         sim.setGraphsUpdatedDuringPlayback(updateGraphsCheckbox.isSelected());
+         sim.setGraphsUpdatedDuringPlayback(updateGraphsDuringPlaybackCheckbox.isSelected());
 
          /*
           * dataBuffer.setMaxBufferSize(newMaxVal);
