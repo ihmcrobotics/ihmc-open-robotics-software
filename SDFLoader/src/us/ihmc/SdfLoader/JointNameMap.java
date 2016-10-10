@@ -12,7 +12,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
 
-public interface SDFJointNameMap extends RobotSpecificJointNames
+public interface JointNameMap extends RobotSpecificJointNames
 {
 
    String getModelName();

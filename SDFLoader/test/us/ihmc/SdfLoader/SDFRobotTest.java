@@ -37,7 +37,7 @@ public class SDFRobotTest
       String modelName = "atlas";
       GeneralizedSDFRobotModel generalizedSDFRobotModel = loader.getGeneralizedSDFRobotModel(modelName);
 
-      SDFHumanoidJointNameMap sdfJointNameMap = null;
+      HumanoidJointNameMap sdfJointNameMap = null;
       boolean useCollisionMeshes = true;
       boolean enableTorqueVelocityLimits = true;
       boolean enableJointDamping = true;

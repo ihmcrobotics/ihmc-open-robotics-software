@@ -110,9 +110,9 @@ public class JaxbSDFLoader
       return generalizedSDFRobotModels.get(name);
    }
 
-   public FloatingRootJointRobot createRobot(SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   public FloatingRootJointRobot createRobot(JointNameMap jointNameMap, boolean useCollisionMeshes)
    {
-      return createRobot(sdfJointNameMap.getModelName(), sdfJointNameMap, useCollisionMeshes);
+      return createRobot(jointNameMap.getModelName(), jointNameMap, useCollisionMeshes);
    }
 
    public FloatingRootJointRobot createRobot(String modelName, boolean useCollisionMeshes)
@@ -120,34 +120,34 @@ public class JaxbSDFLoader
       return createRobot(modelName, null, useCollisionMeshes);
    }
 
-   private FloatingRootJointRobot createRobot(String modelName, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   private FloatingRootJointRobot createRobot(String modelName, JointNameMap jointNameMap, boolean useCollisionMeshes)
    {
-      return createRobot(modelName, sdfJointNameMap, useCollisionMeshes, true, true);
+      return createRobot(modelName, jointNameMap, useCollisionMeshes, true, true);
    }
 
-   public FloatingRootJointRobot createRobot(String modelName, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits,
+   public FloatingRootJointRobot createRobot(String modelName, JointNameMap jointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits,
            boolean enableJointDamping)
    {
       checkModelName(modelName);
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = generalizedSDFRobotModels.get(modelName);
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-      RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
       return new FloatingRootJointRobot(description);
    }
 
-   public void addForceSensor(SDFJointNameMap jointMap, String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)
+   public void addForceSensor(JointNameMap jointMap, String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)
    {
       generalizedSDFRobotModels.get(jointMap.getModelName()).addForceSensor(sensorName, parentJointName, transformToParentJoint);
    }
 
-   public void addContactSensor(SDFJointNameMap jointMap, String sensorName, String parentJointName, ContactSensorType type)
+   public void addContactSensor(JointNameMap jointMap, String sensorName, String parentJointName, ContactSensorType type)
    {
       generalizedSDFRobotModels.get(jointMap.getModelName()).addContactSensor(sensorName, parentJointName, type);
    }
 
-   public RobotDescription createRobotDescription(SDFHumanoidJointNameMap sdfJointNameMap)
+   public RobotDescription createRobotDescription(HumanoidJointNameMap sdfJointNameMap)
    {
       if (sdfJointNameMap != null)
       {

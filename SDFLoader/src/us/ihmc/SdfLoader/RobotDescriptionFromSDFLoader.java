@@ -73,14 +73,14 @@ public class RobotDescriptionFromSDFLoader
       return robotDescription;
    }
 
-   public RobotDescription loadRobotDescriptionFromSDF(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, 
+   public RobotDescription loadRobotDescriptionFromSDF(String modelName, InputStream inputStream, List<String> resourceDirectories, SDFDescriptionMutator mutator, JointNameMap jointNameMap, boolean useCollisionMeshes,
          boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       GeneralizedSDFRobotModel generalizedSDFRobotModel = loadSDFFile(modelName, inputStream, resourceDirectories, mutator);
-      return loadRobotDescriptionFromSDF(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+      return loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
    }
 
-   public RobotDescription loadRobotDescriptionFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
+   public RobotDescription loadRobotDescriptionFromSDF(GeneralizedSDFRobotModel generalizedSDFRobotModel, JointNameMap jointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       this.generalizedSDFRobotModel = generalizedSDFRobotModel;
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
@@ -109,9 +109,9 @@ public class RobotDescriptionFromSDFLoader
       robotDescription.addRootJoint(rootJointDescription);
       jointDescriptions.put(rootJointDescription.getName(), rootJointDescription);
 
-      if (sdfJointNameMap != null)
+      if (jointNameMap != null)
       {
-         enableTorqueVelocityLimits = enableTorqueVelocityLimits && sdfJointNameMap.isTorqueVelocityLimitsEnabled();
+         enableTorqueVelocityLimits = enableTorqueVelocityLimits && jointNameMap.isTorqueVelocityLimitsEnabled();
       }
 
       for (SDFJointHolder child : rootLink.getChildren())
@@ -120,9 +120,9 @@ public class RobotDescriptionFromSDFLoader
 
          Set<String> lastSimulatedJoints;
 
-         if (sdfJointNameMap != null)
+         if (jointNameMap != null)
          {
-            lastSimulatedJoints = sdfJointNameMap.getLastSimulatedJoints();
+            lastSimulatedJoints = jointNameMap.getLastSimulatedJoints();
          }
          else
          {
@@ -134,9 +134,9 @@ public class RobotDescriptionFromSDFLoader
       // Ground Contact Points:
 
       LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
-      if (sdfJointNameMap != null)
+      if (jointNameMap != null)
       {
-         for (ImmutablePair<String, Vector3d> jointContactPoint : sdfJointNameMap.getJointNameGroundContactPointMap())
+         for (ImmutablePair<String, Vector3d> jointContactPoint : jointNameMap.getJointNameGroundContactPointMap())
          {
             String jointName = jointContactPoint.getLeft();
 
@@ -176,7 +176,7 @@ public class RobotDescriptionFromSDFLoader
 
       for (SDFJointHolder child : rootLink.getChildren())
       {
-         addForceSensorsIncludingDescendants(child, sdfJointNameMap);
+         addForceSensorsIncludingDescendants(child, jointNameMap);
       }
 
       return robotDescription;
@@ -597,7 +597,7 @@ public class RobotDescriptionFromSDFLoader
       }
    }
 
-   private void addForceSensorsIncludingDescendants(SDFJointHolder joint, SDFJointNameMap jointNameMap)
+   private void addForceSensorsIncludingDescendants(SDFJointHolder joint, JointNameMap jointNameMap)
    {
       addForceSensor(joint, jointNameMap);
 
@@ -607,7 +607,7 @@ public class RobotDescriptionFromSDFLoader
       }
    }
 
-   private void addForceSensor(SDFJointHolder joint, SDFJointNameMap jointNameMap)
+   private void addForceSensor(SDFJointHolder joint, JointNameMap jointNameMap)
    {
       if (joint.getForceSensors().size() > 0)
       {

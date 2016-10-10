@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
+import us.ihmc.SdfLoader.HumanoidJointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -18,7 +18,7 @@ public class HumanoidFloatingRootJointRobot extends FloatingRootJointRobot
    private final SideDependentList<ArrayList<GroundContactPoint>> footGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
    private final SideDependentList<ArrayList<GroundContactPoint>> handGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
 
-   public HumanoidFloatingRootJointRobot(RobotDescription robotDescription, SDFHumanoidJointNameMap sdfJointNameMap)
+   public HumanoidFloatingRootJointRobot(RobotDescription robotDescription, HumanoidJointNameMap sdfJointNameMap)
    {
       super(robotDescription);
 

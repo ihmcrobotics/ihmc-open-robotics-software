@@ -12,7 +12,7 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.SDFQuadrupedJointNameMap;
+import us.ihmc.SdfLoader.QuadrupedJointNameMap;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -22,7 +22,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class LLAQuadrupedJointNameMap implements SDFQuadrupedJointNameMap
+public class LLAQuadrupedJointNameMap implements QuadrupedJointNameMap
 {
    private final String modelName = "llaQuadruped";
    private final String rootJoint = "body";
