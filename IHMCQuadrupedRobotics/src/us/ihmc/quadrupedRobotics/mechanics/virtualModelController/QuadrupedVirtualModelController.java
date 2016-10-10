@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.mechanics.virtualModelController;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;

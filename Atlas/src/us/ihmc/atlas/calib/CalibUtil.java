@@ -13,7 +13,7 @@ import org.ejml.ops.CommonOps;
 
 import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.so.Rodrigues_F64;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

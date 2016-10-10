@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.model;
 
-import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;

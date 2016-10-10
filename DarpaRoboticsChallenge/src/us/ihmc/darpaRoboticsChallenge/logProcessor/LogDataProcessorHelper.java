@@ -11,7 +11,7 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createZName;
 import java.util.ArrayList;
 
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;

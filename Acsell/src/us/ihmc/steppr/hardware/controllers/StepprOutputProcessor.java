@@ -2,7 +2,7 @@ package us.ihmc.steppr.hardware.controllers;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.acsell.hardware.state.AcsellAnkleAngleCalculator;
 import us.ihmc.acsell.hardware.state.AcsellAnkleFullComputation;
 import us.ihmc.acsell.hardware.state.AcsellFourbarCalculator;

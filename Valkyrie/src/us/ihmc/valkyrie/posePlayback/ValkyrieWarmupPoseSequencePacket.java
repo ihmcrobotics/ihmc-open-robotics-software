@@ -5,8 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPose;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseSequence;

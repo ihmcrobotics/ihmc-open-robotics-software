@@ -14,7 +14,7 @@ import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.ImageFloat32;
 import georegression.struct.se.Se3_F64;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 
 /**
  * Using a camera calibration target verify the robot arm's kinematics.

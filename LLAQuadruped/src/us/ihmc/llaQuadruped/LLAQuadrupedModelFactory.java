@@ -6,12 +6,12 @@ import java.util.Collection;
 
 import javax.xml.bind.JAXBException;
 
+import us.ihmc.robotModels.FullQuadrupedRobotModelFromDescription;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.SdfLoader.FullQuadrupedRobotModelFromDescription;
-import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.robotics.robotDescription.RobotDescription;

@@ -10,7 +10,7 @@ import javax.vecmath.AxisAngle4d;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;

@@ -3,7 +3,7 @@ package us.ihmc.atlas.sensors;
 import java.io.IOException;
 import java.net.URI;
 
-import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.configuration.NetworkParameters;
