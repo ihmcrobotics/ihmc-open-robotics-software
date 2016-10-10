@@ -1,6 +1,6 @@
 package us.ihmc.wholeBodyController;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
