@@ -14,17 +14,17 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   protected final YoVariableRegistry registry;
 
    private final DoubleYoVariable stiffness;
    private final DoubleYoVariable damping;
 
-   private final ExternalForcePoint connectionPointA;
-   private final ExternalForcePoint connectionPointB;
+   protected final ExternalForcePoint connectionPointA;
+   protected final ExternalForcePoint connectionPointB;
 
    private final YoFramePoint yoConnectionAPosition;
    private final YoFramePoint yoConnectionBPosition;
-   private final YoFrameVector yoConnectionPositionError;
+   protected final YoFrameVector yoConnectionPositionError;
    private final DoubleYoVariable yoConnectionPositionErrorMagnitude;
 
    private final YoFrameVector yoConnectionAVelocity;
@@ -60,7 +60,7 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
 
       yoConnectionAVelocity = connectionPointA.getYoVelocity();
       yoConnectionBVelocity = connectionPointB.getYoVelocity();
-      yoConnectionVelocityError = new YoFrameVector(name + "_ConnectionVelocityErrorMagnitude", worldFrame, registry);
+      yoConnectionVelocityError = new YoFrameVector(name + "_ConnectionVelocityError", worldFrame, registry);
       yoConnectionVelocityErrorMagnitude = new DoubleYoVariable(name + "_ConnectionVelocityErrorMagnitude", registry);
 
       parentRegistry.addChild(registry);
@@ -82,10 +82,9 @@ public class ExternalForcePointPDConstraintToIntegrate implements FunctionToInte
       this.damping.set(damping);
    }
 
-   private void updateClosedJoint()
+   protected void updateClosedJoint()
    {
       updateFrameAndKinematics();
-
       computeErrors();
 
       totalForce.setToZero(worldFrame);

@@ -12,23 +12,23 @@ import javax.vecmath.Vector2d;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.MutationTestingTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Fast})
 public class ConvexPolygon2dCalculatorTest
 {
    private static final double epsilon = 1.0e-10;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testConstruction()
    {
       new ConvexPolygon2dCalculator();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetSignedDistance1()
    {
@@ -42,7 +42,7 @@ public class ConvexPolygon2dCalculatorTest
       assertDistanceCorrect(Math.sqrt(2.5 * 2.5 + 1.0 * 1.0), distance);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetSignedDistance2()
    {
@@ -61,7 +61,7 @@ public class ConvexPolygon2dCalculatorTest
       assertDistanceCorrect(1.0, distance2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetSignedDistance3()
    {
@@ -97,7 +97,7 @@ public class ConvexPolygon2dCalculatorTest
       assertDistanceCorrect(Math.sqrt(5.0 * 5.0 + 0.15 * 0.15), distance6);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetClosestVertexPoint1()
    {
@@ -130,7 +130,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(vertex3, ConvexPolygon2dCalculator.getClosestVertexCopy(point6, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetClosestVertexPoint2()
    {
@@ -142,7 +142,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.getClosestVertexCopy(new Point2d(), polygon) == null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetClosestVertexLine1()
    {
@@ -172,7 +172,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(vertex3, ConvexPolygon2dCalculator.getClosestVertexCopy(line5, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetClosestVertexLine2()
    {
@@ -184,7 +184,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.getClosestVertexCopy(new Line2d(), polygon) == null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIsPointInside1()
    {
@@ -214,7 +214,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.isPointInside(point6, 1.0, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIsPointInside2()
    {
@@ -246,7 +246,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.isPointInside(point7, 0.5, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIsPointInside3()
    {
@@ -288,7 +288,7 @@ public class ConvexPolygon2dCalculatorTest
       assertFalse(ConvexPolygon2dCalculator.isPointInside(point10, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIsPointInside4()
    {
@@ -299,7 +299,7 @@ public class ConvexPolygon2dCalculatorTest
       assertFalse(ConvexPolygon2dCalculator.isPointInside(point1, epsilon, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIsPointInside5()
    {
@@ -318,7 +318,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.isPointInside(point2, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIsPointInBoundingBox1()
    {
@@ -354,7 +354,7 @@ public class ConvexPolygon2dCalculatorTest
       assertFalse(ConvexPolygon2dCalculator.isPointInBoundingBox(point8, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIsPointInBoundingBox2()
    {
@@ -386,7 +386,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point7, 2.0 * epsilon, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIsPointInBoundingBox3()
    {
@@ -434,7 +434,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.isPointInBoundingBox(point12, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIsPolygonInside1()
    {
@@ -471,7 +471,7 @@ public class ConvexPolygon2dCalculatorTest
       assertFalse(ConvexPolygon2dCalculator.isPolygonInside(polygonToTest5, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testTranslatePolygon1()
    {
@@ -492,7 +492,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(polygon2.getVertex(0).epsilonEquals(new Point2d(1.0, 10.5), epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testTranslatePolygon2()
    {
@@ -505,7 +505,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(polygon.getVertex(0).epsilonEquals(translation1, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testCanObserverSeeEdge1()
    {
@@ -544,7 +544,7 @@ public class ConvexPolygon2dCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testCanObserverSeeEdge2()
    {
@@ -561,7 +561,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue((seeEdge1 || seeEdge2) && !(seeEdge1 && seeEdge2));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testCanObserverSeeEdge3()
    {
@@ -574,7 +574,7 @@ public class ConvexPolygon2dCalculatorTest
       assertFalse(ConvexPolygon2dCalculator.canObserverSeeEdge(0, observer1, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetVertexOnSide1()
    {
@@ -638,7 +638,7 @@ public class ConvexPolygon2dCalculatorTest
       assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 3, observer2, polygon), 3);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetVertexOnSide2()
    {
@@ -661,7 +661,7 @@ public class ConvexPolygon2dCalculatorTest
       assertIndexCorrect(ConvexPolygon2dCalculator.getVertexOnLeft(0, 1, observer4, polygon), 1);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetMiddleIndexCounterClockwise1()
    {
@@ -724,7 +724,7 @@ public class ConvexPolygon2dCalculatorTest
       assertIndexCorrect(ConvexPolygon2dCalculator.getMiddleIndexCounterClockwise(0, 0, polygon), 0);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetLineOfSightVertices1()
    {
@@ -764,7 +764,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(null, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer7, polygon), true);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetLineOfSightVertices2()
    {
@@ -776,7 +776,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(null, ConvexPolygon2dCalculator.getLineOfSightVerticesCopy(observer1, polygon), true);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetLineOfSightVertexIndices1()
    {
@@ -799,7 +799,7 @@ public class ConvexPolygon2dCalculatorTest
       assertIndicesCorrect(new int[] {0, 0}, result);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetLineOfSightVertexIndices4()
    {
@@ -825,7 +825,7 @@ public class ConvexPolygon2dCalculatorTest
       assertIndicesCorrect(null, ConvexPolygon2dCalculator.getLineOfSightVertexIndicesCopy(observer5, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetIntersectionLambda1()
    {
@@ -849,7 +849,7 @@ public class ConvexPolygon2dCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetIntersectionLambda2()
    {
@@ -869,7 +869,7 @@ public class ConvexPolygon2dCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetIntersectionLambda3()
    {
@@ -976,7 +976,7 @@ public class ConvexPolygon2dCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testDoesLineIntersectEdge1()
    {
@@ -1018,7 +1018,7 @@ public class ConvexPolygon2dCalculatorTest
       assertFalse(ConvexPolygon2dCalculator.doesLineIntersectEdge(line4, 4, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testDoesLineIntersectEdge2()
    {
@@ -1053,7 +1053,7 @@ public class ConvexPolygon2dCalculatorTest
       assertFalse(ConvexPolygon2dCalculator.doesLineIntersectEdge(line6, 1, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testDoesLineIntersectEdge3()
    {
@@ -1063,7 +1063,7 @@ public class ConvexPolygon2dCalculatorTest
       assertFalse(ConvexPolygon2dCalculator.doesLineIntersectEdge(line5, 0, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetIntersectingEdges1()
    {
@@ -1142,7 +1142,7 @@ public class ConvexPolygon2dCalculatorTest
       assertEdgesEqual(expected9, new LineSegment2d[] {result1, result2}, false);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetIntersectingEdges2()
    {
@@ -1179,7 +1179,7 @@ public class ConvexPolygon2dCalculatorTest
       assertEquals(0, ConvexPolygon2dCalculator.getIntersectingEdges(line3, result1, result2, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetIntersectingEdges3()
    {
@@ -1204,7 +1204,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line3, polygon) == null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetIntersectingEdges4()
    {
@@ -1219,7 +1219,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.getIntersectingEdgesCopy(line1, polygon) == null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIntersectionWithLine1()
    {
@@ -1271,7 +1271,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(expected7, ConvexPolygon2dCalculator.intersectionWithLineCopy(line7, polygon), false);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIntersectionWithLine2()
    {
@@ -1306,7 +1306,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(expected6, ConvexPolygon2dCalculator.intersectionWithLineCopy(line6, polygon), false);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIntersectionWithLine3()
    {
@@ -1324,7 +1324,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(expected2, ConvexPolygon2dCalculator.intersectionWithLineCopy(line2, polygon), false);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIntersectionWithLine4()
    {
@@ -1336,7 +1336,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(expected1, ConvexPolygon2dCalculator.intersectionWithLineCopy(line1, polygon), false);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIntersectionWithRay1()
    {
@@ -1426,7 +1426,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.intersectionWithRay(ray15, result1, result2, polygon) == 0);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testOrthogonalProjection1()
    {
@@ -1488,7 +1488,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(new Point2d(-1.0, -0.9), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point17, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testOrthogonalProjection2()
    {
@@ -1497,7 +1497,7 @@ public class ConvexPolygon2dCalculatorTest
       ConvexPolygon2dCalculator.orthogonalProjectionCopy(new Point2d(), polygon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testOrthogonalProjection3()
    {
@@ -1512,7 +1512,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(vertex, ConvexPolygon2dCalculator.orthogonalProjectionCopy(new Point2d(1.0, 2.0), polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testOrthogonalProjection4()
    {
@@ -1532,7 +1532,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(new Point2d(1.0, 1.2), ConvexPolygon2dCalculator.orthogonalProjectionCopy(point3, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetClosestPointToRay1()
    {
@@ -1583,7 +1583,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(new Point2d(0.0, -0.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray13, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetClosestPointToRay2()
    {
@@ -1591,7 +1591,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.getClosestPointToRayCopy(new Line2d(), polygon) == null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetClosestPointToRay3()
    {
@@ -1608,7 +1608,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(vertex, ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray2, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetClosestPointToRay4()
    {
@@ -1639,7 +1639,7 @@ public class ConvexPolygon2dCalculatorTest
       assertPointsEqual(new Point2d(1.5, -5.5), ConvexPolygon2dCalculator.getClosestPointToRayCopy(ray7, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetEdgeNormal()
    {
@@ -1667,7 +1667,7 @@ public class ConvexPolygon2dCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetClosestEdge1()
    {
@@ -1711,7 +1711,7 @@ public class ConvexPolygon2dCalculatorTest
       assertEdgesEqual(edge1, ConvexPolygon2dCalculator.getClosestEdgeCopy(point7, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetClosestEdge2()
    {
@@ -1735,7 +1735,7 @@ public class ConvexPolygon2dCalculatorTest
       assertEdgesEqual(edge1, ConvexPolygon2dCalculator.getClosestEdgeCopy(point3, polygon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetClosestEdge3()
    {
@@ -1745,7 +1745,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.getClosestEdgeCopy(new Point2d(), polygon) == null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testGetClosestEdge4()
    {
@@ -1753,7 +1753,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.getClosestEdgeCopy(new Point2d(), polygon) == null);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIntersectionWithLineSegment1()
    {
@@ -1945,7 +1945,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.intersectionWithLineSegment(segment29, result1, result2, polygon) == 2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIntersectionWithLineSegment2()
    {
@@ -1961,7 +1961,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.intersectionWithLineSegment(segment1, result1, result2, polygon) == 0);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIntersectionWithLineSegment3()
    {
@@ -1989,7 +1989,7 @@ public class ConvexPolygon2dCalculatorTest
       assertTrue(ConvexPolygon2dCalculator.intersectionWithLineSegment(segment3, result1, result2, polygon) == 1);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 3000)
    public void testIntersectionWithLineSegment4()
    {

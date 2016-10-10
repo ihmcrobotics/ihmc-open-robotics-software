@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class DifferentiatorTest
@@ -30,7 +30,7 @@ public class DifferentiatorTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSinusDifferentiatedIsCloseToCosinus()
    {
@@ -56,7 +56,7 @@ public class DifferentiatorTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNOrderPolynomDifferentiatedIsNMinusOneOrderPolynom()
    {
@@ -85,7 +85,7 @@ public class DifferentiatorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFirstUpdatedToZero()
    {
@@ -96,7 +96,7 @@ public class DifferentiatorTest
       assertEquals(0.0, differentiator.val(), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
    @Test(timeout=300000,expected = RuntimeException.class)
    public void testTimeIntervalEqualZero()
    {
@@ -106,7 +106,7 @@ public class DifferentiatorTest
       // TODO 20120911 Khai-Long Ho Hoang: Differentiator class must be enhanced by a detection if time interval dt is equal zero.
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testTimeIntervalLessZero()
    {
@@ -122,7 +122,7 @@ public class DifferentiatorTest
       return t >= 2.0 * dt;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testResetReturnsZero()
    {

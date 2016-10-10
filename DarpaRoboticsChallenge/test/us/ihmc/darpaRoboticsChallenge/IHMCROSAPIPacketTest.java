@@ -42,7 +42,7 @@ import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotCo
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
@@ -102,7 +102,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 8.7)
+   @ContinuousIntegrationTest(estimatedDuration = 8.7)
    @Test(timeout = 43000)
    public void testFuzzyPacketsUsingRos()
    {
@@ -218,7 +218,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
    private DRCSimulationFactory drcSimulation;
 
-   @DeployableTestMethod(estimatedDuration = 2.7)
+   @ContinuousIntegrationTest(estimatedDuration = 2.7)
    @Test(timeout = 30000)
    public void testFuzzyPacketsWithoutRos()
    {

@@ -2,10 +2,10 @@ package us.ihmc.robotiq.communication.registers;
 
 import us.ihmc.robotiq.communication.registers.GripperOptionRegister.rICF;
 import us.ihmc.robotiq.communication.registers.GripperOptionRegister.rICS;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
 public class GripperOptionRegisterTest extends RobotiqOutputRegisterTest
 {
    @Override

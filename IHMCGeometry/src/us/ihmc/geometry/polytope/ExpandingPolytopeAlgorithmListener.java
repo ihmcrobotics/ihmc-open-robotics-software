@@ -5,12 +5,11 @@ import javax.vecmath.Vector3d;
 
 public interface ExpandingPolytopeAlgorithmListener
 {
-
-   public abstract void setPolytopes(SimplexPolytope simplex, ConvexPolytope polytopeOne, ConvexPolytope polytopeTwo, ExpandingPolytopeEntry triangleEntry);
+   public abstract void setPolytopes(SimplexPolytope simplex, SupportingVertexHolder polytopeOne, SupportingVertexHolder polytopeTwo, ExpandingPolytopeEntry triangleEntry);
 
    public abstract void polledEntryToExpand(ExpandingPolytopeEntry triangleEntryToExpand);
 
-   public abstract void computedSupportingVertices(PolytopeVertex supportingVertexA, PolytopeVertex supportingVertexB, Vector3d w);
+   public abstract void computedSupportingVertices(Point3d supportingVertexA, Point3d supportingVertexB, Vector3d w);
 
    public abstract void computedCloseEnough(double vDotW, double lengthSquared, double mu, boolean closeEnough);
 

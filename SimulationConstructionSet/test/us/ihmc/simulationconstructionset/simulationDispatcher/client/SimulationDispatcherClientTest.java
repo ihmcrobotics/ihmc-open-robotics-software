@@ -7,10 +7,10 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = TestPlanTarget.Manual)
+@ContinuousIntegrationPlan(targets = TestPlanTarget.Manual)
 public class SimulationDispatcherClientTest
 {
    private static final String pwd = "***REMOVED***";
@@ -24,7 +24,7 @@ public class SimulationDispatcherClientTest
    
 // private static final String serverURL = "//10.100.0.74/RemoteSimulationRunner0";
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void test()
    {

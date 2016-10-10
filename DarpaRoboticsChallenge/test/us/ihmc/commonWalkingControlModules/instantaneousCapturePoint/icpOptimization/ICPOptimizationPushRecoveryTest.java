@@ -7,12 +7,15 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -24,7 +27,8 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 import javax.vecmath.Point3d;
@@ -85,7 +89,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationNoPush() throws SimulationExceededMaximumTimeException
    {
@@ -98,7 +102,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -111,7 +115,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
-      double percentWeight = 0.50;
+      double percentWeight = 0.25;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -122,7 +126,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -146,7 +150,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -202,7 +206,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationRandomPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -230,7 +234,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationLongForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -254,7 +258,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationLongBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -278,7 +282,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationLongInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -302,7 +306,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationOutwardPushInTransfer() throws SimulationExceededMaximumTimeException
    {
@@ -315,7 +319,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
-      double percentWeight = 0.23;
+      double percentWeight = 0.12;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
 
@@ -332,7 +336,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -356,7 +360,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationInwardPushInTransfer() throws SimulationExceededMaximumTimeException
    {
@@ -386,7 +390,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -410,7 +414,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -434,7 +438,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @DeployableTestMethod(estimatedDuration =  20.0)
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
    public void testPushICPOptimizationOutwardPushOnEachStep() throws SimulationExceededMaximumTimeException
    {

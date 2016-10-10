@@ -14,11 +14,11 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.shape.Box;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class CollisionBoxTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testInsideBoxPoints()
    {
@@ -36,7 +36,7 @@ public class CollisionBoxTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testOutsideBoxPoints()
    {
@@ -54,7 +54,7 @@ public class CollisionBoxTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void compareWithJMEBox()
    {

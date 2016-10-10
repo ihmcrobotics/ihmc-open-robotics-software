@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 
 public class IndexOrderCheckerTest
@@ -20,7 +20,7 @@ public class IndexOrderCheckerTest
       indexOrderChecker = new IndexOrderChecker("test", registry, 1);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testNoOverflow()
    {
@@ -32,7 +32,7 @@ public class IndexOrderCheckerTest
       assertEquals(increment - 1, indexOrderChecker.getMissedIndices());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOverflowOne()
    {
@@ -43,7 +43,7 @@ public class IndexOrderCheckerTest
       assertEquals(0, indexOrderChecker.getMissedIndices());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOverflowTwo()
    {
@@ -55,7 +55,7 @@ public class IndexOrderCheckerTest
       assertEquals(increment - 1, indexOrderChecker.getMissedIndices());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testABunch()
    {

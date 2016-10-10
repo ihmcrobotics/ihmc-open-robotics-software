@@ -22,7 +22,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class WrenchTest
 {
@@ -71,7 +71,7 @@ public class WrenchTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeExpressedInWhatReferenceFrame()
    {
@@ -101,7 +101,7 @@ public class WrenchTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDefaultConstructor()
    {
@@ -112,7 +112,7 @@ public class WrenchTest
       JUnitTools.assertTuple3dEquals(new Vector3d(), wrench.getLinearPart(), 0.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructUsingMatrix()
    {
@@ -131,7 +131,7 @@ public class WrenchTest
       JUnitTools.assertTuple3dEquals(force, wrench.getLinearPartCopy(), 0.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingMatrixTooSmall()
    {
@@ -140,7 +140,7 @@ public class WrenchTest
       new Wrench(frameA, frameB, matrix);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingMatrixTooBig()
    {
@@ -149,7 +149,7 @@ public class WrenchTest
       new Wrench(frameA, frameB, matrix);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructUsingDoubleArray()
    {
@@ -174,21 +174,21 @@ public class WrenchTest
       JUnitTools.assertTuple3dEquals(new Vector3d(linearArray), wrench.getLinearPartCopy(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingDoubleArrayTooSmall()
    {
       new Wrench(frameA, frameB, new double[Wrench.SIZE + 1]);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingDoubleArrayTooBig()
    {
       new Wrench(frameA, frameB, new double[Wrench.SIZE - 1]);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testAddNotAllowed()
    {
@@ -206,7 +206,7 @@ public class WrenchTest
       wrench1.add(wrench2);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testAddNotAllowed2()
    {
@@ -224,7 +224,7 @@ public class WrenchTest
       wrench1.add(wrench2);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAdd()
    {
@@ -244,7 +244,7 @@ public class WrenchTest
       JUnitTools.assertTuple3dEquals(wrench3.getAngularPartCopy(), angularPart, 1e-24);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSubNotAllowed()
    {
@@ -262,7 +262,7 @@ public class WrenchTest
       wrench1.sub(wrench2);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSubNotAllowed2()
    {
@@ -280,7 +280,7 @@ public class WrenchTest
       wrench1.sub(wrench2);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSub()
    {
@@ -300,7 +300,7 @@ public class WrenchTest
       JUnitTools.assertTuple3dEquals(wrench3.getAngularPartCopy(), angularPart, 1e-24);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testCheckAndSetNotAllowed1()
    {
@@ -318,7 +318,7 @@ public class WrenchTest
       wrench2.checkAndSet(wrench1);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testCheckAndSetNotAllowed2()
    {
@@ -336,21 +336,21 @@ public class WrenchTest
       wrench2.checkAndSet(wrench1);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDotProduct()
    {
       testDotProduct(frameA, frameB, frameC);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testDotProductNotAllowed1()
    {
       testDotProductNotAllowed1(frameA, frameB, frameC);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testDotProductNotAllowed2()
    {
@@ -405,7 +405,7 @@ public class WrenchTest
       wrench.dot(twist);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetToZero()
    {

@@ -2,6 +2,7 @@ package us.ihmc.javaFXToolkit;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
@@ -68,6 +69,14 @@ public abstract class JavaFXTools
       affineToPack.setTx(rigidBodyTransform.getM03());
       affineToPack.setTy(rigidBodyTransform.getM13());
       affineToPack.setTz(rigidBodyTransform.getM23());
+   }
+
+   public static Affine createAffineFromQuaternionAndTuple(Quat4d quaternion, Tuple3d translation)
+   {
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.setRotation(quaternion);
+      transform.setTranslation(translation.getX(), translation.getY(), translation.getZ());
+      return convertRigidBodyTransformToAffine(transform);
    }
 
    public static Affine createAffineFromAxisAngle(AxisAngle4d axisAngle)

@@ -8,11 +8,11 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.roughTerrainWalking.HumanoidPointyRocksEnvironmentContactsTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Slow})
 public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocksEnvironmentContactsTest
 {
    private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
@@ -37,7 +37,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 137.5, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 137.5, targetsOverride = {TestPlanTarget.Slow, TestPlanTarget.Video})
    @Test(timeout = 690000)
    public void testWalkingOnLinesInEnvironment() throws SimulationExceededMaximumTimeException
    {
@@ -45,7 +45,7 @@ public class AtlasPointyRocksEnvironmentContactsTest extends HumanoidPointyRocks
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 69.7, targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 69.7, targetsOverride = {TestPlanTarget.Slow, TestPlanTarget.Video})
    @Test(timeout = 350000)
    public void testWalkingOnPointInEnvironment() throws SimulationExceededMaximumTimeException
    {

@@ -23,7 +23,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class AllYoVariablesSimulationComparerTest 
 {
@@ -123,7 +123,7 @@ public class AllYoVariablesSimulationComparerTest
 	      return ret;
 	   }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
 	public void testCompareWithZeroEpsilon() 
 	{
@@ -158,7 +158,7 @@ public class AllYoVariablesSimulationComparerTest
 		assertEquals(doubleYoVariable4, differences.get(0)[1]);
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
 	public void testWithLowEpsilon()
 	{
@@ -187,7 +187,7 @@ public class AllYoVariablesSimulationComparerTest
 		assertFalse(comparerWithLowEpsilon.compare(scs1, scs2)); 
 	}
 
-	@DeployableTestMethod(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
 	public void testWithHighEpsilon()
 	{

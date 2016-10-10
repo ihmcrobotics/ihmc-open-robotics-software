@@ -19,7 +19,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class FourBarKinematicLoopTest
 {
@@ -36,7 +36,7 @@ public class FourBarKinematicLoopTest
 
    private final static double eps = 1e-7;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPlanarSquareWithParallelReferenceFrames()
    {
@@ -53,7 +53,7 @@ public class FourBarKinematicLoopTest
       testPlanarSquare(recomputeJointLimits, jointAtoD);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPlanarSquareWithRotatedJointFrames()
    {
@@ -159,7 +159,7 @@ public class FourBarKinematicLoopTest
       assertTrue(fourBarKinematicLoop.getPassiveRevoluteJointD() == passiveJointD);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSquareWithoutClosureAtZeroAngles()
    {
@@ -209,7 +209,7 @@ public class FourBarKinematicLoopTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRectangleWithJointOutOfPlane()
    {
@@ -263,7 +263,7 @@ public class FourBarKinematicLoopTest
       assertEquals(passiveJointD.getQd(), -masterJointVelocity, eps);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testParallelJointAxesIsEnforced_TranslatedJointsFrames()
    {
@@ -344,7 +344,7 @@ public class FourBarKinematicLoopTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testJointLimitsNearFourBarConstraint()
    {
@@ -384,7 +384,7 @@ public class FourBarKinematicLoopTest
       new FourBarKinematicLoop("fourBar", masterJointA, passiveJointB, passiveJointC, passiveJointD, jointAtoD.getVector(), recomputeJointLimits);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRecomputingJointLimits_NoLimitsAreSet_UnitSquare()
    {
@@ -408,7 +408,7 @@ public class FourBarKinematicLoopTest
       assertEquals(jointAMax, 0.5 * Math.PI, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRecomputingJointLimits_NoLimitsAreSet_RandomQuadrilateral()
    {
@@ -454,7 +454,7 @@ public class FourBarKinematicLoopTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRecomputingJointLimits_UserSetRestrictiveJointLimits_UnitSquare()
    {
@@ -514,7 +514,7 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, angleEpsilon, 0.01 * angleEpsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRecomputingJointLimits_UserSetLimitsNearFourBarConstraints_UnitSquare()
    {
@@ -619,14 +619,14 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointAUpper, 0.5 * Math.PI, 0.01 * angleEpsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRecomputingJointLimits_MasterJointLimitsMostRestrictive_UnitSquare()
    {
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testJointOrderIsChecked_PlanarSquare()
    {
@@ -649,7 +649,7 @@ public class FourBarKinematicLoopTest
       failIfFourBarConstructsWithoutAnException(masterJointA, passiveJointD, passiveJointC, passiveJointB, jointDtoA, recomputeJointLimits);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAntiParallelJointAxesWithoutRecomputingJointLimits_UnitSquare()
    {
@@ -689,7 +689,7 @@ public class FourBarKinematicLoopTest
       assertEquals(masterJointA.getJointLimitUpper(), 0.5 * Math.PI - angleEpsilon1, eps);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOutputJoint()
    {
@@ -721,7 +721,7 @@ public class FourBarKinematicLoopTest
       assertTrue(passiveJointD == fourBarKinematicLoop.getFourBarOutputJoint());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testJacobian_UnitSquare()
    {

@@ -6,15 +6,15 @@ import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.Fast})
 public class ValueDataCheckerParametersTest
 {
    private double EPSILON = 1e-10;
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
       public void testGetDefensiveCopy()
    {
@@ -34,7 +34,7 @@ public class ValueDataCheckerParametersTest
       assertEquals(valueDataCheckerParametersOriginal.getMinimumValue(), valueDataCheckerParametersCopy.getMinimumValue(), EPSILON);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
       public void testErrorThresholdOnDerivativeComparison()
    {
@@ -49,7 +49,7 @@ public class ValueDataCheckerParametersTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
       public void testMaximumDerivative()
    {
@@ -64,7 +64,7 @@ public class ValueDataCheckerParametersTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMaximumSecondDerivative()
    {
@@ -78,7 +78,7 @@ public class ValueDataCheckerParametersTest
       assertEquals(valueDataCheckerParametersOriginal.getMaximumSecondDerivative(), value, EPSILON);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
       public void testMaximumValue()
    {
@@ -93,7 +93,7 @@ public class ValueDataCheckerParametersTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    
    public void testMinimumValue()
@@ -108,7 +108,7 @@ public class ValueDataCheckerParametersTest
       assertFalse(valueDataCheckerParametersOriginal.getMinimumValue() == value);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected=RuntimeException.class)
    public void testSetMinGreaterThanMax()
    {
@@ -119,7 +119,7 @@ public class ValueDataCheckerParametersTest
       valueDataCheckerParametersOriginal.setMinimumValue(value + 1.0);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected=RuntimeException.class)
    public void testSetMaxLessThanMin()
    {

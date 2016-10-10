@@ -599,6 +599,49 @@ public class Graphics3DObject
 
       return addMeshData(meshData, sphereApp);
    }
+   
+   public Graphics3DAddMeshDataInstruction addCapsule(double objectRadius, double objectHeight)
+   {
+      return addCapsule(objectRadius, objectHeight, YoAppearance.Black());
+   }
+   
+   public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height, AppearanceDefinition capsuleAppearance)
+   {
+      translate(0.0, 0.0, -height/2.0 + radius);
+      rotate(Math.PI, Axis.X);
+      addHemiEllipsoid(radius, radius, radius, capsuleAppearance);
+      rotate(-Math.PI, Axis.X);
+
+      addCylinder(height - 2.0 * radius, radius, capsuleAppearance);
+
+      translate(0.0, 0.0, height - 2.0 * radius);
+      addHemiEllipsoid(radius, radius, radius, capsuleAppearance);
+
+      translate(0.0, 0.0, -(height/2.0 - radius));
+
+      //TODO: Make a Mesh for Capsules.
+      //      MeshDataHolder meshData = MeshDataGenerator.Capsule(radius, height, RESOLUTION, RESOLUTION);
+
+      return null; //addMeshData(meshData, capsuleAppearance);
+   }
+
+//   public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height, AppearanceDefinition capsuleAppearance)
+//   {
+//      This seems to be what is needed for Bullet stuff. But still has problems:
+//      translate(0.0, 0.0, radius);
+//      addHemiEllipsoid(radius, radius, radius, capsuleAppearance);
+//      
+//      translate(0.0, 0.0, -height + radius);
+//      addCylinder(height - radius, radius, capsuleAppearance);
+//
+//      rotate(Math.PI, Axis.X);
+//      addHemiEllipsoid(radius, radius, radius, capsuleAppearance);
+//      rotate(-Math.PI, Axis.X);
+//      TODO: Make a Mesh for Capsules.
+//      MeshDataHolder meshData = MeshDataGenerator.Capsule(radius, height, RESOLUTION, RESOLUTION);
+//
+//      return null; //addMeshData(meshData, capsuleAppearance);
+//   }
 
    public Graphics3DAddMeshDataInstruction addMeshData(MeshDataHolder meshData, AppearanceDefinition meshAppearance)
    {
@@ -1132,4 +1175,5 @@ public class Graphics3DObject
    {
       this.changeable = changeable;
    }
+
 }

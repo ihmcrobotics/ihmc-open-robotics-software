@@ -9,16 +9,16 @@ import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.robotics.Axis;
 import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets={TestPlanTarget.UI})
+@ContinuousIntegrationPlan(targets={TestPlanTarget.UI})
 public class Graphics3DTextTest implements Graphics3DFrameListener
 {
    int counter = 0;
    Graphics3DAddExtrusionInstruction instruction;
 
-	@DeployableTestMethod(estimatedDuration = 4.0)
+	@ContinuousIntegrationTest(estimatedDuration = 4.0)
 	@Test(timeout = 30000)
    public void testTextDisplay()
    {

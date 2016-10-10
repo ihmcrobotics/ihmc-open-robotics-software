@@ -11,16 +11,16 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
-@DeployableTestClass(targets = {TestPlanTarget.UI})
+@ContinuousIntegrationPlan(targets = {TestPlanTarget.UI})
 public class SimulationConstructionSetMemoryReclamationTest
 {
    private static final boolean DEBUG = true;
 
-	@DeployableTestMethod(estimatedDuration = 10.3)
+	@ContinuousIntegrationTest(estimatedDuration = 10.3)
 	@Test(timeout = 51000)
    public void testMemoryReclamationForSCSWithoutARobot()
    {
@@ -35,7 +35,7 @@ public class SimulationConstructionSetMemoryReclamationTest
       assertTrue("usedMemoryMB = " + usedMemoryMB, usedMemoryMB < 50);
    }
 
-	@DeployableTestMethod(estimatedDuration = 6.4)
+	@ContinuousIntegrationTest(estimatedDuration = 6.4)
 	@Test(timeout = 32000)
    public void testMemoryReclamationForSCSWithARobot()
    {
@@ -51,7 +51,7 @@ public class SimulationConstructionSetMemoryReclamationTest
    }
 
    // TODO https://jira.ihmc.us/browse/DRC-2208
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout=300000)
    public void testMemoryReclamationForSCSWithARobotAndVideo()
    {

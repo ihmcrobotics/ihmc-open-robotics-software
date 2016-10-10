@@ -43,7 +43,7 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 /**
  * This currently needs to be here because it uses SCS classes to test the inverse dynamics calculator, and SCS isn't on the IHMCUtilities build path
@@ -66,7 +66,7 @@ public class InverseDynamicsCalculatorSCSTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOneFreeRigidBody()
    {
@@ -132,7 +132,7 @@ public class InverseDynamicsCalculatorSCSTest
       compareWrenches(inputWrench, outputWrench);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testChainNoGravity()
    {
@@ -152,7 +152,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testTreeWithNoGravity()
    {
@@ -178,7 +178,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testTreeWithGravity()
    {
@@ -204,7 +204,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testDoingInverseDynamicsTermPerTerm()
    {
@@ -248,7 +248,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDoingNothing()
    {
@@ -278,7 +278,7 @@ public class InverseDynamicsCalculatorSCSTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGravityCompensationForChain()
    {
@@ -297,7 +297,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertZeroAccelerations(jointMap);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testChainWithGravity()
    {

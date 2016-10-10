@@ -223,7 +223,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround = 0.625;
    private double nominalHeightAboveGround = 0.705;
-   private final double maximumHeightAboveGround = 0.765;
+   private final double maximumHeightAboveGround = 0.765 + 0.08;
 
 // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
 //   private final double minimumHeightAboveGround = 0.785;
@@ -604,11 +604,15 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       double zetaOrientation = 0.7;
 
       // Reduce maxPositionAcceleration from 30 to 6 to prevent too high acceleration when hitting joint limits.
-      double maxPositionAcceleration = realRobot ? 6.0 : Double.POSITIVE_INFINITY;
+      double maxPositionAcceleration = realRobot ? 20.0 : Double.POSITIVE_INFINITY;
 //      double maxPositionAcceleration = realRobot ? 30.0 : Double.POSITIVE_INFINITY;
-      double maxPositionJerk = realRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxPositionJerk = realRobot ? 300.0 : Double.POSITIVE_INFINITY;
       double maxOrientationAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxOrientationJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
+
+      double kdReductionRatio = 1.0;
+      double parallelDampingDeadband = 100.0;
+      double positionErrorForMinimumKd = 10000.0;
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
@@ -616,6 +620,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
+      gains.setTangentialDampingGains(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -1046,6 +1051,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getSwingFootVelocityAdjustmentDamping()
    {
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
-      return realRobot ? 0.8 : 0.5;
+      return realRobot ? 0.8 : 0.5; // Robert: 0.8
    }
 }

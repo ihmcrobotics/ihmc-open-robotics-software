@@ -8,12 +8,12 @@ import java.util.concurrent.locks.LockSupport;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class HyperCubeTreeTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPutGetNoSplit()
    {
@@ -66,7 +66,7 @@ public class HyperCubeTreeTest
       return tree;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPutGetRemove2D()
    {
@@ -116,7 +116,7 @@ public class HyperCubeTreeTest
       assertEquals(testValue1, tree.get(point).getValue());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPutGetWithSplit2()
    {
@@ -160,7 +160,7 @@ public class HyperCubeTreeTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPutGetWithSplit3()
    {
@@ -217,7 +217,7 @@ public class HyperCubeTreeTest
 
    public static final double eps = 1e-13;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLocationSpecificRecursions()
    {
@@ -228,7 +228,7 @@ public class HyperCubeTreeTest
       assertEquals(1.6, node.getLeaf().getValue(), eps);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimplePutting()
    {
@@ -239,7 +239,7 @@ public class HyperCubeTreeTest
       assertEquals(1.6, node.getLeaf().getValue(), eps);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGatherAllLeaves()
    {
@@ -292,7 +292,7 @@ public class HyperCubeTreeTest
    private final static int alpha = 9;
    private final static double DIVISOR = 1 / ((double) (1 << alpha));
 
-	@DeployableTestMethod(estimatedDuration = 1.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void testTimingMeasurement()
    {
@@ -307,7 +307,7 @@ public class HyperCubeTreeTest
       System.out.println("ThreadTools.sleep(1L) takes on average " + averageSeconds + " seconds to store a point.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTimer()
    {
@@ -333,7 +333,7 @@ public class HyperCubeTreeTest
       // 0.0010669192539062501
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testMinimumMeasurableTime()
    {
@@ -361,7 +361,7 @@ public class HyperCubeTreeTest
       // 0.0010669192539062501
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSystemTimeNano()
    {

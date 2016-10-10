@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.HullFace;
 import us.ihmc.robotics.geometry.QuickHull3dWrapper;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.transformables.Pose;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 public class QuickHull3DWrapperTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimplexHull()
    {
@@ -38,7 +38,7 @@ public class QuickHull3DWrapperTest
       assertTrue(quickHull.getNumFaces() == 4);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testExtraPointInSimplex()
    {
@@ -56,7 +56,7 @@ public class QuickHull3DWrapperTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testExtraPointOnSimplex()
    {
@@ -73,7 +73,7 @@ public class QuickHull3DWrapperTest
       assertTrue(quickHull.getNumFaces() == 4);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFivePointHull()
    {
@@ -90,7 +90,7 @@ public class QuickHull3DWrapperTest
       assertTrue(quickHull.getNumFaces() == 6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testExtraPointApproximatelyOnSimplex()
    {
@@ -116,7 +116,7 @@ public class QuickHull3DWrapperTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCubeHull()
    {
@@ -142,7 +142,7 @@ public class QuickHull3DWrapperTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTrapezoidalPrismHull()
    {
@@ -187,7 +187,7 @@ public class QuickHull3DWrapperTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFaceToPolygonTrapezoidalPrismHull()
    {

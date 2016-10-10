@@ -11,7 +11,7 @@ public class ExpandingPolytopeAlgorithmAssertListener implements ExpandingPolyto
 {
 
    @Override
-   public void setPolytopes(SimplexPolytope simplex, ConvexPolytope polytopeOne, ConvexPolytope polytopeTwo, ExpandingPolytopeEntry triangleEntry)
+   public void setPolytopes(SimplexPolytope simplex, SupportingVertexHolder polytopeOne, SupportingVertexHolder polytopeTwo, ExpandingPolytopeEntry triangleEntry)
    {      
    }
 
@@ -21,7 +21,7 @@ public class ExpandingPolytopeAlgorithmAssertListener implements ExpandingPolyto
    }
 
    @Override
-   public void computedSupportingVertices(PolytopeVertex supportingVertexA, PolytopeVertex supportingVertexB, Vector3d w)
+   public void computedSupportingVertices(Point3d supportingVertexA, Point3d supportingVertexB, Vector3d w)
    {      
    }
 

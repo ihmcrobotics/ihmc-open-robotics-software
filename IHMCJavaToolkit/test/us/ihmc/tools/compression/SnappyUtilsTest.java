@@ -10,13 +10,13 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.tools.compression.SnappyUtils;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class SnappyUtilsTest
 {
       private final Random rand = new Random(98753244356L);
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
       public void testDirectByteBuffers() throws IOException
       {
@@ -32,7 +32,7 @@ public class SnappyUtilsTest
          testCompression(elements, in, inOffset, out, outOffset, decompress, decompressOffset);
       }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
       public void testDirectInput() throws IOException
       {
@@ -48,7 +48,7 @@ public class SnappyUtilsTest
          testCompression(elements, in, inOffset, out, outOffset, decompress, decompressOffset);
       }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
       public void testDirectOutput() throws IOException
       {
@@ -64,7 +64,7 @@ public class SnappyUtilsTest
          testCompression(elements, in, inOffset, out, outOffset, decompress, decompressOffset);
       }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
       public void testDirectCompressed() throws IOException
       {
@@ -80,7 +80,7 @@ public class SnappyUtilsTest
          testCompression(elements, in, inOffset, out, outOffset, decompress, decompressOffset);
       }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
       public void testHeap() throws IOException
       {
@@ -96,7 +96,7 @@ public class SnappyUtilsTest
          testCompression(elements, in, inOffset, out, outOffset, decompress, decompressOffset);
       }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
       public void testSlice() throws IOException
       {
@@ -123,7 +123,7 @@ public class SnappyUtilsTest
          testCompression(elements, in, inOffset, out, outOffset, decompress, decompressOffset);
       }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
       public void testCompressionRatio() throws IOException
       {

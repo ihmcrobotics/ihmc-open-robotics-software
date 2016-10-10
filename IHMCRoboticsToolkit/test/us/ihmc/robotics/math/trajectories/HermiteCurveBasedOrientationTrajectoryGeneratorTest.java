@@ -16,13 +16,13 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 {
    private static boolean DEBUG = false;
 
-   @DeployableTestMethod(estimatedDuration = 0.9)
+   @ContinuousIntegrationTest(estimatedDuration = 0.9)
    @Test(timeout = 30000)
    public void testDerivativesConsistency() throws Exception
    {
@@ -85,7 +85,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testLimitConditions() throws Exception
    {
@@ -191,7 +191,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testContinuityForSlowTrajectory() throws Exception
    {
@@ -300,7 +300,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testContinuityForFastishTrajectory() throws Exception
    {

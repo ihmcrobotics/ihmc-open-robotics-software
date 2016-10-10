@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTestInterface
@@ -35,7 +35,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @DeployableTestMethod(estimatedDuration = 18.8)
+   @ContinuousIntegrationTest(estimatedDuration = 18.8)
    @Test(timeout = 94000)
    public void testSingleWaypoint() throws Exception
    {

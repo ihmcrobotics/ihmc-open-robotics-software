@@ -5,12 +5,12 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class CallFrequencyCalculatorTest
 {
-   @DeployableTestMethod(estimatedDuration = 5.0, targets = TestPlanTarget.Fast)
+   @ContinuousIntegrationTest(estimatedDuration = 5.0, targetsOverride = TestPlanTarget.Fast)
    @Test(timeout = 30000)
    public void testDetermineCallFrequency()
    {

@@ -24,7 +24,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransformTest;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ReferenceFrameTest
 {
@@ -194,7 +194,7 @@ public class ReferenceFrameTest
       matrix.setM22(1);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTypicalExample()
    {
@@ -211,7 +211,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetTransformToParents()
    {
@@ -235,7 +235,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetTransformToRoots()
    {
@@ -256,7 +256,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void getTransformToSelf()
    {
@@ -271,7 +271,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testGetTransformBetweenFrames()
    {
@@ -311,7 +311,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUpdateInMiddleFrame()
    {
@@ -354,7 +354,7 @@ public class ReferenceFrameTest
       JUnitTools.assertTuple3dEquals(expectedTranslation, totalTranslation, 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUpdateInMiddleWithCorruptors()
    {
@@ -407,7 +407,7 @@ public class ReferenceFrameTest
       RigidBodyTransformTest.assertTransformEquals(expectedTransform, transformToDesiredFrame, 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testGetTransformBetweenFramesTwo()
    {
@@ -445,7 +445,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 	
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testConstructFrameFromPointAndAxis()
    {
@@ -474,7 +474,7 @@ public class ReferenceFrameTest
       tearDown();
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testCopyAndAlignAxisWithVector()
    {
@@ -512,7 +512,7 @@ public class ReferenceFrameTest
       tearDown();
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testCopyAndAlignTwoAxesWithTwoVectors()
    {
@@ -558,7 +558,7 @@ public class ReferenceFrameTest
       tearDown();
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testCopyAndAimAxisAtPoint()
    {
@@ -599,7 +599,7 @@ public class ReferenceFrameTest
       tearDown();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testWorldFrameSerializable()
    {
@@ -611,7 +611,7 @@ public class ReferenceFrameTest
       //NOTE:No other reference frame is serializable because of transform3D
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.7)
+	@ContinuousIntegrationTest(estimatedDuration = 0.7)
 	@Test(timeout = 30000)
    public void testGarbageCollectionInBroadTrees()
    {

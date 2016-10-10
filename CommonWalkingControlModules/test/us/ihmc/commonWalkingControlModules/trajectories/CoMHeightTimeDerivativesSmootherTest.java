@@ -13,7 +13,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class CoMHeightTimeDerivativesSmootherTest
@@ -32,7 +32,7 @@ public class CoMHeightTimeDerivativesSmootherTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testConstantHeight()
    {
@@ -65,7 +65,7 @@ public class CoMHeightTimeDerivativesSmootherTest
       assertEquals(comHeightAcceleration, comHeightAccelerationOut, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testDiscreetJump()
    {
@@ -158,7 +158,7 @@ public class CoMHeightTimeDerivativesSmootherTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testSinusoidalInput()
    {

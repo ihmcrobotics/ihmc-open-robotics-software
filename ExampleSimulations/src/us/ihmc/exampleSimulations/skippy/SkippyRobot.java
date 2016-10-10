@@ -211,6 +211,7 @@ public class SkippyRobot extends Robot
          rootJointIfSkippy.setRotationAndTranslation(transform);
 
          shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2), this, Axis.Y);
+         shoulderJoint.setDamping(0.05);
          shoulderJoint.setInitialState(initialShoulderJointAngle, 0.0);
          Link arms = createArmsTippy();
          shoulderJoint.setLink(arms);
@@ -223,6 +224,7 @@ public class SkippyRobot extends Robot
          rootJointIfSkippy.addJoint(shoulderJoint);
 
          hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
+         hipJoint.setDamping(0.05);
          hipJoint.setInitialState(2.0 * Math.PI / 8.0, 0.0);
          Link leg = createLegSkippy();
          hipJoint.setLink(leg);
@@ -293,7 +295,7 @@ public class SkippyRobot extends Robot
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -LEG_LENGTH);
-      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Crimson());
+      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Glass(0.75));//Yellow());//
 
       // associate the linkGraphics object with the link object
       leg.setLinkGraphics(linkGraphics);
@@ -314,7 +316,7 @@ public class SkippyRobot extends Robot
       torso.setMomentOfInertia(TORSO_MOI, TORSO_MOI, 0.0001);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.LightSkyBlue());
+      linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.Glass(0.75));
       linkGraphics.addSphere(0.10, YoAppearance.White());
 
       torso.setLinkGraphics(linkGraphics);
@@ -336,7 +338,7 @@ public class SkippyRobot extends Robot
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -TORSO_LENGTH / 2);
-      linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.LightSkyBlue());
+      linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.Blue());
 
       torso.setLinkGraphics(linkGraphics);
 
@@ -358,7 +360,7 @@ public class SkippyRobot extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.rotate(Math.toRadians(90), Axis.Y);
       linkGraphics.translate(0.0, 0.0, -SHOULDER_LENGTH / 2.0);
-      linkGraphics.addCylinder(SHOULDER_LENGTH, SHOULDER_RADIUS, YoAppearance.DarkBlue());
+      linkGraphics.addCylinder(SHOULDER_LENGTH, SHOULDER_RADIUS, YoAppearance.Red());
       arms.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)

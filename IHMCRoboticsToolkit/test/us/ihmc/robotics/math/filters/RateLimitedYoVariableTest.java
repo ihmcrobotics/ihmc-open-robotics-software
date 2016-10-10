@@ -10,7 +10,7 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class RateLimitedYoVariableTest
 {
@@ -48,7 +48,7 @@ public class RateLimitedYoVariableTest
       rateLimitedYoVariable4 = new RateLimitedYoVariable("rateLimitedYoVariable4", registry, maxRate4, position4, dt4);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdate()
    {
@@ -63,7 +63,7 @@ public class RateLimitedYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdateWithNullPointerException()
    {
@@ -80,7 +80,7 @@ public class RateLimitedYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdateWithCurrentPositionParameter()
    {
@@ -113,7 +113,7 @@ public class RateLimitedYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdateWithCurrentPositionParameterExceedingMaxRate()
    {
@@ -174,7 +174,7 @@ public class RateLimitedYoVariableTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testUpdateWithMaxRateBeingNegative()
    {

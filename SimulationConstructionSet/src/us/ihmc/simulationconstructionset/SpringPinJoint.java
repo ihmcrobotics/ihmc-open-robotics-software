@@ -24,9 +24,9 @@ public class SpringPinJoint extends PinJoint
       super(jname, offset, rob, u_hat);
       kp = new DoubleYoVariable(jname + "_kp", registry);
       kd = new DoubleYoVariable(jname + "_kd", registry);
-      setChangeListeners();
-      kp.set(40000.0);
-      kd.set(200.0);
+      setKp(8000.0);
+      setKd(200.0);
+//      setChangeListeners();
    }
 
    public SpringPinJoint(String jname, Vector3d offset, Robot rob, Axis jaxis)
@@ -34,9 +34,9 @@ public class SpringPinJoint extends PinJoint
       super(jname, offset, rob, jaxis);
       kp = new DoubleYoVariable(jname + "_kp", registry);
       kd = new DoubleYoVariable(jname + "_kd", registry);
-      setChangeListeners();
-      kp.set(40000.0);
-      kd.set(200.0);
+      setKp(10000.0);
+      setKd(200.0);
+//      setChangeListeners();
    }
    
    private void setChangeListeners()

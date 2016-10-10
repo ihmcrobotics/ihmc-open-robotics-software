@@ -128,6 +128,11 @@ public class MultiColorMeshBuilder
       addBoxMesh(size, size, size, pointsOffset, color);
    }
 
+   public void addCubeMesh(double size, double xOffset, double yOffset, double zOffset, Color color)
+   {
+      addBoxMesh(size, size, size, new Point3d(xOffset, yOffset, zOffset), color);
+   }
+
    public void addLineMesh(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth, Color color)
    {
       float lx = xf - x0;
@@ -157,6 +162,9 @@ public class MultiColorMeshBuilder
 
    public void addMultiLineMesh(Point3d[] points, double lineWidth, Color color, boolean close)
    {
+      if (points.length < 2)
+         return;
+
       for (int i = 1; i < points.length; i++)
       {
          Point3d start = points[i-1];
@@ -174,6 +182,9 @@ public class MultiColorMeshBuilder
 
    public void addMultiLineMesh(List<Point3d> points, double lineWidth, Color color, boolean close)
    {
+      if (points.size() < 2)
+         return;
+
       for (int i = 1; i < points.size(); i++)
       {
          Point3d start = points.get(i-1);

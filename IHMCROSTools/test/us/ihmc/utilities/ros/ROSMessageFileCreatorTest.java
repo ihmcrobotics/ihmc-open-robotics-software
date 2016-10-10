@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
  */
 public class ROSMessageFileCreatorTest
 {
-   @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 0.0)
+   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAllExportedPacketsWithTopicsAreFormattedCorrectly()
    {

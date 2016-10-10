@@ -36,7 +36,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -84,7 +84,7 @@ public class AtlasSDFVerificationTest
     * @throws IOException
     * @throws ControllerFailureException
     */
-	@DeployableTestMethod(estimatedDuration = 10.4, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 10.4, targetsOverride = TestPlanTarget.Exclude)
 	@Test(timeout = 41302)
    public void testSimpleLegSwing() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException, ControllerFailureException
    {

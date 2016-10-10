@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public class ConvexPolytope
+public class ConvexPolytope implements SupportingVertexHolder
 {
    private final ArrayList<PolytopeVertex> vertices = new ArrayList<>();
 
@@ -148,7 +148,8 @@ public class ConvexPolytope
       }
    }
 
-   public PolytopeVertex getSupportingVertex(Vector3d supportDirection)
+   @Override
+   public Point3d getSupportingVertex(Vector3d supportDirection)
    {
       // Naive implementation. Just search through all of them.
 
@@ -167,7 +168,7 @@ public class ConvexPolytope
          }
       }
 
-      return bestVertex;
+      return bestVertex.getPosition();
    }
 
    public String toString()

@@ -21,7 +21,7 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
 import us.ihmc.tools.testing.MutationTestingTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
 /**
@@ -61,7 +61,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       return new FramePoint(referenceFrame, x, y, z, name);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testRunTestMain()
    {
@@ -216,7 +216,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOtherConstructors() //Brett was here
    {
@@ -259,7 +259,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertEquals("These should be equal", theFrame, frameName.getReferenceFrame());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMidPoint()
    {
@@ -276,7 +276,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertTrue(expectedMidPoint.epsilonEquals(actualMidPoint, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testMidPointException()
    {
@@ -286,7 +286,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       FramePoint.getMidPoint(framePoint1, framePoint2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAverage()
    {
@@ -300,7 +300,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertEquals(10.0, average.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class)
    public void testGetXYplaneDistance()
    {
@@ -314,7 +314,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       firstPoint.getXYPlaneDistance(thirdPoint);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class)
    public void testDistance() //Brett
    {
@@ -330,7 +330,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       framePoint1.distance(framePoint2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = ReferenceFrameMismatchException.class)
    public void testDistanceSquared() //Brett
    {
@@ -346,7 +346,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       framePoint1.distanceSquared(framePoint2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testToFramePoint2d() //Brett
    {
@@ -358,7 +358,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertEquals(2.0, framePoint2d.getY(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetFramePoint2d() //Brett
    {
@@ -372,7 +372,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertEquals(2.0, framePoint2d.getY(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetPoint()
    {
@@ -384,7 +384,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertTrue(tuple3d.epsilonEquals(tuple3dCopy, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFrameChanges()
    {
@@ -406,7 +406,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       framePoint.checkReferenceFrameMatch(theFrame);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testApplyTransform()
    {
@@ -425,7 +425,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertEquals(16.0, frameTuple.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testApplyTransformScale()
    {
@@ -441,7 +441,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertTrue(expectedResultPoint.epsilonEquals(resultPoint, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testApplyTransformTranslate()
    {
@@ -458,7 +458,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertTrue(expectedResultPoint.epsilonEquals(resultPoint, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public final void testApplyTransformRotateZ()
    {
@@ -475,7 +475,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertTrue(expectedResultPoint.epsilonEquals(resultPoint, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructors()
    {
@@ -507,7 +507,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertTrue(pointToBeTested.getPoint().epsilonEquals(point3dExpected, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testYawAboutPointRegression()
    {
@@ -554,7 +554,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertEquals("not equal", -3096.5574256022164, result.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPitchAboutPointRegression()
    {
@@ -611,7 +611,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       return (random.nextDouble() - 0.5) * 2.0 * Math.PI;
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testYawAboutPoint()
    {
@@ -655,7 +655,7 @@ public class FramePointTest extends FrameTupleTest<TransformablePoint3d>
       assertEquals("These should be equal", 1.0, result.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPitchAboutPoint()
    {

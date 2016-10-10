@@ -9,7 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class TrapezoidalVelocityTrajectoryTest
@@ -26,7 +26,7 @@ public class TrapezoidalVelocityTrajectoryTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetState()
    {
@@ -91,7 +91,7 @@ public class TrapezoidalVelocityTrajectoryTest
 
 
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void DONTtestOne()
    {
@@ -119,7 +119,7 @@ public class TrapezoidalVelocityTrajectoryTest
 //    sleepForever();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTwo()
    {
@@ -149,7 +149,7 @@ public class TrapezoidalVelocityTrajectoryTest
 //    sleepForever();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithoutEnforcingFinalVelocity()
    {
@@ -178,7 +178,7 @@ public class TrapezoidalVelocityTrajectoryTest
 //    sleepForever();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testNotEnforcingFinalVelocityBadCase()
    {
@@ -214,7 +214,7 @@ public class TrapezoidalVelocityTrajectoryTest
       assertTrue("endSpeed=" + endSpeed + ", : " + errorMessage, endSpeed <= maxVelocity);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testRandomStuff()
    {
@@ -262,7 +262,7 @@ public class TrapezoidalVelocityTrajectoryTest
          throw new RuntimeException("testRandomStuff Failed. Check output.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testProblemOnDog()
    {
@@ -279,7 +279,7 @@ public class TrapezoidalVelocityTrajectoryTest
       performTests(trap, t0, x0, v0, xF, vF, vMax, aMax);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.1)
    @Test(timeout = 30000)
    public void testNotEnforcingFinalVelocity()
    {
@@ -352,7 +352,7 @@ public class TrapezoidalVelocityTrajectoryTest
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testProblemOne()
    {
@@ -371,7 +371,7 @@ public class TrapezoidalVelocityTrajectoryTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testProblemTwo()
    {
@@ -395,7 +395,7 @@ public class TrapezoidalVelocityTrajectoryTest
 	/**
 	 * Never really worked yet. Some day maybe.
 	 */
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
    @Test(timeout = 300000)
    public void DONTtestRandomSamples()
    {

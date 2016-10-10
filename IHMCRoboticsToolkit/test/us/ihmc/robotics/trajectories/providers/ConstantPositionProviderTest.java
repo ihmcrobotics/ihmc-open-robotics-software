@@ -4,7 +4,7 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import java.util.Random;
 
@@ -15,7 +15,7 @@ public class ConstantPositionProviderTest
 
    private static final double EPS = 1e-12;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void test()
    {

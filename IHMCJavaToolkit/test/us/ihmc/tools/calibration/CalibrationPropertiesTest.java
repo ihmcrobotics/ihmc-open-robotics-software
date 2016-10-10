@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.tools.calibration.CalibrationProperties;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 
 public class CalibrationPropertiesTest
@@ -34,7 +34,7 @@ public class CalibrationPropertiesTest
       currentPropertiesFile.delete();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetIntegerProperty()
    {
@@ -53,7 +53,7 @@ public class CalibrationPropertiesTest
       assertEquals(0, calibrationProperties.getIntegerProperty("notAKey"));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetDoubleProperty()
    {
@@ -73,7 +73,7 @@ public class CalibrationPropertiesTest
       assertEquals(0.0, calibrationProperties.getDoubleProperty("notAKey"), EPSILON);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testSaveAndLoad()
    {
@@ -86,7 +86,7 @@ public class CalibrationPropertiesTest
       assertEquals(value, calibrationProperties2.getIntegerProperty(key));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testArithmetic1()
    {
@@ -98,7 +98,7 @@ public class CalibrationPropertiesTest
       assertEquals(value1 + value2, calibrationProperties.getIntegerProperty(key));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testArithmetic2()
    {

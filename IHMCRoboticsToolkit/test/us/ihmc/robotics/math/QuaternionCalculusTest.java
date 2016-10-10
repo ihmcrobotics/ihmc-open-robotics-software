@@ -19,13 +19,13 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class QuaternionCalculusTest
 {
    private static final double EPSILON = 1.0e-10;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLogAndExpAlgebra() throws Exception
    {
@@ -53,7 +53,7 @@ public class QuaternionCalculusTest
    }
    
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConversionQDotToAngularVelocityBackAndForth() throws Exception
    {
@@ -77,7 +77,7 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConversionQDDotToAngularAccelerationBackAndForth() throws Exception
    {
@@ -118,7 +118,7 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testVelocityFromFDAgainstTrajectory() throws Exception
    {
@@ -164,7 +164,7 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFDSimpleCase() throws Exception
    {
@@ -213,7 +213,7 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAccelerationFromFDAgainstTrajectory() throws Exception
    {
@@ -261,7 +261,7 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testInterpolateAgainstQuat4d() throws Exception
    {
@@ -281,7 +281,7 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTransformOnVector() throws Exception
    {
@@ -311,7 +311,7 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInvertTransformOnVector() throws Exception
    {
@@ -342,7 +342,7 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTransformOnQuaternion() throws Exception
    {
@@ -377,7 +377,7 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInvertTransformOnQuaternion() throws Exception
    {

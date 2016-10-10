@@ -8,12 +8,12 @@ import org.junit.Test;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.TestPlanTarget;
 
 public class YoMinimumJerkTrajectoryTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.6)
+	@ContinuousIntegrationTest(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
    public void testRandomInitialFinalConditions()
    {
@@ -59,7 +59,7 @@ public class YoMinimumJerkTrajectoryTest
       return min + Math.random() * (max - min);
    }
    
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testTimeExtensionRuntime()
    {
@@ -86,7 +86,7 @@ public class YoMinimumJerkTrajectoryTest
       System.out.println("TestMinimumJerkTrajectory.testTimeExtensionRuntime: Execution Time = " + (runtime) + "ms per 6 calls");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindMaxVals()
    {
@@ -112,7 +112,7 @@ public class YoMinimumJerkTrajectoryTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
    @Test(timeout=300000)
    public void testTimeExtension()
    {
@@ -131,7 +131,7 @@ public class YoMinimumJerkTrajectoryTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testZeroLength()
    {
@@ -163,7 +163,7 @@ public class YoMinimumJerkTrajectoryTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testBadInitialParams()
    {

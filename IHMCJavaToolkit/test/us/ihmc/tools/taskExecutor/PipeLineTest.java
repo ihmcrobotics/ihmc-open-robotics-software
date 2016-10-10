@@ -8,12 +8,12 @@ import org.junit.Test;
 import us.ihmc.tools.taskExecutor.ParallelTask;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.tools.testing.MutationTestingTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class PipeLineTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testEmptyPipeline()
    {
@@ -24,7 +24,7 @@ public class PipeLineTest
       assertTrue(pipeLine.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPipelineWithOneSingleTaskStage()
    {
@@ -45,7 +45,7 @@ public class PipeLineTest
       assertTrue(pipeLine.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPipelineWithTwoSingleTaskStages()
    {
@@ -87,7 +87,7 @@ public class PipeLineTest
       assertTrue(pipeLine.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPipelineOneStageTwoPipesThenOneSingleTaskStage()
    {
@@ -145,7 +145,7 @@ public class PipeLineTest
       assertTrue(pipeLine.isDone());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTwoParallelPipes()
    {
@@ -200,7 +200,7 @@ public class PipeLineTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testThreePipesWithParallelAndSeriesTasks()
    {
