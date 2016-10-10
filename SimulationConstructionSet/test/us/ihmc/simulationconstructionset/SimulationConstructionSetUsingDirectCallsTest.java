@@ -225,10 +225,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
       toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
       yoGraphicsListRegistry = createDynamicGraphicObjectsListRegistryWithObject();
       dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
-      simpleScsPhysics = createScsPhysics();
       simpleWrenchContactPoint = new WrenchContactPoint("simpleWrenchContactPoint", dummyRegistry, staticLink);
 
       scs = new SimulationConstructionSet(simpleRobot);
+      simpleScsPhysics = createScsPhysics();
       scs.setFrameMaximized();
       scs.startOnAThread();
    }
