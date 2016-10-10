@@ -26,7 +26,7 @@ public interface WholeBodyControllerParameters extends FullHumanoidRobotModelFac
 	
 	public double getControllerDT();
 
-	public HumanoidFloatingRootJointRobot createSdfRobot(boolean createCollisionMeshes);
+	public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes);
 	
 	
 	public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel);

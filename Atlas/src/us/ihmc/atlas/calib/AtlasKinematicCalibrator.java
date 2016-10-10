@@ -37,7 +37,7 @@ public class AtlasKinematicCalibrator
    public AtlasKinematicCalibrator(DRCRobotModel robotModel)
    {
       //load robot
-      robot = robotModel.createSdfRobot(false);
+      robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       registry = robot.getRobotsYoVariableRegistry();
       fullRobotModel = robotModel.createFullRobotModel();
       joints = fullRobotModel.getOneDoFJoints();

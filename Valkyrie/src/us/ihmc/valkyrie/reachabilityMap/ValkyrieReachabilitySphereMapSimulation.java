@@ -19,7 +19,7 @@ public class ValkyrieReachabilitySphereMapSimulation
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      FloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      FloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       final JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(sdfRobot, fullRobotModel);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(true, 16000);

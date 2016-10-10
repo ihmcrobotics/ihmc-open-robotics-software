@@ -11,7 +11,7 @@ public class WholeBodyVisualizier
    {
       //model = AtlasRobotModelFactory.selectSimulationModelFromFlag(args);
    
-      FloatingRootJointRobot simulatedRobot = robotModel.createSdfRobot(false);
+      FloatingRootJointRobot simulatedRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       scs = new SimulationConstructionSet(simulatedRobot);
       scs.startOnAThread();

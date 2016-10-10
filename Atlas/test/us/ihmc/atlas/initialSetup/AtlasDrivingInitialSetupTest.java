@@ -29,7 +29,7 @@ public class AtlasDrivingInitialSetupTest
    public void testLoadFile()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(version, DRCRobotModel.RobotTarget.SCS, false);
-      HumanoidFloatingRootJointRobot robot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       DRCRobotJointMap jointMap = new AtlasJointMap(version);
       
       AtlasInitialSetupFromFile initialSetup = new AtlasInitialSetupFromFile("initialDrivingSetup");

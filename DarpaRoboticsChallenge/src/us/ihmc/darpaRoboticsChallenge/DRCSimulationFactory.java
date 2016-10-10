@@ -107,7 +107,7 @@ public class DRCSimulationFactory
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
 
       boolean createCollisionMeshes = false;
-      simulatedRobot = drcRobotModel.createSdfRobot(createCollisionMeshes);
+      simulatedRobot = drcRobotModel.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
 
       this.controllerFactory = controllerFactory;
 

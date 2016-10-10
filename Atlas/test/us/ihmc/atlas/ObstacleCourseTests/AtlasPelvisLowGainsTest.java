@@ -87,7 +87,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
 
          boolean createCollisionMeshes = false;
          atlasRobotModel.setEnableJointDamping(false);
-         robot = atlasRobotModel.createSdfRobot(createCollisionMeshes);
+         robot = atlasRobotModel.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
          robot.setGravity(gravityZ);
 
          atlasInverseDynamicsCalculatorTestHelper = new DRCInverseDynamicsCalculatorTestHelper(controllersFullRobotModel, robot, visualize, gravityZ);

@@ -22,7 +22,7 @@ public class ValkyrieSystemIdentificationSCSUI
 
       // initialize SCS
      DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, false);
-      final FloatingRootJointRobot robot =robotModel.createSdfRobot(false);
+      final FloatingRootJointRobot robot =robotModel.createHumanoidFloatingRootJointRobot(false);
       
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(65536);
