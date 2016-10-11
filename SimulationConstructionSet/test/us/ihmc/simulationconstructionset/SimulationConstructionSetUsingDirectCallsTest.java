@@ -225,10 +225,10 @@ public class SimulationConstructionSetUsingDirectCallsTest
       toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
       yoGraphicsListRegistry = createDynamicGraphicObjectsListRegistryWithObject();
       dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
-      simpleScsPhysics = createScsPhysics();
       simpleWrenchContactPoint = new WrenchContactPoint("simpleWrenchContactPoint", dummyRegistry, staticLink);
 
       scs = new SimulationConstructionSet(simpleRobot);
+      simpleScsPhysics = createScsPhysics();
       scs.setFrameMaximized();
       scs.startOnAThread();
    }
@@ -287,11 +287,11 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertTrue(exitActionListenerHasBeenNotified.getBooleanValue());
 
       scs.setGraphsUpdatedDuringPlayback(false);
-      boolean isGraphsUpdatedDuringPlaybackFromSCS = scs.isGraphsUpdatedDuringPlayback();
+      boolean isGraphsUpdatedDuringPlaybackFromSCS = scs.areGraphsUpdatedDuringPlayback();
       assertFalse(isGraphsUpdatedDuringPlaybackFromSCS);
 
       scs.setGraphsUpdatedDuringPlayback(true);
-      boolean isGraphsUpdatedDuringPlaybackFromSCS2 = scs.isGraphsUpdatedDuringPlayback();
+      boolean isGraphsUpdatedDuringPlaybackFromSCS2 = scs.areGraphsUpdatedDuringPlayback();
       assertTrue(isGraphsUpdatedDuringPlaybackFromSCS2);
 
       scs.setScrollGraphsEnabled(true);

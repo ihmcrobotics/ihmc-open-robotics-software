@@ -54,6 +54,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.robotics.stateMachines.StateMachinesJPanel;
 import us.ihmc.robotics.time.GlobalTimer;
+import us.ihmc.robotics.time.RealTimeRateEnforcer;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
@@ -258,6 +259,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    private boolean simulationThreadIsUpAndRunning = false;
    private boolean isSimulating = false;
+   private boolean simulateNoFasterThanRealTime = false;
+   private final RealTimeRateEnforcer realTimeRateEnforcer = new RealTimeRateEnforcer();
    private boolean isPlaying = false;
    private boolean fastSimulate = false;
    private int numberOfTicksBeforeUpdatingGraphs = 15;
@@ -2215,6 +2218,11 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          {
             try
             {
+               if (simulateNoFasterThanRealTime)
+               {
+                  realTimeRateEnforcer.sleepIfNecessaryToEnforceRealTimeRate(this.getTime());
+               }
+   
                simulateCycle();
             }
             catch (UnreasonableAccelerationException ex)
@@ -2378,7 +2386,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
-   private boolean updateGraphs = true;
+   private boolean updateGraphsDuringPlayback = true;
 
    /**
     * Enables or disables graph updates during playback. Disabling updates may grant some improved performance but the current data point will nolonger be highlighted on the graphs.
@@ -2386,9 +2394,9 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @param updateGraphs Specify whether or not graphs should update during playback.
     */
-   public void setGraphsUpdatedDuringPlayback(boolean updateGraphs)
+   public void setGraphsUpdatedDuringPlayback(boolean updateGraphsDuringPlayback)
    {
-      this.updateGraphs = updateGraphs;
+      this.updateGraphsDuringPlayback = updateGraphsDuringPlayback;
    }
 
    /**
@@ -2397,9 +2405,30 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @return Are graph updates enabled during playback?
     * @see #setGraphsUpdatedDuringPlayback setGraphsUpdatedDuringPlayback
     */
-   public boolean isGraphsUpdatedDuringPlayback()
+   public boolean areGraphsUpdatedDuringPlayback()
    {
-      return updateGraphs;
+      return updateGraphsDuringPlayback;
+   }
+
+   /**
+    * If true, will slow down simulations that are faster than real time to simulate at exactly real time rate.
+    * 
+    * @param simulateNoFasterThanRealTime
+    */
+   public void setSimulateNoFasterThanRealTime(boolean simulateNoFasterThanRealTime)
+   {
+      this.simulateNoFasterThanRealTime = simulateNoFasterThanRealTime;
+      this.realTimeRateEnforcer.reset();
+   }
+
+   /**
+    * Return whether simulation will slow down when faster than real time to simulate at exactly real time rate.
+    * 
+    * @param simulateNoFasterThanRealTime
+    */
+   public boolean getSimulateNoFasterThanRealTime()
+   {
+      return this.simulateNoFasterThanRealTime;
    }
 
    private long nextWakeMillis;
@@ -2460,7 +2489,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
 
       // if (updateGraphs) myGUI.updateGraphsLeisurely(20);
-      if (updateGraphs)
+      if (updateGraphsDuringPlayback)
       {
          myGUI.updateGraphs();
       }
@@ -2520,7 +2549,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             myGUI.allowTickUpdatesNow();
          }
 
-         if (updateGraphs)
+         if (updateGraphsDuringPlayback)
          {
             myGUI.updateGraphs();
          }
@@ -2559,6 +2588,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       isPlaying = false;
       isSimulating = false;
+      realTimeRateEnforcer.reset();
       ticksToSimulate = 0;
       setScrollGraphsEnabled(true);
 
@@ -2772,13 +2802,9 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          ticksToSimulate += numTicks;
          isPlaying = false;
          isSimulating = true;
+         realTimeRateEnforcer.reset();
       }
 
-      /*
-       * while(numTicks > 0) { for(int i=0;i<RECORD_FREQ;i++) {
-       * mySimulator.simulate(); } myDataBuffer.tickAndUpdate(); numTicks -=
-       * RECORD_FREQ; }
-       */
    }
 
    /**
