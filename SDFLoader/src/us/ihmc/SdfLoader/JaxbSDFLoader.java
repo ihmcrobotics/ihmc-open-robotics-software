@@ -149,25 +149,31 @@ public class JaxbSDFLoader
       generalizedSDFRobotModels.get(jointMap.getModelName()).addContactSensor(sensorName, parentJointName, type);
    }
 
-   public RobotDescription createRobotDescription(HumanoidJointNameMap sdfJointNameMap)
+   public RobotDescription createRobotDescription(JointNameMap jointNameMap)
    {
-      if (sdfJointNameMap != null)
+      boolean useCollisionMeshes = false;
+      boolean enableTorqueVelocityLimits = true;
+      boolean enableJointDamping = true;
+
+      return createRobotDescription(jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+   }
+
+   public RobotDescription createRobotDescription(JointNameMap jointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits, boolean enableJointDamping)
+   {
+      if (jointNameMap != null)
       {
-         String modelName = sdfJointNameMap.getModelName();
+         String modelName = jointNameMap.getModelName();
          checkModelName(modelName);
 
-         boolean useCollisionMeshes = false;
-         boolean enableTorqueVelocityLimits = true;
-         boolean enableJointDamping = true;
 
          RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-         RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModels.get(modelName), sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+         RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModels.get(modelName), jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
          return description;
       }
       else
       {
-         throw new RuntimeException("Cannot make a fullrobotmodel without a sdfJointNameMap");
+         throw new RuntimeException("Cannot make a fullrobotmodel without a jointNameMap");
       }
    }
 }
