@@ -220,8 +220,6 @@ public class YoVariableValueDataCheckerTest
 
       double deltaT = 0.001;
 
-      scs.startOnAThread();
-
       for (double time = 0.0; time < 7.0; time = time + deltaT)
       {
          robot.setTime(time);
@@ -245,8 +243,6 @@ public class YoVariableValueDataCheckerTest
       assertTrue(yoVariableValueDataChecker.isMaxSecondDerivativeExeeded());
       assertTrue(yoVariableValueDataChecker.isMaxValueExeeded());
       assertTrue(yoVariableValueDataChecker.isMinValueExeeded());
-
-      scs.stopSimulationThread();
    }
 
 
