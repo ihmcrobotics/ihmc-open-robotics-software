@@ -311,6 +311,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       {
          for (Robot robot : robots)
          {
+            //TODO: Should use the graphics robots, not the robots for cameras...
             robot.getCameraMountList(cameraMountList);
          }
       }
@@ -465,6 +466,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
    public void setup(final HeightMap heightMap)
    {
+      createGraphicsRobots();
+
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
          @Override
@@ -657,18 +660,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       // contentPane.add(splitPane);
       // 3D Canvass Stuff goes here...
 
-      if (robots != null)
-      {
-         for (Robot robot : robots)
-         {
-            GraphicsRobot graphicsRobot = new GraphicsRobot(robot);
-            graphicsUpdatables.add(graphicsRobot);
-            graphicsRobots.put(robot, graphicsRobot);
-            graphics3dAdapter.addRootNode(graphicsRobot.getRootNode());
-
-         }
-      }
-
       // GUI Actions:
       if (robots != null)
       {
@@ -822,6 +813,20 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          YoVariablePanelJPopupMenu varPanelJPopupMenu = new YoVariablePanelJPopupMenu(myGraphArrayPanel, myEntryBoxArrayPanel, selectedVariableHolder, yoVariableExplorerTabbedPane,
                bookmarkedVariablesHolder);
          yoVariableExplorerTabbedPane.setVarPanelJPopupMenu(varPanelJPopupMenu);
+      }
+   }
+
+   private void createGraphicsRobots()
+   {
+      if (robots != null)
+      {
+         for (Robot robot : robots)
+         {
+            GraphicsRobot graphicsRobot = new GraphicsRobot(robot);
+            graphicsUpdatables.add(graphicsRobot);
+            graphicsRobots.put(robot, graphicsRobot);
+            graphics3dAdapter.addRootNode(graphicsRobot.getRootNode());
+         }
       }
    }
 
@@ -3131,6 +3136,11 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
          }
 
       }
+   }
+   
+   public Object getGraphicsConch()
+   {
+      return graphics3dAdapter.getGraphicsConch();
    }
 
    public void removeStaticGraphics3dNode(Graphics3DNode nodeToRemove)
