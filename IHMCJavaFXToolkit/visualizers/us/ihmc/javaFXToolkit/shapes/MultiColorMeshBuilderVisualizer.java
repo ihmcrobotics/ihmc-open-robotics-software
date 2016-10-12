@@ -80,7 +80,7 @@ public class MultiColorMeshBuilderVisualizer extends Application
          double z = 0.1 * random.nextDouble();
          points.add(new Point3d(x, y, z));
       }
-      meshBuilder.addMultiLineMesh(points, 0.01, Color.YELLOWGREEN, true);
+      meshBuilder.addMultiLine(points, 0.01, Color.YELLOWGREEN, true);
    }
 
    private void addLine(MultiColorMeshBuilder meshBuilder)
@@ -89,7 +89,7 @@ public class MultiColorMeshBuilderVisualizer extends Application
       Point3d end = new Point3d(0.0, 0.3, 0.0);
       double lineWidth = 0.01;
       Color color = Color.RED;
-      meshBuilder.addLineMesh(start, end, lineWidth, color);
+      meshBuilder.addLine(start, end, lineWidth, color);
    }
 
    public void addRandomBoxes(Color[] colors, MultiColorMeshBuilder meshBuilder)
@@ -103,7 +103,7 @@ public class MultiColorMeshBuilderVisualizer extends Application
             {
 
                Color color = colors[count%colors.length];
-               meshBuilder.addCubeMesh(0.05f, new Vector3f(x, y, 0 * RandomTools.generateRandomFloatInRange(new Random(), -5.0f, 5.0f)), color);
+               meshBuilder.addCube(0.05f, new Vector3f(x, y, 0 * RandomTools.generateRandomFloatInRange(new Random(), -5.0f, 5.0f)), color);
                count++;
             }
          }
