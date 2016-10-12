@@ -50,6 +50,7 @@ public class DRCNetworkProcessor
          setupKinematicsToolboxModule(robotModel, params);
          addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts());
          addTextToSpeechEngine(params);
+         setupRobotEnvironmentAwarenessModule(params);
       }
       catch (IOException e)
       {
@@ -321,6 +322,16 @@ public class DRCNetworkProcessor
 
          String methodName = "setupControllerCommunicator ";
          printModuleConnectedDebugStatement(PacketDestination.CONTROLLER, methodName);
+      }
+   }
+
+   private void setupRobotEnvironmentAwarenessModule(DRCNetworkModuleParameters parameters) throws IOException
+   {
+      if (parameters.isRobotEnvironmentAwerenessModuleEnabled())
+      {
+         PacketCommunicator reaCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.REA_MODULE_PORT, NET_CLASS_LIST);
+         packetRouter.attachPacketCommunicator(PacketDestination.REA_MODULE, reaCommunicator);
+         reaCommunicator.connect();
       }
    }
 
