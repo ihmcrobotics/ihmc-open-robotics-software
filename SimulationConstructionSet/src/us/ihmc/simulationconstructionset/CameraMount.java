@@ -195,6 +195,11 @@ public class CameraMount implements CameraMountInterface
       }
    }
 
+   public void setFieldOfView(double fieldOfView)
+   {
+      this.fieldOfView = fieldOfView;
+   }
+
    public double getFieldOfView()
    {
       return fieldOfView;
@@ -222,6 +227,8 @@ public class CameraMount implements CameraMountInterface
       {
          fieldOfView = 3.0;
       }
+
+//      System.out.println("Zoom. Field of View = " + fieldOfView);
    }
 
    public int getImageWidth()
