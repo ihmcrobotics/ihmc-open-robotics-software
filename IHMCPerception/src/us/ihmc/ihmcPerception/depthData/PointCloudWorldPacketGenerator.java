@@ -5,17 +5,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.robotics.dataStructures.TimestampedPoint;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -91,6 +95,16 @@ public class PointCloudWorldPacketGenerator implements Runnable
       return packet;
    }
 
+   private final AtomicReference<LidarPosePacket> lidarPosePacketToSend = new AtomicReference<LidarPosePacket>(null);
+
+   public void setLidarPose(RigidBodyTransform lidarTransformToWorld)
+   {
+      Point3d position = new Point3d();
+      Quat4d orientation = new Quat4d();
+      lidarTransformToWorld.get(orientation, position);
+      lidarPosePacketToSend.set(new LidarPosePacket(position, orientation));
+   }
+
    public void start()
    {
       if (scheduled == null)
@@ -114,6 +128,13 @@ public class PointCloudWorldPacketGenerator implements Runnable
          PointCloudWorldPacket pointCloudWorldPacket = getPointCloudWorldPacket();
          pointCloudWorldPacket.setDestination(packetDestination);
          packetCommunicator.send(pointCloudWorldPacket);
+
+         LidarPosePacket lidarPosePacket = lidarPosePacketToSend.getAndSet(null);
+         if (lidarPosePacket != null)
+         {
+            lidarPosePacket.setDestination(packetDestination);
+            packetCommunicator.send(lidarPosePacket);
+         }
       }
       catch(Exception e)
       {

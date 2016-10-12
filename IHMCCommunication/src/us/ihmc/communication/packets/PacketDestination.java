@@ -20,7 +20,8 @@ public enum PacketDestination
    TEXT_TO_SPEECH,
    DRILL_DETECTOR,
    AUDIO_MODULE,
-   KINEMATICS_TOOLBOX_MODULE;
+   KINEMATICS_TOOLBOX_MODULE,
+   REA_MODULE; // Destination for the robot environment awareness module. Not yet available in the open source repo.
 
    public static final PacketDestination[] values = values();
    

@@ -46,6 +46,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
    private final LinkedBlockingQueue<PointCloudData> dataQueue = new LinkedBlockingQueue<PointCloudData>();
    private final AtomicBoolean sendData = new AtomicBoolean(false);
+   private final AtomicBoolean sendLidarPose = new AtomicBoolean(false);
    private volatile boolean running = true;
 
    private volatile boolean clearQuadTree = false;
@@ -218,6 +219,9 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
                      }
                   }
                }
+
+               if (sendLidarPose.get())
+                  pointCloudWorldPacketGenerator.setLidarPose(scanFrameToWorld);
             }
             readWriteLock.writeLock().unlock();
          }
@@ -279,6 +283,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
          public void receivedPacket(DepthDataStateCommand object)
          {
             setLidarState(object.getLidarState());
+            sendLidarPose.set(object.isLidarPoseRequested());
          }
       });
 
