@@ -199,7 +199,7 @@ public class SkippyRobot extends Robot
          rootJointIfSkippy.addExternalForcePoint(rootJointForce);
          Link torso = createTorsoSkippy();
          rootJointIfSkippy.setLink(torso);
-//         torso.addCoordinateSystemToCOM(LEG_LENGTH);
+
          bodyPoint = new KinematicPoint("bodyPoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2.0), this);
          rootJointIfSkippy.addKinematicPoint(bodyPoint);
 
@@ -224,7 +224,7 @@ public class SkippyRobot extends Robot
          rootJointIfSkippy.addJoint(shoulderJoint);
 
          hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
-         hipJoint.setDamping(0.5);
+         hipJoint.setDamping(0.1);
          hipJoint.setInitialState(2.0 * Math.PI / 8.0, 0.0);
          Link leg = createLegSkippy();
          hipJoint.setLink(leg);
