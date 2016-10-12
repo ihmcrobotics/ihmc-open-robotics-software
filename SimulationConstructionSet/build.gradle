@@ -59,7 +59,6 @@ dependencies {
 	compile group: 'com.badlogicgames.gdx', name: 'gdx-bullet', version: '1.9.4'
 	compile group: 'com.badlogicgames.gdx', name: 'gdx', version: '1.9.4'
 	compile group: 'com.google.guava', name: 'guava', version: '18.0'
-	compile group: 'org.ejml', name: 'dense64', version: '0.28'
 
 	compile group: 'org.easytesting', name: 'fest', version: '1.0.3'
 	compile('org.easytesting:fest-swing:1.2.1' )
@@ -69,7 +68,6 @@ dependencies {
 
     runtime group: 'com.badlogicgames.gdx', name: 'gdx-bullet-platform', version: '1.9.4', classifier: 'natives-desktop' // runtime?
 
-    compile ihmc.getProjectDependency(":ConvexOptimizationAdapter")
     compile ihmc.getProjectDependency(":Plotting")
 	compile ihmc.getProjectDependency(":Graphics3DAdapter")
 	compile ihmc.getProjectDependency(":IHMCRobotDescription")
