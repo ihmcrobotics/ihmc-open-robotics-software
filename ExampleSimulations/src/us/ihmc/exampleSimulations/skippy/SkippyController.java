@@ -381,6 +381,12 @@ public class SkippyController implements RobotController
       YoGraphicVector tauShoulderJointYoGraphic = new YoGraphicVector("tauShoulderJointYoGraphic", shoulderJointPosition, tauShoulderJoint, 0.05,
                                                                        YoAppearance.Yellow(), true);
       yoGraphicsListRegistries.registerYoGraphic("tauShoulderJoint", tauShoulderJointYoGraphic);
+      /*
+       * Shoulder joint torque
+       */
+      YoGraphicVector rateOfChangeOfAngularMomentumYoGraphic = new YoGraphicVector("angulerMomentum", centerOfMass, rateOfChangeOfAngularMomentum, 0.05,
+                                                                       YoAppearance.Yellow(), true);
+      yoGraphicsListRegistries.registerYoGraphic("rateOfChangeOfAngularMomentum", rateOfChangeOfAngularMomentumYoGraphic);
 
       initialize();
 

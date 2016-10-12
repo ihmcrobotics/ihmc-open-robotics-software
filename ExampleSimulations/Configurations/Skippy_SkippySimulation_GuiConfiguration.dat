@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.centerOfMassVelocityX</Variables>
+		<Variables>root.Skippy.SkippyController.rateOfChangeOfLinearMomentumX,root.Skippy.SkippyController.rateOfChangeOfLinearMomentumY,root.Skippy.SkippyController.rateOfChangeOfLinearMomentumZ</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.q_hip</Variables>
+		<Variables>root.Skippy.SkippyController.angularMomentumY,root.Skippy.SkippyController.angularMomentumZ,root.Skippy.SkippyController.rateOfChangeOfLinearMomentumX</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -122,9 +122,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>4.791759361631498</Camera X>
- <Camera Y>5.039043522644768</Camera Y>
- <Camera Z>1.8521229653370708</Camera Z>
+ <Camera X>-8.115811996267658</Camera X>
+ <Camera Y>5.77159535759489</Camera Y>
+ <Camera Z>2.2680175866656924</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
