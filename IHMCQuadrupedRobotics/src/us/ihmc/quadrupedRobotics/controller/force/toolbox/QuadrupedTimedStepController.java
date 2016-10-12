@@ -19,7 +19,6 @@ import us.ihmc.quadrupedRobotics.state.FiniteStateMachineStateChangedListener;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
@@ -77,7 +76,7 @@ public class QuadrupedTimedStepController
    }
 
    private final QuadrantDependentList<FiniteStateMachine<StepState, StepEvent>> stepStateMachine;
-   private QuadrupedTimedStepTransitionCallback stepTransitionCallback;
+   private QuadrupedStepTransitionCallback stepTransitionCallback;
 
    public QuadrupedTimedStepController(QuadrantDependentList<QuadrupedSolePositionController> solePositionController, DoubleYoVariable timestamp,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
@@ -130,7 +129,7 @@ public class QuadrupedTimedStepController
       parentRegistry.addChild(registry);
    }
 
-   public void registerStepTransitionCallback(QuadrupedTimedStepTransitionCallback stepTransitionCallback)
+   public void registerStepTransitionCallback(QuadrupedStepTransitionCallback stepTransitionCallback)
    {
       this.stepTransitionCallback = stepTransitionCallback;
    }
@@ -302,7 +301,7 @@ public class QuadrupedTimedStepController
             {
                if (stepTransitionCallback != null)
                {
-                  stepTransitionCallback.onLiftOff(robotQuadrant, contactState);
+                  stepTransitionCallback.onLiftOff(robotQuadrant);
                }
                contactState.set(robotQuadrant, ContactState.NO_CONTACT);
                return StepEvent.TIMEOUT;
@@ -409,7 +408,7 @@ public class QuadrupedTimedStepController
          {
             if (stepTransitionCallback != null)
             {
-               stepTransitionCallback.onTouchDown(robotQuadrant, contactState);
+               stepTransitionCallback.onTouchDown(robotQuadrant);
             }
             contactState.set(robotQuadrant, ContactState.IN_CONTACT);
             return StepEvent.TIMEOUT;

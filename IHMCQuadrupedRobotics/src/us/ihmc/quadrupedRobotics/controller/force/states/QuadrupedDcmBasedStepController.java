@@ -30,7 +30,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedDcmBasedStepController implements QuadrupedController, QuadrupedTimedStepTransitionCallback
+public class QuadrupedDcmBasedStepController implements QuadrupedController, QuadrupedStepTransitionCallback
 {
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedStepStream stepStream;
@@ -376,7 +376,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    }
 
    @Override
-   public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
+   public void onLiftOff(RobotQuadrant thisStepQuadrant)
    {
       // update ground plane estimate
       groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
@@ -387,7 +387,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    }
 
    @Override
-   public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
+   public void onTouchDown(RobotQuadrant thisStepQuadrant)
    {
       onTouchDownTriggered.set(true);
    }
