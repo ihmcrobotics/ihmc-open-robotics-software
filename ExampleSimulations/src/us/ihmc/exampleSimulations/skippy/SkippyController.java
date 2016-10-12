@@ -91,7 +91,7 @@ public class SkippyController implements RobotController
    private final DoubleYoVariable planarDistanceYZPlane, planarDistanceXZPlane;
 
    private final DoubleYoVariable alphaAngularVelocity;
-   private final FilteredVelocityYoVariable angularVelocityToCoMYZPlane2, angularVelocityToCoMXZPlane2;
+   private final FilteredVelocityYoVariable angularVelocityToCoMYZPlane2, angularVelocityToCoMXZPlane2, filteredRateOfChangeOfAngularMomentumX;
 
    private final YoFramePoint bodyLocation = new YoFramePoint("body", ReferenceFrame.getWorldFrame(), registry);
 
@@ -133,8 +133,6 @@ public class SkippyController implements RobotController
    private final YoFramePoint actualICP = new YoFramePoint("actualICP", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint actualCMPFromDefinition = new YoFramePoint("actualCMPFromDefinition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint desiredCMPFromICP = new YoFramePoint("desiredCMPFromICP", ReferenceFrame.getWorldFrame(), registry);
-   private PIDController controllerCmpX;
-   private PIDController controllerCmpY;
    private final YoFramePoint footLocation = new YoFramePoint("footLocation", ReferenceFrame.getWorldFrame(), registry);
 
    private final DoubleYoVariable robotMass = new DoubleYoVariable("robotMass", registry);
@@ -201,7 +199,6 @@ public class SkippyController implements RobotController
       kCapture.set(1.5);//2.0);//0.9);
       robotMass.set(robot.getMass());
       robotWeight.set(robotMass.getDoubleValue() * Math.abs(robot.getGravityZ()));
-      initializeControls();
       firstStick = true;
       /*
        * Set up a file for output method 1
@@ -258,6 +255,9 @@ public class SkippyController implements RobotController
       angularVelocityToCoMXZPlane2 = new FilteredVelocityYoVariable("angularVelocityToCoMXZPlane2", "", alphaAngularVelocity, angleToCoMInXZPlane, controlDT,
                                                                     registry);
 
+      filteredRateOfChangeOfAngularMomentumX = new FilteredVelocityYoVariable("filteredRateOfChangeOfAngularMomentumX", "", alphaAngularVelocity, angularMomentum.getYoX(), controlDT,
+                                                                    registry);
+      
       if (skippyToDo.getEnumValue() != SkippyToDo.BALANCE && skippyToDo.getEnumValue() != SkippyToDo.POSITION || true)
       {
          stateMachine = new StateMachine<States>("stateMachine", "stateMachineTime", States.class, robot.t, registry);
@@ -351,7 +351,7 @@ public class SkippyController implements RobotController
                                                                        YoAppearance.Yellow(), true);
       yoGraphicsListRegistries.registerYoGraphic("tauShoulderJoint", tauShoulderJointYoGraphic);
       /*
-       * Shoulder joint torque
+       * Rate of change of angular momentum
        */
       YoGraphicVector rateOfChangeOfAngularMomentumYoGraphic = new YoGraphicVector("angulerMomentum", centerOfMass, rateOfChangeOfAngularMomentum, 0.05,
                                                                        YoAppearance.Yellow(), true);
@@ -361,27 +361,6 @@ public class SkippyController implements RobotController
 
    }
 
-   public void initializeControls()
-   {
-      /*
-       * ICP_X
-       */
-      controllerCmpX = new PIDController("icpX", registry);
-      controllerCmpX.setProportionalGain(1.5);//0.6);// 3);
-      controllerCmpX.setDerivativeGain(0.0);// 05);
-      controllerCmpX.setIntegralGain(0.0);// 01);
-      // desiredBodyZ = new DoubleYoVariable("desiredBodyZ", registry);
-      // desiredBodyZ.set(1.5);
-      /*
-       * ICP_Y
-       */
-      controllerCmpY = new PIDController("icpY", registry);
-      controllerCmpY.setProportionalGain(1.5);// 3);
-      controllerCmpY.setDerivativeGain(0.0);// 05);
-      controllerCmpY.setIntegralGain(0.0);// 01);
-      // desiredBodyZ = new DoubleYoVariable("desiredBodyZ", registry);
-      // desiredBodyZ.set(1.5);
-   }
 
    public void doControl()
    {
@@ -633,6 +612,7 @@ public class SkippyController implements RobotController
    public void linearAndAngularMomentumRateOfChange()
    {
       double deltaT = (double) SkippySimulation.DT;
+      
       rateOfChangeOfLinearMomentum.set(linearMomentum);
       rateOfChangeOfLinearMomentum.sub(lastLinearMomentum);
       rateOfChangeOfLinearMomentum.scale(1 / deltaT);
@@ -642,6 +622,11 @@ public class SkippyController implements RobotController
       rateOfChangeOfAngularMomentum.set(angularMomentum);
       rateOfChangeOfAngularMomentum.sub(lastAngularMomentum);
       rateOfChangeOfAngularMomentum.scale(1 / deltaT);
+      /*
+       * Filtered rate of change of CoM angular momentum X component
+       */
+      filteredRateOfChangeOfAngularMomentumX.set(rateOfChangeOfAngularMomentum.dot(hipJointUnitVector));
+      filteredRateOfChangeOfAngularMomentumX.update();
       /*
        * Atualize last angular and linear momentum
        */
@@ -738,10 +723,11 @@ public class SkippyController implements RobotController
       tauOnHipJoint(desiredReactionForce, tauHipJoint, tauOnHipJointAxis);
 //      tauOnHipJointAxis.mul(3.0);
       tauOnShoulderJoint(desiredReactionForce, tauShoulderJoint, tauOnShoulderJointAxis);
-      
+      /*
+       * Approach to find a hip torque to control hip angle (Sylvain)
+       */
       double signICPError = - Math.signum(actualIcpToFootError.getY());
       double signHipAngle = Math.signum(robot.getQ_hip().getDoubleValue());//robot.getQ_hip().getDoubleValue();
-
       if (signICPError * signHipAngle < 0.0 && Math.abs(actualIcpToFootError.getY()) > 0.02)
       {
          tauHipForAngleTracking.set(signICPError * 15.0);
@@ -750,7 +736,11 @@ public class SkippyController implements RobotController
       {
          tauHipForAngleTracking.set(0.0);
       }
-
+      /*
+       * Taking hip torque to control hip angle from rate of change of angular momentum 
+       */
+      
+      tauHipForAngleTracking.set(filteredRateOfChangeOfAngularMomentumX.getDoubleValue());
       /*
        * Torque on hip for keeping track the angle between torso and leg
        */
