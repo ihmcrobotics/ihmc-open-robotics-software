@@ -30,6 +30,7 @@ public class DRCNetworkModuleParameters
    private boolean useKinematicsToolbox = true;
    private boolean useKinematicsToolboxVisualizer = false;
    private boolean useTextToSpeechModule = false;
+   private boolean useRobotEnvironmentAwarenessModule = false;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
    
@@ -87,7 +88,12 @@ public class DRCNetworkModuleParameters
    {
       return useMultisenseManualTestModule;
    }
-   
+
+   public boolean isRobotEnvironmentAwerenessModuleEnabled()
+   {
+      return useRobotEnvironmentAwarenessModule;
+   }
+
    public void enableMultisenseManualTestModule(boolean b)
    {
       useMultisenseManualTestModule = b;
@@ -142,6 +148,11 @@ public class DRCNetworkModuleParameters
       usePerceptionModule = b;
       if (b)
          useController = true;
+   }
+
+   public void enableRobotEnvironmentAwerenessModule(boolean enable)
+   {
+      this.useRobotEnvironmentAwarenessModule = enable;
    }
 
    public void enableRosModule(boolean b)
