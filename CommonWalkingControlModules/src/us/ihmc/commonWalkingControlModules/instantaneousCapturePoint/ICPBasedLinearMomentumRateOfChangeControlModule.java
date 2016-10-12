@@ -11,6 +11,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
 {
    private final ICPProportionalController icpProportionalController;
+   private final BipedSupportPolygons bipedSupportPolygons;
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
@@ -23,7 +24,8 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
          double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
-      super("", referenceFrames, bipedSupportPolygons, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry, use2DProjection);
+      super("", referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry, use2DProjection);
+      this.bipedSupportPolygons = bipedSupportPolygons;
 
 
       icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, registry);
