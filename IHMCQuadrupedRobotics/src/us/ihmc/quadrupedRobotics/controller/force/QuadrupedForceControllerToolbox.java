@@ -20,15 +20,17 @@ public class QuadrupedForceControllerToolbox
    private final QuadrupedComPositionController comPositionController;
    private final QuadrupedBodyOrientationController bodyOrientationController;
    private final QuadrantDependentList<QuadrupedSolePositionController> solePositionController;
+   private final QuadrantDependentList<QuadrupedFootStateMachine> footStateMachine;
    private final QuadrupedTimedStepController timedStepController;
+   private final QuadrupedSoleWaypointController soleWaypointController;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrupedFallDetector fallDetector;
-   private final QuadrupedSoleWaypointController soleWaypointController;
 
    public QuadrupedForceControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties, YoVariableRegistry registry)
    {
-      double mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
       double gravity = 9.81;
+      double mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
+      runtimeEnvironment.getParentRegistry().addChild(QuadrupedFootStateMachine.getStaticRegistry());
 
       // create controllers and estimators
       referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), physicalProperties);
@@ -40,11 +42,14 @@ public class QuadrupedForceControllerToolbox
       comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
       bodyOrientationController = new QuadrupedBodyOrientationController(referenceFrames.getBodyFrame(), runtimeEnvironment.getControlDT(), registry);
       solePositionController = new QuadrantDependentList<>();
+      footStateMachine = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          solePositionController.set(robotQuadrant,
                new QuadrupedSolePositionController(robotQuadrant, referenceFrames.getFootReferenceFrames().get(robotQuadrant),
                      runtimeEnvironment.getControlDT(), registry));
+         footStateMachine.set(robotQuadrant,
+               new QuadrupedFootStateMachine(robotQuadrant, solePositionController.get(robotQuadrant), runtimeEnvironment.getRobotTimestamp(), registry));
       }
       timedStepController = new QuadrupedTimedStepController(solePositionController, runtimeEnvironment.getRobotTimestamp(), registry, runtimeEnvironment.getGraphicsListRegistry());
       soleWaypointController = new QuadrupedSoleWaypointController(referenceFrames.getBodyFrame(), solePositionController, runtimeEnvironment.getRobotTimestamp(), registry);
@@ -105,6 +110,16 @@ public class QuadrupedForceControllerToolbox
    public QuadrupedTimedStepController getTimedStepController()
    {
       return timedStepController;
+   }
+
+   public QuadrantDependentList<QuadrupedFootStateMachine> getFootStateMachine()
+   {
+      return footStateMachine;
+   }
+
+   public QuadrupedFootStateMachine getFootStateMachine(RobotQuadrant robotQuadrant)
+   {
+      return footStateMachine.get(robotQuadrant);
    }
 
    public GroundPlaneEstimator getGroundPlaneEstimator()

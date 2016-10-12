@@ -28,7 +28,7 @@ import us.ihmc.robotics.robotSide.*;
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 
-public class QuadrupedMpcBasedXGaitController implements QuadrupedController, QuadrupedTimedStepTransitionCallback
+public class QuadrupedMpcBasedXGaitController implements QuadrupedController, QuadrupedStepTransitionCallback
 {
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
@@ -311,7 +311,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    }
 
    @Override
-   public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
+   public void onLiftOff(RobotQuadrant thisStepQuadrant)
    {
       // update ground plane estimate
       groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
@@ -324,7 +324,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    }
 
    @Override
-   public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
+   public void onTouchDown(RobotQuadrant thisStepQuadrant)
    {
       // update current step goal position
       RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
