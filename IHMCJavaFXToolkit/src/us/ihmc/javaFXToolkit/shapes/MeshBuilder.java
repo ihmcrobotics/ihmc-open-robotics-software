@@ -215,7 +215,17 @@ public class MeshBuilder
       addMesh(other.points, other.texCoords, other.faces, other.faceSmoothingGroups);
    }
 
-   public void addBoxMesh(float lx, float ly, float lz)
+   public void addCube(float size, Tuple3f cubeOffset)
+   {
+      addBox(size, size, size, cubeOffset);
+   }
+
+   public void addCube(double size, Tuple3d cubeOffset)
+   {
+      addBox(size, size, size, cubeOffset);
+   }
+
+   public void addBox(float lx, float ly, float lz)
    {
       float[] boxPoints = BoxMeshGenerator.generatePoints(lx, ly, lz);
       float[] boxTexCoords = BoxMeshGenerator.texCoords;
@@ -224,17 +234,7 @@ public class MeshBuilder
       addMesh(boxPoints, boxTexCoords, boxFaces, boxFaceSmoothingGroups);
    }
 
-   public void addCubeMesh(float size, Tuple3f cubeOffset)
-   {
-      addBoxMesh(size, size, size, cubeOffset);
-   }
-
-   public void addCubeMesh(double size, Tuple3d cubeOffset)
-   {
-      addBoxMesh(size, size, size, cubeOffset);
-   }
-
-   public void addBoxMesh(float lx, float ly, float lz, Tuple3f boxOffset)
+   public void addBox(float lx, float ly, float lz, Tuple3f boxOffset)
    {
       float[] boxPoints = BoxMeshGenerator.generatePoints(lx, ly, lz);
       float[] boxTexCoords = BoxMeshGenerator.texCoords;
@@ -243,12 +243,12 @@ public class MeshBuilder
       addMesh(boxPoints, boxTexCoords, boxFaces, boxFaceSmoothingGroups, boxOffset);
    }
 
-   public void addBoxMesh(double lx, double ly, double lz, Tuple3d boxOffset)
+   public void addBox(double lx, double ly, double lz, Tuple3d boxOffset)
    {
-      addBoxMesh((float) lx, (float) ly, (float) lz, new Point3f(boxOffset));
+      addBox((float) lx, (float) ly, (float) lz, new Point3f(boxOffset));
    }
 
-   public void addLineMesh(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth)
+   public void addLine(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth)
    {
       float lx = xf - x0;
       float ly = yf - y0;
@@ -260,12 +260,12 @@ public class MeshBuilder
       addMesh(linePoints, lineTexCoords, lineFaces, lineFaceSmoothingGroups, x0, y0, z0);
    }
 
-   public void addLineMesh(double x0, double y0, double z0, double xf, double yf, double zf, double lineWidth)
+   public void addLine(double x0, double y0, double z0, double xf, double yf, double zf, double lineWidth)
    {
-      addLineMesh((float) x0, (float) y0, (float) z0, (float) xf, (float) yf, (float) zf, (float) lineWidth);
+      addLine((float) x0, (float) y0, (float) z0, (float) xf, (float) yf, (float) zf, (float) lineWidth);
    }
 
-   public void addLineMesh(Point3d start, Point3d end, double lineWidth)
+   public void addLine(Point3d start, Point3d end, double lineWidth)
    {
       double x0 = start.getX();
       double y0 = start.getY();
@@ -273,10 +273,10 @@ public class MeshBuilder
       double xf = end.getX();
       double yf = end.getY();
       double zf = end.getZ();
-      addLineMesh(x0, y0, z0, xf, yf, zf, lineWidth);
+      addLine(x0, y0, z0, xf, yf, zf, lineWidth);
    }
 
-   public void addMultiLineMesh(Point3d[] points, double lineWidth, boolean close)
+   public void addMultiLine(Point3d[] points, double lineWidth, boolean close)
    {
       if (points.length < 2)
          return;
@@ -285,18 +285,18 @@ public class MeshBuilder
       {
          Point3d start = points[i-1];
          Point3d end = points[i];
-         addLineMesh(start, end, lineWidth);
+         addLine(start, end, lineWidth);
       }
 
       if (close)
       {
          Point3d start = points[points.length - 1];
          Point3d end = points[0];
-         addLineMesh(start, end, lineWidth);
+         addLine(start, end, lineWidth);
       }
    }
 
-   public void addMultiLineMesh(List<Point3d> points, double lineWidth, boolean close)
+   public void addMultiLine(List<Point3d> points, double lineWidth, boolean close)
    {
       if (points.size() < 2)
          return;
@@ -305,14 +305,14 @@ public class MeshBuilder
       {
          Point3d start = points.get(i-1);
          Point3d end = points.get(i);
-         addLineMesh(start, end, lineWidth);
+         addLine(start, end, lineWidth);
       }
 
       if (close)
       {
          Point3d start = points.get(points.size() - 1);
          Point3d end = points.get(0);
-         addLineMesh(start, end, lineWidth);
+         addLine(start, end, lineWidth);
       }
    }
 
