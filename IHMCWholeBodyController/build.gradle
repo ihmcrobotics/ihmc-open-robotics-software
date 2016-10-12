@@ -53,7 +53,6 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
 
-	compile ihmc.getProjectDependency(":SDFLoader")
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")

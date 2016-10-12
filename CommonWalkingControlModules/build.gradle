@@ -49,7 +49,7 @@ dependencies {
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
     compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
 
-    compile ihmc.getProjectDependency(":SDFLoader")
+    compile ihmc.getProjectDependency(":IHMCRobotModels")
     compile ihmc.getProjectDependency(":Plotting")
     compile ihmc.getProjectDependency(":SensorProcessing")
     compile ihmc.getProjectDependency(":SimulationConstructionSet")

@@ -52,7 +52,7 @@ dependencies {
     compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
     compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.1.0-160510'
 
-    compile ihmc.getProjectDependency(":SDFLoader")
+    compile ihmc.getProjectDependency(":IHMCRobotModels")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
