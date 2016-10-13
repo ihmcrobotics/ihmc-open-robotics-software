@@ -566,6 +566,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          {
             jmeGraphicsNode.update();
          }
+         updateCameras();
       }
 
       if (count > 1000&&!tickUpdated)
@@ -573,7 +574,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          tickUpdated = true;
       }
 
-      updateCameras();
       count++;
 
       updateGraphics(tpf);
@@ -677,7 +677,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       // user code here..
    }
 
-   private void updateCameras()
+   private synchronized void updateCameras()
    {
       if (alreadyClosing) return;
 

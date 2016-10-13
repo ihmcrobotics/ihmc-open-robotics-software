@@ -71,7 +71,7 @@ public class MeshBuilderVisualizer extends Application
       {
          for (float y = -2.0f; y <= 2.0f; y += 0.055f)
          {
-            meshBuilder.addBoxMesh(0.05f, 0.05f, 0.05f, new Vector3f(x, y, RandomTools.generateRandomFloatInRange(new Random(), -2.0f, 2.0f)));
+            meshBuilder.addBox(0.05f, 0.05f, 0.05f, new Vector3f(x, y, RandomTools.generateRandomFloatInRange(new Random(), -2.0f, 2.0f)));
             count++;
          }
       }
@@ -83,7 +83,7 @@ public class MeshBuilderVisualizer extends Application
       Point3d start = new Point3d(0.3, 0.0, -0.);
       Point3d end = new Point3d(0.0, 0.3, 0.0);
       double lineWidth = 0.01;
-      meshBuilder.addLineMesh(start, end, lineWidth);
+      meshBuilder.addLine(start, end, lineWidth);
    }
 
    private void setupCamera(Group root, Scene scene)

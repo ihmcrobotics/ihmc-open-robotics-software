@@ -1,5 +1,9 @@
 package us.ihmc.javaFXToolkit.cameraControllers;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
@@ -7,6 +11,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import javafx.animation.AnimationTimer;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -39,7 +44,7 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
    private final Affine cameraOrientation = new Affine();
    private final Translate offsetFromFocusPoint = new Translate(0.0, 0.0, -DEFAULT_DISTANCE_FROM_FOCUS_POINT);
 
-   private double focusPointSlowModifier = 0.1;
+   private double focusPointSlowModifier = 0.02;
    private double focusPointFastModifier = 2.0 * focusPointSlowModifier;
 
    private final Point2d oldMouseLocation = new Point2d();
@@ -82,6 +87,15 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
       material.setSpecularColor(Color.RED);
       focusPointViz.setMaterial(material);
       focusPointViz.getTransforms().add(focusPointTranslation);
+
+      new AnimationTimer()
+      {
+         @Override
+         public void handle(long now)
+         {
+            shiftCameraFocusPoint();
+         }
+      }.start();
    }
 
    public void setKeepCameraLeveled(boolean keepCameraLeveled)
@@ -238,31 +252,46 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
       }
    }
 
+   private final AtomicBoolean isShiftDown = new AtomicBoolean(false);
+   private final Set<KeyCode> keyBeingPressed = new HashSet<>();
+
    private void handleKeyEvent(KeyEvent event)
+   {
+      KeyCode keyCode = event.getCode();
+      if (event.getEventType() == KeyEvent.KEY_PRESSED)
+         keyBeingPressed.add(keyCode);
+      else if (event.getEventType() == KeyEvent.KEY_RELEASED)
+         keyBeingPressed.remove(keyCode);
+
+      isShiftDown.set(event.isShiftDown());
+   }
+
+   private void shiftCameraFocusPoint()
    {
       double change = focusPointSlowModifier;
       //Add shift modifier to simulate running speed
-      if (event.isShiftDown())
+      if (isShiftDown.get())
          change = focusPointFastModifier;
 
-      KeyCode keyCode = event.getCode();
-
       Vector3d focusPointShift = new Vector3d();
-
-      if (keyCode == KeyCode.W)
-         focusPointShift.setZ(focusPointShift.getZ() - change);
-      if (keyCode == KeyCode.S)
-         focusPointShift.setZ(focusPointShift.getZ() + change);
-
-      if (keyCode == KeyCode.D)
-         focusPointShift.setX(focusPointShift.getX() - change);
-      if (keyCode == KeyCode.A)
-         focusPointShift.setX(focusPointShift.getX() + change);
-
-      if (keyCode == KeyCode.Q)
-         focusPointShift.setY(focusPointShift.getY() + change);
-      if (keyCode == KeyCode.Z)
-         focusPointShift.setY(focusPointShift.getY() - change);
+      
+      for (KeyCode keyDown : keyBeingPressed)
+      {
+         if (keyDown == KeyCode.W)
+            focusPointShift.setZ(focusPointShift.getZ() - change);
+         if (keyDown == KeyCode.S)
+            focusPointShift.setZ(focusPointShift.getZ() + change);
+         
+         if (keyDown == KeyCode.D)
+            focusPointShift.setX(focusPointShift.getX() - change);
+         if (keyDown == KeyCode.A)
+            focusPointShift.setX(focusPointShift.getX() + change);
+         
+         if (keyDown == KeyCode.Q)
+            focusPointShift.setY(focusPointShift.getY() + change);
+         if (keyDown == KeyCode.Z)
+            focusPointShift.setY(focusPointShift.getY() - change);
+      }
 
       if (performHorizontalTranslation)
       {
