@@ -4,6 +4,7 @@ import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.params.DoubleParameter;
 import us.ihmc.quadrupedRobotics.params.IntegerParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
@@ -115,6 +116,14 @@ public class QuadrupedFootStateMachine
    public void adjustStep(FramePoint newGoalPosition)
    {
       this.stepCommand.setGoalPosition(newGoalPosition);
+   }
+
+   public ContactState getContactState()
+   {
+      if (footStateMachine.getState() == FootState.SUPPORT)
+         return ContactState.IN_CONTACT;
+      else
+         return ContactState.NO_CONTACT;
    }
 
    public void compute(FrameVector soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates)

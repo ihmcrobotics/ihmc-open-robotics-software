@@ -1,7 +1,10 @@
-package us.ihmc.quadrupedRobotics.controller.force.toolbox;
+package us.ihmc.quadrupedRobotics.controller.forceDevelopment;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceLimits;
 import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
 
