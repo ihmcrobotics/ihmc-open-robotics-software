@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.factories;
 
-import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 

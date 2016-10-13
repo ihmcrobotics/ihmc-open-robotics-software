@@ -48,7 +48,6 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
 	compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
-	compile ihmc.getProjectDependency(":SDFLoader")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 	compile ihmc.getProjectDependency(":IHMCWholeBodyController")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")

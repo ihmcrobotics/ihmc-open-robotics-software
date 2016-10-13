@@ -8,11 +8,11 @@ import javax.vecmath.Quat4d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.partNames.JointRole;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCSimulatedIMUPublisher;
@@ -107,7 +107,7 @@ public class DRCSimulationFactory
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
 
       boolean createCollisionMeshes = false;
-      simulatedRobot = drcRobotModel.createSdfRobot(createCollisionMeshes);
+      simulatedRobot = drcRobotModel.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
 
       this.controllerFactory = controllerFactory;
 

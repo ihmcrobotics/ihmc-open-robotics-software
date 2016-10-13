@@ -2,8 +2,8 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.partNames.JointRole;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;

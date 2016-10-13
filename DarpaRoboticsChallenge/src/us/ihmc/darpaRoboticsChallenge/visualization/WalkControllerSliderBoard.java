@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.util.CommonNames;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;

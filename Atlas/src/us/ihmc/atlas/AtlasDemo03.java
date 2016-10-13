@@ -2,7 +2,7 @@ package us.ihmc.atlas;
 
 import com.martiansoftware.jsap.JSAPException;
 
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.atlas.initialSetup.VRCTask1InVehicleHovering;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo03;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;

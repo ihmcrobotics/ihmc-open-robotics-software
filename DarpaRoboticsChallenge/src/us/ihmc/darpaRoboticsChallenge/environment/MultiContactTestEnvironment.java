@@ -7,8 +7,8 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -39,7 +39,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
                                       RobotSide[] footContactSides, RobotSide[] handContactSides, SideDependentList<RigidBodyTransform> invisibleContactablePlaneHandContactPointTransforms)
    {
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      HumanoidFloatingRootJointRobot robotForEnvironmentSetup = robotModel.createSdfRobot(DRCConfigParameters.USE_COLLISIONS_MESHS_FOR_VISUALIZATION);
+      HumanoidFloatingRootJointRobot robotForEnvironmentSetup = robotModel.createHumanoidFloatingRootJointRobot(DRCConfigParameters.USE_COLLISIONS_MESHS_FOR_VISUALIZATION);
       robotInitialSetup.initializeRobot(robotForEnvironmentSetup, jointMap);
       robotForEnvironmentSetup.update();
       FullHumanoidRobotModel fullRobotModelForEnvironmentSetup = robotModel.createFullRobotModel();

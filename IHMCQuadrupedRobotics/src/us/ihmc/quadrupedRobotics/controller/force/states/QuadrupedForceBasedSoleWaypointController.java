@@ -1,12 +1,11 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
-import us.ihmc.SdfLoader.partNames.JointRole;
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSoleForceEstimator;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;

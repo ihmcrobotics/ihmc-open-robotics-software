@@ -20,7 +20,7 @@ import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotDataCommunication.VisualizerRobot;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.tools.ClassLoaderTools;
@@ -62,7 +62,7 @@ public class SDFModelLoader implements LogModelLoader
       GeneralizedSDFRobotModel generalizedSDFRobotModel = createJaxbSDFLoader().getGeneralizedSDFRobotModel(modelName);
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
       RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
-      return new VisualizerRobot(description, null);
+      return new VisualizerRobot(description);
    }
 
    public JaxbSDFLoader createJaxbSDFLoader()

@@ -20,7 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -91,7 +91,7 @@ public class AtlasSDFVerificationTest
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCRobotModel selectedModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, DRCRobotModel.RobotTarget.SCS, false);
-      FloatingRootJointRobot sdfRobot = selectedModel.createSdfRobot(true);
+      FloatingRootJointRobot sdfRobot = selectedModel.createHumanoidFloatingRootJointRobot(true);
 
       pinRobotInAir(sdfRobot);
 

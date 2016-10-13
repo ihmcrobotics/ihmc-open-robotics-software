@@ -7,7 +7,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.quadrupedRobotics.communication.packets.BodyAngularRatePacket;

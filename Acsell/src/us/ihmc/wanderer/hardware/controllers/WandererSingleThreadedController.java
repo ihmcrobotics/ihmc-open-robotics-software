@@ -5,8 +5,8 @@ import java.util.EnumMap;
 
 import javax.vecmath.Quat4d;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.acsell.hardware.AcsellSetup;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;

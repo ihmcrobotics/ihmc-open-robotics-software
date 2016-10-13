@@ -13,8 +13,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -42,7 +42,7 @@ public class PoseSequenceSelectorPanel extends JPanel
 
 
       fullRobotModel = robotModel.createFullRobotModel();
-      sdfRobot = robotModel.createSdfRobot(false);
+      sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       sequence = new PlaybackPoseSequence(fullRobotModel);
       

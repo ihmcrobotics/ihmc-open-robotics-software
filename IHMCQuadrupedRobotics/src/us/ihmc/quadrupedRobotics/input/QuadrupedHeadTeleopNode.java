@@ -10,7 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import net.java.games.input.Event;
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;

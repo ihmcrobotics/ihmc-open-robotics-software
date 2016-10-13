@@ -40,7 +40,6 @@ dependencies {
 
     compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-    compile group: 'com.google.guava', name: 'guava', version: '18.0'
 
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":Graphics3DAdapter")

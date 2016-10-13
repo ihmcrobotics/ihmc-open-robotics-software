@@ -6,9 +6,9 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.Robot;
@@ -179,7 +179,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
 
       boolean createCollisionMeshes = false;
       drcRobotModel.setEnableJointDamping(false);
-      HumanoidFloatingRootJointRobot robot = drcRobotModel.createSdfRobot(createCollisionMeshes);
+      HumanoidFloatingRootJointRobot robot = drcRobotModel.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
       robot.setGravity(gravityZ);
 
       return new DRCInverseDynamicsCalculatorTestHelper(fullRobotModel, robot, visualize, gravityZ);
