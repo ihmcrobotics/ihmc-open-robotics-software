@@ -72,7 +72,7 @@ public class MeshBuilder
       texCoords.add(texture.getX());
       texCoords.add(texture.getY());
 
-      this.faces.add(translateFaces(new int[]{0, 0, 1, 0, 2, 0}, numPoints, numTexCoords));
+      this.faces.add(translateFaces(new int[] {0, 0, 1, 0, 2, 0}, numPoints, numTexCoords));
       this.faceSmoothingGroups.add(0);
    }
 
@@ -97,13 +97,13 @@ public class MeshBuilder
       texCoords.add(texture2.getX());
       texCoords.add(texture2.getY());
 
-      this.faces.add(translateFaces(new int[]{0, 0, 1, 1, 2, 2}, numPoints, numTexCoords));
+      this.faces.add(translateFaces(new int[] {0, 0, 1, 1, 2, 2}, numPoints, numTexCoords));
       this.faceSmoothingGroups.add(0);
    }
 
    public void addPolygon(List<Point3d> polygon)
    {
-      addPolygon(polygon, new float[]{0.0f, 0.0f});
+      addPolygon(polygon, new float[] {0.0f, 0.0f});
    }
 
    public void addPolygon(List<Point3d> polygon, float[] texture)
@@ -248,6 +248,20 @@ public class MeshBuilder
       addBox((float) lx, (float) ly, (float) lz, new Point3f(boxOffset));
    }
 
+   public void addCylinder(double height, double radius, Tuple3d cylinderOffset)
+   {
+      addCylinder((float) height, (float) radius, new Point3f(cylinderOffset));
+   }
+
+   public void addCylinder(float height, float radius, Tuple3f cylinderOffset)
+   {
+      float[] cylinderPoints = CylinderMeshGenerator.generatePoints(radius, height, CylinderMeshGenerator.DEFAULT_DIVISIONS);
+      float[] cylinderTexCoords = CylinderMeshGenerator.defaultTexCoords;
+      int[] cylinderFaces = CylinderMeshGenerator.defaultFaces;
+      int[] cylinderFaceSmoothingGroups = CylinderMeshGenerator.defaultFaceSmoothingGroups;
+      addMesh(cylinderPoints, cylinderTexCoords, cylinderFaces, cylinderFaceSmoothingGroups, cylinderOffset);
+   }
+
    public void addLine(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth)
    {
       float lx = xf - x0;
@@ -283,7 +297,7 @@ public class MeshBuilder
 
       for (int i = 1; i < points.length; i++)
       {
-         Point3d start = points[i-1];
+         Point3d start = points[i - 1];
          Point3d end = points[i];
          addLine(start, end, lineWidth);
       }
@@ -303,7 +317,7 @@ public class MeshBuilder
 
       for (int i = 1; i < points.size(); i++)
       {
-         Point3d start = points.get(i-1);
+         Point3d start = points.get(i - 1);
          Point3d end = points.get(i);
          addLine(start, end, lineWidth);
       }
@@ -374,15 +388,8 @@ public class MeshBuilder
          float halfLy = ly / 2.0f;
          float halfLz = lz / 2.0f;
 
-         float points[] = {
-             -halfLx, -halfLy, -halfLz,
-              halfLx, -halfLy, -halfLz,
-              halfLx,  halfLy, -halfLz,
-             -halfLx,  halfLy, -halfLz,
-             -halfLx, -halfLy,  halfLz,
-              halfLx, -halfLy,  halfLz,
-              halfLx,  halfLy,  halfLz,
-             -halfLx,  halfLy,  halfLz};
+         float points[] = {-halfLx, -halfLy, -halfLz, halfLx, -halfLy, -halfLz, halfLx, halfLy, -halfLz, -halfLx, halfLy, -halfLz, -halfLx, -halfLy, halfLz,
+               halfLx, -halfLy, halfLz, halfLx, halfLy, halfLz, -halfLx, halfLy, halfLz};
          return points;
       }
 
@@ -390,20 +397,8 @@ public class MeshBuilder
 
       static final int faceSmoothingGroups[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-      static final int faces[] = {
-          0, 0, 2, 2, 1, 1,
-          2, 2, 0, 0, 3, 3,            
-          1, 0, 6, 2, 5, 1,
-          6, 2, 1, 0, 2, 3,            
-          5, 0, 7, 2, 4, 1,
-          7, 2, 5, 0, 6, 3,
-          4, 0, 3, 2, 0, 1,
-          3, 2, 4, 0, 7, 3,            
-          3, 0, 6, 2, 2, 1,
-          6, 2, 3, 0, 7, 3,
-          4, 0, 1, 2, 5, 1,
-          1, 2, 4, 0, 0, 3,
-      };
+      static final int faces[] = {0, 0, 2, 2, 1, 1, 2, 2, 0, 0, 3, 3, 1, 0, 6, 2, 5, 1, 6, 2, 1, 0, 2, 3, 5, 0, 7, 2, 4, 1, 7, 2, 5, 0, 6, 3, 4, 0, 3, 2, 0, 1,
+            3, 2, 4, 0, 7, 3, 3, 0, 6, 2, 2, 1, 6, 2, 3, 0, 7, 3, 4, 0, 1, 2, 5, 1, 1, 2, 4, 0, 0, 3,};
    }
 
    static class LineMeshGenerator
@@ -421,35 +416,35 @@ public class MeshBuilder
          for (int i = 2; i < points.length; i += 3)
             points[i] += halfL;
 
-            float yaw;
-            float pitch;
-            if (Math.abs(localDirection.getZ()) < 1.0 - 1.0e-3)
-            {
-               yaw = (float) Math.atan2(localDirection.getY(), localDirection.getX());
-               double xyLength = Math.sqrt(localDirection.getX() * localDirection.getX() + localDirection.getY() * localDirection.getY());
-               pitch = (float) Math.atan2(xyLength, localDirection.getZ());
-            }
-            else
-            {
-               yaw = 0.0f;
-               pitch = localDirection.getZ() >= 0.0 ? 0.0f : (float) Math.PI;
-            }
+         float yaw;
+         float pitch;
+         if (Math.abs(localDirection.getZ()) < 1.0 - 1.0e-3)
+         {
+            yaw = (float) Math.atan2(localDirection.getY(), localDirection.getX());
+            double xyLength = Math.sqrt(localDirection.getX() * localDirection.getX() + localDirection.getY() * localDirection.getY());
+            pitch = (float) Math.atan2(xyLength, localDirection.getZ());
+         }
+         else
+         {
+            yaw = 0.0f;
+            pitch = localDirection.getZ() >= 0.0 ? 0.0f : (float) Math.PI;
+         }
 
-            float cYaw = (float) Math.cos(yaw);
-            float sYaw = (float) Math.sin(yaw);
+         float cYaw = (float) Math.cos(yaw);
+         float sYaw = (float) Math.sin(yaw);
 
-            float cPitch = (float) Math.cos(pitch);
-            float sPitch = (float) Math.sin(pitch);
+         float cPitch = (float) Math.cos(pitch);
+         float sPitch = (float) Math.sin(pitch);
 
-            for (int i = 0; i < points.length; i += 3)
-            {
-               float x = points[i];
-               float y = points[i + 1];
-               float z = points[i + 2];
-               points[i] = cYaw * cPitch * x - sYaw * y + cYaw * sPitch * z;
-               points[i + 1] = sYaw * cPitch * x + cYaw * y + sYaw * sPitch * z;
-               points[i + 2] = -sPitch * x + cPitch * z;
-            }
+         for (int i = 0; i < points.length; i += 3)
+         {
+            float x = points[i];
+            float y = points[i + 1];
+            float z = points[i + 2];
+            points[i] = cYaw * cPitch * x - sYaw * y + cYaw * sPitch * z;
+            points[i + 1] = sYaw * cPitch * x + cYaw * y + sYaw * sPitch * z;
+            points[i + 2] = -sPitch * x + cPitch * z;
+         }
 
          return points;
       }
@@ -459,5 +454,190 @@ public class MeshBuilder
       static final int faceSmoothingGroups[] = BoxMeshGenerator.faceSmoothingGroups;
 
       static final int faces[] = BoxMeshGenerator.faces;
+   }
+
+   static class CylinderMeshGenerator
+   {
+      static final int DEFAULT_DIVISIONS = 64;
+
+      static final float[] defaultTexCoords = generateTexCoords(DEFAULT_DIVISIONS);
+      static final int[] defaultFaces = generatreFaces(DEFAULT_DIVISIONS);
+      static final int[] defaultFaceSmoothingGroups = generateFaceSmoothingGroups(DEFAULT_DIVISIONS);
+
+      static float[] generatePoints(float radius, float height, int divisions)
+      {
+         final int nPoints = divisions * 2 + 2;
+
+         double dAngle = -2.0 * Math.PI / divisions;
+         height *= 0.5f;
+
+         float points[] = new float[nPoints * 3];
+
+         int index = 0;
+
+         for (int i = 0; i < divisions; i++)
+         {
+            double a = dAngle * i;
+            points[index++] = (float) (Math.sin(a) * radius);
+            points[index++] = (float) (Math.cos(a) * radius);
+            points[index++] = height;
+         }
+
+         for (int i = 0; i < divisions; i++)
+         {
+            double a = dAngle * i;
+            points[index++] = (float) (Math.sin(a) * radius);
+            points[index++] = (float) (Math.cos(a) * radius);
+            points[index++] = -height;
+         }
+
+         // add cap central points
+         points[index++] = 0;
+         points[index++] = 0;
+         points[index++] = height;
+         points[index++] = 0;
+         points[index++] = 0;
+         points[index++] = -height;
+
+         return points;
+      }
+
+      static float[] generateTexCoords(int divisions)
+      {
+         // NOTE: still create mesh for degenerated cylinder
+         final int tcCount = (divisions + 1) * 4 + 1; // 2 cap tex
+         float textureDelta = 1.0f / 256;
+
+         float dA = -1.0f / divisions;
+
+         float texCoords[] = new float[tcCount * 2];
+
+         int index = 0;
+
+         for (int i = 0; i < divisions; i++)
+         {
+            texCoords[index++] = 1 - dA * i;
+            texCoords[index++] = 1 - textureDelta;
+         }
+
+         // top edge
+         texCoords[index++] = 0;
+         texCoords[index++] = 1 - textureDelta;
+
+         for (int i = 0; i < divisions; i++)
+         {
+            texCoords[index++] = 1 - dA * i;
+            texCoords[index++] = textureDelta;
+         }
+
+         // bottom edge
+         texCoords[index++] = 0;
+         texCoords[index++] = textureDelta;
+
+         // add cap central points
+         // bottom cap
+         for (int i = 0; i <= divisions; i++)
+         {
+            double a = (i < divisions) ? (dA * i * 2) * Math.PI : 0;
+            texCoords[index++] = 0.5f + (float) (Math.sin(a) * 0.5f);
+            texCoords[index++] = 0.5f + (float) (Math.cos(a) * 0.5f);
+         }
+
+         // top cap
+         for (int i = 0; i <= divisions; ++i)
+         {
+            double a = (i < divisions) ? (dA * i * 2) * Math.PI : 0;
+            texCoords[index++] = 0.5f + (float) (Math.sin(a) * 0.5f);
+            texCoords[index++] = 0.5f - (float) (Math.cos(a) * 0.5f);
+         }
+
+         texCoords[index++] = 0.5f;
+         texCoords[index++] = 0.5f;
+
+         return texCoords;
+      }
+
+      static int[] generatreFaces(int divisions)
+      {
+         int faces[] = new int[divisions * 24];
+
+         int fIndex = 0;
+
+         for (int p0 = 0; p0 < divisions; p0++)
+         {
+            int p1 = p0 + 1;
+            int p2 = p0 + divisions;
+            int p3 = p1 + divisions;
+
+            faces[fIndex + 0] = p0;
+            faces[fIndex + 1] = p0;
+            faces[fIndex + 2] = p2;
+            faces[fIndex + 3] = p2 + 1;
+            faces[fIndex + 4] = p1 == divisions ? 0 : p1;
+            faces[fIndex + 5] = p1;
+            fIndex += 6;
+
+            faces[fIndex + 0] = p3 % divisions == 0 ? p3 - divisions : p3;
+            faces[fIndex + 1] = p3 + 1;
+            faces[fIndex + 2] = p1 == divisions ? 0 : p1;
+            faces[fIndex + 3] = p1;
+            faces[fIndex + 4] = p2;
+            faces[fIndex + 5] = p2 + 1;
+            fIndex += 6;
+
+         }
+         // build cap faces
+         int tStart = (divisions + 1) * 2;
+         int t1 = (divisions + 1) * 4;
+         int p1 = divisions * 2;
+
+         // bottom cap
+         for (int p0 = 0; p0 < divisions; p0++)
+         {
+            int p2 = p0 + 1;
+            int t0 = tStart + p0;
+            int t2 = t0 + 1;
+
+            // add p0, p1, p2
+            faces[fIndex + 0] = p0;
+            faces[fIndex + 1] = t0;
+            faces[fIndex + 2] = p2 == divisions ? 0 : p2;
+            faces[fIndex + 3] = t2;
+            faces[fIndex + 4] = p1;
+            faces[fIndex + 5] = t1;
+            fIndex += 6;
+         }
+
+         p1 = divisions * 2 + 1;
+         tStart = (divisions + 1) * 3;
+
+         // top cap
+         for (int p0 = 0; p0 < divisions; p0++)
+         {
+            int p2 = p0 + 1 + divisions;
+            int t0 = tStart + p0;
+            int t2 = t0 + 1;
+
+            faces[fIndex + 0] = p0 + divisions;
+            faces[fIndex + 1] = t0;
+            faces[fIndex + 2] = p1;
+            faces[fIndex + 3] = t1;
+            faces[fIndex + 4] = p2 % divisions == 0 ? p2 - divisions : p2;
+            faces[fIndex + 5] = t2;
+            fIndex += 6;
+         }
+
+         return faces;
+      }
+
+      static int[] generateFaceSmoothingGroups(int div)
+      {
+         int smoothing[] = new int[div * 4];
+        for (int i = 0; i < div * 2; ++i) 
+            smoothing[i] = 1;
+        for (int i = div * 2; i < div * 4; ++i) 
+            smoothing[i] = 2;
+        return smoothing;
+      }
    }
 }
