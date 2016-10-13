@@ -3,7 +3,8 @@ package us.ihmc.tools.maps;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class CircularLongMapTest
 {

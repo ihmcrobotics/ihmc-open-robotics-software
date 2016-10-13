@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.kalman.imu.QuaternionBasedArrayFullIMUKalmanFilter;
 import us.ihmc.kalman.imu.QuaternionBasedJamaFullIMUKalmanFilter;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class KalmanFilterComparisonTest
 {

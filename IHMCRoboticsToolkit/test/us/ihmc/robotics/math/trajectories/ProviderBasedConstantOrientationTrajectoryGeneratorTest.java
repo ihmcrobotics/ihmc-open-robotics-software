@@ -17,7 +17,7 @@ import us.ihmc.robotics.math.trajectories.ProviderBasedConstantOrientationTrajec
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
 {

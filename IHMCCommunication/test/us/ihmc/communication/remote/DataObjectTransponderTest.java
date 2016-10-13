@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class DataObjectTransponderTest
 {
    private static final int MAXIMUM_INTER_PACKET_DELAY_MILLIS = 300;
@@ -83,7 +83,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.3, targetsOverride = TestPlanTarget.Flaky)
+   @ContinuousIntegrationTest(estimatedDuration = 8.3, categoriesOverride = IntegrationCategory.FLAKY)
    @Test(timeout = 42000)
    public void testDoubleBidirectionalCommunication() throws InterruptedException
    {

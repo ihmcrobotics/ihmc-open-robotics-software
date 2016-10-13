@@ -17,15 +17,15 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.tools.testing.TestPlanAnnotations;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
-@ContinuousIntegrationPlan(targets = {TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
 public class DataExporterGraphCreatorTest
 {
 
-    @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 1.0)
+    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 1.0)
     @Test(timeout = 30000)
     public void testDataExporterGraphCreator() throws IOException
     {

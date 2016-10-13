@@ -7,10 +7,10 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 
 //TODO: update this test class to access poses via resource directory and undelete old pose files from svn

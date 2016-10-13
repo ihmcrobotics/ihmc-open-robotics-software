@@ -28,7 +28,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.ReflectionSimula
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimpleRewindabilityComparisonScript;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationComparisonScript;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ReflectionSimulationComparerTest
 {

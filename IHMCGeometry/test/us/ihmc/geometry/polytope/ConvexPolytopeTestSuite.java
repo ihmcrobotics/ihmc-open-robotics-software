@@ -3,13 +3,13 @@ package us.ihmc.geometry.polytope;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
 import us.ihmc.tools.testing.MutationTestingTools;
-import us.ihmc.tools.testing.TestPlanSuite;
-import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
-import us.ihmc.tools.testing.TestPlanTarget;
 
-@RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@RunWith(ContinuousIntegrationSuite.class)
+@ContinuousIntegrationSuiteCategory(IntegrationCategory.FAST)
 @SuiteClasses({ ExpandingPolytopeAlgorithmTest.class, IcoSphereCreatorTest.class, SimplexPolytopeTest.class, ExpandingPolytopeEntryTest.class, ExpandingPolytopeEntryFromSimpleMeshGeneratorTest.class,
       ConvexPolytopeTest.class, GilbertJohnsonKeerthiCollisionDetectorTest.class, ConvexPolytopeFromExpandingPolytopeEntryGeneratorTest.class, ExpandingPolytopeSilhouetteConstructorTest.class })
 

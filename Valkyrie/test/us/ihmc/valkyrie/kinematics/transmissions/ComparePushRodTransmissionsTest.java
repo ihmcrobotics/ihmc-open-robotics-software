@@ -14,15 +14,15 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.valkyrie.kinematics.LinearActuator;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.YoValkyrieJointWriter;
 
-@ContinuousIntegrationPlan(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ComparePushRodTransmissionsTest
 {
    private static final boolean DEBUG = true;
@@ -51,7 +51,7 @@ public class ComparePushRodTransmissionsTest
    }
 
 	@Ignore
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testTiming()
    {
@@ -73,7 +73,7 @@ public class ComparePushRodTransmissionsTest
       testTimingTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 30000)
    public void testCompareInefficientToEfficientWaist()
    {
@@ -95,7 +95,7 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionForce(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 30000)
    public void testCompareInefficientToJSCWaist()
    {
@@ -118,7 +118,7 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionForce(random, epsilon, inefficientPushrodTransmission, nasaPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 30000)
    public void testCompareInefficientToEfficientWaistOverRenishaw()
    {
@@ -142,7 +142,7 @@ public class ComparePushRodTransmissionsTest
       compareTwoPushRodTransmissionForce(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 30000)
    public void testCompareEfficientToJSCWaist()
    {

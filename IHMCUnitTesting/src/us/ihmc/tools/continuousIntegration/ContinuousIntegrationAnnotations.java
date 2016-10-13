@@ -1,11 +1,11 @@
-package us.ihmc.tools.testing;
+package us.ihmc.tools.continuousIntegration;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-public class TestPlanAnnotations
+public class ContinuousIntegrationAnnotations
 {
    public static final Double defaultEstimatedDuration = 0.1;
    
@@ -13,7 +13,7 @@ public class TestPlanAnnotations
    @Target(ElementType.TYPE)
    public @interface ContinuousIntegrationPlan
    {
-      TestPlanTarget[] targets() default {TestPlanTarget.Fast};
+      IntegrationCategory[] categories() default {IntegrationCategory.FAST};
    }
    
    @Retention(RetentionPolicy.RUNTIME)
@@ -21,6 +21,6 @@ public class TestPlanAnnotations
    public @interface ContinuousIntegrationTest
    {
       double estimatedDuration();
-      TestPlanTarget[] targetsOverride() default {};
+      IntegrationCategory[] categoriesOverride() default {};
    }
 }

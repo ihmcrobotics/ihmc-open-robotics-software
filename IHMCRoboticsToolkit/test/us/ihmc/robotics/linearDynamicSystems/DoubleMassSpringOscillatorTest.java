@@ -9,7 +9,7 @@ import org.junit.Test;
 import Jama.Matrix;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.dataStructures.Polynomial;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class DoubleMassSpringOscillatorTest
 {

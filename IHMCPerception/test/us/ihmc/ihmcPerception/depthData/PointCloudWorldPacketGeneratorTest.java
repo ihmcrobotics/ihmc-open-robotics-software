@@ -7,7 +7,7 @@ import javax.vecmath.Point3d;
 import org.junit.Test;
 
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class PointCloudWorldPacketGeneratorTest
 {

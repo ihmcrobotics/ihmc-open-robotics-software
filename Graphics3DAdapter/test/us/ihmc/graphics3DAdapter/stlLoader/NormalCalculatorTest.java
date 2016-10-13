@@ -28,9 +28,9 @@ import us.ihmc.graphics3DAdapter.stlLoader.NormalCalculator;
 import us.ihmc.graphics3DAdapter.stlLoader.STLReader;
 import us.ihmc.graphics3DAdapter.stlLoader.STLReaderFactory;
 import us.ihmc.graphics3DAdapter.stlLoader.Triangle;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * Test the normal calculation routine based on the normals in the the teapotBinary.STL model.
@@ -38,7 +38,7 @@ import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
  * @author Jesper Smith
  *
  */
-@ContinuousIntegrationPlan(targets={TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class NormalCalculatorTest
 {
 

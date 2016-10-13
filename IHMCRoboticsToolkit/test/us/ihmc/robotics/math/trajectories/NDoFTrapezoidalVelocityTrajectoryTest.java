@@ -7,8 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.AlphaToAlphaType;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 
 public class NDoFTrapezoidalVelocityTrajectoryTest
@@ -142,7 +142,7 @@ public class NDoFTrapezoidalVelocityTrajectoryTest
       plot(time, positions, "Position for multiple trajectories (simple)");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testVelocityAndAcceleration()
    {

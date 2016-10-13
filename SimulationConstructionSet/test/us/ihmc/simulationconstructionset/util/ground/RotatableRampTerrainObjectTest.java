@@ -9,11 +9,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class RotatableRampTerrainObjectTest
 {
    private RotatableRampTerrainObject simpleRamp, simpleRampDown, ramp90;
@@ -135,7 +135,7 @@ public class RotatableRampTerrainObjectTest
       testHeightAtRampForAnyRamp(pointsOnRamp90PassingHeightCornerCases, ramp90);      
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void HeightAtRamp90EdgeCasesFailDueToNumericalErrorTest()
    {

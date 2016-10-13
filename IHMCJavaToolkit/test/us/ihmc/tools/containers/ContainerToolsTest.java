@@ -20,7 +20,7 @@ import java.util.Vector;
 import org.junit.Test;
 
 import us.ihmc.tools.containers.ContainerTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ContainerToolsTest
 {

@@ -24,8 +24,8 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestInterface
@@ -93,7 +93,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 44.4, targetsOverride = {TestPlanTarget.Flaky, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 44.4, categoriesOverride = {IntegrationCategory.FLAKY, IntegrationCategory.VIDEO})
    @Test(timeout = 143110)
    public void testWalkingUpToRampWithShortStepsWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
@@ -131,7 +131,7 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 47.9, targetsOverride = {TestPlanTarget.Flaky, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 47.9, categoriesOverride = {IntegrationCategory.FLAKY, IntegrationCategory.VIDEO})
    @Test(timeout = 240000)
    public void testTurningInPlaceAndPassingPIWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {

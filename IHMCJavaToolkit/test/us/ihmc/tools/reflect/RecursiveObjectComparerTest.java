@@ -15,9 +15,9 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.tools.ArrayTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.reflect.RecursiveObjectComparer;
 import us.ihmc.tools.reflect.StringFieldMatcher;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 

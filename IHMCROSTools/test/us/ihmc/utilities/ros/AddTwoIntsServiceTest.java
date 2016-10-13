@@ -15,13 +15,13 @@ import org.ros.node.service.ServiceResponseListener;
 import test_rosmaster.AddTwoInts;
 import test_rosmaster.AddTwoIntsRequest;
 import test_rosmaster.AddTwoIntsResponse;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.utilities.ros.service.AddTwoIntsClient;
 import us.ihmc.utilities.ros.service.AddTwoIntsServer;
 
-@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
 {
    final static boolean USE_JAVA_ROSCORE = true;

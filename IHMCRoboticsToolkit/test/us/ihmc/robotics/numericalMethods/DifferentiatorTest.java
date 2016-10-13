@@ -8,8 +8,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class DifferentiatorTest
 {
@@ -96,7 +96,7 @@ public class DifferentiatorTest
       assertEquals(0.0, differentiator.val(), delta);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout=300000,expected = RuntimeException.class)
    public void testTimeIntervalEqualZero()
    {
@@ -106,7 +106,7 @@ public class DifferentiatorTest
       // TODO 20120911 Khai-Long Ho Hoang: Differentiator class must be enhanced by a detection if time interval dt is equal zero.
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testTimeIntervalLessZero()
    {

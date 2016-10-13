@@ -3,11 +3,11 @@ package us.ihmc.valkyrie.networkProcessor.depthData;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.HumanoidPointCloudDataReceiverTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@ContinuousIntegrationPlan(targets = TestPlanTarget.Exclude)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
 public class ValkyriePointCloudDataReceiverTest extends HumanoidPointCloudDataReceiverTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);

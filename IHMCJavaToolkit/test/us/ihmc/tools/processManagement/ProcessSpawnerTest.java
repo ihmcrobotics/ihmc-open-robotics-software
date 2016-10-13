@@ -13,6 +13,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 import org.junit.Test;
+
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.processManagement.ExitListener;
@@ -20,12 +24,9 @@ import us.ihmc.tools.processManagement.ForkedShellProcessSpawner;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.tools.processManagement.ProcessSpawner;
 import us.ihmc.tools.processManagement.ShellScriptProcessSpawner;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ProcessSpawnerTest
 {
    private static final Path testFilePath = Paths.get(System.getProperty("java.io.tmpdir"), "ProcessSpawnerTest.tmp");
@@ -40,7 +41,7 @@ public class ProcessSpawnerTest
       Assert.assertEquals(expectedContent, content);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testForkedShellProcessSpawner() throws Exception
    {
@@ -59,7 +60,7 @@ public class ProcessSpawnerTest
       validateFileContents(randomString);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testShelloutProcessSpawnerOnShellScript() throws Exception
    {
@@ -120,7 +121,7 @@ public class ProcessSpawnerTest
       validateFileContents(randomString);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.1, targetsOverride = TestPlanTarget.Flaky)
+   @ContinuousIntegrationTest(estimatedDuration = 2.1, categoriesOverride = IntegrationCategory.FLAKY)
    @Test(timeout = 30000)
    public void testExitListeners() throws Exception
    {

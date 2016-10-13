@@ -18,11 +18,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@ContinuousIntegrationPlan(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class HumanEvaluationLine2dTest
 {
    private final boolean WAIT_FOR_BUTTON_PUSH = false;
@@ -74,7 +74,7 @@ public class HumanEvaluationLine2dTest
    {
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout = 30000)
    public void testIsOnLeftSideOfLine()
    {
@@ -118,7 +118,7 @@ public class HumanEvaluationLine2dTest
       testFrame.dispose();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3, targetsOverride = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout = 30000)
    public void testIsInFrontOfLine()
    {

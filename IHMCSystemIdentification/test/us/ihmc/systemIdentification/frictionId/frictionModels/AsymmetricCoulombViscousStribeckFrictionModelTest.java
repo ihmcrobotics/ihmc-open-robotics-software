@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousStribeckFrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class AsymmetricCoulombViscousStribeckFrictionModelTest
 {

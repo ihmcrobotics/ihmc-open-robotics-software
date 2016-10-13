@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
 import static org.junit.Assert.*;
-import static us.ihmc.tools.testing.TestPlanTarget.*;
+import static us.ihmc.tools.continuousIntegration.IntegrationCategory.*;
 
 import java.util.Random;
 
@@ -33,12 +33,12 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
-@ContinuousIntegrationPlan(targets = Fast)
+@ContinuousIntegrationPlan(categories = FAST)
 @VmOptions("-XX:-TieredCompilation")
 public class QuadrupedSupportPolygonTest
 {

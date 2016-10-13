@@ -60,8 +60,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestInterface
@@ -93,7 +93,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    private BooleanYoVariable allowUsingHighMomentumWeight;
    private BooleanYoVariable doToeOffIfPossible;
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, targetsOverride = {TestPlanTarget.InDevelopment})
+   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 300000)
    public void testWalkingOnStraightSidewayLines() throws SimulationExceededMaximumTimeException
    {
@@ -148,7 +148,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, targetsOverride = {TestPlanTarget.InDevelopment})
+   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 300000)
    public void testWalkingOnStraightForwardLines() throws SimulationExceededMaximumTimeException
    {
@@ -203,7 +203,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, targetsOverride = {TestPlanTarget.InDevelopment})
+   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 300000)
    public void testWalkingOnLines() throws SimulationExceededMaximumTimeException
    {

@@ -7,8 +7,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ShipCorridorGroundProfileTest 
 {

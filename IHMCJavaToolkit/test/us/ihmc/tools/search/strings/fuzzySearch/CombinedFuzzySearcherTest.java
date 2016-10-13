@@ -2,14 +2,14 @@ package us.ihmc.tools.search.strings.fuzzySearch;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-@ContinuousIntegrationPlan(targets = TestPlanTarget.Exclude)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
 public class CombinedFuzzySearcherTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

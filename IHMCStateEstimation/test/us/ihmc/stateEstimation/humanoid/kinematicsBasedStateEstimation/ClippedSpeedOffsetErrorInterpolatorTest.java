@@ -29,11 +29,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@ContinuousIntegrationPlan(targets={TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.FAST})
 public class ClippedSpeedOffsetErrorInterpolatorTest
 {
    SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
@@ -153,7 +153,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    //TODO
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 600000)
    public void testRandomRotationErrorInterpolation()
    {
@@ -241,7 +241,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
    
    // TODO
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 600000)
    public void testTranslationAndRotationErrorsInterpolation()
    {
@@ -402,7 +402,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    //TODO
-   @ContinuousIntegrationTest(estimatedDuration = 0.3, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 60000)
    public void testMaxRotationalCorrectionSpeedClip()
    {
@@ -487,7 +487,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    }
 
    // TODO
-   @ContinuousIntegrationTest(estimatedDuration = 0.3, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testMaxCorrectionSpeedClipWorksWhenTranslationAndRotationOffsetsAreBig()
    {
