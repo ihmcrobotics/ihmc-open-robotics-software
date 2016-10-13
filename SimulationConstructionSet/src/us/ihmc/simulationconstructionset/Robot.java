@@ -561,7 +561,6 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
     */
    public void getCameraMountList(CameraMountList cameraMountList)
    {
-      // CameraMountList ret = new CameraMountList();
       ArrayList<CameraMountInterface> mountArrayList = new ArrayList<CameraMountInterface>();
 
       ArrayList<Joint> children = this.getRootJoints();
@@ -573,8 +572,6 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
          rootJoint.recursiveGetCameraMounts(mountArrayList);
          cameraMountList.addCameraMounts(mountArrayList);
       }
-
-      // return ret;
    }
    
    public ArrayList<SimulatedSensor> getSensors()

@@ -92,7 +92,7 @@ public class MultiColorMeshBuilder
       meshBuilder.addPolygon(polygon, colorPalette.getTextureLocation(color));
    }
 
-   public void addBoxMesh(float lx, float ly, float lz, Color color)
+   public void addBox(float lx, float ly, float lz, Color color)
    {
       float[] points = BoxMeshGenerator.generatePoints(lx, ly, lz);
       int[] faces = BoxMeshGenerator.faces;
@@ -100,7 +100,7 @@ public class MultiColorMeshBuilder
       addMesh(points, faces, faceSmoothingGroups, color);
    }
 
-   public void addBoxMesh(float lx, float ly, float lz, Tuple3f pointsOffset, Color color)
+   public void addBox(float lx, float ly, float lz, Tuple3f pointsOffset, Color color)
    {
       float[] points = BoxMeshGenerator.generatePoints(lx, ly, lz);
       int[] faces = BoxMeshGenerator.faces;
@@ -108,32 +108,32 @@ public class MultiColorMeshBuilder
       addMesh(points, faces, faceSmoothingGroups, pointsOffset, color);
    }
 
-   public void addBoxMesh(double lx, double ly, double lz, Tuple3d pointsOffset, Color color)
+   public void addBox(double lx, double ly, double lz, Tuple3d pointsOffset, Color color)
    {
-      addBoxMesh((float) lx, (float) ly, (float) lz, new Point3f(pointsOffset), color);
+      addBox((float) lx, (float) ly, (float) lz, new Point3f(pointsOffset), color);
    }
 
-   public void addCubeMesh(float size, Color color)
+   public void addCube(float size, Color color)
    {
-      addBoxMesh(size, size, size, color);
+      addBox(size, size, size, color);
    }
 
-   public void addCubeMesh(float size, Tuple3f pointsOffset, Color color)
+   public void addCube(float size, Tuple3f pointsOffset, Color color)
    {
-      addBoxMesh(size, size, size, pointsOffset, color);
+      addBox(size, size, size, pointsOffset, color);
    }
 
-   public void addCubeMesh(double size, Tuple3d pointsOffset, Color color)
+   public void addCube(double size, Tuple3d pointsOffset, Color color)
    {
-      addBoxMesh(size, size, size, pointsOffset, color);
+      addBox(size, size, size, pointsOffset, color);
    }
 
-   public void addCubeMesh(double size, double xOffset, double yOffset, double zOffset, Color color)
+   public void addCube(double size, double xOffset, double yOffset, double zOffset, Color color)
    {
-      addBoxMesh(size, size, size, new Point3d(xOffset, yOffset, zOffset), color);
+      addBox(size, size, size, new Point3d(xOffset, yOffset, zOffset), color);
    }
 
-   public void addLineMesh(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth, Color color)
+   public void addLine(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth, Color color)
    {
       float lx = xf - x0;
       float ly = yf - y0;
@@ -144,12 +144,12 @@ public class MultiColorMeshBuilder
       addMesh(linePoints, lineFaces, lineFaceSmoothingGroups, x0, y0, z0, color);
    }
 
-   public void addLineMesh(double x0, double y0, double z0, double xf, double yf, double zf, double lineWidth, Color color)
+   public void addLine(double x0, double y0, double z0, double xf, double yf, double zf, double lineWidth, Color color)
    {
-      addLineMesh((float) x0, (float) y0, (float) z0, (float) xf, (float) yf, (float) zf, (float) lineWidth, color);
+      addLine((float) x0, (float) y0, (float) z0, (float) xf, (float) yf, (float) zf, (float) lineWidth, color);
    }
 
-   public void addLineMesh(Point3d start, Point3d end, double lineWidth, Color color)
+   public void addLine(Point3d start, Point3d end, double lineWidth, Color color)
    {
       double x0 = start.getX();
       double y0 = start.getY();
@@ -157,10 +157,10 @@ public class MultiColorMeshBuilder
       double xf = end.getX();
       double yf = end.getY();
       double zf = end.getZ();
-      addLineMesh(x0, y0, z0, xf, yf, zf, lineWidth, color);
+      addLine(x0, y0, z0, xf, yf, zf, lineWidth, color);
    }
 
-   public void addMultiLineMesh(Point3d[] points, double lineWidth, Color color, boolean close)
+   public void addMultiLine(Point3d[] points, double lineWidth, Color color, boolean close)
    {
       if (points.length < 2)
          return;
@@ -169,18 +169,18 @@ public class MultiColorMeshBuilder
       {
          Point3d start = points[i-1];
          Point3d end = points[i];
-         addLineMesh(start, end, lineWidth, color);
+         addLine(start, end, lineWidth, color);
       }
 
       if (close)
       {
          Point3d start = points[points.length - 1];
          Point3d end = points[0];
-         addLineMesh(start, end, lineWidth, color);
+         addLine(start, end, lineWidth, color);
       }
    }
 
-   public void addMultiLineMesh(List<Point3d> points, double lineWidth, Color color, boolean close)
+   public void addMultiLine(List<Point3d> points, double lineWidth, Color color, boolean close)
    {
       if (points.size() < 2)
          return;
@@ -189,14 +189,14 @@ public class MultiColorMeshBuilder
       {
          Point3d start = points.get(i-1);
          Point3d end = points.get(i);
-         addLineMesh(start, end, lineWidth, color);
+         addLine(start, end, lineWidth, color);
       }
 
       if (close)
       {
          Point3d start = points.get(points.size() - 1);
          Point3d end = points.get(0);
-         addLineMesh(start, end, lineWidth, color);
+         addLine(start, end, lineWidth, color);
       }
    }
 

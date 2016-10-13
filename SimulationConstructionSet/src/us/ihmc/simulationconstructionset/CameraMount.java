@@ -150,14 +150,20 @@ public class CameraMount implements CameraMountInterface
 
    }
 
-   public void getTransformToMount(RigidBodyTransform transform)
+   public void getTransformToMount(RigidBodyTransform transformToPack)
    {
-      transform.set(transformToMount);
+      transformToPack.set(transformToMount);
    }
 
-   public void getTransformToCamera(RigidBodyTransform transform)
+   @Override
+   public void getTransformToCamera(RigidBodyTransform transformToPack)
    {
-      transform.set(transformToCamera);
+      transformToPack.set(transformToCamera);
+   }
+
+   public void getOffsetTransform(RigidBodyTransform offsetTransformToPack)
+   {
+      offsetTransformToPack.set(this.offsetTransform);
    }
 
    public void setOffset(RigidBodyTransform newOffsetTransform)
@@ -189,6 +195,11 @@ public class CameraMount implements CameraMountInterface
       }
    }
 
+   public void setFieldOfView(double fieldOfView)
+   {
+      this.fieldOfView = fieldOfView;
+   }
+
    public double getFieldOfView()
    {
       return fieldOfView;
@@ -216,6 +227,8 @@ public class CameraMount implements CameraMountInterface
       {
          fieldOfView = 3.0;
       }
+
+//      System.out.println("Zoom. Field of View = " + fieldOfView);
    }
 
    public int getImageWidth()
