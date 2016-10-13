@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
+package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,18 +6,17 @@ import java.util.List;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.WalkToLocationBehaviorCoactiveElementBehaviorSide;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
@@ -110,7 +109,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
    @Override
    public CoactiveElement getCoactiveElement()
    {
-      return coactiveElement;
+      return null;//coactiveElement;
    }
 
    public void setTarget(FramePose2d targetPose2dInWorld)
@@ -360,7 +359,6 @@ public class WalkToLocationBehavior extends AbstractBehavior
       footstepListBehavior.doPostBehaviorCleanup();
    }
 
-   @Override
    public boolean hasInputBeenSet()
    {
       return (hasInputBeenSet.getBooleanValue());

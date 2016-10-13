@@ -111,9 +111,6 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
       return trajectoryTimeHasElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-  
-
-   @Override
    public boolean hasInputBeenSet()
    {
       return outgoingChestTrajectoryMessage != null;

@@ -101,7 +101,6 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
 
    
 
-   @Override
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();

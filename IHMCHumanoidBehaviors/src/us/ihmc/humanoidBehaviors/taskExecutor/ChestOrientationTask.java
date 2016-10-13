@@ -3,26 +3,37 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 
-public class ChestOrientationTask extends BehaviorTask
+public class ChestOrientationTask<E extends Enum<E>> extends BehaviorAction<E>
 {
    private final ChestTrajectoryMessage chestOrientationPacket;
    private final ChestTrajectoryBehavior chestOrientationBehavior;
 
-   public ChestOrientationTask(ChestTrajectoryMessage chestTrajectoryMessage, DoubleYoVariable yoTime, ChestTrajectoryBehavior chestOrientationBehavior)
+   public ChestOrientationTask(ChestTrajectoryMessage chestTrajectoryMessage, ChestTrajectoryBehavior chestOrientationBehavior)
    {
-      super(chestOrientationBehavior, yoTime);
+      this(null, chestTrajectoryMessage, chestOrientationBehavior);
+   }
+
+   public ChestOrientationTask(FrameOrientation desiredChestOrientation, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime)
+   {
+      this(null, desiredChestOrientation, chestOrientationBehavior, trajectoryTime);
+
+   }
+
+   public ChestOrientationTask(E stateEnum, ChestTrajectoryMessage chestTrajectoryMessage, ChestTrajectoryBehavior chestOrientationBehavior)
+   {
+      super(stateEnum, chestOrientationBehavior);
       this.chestOrientationBehavior = chestOrientationBehavior;
       this.chestOrientationPacket = chestTrajectoryMessage;
    }
-   
-   public ChestOrientationTask(FrameOrientation desiredChestOrientation, DoubleYoVariable yoTime, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime)
+
+   public ChestOrientationTask(E stateEnum, FrameOrientation desiredChestOrientation, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime)
    {
-   
-      super(chestOrientationBehavior, yoTime);
+
+      super(stateEnum, chestOrientationBehavior);
       this.chestOrientationBehavior = chestOrientationBehavior;
       Quat4d chestOrientation = new Quat4d();
       desiredChestOrientation.getQuaternion(chestOrientation);

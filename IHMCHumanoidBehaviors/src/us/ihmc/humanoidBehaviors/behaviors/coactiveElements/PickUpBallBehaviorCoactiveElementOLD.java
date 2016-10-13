@@ -5,19 +5,22 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 
-public abstract class PickUpBallBehaviorCoactiveElement extends BehaviorCoactiveElement
+public abstract class PickUpBallBehaviorCoactiveElementOLD extends BehaviorCoactiveElement
 {
    public enum PickUpBallBehaviorState
    {
       STOPPED,
-      SETUP_ROBOT,
-      SEARCHING_FOR_BALL_FAR,
+      ENABLING_LIDAR,
+      SETTING_LIDAR_PARAMS,
+      CLEARING_LIDAR,
+      SEARCHING_FOR_BALL,
+      WAITING_FOR_USER_CONFIRMATION,
       WALKING_TO_BALL,
-      SEARCHING_FOR_BALL_NEAR,
+      BENDING_OVER,
+      REACHING_FOR_BALL,
+      CLOSING_HAND,
       PICKING_UP_BALL,
-      PUTTING_BALL_IN_BASKET,
-      RESET_ROBOT,
-      WAITING_FOR_USER_CONFIRMATION
+      PUTTING_BALL_IN_BASKET
    }
 
    //UI SIDE YOVARS

@@ -222,7 +222,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
    private HandDesiredConfigurationBehavior testHandDesiredConfigurationBehavior(HandDesiredConfigurationMessage handDesiredConfigurationMessage, double trajectoryTime)
          throws SimulationExceededMaximumTimeException
    {
-      final HandDesiredConfigurationBehavior behavior = new HandDesiredConfigurationBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      final HandDesiredConfigurationBehavior behavior = new HandDesiredConfigurationBehavior("test",drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
             drcBehaviorTestHelper.getYoTime());
 
       behavior.initialize();

@@ -43,9 +43,5 @@ public class SimpleVideoForwardingBehavior extends ImageProcessingBehavior
       }
    }
 
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      return false;
-   }
+  
 }
