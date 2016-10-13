@@ -13,8 +13,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
-import us.ihmc.javaFXToolkit.shapes.MeshBuilder.BoxMeshGenerator;
-import us.ihmc.javaFXToolkit.shapes.MeshBuilder.LineMeshGenerator;
+import us.ihmc.javaFXToolkit.shapes.meshGenerators.BoxMeshGenerator;
+import us.ihmc.javaFXToolkit.shapes.meshGenerators.LineMeshGenerator;
 
 public class MultiColorMeshBuilder
 {
