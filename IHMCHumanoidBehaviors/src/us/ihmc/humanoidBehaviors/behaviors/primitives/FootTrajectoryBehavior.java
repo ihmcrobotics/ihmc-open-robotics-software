@@ -108,9 +108,5 @@ public class FootTrajectoryBehavior extends AbstractBehavior
 
    
 
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      return outgoingFootTrajectoryMessage != null;
-   }
+ 
 }

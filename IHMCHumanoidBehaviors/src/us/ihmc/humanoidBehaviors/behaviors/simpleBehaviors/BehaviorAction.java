@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.stateMachine;
+package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import java.util.ArrayList;
 
@@ -10,23 +10,34 @@ import us.ihmc.robotics.stateMachines.FinishableState;
 import us.ihmc.robotics.stateMachines.StateTransition;
 import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.taskExecutor.Task;
 
-public class BehaviorStateWrapper<E extends Enum<E>> extends FinishableState<E>
+// a behavior action can be used in either a StateMachine or a pipeline.
+
+public class BehaviorAction<E extends Enum<E>> extends FinishableState<E> implements Task
 {
    private final ArrayList<AbstractBehavior> behaviors;
    private final Boolean initializeOnTransitionIntoAction;
-   protected final DoubleYoVariable yoTime;
 
-   public BehaviorStateWrapper(E stateEnum, DoubleYoVariable yoTime, AbstractBehavior... behavior)
+   public BehaviorAction(AbstractBehavior... behavior)
    {
-      this(stateEnum, true, yoTime, behavior);
+      this(null, true, behavior);
    }
 
-   public BehaviorStateWrapper(E stateEnum, boolean initializeOnTransitionIntoAction, DoubleYoVariable yoTime, AbstractBehavior... behavior)
+   public BehaviorAction(E stateEnum, AbstractBehavior... behavior)
+   {
+      this(stateEnum, true, behavior);
+   }
+
+   public BehaviorAction(boolean initializeOnTransitionIntoAction, AbstractBehavior... behavior)
+   {
+      this(null, initializeOnTransitionIntoAction, behavior);
+   }
+
+   public BehaviorAction(E stateEnum, boolean initializeOnTransitionIntoAction, AbstractBehavior... behavior)
    {
       super(stateEnum);
       behaviors = new ArrayList<AbstractBehavior>();
-      this.yoTime = yoTime;
       for (AbstractBehavior currentBehavior : behavior)
       {
          behaviors.add(currentBehavior);
@@ -37,7 +48,6 @@ public class BehaviorStateWrapper<E extends Enum<E>> extends FinishableState<E>
          }
       }
       this.initializeOnTransitionIntoAction = initializeOnTransitionIntoAction;
-
 
    }
 
@@ -55,25 +65,20 @@ public class BehaviorStateWrapper<E extends Enum<E>> extends FinishableState<E>
       addStateTransition(defaultToNextState);
    }
 
-   
-
-
    @Override
    public void doTransitionIntoAction()
    {
       if (initializeOnTransitionIntoAction)
       {
-         PrintTools.debug(this, "Initializing " + getStateEnum().name());
 
          for (int i = 0; i < behaviors.size(); i++)
          {
 
-               //TODO merge abstract behavior and behavior task, add transitioninto behavior here 
+            //TODO merge abstract behavior and behavior task, add transitioninto behavior here 
             behaviors.get(i).initialize();
-            
+
             setBehaviorInput();
 
-            
             CoactiveElement coactiveElement = behaviors.get(i).getCoactiveElement();
             if (coactiveElement != null)
             {
@@ -82,29 +87,31 @@ public class BehaviorStateWrapper<E extends Enum<E>> extends FinishableState<E>
          }
       }
    }
-   //TODO this should not be here the behavior input should be called on each behavior after the merge
+
    protected void setBehaviorInput()
    {
-      
+
    }
-   
+
    @Override
    public void doAction()
    {
       for (int i = 0; i < behaviors.size(); i++)
       {
 
-         behaviors.get(i).doControl();
+         
+            
+            behaviors.get(i).doControl();
 
-         CoactiveElement coactiveElement = behaviors.get(i).getCoactiveElement();
-         if (coactiveElement != null)
-         {
-            coactiveElement.updateMachineSide();
-         }
+            CoactiveElement coactiveElement = behaviors.get(i).getCoactiveElement();
+            if (coactiveElement != null)
+            {
+               coactiveElement.updateMachineSide();
+            }
+         
       }
    }
 
-//TODO this should call the transition out for each behavior after the merge
    @Override
    public void doTransitionOutOfAction()
    {
@@ -129,7 +136,6 @@ public class BehaviorStateWrapper<E extends Enum<E>> extends FinishableState<E>
    public void pause()
    {
 
-      PrintTools.debug(this, "Pausing " + getStateEnum().name());
       for (int i = 0; i < behaviors.size(); i++)
       {
          behaviors.get(i).pause();
@@ -140,7 +146,6 @@ public class BehaviorStateWrapper<E extends Enum<E>> extends FinishableState<E>
    public void resume()
    {
 
-      PrintTools.debug(this, "Resuming " + getStateEnum().name());
       for (int i = 0; i < behaviors.size(); i++)
       {
          behaviors.get(i).resume();
@@ -148,9 +153,8 @@ public class BehaviorStateWrapper<E extends Enum<E>> extends FinishableState<E>
 
    }
 
-   public void stop()
+   public void abort()
    {
-      PrintTools.debug(this, "Stopping " + getStateEnum().name());
       for (int i = 0; i < behaviors.size(); i++)
       {
          behaviors.get(i).abort();
@@ -159,7 +163,6 @@ public class BehaviorStateWrapper<E extends Enum<E>> extends FinishableState<E>
 
    public void doPostBehaviorCleanup()
    {
-      PrintTools.debug(this, "Cleaning up " + getStateEnum().name());
       for (int i = 0; i < behaviors.size(); i++)
       {
          behaviors.get(i).doPostBehaviorCleanup();

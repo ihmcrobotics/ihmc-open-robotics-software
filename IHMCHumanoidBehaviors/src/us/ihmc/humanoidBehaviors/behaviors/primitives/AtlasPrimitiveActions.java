@@ -1,90 +1,114 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import java.util.ArrayList;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
-public class AtlasPrimitiveActions
+public class AtlasPrimitiveActions 
 {
-   //ALL Primitive Behaviors Go In Here. Talk To John Carff before chaning this.
+   ArrayList<AbstractBehavior> allPrimitives = new ArrayList<>();
+   //ALL Primitive Behaviors Go In Here. Talk To John Carff before changing this.
    public final ArmTrajectoryBehavior leftArmTrajectoryBehavior;
-   private final ArmTrajectoryBehavior rightArmTrajectoryBehavior;
-   private final ChestTrajectoryBehavior chestTrajectoryBehavior;
-   private final ClearLidarBehavior clearLidarBehavior;
-   private final EnableLidarBehavior enableLidarBehavior;
-   private final EndEffectorLoadBearingBehavior leftFootEndEffectorLoadBearingBehavior;
-   private final EndEffectorLoadBearingBehavior rightFootEndEffectorLoadBearingBehavior;
-   private final EndEffectorLoadBearingBehavior leftHandEndEffectorLoadBearingBehavior;
-   private final EndEffectorLoadBearingBehavior rightHandEndEffectorLoadBearingBehavior;
-   private final FootstepListBehavior footstepListBehavior;
-   private final GoHomeBehavior leftArmGoHomeBehavior;
-   private final GoHomeBehavior rightArmGoHomeBehavior;
-   private final GoHomeBehavior chestGoHomeBehavior;
-   private final GoHomeBehavior pelvisGoHomeBehavior;
-   private final HandDesiredConfigurationBehavior leftHandDesiredConfigurationBehavior;
-   private final HandDesiredConfigurationBehavior rightHandDesiredConfigurationBehavior;
-   private final HandTrajectoryBehavior leftHandTrajectoryBehavior;
-   private final HandTrajectoryBehavior rightHandTrajectoryBehavior;
-   private final HeadTrajectoryBehavior headTrajectoryBehavior;
-   private final PelvisHeightTrajectoryBehavior pelvisHeightTrajectoryBehavior;
-   private final PelvisOrientationTrajectoryBehavior pelvisOrientationTrajectoryBehavior;
-   private final PelvisTrajectoryBehavior pelvisTrajectoryBehavior;
-   private final SetLidarParametersBehavior setLidarParametersBehavior;
+   public final ArmTrajectoryBehavior rightArmTrajectoryBehavior;
+   public final ChestTrajectoryBehavior chestTrajectoryBehavior;
+   public final ClearLidarBehavior clearLidarBehavior;
+   public final EnableLidarBehavior enableLidarBehavior;
+   public final EndEffectorLoadBearingBehavior leftFootEndEffectorLoadBearingBehavior;
+   public final EndEffectorLoadBearingBehavior rightFootEndEffectorLoadBearingBehavior;
+   public final EndEffectorLoadBearingBehavior leftHandEndEffectorLoadBearingBehavior;
+   public final EndEffectorLoadBearingBehavior rightHandEndEffectorLoadBearingBehavior;
+   public final FootstepListBehavior footstepListBehavior;
+   public final GoHomeBehavior leftArmGoHomeBehavior;
+   public final GoHomeBehavior rightArmGoHomeBehavior;
+   public final GoHomeBehavior chestGoHomeBehavior;
+   public final GoHomeBehavior pelvisGoHomeBehavior;
+   public final HandDesiredConfigurationBehavior leftHandDesiredConfigurationBehavior;
+   public final HandDesiredConfigurationBehavior rightHandDesiredConfigurationBehavior;
+   public final HandTrajectoryBehavior leftHandTrajectoryBehavior;
+   public final HandTrajectoryBehavior rightHandTrajectoryBehavior;
+   public final HeadTrajectoryBehavior headTrajectoryBehavior;
+   public final PelvisHeightTrajectoryBehavior pelvisHeightTrajectoryBehavior;
+   public final PelvisOrientationTrajectoryBehavior pelvisOrientationTrajectoryBehavior;
+   public final PelvisTrajectoryBehavior pelvisTrajectoryBehavior;
+   public final SetLidarParametersBehavior setLidarParametersBehavior;
+   public final WalkToLocationBehavior walkToLocationBehavior;
+   public final WholeBodyInverseKinematicsBehavior wholeBodyBehavior;
+   private final YoVariableRegistry behaviorRegistry;
 
-   public AtlasPrimitiveActions(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters,
-         DoubleYoVariable yoTime, YoVariableRegistry behaviorRegistry)
+   public AtlasPrimitiveActions(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
+         HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime,
+         WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
    {
-      
+      this.behaviorRegistry = behaviorRegistry;
       leftArmTrajectoryBehavior = new ArmTrajectoryBehavior("left", outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(leftArmTrajectoryBehavior.getYoVariableRegistry());
+      addPrimitive(leftArmTrajectoryBehavior);
 
       rightArmTrajectoryBehavior = new ArmTrajectoryBehavior("right", outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(rightArmTrajectoryBehavior.getYoVariableRegistry());
+      addPrimitive(rightArmTrajectoryBehavior);
       chestTrajectoryBehavior = new ChestTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(chestTrajectoryBehavior.getYoVariableRegistry());
+      addPrimitive(chestTrajectoryBehavior);
       clearLidarBehavior = new ClearLidarBehavior(outgoingCommunicationBridge);
-      behaviorRegistry.addChild(clearLidarBehavior.getYoVariableRegistry());
+      addPrimitive(clearLidarBehavior);
       enableLidarBehavior = new EnableLidarBehavior(outgoingCommunicationBridge);
-      behaviorRegistry.addChild(enableLidarBehavior.getYoVariableRegistry());
+      addPrimitive(enableLidarBehavior);
       leftFootEndEffectorLoadBearingBehavior = new EndEffectorLoadBearingBehavior("leftFoot", outgoingCommunicationBridge);
-      behaviorRegistry.addChild(leftFootEndEffectorLoadBearingBehavior.getYoVariableRegistry());
+      addPrimitive(leftFootEndEffectorLoadBearingBehavior);
       rightFootEndEffectorLoadBearingBehavior = new EndEffectorLoadBearingBehavior("rightFoot", outgoingCommunicationBridge);
-      behaviorRegistry.addChild(rightFootEndEffectorLoadBearingBehavior.getYoVariableRegistry());
+      addPrimitive(rightFootEndEffectorLoadBearingBehavior);
       leftHandEndEffectorLoadBearingBehavior = new EndEffectorLoadBearingBehavior("leftHand", outgoingCommunicationBridge);
-      behaviorRegistry.addChild(leftHandEndEffectorLoadBearingBehavior.getYoVariableRegistry());
+      addPrimitive(leftHandEndEffectorLoadBearingBehavior);
       rightHandEndEffectorLoadBearingBehavior = new EndEffectorLoadBearingBehavior("rightHand", outgoingCommunicationBridge);
-      behaviorRegistry.addChild(rightHandEndEffectorLoadBearingBehavior.getYoVariableRegistry());
+      addPrimitive(rightHandEndEffectorLoadBearingBehavior);
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
-      behaviorRegistry.addChild(footstepListBehavior.getYoVariableRegistry());
+      addPrimitive(footstepListBehavior);
       leftArmGoHomeBehavior = new GoHomeBehavior("leftArm", outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(leftArmGoHomeBehavior.getYoVariableRegistry());
+      addPrimitive(leftArmGoHomeBehavior);
       rightArmGoHomeBehavior = new GoHomeBehavior("rightArm", outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(rightArmGoHomeBehavior.getYoVariableRegistry());
+      addPrimitive(rightArmGoHomeBehavior);
       chestGoHomeBehavior = new GoHomeBehavior("chest", outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(chestGoHomeBehavior.getYoVariableRegistry());
+      addPrimitive(chestGoHomeBehavior);
       pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(pelvisGoHomeBehavior.getYoVariableRegistry());
-      leftHandDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(leftHandDesiredConfigurationBehavior.getYoVariableRegistry());
-      rightHandDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(rightHandDesiredConfigurationBehavior.getYoVariableRegistry());
+      addPrimitive(pelvisGoHomeBehavior);
+      leftHandDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior("leftHand", outgoingCommunicationBridge, yoTime);
+      addPrimitive(leftHandDesiredConfigurationBehavior);
+      rightHandDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior("rigthHand", outgoingCommunicationBridge, yoTime);
+      addPrimitive(rightHandDesiredConfigurationBehavior);
       leftHandTrajectoryBehavior = new HandTrajectoryBehavior("left", outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(leftHandTrajectoryBehavior.getYoVariableRegistry());
+      addPrimitive(leftHandTrajectoryBehavior);
       rightHandTrajectoryBehavior = new HandTrajectoryBehavior("right", outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(rightHandTrajectoryBehavior.getYoVariableRegistry());
+      addPrimitive(rightHandTrajectoryBehavior);
       headTrajectoryBehavior = new HeadTrajectoryBehavior("", outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(headTrajectoryBehavior.getYoVariableRegistry());
+      addPrimitive(headTrajectoryBehavior);
       pelvisHeightTrajectoryBehavior = new PelvisHeightTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(pelvisHeightTrajectoryBehavior.getYoVariableRegistry());
+      addPrimitive(pelvisHeightTrajectoryBehavior);
       pelvisOrientationTrajectoryBehavior = new PelvisOrientationTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(pelvisOrientationTrajectoryBehavior.getYoVariableRegistry());
+      addPrimitive(pelvisOrientationTrajectoryBehavior);
       pelvisTrajectoryBehavior = new PelvisTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
-      behaviorRegistry.addChild(pelvisTrajectoryBehavior.getYoVariableRegistry());
+      addPrimitive(pelvisTrajectoryBehavior);
       setLidarParametersBehavior = new SetLidarParametersBehavior(outgoingCommunicationBridge);
-      behaviorRegistry.addChild(setLidarParametersBehavior.getYoVariableRegistry());
+      addPrimitive(setLidarParametersBehavior);
+      walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
+      addPrimitive(walkToLocationBehavior);
+      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior("atlas", wholeBodyControllerParameters, yoTime, outgoingCommunicationBridge);
+      addPrimitive(wholeBodyBehavior);
 
-      
+   }
+   private void addPrimitive(AbstractBehavior behavior)
+   {
+      allPrimitives.add(behavior);
+      behaviorRegistry.addChild(behavior.getYoVariableRegistry());
+   }
+   
+   public ArrayList<AbstractBehavior> getAllPrimitiveBehaviors()
+   {
+      return allPrimitives;
    }
 
 }

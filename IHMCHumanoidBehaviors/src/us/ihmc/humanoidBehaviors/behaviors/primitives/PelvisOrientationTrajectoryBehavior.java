@@ -105,7 +105,6 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    }
 
    
-   @Override
    public boolean hasInputBeenSet()
    {
       return outgoingPelvisOrientationTrajectoryMessage != null;

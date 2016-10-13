@@ -237,8 +237,6 @@ public class FootstepListBehavior extends AbstractBehavior
    }
 
   
-
-   @Override
    public boolean hasInputBeenSet()
    {
       if (numberOfFootsteps.getIntegerValue() != -1 && hasRobotStartedWalking.getBooleanValue())

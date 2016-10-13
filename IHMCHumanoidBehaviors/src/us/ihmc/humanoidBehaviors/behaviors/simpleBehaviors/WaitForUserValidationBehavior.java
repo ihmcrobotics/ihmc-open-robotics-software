@@ -47,11 +47,7 @@ public class WaitForUserValidationBehavior extends AbstractBehavior
 
 
 
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      return true;
-   }
+  
 
    @Override
    public void initialize()

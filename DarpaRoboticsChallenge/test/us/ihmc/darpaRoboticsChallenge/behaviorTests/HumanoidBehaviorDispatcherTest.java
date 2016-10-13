@@ -1,6 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior.DiagnosticTask;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;

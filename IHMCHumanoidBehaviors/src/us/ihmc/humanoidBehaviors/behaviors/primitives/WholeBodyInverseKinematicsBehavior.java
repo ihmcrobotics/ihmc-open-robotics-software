@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
+package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -6,7 +6,6 @@ import javax.vecmath.Quat4d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxStateMessage;
 import us.ihmc.communication.packets.KinematicsToolboxStateMessage.KinematicsToolboxState;
@@ -17,6 +16,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -160,6 +160,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    @Override
    public void initialize()
    {
+      
+      System.out.println("init whole body behavior");
       isPaused.set(false);
       isStopped.set(false);
       isDone.set(false);
@@ -193,7 +195,6 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             sendPacketToNetworkProcessor(handTrajectoryMessage);
          }
       }
-
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable() && !hasSentMessageToController.getBooleanValue())
       {
          KinematicsToolboxOutputStatus newestSolution = kinematicsToolboxOutputQueue.poll();
@@ -201,7 +202,6 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          boolean isSolutionStable = currentSolutionQuality.getDoubleValue() - newestSolution.getSolutionQuality() < 1.0e-6;
          boolean isSolutionGoodEnough = newestSolution.getSolutionQuality() < solutionQualityThreshold.getDoubleValue();
          boolean sendSolutionToController = isSolutionStable && isSolutionGoodEnough;
-
          if (!isPaused())
          {
             if (isSolutionStable && !isSolutionGoodEnough)
@@ -274,5 +274,5 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       sendPacketToNetworkProcessor(message);
    }
 
-
+   
 }

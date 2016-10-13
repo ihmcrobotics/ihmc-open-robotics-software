@@ -192,7 +192,6 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    }
 
 
-   @Override
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();
