@@ -15,6 +15,9 @@ public class LineSegment1d
 
    public LineSegment1d()
    {
+      //TODO maybe implement something like this?
+      /*endpoints[0] = new TransformablePoint2d(Double.MIN_VALUE, Double.MIN_VALUE);
+      endpoints[1] = new TransformablePoint2d(Double.MAX_VALUE, Double.MAX_VALUE);*/
    }
 
    public LineSegment1d(double firstEndpoint, double secondEndpoint)
@@ -105,7 +108,7 @@ public class LineSegment1d
    public double distance(double point)
    {
       if (isBetweenEndpointsInclusive(point))
-         return -Math.min(point - getMinPoint(), getMaxPoint() - point);
+         return - Math.min(point - getMinPoint(), getMaxPoint() - point);
       else if (point < getMinPoint())
          return getMinPoint() - point;
       else
@@ -177,7 +180,7 @@ public class LineSegment1d
 
    public void setMaxPoint(double newMaxPoint)
    {
-      if (newMaxPoint >= getMinPoint())
+      if (newMaxPoint <= getMinPoint()) //TODO error in >=??
          throw new RuntimeException("Unexpected newMaxPoint: " + newMaxPoint + ", expected it to be greater than the current min point: " + getMinPoint());
       if (positiveDirection)
          endpoint2 = newMaxPoint;
