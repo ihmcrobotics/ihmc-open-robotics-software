@@ -21,7 +21,6 @@ public class QuadrupedForceControllerToolbox
    private final QuadrupedBodyOrientationController bodyOrientationController;
    private final QuadrantDependentList<QuadrupedSolePositionController> solePositionController;
    private final QuadrantDependentList<QuadrupedFootStateMachine> footStateMachine;
-   private final QuadrupedTimedStepController timedStepController;
    private final QuadrupedSoleWaypointController soleWaypointController;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrupedFallDetector fallDetector;
@@ -51,7 +50,6 @@ public class QuadrupedForceControllerToolbox
          footStateMachine.set(robotQuadrant,
                new QuadrupedFootStateMachine(robotQuadrant, solePositionController.get(robotQuadrant), runtimeEnvironment.getRobotTimestamp(), registry));
       }
-      timedStepController = new QuadrupedTimedStepController(solePositionController, runtimeEnvironment.getRobotTimestamp(), registry, runtimeEnvironment.getGraphicsListRegistry());
       soleWaypointController = new QuadrupedSoleWaypointController(referenceFrames.getBodyFrame(), solePositionController, runtimeEnvironment.getRobotTimestamp(), registry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
@@ -105,11 +103,6 @@ public class QuadrupedForceControllerToolbox
    public QuadrupedSolePositionController getSolePositionController(RobotQuadrant robotQuadrant)
    {
       return solePositionController.get(robotQuadrant);
-   }
-
-   public QuadrupedTimedStepController getTimedStepController()
-   {
-      return timedStepController;
    }
 
    public QuadrantDependentList<QuadrupedFootStateMachine> getFootStateMachine()
