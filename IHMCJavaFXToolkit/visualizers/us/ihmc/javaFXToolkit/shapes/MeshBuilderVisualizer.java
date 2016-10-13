@@ -20,8 +20,8 @@ import us.ihmc.robotics.random.RandomTools;
 
 public class MeshBuilderVisualizer extends Application
 {
-   private enum MeshToDisplay {BOX, LINE, CYLINDER}
-   private static final MeshToDisplay MESH_TO_DISPLAY = MeshToDisplay.CYLINDER;
+   private enum MeshToDisplay {BOX, LINE, CYLINDER, CONE}
+   private static final MeshToDisplay MESH_TO_DISPLAY = MeshToDisplay.CONE;
 
    public MeshBuilderVisualizer()
    {
@@ -52,6 +52,9 @@ public class MeshBuilderVisualizer extends Application
          break;
       case CYLINDER:
          addCylinders(meshBuilder);
+         break;
+      case CONE:
+         addCones(meshBuilder);
          break;
       default:
          break;
@@ -96,6 +99,14 @@ public class MeshBuilderVisualizer extends Application
       double height = 0.3;
       double radius = 0.1;
       meshBuilder.addCylinder(height, radius, cylinderPosition);
+   }
+
+   private void addCones(MeshBuilder meshBuilder)
+   {
+      Point3d conePosition = new Point3d(0.0, 0.0, 0.0);
+      double height = 0.3;
+      double radius = 0.1;
+      meshBuilder.addCone(height, radius, conePosition);
    }
 
    private void setupCamera(Group root, Scene scene)

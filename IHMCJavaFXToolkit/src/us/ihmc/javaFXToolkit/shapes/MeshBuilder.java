@@ -262,6 +262,20 @@ public class MeshBuilder
       addMesh(cylinderPoints, cylinderTexCoords, cylinderFaces, cylinderFaceSmoothingGroups, cylinderOffset);
    }
 
+   public void addCone(double height, double radius, Tuple3d cylinderOffset)
+   {
+      addCone((float) height, (float) radius, new Point3f(cylinderOffset));
+   }
+
+   public void addCone(float height, float radius, Tuple3f cylinderOffset)
+   {
+      float[] cylinderPoints = ConeMeshGenerator.generatePoints(radius, height, CylinderMeshGenerator.DEFAULT_DIVISIONS);
+      float[] cylinderTexCoords = ConeMeshGenerator.defaultTexCoords;
+      int[] cylinderFaces = ConeMeshGenerator.defaultFaces;
+      int[] cylinderFaceSmoothingGroups = ConeMeshGenerator.defaultFaceSmoothingGroups;
+      addMesh(cylinderPoints, cylinderTexCoords, cylinderFaces, cylinderFaceSmoothingGroups, cylinderOffset);
+   }
+
    public void addLine(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth)
    {
       float lx = xf - x0;
@@ -466,14 +480,10 @@ public class MeshBuilder
 
       static float[] generatePoints(float radius, float height, int divisions)
       {
-         final int nPoints = divisions * 2 + 2;
-
+         float points[] = new float[(divisions * 2 + 2) * 3];
          double dAngle = -2.0 * Math.PI / divisions;
-         height *= 0.5f;
-
-         float points[] = new float[nPoints * 3];
-
          int index = 0;
+
 
          for (int i = 0; i < divisions; i++)
          {
@@ -488,29 +498,25 @@ public class MeshBuilder
             double a = dAngle * i;
             points[index++] = (float) (Math.sin(a) * radius);
             points[index++] = (float) (Math.cos(a) * radius);
-            points[index++] = -height;
+            points[index++] = 0.0f;
          }
 
          // add cap central points
-         points[index++] = 0;
-         points[index++] = 0;
+         points[index++] = 0.0f;
+         points[index++] = 0.0f;
          points[index++] = height;
-         points[index++] = 0;
-         points[index++] = 0;
-         points[index++] = -height;
+         points[index++] = 0.0f;
+         points[index++] = 0.0f;
+         points[index++] = 0.0f;
 
          return points;
       }
 
       static float[] generateTexCoords(int divisions)
       {
-         // NOTE: still create mesh for degenerated cylinder
-         final int tcCount = (divisions + 1) * 4 + 1; // 2 cap tex
+         float texCoords[] = new float[((divisions + 1) * 4 + 1) * 2];
          float textureDelta = 1.0f / 256;
-
          float dA = -1.0f / divisions;
-
-         float texCoords[] = new float[tcCount * 2];
 
          int index = 0;
 
@@ -630,12 +636,145 @@ public class MeshBuilder
          return faces;
       }
 
-      static int[] generateFaceSmoothingGroups(int div)
+      static int[] generateFaceSmoothingGroups(int divivions)
       {
-         int smoothing[] = new int[div * 4];
-        for (int i = 0; i < div * 2; ++i) 
+         int smoothing[] = new int[divivions * 4];
+        for (int i = 0; i < divivions * 2; ++i) 
             smoothing[i] = 1;
-        for (int i = div * 2; i < div * 4; ++i) 
+        for (int i = divivions * 2; i < divivions * 4; ++i) 
+            smoothing[i] = 2;
+        return smoothing;
+      }
+   }
+
+   static class ConeMeshGenerator
+   {
+      static final int DEFAULT_DIVISIONS = 64;
+
+      static final float[] defaultTexCoords = generateTexCoords(DEFAULT_DIVISIONS);
+      static final int[] defaultFaces = generatreFaces(DEFAULT_DIVISIONS);
+      static final int[] defaultFaceSmoothingGroups = generateFaceSmoothingGroups(DEFAULT_DIVISIONS);
+
+      static float[] generatePoints(float radius, float height, int divisions)
+      {
+         float points[] = new float[(divisions + 2) * 3];
+         double dAngle = -2.0 * Math.PI / divisions;
+         int index = 0;
+
+         for (int i = 0; i < divisions; i++)
+         {
+            double a = dAngle * i;
+            points[index++] = (float) (Math.sin(a) * radius);
+            points[index++] = (float) (Math.cos(a) * radius);
+            points[index++] = 0.0f;
+         }
+
+         // The top
+         points[index++] = 0.0f;
+         points[index++] = 0.0f;
+         points[index++] = height;
+
+         // The base central point
+         points[index++] = 0.0f;
+         points[index++] = 0.0f;
+         points[index++] = 0.0f;
+
+         return points;
+      }
+
+      static float[] generateTexCoords(int divisions)
+      {
+         float texCoords[] = new float[((divisions + 1) * 4 + 1) * 2];
+         float textureDelta = 1.0f / 256;
+         float dA = -1.0f / divisions;
+
+         int index = 0;
+
+         for (int i = 0; i < divisions; i++)
+         {
+            texCoords[index++] = 1 - dA * i;
+            texCoords[index++] = 1 - textureDelta;
+         }
+
+         // top edge
+         texCoords[index++] = 0;
+         texCoords[index++] = 1 - textureDelta;
+
+         for (int i = 0; i < divisions; i++)
+         {
+            texCoords[index++] = 1 - dA * i;
+            texCoords[index++] = textureDelta;
+         }
+
+         // bottom edge
+         texCoords[index++] = 0;
+         texCoords[index++] = textureDelta;
+
+         // add cap central points
+         // bottom cap
+         for (int i = 0; i <= divisions; i++)
+         {
+            double a = (i < divisions) ? (dA * i * 2) * Math.PI : 0;
+            texCoords[index++] = 0.5f + (float) (Math.sin(a) * 0.5f);
+            texCoords[index++] = 0.5f + (float) (Math.cos(a) * 0.5f);
+         }
+
+         // top cap
+         for (int i = 0; i <= divisions; ++i)
+         {
+            double a = (i < divisions) ? (dA * i * 2) * Math.PI : 0;
+            texCoords[index++] = 0.5f + (float) (Math.sin(a) * 0.5f);
+            texCoords[index++] = 0.5f - (float) (Math.cos(a) * 0.5f);
+         }
+
+         texCoords[index++] = 0.5f;
+         texCoords[index++] = 0.5f;
+
+         return texCoords;
+      }
+
+      static int[] generatreFaces(int divisions)
+      {
+         int faces[] = new int[divisions * 24];
+
+         int fIndex = 0;
+
+         int topIndex = divisions;
+         int baseCenterIndex = divisions + 1;
+
+         for (int p0 = 0; p0 <= divisions; p0++)
+         {
+            int p1 = (p0 + 1) % divisions;
+
+            faces[fIndex + 0] = baseCenterIndex;
+            faces[fIndex + 2] = p1;
+            faces[fIndex + 4] = p0;
+
+            faces[fIndex + 1] = 0;
+            faces[fIndex + 3] = 0;
+            faces[fIndex + 5] = 0;
+            fIndex += 6;
+
+            faces[fIndex + 0] = p0;
+            faces[fIndex + 2] = p1;
+            faces[fIndex + 4] = topIndex;
+
+            faces[fIndex + 1] = 0;
+            faces[fIndex + 3] = 0;
+            faces[fIndex + 5] = 0;
+            fIndex += 6;
+
+         }
+
+         return faces;
+      }
+
+      static int[] generateFaceSmoothingGroups(int divisions)
+      {
+         int smoothing[] = new int[divisions * 4];
+        for (int i = 0; i < divisions * 2; ++i) 
+            smoothing[i] = 1;
+        for (int i = divisions * 2; i < divisions * 4; ++i) 
             smoothing[i] = 2;
         return smoothing;
       }
