@@ -17,7 +17,7 @@ public class DataExporter implements ActionListener
 
    private DataExporterOptionsDialog optionsPanel;
    private final DataExporterReadmeWriter readmeWriter = new DataExporterReadmeWriter();
-   private final DataExporterGraphCreator graphCreator;
+   private final TorqueSpeedDataExporterGraphCreator graphCreator;
    private final DataExporterExcelWorkbookCreator excelWorkbookCreator;
 
    private final Class<?> rootClassForDirectory;
@@ -38,7 +38,7 @@ public class DataExporter implements ActionListener
       this.robot = robot;
       this.subdirectoryName = subdirectoryName;
 
-      this.graphCreator = new DataExporterGraphCreator(robot, scs.getDataBuffer());
+      this.graphCreator = new TorqueSpeedDataExporterGraphCreator(robot, scs.getDataBuffer());
       this.excelWorkbookCreator = new DataExporterExcelWorkbookCreator(robot, scs.getDataBuffer());
 
       this.rootClassForDirectory = rootClassForDirectory;
@@ -118,7 +118,7 @@ public class DataExporter implements ActionListener
             if (optionsPanel.createGraphsJPG() || optionsPanel.createGraphsPDF())
             {
                System.out.println("creating torque and speed graphs");
-               graphCreator.createGraphs(graphDirectory, tagName, optionsPanel.createGraphsJPG(), optionsPanel.createGraphsPDF());
+               graphCreator.createJointTorqueSpeedGraphs(graphDirectory, tagName, optionsPanel.createGraphsJPG(), optionsPanel.createGraphsPDF());
                System.out.println("done creating torque and speed graphs");
             }
 

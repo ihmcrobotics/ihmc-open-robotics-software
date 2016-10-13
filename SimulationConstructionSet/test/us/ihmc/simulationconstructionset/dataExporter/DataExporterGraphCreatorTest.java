@@ -30,11 +30,11 @@ public class DataExporterGraphCreatorTest
     public void testDataExporterGraphCreator() throws IOException
     {
         SimulationConstructionSet sim = createSimulation();
-        DataExporterGraphCreator graphCreator = new DataExporterGraphCreator(sim.getRobots()[0], sim.getDataBuffer());
+        TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(sim.getRobots()[0], sim.getDataBuffer());
 
         File path = new File(System.getProperty("java.io.tmpdir"));
         Path tmpPath = Files.createTempDirectory(Paths.get(path.getAbsolutePath()), "test");
-        graphCreator.createGraphs(tmpPath.toFile(), "", true, true);
+        graphCreator.createJointTorqueSpeedGraphs(tmpPath.toFile(), "", true, true);
 
         int fileCount = tmpPath.toFile().listFiles(new FilenameFilter()
             {
