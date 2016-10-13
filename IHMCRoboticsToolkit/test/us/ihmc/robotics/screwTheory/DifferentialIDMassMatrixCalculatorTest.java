@@ -3,7 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import static org.junit.Assert.assertEquals;
 

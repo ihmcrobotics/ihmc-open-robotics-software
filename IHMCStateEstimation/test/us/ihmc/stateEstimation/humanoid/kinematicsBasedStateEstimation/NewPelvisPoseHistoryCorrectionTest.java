@@ -33,11 +33,11 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@ContinuousIntegrationPlan(targets={TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.FAST})
 public class NewPelvisPoseHistoryCorrectionTest
 {
    private YoVariableRegistry registry;

@@ -8,11 +8,11 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.DeadzoneYoVariable;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@ContinuousIntegrationPlan(targets = { TestPlanTarget.Fast })
+@ContinuousIntegrationPlan(categories = { IntegrationCategory.FAST })
 public class DeadzoneYoVariableTest
 {
 

@@ -1,4 +1,4 @@
-package us.ihmc.tools.testing;
+package us.ihmc.tools.continuousIntegration;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,19 +13,19 @@ import org.junit.runners.Suite;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.RunnerBuilder;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-public class TestPlanSuite extends Suite
+public class ContinuousIntegrationSuite extends Suite
 {
    @Retention(RetentionPolicy.RUNTIME)
    @Target(ElementType.TYPE)
-   public @interface TestSuiteTarget
+   public @interface ContinuousIntegrationSuiteCategory
    {
-       public TestPlanTarget value();
+       public IntegrationCategory value();
    }
    
-   public TestPlanSuite(Class<?> clazz, RunnerBuilder builder) throws InitializationError
+   public ContinuousIntegrationSuite(Class<?> clazz, RunnerBuilder builder) throws InitializationError
    {
       super(clazz, builder);
       
@@ -35,15 +35,15 @@ public class TestPlanSuite extends Suite
       }
       catch (NoTestsRemainException e)
       {
-         throw new InitializationError(TestPlanSuite.class.getSimpleName() + ": No unfiltered tests in suite.");
+         throw new InitializationError(ContinuousIntegrationSuite.class.getSimpleName() + ": No unfiltered tests in suite.");
       }
    }
    
    private static class TestPlanFilter extends Filter
    {
-      private final TestPlanTarget target;
+      private final IntegrationCategory target;
       
-      public TestPlanFilter(TestPlanTarget target)
+      public TestPlanFilter(IntegrationCategory target)
       {
          this.target = target;
       }
@@ -51,7 +51,7 @@ public class TestPlanSuite extends Suite
       @Override
       public boolean shouldRun(Description description)
       {
-         TestPlanTarget[] directTargets = getDirectTargets(description);
+         IntegrationCategory[] directTargets = getDirectTargets(description);
          if (directTargets != null)
          {
             boolean containsTarget = Arrays.asList(directTargets).contains(target);
@@ -67,14 +67,14 @@ public class TestPlanSuite extends Suite
          }
          if (description.isTest())
          {
-            TestPlanTarget[] parentTargets = getParentTargets(description);
+            IntegrationCategory[] parentTargets = getParentTargets(description);
             if (parentTargets != null)
             {
                return Arrays.asList(parentTargets).contains(target);
             }
          }
          
-         if (target.equals(TestPlanTarget.defaultTarget))
+         if (target.equals(IntegrationCategory.defaultCategory))
          {
             return true;
          }
@@ -92,10 +92,10 @@ public class TestPlanSuite extends Suite
       @Override
       public String describe()
       {
-         return "Filter for tests in " + target.name() + ".";
+         return "Filter for tests in " + target.getName() + ".";
       }
       
-      private TestPlanTarget[] getParentTargets(Description description)
+      private IntegrationCategory[] getParentTargets(Description description)
       {
          Class<?> testClass = description.getTestClass();
          if (testClass != null)
@@ -107,26 +107,26 @@ public class TestPlanSuite extends Suite
          return null;
       }
       
-      private TestPlanTarget[] getDirectTargets(Description description)
+      private IntegrationCategory[] getDirectTargets(Description description)
       {
          ContinuousIntegrationTest deployableTestMethod = description.getAnnotation(ContinuousIntegrationTest.class);
-         if (deployableTestMethod != null && deployableTestMethod.targetsOverride().length > 0)
+         if (deployableTestMethod != null && deployableTestMethod.categoriesOverride().length > 0)
          {
-            return deployableTestMethod.targetsOverride();
+            return deployableTestMethod.categoriesOverride();
          }
          ContinuousIntegrationPlan deployableTestClass = description.getAnnotation(ContinuousIntegrationPlan.class);
-         if (deployableTestClass != null && deployableTestClass.targets().length > 0)
+         if (deployableTestClass != null && deployableTestClass.categories().length > 0)
          {
-            return deployableTestClass.targets();
+            return deployableTestClass.categories();
          }
          
          return null;
       }
    }
    
-   private TestPlanTarget getTestSuiteTarget(Class<?> clazz)
+   private IntegrationCategory getTestSuiteTarget(Class<?> clazz)
    {
-      TestSuiteTarget annotation = clazz.getAnnotation(TestSuiteTarget.class);
+      ContinuousIntegrationSuiteCategory annotation = clazz.getAnnotation(ContinuousIntegrationSuiteCategory.class);
       return annotation == null ? null : annotation.value();
    }
 }

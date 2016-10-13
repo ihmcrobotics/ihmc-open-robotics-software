@@ -18,8 +18,8 @@ import org.junit.Test;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class PrincipalComponentAnalysis3DTest
 {
@@ -547,7 +547,7 @@ public class PrincipalComponentAnalysis3DTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Fast)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
 	@Test(timeout = 30000)
 	/**
 	 * Make sure PCA does not crap out if it gets an empty list of data points.
@@ -560,7 +560,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Fast)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
 	@Test(timeout = 30000)
 	/**
 	 * Make sure PCA does not crap out if a single data point is passed to it.
@@ -576,7 +576,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Fast)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
 	@Test(timeout = 30000)
 	/**
 	 * Make sure PCA does not crap out if two data points are passed to it.
@@ -593,7 +593,7 @@ public class PrincipalComponentAnalysis3DTest
 	   pca.compute();
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Fast)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
 	@Test(timeout = 30000)
 	/**
 	 * Edge case:

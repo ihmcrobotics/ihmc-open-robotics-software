@@ -30,9 +30,9 @@ import us.ihmc.graphics3DAdapter.stlLoader.BinarySTLReader;
 import us.ihmc.graphics3DAdapter.stlLoader.STLReader;
 import us.ihmc.graphics3DAdapter.stlLoader.STLReaderFactory;
 import us.ihmc.graphics3DAdapter.stlLoader.Triangle;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * Test loading of STL files based on a hand crafted STL files with three triangles and known values.
@@ -44,7 +44,7 @@ import us.ihmc.tools.testing.TestPlanTarget;
  *
  */
 
-@ContinuousIntegrationPlan(targets = TestPlanTarget.InDevelopment)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class STLReaderTest
 {
 

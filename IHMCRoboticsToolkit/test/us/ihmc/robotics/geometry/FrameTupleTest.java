@@ -21,8 +21,8 @@ import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 //import us.ihmc.robotics.MathTools;
 //import MatrixTools;

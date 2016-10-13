@@ -5,15 +5,15 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import us.ihmc.tools.FormattingTools;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystick;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class Mouse3DJoystickTest
 {
 	@ContinuousIntegrationTest(estimatedDuration = 0.2)

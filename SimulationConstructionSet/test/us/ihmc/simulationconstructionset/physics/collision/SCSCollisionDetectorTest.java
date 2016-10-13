@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.Contacts;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * Tests compliance to the {@link us.ihmc.simulationconstructionset.physics.ScsCollisionDetector}

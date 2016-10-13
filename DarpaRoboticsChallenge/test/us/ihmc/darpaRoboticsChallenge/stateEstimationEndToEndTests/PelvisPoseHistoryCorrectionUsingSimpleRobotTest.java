@@ -40,8 +40,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrection;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 {

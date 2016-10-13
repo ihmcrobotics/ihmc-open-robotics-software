@@ -6,8 +6,8 @@ import java.awt.event.KeyEvent;
 
 import org.junit.Test;
 
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.inputDevices.ghostMouse.GhostMouseStringToChar;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class GhostMouseStringToCharTest
 {

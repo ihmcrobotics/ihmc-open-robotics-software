@@ -61,8 +61,8 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class FootstepSnapperTest
@@ -169,7 +169,7 @@ public class FootstepSnapperTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 300000)
    public void testSimpleFootstepSnapperOnListOfPoints() throws InsufficientDataException, IOException
    {

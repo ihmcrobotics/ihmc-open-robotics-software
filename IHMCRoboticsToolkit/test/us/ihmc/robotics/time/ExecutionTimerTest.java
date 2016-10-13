@@ -7,13 +7,13 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 
 public class ExecutionTimerTest
 {
    private static final long RANDOM_SEED = 1976L;
 
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.8)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void test()
    {

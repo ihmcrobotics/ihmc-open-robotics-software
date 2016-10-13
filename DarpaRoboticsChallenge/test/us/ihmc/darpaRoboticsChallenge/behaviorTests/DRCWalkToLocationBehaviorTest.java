@@ -35,9 +35,9 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInterface
@@ -375,7 +375,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 57.8, targetsOverride = {TestPlanTarget.InDevelopment})
+   @ContinuousIntegrationTest(estimatedDuration = 57.8, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 290000)
    public void testWalkPauseAndResumeBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -414,7 +414,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 45.7, targetsOverride = {TestPlanTarget.InDevelopment})
+   @ContinuousIntegrationTest(estimatedDuration = 45.7, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 230000)
    public void testWalkPauseAndResumeOnLastStepBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -452,7 +452,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 67.6, targetsOverride = {TestPlanTarget.InDevelopment})
+   @ContinuousIntegrationTest(estimatedDuration = 67.6, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 340000)
    public void testWalkStopAndWalkToDifferentLocation() throws SimulationExceededMaximumTimeException
    {

@@ -11,12 +11,12 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@ContinuousIntegrationPlan(targets = {TestPlanTarget.Slow, TestPlanTarget.Video})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
 public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
@@ -73,7 +73,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 41.4, targetsOverride = {TestPlanTarget.InDevelopment, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 41.4, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
    @Test(timeout = 210000)
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {
@@ -145,7 +145,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 62.5, targetsOverride = {TestPlanTarget.Fast, TestPlanTarget.Video})
+   @ContinuousIntegrationTest(estimatedDuration = 62.5, categoriesOverride = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
    @Test(timeout = 310000)
    public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
    {

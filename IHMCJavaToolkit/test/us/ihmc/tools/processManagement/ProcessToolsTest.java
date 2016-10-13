@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.processManagement.ProcessTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ProcessToolsTest
 {

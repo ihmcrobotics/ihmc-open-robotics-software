@@ -19,7 +19,7 @@ import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class OrientationInterpolationTrajectoryGeneratorTest
 {

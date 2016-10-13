@@ -3,7 +3,7 @@ package us.ihmc.robotics.alphaToAlpha;
 import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.testing.TestPlanAnnotations;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 
 import static org.junit.Assert.*;
 
@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 public class YoMiniJerkUpAndDownAlphaToAlphaTest
 {
    private double EPSILON = 1e-6;
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testInvalidYoVariables()
    {
@@ -46,7 +46,7 @@ public class YoMiniJerkUpAndDownAlphaToAlphaTest
 
 
 
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testValidYoVariables()
    {
@@ -115,7 +115,7 @@ public class YoMiniJerkUpAndDownAlphaToAlphaTest
       assertEquals(value, 0.0, EPSILON);
    }
 
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testHalfWay()
    {
@@ -159,7 +159,7 @@ public class YoMiniJerkUpAndDownAlphaToAlphaTest
    }
 
 
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSmallDifferences()
    {

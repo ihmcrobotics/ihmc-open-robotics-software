@@ -17,8 +17,8 @@ import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 {
@@ -95,7 +95,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
    }
 
    // TODO: Figure out this test and get it to pass if it should.
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testAccelerationOfPointFixedInBodyFrameAlternative()
    {

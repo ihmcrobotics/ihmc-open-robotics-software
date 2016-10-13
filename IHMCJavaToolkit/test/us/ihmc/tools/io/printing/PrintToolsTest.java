@@ -1,19 +1,19 @@
 package us.ihmc.tools.io.printing;
 
 import static org.junit.Assert.*;
+import static us.ihmc.tools.continuousIntegration.IntegrationCategory.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
 import org.junit.Test;
 
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import static us.ihmc.tools.testing.TestPlanTarget.*;
 
 public class PrintToolsTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = EXCLUDE)
    @Test(timeout = 30000)
    public void testPrintTools() throws Exception
    {

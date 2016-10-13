@@ -17,11 +17,11 @@ import org.junit.Test;
 import com.jme3.math.FastMath;
 
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@ContinuousIntegrationPlan(targets = TestPlanTarget.Exclude) // Doesn't work right on all machines
+@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE) // Doesn't work right on all machines
 public class LineModDetectorTest
 {
 

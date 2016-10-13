@@ -9,7 +9,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.FirstOrderBandPassFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class FirstOrderFilteredYoVariableTest
 {

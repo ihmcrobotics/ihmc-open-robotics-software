@@ -2,8 +2,8 @@ package us.ihmc.robotics.geometry;
 
 import org.junit.Test;
 
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;

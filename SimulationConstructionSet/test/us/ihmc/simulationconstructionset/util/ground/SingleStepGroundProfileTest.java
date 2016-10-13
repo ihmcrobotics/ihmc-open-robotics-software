@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.util.ground;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 
 public class SingleStepGroundProfileTest extends GroundProfileTest

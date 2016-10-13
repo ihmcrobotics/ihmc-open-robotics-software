@@ -16,7 +16,7 @@ import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;

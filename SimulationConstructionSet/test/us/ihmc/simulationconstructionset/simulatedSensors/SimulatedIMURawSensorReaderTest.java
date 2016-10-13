@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

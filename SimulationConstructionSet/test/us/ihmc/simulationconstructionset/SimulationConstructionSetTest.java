@@ -7,12 +7,12 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(targets = TestPlanTarget.Manual)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.MANUAL)
 public class SimulationConstructionSetTest
 {
    private boolean isGradleBuild()
@@ -26,7 +26,7 @@ public class SimulationConstructionSetTest
       return false;
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testSimulationConstructionSetNewViewportWindowUsingGUITestFixture() throws AWTException
    {
@@ -56,7 +56,7 @@ public class SimulationConstructionSetTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testSimulationConstructionSetVideoGenerationUsingGUITestFixture() throws AWTException
    {

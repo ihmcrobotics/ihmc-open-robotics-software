@@ -5,10 +5,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.taskExecutor.NullTask;
 import us.ihmc.tools.taskExecutor.ParallelTask;
 import us.ihmc.tools.taskExecutor.TaskExecutor;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ParallelTaskTest
 {

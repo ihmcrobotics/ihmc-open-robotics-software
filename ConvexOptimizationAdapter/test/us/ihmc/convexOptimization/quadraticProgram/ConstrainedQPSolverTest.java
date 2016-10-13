@@ -10,9 +10,9 @@ import org.junit.Test;
 import us.ihmc.convexOptimization.quadraticProgram.CompositeActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class ConstrainedQPSolverTest
 {

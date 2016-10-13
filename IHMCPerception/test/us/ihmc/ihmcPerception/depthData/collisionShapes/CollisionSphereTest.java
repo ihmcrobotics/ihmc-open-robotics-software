@@ -11,7 +11,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class CollisionSphereTest
 {

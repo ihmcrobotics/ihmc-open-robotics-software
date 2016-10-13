@@ -3,8 +3,8 @@ package us.ihmc.robotics.optimization;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 import static org.junit.Assert.assertEquals;
 

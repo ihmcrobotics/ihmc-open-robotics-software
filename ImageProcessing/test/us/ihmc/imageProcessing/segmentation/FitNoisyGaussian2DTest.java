@@ -9,7 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.CovarianceRandomDraw;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * @author Peter Abeles

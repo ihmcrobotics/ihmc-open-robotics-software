@@ -70,13 +70,13 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
-@ContinuousIntegrationPlan(targets = {TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
 public class SimulationConstructionSetUsingDirectCallsTest
 {
    // Note: some of the tests assume that:

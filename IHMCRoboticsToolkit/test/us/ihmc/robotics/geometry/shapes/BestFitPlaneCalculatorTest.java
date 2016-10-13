@@ -18,7 +18,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.HeightMapBestFitPlaneCalculator;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class BestFitPlaneCalculatorTest
 {

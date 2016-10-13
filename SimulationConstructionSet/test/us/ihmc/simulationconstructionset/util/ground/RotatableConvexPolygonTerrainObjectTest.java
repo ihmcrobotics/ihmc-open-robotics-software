@@ -16,8 +16,8 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class RotatableConvexPolygonTerrainObjectTest
 {
