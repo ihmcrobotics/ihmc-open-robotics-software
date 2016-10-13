@@ -43,6 +43,11 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       this(modelToCopy.description, modelToCopy.humanoidJointNameMap, modelToCopy.sensorLinksToTrack);
    }
 
+   public FullHumanoidRobotModelFromDescription(RobotDescription description, HumanoidJointNameMap jointNameMap)
+   {
+      this(description, jointNameMap, new String[0]);
+   }
+
    public FullHumanoidRobotModelFromDescription(RobotDescription description, HumanoidJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       super(description, sdfJointNameMap, sensorLinksToTrack);
