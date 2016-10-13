@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;

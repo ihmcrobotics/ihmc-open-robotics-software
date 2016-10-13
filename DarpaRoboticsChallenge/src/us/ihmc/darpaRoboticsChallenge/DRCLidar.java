@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;

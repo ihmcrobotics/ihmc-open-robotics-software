@@ -2,10 +2,10 @@ package us.ihmc.atlas.ObstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -87,7 +87,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
 
          boolean createCollisionMeshes = false;
          atlasRobotModel.setEnableJointDamping(false);
-         robot = atlasRobotModel.createSdfRobot(createCollisionMeshes);
+         robot = atlasRobotModel.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
          robot.setGravity(gravityZ);
 
          atlasInverseDynamicsCalculatorTestHelper = new DRCInverseDynamicsCalculatorTestHelper(controllersFullRobotModel, robot, visualize, gravityZ);

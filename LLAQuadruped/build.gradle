@@ -54,7 +54,8 @@ dependencies {
 //   compile ihmc.getProjectDependency(":IHMCStateEstimation")
    compile ihmc.getProjectDependency(":SensorProcessing")
    compile ihmc.getProjectDependency(":IHMCRobotDescription")
-   
+   compile ihmc.getProjectDependency(":IHMCRobotModels")
+
    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
    testCompile ihmc.getProjectTestDependency(":IHMCQuadrupedRobotics")
    testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")

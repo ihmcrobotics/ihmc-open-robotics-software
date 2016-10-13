@@ -2,8 +2,8 @@ package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 
 import java.util.List;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.ForceBasedTouchDownDetection;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTouchdownDetector;

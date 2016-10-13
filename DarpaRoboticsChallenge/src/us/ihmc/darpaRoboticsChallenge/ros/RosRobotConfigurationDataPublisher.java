@@ -8,9 +8,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.ros.message.Time;
 
-import us.ihmc.SdfLoader.SDFJointNameMap;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModelFactory;
+import us.ihmc.robotics.partNames.JointNameMap;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.IMUPacket;
@@ -57,7 +57,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final ArrayBlockingQueue<RobotConfigurationData> availableRobotConfigurationData = new ArrayBlockingQueue<RobotConfigurationData>(30);
-   private final SDFJointNameMap jointMap;
+   private final JointNameMap jointMap;
    private final int jointNameHash;
 
    private final SideDependentList<Integer> feetForceSensorIndexes = new SideDependentList<Integer>();
@@ -71,7 +71,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
    public RosRobotConfigurationDataPublisher(FullRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator rosModulePacketCommunicator,
          final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
-         SDFJointNameMap jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
+         JointNameMap jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
    {
       FullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
       this.forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();

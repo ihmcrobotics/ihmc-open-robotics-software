@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.ros;
 
 import org.ros.message.Time;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;

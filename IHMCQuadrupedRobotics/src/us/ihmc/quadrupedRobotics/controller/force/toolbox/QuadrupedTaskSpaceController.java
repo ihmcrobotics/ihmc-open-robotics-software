@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
-import us.ihmc.SdfLoader.models.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelController;
 import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelControllerSettings;
@@ -9,7 +9,6 @@ import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.Quadruped
 import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.QuadrupedContactForceOptimizationSettings;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;

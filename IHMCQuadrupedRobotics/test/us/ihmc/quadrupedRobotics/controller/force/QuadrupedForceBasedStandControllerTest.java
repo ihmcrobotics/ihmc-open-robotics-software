@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import junit.framework.AssertionFailedError;
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotTestConductor;
 import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;

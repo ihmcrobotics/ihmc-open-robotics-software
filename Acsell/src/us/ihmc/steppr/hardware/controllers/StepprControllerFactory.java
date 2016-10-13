@@ -7,7 +7,7 @@ import javax.xml.bind.JAXBException;
 
 import com.martiansoftware.jsap.JSAPException;
 
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.acsell.hardware.AcsellAffinity;
 import us.ihmc.acsell.hardware.AcsellSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;

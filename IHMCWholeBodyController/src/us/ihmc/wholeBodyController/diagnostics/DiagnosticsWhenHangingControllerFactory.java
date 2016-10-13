@@ -2,12 +2,12 @@ package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
 public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehaviorFactory

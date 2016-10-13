@@ -1,7 +1,7 @@
 package us.ihmc.multicastLogDataProtocol.modelLoaders;
 
 import us.ihmc.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 
 public interface LogModelLoader
 {

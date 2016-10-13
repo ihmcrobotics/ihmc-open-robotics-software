@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.model;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.SdfLoader.partNames.QuadrupedJointName;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 
 public interface QuadrupedSimulationInitialPositionParameters
 {

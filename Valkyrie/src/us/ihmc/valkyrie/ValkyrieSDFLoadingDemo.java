@@ -6,8 +6,8 @@ import java.util.HashSet;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -33,7 +33,7 @@ public class ValkyrieSDFLoadingDemo
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
 
-      FloatingRootJointRobot valkyrieRobot = robotModel.createSdfRobot(false);
+      FloatingRootJointRobot valkyrieRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       valkyrieRobot.setPositionInWorld(new Vector3d());
 
       if (SHOW_ELLIPSOIDS)

@@ -8,13 +8,13 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotModels.PerfectSimulatedOutputWriter;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -138,7 +138,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final FloatingRootJointRobot sdfRobot;
    private final FullHumanoidRobotModel fullRobotModel;
    private final SDFPerfectSimulatedSensorReader reader;
-   private final SDFPerfectSimulatedOutputWriter writer;
+   private final PerfectSimulatedOutputWriter writer;
 
    private enum SliderBodyPart
    {
@@ -163,7 +163,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       this.fullRobotModel = fullRobotModel;
       this.sdfRobot = sdfRobot;
       this.reader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, null);
-      this.writer = new SDFPerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
+      this.writer = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
 
       this.controlFingers.set(controlFingers);
       

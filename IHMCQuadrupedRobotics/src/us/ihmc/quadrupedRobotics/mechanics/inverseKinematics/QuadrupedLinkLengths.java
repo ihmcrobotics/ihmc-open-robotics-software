@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

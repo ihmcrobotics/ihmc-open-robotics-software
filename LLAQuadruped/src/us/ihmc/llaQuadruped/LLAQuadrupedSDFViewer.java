@@ -2,7 +2,7 @@ package us.ihmc.llaQuadruped;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class LLAQuadrupedSDFViewer

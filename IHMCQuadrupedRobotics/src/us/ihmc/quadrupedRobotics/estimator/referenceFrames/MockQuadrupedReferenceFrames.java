@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.estimator.referenceFrames;
 
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
