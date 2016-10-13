@@ -21,7 +21,7 @@ import us.ihmc.robotics.random.RandomTools;
 public class MeshBuilderVisualizer extends Application
 {
    private enum MeshToDisplay {BOX, LINE, CYLINDER, CONE}
-   private static final MeshToDisplay MESH_TO_DISPLAY = MeshToDisplay.CONE;
+   private static final MeshToDisplay MESH_TO_DISPLAY = MeshToDisplay.CYLINDER;
 
    public MeshBuilderVisualizer()
    {
