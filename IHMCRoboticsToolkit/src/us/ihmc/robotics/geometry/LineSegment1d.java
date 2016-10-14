@@ -130,7 +130,7 @@ public class LineSegment1d
       if (positiveDirection)
          return point < endpoint1;
       else
-         return point > endpoint2;
+         return point > endpoint1;  //TODO
    }
 
    public boolean isAfter(double point)
@@ -138,7 +138,7 @@ public class LineSegment1d
       if (positiveDirection)
          return point > endpoint2;
       else
-         return point < endpoint1;
+         return point < endpoint2; //TODO
    }
 
    public void set(double firstEndpoint, double secondEndpoint)
@@ -180,7 +180,7 @@ public class LineSegment1d
 
    public void setMaxPoint(double newMaxPoint)
    {
-      if (newMaxPoint <= getMinPoint()) //TODO error in >=??
+      if (newMaxPoint <= getMinPoint()) //TODO
          throw new RuntimeException("Unexpected newMaxPoint: " + newMaxPoint + ", expected it to be greater than the current min point: " + getMinPoint());
       if (positiveDirection)
          endpoint2 = newMaxPoint;
