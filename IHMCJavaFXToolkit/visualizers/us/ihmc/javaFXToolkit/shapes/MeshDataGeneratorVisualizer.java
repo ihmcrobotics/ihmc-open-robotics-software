@@ -50,7 +50,7 @@ public class MeshDataGeneratorVisualizer extends Application
       cone.setTranslateY(0.0);
       rootNode.getChildren().add(cone);
       
-      MeshView sphere = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Sphere(0.2, 32, 32)));
+      MeshView sphere = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Ellipsoid(0.3, 0.1, 0.4, 64, 64)));
       sphere.setMaterial(defaultMaterial);
       sphere.setTranslateX(0.5);
       rootNode.getChildren().add(sphere);
@@ -62,6 +62,25 @@ public class MeshDataGeneratorVisualizer extends Application
       extrudedPolygon.setTranslateY(0.5);
       rootNode.getChildren().add(extrudedPolygon);
 
+      MeshView pyramidCube = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.PyramidCube(0.1, 0.2, 0.1, 0.4)));
+      pyramidCube.setMaterial(defaultMaterial);
+      pyramidCube.setTranslateX(-1.0);
+      pyramidCube.setTranslateY(0.0);
+      rootNode.getChildren().add(pyramidCube);
+
+      MeshView genTruncatedCone = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.GenTruncatedCone(0.3, 0.2, 0.07, 0.05, 0.1, 64)));
+      genTruncatedCone.setMaterial(defaultMaterial);
+      genTruncatedCone.setTranslateX(-0.5);
+      genTruncatedCone.setTranslateY(0.0);
+      rootNode.getChildren().add(genTruncatedCone);
+
+      MeshView hemiEllipsoid = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.HemiEllipsoid(0.3, 0.1, 0.4, 16, 16)));
+      hemiEllipsoid.setMaterial(defaultMaterial);
+      hemiEllipsoid.setTranslateX(-0.5);
+      hemiEllipsoid.setTranslateY(0.5);
+      rootNode.getChildren().add(hemiEllipsoid);
+
+      primaryStage.setMaximized(true);
       primaryStage.setScene(scene);
       primaryStage.show();
    }

@@ -20,22 +20,22 @@ public class MeshDataGenerator
       // Prevent an object being generated.
    }
 
-   public static MeshDataHolder Sphere(double radius, int N, int M)
+   public static MeshDataHolder Sphere(double radius, int latitudeN, int longitudeN)
    {
-      return Sphere((float) radius, N, M);
+      return Sphere((float) radius, latitudeN, longitudeN);
    }
 
-   public static MeshDataHolder Sphere(float radius, int N, int M)
+   public static MeshDataHolder Sphere(float radius, int latitudeN, int longitudeN)
    {
-      return Ellipsoid(radius, radius, radius, N, M);
+      return Ellipsoid(radius, radius, radius, latitudeN, longitudeN);
    }
 
-   public static MeshDataHolder Ellipsoid(double xRad, double yRad, double zRad, int N, int M)
+   public static MeshDataHolder Ellipsoid(double xRadius, double yRadius, double zRadius, int latitudeN, int longitudeN)
    {
-      return Ellipsoid((float) xRad, (float) yRad, (float) zRad, N, M);
+      return Ellipsoid((float) xRadius, (float) yRadius, (float) zRadius, latitudeN, longitudeN);
    }
 
-   public static MeshDataHolder Ellipsoid(float xRad, float yRad, float zRad, int latitudeN, int longitudeN)
+   public static MeshDataHolder Ellipsoid(float xRadius, float yRadius, float zRaduis, int latitudeN, int longitudeN)
    {
       // Reminder of longitude and latitude: http://www.geographyalltheway.com/ks3_geography/maps_atlases/longitude_latitude.htm
       Point3f points[] = new Point3f[(latitudeN - 1) * longitudeN + 2];
@@ -51,9 +51,9 @@ public class MeshDataGenerator
             float latitudeAngle = (float) (-Math.PI / 2.0f + Math.PI * ((float) latitudeIndex / (float) latitudeN));
 
             int currentIndex = (latitudeIndex - 1) * longitudeN + longitudeIndex;
-            float vertexX = (float) (xRad * Math.cos(longitudeAngle) * Math.cos(latitudeAngle));
-            float vertexY = (float) (yRad * Math.sin(longitudeAngle) * Math.cos(latitudeAngle));
-            float vertexZ = (float) (zRad * Math.sin(latitudeAngle));
+            float vertexX = (float) (xRadius * Math.cos(longitudeAngle) * Math.cos(latitudeAngle));
+            float vertexY = (float) (yRadius * Math.sin(longitudeAngle) * Math.cos(latitudeAngle));
+            float vertexZ = (float) (zRaduis * Math.sin(latitudeAngle));
             points[currentIndex] = new Point3f(vertexX, vertexY, vertexZ);
 
             float normalX = (float) (Math.cos(longitudeAngle) * Math.cos(latitudeAngle));
@@ -69,13 +69,13 @@ public class MeshDataGenerator
 
       // South pole
       int southPoleIndex = (latitudeN - 1) * longitudeN;
-      points[southPoleIndex] = new Point3f(0.0f, 0.0f, -zRad);
+      points[southPoleIndex] = new Point3f(0.0f, 0.0f, -zRaduis);
       normals[southPoleIndex] = new Vector3f(0.0f, 0.0f, -1.0f);
       textPoints[southPoleIndex] = new TexCoord2f(0.0f, 0.0f);
 
       // North pole
       int northPoleIndex = (latitudeN - 1) * longitudeN + 1;
-      points[northPoleIndex] = new Point3f(0.0f, 0.0f, zRad);
+      points[northPoleIndex] = new Point3f(0.0f, 0.0f, zRaduis);
       normals[northPoleIndex] = new Vector3f(0.0f, 0.0f, 1.0f);
       textPoints[northPoleIndex] = new TexCoord2f(1.0f, 1.0f);
 
@@ -294,79 +294,118 @@ public class MeshDataGenerator
       return new MeshDataHolder(vertices, texturePoints, triangleIndices, polygonStripCounts, normals);
    }
 
-   public static MeshDataHolder HemiEllipsoid(double xRad, double yRad, double zRad, int N, int M)
+   public static MeshDataHolder HemiEllipsoid(double xRadius, double yRadius, double zRadius, int latitudeN, int longitudeN)
    {
-      return HemiEllipsoid((float) xRad, (float) yRad, (float) zRad, N, M);
+      return HemiEllipsoid((float) xRadius, (float) yRadius, (float) zRadius, latitudeN, longitudeN);
    }
 
-   public static MeshDataHolder HemiEllipsoid(float xRad, float yRad, float zRad, int N, int M)
+   public static MeshDataHolder HemiEllipsoid(float xRadius, float yRadius, float zRadius, int latitudeN, int longitudeN)
    {
-      float longitude;
-      float ztheta;
+      // Reminder of longitude and latitude: http://www.geographyalltheway.com/ks3_geography/maps_atlases/longitude_latitude.htm
+      Point3f points[] = new Point3f[(latitudeN + 1) * longitudeN + 2];
+      Vector3f[] normals = new Vector3f[(latitudeN + 1) * longitudeN + 2];
+      TexCoord2f textPoints[] = new TexCoord2f[(latitudeN + 1) * longitudeN + 2];
 
-      Point3f points[] = new Point3f[N * M];
-      TexCoord2f[] textPoints = new TexCoord2f[N * M];
-
-      for (int i = 0; i < N; i++)
+      for (int longitudeIndex = 0; longitudeIndex < longitudeN; longitudeIndex++)
       {
-         ztheta = (float) (Math.PI / 2.0 * ((float) i / N));
+         float longitudeAngle = (float) (2.0 * Math.PI * ((float) longitudeIndex / (float) longitudeN));
 
-         for (int j = 0; j < M; j++)
+         for (int latitudeIndex = 0; latitudeIndex < latitudeN; latitudeIndex++)
          {
-            longitude = (float) (2.0 * Math.PI * j / M);
+            float latitudeAngle = (float) (Math.PI / 2.0 * ((float) latitudeIndex / (float) latitudeN));
 
-            points[i * M + j] = new Point3f((float) (xRad * Math.cos(longitude) * Math.cos(ztheta)), (float) (yRad * Math.sin(longitude) * Math.cos(ztheta)),
-                  (float) (zRad * Math.sin(ztheta)));
+            int currentIndex = latitudeIndex * longitudeN + longitudeIndex;
+            float vertexX = (float) (xRadius * Math.cos(longitudeAngle) * Math.cos(latitudeAngle));
+            float vertexY = (float) (yRadius * Math.sin(longitudeAngle) * Math.cos(latitudeAngle));
+            float vertexZ = (float) (zRadius * Math.sin(latitudeAngle));
+            points[currentIndex] = new Point3f(vertexX, vertexY, vertexZ);
 
-            textPoints[i * M + j] = new TexCoord2f((float) (longitude / (2.0 * Math.PI)), (float) (0.5 * Math.sin(ztheta) + 0.5));
+            float normalX = (float) (Math.cos(longitudeAngle) * Math.cos(latitudeAngle));
+            float normalY = (float) (Math.sin(longitudeAngle) * Math.cos(latitudeAngle));
+            float normalZ = (float) (Math.sin(latitudeAngle));
+            normals[currentIndex] = new Vector3f(normalX, normalY, normalZ);
+
+            float textureX = (float) (longitudeAngle / (2.0 * Math.PI));
+            float textureY = (float) (0.5 * Math.sin(latitudeAngle) + 0.5);
+            textPoints[currentIndex] = new TexCoord2f(textureX, textureY);
          }
       }
 
-      int[] polygonIndices = new int[4 * M * (N - 1) + 2 * M];
+      // Bottom side
+      for (int longitudeIndex = 0; longitudeIndex < longitudeN; longitudeIndex++)
+      {
+         float longitudeAngle = (float) (2.0 * Math.PI * ((float) longitudeIndex / (float) longitudeN));
+
+         int currentIndex = latitudeN * longitudeN + longitudeIndex;
+         float vertexX = (float) (xRadius * Math.cos(longitudeAngle));
+         float vertexY = (float) (yRadius * Math.sin(longitudeAngle));
+         float vertexZ = 0.0f;
+         points[currentIndex] = new Point3f(vertexX, vertexY, vertexZ);
+
+         normals[currentIndex] = new Vector3f(0.0f, 0.0f, -1.0f);
+
+         float textureX = (float) (longitudeAngle / (2.0 * Math.PI));
+         textPoints[currentIndex] = new TexCoord2f(textureX, 0.5f);
+      }
+
+      // North pole
+      int northPoleIndex = (latitudeN + 1) * longitudeN;
+      points[northPoleIndex] = new Point3f(0.0f, 0.0f, zRadius);
+      normals[northPoleIndex] = new Vector3f(0.0f, 0.0f, 1.0f);
+      textPoints[northPoleIndex] = new TexCoord2f(1.0f, 1.0f);
+
+      // Bottom center
+      int bottomCenterIndex = (latitudeN + 1) * longitudeN + 1;
+      points[bottomCenterIndex] = new Point3f(0.0f, 0.0f, 0.0f);
+      normals[bottomCenterIndex] = new Vector3f(0.0f, 0.0f, -1.0f);
+      textPoints[bottomCenterIndex] = new TexCoord2f(0.5f, 0.5f);
+
+      int numberOfTriangles = 2 * latitudeN * longitudeN + 2 * longitudeN;
+      int[] triangleIndices = new int[3 * numberOfTriangles];
 
       int index = 0;
 
-      for (int i = 0; i < N - 1; i++)
+      // Mid-latitude faces
+      for (int latitudeIndex = 0; latitudeIndex < latitudeN - 1; latitudeIndex++)
       {
-         for (int j = 0; j < M - 1; j++)
+         for (int longitudeIndex = 0; longitudeIndex < longitudeN; longitudeIndex++)
          {
-            polygonIndices[index] = i * M + j;
-            polygonIndices[index + 1] = i * M + j + 1;
-            polygonIndices[index + 2] = (i + 1) * M + j + 1;
-            polygonIndices[index + 3] = (i + 1) * M + j;
-            index = index + 4;
+            int nextLongitudeIndex = (longitudeIndex + 1) % longitudeN;
+            int nextLatitudeIndex = (latitudeIndex + 1);
+
+            // Lower triangles
+            triangleIndices[index++] = latitudeIndex * longitudeN + longitudeIndex;
+            triangleIndices[index++] = latitudeIndex * longitudeN + nextLongitudeIndex;
+            triangleIndices[index++] = nextLatitudeIndex * longitudeN + longitudeIndex;
+            // Upper triangles
+            triangleIndices[index++] = latitudeIndex * longitudeN + nextLongitudeIndex;
+            triangleIndices[index++] = nextLatitudeIndex * longitudeN + nextLongitudeIndex;
+            triangleIndices[index++] = nextLatitudeIndex * longitudeN + longitudeIndex;
          }
-
-         polygonIndices[index] = (i + 1) * M - 1;
-         polygonIndices[index + 1] = i * M;
-         polygonIndices[index + 2] = (i + 1) * M;
-         polygonIndices[index + 3] = (i + 2) * M - 1;
-         index = index + 4;
       }
 
-      // Just cap both ends for now...
-      // Need to figure out the right way to do spheres, etc...
-
-      for (int j = 0; j < M; j++)
+      // North pole faces
+      for (int longitudeIndex = 0; longitudeIndex < longitudeN; longitudeIndex++)
       {
-         polygonIndices[index] = M - j - 1;
-         polygonIndices[index + M] = (N - 1) * M + j;
-         index = index + 1;
+         int nextLongitudeIndex = (longitudeIndex + 1) % longitudeN;
+         triangleIndices[index++] = northPoleIndex;
+         triangleIndices[index++] = (latitudeN - 1) * longitudeN + longitudeIndex;
+         triangleIndices[index++] = (latitudeN - 1) * longitudeN + nextLongitudeIndex;
       }
 
-      index = index + M;
-
-      int[] pStripCounts = new int[M * (N - 1) + 2];
-
-      for (int i = 0; i < (N - 1) * M; i++)
+      // Bottom face
+      for (int longitudeIndex = 0; longitudeIndex < longitudeN; longitudeIndex++)
       {
-         pStripCounts[i] = 4;
+         int nextLongitudeIndex = (longitudeIndex + 1) % longitudeN;
+         triangleIndices[index++] = latitudeN * longitudeN + nextLongitudeIndex;
+         triangleIndices[index++] = latitudeN * longitudeN + longitudeIndex;
+         triangleIndices[index++] = bottomCenterIndex;
       }
 
-      pStripCounts[(N - 1) * M] = M;
-      pStripCounts[(N - 1) * M + 1] = M;
+      int[] pStripCounts = new int[numberOfTriangles];
+      Arrays.fill(pStripCounts, 3);
 
-      return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts);
+      return new MeshDataHolder(points, textPoints, triangleIndices, pStripCounts, normals);
    }
 
    public static MeshDataHolder Cylinder(double radius, double height, int N)
