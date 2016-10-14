@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.tauHipForAngleTracking</Variables>
+		<Variables>root.Skippy.tau_hip</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,21 +25,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.tau_hip</Variables>
+		<Variables>root.Skippy.q_hip</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.Skippy.SkippyController.tauHipAngle</Variables>
-		<GraphConfiguration>
-			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -59,15 +47,15 @@
 
 <Graph Array Window Size>1</Graph Array Window Size>
 <Graph Array Window1>
-<ScreenID>1</ScreenID>
-<WindowLocation>-1542.0, 222.0</WindowLocation>
-<WindowSize>1201.0, 943.0</WindowSize>
+<ScreenID>6</ScreenID>
+<WindowLocation>0.0, 23.0</WindowLocation>
+<WindowSize>1201.0, 877.0</WindowSize>
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.desiredCMPFromICPX,root.Skippy.SkippyController.desiredCMPFromICPY</Variables>
+		<Variables>root.Skippy.SkippyController.desiredCMPFromICPX</Variables>
 		<GraphConfiguration>
-			<Name>config5</Name>
+			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -79,7 +67,7 @@
 	<Graph>
 		<Variables>root.Skippy.SkippyController.actualICPY</Variables>
 		<GraphConfiguration>
-			<Name>config6</Name>
+			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -91,7 +79,7 @@
 	<Graph>
 		<Variables>root.Skippy.SkippyController.actualICPX</Variables>
 		<GraphConfiguration>
-			<Name>config7</Name>
+			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -103,7 +91,7 @@
 	<Graph>
 		<Variables>root.Skippy.SkippyController.tauOnHipJointAxis</Variables>
 		<GraphConfiguration>
-			<Name>config8</Name>
+			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -122,9 +110,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-10.079224948151342</Camera X>
- <Camera Y>-0.46285582851214363</Camera Y>
- <Camera Z>0.9936863301854862</Camera Z>
+ <Camera X>9.787129036067492</Camera X>
+ <Camera Y>-0.6700861210062107</Camera Y>
+ <Camera Z>2.992298021108412</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

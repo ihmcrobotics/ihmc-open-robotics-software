@@ -229,7 +229,6 @@ public class SkippyRobot extends Robot
          Link leg = createLegSkippy();
          hipJoint.setLink(leg);
 
-
          GroundContactPoint footContactPoint = new GroundContactPoint("gc_foot", new Vector3d(0.0, 0.0, -LEG_LENGTH), this);
          hipJoint.addGroundContactPoint(footContactPoint);
 
