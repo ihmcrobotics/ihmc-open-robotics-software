@@ -9,7 +9,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.time.DateTools;
 
-public class DataExporter implements ActionListener
+public class TorqueSpeedDataExporter implements ActionListener
 {
    private final SimulationConstructionSet scs;
    private final Robot robot;
@@ -22,17 +22,17 @@ public class DataExporter implements ActionListener
 
    private final Class<?> rootClassForDirectory;
 
-   public DataExporter(SimulationConstructionSet scs, Robot robot)
+   public TorqueSpeedDataExporter(SimulationConstructionSet scs, Robot robot)
    {
       this(scs, robot, robot.getClass(), robot.getName());
    }
 
-   public DataExporter(SimulationConstructionSet scs, Robot robot, Class<?> rootClassForDirectory)
+   public TorqueSpeedDataExporter(SimulationConstructionSet scs, Robot robot, Class<?> rootClassForDirectory)
    {
       this(scs, robot, rootClassForDirectory, robot.getName());
    }
 
-   public DataExporter(SimulationConstructionSet scs, Robot robot, Class<?> rootClassForDirectory, String subdirectoryName)
+   public TorqueSpeedDataExporter(SimulationConstructionSet scs, Robot robot, Class<?> rootClassForDirectory, String subdirectoryName)
    {
       this.scs = scs;
       this.robot = robot;

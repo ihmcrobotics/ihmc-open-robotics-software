@@ -26,6 +26,12 @@ public class DataExporterGraphCreator
       saveGraphToFile(directory, graphName, graph, createJPG, createPDF);
    }
 
+   public void createDataVsTimeGraph(File directory, String fileHeader, YoVariable<?> variable, boolean createJPG, boolean createPDF)
+   {
+      DataBufferEntry dataBufferEntry = dataBuffer.getEntry(variable);
+      createDataVsTimeGraph(directory, fileHeader, dataBufferEntry, createJPG, createPDF);
+   }
+
    public void createDataOneVsDataTwoGraph(File directory, String fileHeader, DataBufferEntry dataOneEntry, DataBufferEntry dataTwoEntry, boolean createJPG,
          boolean createPDF)
    {
