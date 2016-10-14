@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.dataExporter;
 
+import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,9 +36,9 @@ public class TorqueSpeedDataExporterGraphCreator extends DataExporterGraphCreato
          DataBufferEntry torque = dataBuffer.getEntry(pinJoint.getTauYoVariable());
          DataBufferEntry speed = dataBuffer.getEntry(pinJoint.getQDYoVariable());
 
-         createDataVsTimeGraph(directory, fileHeader, torque, createJPG, createPDF);
-         createDataVsTimeGraph(directory, fileHeader, speed, createJPG, createPDF);
-         createDataOneVsDataTwoGraph(directory, fileHeader, speed, torque, createJPG, createPDF);
+         createDataVsTimeGraph(directory, fileHeader, torque, createJPG, createPDF, Color.black);
+         createDataVsTimeGraph(directory, fileHeader, speed, createJPG, createPDF, Color.black);
+         createDataOneVsDataTwoGraph(directory, fileHeader, speed, torque, createJPG, createPDF, Color.black);
       }
    }
 
