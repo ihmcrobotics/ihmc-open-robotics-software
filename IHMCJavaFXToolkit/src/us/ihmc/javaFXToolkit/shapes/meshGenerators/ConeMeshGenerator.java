@@ -2,7 +2,7 @@ package us.ihmc.javaFXToolkit.shapes.meshGenerators;
 
 public class ConeMeshGenerator
 {
-   static final int DEFAULT_DIVISIONS = 128;
+   public static final int DEFAULT_DIVISIONS = 64;
 
    public static final float[] defaultTexCoords = generateTexCoords(DEFAULT_DIVISIONS);
    public static final int[] defaultFaces = generatreFaces(DEFAULT_DIVISIONS);
@@ -110,7 +110,6 @@ public class ConeMeshGenerator
          fIndex += 6;
 
       }
-System.out.println(fIndex / 6);
       return faces;
    }
 

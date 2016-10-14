@@ -10,8 +10,14 @@ import javax.vecmath.Tuple3f;
 
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import javafx.collections.ObservableFloatArray;
+import javafx.collections.ObservableIntegerArray;
 import javafx.scene.shape.Mesh;
+import javafx.scene.shape.ObservableFaceArray;
 import javafx.scene.shape.TriangleMesh;
+import javafx.scene.shape.VertexFormat;
+import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
+import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.shapes.meshGenerators.BoxMeshGenerator;
 import us.ihmc.javaFXToolkit.shapes.meshGenerators.ConeMeshGenerator;
 import us.ihmc.javaFXToolkit.shapes.meshGenerators.CylinderMeshGenerator;
@@ -145,6 +151,30 @@ public class MeshBuilder
    public void addMesh(MeshBuilder other)
    {
       addMesh(other.points, other.texCoords, other.faces, other.faceSmoothingGroups);
+   }
+
+   public void addMesh(MeshDataHolder meshDataHolder)
+   {
+      addMesh(JavaFXMeshDataInterpreter.interpretMeshData(meshDataHolder));
+   }
+
+   public void addMesh(TriangleMesh triangleMesh)
+   {
+      int[] faces;
+      float[] points = triangleMesh.getPoints().toArray(null);
+      float[] texCoords = triangleMesh.getTexCoords().toArray(null);
+      int[] faceSmoothingGroups = triangleMesh.getFaceSmoothingGroups().toArray(null);
+
+      if (triangleMesh.getVertexFormat() == VertexFormat.POINT_NORMAL_TEXCOORD)
+         faces = getFacesWithoutNormalIndices(triangleMesh.getFaces().toArray(null));
+      else
+         faces = triangleMesh.getFaces().toArray(null);
+      addMesh(points, texCoords, faces, faceSmoothingGroups);
+   }
+
+   public void addMesh(ObservableFloatArray points, ObservableFloatArray texCoords, ObservableFaceArray faces, ObservableIntegerArray faceSmoothingGroups)
+   {
+      addMesh(points.toArray(null), texCoords.toArray(null), faces.toArray(null), faceSmoothingGroups.toArray(null));
    }
 
    public void addMesh(FXMeshDataHolder meshData)
@@ -288,7 +318,7 @@ public class MeshBuilder
 
    public void addCone(float height, float radius, Tuple3f cylinderOffset)
    {
-      float[] cylinderPoints = ConeMeshGenerator.generatePoints(radius, height, CylinderMeshGenerator.DEFAULT_DIVISIONS);
+      float[] cylinderPoints = ConeMeshGenerator.generatePoints(radius, height, ConeMeshGenerator.DEFAULT_DIVISIONS);
       float[] cylinderTexCoords = ConeMeshGenerator.defaultTexCoords;
       int[] cylinderFaces = ConeMeshGenerator.defaultFaces;
       int[] cylinderFaceSmoothingGroups = ConeMeshGenerator.defaultFaceSmoothingGroups;
@@ -363,7 +393,7 @@ public class MeshBuilder
       }
    }
 
-   private int[] translateFaces(int[] faces, int points, int texCoords)
+   private static int[] translateFaces(int[] faces, int points, int texCoords)
    {
       int[] newFaces = new int[faces.length];
       for (int i = 0; i < faces.length; i++)
@@ -373,7 +403,7 @@ public class MeshBuilder
       return newFaces;
    }
 
-   private int[] translateFaces(TIntArrayList faces, int points, int texCoords)
+   private static int[] translateFaces(TIntArrayList faces, int points, int texCoords)
    {
       int[] newFaces = new int[faces.size()];
       for (int i = 0; i < faces.size(); i++)
@@ -383,12 +413,12 @@ public class MeshBuilder
       return newFaces;
    }
 
-   private float[] translatePoints(float[] points, Tuple3f offset)
+   private static float[] translatePoints(float[] points, Tuple3f offset)
    {
       return translatePoints(points, offset.getX(), offset.getY(), offset.getZ());
    }
 
-   private float[] translatePoints(float[] points, float offsetX, float offsetY, float offsetZ)
+   private static float[] translatePoints(float[] points, float offsetX, float offsetY, float offsetZ)
    {
       float[] newPoints = new float[points.length];
       for (int i = 0; i < points.length / 3; i++)
@@ -400,6 +430,20 @@ public class MeshBuilder
       return newPoints;
    }
 
+   private static int[] getFacesWithoutNormalIndices(int[] facesWithNormals)
+   {
+      int[] facesWithoutNormals = new int[2 * facesWithNormals.length / 3];
+
+      int index = 0;
+      for (int i = 0; i < facesWithNormals.length; i += 3)
+      {
+         facesWithoutNormals[index++] = facesWithNormals[i];
+         facesWithoutNormals[index++] = facesWithNormals[i + 2];
+      }
+
+      return facesWithoutNormals;
+   }
+
    public Mesh generateMesh()
    {
       if (points.isEmpty() || faces.isEmpty())
@@ -409,7 +453,7 @@ public class MeshBuilder
       mesh.getPoints().addAll(points.toArray());
       mesh.getTexCoords().addAll(texCoords.toArray());
       mesh.getFaces().addAll(faces.toArray());
-      mesh.getFaceSmoothingGroups().addAll(faceSmoothingGroups.toArray());
+//      mesh.getFaceSmoothingGroups().addAll(faceSmoothingGroups.toArray());
       return mesh;
    }
 }
