@@ -397,32 +397,32 @@ public class MeshDataGenerator
 
       for (int i = 0; i < N; i++)
       {
-         points[i] = new Point3f((float) (radius * Math.cos(i * 2.0 * Math.PI / N)), (float) (radius * Math.sin(i * 2.0 * Math.PI / N)), 0.0f);
-         textPoints[i] = new TexCoord2f((float) (0.5f * Math.cos(i * 2.0 * Math.PI / N) + 0.5f), (float) (0.5f * Math.sin(i * 2.0 * Math.PI / N) + 0.5f));
+         double angle = i * 2.0 * Math.PI / N;
+         points[i] = new Point3f((float) (radius * Math.cos(angle)), (float) (radius * Math.sin(angle)), 0.0f);
+         textPoints[i] = new TexCoord2f((float) (0.5f * Math.cos(angle) + 0.5f), (float) (0.5f * Math.sin(angle) + 0.5f));
       }
 
       points[N] = new Point3f(0.0f, 0.0f, height);
       textPoints[N] = new TexCoord2f(0.5f, 0.5f);
-      
+
       int[] polygonIndices = new int[N + 3 * N];
 
       int index = 0;
 
-      for (int i = 0; i < N; i++)
+      for (int i = N - 1; i >= 0; i--)
       {
-         polygonIndices[index] = N - 1 - i;
-         index = index + 1;
+         polygonIndices[index++] = i;
       }
 
       for (int i = 0; i < N - 1; i++)
       {
-         polygonIndices[index] = i;
+         polygonIndices[index    ] = i;
          polygonIndices[index + 1] = i + 1;
          polygonIndices[index + 2] = N;
          index = index + 3;
       }
 
-      polygonIndices[index] = N - 1;
+      polygonIndices[index    ] = N - 1;
       polygonIndices[index + 1] = 0;
       polygonIndices[index + 2] = N;
 
