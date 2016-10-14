@@ -8,11 +8,11 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCHighLevelStateBehaviorTes
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTest
 {
    private final AtlasRobotModel robotModel;
@@ -35,18 +35,26 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 35.3)
-   @Test(timeout = 180000)
-   public void testDoNothingBehavior() throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 26.3)
+   @Test(timeout = 130000)
+   public void testWalkingState() throws SimulationExceededMaximumTimeException
    {
-      super.testDoNothingBehavior();
+      super.testWalkingState();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 44.4, targets = TestPlanTarget.Flaky)
-   @Test(timeout = 220000)
-   public void testRandomState() throws SimulationExceededMaximumTimeException
+   @ContinuousIntegrationTest(estimatedDuration = 33.0)
+   @Test(timeout = 160000)
+   public void testDoNothingBahviourState() throws SimulationExceededMaximumTimeException
    {
-      super.testRandomState();
+      super.testDoNothingBahviourState();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 20.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @Test(timeout = 300000)
+   public void testDiagnosticsState() throws SimulationExceededMaximumTimeException
+   {
+      super.testDiagnosticsState();
    }
 }

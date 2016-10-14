@@ -1,183 +1,334 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.Momentum;
-
-/**
- * @author twan
- *         Date: 5/1/13
- */
 public class MomentumOptimizationSettings
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DoubleYoVariable linearMomentumXWeight = new DoubleYoVariable("linearMomentumXWeight", registry);
-   private final DoubleYoVariable linearMomentumYWeight = new DoubleYoVariable("linearMomentumYWeight", registry);
-   private final DoubleYoVariable linearMomentumZWeight = new DoubleYoVariable("linearMomentumZWeight", registry);
-   private final DoubleYoVariable angularMomentumXYWeight = new DoubleYoVariable("angularMomentumXYWeight", registry);
-   private final DoubleYoVariable angularMomentumZWeight = new DoubleYoVariable("angularMomentumZWeight", registry);
-   private final DoubleYoVariable rhoMin = new DoubleYoVariable("rhoMin", registry);
-   private final DoubleYoVariable lambda = new DoubleYoVariable("lambda", registry);
-   private final InverseDynamicsJoint[] jointsToOptimizeFor;
+ 
+   private final Vector3d linearMomentumWeight = new Vector3d(0.05, 0.05, 0.01);
+   private final Vector3d highLinearMomentumWeightForRecovery = new Vector3d(0.5, 0.5, 0.05);
+   private final Vector3d angularMomentumWeight = new Vector3d(0.0, 0.0, 0.0);
 
-   private final double[] momentumWeightDiagonal = new double[Momentum.SIZE];
-   private final DenseMatrix64F C = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
-   private double wRhoPlane;
-   private double wRhoSmoother;
-   private double wRhoPenalizer;
+   private Vector3d defaultAngularFootWeight = new Vector3d(0.5, 0.5, 0.5);
+   private Vector3d defaultLinearFootWeight = new Vector3d(30.0, 30.0, 30.0);
+   private Vector3d highAngularFootWeight = new Vector3d(5.0, 5.0, 5.0);
+   private Vector3d highLinearFootWeight = new Vector3d(50.0, 50.0, 50.0);
 
-   private final DenseMatrix64F momentumSubspaceProjector = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
-   private final Momentum tempMomentum = new Momentum(); // just to make sure that the ordering of force and torque are correct
+   private Vector3d chestAngularWeight = new Vector3d(15.0, 10.0, 5.0);
+   private Vector3d pelvisAngularWeight = new Vector3d(5.0, 5.0, 5.0);
+   
+   private int nBasisVectorsPerContactPoint = 4;
+   private int nContactPointsPerContactableBody = 4;
+   private int nContactableBodies = 2;
 
-   // Parameters for shaky feet
-   private boolean enableCoPSmootherControlForShakies = false;
-   private double copErrorThresholdToTriggerSmoother = 0.10;
-   private double copSmootherDuration = 0.5;
-   private double maxWRhoSmoother = 1.5;
+   private double jointAccelerationWeight = 0.005;
+   private double jointJerkWeight = 0.1;
+   private double rhoWeight = 0.00001;
+   private double rhoMin = 4.0;
+   // Be careful with that guy, even 0.005 seems to make the ICP control sluggish.
+   private double rhoRateDefaultWeight = 0.002; // 0.005
+   private double rhoRateHighWeight = 0.05;
+   private final Vector2d copWeight = new Vector2d(100.0, 200.0); //750.0, 1500.0);
+   private final Vector2d copRateDefaultWeight = new Vector2d(20000.0, 20000.0); //100000.0, 200000.0);
+   private final Vector2d copRateHighWeight = new Vector2d(2500000.0, 10000000.0);
+   private double headJointspaceWeight = 1.0;
+   private double headTaskspaceWeight = 1.0;
+   private double headUserModeWeight = 1.0;
+   private double handUserModeWeight = 50.0;
+   private double handJointspaceWeight = 1.0;
+   private Vector3d handAngularTaskspaceWeight = new Vector3d(1.0, 1.0, 1.0);
+   private Vector3d handLinearTaskspaceWeight = new Vector3d(1.0, 1.0, 1.0);
 
-   public MomentumOptimizationSettings(InverseDynamicsJoint[] jointsToOptimizeFor, YoVariableRegistry parentRegistry)
+   public MomentumOptimizationSettings()
    {
-      this.jointsToOptimizeFor = jointsToOptimizeFor;
-      parentRegistry.addChild(registry);
    }
 
-   public void setMomentumWeight(double linearMomentumXWeight, double linearMomentumYWeight, double linearMomentumZWeight, double angularMomentumXYWeight, double angularMomentumZWeight)
+   public void setHeadWeights(double jointspace, double taskspace, double userMode)
    {
-      this.linearMomentumXWeight.set(linearMomentumXWeight);
-      this.linearMomentumYWeight.set(linearMomentumYWeight);
-      this.linearMomentumZWeight.set(linearMomentumZWeight);
-      this.angularMomentumXYWeight.set(angularMomentumXYWeight);
-      this.angularMomentumZWeight.set(angularMomentumZWeight);
+      headJointspaceWeight = jointspace;
+      headTaskspaceWeight = taskspace;
+      headUserModeWeight = userMode;
    }
 
-   public void setMomentumWeight(double linearMomentumXYWeight, double linearMomentumZWeight, double angularMomentumXYWeight, double angularMomentumZWeight)
+   public void setBodyWeights(double chestWeight, double pelvisWeight)
    {
-      setMomentumWeight(linearMomentumXYWeight, linearMomentumXYWeight, linearMomentumZWeight, angularMomentumXYWeight, angularMomentumZWeight);
+      chestAngularWeight.set(chestWeight, chestWeight, chestWeight);
+      pelvisAngularWeight.set(pelvisWeight, pelvisWeight, pelvisWeight);
    }
 
-   public void setRhoPlaneContactRegularization(double wRho)
+   public void setBodyWeights(Vector3d chestAngularWeight, Vector3d pelvisAngularWeight)
    {
-      this.wRhoPlane = wRho;
+      this.chestAngularWeight.set(chestAngularWeight);
+      this.pelvisAngularWeight.set(pelvisAngularWeight);
    }
 
-   public void setDampedLeastSquaresFactor(double lambda)
+   public void setHandTaskspaceControlWeights(Vector3d angular, Vector3d linear)
    {
-      this.lambda.set(lambda);
+      handAngularTaskspaceWeight.set(angular);
+      handLinearTaskspaceWeight.set(linear);
+   }
+
+   public void setManipulationWeights(double jointspace, double taskspace, double userMode)
+   {
+      handJointspaceWeight = jointspace;
+      handAngularTaskspaceWeight.set(taskspace, taskspace, taskspace);
+      handLinearTaskspaceWeight.set(taskspace, taskspace, taskspace);
+      handUserModeWeight = userMode;
+   }
+
+   public void setFootWeights(double support, double swing)
+   {
+      highLinearFootWeight.set(support, support, support);
+      highAngularFootWeight.set(support, support, support);
+      defaultLinearFootWeight.set(swing, swing, swing);
+      defaultAngularFootWeight.set(swing, swing, swing);
+   }
+
+   public void setFootWeights(Vector3d supportAngular, Vector3d supportLinear, Vector3d swingAngular, Vector3d swingLinear)
+   {
+      highLinearFootWeight.set(supportLinear);
+      highAngularFootWeight.set(supportAngular);
+      defaultLinearFootWeight.set(swingLinear);
+      defaultAngularFootWeight.set(swingAngular);
+   }
+
+   public void setPelvisWeight(double pelvisAngularWeight)
+   {
+      this.pelvisAngularWeight.set(pelvisAngularWeight, pelvisAngularWeight, pelvisAngularWeight);
+   }
+
+   public void setPelvisWeights(Vector3d pelvisAngularWeight)
+   {
+      this.pelvisAngularWeight.set(pelvisAngularWeight);
+   }
+
+   public void setMomentumWeight(double linearMomentumWeightX, double linearMomentumWeightY, double linearMomentumWeightZ, double angularMomentumWeightXY, double angularMomentumWeightZ)
+   {
+      linearMomentumWeight.set(linearMomentumWeightX, linearMomentumWeightY, linearMomentumWeightZ);
+      setAngularMomentumWeight(angularMomentumWeightXY, angularMomentumWeightZ);
+   }
+
+   public void setMomentumWeight(double linearMomentumWeightXY, double linearMomentumWeightZ, double angularMomentumWeightXY, double angularMomentumWeightZ)
+   {
+      setMomentumWeight(linearMomentumWeightXY, linearMomentumWeightXY, linearMomentumWeightZ, angularMomentumWeightXY, angularMomentumWeightZ);
+   }
+
+   public void setAngularMomentumWeight(double angularMomentumWeightXY, double angularMomentumWeightZ)
+   {
+      angularMomentumWeight.set(angularMomentumWeightXY, angularMomentumWeightXY, angularMomentumWeightZ);
+   }
+
+   public void setRhoPlaneContactRegularization(double rhoWeight)
+   {
+      this.rhoWeight = rhoWeight;
+   }
+
+   public void setRhoRateWeight(double defaultWeight, double highWeight)
+   {
+      this.rhoRateDefaultWeight = defaultWeight;
+      this.rhoRateHighWeight = highWeight;
+   }
+
+   public void setJointWeight(double jointAccelerationWeight, double jointJerkWeight)
+   {
+      this.jointAccelerationWeight = jointAccelerationWeight;
+      this.jointJerkWeight = jointJerkWeight;
    }
 
    public void setRhoMin(double rhoMin)
    {
-      this.rhoMin.set(rhoMin);
+      this.rhoMin = rhoMin;
    }
 
-   public DenseMatrix64F getMomentumDotWeight(DenseMatrix64F momentumSubspace)
+   public void setCoPWeight(double weightX, double weightY)
    {
-      CommonOps.multOuter(momentumSubspace, momentumSubspaceProjector);
-
-      tempMomentum.setLinearPartX(linearMomentumXWeight.getDoubleValue());
-      tempMomentum.setLinearPartY(linearMomentumYWeight.getDoubleValue());
-      tempMomentum.setLinearPartZ(linearMomentumZWeight.getDoubleValue());
-
-      tempMomentum.setAngularPartX(angularMomentumXYWeight.getDoubleValue());
-      tempMomentum.setAngularPartY(angularMomentumXYWeight.getDoubleValue());
-      tempMomentum.setAngularPartZ(angularMomentumZWeight.getDoubleValue());
-
-      tempMomentum.getMatrix(momentumWeightDiagonal);
-      CommonOps.diag(tempMatrix, Momentum.SIZE, momentumWeightDiagonal);
-
-      CommonOps.mult(momentumSubspaceProjector, tempMatrix, C);
-
-      return C;
+      copWeight.set(weightX, weightY);
    }
 
-   public double getRhoPlaneContactRegularization()
+   public void setCoPWeight(Vector2d weight)
    {
-      return wRhoPlane;
+      copWeight.set(weight);
    }
 
-   public void getDampedLeastSquaresFactorMatrix(DenseMatrix64F dampedLeastSquaresFactorMatrixToPack)
+   public void setCoPRateDefaultWeight(double weightX, double weightY)
    {
-      CommonOps.setIdentity(dampedLeastSquaresFactorMatrixToPack);
-      CommonOps.scale(lambda.getDoubleValue(), dampedLeastSquaresFactorMatrixToPack);
+      copRateDefaultWeight.set(weightX, weightY);
    }
 
-   public double getRhoMinScalar()
+   public void setCoPRateDefaultWeight(Vector2d weight)
    {
-      return rhoMin.getDoubleValue();
+      copRateDefaultWeight.set(weight);
    }
 
-   public double getDampedLeastSquaresFactor()
+   public void setCoPRateHighWeight(double weightX, double weightY)
    {
-      return lambda.getDoubleValue();
+      copRateHighWeight.set(weightX, weightY);
    }
 
-   public double getRateOfChangeOfRhoPlaneContactRegularization()
+   public void setCoPRateHighWeight(Vector2d weight)
    {
-      return wRhoSmoother;
+      copRateHighWeight.set(weight);
+   }
+   
+
+   public void setNumberOfBasisVectorsPerContactPoint(int nBasisVectorsPerContactPoint)
+   {
+      this.nBasisVectorsPerContactPoint = nBasisVectorsPerContactPoint;
    }
 
-   public double getPenalizerOfRhoPlaneContactRegularization()
+   public void setNumberOfContactPointsPerContactableBody(int nContactPointsPerContactableBody)
    {
-      return wRhoPenalizer;
+      this.nContactPointsPerContactableBody = nContactPointsPerContactableBody;
    }
 
-   public void setRhoPenalizerPlaneContactRegularization(double wRhoPenalizer)
+   public void setNumberOfContactableBodies(int nContactableBodies)
    {
-      this.wRhoPenalizer = wRhoPenalizer;
+      this.nContactableBodies = nContactableBodies;
    }
 
-   public void setRateOfChangeOfRhoPlaneContactRegularization(double wRhoSmoother)
+   public Vector3d getLinearMomentumWeight()
    {
-      this.wRhoSmoother = wRhoSmoother;
+      return linearMomentumWeight;
    }
 
-   public InverseDynamicsJoint[] getJointsToOptimizeFor()
+   public Vector3d getHighLinearMomentumWeightForRecovery()
    {
-      return jointsToOptimizeFor;
+      return highLinearMomentumWeightForRecovery;
    }
 
-   public boolean getEnableCoPSmootherControlForShakies()
+   public Vector3d getAngularMomentumWeight()
    {
-      return enableCoPSmootherControlForShakies;
+      return angularMomentumWeight;
    }
 
-   public void setEnableCoPSmootherControlForShakies(boolean enableCoPSmootherControlForShakies)
+   public double getJointAccelerationWeight()
    {
-      this.enableCoPSmootherControlForShakies = enableCoPSmootherControlForShakies;
+      return jointAccelerationWeight;
    }
 
-   public double getCopErrorThresholdToTriggerSmoother()
+   public double getJointJerkWeight()
    {
-      return copErrorThresholdToTriggerSmoother;
+      return jointJerkWeight;
    }
 
-   public void setCopErrorThresholdToTriggerSmoother(double copErrorThresholdToTriggerSmoother)
+   public double getRhoWeight()
    {
-      this.copErrorThresholdToTriggerSmoother = copErrorThresholdToTriggerSmoother;
+      return rhoWeight;
    }
 
-   public double getCoPSmootherDuration()
+   public double getRhoMin()
    {
-      return copSmootherDuration;
+      return rhoMin;
    }
 
-   public void setCopSmootherDuration(double copSmootherDuration)
+   public double getRhoRateDefaultWeight()
    {
-      this.copSmootherDuration = copSmootherDuration;
+      return rhoRateDefaultWeight;
    }
 
-   public double getMaxWRhoSmoother()
+   public double getRhoRateHighWeight()
    {
-      return maxWRhoSmoother;
+      return rhoRateHighWeight;
    }
 
-   public void setMaxWRhoSmoother(double maxWRhoSmoother)
+   public Vector2d getCoPWeight()
    {
-      this.maxWRhoSmoother = maxWRhoSmoother;
+      return copWeight;
+   }
+
+   public Vector2d getCoPRateDefaultWeight()
+   {
+      return copRateDefaultWeight;
+   }
+
+   public Vector2d getCoPRateHighWeight()
+   {
+      return copRateHighWeight;
+   }
+
+   public double getHeadUserModeWeight()
+   {
+      return headUserModeWeight;
+   }
+
+   public double getHeadJointspaceWeight()
+   {
+      return headJointspaceWeight;
+   }
+
+   public double getHeadTaskspaceWeight()
+   {
+      return headTaskspaceWeight;
+   }
+
+   public Vector3d getChestAngularWeight()
+   {
+      return chestAngularWeight;
+   }
+
+   public Vector3d getPelvisAngularWeight()
+   {
+      return pelvisAngularWeight;
+   }
+
+   public Vector3d getDefaultLinearFootWeight()
+   {
+      return defaultLinearFootWeight;
+   }
+
+   public Vector3d getDefaultAngularFootWeight()
+   {
+      return defaultAngularFootWeight;
+   }
+
+   public Vector3d getHighLinearFootWeight()
+   {
+      return highLinearFootWeight;
+   }
+
+   public Vector3d getHighAngularFootWeight()
+   {
+      return highAngularFootWeight;
+   }
+
+   public double getHandUserModeWeight()
+   {
+      return handUserModeWeight;
+   }
+
+   public double getHandJointspaceWeight()
+   {
+      return handJointspaceWeight;
+   }
+
+   public Vector3d getHandAngularTaskspaceWeight()
+   {
+      return handAngularTaskspaceWeight;
+   }
+
+   public Vector3d getHandLinearTaskspaceWeight()
+   {
+      return handLinearTaskspaceWeight;
+   }
+
+   public int getNumberOfBasisVectorsPerContactPoint()
+   {
+      return nBasisVectorsPerContactPoint;
+   }
+
+   public int getNumberOfContactPointsPerContactableBody()
+   {
+      return nContactPointsPerContactableBody;
+   }
+
+   public int getNumberOfContactableBodies()
+   {
+      return nContactableBodies;
+   }
+
+   public int getRhoSize()
+   {
+      return  nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
    }
 }

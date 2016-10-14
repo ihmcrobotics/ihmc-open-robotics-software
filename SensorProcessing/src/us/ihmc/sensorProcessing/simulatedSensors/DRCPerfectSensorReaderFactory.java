@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -20,13 +20,13 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 
 public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
 {
-   private final SDFRobot robot;
+   private final FloatingRootJointRobot robot;
 
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private final DRCPerfectSensorReader perfectSensorReader;
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
-   public DRCPerfectSensorReaderFactory(SDFRobot robot, ForceSensorDataHolder forceSensorDataHolderToUpdate, double estimateDT)
+   public DRCPerfectSensorReaderFactory(FloatingRootJointRobot robot, ForceSensorDataHolder forceSensorDataHolderToUpdate, double estimateDT)
    {
       this.robot = robot;
       perfectSensorReader = new DRCPerfectSensorReader(estimateDT);
@@ -34,7 +34,7 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
    }
 
    @Override
-   public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
+   public void build(FloatingInverseDynamicsJoint rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
          ContactSensorHolder contactSensorDataHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
          DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {

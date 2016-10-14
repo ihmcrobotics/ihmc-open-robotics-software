@@ -136,7 +136,7 @@ public class JMEGeneratedHeightMap implements HeightMap
 
    private JMEGraphics3DNode addNodesRecursively(Graphics3DNode graphics3dNode, Node parentNode)
    {
-      JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, assetLocator, null);
+      JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, assetLocator, null, null);
       Graphics3DNodeType nodeType = graphics3dNode.getNodeType();
       jmeNode.setType(nodeType);
 

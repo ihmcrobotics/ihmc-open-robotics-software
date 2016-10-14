@@ -5,18 +5,18 @@ import javax.swing.*;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.gui.SplashPanel;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.lang.reflect.InvocationTargetException;
 
-@DeployableTestClass(targets = {TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
 public class SimulationConstructionSetSetupTest
 {
    private static final int pauseTimeForGUIs = 5000;
 
-	@DeployableTestMethod(estimatedDuration = 5.0)
+	@ContinuousIntegrationTest(estimatedDuration = 5.0)
 	@Test(timeout = 30000)
    public void testSplashScreen() throws Exception
     {
@@ -34,7 +34,7 @@ public class SimulationConstructionSetSetupTest
       });
    }
 
-	@DeployableTestMethod(estimatedDuration = 5.3)
+	@ContinuousIntegrationTest(estimatedDuration = 5.3)
 	@Test(timeout = 30000)
    public void testSimulationConstructionSetWithoutARobot()
    {
@@ -46,7 +46,7 @@ public class SimulationConstructionSetSetupTest
       scs.closeAndDispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 5.6)
+	@ContinuousIntegrationTest(estimatedDuration = 5.6)
 	@Test(timeout = 30000)
    public void testSimulationConstructionSetWithARobot()
    {

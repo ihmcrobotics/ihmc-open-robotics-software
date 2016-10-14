@@ -15,11 +15,11 @@ import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseWobbl
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-@DeployableTestClass(targets = {TestPlanTarget.Flaky, TestPlanTarget.VideoA})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFootTest
 {
    @Override
@@ -48,9 +48,8 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
    @Override
    protected DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
-      return (DoubleYoVariable) scs.getVariable(
-          "MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController",
-          "pelvisOrientationErrorMagnitude");
+      return (DoubleYoVariable) scs.getVariable("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAxisAngleOrientationController",
+            "pelvisRotationErrorInBodyZ");
    }
 
    private AtlasJointMap createJointMapWithWobblyFeet(final AtlasRobotVersion atlasVersion)

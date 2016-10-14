@@ -39,7 +39,7 @@ public class InverseDynamicsMechanismExplorer
 
          ReferenceFrame frameAfterParentJoint = parentJoint.getFrameAfterJoint();
          RigidBodyTransform comOffsetTransform = frameBeforeJoint.getTransformToDesiredFrame(frameAfterParentJoint);
-         comOffsetTransform.get(jointOffset);
+         comOffsetTransform.getTranslation(jointOffset);
 
          buffer.append("Joint offset = " + jointOffset + "\n");
       }
@@ -103,7 +103,7 @@ public class InverseDynamicsMechanismExplorer
 
          Vector3d comOffset = new Vector3d();
          RigidBodyTransform comOffsetTransform = link.getBodyFixedFrame().getTransformToDesiredFrame(parentJoint.getFrameAfterJoint());
-         comOffsetTransform.get(comOffset);
+         comOffsetTransform.getTranslation(comOffset);
 
          Matrix3d momentOfInertia = inertia.getMassMomentOfInertiaPartCopy();
 
@@ -129,11 +129,11 @@ public class InverseDynamicsMechanismExplorer
 
    }
 
+   @Override
    public String toString()
    {
       StringBuffer buffer = new StringBuffer();
       getRobotInformationAsStringBuffer(buffer);
       return buffer.toString();
    }
-
 }

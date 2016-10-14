@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
@@ -20,7 +21,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInterface
@@ -33,10 +34,10 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
    public void setUp()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
      
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null,
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(),
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
@@ -59,8 +60,8 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @DeployableTestMethod(estimatedDuration = 10.6)
-   @Test(timeout = 53000)
+   @ContinuousIntegrationTest(estimatedDuration = 14.6)
+   @Test(timeout = 73000)
    public void testConstructorAndSetInput()
    {
       ObjectWeightBehavior behavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
@@ -68,7 +69,8 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       assertTrue(behavior.hasInputBeenSet());
    }
    
-   @DeployableTestMethod(estimatedDuration = 19.6)
+   @Ignore("Needs to be reimplemented")
+   @ContinuousIntegrationTest(estimatedDuration = 19.6)
    @Test(timeout = 98000)
    public void testSettingWeight() throws SimulationExceededMaximumTimeException
    {

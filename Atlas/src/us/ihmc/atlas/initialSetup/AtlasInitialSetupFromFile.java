@@ -7,18 +7,18 @@ import java.util.Properties;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFHumanoidRobot>
+public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    private String initialConditionsFileName;
 
@@ -33,7 +33,7 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFHumano
    }
 
    @Override
-   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       if (robotInitialized)
          return;
@@ -48,7 +48,7 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFHumano
 
          for (RobotSide robotSide : RobotSide.values())
          {
-            for (LegJointName jointName : LegJointName.values())
+            for (LegJointName jointName : LegJointName.values)
             {
                String key = jointMap.getLegJointName(robotSide, jointName);
                setRobotAngle(key, properties, robot);
@@ -96,7 +96,7 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFHumano
       robotInitialized = true;
    }
 
-   private void setRobotAngle(String jointName, Properties properties, SDFRobot robot)
+   private void setRobotAngle(String jointName, Properties properties, FloatingRootJointRobot robot)
    {
       if (jointName == null)
          return;

@@ -6,14 +6,11 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 
 //TODO: update this test class to access poses via resource directory and undelete old pose files from svn
@@ -21,14 +18,14 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
 {
    private static final boolean SHOW_GUI = false;
 
-	@DeployableTestMethod(estimatedDuration = 4.0)
+	@ContinuousIntegrationTest(estimatedDuration = 4.0)
 	@Test(timeout = 30000)
    public void testMoveElbowExample()
    {
       DRCRobotModel robotModel = getRobotModel();
 
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       double delay = 0.3;
       double trajectoryTime = 1.0;
@@ -45,13 +42,13 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       });
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.2)
+	@ContinuousIntegrationTest(estimatedDuration = 1.2)
 	@Test(timeout = 30000)
    public void testRandomExample()
    {
       DRCRobotModel robotModel = getRobotModel();
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       
       int numberOfPoses = 5;
       double delay = 0.3;
@@ -78,20 +75,20 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
 //      DRCRobotJointMap jointMap = robotModel.getJointMap();
 //      JaxbSDFLoader sdfLoader = DRCRobotSDFLoader.loadDRCRobot(jointMap, false);
 //      
-//      SDFFullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
+//      FullRobotModel fullRobotModel = sdfLoader.createFullRobotModel(jointMap);
 //      SDFRobot sdfRobot = sdfLoader.createRobot(jointMap, false);
 //      
 //      PosePlaybackRobotPoseSequence sequence = PosePlaybackExampleSequence.createExampleSequenceFourPoses(fullRobotModel);
 //      playASequence(sdfRobot, sequence);
 //   }
 
-	@DeployableTestMethod(estimatedDuration = 3.8)
+	@ContinuousIntegrationTest(estimatedDuration = 3.8)
 	@Test(timeout = 30000)
    public void testLoadingAndPlayingASequence()
    {
       DRCRobotModel robotModel = getRobotModel();
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
       PlaybackPoseSequenceReader.appendFromFile(sequence, getClass().getClassLoader().getResourceAsStream("testSequence2.poseSequence"));
@@ -106,13 +103,13 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       });
    }
 
-	@DeployableTestMethod(estimatedDuration = 4.6)
+	@ContinuousIntegrationTest(estimatedDuration = 4.6)
 	@Test(timeout = 30000)
    public void testLoadingAndPlayingAnotherSequence()
    {
       DRCRobotModel robotModel = getRobotModel();
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
       PlaybackPoseSequenceReader.appendFromFile(sequence, getClass().getClassLoader().getResourceAsStream("tenPoses.poseSequence"));

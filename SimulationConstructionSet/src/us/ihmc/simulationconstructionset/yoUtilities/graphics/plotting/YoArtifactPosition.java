@@ -1,198 +1,181 @@
 package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
+import javax.vecmath.Vector2d;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.plotting.Artifact;
-import us.ihmc.plotting.Drawing2DTools;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 
-
-public class YoArtifactPosition extends Artifact implements RemoteYoGraphic
+public class YoArtifactPosition extends YoArtifact
 {
-   private static final long serialVersionUID = -1824071784539220859L;
+   private static final int LEGEND_RADIUS = 20;
+   private static final BasicStroke STROKE = new BasicStroke(1.2f);
    
-   private final ArrayList<double[]> historicalPositions = new ArrayList<double[]>();
-
-   private final DoubleYoVariable x;
-   private final DoubleYoVariable y;
+   private final YoFramePoint2d point;
+   private final Vector2d radii = new Vector2d();
    private final GraphicType graphicType;
-   private final double scale;
+   
+   private final Point2d tempPoint = new Point2d();
+   private final Vector2d legendRadii = new Vector2d();
 
-   public YoArtifactPosition(String namePrefix, String nameSuffix, YoGraphicPosition.GraphicType type, Color color, double scale, YoVariableRegistry registry)
+   public YoArtifactPosition(String namePrefix, String nameSuffix, GraphicType type, Color color, double radius, YoVariableRegistry registry)
    {
-      this(namePrefix+nameSuffix, new DoubleYoVariable(namePrefix + "X" + nameSuffix, registry), new DoubleYoVariable(namePrefix + "Y" + nameSuffix, registry), type, color, scale);
+      this(namePrefix+nameSuffix, new DoubleYoVariable(namePrefix + "X" + nameSuffix, registry), new DoubleYoVariable(namePrefix + "Y" + nameSuffix, registry), type, color, radius);
    }
    
-   public YoArtifactPosition(String name, DoubleYoVariable x, DoubleYoVariable y, YoGraphicPosition.GraphicType type, Color color, double scale)
+   public YoArtifactPosition(String name, DoubleYoVariable x, DoubleYoVariable y, GraphicType type, Color color, double radius)
    {
-      super(name);
-      this.x = x;
-      this.y = y;
+      this(name, new YoFramePoint2d(x, y, ReferenceFrame.getWorldFrame()), type, color, radius);
+   }
+   
+   public YoArtifactPosition(String name, YoFramePoint2d point, GraphicType type, Color color, double radius)
+   {
+      super(name, new double[] {radius, type.ordinal()}, color, point.getYoX(), point.getYoY());
       
+      this.point = point;
       this.graphicType = type;
-      this.color = color;
-      this.scale = scale;
+      this.radii.set(radius, radius);
    }
 
-   public void takeHistorySnapshot()
+   @Override
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
-      if (getRecordHistory())
-      {
-         synchronized(historicalPositions)
-         {
-            historicalPositions.add(new double[]{x.getDoubleValue(), y.getDoubleValue()});
-         }
-      }
-   }
-   
-   private final Point3d position = new Point3d();
-   private static final int MIN_RADIUS = 5;
-   private static final int MAX_RADIUS = 25;
-
-   public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
-   {
-      double radius = Math.round(4.0 * scale * scaleFactor);
-      radius = MathTools.clipToMinMax(radius, MIN_RADIUS, MAX_RADIUS);
-      draw(graphics, Xcenter, Ycenter, (int) radius);
-   }
-
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
-   {
-      if (isVisible)
-      {
-         getPosition(position);
-         draw(graphics, position.x, position.y, Xcenter, Ycenter, scaleFactor);
-      }
-   }
-   
-   public void getPosition(Point3d point3d)
-   {
-      point3d.set(x.getDoubleValue(), y.getDoubleValue(), 0.0);
-   }
-   
-   public void setPosition(Point2d point2d)
-   {
-      x.set(point2d.getX());
-      y.set(point2d.getY());
-   }
-
-   
-   private void draw(Graphics graphics, double xWorld, double yWorld, int Xcenter, int Ycenter, double scaleFactor)
-   {
-      if (Double.isNaN(xWorld) || Double.isNaN(yWorld))
-         return;
-
-      int x = (int) (xWorld * scaleFactor) + Xcenter;
-      int y = (int) (-yWorld * scaleFactor) + Ycenter;
-      int radius = (int) (4.0 * scale * scaleFactor);
-
-      draw(graphics, x, y, radius);
-   }
-
-
-   private void draw(Graphics graphics, int x, int y, int radius)
-   {
-      YoGraphicPosition.GraphicType type = graphicType;
-      switch (type)
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+      
+      legendRadii.set(LEGEND_RADIUS, LEGEND_RADIUS);
+      
+      switch (graphicType)
       {
          case BALL :
-            Drawing2DTools.drawEmptyCircle(graphics, x, y, radius, color);
-
+            graphics.drawOval(graphics.getScreenFrame(), origin, legendRadii);
             break;
-
          case SOLID_BALL :
-            Drawing2DTools.drawFilledCircle(graphics, x, y, radius, color);
-
+            graphics.drawOvalFilled(graphics.getScreenFrame(), origin, legendRadii);
             break;
-
          case CROSS :
-            Drawing2DTools.drawCircleWithCross(graphics, x, y, radius, color);
-
+            graphics.drawCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
-
          case BALL_WITH_CROSS :
-            Drawing2DTools.drawCircleWithCross(graphics, x, y, radius, color);
-
+            graphics.drawCircleWithCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
-
          case ROTATED_CROSS :
-            Drawing2DTools.drawCircleWithRotatedCross(graphics, x, y, radius, color);
-
+            graphics.drawRotatedCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
-
          case BALL_WITH_ROTATED_CROSS :
-            Drawing2DTools.drawCircleWithRotatedCross(graphics, x, y, radius, color);
-
+            graphics.drawCircleWithRotatedCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
-
          case DIAMOND :
-            Drawing2DTools.drawDiamond(graphics, x, y, radius, color);
-
+            graphics.drawDiamond(graphics.getScreenFrame(), origin, legendRadii);
             break;
-
          case DIAMOND_WITH_CROSS :
-            Drawing2DTools.drawDiamondWithCross(graphics, x, y, radius, color);
-
+            graphics.drawDiamondWithCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
-
          case SQUARE :
-            Drawing2DTools.drawDiamondWithCross(graphics, x, y, radius, color);
-
+            graphics.drawRectangle(graphics.getScreenFrame(), origin, legendRadii);
             break;
-
          case SQUARE_WITH_CROSS :
-            Drawing2DTools.drawDiamondWithCross(graphics, x, y, radius, color);
-
+            graphics.drawSquareWithCross(graphics.getScreenFrame(), origin, legendRadii);
             break;
-      default:
-         throw new RuntimeException("type "+ type +" not implemented");
+         case ELLIPSOID :
+            legendRadii.set(LEGEND_RADIUS * 1.2, LEGEND_RADIUS * 0.8);
+            graphics.drawOval(graphics.getScreenFrame(), origin, legendRadii);
+            break;
+      }
+   }
+
+   @Override
+   public void draw(Graphics2DAdapter graphics)
+   {
+      point.get(tempPoint);
+      drawLocal(graphics);
+   }
+
+   @Override
+   public void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry)
+   {
+      tempPoint.set(entry[0], entry[1]);
+      drawLocal(graphics);
+   }
+
+   private void drawLocal(Graphics2DAdapter graphics)
+   {
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+      
+      if (Double.isNaN(tempPoint.getX()) || Double.isNaN(tempPoint.getY()))
+      {
+         return;
+      }
+      
+      switch (graphicType)
+      {
+         case BALL :
+            graphics.drawOval(tempPoint, radii);
+            break;
+         case SOLID_BALL :
+            graphics.drawOvalFilled(tempPoint, radii);
+            break;
+         case CROSS :
+            graphics.drawCross(tempPoint, radii);
+            break;
+         case BALL_WITH_CROSS :
+            graphics.drawCircleWithCross(tempPoint, radii);
+            break;
+         case ROTATED_CROSS :
+            graphics.drawRotatedCross(tempPoint, radii);
+            break;
+         case BALL_WITH_ROTATED_CROSS :
+            graphics.drawCircleWithRotatedCross(tempPoint, radii);
+            break;
+         case DIAMOND :
+            graphics.drawDiamond(tempPoint, radii);
+            break;
+         case DIAMOND_WITH_CROSS :
+            graphics.drawDiamondWithCross(tempPoint, radii);
+            break;
+         case SQUARE :
+            graphics.drawSquare(tempPoint, radii);
+            break;
+         case SQUARE_WITH_CROSS :
+            graphics.drawSquareWithCross(tempPoint, radii);
+            break;
+         case ELLIPSOID :
+            double radius = radii.getX();
+            radii.setX(radii.getX() * 1.2);
+            radii.setY(radii.getY() * 0.8);
+            graphics.drawOval(tempPoint, radii);
+            radii.set(radius, radius);
+            break;
       }
    }
    
-   public void drawHistory(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
-   {
-      synchronized(historicalPositions)
-      {
-         for (double[] position : historicalPositions)
-         {
-            double xWorld = position[0];
-            double yWorld = position[1];
-
-            draw(graphics, xWorld, yWorld, Xcenter, Ycenter, scaleFactor);
-         }
-      }
-   }
-
+   @Override
    public RemoteGraphicType getRemoteGraphicType() 
    {
       return RemoteGraphicType.POSITION_ARTIFACT;
    }
    
-   public DoubleYoVariable[] getVariables() 
+   public DoubleYoVariable getYoX()
    {
-      return new DoubleYoVariable[]{x, y};
-   }
-
-   public double[] getConstants() 
-   {
-      return new double[]{scale, graphicType.ordinal()};
+      return point.getYoX();
    }
    
-   public AppearanceDefinition getAppearance()
+   public DoubleYoVariable getYoY()
    {
-      return new YoAppearanceRGBColor(color, 0.0);
+      return point.getYoY();
    }
    
+   public void setPosition(Point2d point2d)
+   {
+      point.set(point2d);
+   }
 }

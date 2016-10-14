@@ -7,43 +7,40 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandControlThread;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.ManualHandControlProvider;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
+import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotiq.RobotiqHandInterface;
-import us.ihmc.robotiq.data.RobotiqHandSensorData;
+import us.ihmc.robotiq.RobotiqHandCommunicator;
+import us.ihmc.robotiq.data.RobotiqHandSensorDizzata;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.tools.thread.ThreadTools;
 
-class RobotiqControlThread extends HandControlThread
+public class RobotiqControlThread extends HandControlThread
 {
    private final boolean CALIBRATE_ON_CONNECT = false;
    
    private final RobotSide robotSide;
-   private final RobotiqHandInterface robotiqHand;
-   private final FingerStateProvider fingerStateProvider;
+   private final RobotiqHandCommunicator robotiqHand;
+   private final HandDesiredConfigurationMessageSubscriber handDesiredConfigurationMessageSubscriber;
    private final ManualHandControlProvider manualHandControlProvider;
    private final HandJointAngleCommunicator jointAngleCommunicator;
-   private int errorCount = 0;
-   private RobotiqHandSensorData handStatus;
+   private RobotiqHandSensorDizzata handStatus;
 
    public RobotiqControlThread(RobotSide robotSide, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       super(robotSide);
       this.robotSide = robotSide;
-      robotiqHand = new RobotiqHandInterface(robotSide.equals(RobotSide.LEFT) ? NetworkParameters.getHost(NetworkParameterKeys.leftHand) : NetworkParameters.getHost(NetworkParameterKeys.rightHand));
-      fingerStateProvider = new FingerStateProvider(robotSide);
+      robotiqHand = new RobotiqHandCommunicator(robotSide);
+      handDesiredConfigurationMessageSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, packetCommunicator, closeableAndDisposableRegistry);
       
-      packetCommunicator.attachListener(FingerStatePacket.class, fingerStateProvider);
+      packetCommunicator.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationMessageSubscriber);
       packetCommunicator.attachListener(ManualHandControlPacket.class, manualHandControlProvider);
    }
 
@@ -60,172 +57,93 @@ class RobotiqControlThread extends HandControlThread
       
       while(!packetCommunicator.isConnected())
       {
-         ThreadTools.sleep(100);
+         ThreadTools.sleep(10);
       }
-   }
-
-   public void initialize()
-   {
-      errorCount = 0;
-      int faultCounter = 0;
-      do
-      {
-         if (++errorCount > 3)
-         {
-            System.out.println("Unable to initalize " + robotSide.toString() + " Hand. Uncorrectable Fault has occurred");
-            return;
-         }
-         do
-         {
-            robotiqHand.initialize();
-            boolean initialized = true;
-            do
-            {
-               ThreadTools.sleep(100);
-               updateHandData();
-            }
-            while (handStatus.isInitializing() && !handStatus.hasError() && !initialized);
-
-            if (handStatus.hasError())
-            {
-               handStatus.printError();
-               faultCounter++;
-               if (faultCounter < 3)
-                  robotiqHand.reset();
-               else
-               {
-                  break;
-               }
-            }
-
-         }
-         while (handStatus.hasCompletedAction());
-
-         ThreadTools.sleep(100);
-      }
-      while (!robotiqHand.isReady());
-
-      System.out.println(robotSide.toString() + " Hand Set Up");
    }
 
    private void updateHandData()
    {
-      try
-      {
-         handStatus = robotiqHand.getHandStatus();
-         jointAngleCommunicator.updateHandAngles(handStatus);
-      }
-      catch (IOException e)
-      {
-         handStatus.setConnected(robotiqHand.isConnected());
-         e.printStackTrace();
-      }
+      handStatus = robotiqHand.getHandSensorData();
+      jointAngleCommunicator.updateHandAngles(handStatus);
       jointAngleCommunicator.write();
    }
 
    public void run()
    {
       if(CALIBRATE_ON_CONNECT)
-         fingerStateProvider.receivedPacket(new FingerStatePacket(robotSide, FingerState.CALIBRATE));
+         handDesiredConfigurationMessageSubscriber.receivedPacket(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
 
       while (packetCommunicator.isConnected())
       {
-         if (robotiqHand.isConnected()) //status to UI and keep alive packet
+         robotiqHand.read();
+         
+         updateHandData();
+
+         if (handStatus.hasError())
          {
-            robotiqHand.doControl();
-
-            updateHandData();
-
-            if (handStatus.hasError())
-               handStatus.printError();
-
-            if (fingerStateProvider.isNewFingerStateAvailable())
-            {
-               FingerStatePacket packet = fingerStateProvider.pullPacket();
-               FingerState state = packet.getFingerState();
-               
-               switch (state)
-               {
-               case CALIBRATE:
-                  robotiqHand.initialize();
-                  break;
-               case STOP:
-                  robotiqHand.stop();
-                  break;
-               case OPEN:
-                  robotiqHand.open();
-                  break;
-               case CLOSE:
-                  robotiqHand.close();
-                  break;
-               case CRUSH:
-                  robotiqHand.crush();
-                  break;
-               case HOOK:
-                  robotiqHand.hook(robotSide);
-                  break;
-               case BASIC_GRIP:
-                  robotiqHand.normalGrip();
-                  break;
-               case PINCH_GRIP:
-                  robotiqHand.pinchGrip();
-                  break;
-               case WIDE_GRIP:
-                  robotiqHand.wideGrip();
-                  break;
-               case SCISSOR_GRIP:
-                  robotiqHand.scissorGrip();
-                  break;
-               case HALF_CLOSE:
-                  robotiqHand.halfClose();
-                  break;
-               case CLOSE_FINGERS:
-                  robotiqHand.closeFingers();
-                  break;
-               case CLOSE_THUMB:
-                  robotiqHand.closeThumb();
-                  break;
-               case OPEN_FINGERS:
-                  robotiqHand.openFingers();
-                  break;
-               case OPEN_THUMB:
-                  robotiqHand.openThumb();
-                  break;
-               case RESET:
-               {
-                  robotiqHand.reset();
-                  initialize();
-               }
-               break;
-               default:
-                  break;
-               }
-            }
+//            System.out.println(handStatus.getFaultStatus().name());
+         }
+         
+         if (handDesiredConfigurationMessageSubscriber.isNewDesiredConfigurationAvailable())
+         {
+            HandDesiredConfigurationMessage packet = handDesiredConfigurationMessageSubscriber.pollMessage();
+            HandConfiguration state = packet.getHandDesiredConfiguration();
             
-            if (manualHandControlProvider.isNewPacketAvailable()) // send manual hand control packet to hand
+            switch (state)
             {
-               ManualHandControlPacket packet = manualHandControlProvider.pullPacket();
-               if (!robotiqHand.isConnected() || !packet.getRobotSide().equals(robotSide))
-                  continue;
-               if (packet.getControlType() == ManualHandControlPacket.POSITION)
-               {
-                  robotiqHand.positionControl(packet.getCommands(ManualHandControlPacket.HandType.ROBOTIQ), this.robotSide);
-               }
-               else if (packet.getControlType() == ManualHandControlPacket.VELOCITY)
-               {
-                  robotiqHand.velocityControl(packet.getCommands(ManualHandControlPacket.HandType.ROBOTIQ), this.robotSide);
-               }
+            case CALIBRATE:
+               robotiqHand.initialize();
+               break;
+            case OPEN:
+            case CLOSE:
+            case CRUSH:
+            case BASIC_GRIP:
+            case PINCH_GRIP:
+            case WIDE_GRIP:
+            case SCISSOR_GRIP:
+               if(robotiqHand.isConnected())
+                  robotiqHand.sendHandCommand(state);
+               break;
+            case OPEN_FINGERS:
+            case CLOSE_FINGERS:
+               if(robotiqHand.isConnected())
+                  robotiqHand.sendFingersCommand(state);
+               break;
+            case CLOSE_THUMB:
+            case OPEN_THUMB:
+               if(robotiqHand.isConnected())
+                  robotiqHand.sendThumbCommand(state);
+               break;
+            case RESET:
+               if(robotiqHand.isConnected())
+                  robotiqHand.reset();
+               break;
+            case CONNECT:
+               robotiqHand.reconnect();
+               break;
+            case HOOK:
+               //TODO
+               break;
+            case HALF_CLOSE:
+               //TODO
+               break;
+            default:
+               break;
             }
          }
          
-         ThreadTools.sleep(50);
+         if (manualHandControlProvider.isNewPacketAvailable())
+         {
+            //TODO
+         }
+         
+         ThreadTools.sleep(10);
       }
    }
    
    public static void main(String[] args)
    {
       CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
-      
       JSAP jsap = new JSAP();
       
       FlaggedOption robotSide = new FlaggedOption("robotSide").setRequired(true).setLongFlag("robotSide").setShortFlag('r').setStringParser(JSAP.STRING_PARSER);

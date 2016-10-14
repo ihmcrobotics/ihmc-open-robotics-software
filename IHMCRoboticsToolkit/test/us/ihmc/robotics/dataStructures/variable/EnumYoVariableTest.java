@@ -12,7 +12,7 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableType;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class EnumYoVariableTest
 {
@@ -40,7 +40,7 @@ public class EnumYoVariableTest
 
    @SuppressWarnings("deprecation")
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructorNoDescription()
    {
@@ -54,7 +54,7 @@ public class EnumYoVariableTest
 
    @SuppressWarnings("deprecation")
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructorWithDescription()
    {
@@ -69,7 +69,7 @@ public class EnumYoVariableTest
 
    @SuppressWarnings("deprecation")
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCreateNoDescription()
    {
@@ -82,7 +82,7 @@ public class EnumYoVariableTest
 
    @SuppressWarnings("deprecation")
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCreateWithDescription()
    {
@@ -96,7 +96,7 @@ public class EnumYoVariableTest
       assertTrue(enumYoVariable.getDescription().equals("enumYoVariable with description"));
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetAndValueEquals()
    {
@@ -111,7 +111,7 @@ public class EnumYoVariableTest
       assertTrue(enumYoVariable.valueEquals(null));
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetAndGet()
    {
@@ -127,7 +127,7 @@ public class EnumYoVariableTest
       assertEquals(EnumYoVariableTestEnums.TWO, enumYoVariable.getEnumValue());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValues()
    {
@@ -139,7 +139,7 @@ public class EnumYoVariableTest
       assertEquals(EnumYoVariableTestEnums.TWO, enumTypeArray[1]);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetValueAsDoublePositiveNumber()
    {
@@ -155,7 +155,7 @@ public class EnumYoVariableTest
       assertEquals(EnumYoVariableTestEnums.TWO, enumYoVariable.getEnumValue());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetValueAsDoubleOutOfBoundsJustIgnoresIt()
    {
@@ -170,7 +170,7 @@ public class EnumYoVariableTest
       assertEquals(originalValue, enumYoVariable.getEnumValue());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testForNull()
    {
@@ -180,7 +180,7 @@ public class EnumYoVariableTest
       assertEquals(enumYoVariable.getEnumValue(), null);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testNotAllowNull()
    {
@@ -189,7 +189,7 @@ public class EnumYoVariableTest
       enumYoVariable.set(null);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAllowNull()
    {
@@ -199,7 +199,7 @@ public class EnumYoVariableTest
       assertEquals(enumYoVariable.getEnumValue(), null);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValueAsDouble()
    {
@@ -213,7 +213,7 @@ public class EnumYoVariableTest
       assertEquals(-1, enumYoVariable.getValueAsDouble(), EPSILON);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testToString()
    {
@@ -225,7 +225,7 @@ public class EnumYoVariableTest
       assertEquals("enumYoVariable: TWO", enumYoVariable.toString());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValueStringBufferWithNullValue()
    {
@@ -239,7 +239,7 @@ public class EnumYoVariableTest
       assertEquals("null", valueBuffer.toString());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValueStringBuffer()
    {
@@ -256,7 +256,7 @@ public class EnumYoVariableTest
       assertEquals("ONETWO", valueBuffer.toString());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetYoVariableType()
    {
@@ -265,7 +265,7 @@ public class EnumYoVariableTest
       assertEquals(YoVariableType.ENUM, enumYoVariable.getYoVariableType());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValueAsLongBitsAndSetValueFromLongBits()
    {
@@ -291,7 +291,7 @@ public class EnumYoVariableTest
       assertEquals(-1, enumYoVariable.getValueAsLongBits());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetEnumType()
    {
@@ -303,7 +303,7 @@ public class EnumYoVariableTest
       assertEquals(enumValue.getClass(), enumYoVariable.getEnumType());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValueStringFromDouble()
    {
@@ -343,7 +343,7 @@ public class EnumYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDuplicate()
    {
@@ -358,7 +358,7 @@ public class EnumYoVariableTest
       assertEquals(enumYoVariable2.getAllowNullValue(), enumYoVariable.getAllowNullValue());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetValue()
    {

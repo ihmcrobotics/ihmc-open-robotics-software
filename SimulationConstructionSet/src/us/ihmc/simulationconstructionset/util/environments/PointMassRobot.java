@@ -92,9 +92,9 @@ public class PointMassRobot extends Robot
 
    public void setPosition(Point3d point)
    {
-      xJoint.setQ(point.x);
-      yJoint.setQ(point.y);
-      zJoint.setQ(point.z);
+      xJoint.setQ(point.getX());
+      yJoint.setQ(point.getY());
+      zJoint.setQ(point.getZ());
 
    }
 
@@ -107,9 +107,9 @@ public class PointMassRobot extends Robot
 
    public void setVelocity(Vector3d velocity)
    {
-      xJoint.setQd(velocity.x);
-      yJoint.setQd(velocity.y);
-      zJoint.setQd(velocity.z);
+      xJoint.setQd(velocity.getX());
+      yJoint.setQd(velocity.getY());
+      zJoint.setQd(velocity.getZ());
 
    }
 
@@ -120,18 +120,18 @@ public class PointMassRobot extends Robot
 
    public void getPosition(Tuple3d tuple3d)
    {
-      double x = xJoint.getQ().getDoubleValue();
-      double y = yJoint.getQ().getDoubleValue();
-      double z = zJoint.getQ().getDoubleValue();
+      double x = xJoint.getQYoVariable().getDoubleValue();
+      double y = yJoint.getQYoVariable().getDoubleValue();
+      double z = zJoint.getQYoVariable().getDoubleValue();
 
       tuple3d.set(x, y, z);
    }
 
    public void getVelocity(Tuple3d tuple3d)
    {
-      double xd = xJoint.getQD().getDoubleValue();
-      double yd = yJoint.getQD().getDoubleValue();
-      double zd = zJoint.getQD().getDoubleValue();
+      double xd = xJoint.getQDYoVariable().getDoubleValue();
+      double yd = yJoint.getQDYoVariable().getDoubleValue();
+      double zd = zJoint.getQDYoVariable().getDoubleValue();
 
       tuple3d.set(xd, yd, zd);
    }

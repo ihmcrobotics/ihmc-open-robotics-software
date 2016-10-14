@@ -49,7 +49,7 @@ public class ListOfPointsTrajectory
 
       for (Point2d point : points)
       {
-         FramePoint framePoint = new FramePoint(referenceFrame, point.x, point.y, 0.0);
+         FramePoint framePoint = new FramePoint(referenceFrame, point.getX(), point.getY(), 0.0);
          framePoints.add(framePoint);
       }
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2016-Feb-29 10:07" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20151019-2113">
+        <filterScript>
+
+// no filter script yet defined for this class diagram
+// use CTRL+SPACE for completion suggestions
+hide all constructors
+hide all methods
+hide all fields
+
+</filterScript>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.YoFrameWaypoint" project="IHMCRoboticsToolkit" xLocation="1400" yLocation="125"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.FrameWaypoint" project="IHMCRoboticsToolkit" xLocation="1421" yLocation="303"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointInterface" project="IHMCRoboticsToolkit" xLocation="437" yLocation="309"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointInterface" project="IHMCRoboticsToolkit" xLocation="-90" yLocation="310"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface" project="IHMCRoboticsToolkit" xLocation="-564" yLocation="313"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.interfaces.Waypoint1DInterface" project="IHMCRoboticsToolkit" xLocation="964" yLocation="309"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.interfaces.WaypointInterface" project="IHMCRoboticsToolkit" xLocation="446" yLocation="633"/>
+        <class className="us.ihmc.robotics.math.trajectories.waypoints.interfaces.TransformableGeometryObjectInterface" project="IHMCRoboticsToolkit" xLocation="1183" yLocation="643"/>
+    </diagram>
+</ajsv>

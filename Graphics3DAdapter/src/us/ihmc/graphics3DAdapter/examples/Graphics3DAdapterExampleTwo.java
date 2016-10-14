@@ -87,7 +87,7 @@ public class Graphics3DAdapterExampleTwo
       while (true)
       {
          rotation = rotation + 0.01;
-         node2.getTransform().rotZ(rotation);
+         node2.getTransform().setRotationYawAndZeroTranslation(rotation);
          
          count++;
          if (count > 200)

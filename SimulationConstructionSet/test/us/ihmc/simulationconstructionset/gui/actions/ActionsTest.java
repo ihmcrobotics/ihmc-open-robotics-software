@@ -1,9 +1,56 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import com.google.common.base.Defaults;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.awt.Dimension;
+import java.awt.Point;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Test;
+
+import com.google.common.base.Defaults;
+
 import us.ihmc.graphics3DAdapter.camera.CameraPropertiesHolder;
-import us.ihmc.simulationconstructionset.commands.*;
+import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.CreateNewGraphWindowCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.CreateNewViewportWindowCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.CropBufferCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.CutBufferCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.GotoInPointCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.GotoOutPointCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.NextCameraKeyCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.PackBufferCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.PlayCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.PreviousCameraKeyCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.RemoveCameraKeyCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.SelectGUIConfigFromFileCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.SelectGraphConfigurationCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.SetInPointCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.SetOutPointCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.SimulateCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.StepBackwardCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.StepForwardCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.StopCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.ThinBufferCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.ToggleCameraKeyModeCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
+import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandListener;
+import us.ihmc.simulationconstructionset.commands.ZoomGraphCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.ActiveCameraHolder;
 import us.ihmc.simulationconstructionset.gui.DollyCheckBox;
 import us.ihmc.simulationconstructionset.gui.TrackCheckBox;
@@ -11,26 +58,59 @@ import us.ihmc.simulationconstructionset.gui.actions.configActions.SelectGraphCo
 import us.ihmc.simulationconstructionset.gui.actions.configActions.SelectGraphGroupAction;
 import us.ihmc.simulationconstructionset.gui.actions.configActions.SelectVarGroupAction;
 import us.ihmc.simulationconstructionset.gui.actions.configActions.SelectViewportAction;
-import us.ihmc.simulationconstructionset.gui.actions.dialogActions.*;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.AboutAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.CameraPropertiesAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.DataBufferPropertiesAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ExportDataAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ExportSimulationTo3DMaxAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ExportSnapshotAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ImportDataAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.LoadConfigurationAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.LoadGraphGroupAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.LoadRobotConfigurationAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.MediaCaptureAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.PlaybackPropertiesAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.PrintGraphsAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ResizeViewportAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SaveConfigurationAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SaveGraphConfigurationAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SaveRobotConfigurationAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SelectEntryBoxGroupAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SelectExtraPanelAction;
 import us.ihmc.simulationconstructionset.gui.camera.AbstractCameraPropertiesHolder;
-import us.ihmc.simulationconstructionset.gui.config.*;
-import us.ihmc.simulationconstructionset.gui.dialogConstructors.*;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.simulationconstructionset.gui.config.CameraSelector;
+import us.ihmc.simulationconstructionset.gui.config.EntryBoxGroupSelector;
+import us.ihmc.simulationconstructionset.gui.config.ExtraPanelSelector;
+import us.ihmc.simulationconstructionset.gui.config.GraphGroupSelector;
+import us.ihmc.simulationconstructionset.gui.config.VarGroupSelector;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.AboutDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.CameraPropertiesDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.DataBufferPropertiesDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportDataDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportSimulationTo3DMaxDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.ExportSnapshotDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.ImportDataDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadConfigurationDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadGraphGroupDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.LoadRobotConfigurationDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.MediaCaptureDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.PlaybackPropertiesDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.PrintGraphsDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.ResizeViewportDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveConfigurationDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveGraphConfigurationDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveRobotConfigurationDialogConstructor;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-import java.awt.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.List;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
+@ContinuousIntegrationPlan(categories = { IntegrationCategory.UI})
 public class ActionsTest
 {
-
    /**
     * List of simple actions that just delegate everything to the corresponding executors/constructors
     */
+   @SuppressWarnings("serial")
    private static final Map<Class<?>, Class<?>> SIMPLE_ACTIONS = new HashMap<Class<?>, Class<?>>()
    {
       {
@@ -70,7 +150,7 @@ public class ActionsTest
       }
    };
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testSimpleActions()
    {
@@ -80,7 +160,7 @@ public class ActionsTest
       }
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testCreateNewGraphWindowAction()
    {
@@ -99,7 +179,7 @@ public class ActionsTest
               .assertMethodNotCalled("getGraphArrayWindow", String.class);
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testCreateNewViewportWindowAction()
    {
@@ -118,7 +198,7 @@ public class ActionsTest
               .assertMethodNotCalled("getViewportWindow", String.class);
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testHideShowViewportAction()
    {
@@ -183,7 +263,7 @@ public class ActionsTest
               );
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testSimulateAction()
    {
@@ -199,7 +279,7 @@ public class ActionsTest
               .assertMethodCalled("simulate");
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testToggleKeyPointModeAction()
    {
@@ -256,7 +336,7 @@ public class ActionsTest
               );
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testZoomInAction()
    {
@@ -273,7 +353,7 @@ public class ActionsTest
               .assertMethodNotCalled("zoomOut");
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testZoomOutAction()
    {
@@ -290,7 +370,7 @@ public class ActionsTest
               .assertMethodNotCalled("zoomIn");
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectGraphConfigurationAction()
    {
@@ -306,7 +386,7 @@ public class ActionsTest
               .assertMethodCalled("selectGraphConfiguration", "Test");
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectGraphGroupAction()
    {
@@ -322,7 +402,7 @@ public class ActionsTest
               .assertMethodCalled("selectGraphGroup", "Test");
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectVarGroupAction()
    {
@@ -338,7 +418,7 @@ public class ActionsTest
               .assertMethodCalled("selectVarGroup", "Test");
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectViewportAction()
    {
@@ -355,7 +435,7 @@ public class ActionsTest
    }
 
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout=300000)
    public void testCameraPropertiesAction()
    {
@@ -382,7 +462,7 @@ public class ActionsTest
               .assertAllInterfaceMethodsCalled();
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectEntryBoxGroupAction()
    {
@@ -399,7 +479,7 @@ public class ActionsTest
               .assertAllInterfaceMethodsCalled();
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectExtraPanelAction()
    {
@@ -416,14 +496,14 @@ public class ActionsTest
               .assertAllInterfaceMethodsCalled();
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testThinBufferAction()
    {
       testActionCallingAllInterfaceMethods(ThinBufferCommandExecutor.class, ThinBufferAction.class);
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectCameraAction()
    {
@@ -439,7 +519,7 @@ public class ActionsTest
               .assertMethodCalled("selectCamera", "Test");
    }
 
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSelectGUIConfigFromFileAction()
    {
@@ -649,7 +729,6 @@ public class ActionsTest
          return this;
       }
 
-      @SuppressWarnings("unused")
       public MethodCallTester<MonitoredClass> assertMethodNotCalled(String name, Object... expectedParamValues)
       {
          assertFalse("Method " + mockClass.getSimpleName() + "." + name + "(" + Arrays.toString(expectedParamValues) + ") was called but no call was expected", wasMethodCalled(name, expectedParamValues));
@@ -796,7 +875,7 @@ public class ActionsTest
          });
 
       // Take a constructor with as few params as possible
-      Constructor constructor = type.getDeclaredConstructors()[0];
+      Constructor<?> constructor = type.getDeclaredConstructors()[0];
       for (Constructor<?> c : type.getDeclaredConstructors())
       {
          if (c.getParameterTypes().length < constructor.getParameterTypes().length)
@@ -832,12 +911,13 @@ public class ActionsTest
     * @param <T> interface type
     * @return method tester instance
     */
+   @SuppressWarnings("unchecked")
    private static <T> MethodCallTester<T> createMethodTesterForInterface(Class<T> interfaceClass, final T forwardInstance)
    {
       final List<MethodInvocation> invocations = new ArrayList<>();
 
       //noinspection unchecked
-      T mock = (T)Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass}, new InvocationHandler()
+      T mock = (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class[]{interfaceClass}, new InvocationHandler()
       {
          @Override
          public Object invoke(Object proxy, Method method, Object[] args) throws Throwable

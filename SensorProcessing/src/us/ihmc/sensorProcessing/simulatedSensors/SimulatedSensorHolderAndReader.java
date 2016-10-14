@@ -25,19 +25,19 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 public class SimulatedSensorHolderAndReader implements SensorReader
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
-   private final IntegerYoVariable step = new IntegerYoVariable("step", registry);
+   protected final IntegerYoVariable step = new IntegerYoVariable("step", registry);
 
-   private final DoubleYoVariable yoTime;
+   protected final DoubleYoVariable yoTime;
 
-   private final List<Pair<OneDoFJoint, SimulatedOneDoFJointPositionSensor>> jointPositionSensors = new ArrayList<>();
-   private final List<Pair<OneDoFJoint, SimulatedOneDoFJointVelocitySensor>> jointVelocitySensors = new ArrayList<>();
-   private final List<Pair<OneDoFJoint, SimulatedOneDoFJointTorqueSensor>> jointTorqueSensors = new ArrayList<>();
-   private final List<Pair<IMUDefinition, SimulatedOrientationSensorFromRobot>> orientationSensors = new ArrayList<>();
-   private final List<Pair<IMUDefinition, SimulatedAngularVelocitySensorFromRobot>> angularVelocitySensors = new ArrayList<>();
-   private final List<Pair<IMUDefinition, SimulatedLinearAccelerationSensorFromRobot>> linearAccelerationSensors = new ArrayList<>();
-   private final List<Pair<ForceSensorDefinition, WrenchCalculatorInterface>> forceTorqueSensors = new ArrayList<>();
+   protected final List<Pair<OneDoFJoint, SimulatedOneDoFJointPositionSensor>> jointPositionSensors = new ArrayList<>();
+   protected final List<Pair<OneDoFJoint, SimulatedOneDoFJointVelocitySensor>> jointVelocitySensors = new ArrayList<>();
+   protected final List<Pair<OneDoFJoint, SimulatedOneDoFJointTorqueSensor>> jointTorqueSensors = new ArrayList<>();
+   protected final List<Pair<IMUDefinition, SimulatedOrientationSensorFromRobot>> orientationSensors = new ArrayList<>();
+   protected final List<Pair<IMUDefinition, SimulatedAngularVelocitySensorFromRobot>> angularVelocitySensors = new ArrayList<>();
+   protected final List<Pair<IMUDefinition, SimulatedLinearAccelerationSensorFromRobot>> linearAccelerationSensors = new ArrayList<>();
+   protected final List<Pair<ForceSensorDefinition, WrenchCalculatorInterface>> forceTorqueSensors = new ArrayList<>();
 
-   private final SensorProcessing sensorProcessing;
+   protected final SensorProcessing sensorProcessing;
 
    public SimulatedSensorHolderAndReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
          SensorProcessingConfiguration sensorProcessingConfiguration, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)

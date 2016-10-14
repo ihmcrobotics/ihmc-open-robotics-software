@@ -3,26 +3,16 @@ package us.ihmc.atlas.generatedTestSuites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
-import us.ihmc.tools.testing.TestPlanSuite;
-import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
-@RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@RunWith(ContinuousIntegrationSuite.class)
+@ContinuousIntegrationSuiteCategory(IntegrationCategory.FAST)
 @SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasHeadOrientationBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasLookAtBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasObjectWeightBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.FooTest.class,
-   us.ihmc.atlas.commonWalkingControlModules.sensors.AtlasProvidedMassMatrixToolRigidBodyTest.class,
-   us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
-   us.ihmc.atlas.controllers.responses.AtlasHandPoseStatusTest.class,
-   us.ihmc.atlas.hikSim.AtlasWholeBodyIkSolverTest.class,
-   us.ihmc.atlas.hikSim.AtlasWholeBodyTrajectoryTest.class,
-   us.ihmc.atlas.initialSetup.AtlasDrivingInitialSetupTest.class,
-   us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class
+   us.ihmc.atlas.behaviorTests.AtlasWalkToLocationBehaviorTest.class
 })
 
 public class AtlasDFastTestSuite

@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point2d;
 import java.util.ArrayList;
@@ -77,7 +77,7 @@ public class ConvexHullCalculator2dTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsConvexAndClockwiseBadCase()
    {
@@ -96,7 +96,7 @@ public class ConvexHullCalculator2dTest
          assertTrue(points.size() > convexHull.size());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConvexAndClockwiseVersusConvexHull()
    {
@@ -121,7 +121,7 @@ public class ConvexHullCalculator2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimplified7PointProblem()
    {
@@ -164,10 +164,10 @@ public class ConvexHullCalculator2dTest
 
    private double slope(Point2d point1, Point2d point2)
    {
-      return (point2.y - point1.y) / (point2.x - point1.x);
+      return (point2.getY() - point1.getY()) / (point2.getX() - point1.getX());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void test7PointProblem()
    {
@@ -194,7 +194,7 @@ public class ConvexHullCalculator2dTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testThreePointProblem()
    {
@@ -221,7 +221,7 @@ public class ConvexHullCalculator2dTest
 //    }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testEqualXProblem()
    {
@@ -261,18 +261,18 @@ public class ConvexHullCalculator2dTest
 //    }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetUpperHull()
    {
       ArrayList<Point2d> coincidalPointsRet = new ArrayList<Point2d>();
       ConvexHullCalculator2d.getUpperHull(coincidalPointsRet, coincidalPoints);
-      assertEquals("Coincidal points not handled properly", coincidalPoints.get(0).x, coincidalPointsRet.get(0).x, 1e-7);
-      assertEquals("Coincidal points not handled properly", coincidalPoints.get(0).y, coincidalPointsRet.get(0).y, 1e-7);
+      assertEquals("Coincidal points not handled properly", coincidalPoints.get(0).getX(), coincidalPointsRet.get(0).getX(), 1e-7);
+      assertEquals("Coincidal points not handled properly", coincidalPoints.get(0).getY(), coincidalPointsRet.get(0).getY(), 1e-7);
 
       ArrayList<Point2d> twoPointsEqualXRet = new ArrayList<Point2d>();
       ConvexHullCalculator2d.getUpperHull(twoPointsEqualXRet, twoPointsEqualX);
-      assertEquals("2 points with equal x-coordinates not handled correctly", twoPointsEqualX.get(1).y, twoPointsEqualXRet.get(0).y, 1e-7);
+      assertEquals("2 points with equal x-coordinates not handled correctly", twoPointsEqualX.get(1).getY(), twoPointsEqualXRet.get(0).getY(), 1e-7);
 
       ArrayList<Point2d> fourPointsRet = new ArrayList<Point2d>();
       ConvexHullCalculator2d.getUpperHull(fourPointsRet, fourPoints);
@@ -305,19 +305,19 @@ public class ConvexHullCalculator2dTest
        */
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetLowerHull()
    {
       ArrayList<Point2d> coincidalPointsRet = new ArrayList<Point2d>();
       ConvexHullCalculator2d.getLowerHull(coincidalPointsRet, coincidalPoints);
       
-      assertEquals("Coincidal points not handled properly", coincidalPoints.get(0).x, coincidalPointsRet.get(0).x, 1e-7);
-      assertEquals("Coincidal points not handled properly", coincidalPoints.get(0).y, coincidalPointsRet.get(0).y, 1e-7);
+      assertEquals("Coincidal points not handled properly", coincidalPoints.get(0).getX(), coincidalPointsRet.get(0).getX(), 1e-7);
+      assertEquals("Coincidal points not handled properly", coincidalPoints.get(0).getY(), coincidalPointsRet.get(0).getY(), 1e-7);
 
       ArrayList<Point2d> twoPointsEqualXRet = new ArrayList<Point2d>();
       ConvexHullCalculator2d.getLowerHull(twoPointsEqualXRet, twoPointsEqualX);
-      assertEquals("2 points with equal x-coordinates not handled correctly", twoPointsEqualX.get(0).y, twoPointsEqualXRet.get(0).y, 1e-7);
+      assertEquals("2 points with equal x-coordinates not handled correctly", twoPointsEqualX.get(0).getY(), twoPointsEqualXRet.get(0).getY(), 1e-7);
 
       ArrayList<Point2d> fourPointsRet = new ArrayList<Point2d>();
       ConvexHullCalculator2d.getLowerHull(fourPointsRet, fourPoints);
@@ -351,14 +351,14 @@ public class ConvexHullCalculator2dTest
        */
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetConvexHull()
    {
       ArrayList<Point2d> coincidalPointsRet = new ArrayList<Point2d>();
       ConvexHullCalculator2d.getConvexHull(coincidalPointsRet, coincidalPoints);
-      assertEquals("Coincidal points not handled properly", coincidalPoints.get(0).x, coincidalPointsRet.get(0).x, 1e-7);
-      assertEquals("Coincidal points not handled properly", coincidalPoints.get(0).y, coincidalPointsRet.get(0).y, 1e-7);
+      assertEquals("Coincidal points not handled properly", coincidalPoints.get(0).getX(), coincidalPointsRet.get(0).getX(), 1e-7);
+      assertEquals("Coincidal points not handled properly", coincidalPoints.get(0).getY(), coincidalPointsRet.get(0).getY(), 1e-7);
       assertEquals("Size of returned list not correct for 2 coincidal points case", 1, coincidalPointsRet.size());
       boolean coincidalPointsTestBoolean = coincidalPointsRet.get(0).equals(coincidalPoints.get(0)) || coincidalPointsRet.get(0).equals(coincidalPoints.get(1));
       assertTrue("Reference to returned point is not the same as reference to either input point", coincidalPointsTestBoolean);

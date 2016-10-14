@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package>
+  <name>lla_quadruped_description</name>
+  <version>0.0.1</version>
+  <description>The lla_quadruped_description package</description>
+  <maintainer email="bshrewsbury@ihmc.us">shrews</maintainer>
+  <license>Apache 2.0</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>xacro</build_depend>
+  <run_depend>xacro</run_depend>
+</package>

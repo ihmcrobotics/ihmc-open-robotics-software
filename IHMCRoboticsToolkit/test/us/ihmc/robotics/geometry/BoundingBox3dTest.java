@@ -11,14 +11,14 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class BoundingBox3dTest
 {
    double epsilon = 0.00001;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCreateUsingCenterAndPlusMinusVector()
    {
@@ -32,7 +32,7 @@ public class BoundingBox3dTest
       assertEquals(box.getZMax(), 1.0, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMinPoint()
    {
@@ -54,14 +54,14 @@ public class BoundingBox3dTest
       assertEquals(minPoint.getZ(), lowerLeftPoint.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMinPoint_2()
    {
       Point3d lowerLeftPoint = new Point3d(0.0, 0.1, 0.6);
       Point3d upperRightPoint = new Point3d(2.0, 2.1, 5.6);
-      BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.x, lowerLeftPoint.y, lowerLeftPoint.z, upperRightPoint.x, upperRightPoint.y,
-                                       upperRightPoint.z);
+      BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.getX(), lowerLeftPoint.getY(), lowerLeftPoint.getZ(), upperRightPoint.getX(), upperRightPoint.getY(),
+                                       upperRightPoint.getZ());
 
       Point3d minPoint = new Point3d();
       boundingBox3d.getMinPoint(minPoint);
@@ -77,34 +77,34 @@ public class BoundingBox3dTest
       assertEquals(minPoint.getZ(), lowerLeftPoint.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testVerifyBounds()
    {
       Point3d lowerLeftPoint = new Point3d(0.0, 0.1, 0.6);
       Point3d upperRightPoint = new Point3d(2.0, 2.1, 5.6);
-      BoundingBox3d boundingBox3d = new BoundingBox3d(4.0, lowerLeftPoint.y, lowerLeftPoint.z, upperRightPoint.x, upperRightPoint.y, upperRightPoint.z);
+      BoundingBox3d boundingBox3d = new BoundingBox3d(4.0, lowerLeftPoint.getY(), lowerLeftPoint.getZ(), upperRightPoint.getX(), upperRightPoint.getY(), upperRightPoint.getZ());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testVerifyBounds_2()
    {
       Point3d lowerLeftPoint = new Point3d(0.0, 0.1, 0.6);
       Point3d upperRightPoint = new Point3d(2.0, 2.1, 5.6);
-      BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.x, 4.0, lowerLeftPoint.z, upperRightPoint.x, upperRightPoint.y, upperRightPoint.z);
+      BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.getX(), 4.0, lowerLeftPoint.getZ(), upperRightPoint.getX(), upperRightPoint.getY(), upperRightPoint.getZ());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testVerifyBounds_3()
    {
       Point3d lowerLeftPoint = new Point3d(0.0, 0.1, 0.6);
       Point3d upperRightPoint = new Point3d(2.0, 2.1, 5.6);
-      BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.x, lowerLeftPoint.y, 10.0, upperRightPoint.x, upperRightPoint.y, upperRightPoint.z);
+      BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.getX(), lowerLeftPoint.getY(), 10.0, upperRightPoint.getX(), upperRightPoint.getY(), upperRightPoint.getZ());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMin()
    {
@@ -112,16 +112,16 @@ public class BoundingBox3dTest
       for (int i = 0; i < 1000; i++)
       {
          Point3d lowerLeftPoint = new Point3d(rand.nextDouble() * 1000, rand.nextDouble() * 1000, rand.nextDouble() * 1000);
-         Point3d upperRightPoint = new Point3d(lowerLeftPoint.x + 1.0, lowerLeftPoint.y + 1.0, lowerLeftPoint.z + 1.0);
-         BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.x, lowerLeftPoint.y, lowerLeftPoint.z, upperRightPoint.x, upperRightPoint.y,
-                                          upperRightPoint.z);
-         assertEquals(boundingBox3d.getXMin(), lowerLeftPoint.x, 1e-7);
-         assertEquals(boundingBox3d.getYMin(), lowerLeftPoint.y, 1e-7);
-         assertEquals(boundingBox3d.getZMin(), lowerLeftPoint.z, 1e-7);
+         Point3d upperRightPoint = new Point3d(lowerLeftPoint.getX() + 1.0, lowerLeftPoint.getY() + 1.0, lowerLeftPoint.getZ() + 1.0);
+         BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.getX(), lowerLeftPoint.getY(), lowerLeftPoint.getZ(), upperRightPoint.getX(), upperRightPoint.getY(),
+                                          upperRightPoint.getZ());
+         assertEquals(boundingBox3d.getXMin(), lowerLeftPoint.getX(), 1e-7);
+         assertEquals(boundingBox3d.getYMin(), lowerLeftPoint.getY(), 1e-7);
+         assertEquals(boundingBox3d.getZMin(), lowerLeftPoint.getZ(), 1e-7);
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMax()
    {
@@ -129,16 +129,16 @@ public class BoundingBox3dTest
       for (int i = 0; i < 1000; i++)
       {
          Point3d lowerLeftPoint = new Point3d(rand.nextDouble() * 1000, rand.nextDouble() * 1000, rand.nextDouble() * 1000);
-         Point3d upperRightPoint = new Point3d(lowerLeftPoint.x + 1.0, lowerLeftPoint.y + 1.0, lowerLeftPoint.z + 1.0);
-         BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.x, lowerLeftPoint.y, lowerLeftPoint.z, upperRightPoint.x, upperRightPoint.y,
-                                          upperRightPoint.z);
-         assertEquals(boundingBox3d.getXMax(), upperRightPoint.x, 1e-7);
-         assertEquals(boundingBox3d.getYMax(), upperRightPoint.y, 1e-7);
-         assertEquals(boundingBox3d.getZMax(), upperRightPoint.z, 1e-7);
+         Point3d upperRightPoint = new Point3d(lowerLeftPoint.getX() + 1.0, lowerLeftPoint.getY() + 1.0, lowerLeftPoint.getZ() + 1.0);
+         BoundingBox3d boundingBox3d = new BoundingBox3d(lowerLeftPoint.getX(), lowerLeftPoint.getY(), lowerLeftPoint.getZ(), upperRightPoint.getX(), upperRightPoint.getY(),
+                                          upperRightPoint.getZ());
+         assertEquals(boundingBox3d.getXMax(), upperRightPoint.getX(), 1e-7);
+         assertEquals(boundingBox3d.getYMax(), upperRightPoint.getY(), 1e-7);
+         assertEquals(boundingBox3d.getZMax(), upperRightPoint.getZ(), 1e-7);
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMaxPoint()
    {
@@ -160,7 +160,7 @@ public class BoundingBox3dTest
       assertEquals(maxPoint.getZ(), upperRightPoint.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetCenterPointCopy()
    {
@@ -184,14 +184,14 @@ public class BoundingBox3dTest
 
          // determine center point
          Point3d actualCenterPoint = new Point3d();
-         BoundingBox3d.getCenterPointCopy(actualCenterPoint);
+         BoundingBox3d.getCenterPoint(actualCenterPoint);
          assertEquals(expectedCenterPoint.getX(), actualCenterPoint.getX(), epsilon);
          assertEquals(expectedCenterPoint.getY(), actualCenterPoint.getY(), epsilon);
          assertEquals(expectedCenterPoint.getZ(), actualCenterPoint.getZ(), epsilon);
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsAtOrAbove()
    {
@@ -205,7 +205,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3d.isBoxAtOrAbove(5.0));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsAtOrBelow()
    {
@@ -219,7 +219,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3d.isBoxAtOrBelow(2.69));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsAtOrLeftOf()
    {
@@ -233,7 +233,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3d.isBoxAtOrLeftOf(3.0));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsAtOrRightOf()
    {
@@ -247,7 +247,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3d.isBoxAtOrRightOf(1.0));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsBoxAtOrInFrontOf()
    {
@@ -261,7 +261,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3d.isBoxAtOrInFrontOf(0.6));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsBoxAtOrBehind()
    {
@@ -275,7 +275,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3d.isBoxAtOrBehind(-0.2));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsInside()
    {
@@ -298,7 +298,7 @@ public class BoundingBox3dTest
          BoundingBox3d BoundingBox3d = new BoundingBox3d(lowerLeftPoint, upperRightPoint);
 
          Point3d actualCenterPoint = new Point3d();
-         BoundingBox3d.getCenterPointCopy(actualCenterPoint);
+         BoundingBox3d.getCenterPoint(actualCenterPoint);
 
          Point3d inPoint = new Point3d(centerX + (randomX * 0.9), centerY + (randomY * 0.9), centerZ + (randomZ * 0.9));
          assertTrue(BoundingBox3d.isInside(inPoint));
@@ -341,7 +341,7 @@ public class BoundingBox3dTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPointIntersects()
    {
@@ -383,7 +383,7 @@ public class BoundingBox3dTest
       assertTrue(BoundingBox3dA.intersects(start, end));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testBoxIntersects()
    {
@@ -429,7 +429,7 @@ public class BoundingBox3dTest
       assertFalse(BoundingBox3dA.intersects(BoundingBox3dG));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructors()
    {
@@ -444,9 +444,9 @@ public class BoundingBox3dTest
       assertTrue(BoundingBox3dA.intersects(BoundingBox3dB));
 
       Point3d expectedCenterPoint = new Point3d();
-      BoundingBox3dA.getCenterPointCopy(expectedCenterPoint);
+      BoundingBox3dA.getCenterPoint(expectedCenterPoint);
       Point3d actualCenterPoint = new Point3d();
-      BoundingBox3dB.getCenterPointCopy(actualCenterPoint);
+      BoundingBox3dB.getCenterPoint(actualCenterPoint);
       assertEquals(expectedCenterPoint.getX(), actualCenterPoint.getX(), epsilon);
       assertEquals(expectedCenterPoint.getY(), actualCenterPoint.getY(), epsilon);
       assertEquals(expectedCenterPoint.getZ(), actualCenterPoint.getZ(), epsilon);
@@ -456,15 +456,15 @@ public class BoundingBox3dTest
       assertTrue(BoundingBox3dA.intersects(BoundingBox3dC));
 
       expectedCenterPoint = new Point3d();
-      BoundingBox3dA.getCenterPointCopy(expectedCenterPoint);
+      BoundingBox3dA.getCenterPoint(expectedCenterPoint);
       actualCenterPoint = new Point3d();
-      BoundingBox3dC.getCenterPointCopy(actualCenterPoint);
+      BoundingBox3dC.getCenterPoint(actualCenterPoint);
       assertEquals(expectedCenterPoint.getX(), actualCenterPoint.getX(), epsilon);
       assertEquals(expectedCenterPoint.getY(), actualCenterPoint.getY(), epsilon);
       assertEquals(expectedCenterPoint.getZ(), actualCenterPoint.getZ(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testUnion()
    {
@@ -488,7 +488,7 @@ public class BoundingBox3dTest
       JUnitTools.assertTuple3dEquals(upperRightPointB, maxPoint, epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testToString()
    {

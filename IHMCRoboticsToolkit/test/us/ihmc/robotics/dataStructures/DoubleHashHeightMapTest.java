@@ -14,14 +14,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javax.vecmath.GMatrix;
 import javax.vecmath.Point3d;
 
+import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.geometry.InsufficientDataException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class DoubleHashHeightMapTest extends AbstractHeightMapTest
 {
@@ -33,7 +33,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
    private static final double eps = 1e-7;
    private static final double NaN = Double.NaN;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSinglePointOld()
    {
@@ -64,13 +64,14 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       assertSinglePointGridHandlesPoint(x, y, xIndex, yIndex, z);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGettingAreasOld()
    {
       double gridResolution = 1;
       HeightMapWithPoints map = new DoubleHashHeightMap(gridResolution);
-      GMatrix matrix = new GMatrix(7, 7, new double[] { 
+      DenseMatrix64F matrix = new DenseMatrix64F(7, 7);
+      matrix.setData(new double[] { 
             0, 0, 0, 0, 3, 0, 0, 
             0, 0, 8, 8, 0, 0, 0, 
             0, 0, 0, 0, 0, 1, 0, 
@@ -115,7 +116,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUnhandledPointsOld()
    {
@@ -149,7 +150,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGrabCellsOld()
    {
@@ -183,7 +184,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       assertEquals(z, simpleMap.getHeightAtPoint(xIndex * RESOLUTION, yIndex * RESOLUTION), eps);
    }
 
-	@DeployableTestMethod(estimatedDuration = 3.0)
+	@ContinuousIntegrationTest(estimatedDuration = 2.0)
 	@Test(timeout = 30000)
    public void rowModificationSynchronizationTestOld()
    {
@@ -211,7 +212,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testUnhandledPoints()
    {
@@ -288,13 +289,14 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testKernelMaskingOld() throws InsufficientDataException
    {
       double b = 10000;    // borderOfExpectedFootPlacement
        double gridResolution = 0.01;
-      GMatrix matrix = new GMatrix(11, 11, new double[]
+      DenseMatrix64F matrix = new DenseMatrix64F(11, 11);
+      matrix.setData(new double[]
       {
          b, b, b, b, b, b, b, b, b, b, b, 
          b, b, b, 0, 0, 0, 0, 0, b, b, b, 
@@ -314,7 +316,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
 
          public boolean isIncluded(Point3d test)
          {
-            return test.z<20;
+            return test.getZ()<20;
          }
          
       });

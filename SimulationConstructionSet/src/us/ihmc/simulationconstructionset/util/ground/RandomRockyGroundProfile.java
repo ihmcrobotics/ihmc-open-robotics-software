@@ -175,9 +175,9 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
 
    public void surfaceNormalAt(double x_world, double y_world, double z_world, Vector3d normal)
    {
-      normal.x = 0.0;
-      normal.y = 0.0;
-      normal.z = 1.0;
+      normal.setX(0.0);
+      normal.setY(0.0);
+      normal.setZ(1.0);
 
       int xPos1 = (int) Math.floor((x_world - boundingBox.getXMin()) / resolution);
       int yPos1 = (int) Math.floor((y_world - boundingBox.getYMin()) / resolution);

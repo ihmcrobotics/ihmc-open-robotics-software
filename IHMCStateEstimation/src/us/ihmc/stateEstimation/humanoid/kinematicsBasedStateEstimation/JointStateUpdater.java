@@ -28,7 +28,7 @@ public class JointStateUpdater
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final RigidBody rootBody;
 
-   private final OneDoFJoint[] oneDoFJoints;
+   private OneDoFJoint[] oneDoFJoints;
    private final SensorOutputMapReadOnly sensorMap;
    private final IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator;
 
@@ -49,6 +49,11 @@ public class JointStateUpdater
       iMUBasedJointVelocityEstimator = createIMUBasedJointVelocityEstimator(sensorOutputMapReadOnly, stateEstimatorParameters, registry);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setJointsToUpdate(OneDoFJoint[] oneDoFJoints)
+   {
+      this.oneDoFJoints = oneDoFJoints;
    }
 
    public IMUBasedJointVelocityEstimator createIMUBasedJointVelocityEstimator(SensorOutputMapReadOnly sensorOutputMapReadOnly,
@@ -79,7 +84,7 @@ public class JointStateUpdater
       if (pelvisIMU != null && chestIMU != null)
       {
          double estimatorDT = stateEstimatorParameters.getEstimatorDT();
-         double slopTime = stateEstimatorParameters.getPelvisVelocityBacklashSlopTime();
+         double slopTime = stateEstimatorParameters.getIMUJointVelocityEstimationBacklashSlopTime();
          IMUBasedJointVelocityEstimator iMUBasedJointVelocityEstimator = new IMUBasedJointVelocityEstimator(pelvisIMU, chestIMU, sensorOutputMapReadOnly, estimatorDT, slopTime, parentRegistry);
          iMUBasedJointVelocityEstimator.compute();
          iMUBasedJointVelocityEstimator.setAlphaFuse(stateEstimatorParameters.getAlphaIMUsForSpineJointVelocityEstimation());
@@ -92,12 +97,12 @@ public class JointStateUpdater
          {
             PrintTools.warn("Pelvis IMU is null.");
          }
-         
+
          if(chestIMU == null)
          {
-            PrintTools.warn("Pelvis IMU is null.");
+            PrintTools.warn("Chest IMU is null.");
          }
-         
+
          return null;
       }
    }
@@ -122,7 +127,7 @@ public class JointStateUpdater
          double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
          double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
          boolean jointEnabledIndicator = sensorMap.isJointEnabled(oneDoFJoint);
-         
+
          oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setEnabled(jointEnabledIndicator);
 

@@ -1,7 +1,5 @@
 package us.ihmc.simulationconstructionset.util.graphs;
 
-
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -46,6 +44,7 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
 import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class JFreeGraph extends JPanel
 {
@@ -61,11 +60,10 @@ public class JFreeGraph extends JPanel
 
    private AxisScaling xAxisScaling;
    private AxisScaling yAxisScaling;
-   
+
    public enum AxisScaling
    {
-      CONSTANT,
-      LOGARITHMIC
+      CONSTANT, LOGARITHMIC
    }
 
    public JFreeChart getJFreeChart()
@@ -85,7 +83,6 @@ public class JFreeGraph extends JPanel
 
       return returnGraph;
    }
-
 
    public JFreeGraph(String title)
 
@@ -121,29 +118,23 @@ public class JFreeGraph extends JPanel
    {
       xySeriesCollection.removeAllSeries();
 
-
       for (JFreePlot plot : plots)
       {
          xySeriesCollection.addSeries(plot);
       }
 
-
-      graph = ChartFactory.createXYLineChart(title,    // Title
-              xLabel,    // x-axis Label
-              yLabel,    // y-axis Label
-              xySeriesCollection,    // Dataset
-              PlotOrientation.VERTICAL,    // Plot Orientation
-              false,    // Show Legend
-              true,    // Use tooltips
-              false    // Configure chart to generate URLs?
-                 );
-
+      graph = ChartFactory.createXYLineChart(title, // Title
+            xLabel, // x-axis Label
+            yLabel, // y-axis Label
+            xySeriesCollection, // Dataset
+            PlotOrientation.VERTICAL, // Plot Orientation
+            false, // Show Legend
+            true, // Use tooltips
+            false // Configure chart to generate URLs?
+      );
 
       // set style for graph
       setUpVisuals();
-
-
-
 
       // ChartPanel chartpanel = new ChartPanel(graph, true, true, true, true, true);
 
@@ -172,7 +163,7 @@ public class JFreeGraph extends JPanel
    private void setXAxis()
    {
       ValueAxis axis;
-      switch(xAxisScaling)
+      switch (xAxisScaling)
       {
       case LOGARITHMIC:
          axis = new LogarithmicAxis(xLabel);
@@ -184,11 +175,11 @@ public class JFreeGraph extends JPanel
       }
       graph.getXYPlot().setDomainAxis(0, axis);
    }
-   
+
    private void setYAxis()
    {
       ValueAxis axis;
-      switch(yAxisScaling)
+      switch (yAxisScaling)
       {
       case LOGARITHMIC:
          axis = new LogarithmicAxis(xLabel);
@@ -198,10 +189,10 @@ public class JFreeGraph extends JPanel
          axis = new NumberAxis(xLabel);
          break;
       }
-      
+
       graph.getXYPlot().setRangeAxis(0, axis);
    }
-   
+
    public void setXAxisLabel(String label)
    {
       this.xLabel = label;
@@ -215,19 +206,18 @@ public class JFreeGraph extends JPanel
       setYAxis();
 
    }
-   
+
    public void setXaxisScaling(AxisScaling scaling)
    {
       this.xAxisScaling = scaling;
       setXAxis();
    }
-   
+
    public void setYaxisScaling(AxisScaling scaling)
    {
       this.yAxisScaling = scaling;
       setYAxis();
    }
-
 
    public void setYAxisTickUnit(double tickUnit)
    {
@@ -287,28 +277,26 @@ public class JFreeGraph extends JPanel
 
       return null;
    }
-   
+
    public void enableGrid(boolean enable)
    {
-      if(enable)
+      if (enable)
       {
          BasicStroke dotted = new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, new float[] {1.0f, 6.0f}, 0.0f);
-         graph.getXYPlot().setDomainGridlinesVisible(true);  
-         graph.getXYPlot().setRangeGridlinesVisible(true);  
-         graph.getXYPlot().setRangeGridlinePaint(Color.black);  
-         graph.getXYPlot().setDomainGridlinePaint(Color.black);  
+         graph.getXYPlot().setDomainGridlinesVisible(true);
+         graph.getXYPlot().setRangeGridlinesVisible(true);
+         graph.getXYPlot().setRangeGridlinePaint(Color.black);
+         graph.getXYPlot().setDomainGridlinePaint(Color.black);
          graph.getXYPlot().setRangeGridlineStroke(dotted);
          graph.getXYPlot().setDomainGridlineStroke(dotted);
-         
+
       }
       else
       {
-         graph.getXYPlot().setDomainGridlinesVisible(false);  
-         graph.getXYPlot().setRangeGridlinesVisible(false);  
+         graph.getXYPlot().setDomainGridlinesVisible(false);
+         graph.getXYPlot().setRangeGridlinesVisible(false);
       }
    }
-
-
 
    public static JFreeGraph createDataVsTimeGraph(DataBufferEntry timeEntry, DataBufferEntry dataEntry)
    {
@@ -325,13 +313,13 @@ public class JFreeGraph extends JPanel
       return graph;
    }
 
-   public static JFreeGraph createTorqueVsSpeedGraph(DataBufferEntry speedEntry, DataBufferEntry torqueEntry)
+   public static JFreeGraph createDataOneVsDataTwoGraph(DataBufferEntry dataOneEntry, DataBufferEntry dataTwoEntry)
    {
-      String speedVariableName1 = speedEntry.getVariable().getName();
-      String torqueVariableName1 = torqueEntry.getVariable().getName();
-      JFreePlot plot = new JFreePlot((speedVariableName1 + "_Vs_" + torqueVariableName1), speedEntry, torqueEntry, false, true);
+      String dataOneVariableName = dataOneEntry.getVariable().getName();
+      String dataTwoVariableName = dataTwoEntry.getVariable().getName();
+      JFreePlot plot = new JFreePlot((dataOneVariableName + "_Vs_" + dataTwoVariableName), dataOneEntry, dataTwoEntry, false, true);
 
-      JFreeGraph graph = new JFreeGraph((speedVariableName1 + "_Vs_" + torqueVariableName1), speedVariableName1, torqueVariableName1, plot);
+      JFreeGraph graph = new JFreeGraph((dataOneVariableName + "_Vs_" + dataTwoVariableName), dataOneVariableName, dataTwoVariableName, plot);
 
       return graph;
 
@@ -339,18 +327,12 @@ public class JFreeGraph extends JPanel
 
    void saveToSVG(File svgFileName) throws IOException
    {
-
-
       DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
       Document document = domImpl.createDocument(null, "svg", null);
 
       // Create an instance of the SVG Generator
       SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-
-
-
       ChartPanel chartpanel = new ChartPanel(graph, true, true, true, false, true);
-
 
       JFrame tmpFrame = new JFrame();
       tmpFrame.getContentPane().add(chartpanel);
@@ -384,9 +366,9 @@ public class JFreeGraph extends JPanel
    {
       int x = 1024, y = 768;
       saveToPDF(pdfFileName, x, y);
-      
+
    }
-   
+
    public void saveToPDF(File pdfFileName, int x, int y)
    {
       try
@@ -399,9 +381,9 @@ public class JFreeGraph extends JPanel
          PDPageContentStream contentStream = new PDPageContentStream(document, page);
 
          BufferedImage image = new BufferedImage(x, y, BufferedImage.TYPE_INT_RGB);
-         Graphics2D g2 = image.createGraphics();
-         graph.draw(g2, new Rectangle(x, y));
-         g2.dispose();
+         Graphics2D graphics2D = image.createGraphics();
+         graph.draw(graphics2D, new Rectangle(x, y));
+         graphics2D.dispose();
 
          PDPixelMap pixelMap = new PDPixelMap(document, image);
 
@@ -414,7 +396,7 @@ public class JFreeGraph extends JPanel
       }
       catch (IOException | COSVisitorException e)
       {
-         e.printStackTrace();
+         PrintTools.error(this, "Could not save pdf to file " + pdfFileName);
       }
    }
 
@@ -440,7 +422,6 @@ public class JFreeGraph extends JPanel
       graph.getXYPlot().setRangeGridlinesVisible(false);
       graph.getXYPlot().setRangeGridlineStroke(new BasicStroke(3f));
 
-
       // set style for boarder line
       graph.getXYPlot().setOutlineVisible(false);
       graph.getXYPlot().setOutlinePaint(Color.BLACK);
@@ -461,20 +442,18 @@ public class JFreeGraph extends JPanel
          setPlotColor(i, plots.get(i).getColor());
          setPlotStroke(i, plots.get(i).getBasicStroke());
       }
-//      graph.getLegend().setItemFont(new Font("SansSerif", Font.PLAIN, 16));
+      //      graph.getLegend().setItemFont(new Font("SansSerif", Font.PLAIN, 16));
       graph.getTitle().setFont(new Font("SansSerif", Font.BOLD, 26));
-     graph.getXYPlot().getDomainAxis().setTickLabelFont(new Font("SansSerif", Font.PLAIN, 20));
-     graph.getXYPlot().getRangeAxis().setTickLabelFont(new Font("SansSerif", Font.PLAIN, 20));
-     graph.getXYPlot().getDomainAxis().setLabelFont(new Font("SansSerif", Font.BOLD, 22));
-     graph.getXYPlot().getRangeAxis().setLabelFont(new Font("SansSerif", Font.BOLD, 22));
+      graph.getXYPlot().getDomainAxis().setTickLabelFont(new Font("SansSerif", Font.PLAIN, 20));
+      graph.getXYPlot().getRangeAxis().setTickLabelFont(new Font("SansSerif", Font.PLAIN, 20));
+      graph.getXYPlot().getDomainAxis().setLabelFont(new Font("SansSerif", Font.BOLD, 22));
+      graph.getXYPlot().getRangeAxis().setLabelFont(new Font("SansSerif", Font.BOLD, 22));
    }
 
    public void addLegend(LegendTitle legend)
    {
       legend.setItemFont(new Font("SansSerif", Font.PLAIN, 22));
       graph.addLegend(legend);
-      
    }
-
 
 }

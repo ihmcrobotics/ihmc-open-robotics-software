@@ -13,7 +13,6 @@ import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-
 public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNormals
 {
    private BoundingBox3d boundingBox = null;
@@ -36,6 +35,11 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       return name;
    }
 
+   public void addSphere(double xCenter, double yCenter, double zCenter, double radius, AppearanceDefinition appearance)
+   {
+      SphereTerrainObject sphere = new SphereTerrainObject(xCenter, yCenter, zCenter, radius, appearance);
+      addTerrainObject(sphere);
+   }
 
    public void addBox(double xStart, double yStart, double xEnd, double yEnd, double height, AppearanceDefinition appearance)
    {
@@ -61,7 +65,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       RotatableBoxTerrainObject box = new RotatableBoxTerrainObject(box3d, appearanceDefinition);
       addTerrainObject(box);
    }
-   
+
    public void addRotatableBox(Box3d box, AppearanceDefinition appearanceDefinition)
    {
       RotatableBoxTerrainObject terrainObject = new RotatableBoxTerrainObject(box, appearanceDefinition);
@@ -79,7 +83,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       CylinderTerrainObject cylinder = new CylinderTerrainObject(location, height, radius, appearance);
       addTerrainObject(cylinder);
    }
-   
+
    public void addCone(double xMiddle, double yMiddle, double bottomRadius, double topRadius, double height, AppearanceDefinition appearance)
    {
       ConeTerrainObject cone = new ConeTerrainObject(xMiddle, yMiddle, bottomRadius, topRadius, height, appearance);
@@ -91,7 +95,6 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       ConeTerrainObject cone = new ConeTerrainObject(xMiddle, yMiddle, bottomRadius, topRadius, height);
       addTerrainObject(cone);
    }
-
 
    public void addRotatedRamp(double xCenter, double yCenter, double xRun, double yWidth, double height, double yawDegrees, AppearanceDefinition appearance)
    {
@@ -155,7 +158,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
 
    private final Point3d localIntersection = new Point3d();
    private final Vector3d localNormal = new Vector3d();
-   
+
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       double smallestDistance = Double.MAX_VALUE;
@@ -167,7 +170,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       intersectionToPack.set(x, y, 0.0);
       normalToPack.set(0.0, 0.0, 1.0);
 
-      for(int i = 0; i < terrainObjects.size(); i++)
+      for (int i = 0; i < terrainObjects.size(); i++)
       {
          TerrainObject3D terrainObject = terrainObjects.get(i);
          if (terrainObject.isClose(x, y, z))
@@ -190,11 +193,11 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       return isInside;
    }
 
-
    public boolean isClose(double x, double y, double z)
    {
-      if (boundingBox == null) return false;
-      
+      if (boundingBox == null)
+         return false;
+
       return boundingBox.isInside(x, y, z);
    }
 
@@ -223,7 +226,6 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
          }
       }
    }
-
 
    public void addBoundingBoxVisualizerToLinkGraphics(Graphics3DObject linkGraphics, AppearanceDefinition appearance)
    {
@@ -271,7 +273,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
    {
       double heightAt = Double.NEGATIVE_INFINITY;
 
-      for (int i=0; i<terrainObjects.size(); i++)
+      for (int i = 0; i < terrainObjects.size(); i++)
       {
          TerrainObject3D terrainObject = terrainObjects.get(i);
 
@@ -281,7 +283,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
             if (heightMap != null)
             {
                double localHeightAt = heightMap.heightAt(x, y, z);
-               if (localHeightAt > heightAt) 
+               if (localHeightAt > heightAt)
                {
                   heightAt = localHeightAt;
                }
@@ -291,12 +293,12 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
 
       return heightAt;
    }
-   
+
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
       double heightAt = Double.NEGATIVE_INFINITY;
 
-      for (int i=0; i<terrainObjects.size(); i++)
+      for (int i = 0; i < terrainObjects.size(); i++)
       {
          TerrainObject3D terrainObject = terrainObjects.get(i);
 
@@ -306,7 +308,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
             if (heightMap != null)
             {
                double localHeightAt = heightMap.heightAt(x, y, z);
-               if (localHeightAt > heightAt) 
+               if (localHeightAt > heightAt)
                {
                   heightAt = heightMap.heightAndNormalAt(x, y, z, normalToPack);
                }
@@ -336,6 +338,5 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
    {
       return boundingBox.getYMax();
    }
-   
-   
+
 }

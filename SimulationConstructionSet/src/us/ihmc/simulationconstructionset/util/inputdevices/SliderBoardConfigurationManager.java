@@ -10,6 +10,16 @@ public class SliderBoardConfigurationManager extends MidiSliderBoard
 {
    protected final Hashtable<String, Hashtable> configurations = new Hashtable<String, Hashtable>();
 
+   public SliderBoardConfigurationManager(SimulationConstructionSet scs, boolean useVirtualSliderBoard, boolean showSliderboardVisualizer)
+   {
+      super(scs, useVirtualSliderBoard, showSliderboardVisualizer);
+   }
+
+   public SliderBoardConfigurationManager(SimulationConstructionSet scs, boolean useVirtualSliderBoard)
+   {
+      super(scs, useVirtualSliderBoard);
+   }
+
    public SliderBoardConfigurationManager(SimulationConstructionSet scs)
    {
       super(scs);
@@ -36,6 +46,7 @@ public class SliderBoardConfigurationManager extends MidiSliderBoard
       {
          clearControls();
          addListOfControls(configurations.get(name).values());
+         super.setTitle(name);
       }
       else
       {

@@ -21,8 +21,8 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class RigidBodyInertiaTest
 {
@@ -47,7 +47,7 @@ public class RigidBodyInertiaTest
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            transformToParent.setEuler(1.0, 2.0, 3.0);
+            transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
             RigidBodyTransform translation = new RigidBodyTransform();
             translation.setTranslation(new Vector3d(3.0, 4.0, 5.0));
             transformToParent.multiply(translation);
@@ -61,7 +61,7 @@ public class RigidBodyInertiaTest
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            transformToParent.setEuler(1.0, 2.0, 3.0);
+            transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
             RigidBodyTransform translation = new RigidBodyTransform();
             translation.setTranslation(new Vector3d(3.0, 4.0, 5.0));
             transformToParent.multiply(translation);
@@ -75,7 +75,7 @@ public class RigidBodyInertiaTest
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            transformToParent.setEuler(1.0, 2.0, 3.0);
+            transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
          }
       };
 
@@ -86,7 +86,7 @@ public class RigidBodyInertiaTest
       inertia = new RigidBodyInertia(frameB, getRandomSymmetricPositiveDefiniteMatrix(), getRandomPositiveNumber());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeKineticCoEnergyNoFrameChange()
    {
@@ -94,7 +94,7 @@ public class RigidBodyInertiaTest
       assertKineticCoEnergyFrameIndependent(twist, inertia);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeKineticCoEnergyWithFrameChange()
    {
@@ -105,7 +105,7 @@ public class RigidBodyInertiaTest
       assertKineticCoEnergyFrameIndependent(twist, inertia);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrame()
    {
@@ -126,7 +126,7 @@ public class RigidBodyInertiaTest
       JUnitTools.assertMatrixEquals(inertiaCheap, inertiaExpensive.getMatrix(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameKineticCoEnergyConsistency()
    {
@@ -144,7 +144,7 @@ public class RigidBodyInertiaTest
       assertEquals(kineticCoEnergyFrameB, kineticCoEnergyFrameC, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSantiyIfChangeFramePurelyRotational()
    {
@@ -179,14 +179,14 @@ public class RigidBodyInertiaTest
       // There exists a unique lower triangular matrix L, with strictly positive diagonal elements, that allows the factorization of M into M = LL*.
 
       Matrix3d lowerTriangular = new Matrix3d();
-      lowerTriangular.m00 = getRandomPositiveNumber();
+      lowerTriangular.setM00(getRandomPositiveNumber());
 
-      lowerTriangular.m10 = random.nextDouble() - 0.5;
-      lowerTriangular.m11 = getRandomPositiveNumber();
+      lowerTriangular.setM10(random.nextDouble() - 0.5);
+      lowerTriangular.setM11(getRandomPositiveNumber());
 
-      lowerTriangular.m20 = random.nextDouble() - 0.5;
-      lowerTriangular.m21 = random.nextDouble() - 0.5;
-      lowerTriangular.m22 = getRandomPositiveNumber();
+      lowerTriangular.setM20(random.nextDouble() - 0.5);
+      lowerTriangular.setM21(random.nextDouble() - 0.5);
+      lowerTriangular.setM22(getRandomPositiveNumber());
 
       Matrix3d ret = new Matrix3d(lowerTriangular);
       ret.mulTransposeRight(ret, lowerTriangular);
@@ -203,9 +203,9 @@ public class RigidBodyInertiaTest
     */
    private static void checkIsSymmetric(Matrix3d matrix, double epsilon)
    {
-      assertEquals(0.0, matrix.m01 - matrix.m10, epsilon);
-      assertEquals(0.0, matrix.m02 - matrix.m20, epsilon);
-      assertEquals(0.0, matrix.m12 - matrix.m21, epsilon);
+      assertEquals(0.0, matrix.getM01() - matrix.getM10(), epsilon);
+      assertEquals(0.0, matrix.getM02() - matrix.getM20(), epsilon);
+      assertEquals(0.0, matrix.getM12() - matrix.getM21(), epsilon);
    }
 
    private static void checkEigenValuesRealAndPositive(Matrix3d matrix, double epsilon)
@@ -279,7 +279,7 @@ public class RigidBodyInertiaTest
       transform.getRotation(rotation);
 
       Vector3d translation = new Vector3d();
-      transform.get(translation);
+      transform.getTranslation(translation);
 
       Matrix3d translationTilde = new Matrix3d();
       MatrixTools.toTildeForm(translationTilde, translation);

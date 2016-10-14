@@ -35,6 +35,7 @@ public class ZUpFrame extends ReferenceFrame
    private final Point3d originPoint3d = new Point3d();
    private final RigidBodyTransform nonZUpToWorld = new RigidBodyTransform();
 
+   @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       origin.getReferenceFrame().getTransformToDesiredFrame(nonZUpToWorld, worldFrame);
@@ -42,7 +43,7 @@ public class ZUpFrame extends ReferenceFrame
 
       double yaw = RotationTools.computeYaw(nonZUpToWorldRotation);
       euler.set(0.0, 0.0, yaw);
-      transformToParent.setEuler(euler);
+      transformToParent.setRotationEulerAndZeroTranslation(euler);
 
       originPoint3d.set(origin.getPoint());
       nonZUpToWorld.transform(originPoint3d);

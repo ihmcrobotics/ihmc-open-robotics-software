@@ -28,9 +28,9 @@ import us.ihmc.graphics3DAdapter.stlLoader.NormalCalculator;
 import us.ihmc.graphics3DAdapter.stlLoader.STLReader;
 import us.ihmc.graphics3DAdapter.stlLoader.STLReaderFactory;
 import us.ihmc.graphics3DAdapter.stlLoader.Triangle;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * Test the normal calculation routine based on the normals in the the teapotBinary.STL model.
@@ -38,11 +38,11 @@ import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
  * @author Jesper Smith
  *
  */
-@DeployableTestClass(targets={TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class NormalCalculatorTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNormalsBasedOnTeapot() throws IOException
    {

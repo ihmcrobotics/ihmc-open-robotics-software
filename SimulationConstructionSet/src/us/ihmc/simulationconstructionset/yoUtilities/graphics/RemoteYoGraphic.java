@@ -8,7 +8,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
  * being packed into YoVariables and sent from simulation to viewer.
  *
  * See DynamicGraphicFactory and YoVariableHandshakeServer
- * 
+ *
  * @author Alex Lesman
  *
  */
@@ -21,9 +21,9 @@ public interface RemoteYoGraphic
    {
       CYLINDER_DGO,
       COORDINATE_SYSTEM_DGO,
-      EMPTY_SLOT_1_DGO,
+      TRIANGLE_DGO,
       POSITION_DGO,
-      EMPTY_SLOT_2_DGO, 
+      EMPTY_SLOT_2_DGO,
       EMPTY_SLOT_3_DGO,
       VECTOR_DGO,
       YO_FRAME_POLYGON_DGO,
@@ -32,7 +32,8 @@ public interface RemoteYoGraphic
       POSITION_ARTIFACT,
       CIRCLE_ARTIFACT,
       LINE_SEGMENT_2D_ARTIFACT,
-      POLYGON_ARTIFACT
+      POLYGON_ARTIFACT,
+      LINE_ARTIFACT
    }
 
    public String getName();

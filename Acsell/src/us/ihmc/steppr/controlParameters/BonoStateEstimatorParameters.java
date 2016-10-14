@@ -7,8 +7,6 @@ import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorT
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -18,7 +16,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.steppr.hardware.StepprJoint;
 
-public class BonoStateEstimatorParameters implements StateEstimatorParameters
+public class BonoStateEstimatorParameters extends StateEstimatorParameters
 {
    private final boolean runningOnRealRobot;
 
@@ -109,16 +107,40 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
-   public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
-   {
-      return 16.0; //50.0;
-   }
-
-   @Override
    public double getCoPFilterFreqInHertz()
    {
       // TODO Try to crank up that one, might be a bit sluggish with 4Hz. If the change is not evident, leave it to 4Hz then.
       return 4.0;
+   }
+
+   @Override
+   public boolean enableIMUBiasCompensation()
+   {
+      return false;
+   }
+
+   @Override
+   public boolean enableIMUYawDriftCompensation()
+   {
+      return false;
+   }
+
+   @Override
+   public double getIMUBiasFilterFreqInHertz()
+   {
+      return 6.0e-3;
+   }
+
+   @Override
+   public double getIMUYawDriftFilterFreqInHertz()
+   {
+      return 1.0e-3;
+   }
+
+   @Override
+   public double getIMUBiasVelocityThreshold()
+   {
+      return 0.015;
    }
 
    @Override
@@ -128,21 +150,9 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
-   public boolean estimateAccelerationBias()
-   {
-      return false;
-   }
-
-   @Override
    public boolean cancelGravityFromAccelerationMeasurement()
    {
       return true;
-   }
-
-   @Override
-   public double getAccelerationBiasFilterFreqInHertz()
-   {
-      return 5.3052e-4;
    }
 
    @Override
@@ -158,12 +168,6 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
-   public double getPelvisVelocityBacklashSlopTime()
-   {
-      return jointVelocitySlopTimeForBacklashCompensation;
-   }
-
-   @Override
    public double getDelayTimeForTrustingFoot()
    {
       return 0.02;
@@ -173,36 +177,6 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    public double getForceInPercentOfWeightThresholdToTrustFoot()
    {
       return 0.3;
-   }
-
-   @Override
-   public boolean estimateIMUDrift()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean compensateIMUDrift()
-   {
-      return true;
-   }
-
-   @Override
-   public double getIMUDriftFilterFreqInHertz()
-   {
-      return 0.5332;
-   }
-
-   @Override
-   public double getFootVelocityUsedForImuDriftFilterFreqInHertz()
-   {
-      return 0.5332;
-   }
-
-   @Override
-   public double getFootVelocityThresholdToEnableIMUDriftCompensation()
-   {
-      return 0.03;
    }
 
    @Override
@@ -218,21 +192,9 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
-   public boolean useTwistForPelvisLinearStateEstimation()
-   {
-      return true;
-   }
-
-   @Override
    public double getPelvisLinearVelocityAlphaNewTwist()
    {
       return 0.15;
-   }
-
-   @Override
-   public boolean createFusedIMUSensor()
-   {
-      return false;
    }
 
    @Override
@@ -248,27 +210,6 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
-   public boolean useIMUsForSpineJointVelocityEstimation()
-   {
-      // TODO For Valkyrie. Probably have to make more generic.
-      return false;
-   }
-
-   @Override
-   public double getAlphaIMUsForSpineJointVelocityEstimation()
-   {
-      // TODO For Valkyrie. Probably have to make more generic.
-      return 0;
-   }
-
-   @Override
-   public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
-   {
-      // TODO For Valkyrie. Probably have to make more generic.
-      return null;
-   }
-   
-   @Override
    public double getContactThresholdHeight()
    {
       return 0.01;
@@ -278,18 +219,6 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    public FootSwitchType getFootSwitchType()
    {
       return FootSwitchType.WrenchBased;
-   }
-
-   @Override
-   public boolean requestWristForceSensorCalibrationAtStart()
-   {
-      return false;
-   }
-
-   @Override
-   public SideDependentList<String> getWristForceSensorNames()
-   {
-      return null;
    }
 
    @Override
@@ -303,5 +232,24 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    public SideDependentList<String> getFootForceSensorNames()
    {
       return null;
+   }
+
+
+   @Override
+   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+   {
+      return false;
+   }
+   
+   @Override
+   public double getCenterOfMassVelocityFusingFrequency()
+   {
+      return 0.4261;
+   }
+
+   @Override
+   public boolean useGroundReactionForcesToComputeCenterOfMassVelocity()
+   {
+      return false;
    }
 }

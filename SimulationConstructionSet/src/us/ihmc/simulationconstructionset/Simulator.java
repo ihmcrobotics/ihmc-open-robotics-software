@@ -2,8 +2,10 @@ package us.ihmc.simulationconstructionset;
 
 import java.util.ArrayList;
 
+import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
+import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
+import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 
@@ -17,8 +19,9 @@ public class Simulator implements java.io.Serializable
    private double DT;
    private ArrayList<Script> scripts = null;
 
-   private ScsCollisionDetector collisions;
-   private DefaultCollisionVisualize collisionVisualize;
+   private ScsCollisionDetector collisionDetector;
+   private CollisionHandler collisionHandler;
+   private DefaultCollisionVisualizer collisionVisualizer;
    protected ArrayList<WrenchContactPoint> forceSensor = new ArrayList<WrenchContactPoint>();
 
    // private final YoVariable time;
@@ -66,7 +69,9 @@ public class Simulator implements java.io.Serializable
       doDynamicsAndIntegrate();
    }
 
-   protected void updateState()
+   private final CollisionDetectionResult results = new CollisionDetectionResult();
+
+   private void updateState()
    {
       synchronized (simulationSynchronizer)
       {
@@ -86,7 +91,7 @@ public class Simulator implements java.io.Serializable
                robot.getGroundContactModel().doGroundContact(); // Do the ground contact model
             }
 
-            // Needed to move this outside and do it even if no ground contact model, for 
+            // Needed to move this outside and do it even if no ground contact model, for
             // Contact models that are done outside of the robot.
             robot.decideGroundContactPointsInContact(); // +++JEP OPTIMIZE. This should be in a GroundContactDetector...
 
@@ -99,19 +104,21 @@ public class Simulator implements java.io.Serializable
             }
          }
 
-         if (collisions != null)
+         if (collisionDetector != null)
          {
-            if (collisionVisualize != null)
-               collisionVisualize.callBeforeCollision();
+            if (collisionVisualizer != null)
+               collisionVisualizer.callBeforeCollisionDetection();
 
-            collisions.performCollisionDetection();
+            results.clear();
+            collisionDetector.performCollisionDetection(results);
+            collisionHandler.handleCollisions(results);
          }
       }
 
       for (int i = 0; i < forceSensor.size(); i++)
       {
-         WrenchContactPoint wcp = forceSensor.get(i);
-         wcp.updateForce();
+         WrenchContactPoint wrenchContactPoint = forceSensor.get(i);
+         wrenchContactPoint.updateForce();
       }
    }
 
@@ -145,9 +152,10 @@ public class Simulator implements java.io.Serializable
       //
    }
 
-   public void setCollisions(ScsCollisionDetector collisions, DefaultCollisionVisualize visulize)
+   public void setCollisions(ScsCollisionDetector collisionDetector, CollisionHandler collisionHandler, DefaultCollisionVisualizer visulize)
    {
-      this.collisions = collisions;
-      this.collisionVisualize = visulize;
+      this.collisionDetector = collisionDetector;
+      this.collisionHandler = collisionHandler;
+      this.collisionVisualizer = visulize;
    }
 }

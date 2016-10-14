@@ -750,13 +750,8 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       CommonOps.mult(QInverse, tempVector, xSolutionToPack);
 
       int startRow = 0;
-      lagrangeEqualityConstraintMultipliersToPack.zero();
       int numberOfRows = numberOfOriginalEqualityConstraints;
-
-      if (numberOfOriginalEqualityConstraints > 0)
-      {
-         CommonOps.extract(augmentedLagrangeMultipliers, startRow, startRow + numberOfRows, 0, 1, lagrangeEqualityConstraintMultipliersToPack, 0, 0);
-      }
+      CommonOps.extract(augmentedLagrangeMultipliers, startRow, startRow + numberOfRows, 0, 1, lagrangeEqualityConstraintMultipliersToPack, 0, 0);
 
       startRow += numberOfRows;
       lagrangeInequalityConstraintMultipliersToPack.zero();

@@ -11,15 +11,15 @@ import org.junit.Test;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class CylinderTerrainObjectTest
 {
    private static final double errEpsilon = 1e-14;
    private static final double testDelta = .0001;
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSimpleCylinder()
    {
@@ -55,7 +55,7 @@ public class CylinderTerrainObjectTest
 
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtTranslatedRot90TallHorizontalCylinderJustInsideAndOutside()
    {
@@ -74,28 +74,28 @@ public class CylinderTerrainObjectTest
       CylinderTerrainObject translatedRot90TallHorizontalCylinder = new CylinderTerrainObject(translatedCenter, slopeDegrees, yawDegrees, tallHeight, radius,
                                                                        app);
 
-      double expectedHeight = radius + translatedCenter.z;
+      double expectedHeight = radius + translatedCenter.getZ();
       double expectedMiss = 0.0;
       double[] signY = {0, -1, 1};
       boolean[] isEdge = {false, true, true};
 
       for (int i = 0; i < signY.length; i++)
       {
-         double testX = 0.0 + +translatedCenter.x;
-         double testY = signY[i] * (tallHeight / 2 - testDelta) + +translatedCenter.y;
+         double testX = 0.0 + +translatedCenter.getX();
+         double testY = signY[i] * (tallHeight / 2 - testDelta) + +translatedCenter.getY();
          double testZ = expectedHeight + 1.0;
 
          assertEquals(expectedHeight, translatedRot90TallHorizontalCylinder.heightAt(testX, testY, testZ), errEpsilon);
 
          if (isEdge[i])
          {
-            testY = signY[i] * (tallHeight / 2 + testDelta) + translatedCenter.y;
+            testY = signY[i] * (tallHeight / 2 + testDelta) + translatedCenter.getY();
             assertEquals(expectedMiss, translatedRot90TallHorizontalCylinder.heightAt(testX, testY, testZ), errEpsilon);
          }
       }
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtRot90TallHorizontalCylinderJustInsideAndOutside()
    {
@@ -133,7 +133,7 @@ public class CylinderTerrainObjectTest
       }
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtTranslatedVerticalCylinderJustInside()
    {
@@ -148,21 +148,21 @@ public class CylinderTerrainObjectTest
 
       CylinderTerrainObject translatedVerticalCylinder = new CylinderTerrainObject(translatedCenter, slopeDegrees, yawDegrees, height, radius, app);
 
-      double expectedHeight = translatedCenter.z + height / 2;
+      double expectedHeight = translatedCenter.getZ() + height / 2;
       double[] signX = {-1, 0, 1, 0};
       double[] signY = {0, -1, 0, 1};
 
       for (int i = 0; i < signX.length; i++)
       {
-         double testX = signX[i] * (radius - testDelta) + translatedCenter.x;
-         double testY = signY[i] * (radius - testDelta) + translatedCenter.y;
+         double testX = signX[i] * (radius - testDelta) + translatedCenter.getX();
+         double testY = signY[i] * (radius - testDelta) + translatedCenter.getY();
          double testZ = expectedHeight + 1.0;
 
          assertEquals(expectedHeight, translatedVerticalCylinder.heightAt(testX, testY, testZ), errEpsilon);
       }
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtTranslatedHorizontalCylinderJustInside()
    {
@@ -179,20 +179,20 @@ public class CylinderTerrainObjectTest
       CylinderTerrainObject translatedHorizontalCylinder = new CylinderTerrainObject(translatedCenter, slopeDegrees, yawDegrees, height, radius, app);
 
 
-      double expectedHeight = translatedCenter.z + radius;
+      double expectedHeight = translatedCenter.getZ() + radius;
       double[] signX = {-1, 0, 1};
 
       for (int i = 0; i < signX.length; i++)
       {
-         double testX = signX[i] * (height / 2 - testDelta) + translatedCenter.x;
-         double testY = translatedCenter.y;
+         double testX = signX[i] * (height / 2 - testDelta) + translatedCenter.getX();
+         double testY = translatedCenter.getY();
          double testZ = expectedHeight + 1.0;
 
          assertEquals(expectedHeight, translatedHorizontalCylinder.heightAt(testX, testY, testZ), errEpsilon);
       }
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtTranslatedVerticalCylinderJustOutside()
    {
@@ -211,15 +211,15 @@ public class CylinderTerrainObjectTest
 
       for (int i = 0; i < signX.length; i++)
       {
-         double testX = signX[i] * (radius + testDelta) + translatedCenter.x;
-         double testY = signY[i] * (radius + testDelta) + translatedCenter.y;
+         double testX = signX[i] * (radius + testDelta) + translatedCenter.getX();
+         double testY = signY[i] * (radius + testDelta) + translatedCenter.getY();
          double testZ = expectedHeight + 1.0;
 
          assertEquals(expectedHeight, translatedVerticalCylinder.heightAt(testX, testY, testZ), errEpsilon);
       }
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtTranslatedHorizontalCylinderJustOutside()
    {
@@ -240,15 +240,15 @@ public class CylinderTerrainObjectTest
 
       for (int i = 0; i < signX.length; i++)
       {
-         double testX = signX[i] * (height / 2 + testDelta) + translatedCenter.x;
-         double testY = translatedCenter.y;
+         double testX = signX[i] * (height / 2 + testDelta) + translatedCenter.getX();
+         double testY = translatedCenter.getY();
          double testZ = expectedHeight + 1.0;
 
          assertEquals(expectedHeight, translatedHorizontalCylinder.heightAt(testX, testY, testZ), errEpsilon);
       }
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtVerticalCylinderOutside()
    {
@@ -287,7 +287,7 @@ public class CylinderTerrainObjectTest
       assertEquals(expectedHeightOnCircle, horizontalCylinder.heightAt(height / 4, radius / 2, radius), errEpsilon);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedTwoSidesTop()
    {
@@ -317,7 +317,7 @@ public class CylinderTerrainObjectTest
       assertEquals(z, slopedRotatedCylinder.heightAt(x, y, z + 1), errEpsilon);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedTwoSidesBottom()
    {
@@ -349,7 +349,7 @@ public class CylinderTerrainObjectTest
       assertEquals(expectedHeight, slopedRotatedCylinder.heightAt(x, y, -1), errEpsilon);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedEndAndSideTop()
    {
@@ -378,7 +378,7 @@ public class CylinderTerrainObjectTest
       assertEquals(expectedHeight, slopedRotatedCylinder.heightAt(x, y, 2), errEpsilon);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testHeightAtSlopedRotatedEndAndSideBottom()
    {

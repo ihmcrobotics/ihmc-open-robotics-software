@@ -3,13 +3,13 @@ package us.ihmc.sensorProcessing.generatedTestSuites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
-import us.ihmc.tools.testing.TestPlanSuite;
-import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
-@RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@RunWith(ContinuousIntegrationSuite.class)
+@ContinuousIntegrationSuiteCategory(IntegrationCategory.FAST)
 @SuiteClasses
 ({
    us.ihmc.controlFlow.ControlFlowTest.class,
@@ -20,11 +20,8 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.sensorProcessing.encoder.SimulatedEncoderTest.class,
    us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTreeTest.class,
    us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMapTest.class,
-   us.ihmc.sensorProcessing.pointClouds.shape.EstimateMotionFromBoxTest.class,
    us.ihmc.sensorProcessing.pointClouds.shape.ExpectationMaximizationFitterTest.class,
    us.ihmc.sensorProcessing.pointClouds.shape.FitPlaneWeighted3DTest.class,
-   us.ihmc.sensorProcessing.pointClouds.shape.IhmcPointCloudOpsTest.class,
-   us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignmentTest.class,
    us.ihmc.sensorProcessing.sensorProcessors.ElasticityCompensatorYoVariableTest.class,
    us.ihmc.sensorProcessing.SimulatedIMURawSensorReader2Test.class,
    us.ihmc.sensorProcessing.simulatedSensors.InverseDynamicsJointsFromSCSRobotGeneratorTest.class,

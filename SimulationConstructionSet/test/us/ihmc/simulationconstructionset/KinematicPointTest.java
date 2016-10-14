@@ -12,8 +12,8 @@ import org.junit.Test;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 
 
@@ -31,7 +31,7 @@ public class KinematicPointTest
 		kinematicPoint = new KinematicPoint("testPoint", offset, robot.getRobotsYoVariableRegistry());
 	}
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testGetAndSetParentJoint() 
 	{
@@ -41,14 +41,14 @@ public class KinematicPointTest
 		assertTrue(joint == kinematicPoint.getParentJoint());
 	}
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testToString()
 	{
 		assertEquals("name: testPoint x: 0.0, y: 0.0, z: 0.0", kinematicPoint.toString());
 	}
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testSetOffsetJointWithBothVectorAndXYAndZValuesAsParameters()
 	{
@@ -80,83 +80,83 @@ public class KinematicPointTest
 //		assertTrue(3.5 == kinematicPoint.getOffset().getZ());
 //	}
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testGetName()
 	{
 		assertTrue(kinematicPoint.getName() == "testPoint");
 	}
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testGetPosition()
 	{
 		Point3d positionToPack = new Point3d();
 		kinematicPoint.getPosition(positionToPack);
-		assertTrue(0 == positionToPack.x);
-		assertTrue(0 == positionToPack.y);
-		assertTrue(0 == positionToPack.z);
+		assertTrue(0 == positionToPack.getX());
+		assertTrue(0 == positionToPack.getY());
+		assertTrue(0 == positionToPack.getZ());
 		
 		kinematicPoint.getYoPosition().set(new Point3d(5.0, 5.1, 5.2));
 		kinematicPoint.getPosition(positionToPack);
-		assertTrue(5.0 == positionToPack.x);
-		assertTrue(5.1 == positionToPack.y);
-		assertTrue(5.2 == positionToPack.z);
+		assertTrue(5.0 == positionToPack.getX());
+		assertTrue(5.1 == positionToPack.getY());
+		assertTrue(5.2 == positionToPack.getZ());
 
 	}
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testGetPositionPoint()
 	{
 		Point3d positionReceivedFromGetMethod = kinematicPoint.getPositionPoint();
-		assertTrue(0 == positionReceivedFromGetMethod.x);
-		assertTrue(0 == positionReceivedFromGetMethod.y);
-		assertTrue(0 == positionReceivedFromGetMethod.z);
+		assertTrue(0 == positionReceivedFromGetMethod.getX());
+		assertTrue(0 == positionReceivedFromGetMethod.getY());
+		assertTrue(0 == positionReceivedFromGetMethod.getZ());
 		
 		kinematicPoint.getYoPosition().set(new Point3d(5.0, 5.1, 5.2));
 		positionReceivedFromGetMethod = kinematicPoint.getPositionPoint();
-		assertTrue(5.0 == positionReceivedFromGetMethod.x);
-		assertTrue(5.1 == positionReceivedFromGetMethod.y);
-		assertTrue(5.2 == positionReceivedFromGetMethod.z);
+		assertTrue(5.0 == positionReceivedFromGetMethod.getX());
+		assertTrue(5.1 == positionReceivedFromGetMethod.getY());
+		assertTrue(5.2 == positionReceivedFromGetMethod.getZ());
 	}
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testGetVelocityVector()
 	{
 		Vector3d vectorReceivedFromGetMethod = kinematicPoint.getVelocityVector();
-		assertTrue(0 == vectorReceivedFromGetMethod.x);
-		assertTrue(0 == vectorReceivedFromGetMethod.y);
-		assertTrue(0 == vectorReceivedFromGetMethod.z);
+		assertTrue(0 == vectorReceivedFromGetMethod.getX());
+		assertTrue(0 == vectorReceivedFromGetMethod.getY());
+		assertTrue(0 == vectorReceivedFromGetMethod.getZ());
 		
 		kinematicPoint.getYoVelocity().set(new Vector3d(5.0, 5.1, 5.2));
 		vectorReceivedFromGetMethod = kinematicPoint.getVelocityVector();
-		assertTrue(5.0 == vectorReceivedFromGetMethod.x);
-		assertTrue(5.1 == vectorReceivedFromGetMethod.y);
-		assertTrue(5.2 == vectorReceivedFromGetMethod.z);
+		assertTrue(5.0 == vectorReceivedFromGetMethod.getX());
+		assertTrue(5.1 == vectorReceivedFromGetMethod.getY());
+		assertTrue(5.2 == vectorReceivedFromGetMethod.getZ());
 		
 	}
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testGetVelocity()
 	{
 		Vector3d velocityToPack = kinematicPoint.getVelocityVector();
 		kinematicPoint.getVelocity(velocityToPack);
-		assertTrue(0 == velocityToPack.x);
-		assertTrue(0 == velocityToPack.y);
-		assertTrue(0 == velocityToPack.z);
+		assertTrue(0 == velocityToPack.getX());
+		assertTrue(0 == velocityToPack.getY());
+		assertTrue(0 == velocityToPack.getZ());
 		
 		kinematicPoint.getYoVelocity().set(new Vector3d(5.0, 5.1, 5.2));
 		kinematicPoint.getVelocity(velocityToPack);
-		assertTrue(5.0 == velocityToPack.x);
-		assertTrue(5.1 == velocityToPack.y);
-		assertTrue(5.2 == velocityToPack.z);
+		assertTrue(5.0 == velocityToPack.getX());
+		assertTrue(5.1 == velocityToPack.getY());
+		assertTrue(5.2 == velocityToPack.getZ());
 		
 	}
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testGetYoPosition()
 	{
@@ -168,7 +168,7 @@ public class KinematicPointTest
 		assertEquals("(5.0, 5.1, 5.2)-" + frameName, yoPosition.toString());
 	}
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testGetYoVelocity()
 	{
@@ -180,7 +180,7 @@ public class KinematicPointTest
 		assertEquals("(5.0, 5.1, 5.2)-" + frameName, yoVelocity.toString());
 	}
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
 	public void testChangeableOffset()
 	{

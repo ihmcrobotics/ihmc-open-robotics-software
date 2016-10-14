@@ -3,15 +3,18 @@ package us.ihmc.simulationconstructionset.generatedTestSuites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
-import us.ihmc.tools.testing.TestPlanSuite;
-import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
-@RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.UI)
+@RunWith(ContinuousIntegrationSuite.class)
+@ContinuousIntegrationSuiteCategory(IntegrationCategory.UI)
 @SuiteClasses
 ({
+   us.ihmc.simulationconstructionset.bambooTools.BambooToolsTest.class,
+   us.ihmc.simulationconstructionset.dataExporter.DataExporterGraphCreatorTest.class,
+   us.ihmc.simulationconstructionset.gui.actions.ActionsTest.class,
    us.ihmc.simulationconstructionset.gui.YoEntryBoxTest.class,
    us.ihmc.simulationconstructionset.LinkGraphicsTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetFestTest.class,

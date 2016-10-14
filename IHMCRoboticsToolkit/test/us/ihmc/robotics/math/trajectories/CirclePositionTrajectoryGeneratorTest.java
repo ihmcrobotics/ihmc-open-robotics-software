@@ -8,7 +8,6 @@ import us.ihmc.robotics.geometry.FramePointTest;
 import us.ihmc.robotics.geometry.FrameVectorTest;
 import us.ihmc.robotics.math.trajectories.CirclePositionTrajectoryGenerator;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -17,12 +16,13 @@ import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 
 public class CirclePositionTrajectoryGeneratorTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testVersusNumericalDifferentiation()
    {
@@ -63,7 +63,7 @@ public class CirclePositionTrajectoryGeneratorTest
       FrameVectorTest.assertFrameVectorEquals(acceleration, numericallyDifferentiatedAcceleration, 1e-4);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInitialAndFinalPositionFullCircle()
    {

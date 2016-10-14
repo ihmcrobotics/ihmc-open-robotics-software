@@ -111,7 +111,7 @@ public class StewartPlatformRobot extends Robot
       this.addRootJoint(platformJoint);
 
       ExternalForcePoint ef_platform = new ExternalForcePoint("ef_platform", new Vector3d(), this);
-      platformJoint.physics.addExternalForcePoint(ef_platform);
+      platformJoint.addExternalForcePoint(ef_platform);
 
       // Platform External Force Points
 
@@ -126,7 +126,7 @@ public class StewartPlatformRobot extends Robot
       for (int i = 0; i < 6; i++)
       {
          ExternalForcePoint ef_p = new ExternalForcePoint("ef_p" + i, platform_offsets[i], this);
-         platformJoint.physics.addExternalForcePoint(ef_p);
+         platformJoint.addExternalForcePoint(ef_p);
       }
 
       // 6 Legs:
@@ -144,7 +144,7 @@ public class StewartPlatformRobot extends Robot
          uni.addJoint(slider);
 
          ExternalForcePoint ef = new ExternalForcePoint("ef_a" + i, new Vector3d(), this);
-         slider.physics.addExternalForcePoint(ef);
+         slider.addExternalForcePoint(ef);
       }
 
 
@@ -269,55 +269,55 @@ public class StewartPlatformRobot extends Robot
    {
       double mirror = 1.0;
 
-      b[0].x = Math.cos(shiftAng + 9.0 * Math.PI / 6.0 - baseAng) * baseRad;
-      b[0].y = mirror * Math.sin(shiftAng + 9.0 * Math.PI / 6.0 - baseAng) * baseRad;
-      b[0].z = 0.0;
+      b[0].setX(Math.cos(shiftAng + 9.0 * Math.PI / 6.0 - baseAng) * baseRad);
+      b[0].setY(mirror * Math.sin(shiftAng + 9.0 * Math.PI / 6.0 - baseAng) * baseRad);
+      b[0].setZ(0.0);
 
-      b[1].x = Math.cos(shiftAng + 9.0 * Math.PI / 6.0 + baseAng) * baseRad;
-      b[1].y = mirror * Math.sin(shiftAng + 9.0 * Math.PI / 6.0 + baseAng) * baseRad;
-      b[1].z = 0.0;
+      b[1].setX(Math.cos(shiftAng + 9.0 * Math.PI / 6.0 + baseAng) * baseRad);
+      b[1].setY(mirror * Math.sin(shiftAng + 9.0 * Math.PI / 6.0 + baseAng) * baseRad);
+      b[1].setZ(0.0);
 
-      b[2].x = Math.cos(shiftAng + Math.PI / 6.0 - baseAng) * baseRad;
-      b[2].y = mirror * Math.sin(shiftAng + Math.PI / 6.0 - baseAng) * baseRad;
-      b[2].z = 0.0;
+      b[2].setX(Math.cos(shiftAng + Math.PI / 6.0 - baseAng) * baseRad);
+      b[2].setY(mirror * Math.sin(shiftAng + Math.PI / 6.0 - baseAng) * baseRad);
+      b[2].setZ(0.0);
 
-      b[3].x = Math.cos(shiftAng + Math.PI / 6.0 + baseAng) * baseRad;
-      b[3].y = mirror * Math.sin(shiftAng + Math.PI / 6.0 + baseAng) * baseRad;
-      b[3].z = 0.0;
+      b[3].setX(Math.cos(shiftAng + Math.PI / 6.0 + baseAng) * baseRad);
+      b[3].setY(mirror * Math.sin(shiftAng + Math.PI / 6.0 + baseAng) * baseRad);
+      b[3].setZ(0.0);
 
-      b[4].x = Math.cos(shiftAng + 5.0 * Math.PI / 6.0 - baseAng) * baseRad;
-      b[4].y = mirror * Math.sin(shiftAng + 5.0 * Math.PI / 6.0 - baseAng) * baseRad;
-      b[4].z = 0.0;
+      b[4].setX(Math.cos(shiftAng + 5.0 * Math.PI / 6.0 - baseAng) * baseRad);
+      b[4].setY(mirror * Math.sin(shiftAng + 5.0 * Math.PI / 6.0 - baseAng) * baseRad);
+      b[4].setZ(0.0);
 
-      b[5].x = Math.cos(shiftAng + 5.0 * Math.PI / 6.0 + baseAng) * baseRad;
-      b[5].y = mirror * Math.sin(shiftAng + 5.0 * Math.PI / 6.0 + baseAng) * baseRad;
-      b[5].z = 0.0;
+      b[5].setX(Math.cos(shiftAng + 5.0 * Math.PI / 6.0 + baseAng) * baseRad);
+      b[5].setY(mirror * Math.sin(shiftAng + 5.0 * Math.PI / 6.0 + baseAng) * baseRad);
+      b[5].setZ(0.0);
 
       // Platform
 
-      p[3].x = Math.cos(shiftAng + 3.0 * Math.PI / 6.0 - platAng) * platRad;
-      p[3].y = mirror * Math.sin(shiftAng + 3.0 * Math.PI / 6.0 - platAng) * platRad;
-      p[3].z = 0.0;
+      p[3].setX(Math.cos(shiftAng + 3.0 * Math.PI / 6.0 - platAng) * platRad);
+      p[3].setY(mirror * Math.sin(shiftAng + 3.0 * Math.PI / 6.0 - platAng) * platRad);
+      p[3].setZ(0.0);
 
-      p[4].x = Math.cos(shiftAng + 3.0 * Math.PI / 6.0 + platAng) * platRad;
-      p[4].y = mirror * Math.sin(shiftAng + 3.0 * Math.PI / 6.0 + platAng) * platRad;
-      p[4].z = 0.0;
+      p[4].setX(Math.cos(shiftAng + 3.0 * Math.PI / 6.0 + platAng) * platRad);
+      p[4].setY(mirror * Math.sin(shiftAng + 3.0 * Math.PI / 6.0 + platAng) * platRad);
+      p[4].setZ(0.0);
 
-      p[1].x = Math.cos(shiftAng + 11.0 * Math.PI / 6.0 - platAng) * platRad;
-      p[1].y = mirror * Math.sin(shiftAng + 11.0 * Math.PI / 6.0 - platAng) * platRad;
-      p[1].z = 0.0;
+      p[1].setX(Math.cos(shiftAng + 11.0 * Math.PI / 6.0 - platAng) * platRad);
+      p[1].setY(mirror * Math.sin(shiftAng + 11.0 * Math.PI / 6.0 - platAng) * platRad);
+      p[1].setZ(0.0);
 
-      p[2].x = Math.cos(shiftAng + 11.0 * Math.PI / 6.0 + platAng) * platRad;
-      p[2].y = mirror * Math.sin(shiftAng + 11.0 * Math.PI / 6.0 + platAng) * platRad;
-      p[2].z = 0.0;
+      p[2].setX(Math.cos(shiftAng + 11.0 * Math.PI / 6.0 + platAng) * platRad);
+      p[2].setY(mirror * Math.sin(shiftAng + 11.0 * Math.PI / 6.0 + platAng) * platRad);
+      p[2].setZ(0.0);
 
-      p[0].x = Math.cos(shiftAng + 7.0 * Math.PI / 6.0 + platAng) * platRad;
-      p[0].y = mirror * Math.sin(shiftAng + 7.0 * Math.PI / 6.0 + platAng) * platRad;
-      p[0].z = 0.0;
+      p[0].setX(Math.cos(shiftAng + 7.0 * Math.PI / 6.0 + platAng) * platRad);
+      p[0].setY(mirror * Math.sin(shiftAng + 7.0 * Math.PI / 6.0 + platAng) * platRad);
+      p[0].setZ(0.0);
 
-      p[5].x = Math.cos(shiftAng + 7.0 * Math.PI / 6.0 - platAng) * platRad;
-      p[5].y = mirror * Math.sin(shiftAng + 7.0 * Math.PI / 6.0 - platAng) * platRad;
-      p[5].z = 0.0;
+      p[5].setX(Math.cos(shiftAng + 7.0 * Math.PI / 6.0 - platAng) * platRad);
+      p[5].setY(mirror * Math.sin(shiftAng + 7.0 * Math.PI / 6.0 - platAng) * platRad);
+      p[5].setZ(0.0);
 
    }
 

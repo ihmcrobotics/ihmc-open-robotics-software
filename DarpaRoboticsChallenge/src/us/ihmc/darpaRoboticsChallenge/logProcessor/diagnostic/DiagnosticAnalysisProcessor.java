@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.logProcessor.diagnostic;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorFunction;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorHelper;

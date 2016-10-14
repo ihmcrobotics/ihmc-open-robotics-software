@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.tools.thread.NonRealTimeThreadCreatorAndStarter;
-import us.ihmc.tools.thread.ThreadCreatorAndStarter;
+import us.ihmc.tools.thread.ThreadTools;
 
 
 public class TCPYoWhiteBoardEvaluation
@@ -17,14 +16,14 @@ public class TCPYoWhiteBoardEvaluation
    private static final boolean USE_UDP = true;
    private static final boolean THROW_OUT_STALE_PACKETS = true;
 
-   public TCPYoWhiteBoardEvaluation(boolean leftSide, ThreadCreatorAndStarter threadCreatorAndStarter, int port, DoSomeWorker doSomeWorker,
+   public TCPYoWhiteBoardEvaluation(boolean leftSide, int port, DoSomeWorker doSomeWorker,
                                     int numberVariablesToReadLeftWriteRight, int numberVariablesToWriteLeftReadRight)
            throws UnknownHostException, IOException
    {
-      this(leftSide, threadCreatorAndStarter, null, port, doSomeWorker, numberVariablesToReadLeftWriteRight, numberVariablesToWriteLeftReadRight);
+      this(leftSide, null, port, doSomeWorker, numberVariablesToReadLeftWriteRight, numberVariablesToWriteLeftReadRight);
    }
 
-   public TCPYoWhiteBoardEvaluation(boolean leftSide, ThreadCreatorAndStarter threadCreatorAndStarter, String ipAddress, int port, DoSomeWorker doSomeWorker,
+   public TCPYoWhiteBoardEvaluation(boolean leftSide, String ipAddress, int port, DoSomeWorker doSomeWorker,
                                     int numberVariablesToReadLeftWriteRight, int numberVariablesToWriteLeftReadRight)
            throws UnknownHostException, IOException
    {
@@ -62,7 +61,7 @@ public class TCPYoWhiteBoardEvaluation
          }
       }
 
-      threadCreatorAndStarter.createAndStartAThread((Runnable) whiteBoard);
+      ThreadTools.startAThread((Runnable) whiteBoard, "TCPYoWhiteBoardEvaluationThread");
 
       ArrayList<YoVariable<?>> variablesToReadLeftWriteRight = generateSomeDoubleYoVariables("readLeftWriteRight", numberVariablesToReadLeftWriteRight);
       ArrayList<YoVariable<?>> variablesToWriteLeftReadRight = generateSomeDoubleYoVariables("writeLeftReadRight", numberVariablesToWriteLeftReadRight);
@@ -220,8 +219,6 @@ public class TCPYoWhiteBoardEvaluation
       int numberVariablesOne = 200;
       int numberVariablesTwo = 100;
       
-      NonRealTimeThreadCreatorAndStarter threadCreatorAndStarter = new NonRealTimeThreadCreatorAndStarter();
-
       if ((args == null) || (args.length == 0))
       {
          System.out.println("Starting a Server. If you want a client, put the ipAddress in the program arguments.");
@@ -229,7 +226,7 @@ public class TCPYoWhiteBoardEvaluation
          DoSomeWorker doSomeWorker = new PauseDoSomeWorker();
          
          
-         new TCPYoWhiteBoardEvaluation(true, threadCreatorAndStarter, port, doSomeWorker, numberVariablesOne, numberVariablesTwo);
+         new TCPYoWhiteBoardEvaluation(true, port, doSomeWorker, numberVariablesOne, numberVariablesTwo);
       }
 
       else
@@ -238,7 +235,7 @@ public class TCPYoWhiteBoardEvaluation
          System.out.println("Starting a client, attaching to " + ipAddress + ". If you want a server, don't put the ipAddress in the program arguments.");
 
          DoSomeWorker doSomeWorker = new PauseDoSomeWorker();
-         new TCPYoWhiteBoardEvaluation(false, threadCreatorAndStarter, ipAddress, port, doSomeWorker, numberVariablesOne, numberVariablesTwo);
+         new TCPYoWhiteBoardEvaluation(false, ipAddress, port, doSomeWorker, numberVariablesOne, numberVariablesTwo);
       }
    }
    

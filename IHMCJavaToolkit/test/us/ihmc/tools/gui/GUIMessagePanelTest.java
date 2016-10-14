@@ -4,12 +4,16 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.gui.GUIMessagePanel;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
 public class GUIMessagePanelTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testGetText()
    {

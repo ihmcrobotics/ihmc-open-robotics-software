@@ -42,7 +42,7 @@ public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
       for (Point3d valveLocation : valveLocations)
       {
          String valveRobotName = "ValveRobot" + i;
-         createValve(valveRobotName, ValveType.BIG_VALVE, valveLocation.x, valveLocation.y, valveLocation.z, valveYawAngles_degrees.get(valveLocation),
+         createValve(valveRobotName, ValveType.BIG_VALVE, valveLocation.getX(), valveLocation.getY(), valveLocation.getZ(), valveYawAngles_degrees.get(valveLocation),
                forceVectorScale);
          i++;
       }

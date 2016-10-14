@@ -3,7 +3,6 @@ package us.ihmc.tools.thread;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static us.ihmc.tools.testing.TestPlanTarget.InDevelopment;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,8 +15,8 @@ import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ThreadToolsTest
 {
@@ -26,7 +25,7 @@ public class ThreadToolsTest
     * does not produce an error, which is the most likely
     * failure mode.
     */
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRunCommandLineStringedCommmands()
    {
@@ -51,7 +50,7 @@ public class ThreadToolsTest
    /**
     * Tests capturing the output of an echo.
     */
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testRunCommandLineEchoOutput()
    {
@@ -71,7 +70,7 @@ public class ThreadToolsTest
       Assert.assertTrue("Output not correct: " + commandLineOutput.toString(), commandLineOutput.toString().matches("Hi\\s*"));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Flaky)
+   @ContinuousIntegrationTest(estimatedDuration = 3.1, categoriesOverride = IntegrationCategory.FLAKY)
    @Test(timeout = 30000)
    public void testTimeLimitScheduler()
    {
@@ -98,13 +97,16 @@ public class ThreadToolsTest
       {
          long startTime = System.currentTimeMillis();
          ScheduledFuture<?> future = ThreadTools.scheduleWithFixeDelayAndTimeLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit, timeLimit);
-         while(!future.isDone());
+         while(!future.isDone())
+         {
+            // do nothing
+         }
          long endTime = System.currentTimeMillis();
          assertEquals(timeLimit, endTime - startTime, EPSILON);
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testIterationLimitScheduler()
    {
@@ -126,11 +128,15 @@ public class ThreadToolsTest
 
       ScheduledFuture<?> future = ThreadTools.scheduleWithFixedDelayAndIterationLimit(getClass().getSimpleName(), runnable, initialDelay, delay, timeUnit, iterations);
       
-      while(!future.isDone());
+      while(!future.isDone())
+      {
+         // do nothing
+      }
+      
       assertEquals(iterations, counter.get());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2, targets = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.FLAKY)
    @Test(timeout = 30000)
    public void testExecuteWithTimeout()
    {

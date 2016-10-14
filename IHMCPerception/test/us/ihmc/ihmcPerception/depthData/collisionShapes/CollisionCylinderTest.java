@@ -11,11 +11,11 @@ import javax.vecmath.Vector2d;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class CollisionCylinderTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testInsideCylinderPoints()
    {
@@ -32,11 +32,11 @@ public class CollisionCylinderTest
          double z = -5.0 +  10.0 * random.nextDouble();  
          
          
-         Point3d point = new Point3d(vector.x, vector.y, z);
+         Point3d point = new Point3d(vector.getX(), vector.getY(), z);
          assertTrue(cylinder.contains(point));
       }
    }
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testOutideCylinderPoints()
    {
@@ -53,7 +53,7 @@ public class CollisionCylinderTest
          double z = (random.nextBoolean()?1.0:-1.0) * (5.0 + 10.0 * random.nextDouble());  
          
          
-         Point3d point = new Point3d(vector.x, vector.y, z);
+         Point3d point = new Point3d(vector.getX(), vector.getY(), z);
          assertFalse(cylinder.contains(point));
       }
    }

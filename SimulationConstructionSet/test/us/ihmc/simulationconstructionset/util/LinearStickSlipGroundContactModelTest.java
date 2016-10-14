@@ -19,13 +19,13 @@ import us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfile;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class LinearStickSlipGroundContactModelTest
 {
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOnFlatGroundNoSlipCompareWithAndWithoutNormals()
    {
@@ -122,7 +122,7 @@ public class LinearStickSlipGroundContactModelTest
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 0.0), force, 1e-7);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testOnSlantedGroundCompareWithAndWithoutNormals()
    {
@@ -145,8 +145,8 @@ public class LinearStickSlipGroundContactModelTest
       groundContactModelOnFlat.setGroundProfile3D(flatGroundProfile);
       
       RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.rotX(0.3);
-      transform3D.rotY(-0.7);
+      transform3D.setRotationRollAndZeroTranslation(0.3);
+      transform3D.setRotationPitchAndZeroTranslation(-0.7);
       transform3D.setTranslation(new Vector3d(0.1, 0.2, 0.3));
       
       RigidBodyTransform inverseTransform3D = new RigidBodyTransform(transform3D);

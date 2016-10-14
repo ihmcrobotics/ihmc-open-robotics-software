@@ -13,7 +13,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -21,13 +21,13 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -50,20 +50,20 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 65.8)
-	@Test(timeout = 330000)
+	@ContinuousIntegrationTest(estimatedDuration = 51.6)
+	@Test(timeout = 260000)
    public void testWalkingOntoRocks() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
-      
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoRocksTest", "", selectedLocation, simulationTestingParameters, getRobotModel());
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -73,7 +73,7 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForWalkingToTheRocks(scriptedFootstepGenerator);
+      FootstepDataListMessage footstepDataList = createFootstepsForWalkingToTheRocks(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.5);
@@ -85,32 +85,32 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
 
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
       }
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
-      assertTrue(success);
-      
-      Point3d center = new Point3d(0.6853965087476173, 4.5173529666394305, 0.8898586980716016);      
+      assertTrue("Caught Exception: " + drcSimulationTestHelper.getCaughtException(), success);
+
+      Point3d center = new Point3d(0.6853965087476173, 4.5173529666394305, 0.8898586980716016);
       Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      
-      BambooTools.reportTestFinishedMessage();
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
-   
+
+
    private void setupCameraForWalkingOntoRocks(SimulationConstructionSet scs)
    {
       Point3d cameraFix = new Point3d(0.1, 3.2, 0.5);
-      Point3d cameraPosition = new Point3d(-2.8, 4.8, 1.5);
+      Point3d cameraPosition = new Point3d(-5.6, 9.6, 3.0);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
-  
-   private FootstepDataList createFootstepsForWalkingToTheRocks(ScriptedFootstepGenerator scriptedFootstepGenerator)
+
+   private FootstepDataListMessage createFootstepsForWalkingToTheRocks(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {{{-0.1332474847934586, 2.17798187482979, 0.08940742138400676}, {-3.403089128803084E-18, -2.675953624308355E-18, 0.6245692503477591, 0.7809694305925413}},
@@ -123,13 +123,13 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
-   
-   private FootstepDataList createFootstepsForSteppingOntoTheRocks(ScriptedFootstepGenerator scriptedFootstepGenerator)
+
+   private FootstepDataListMessage createFootstepsForSteppingOntoTheRocks(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {
             {{0.5529662090543602, 3.6286983881838646, 0.21590956237843234}, {-0.022876958432406867, -1.6243179975814606E-4, 0.6241266770053053, 0.7809881621632351}},
-            {{0.24389485139604242, 3.7607451973897086, 0.23208827774938992}, {0.15338009067097566, 0.022598335690374175, 0.6247807222043084, 0.7652534953671569}},
+            {{0.23889485139604242, 3.7707451973897086, 0.23208827774938992}, {0.15338009067097566, 0.022598335690374175, 0.6247807222043084, 0.7652534953671569}},
             {{0.49923112290573035, 4.061638018194549, 0.2279816197448486}, {0.016006125164714134, 7.02388640921526E-4, 0.6320497992718929, 0.7747621324301857}},
             {{0.25039979297513204, 4.182455867683593, 0.23109072043393983}, {-0.011488423864199179, 0.006006205458266799, 0.6320296588353294, 0.7748357580581879}},
             {{0.7403166726686088, 4.45052552107267, 0.2700214618943709}, {-0.024017719675227735, -0.032205010198184086, 0.6337204274025326, 0.7725182239614081}},

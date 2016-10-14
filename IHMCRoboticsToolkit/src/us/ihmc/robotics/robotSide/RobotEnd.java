@@ -149,9 +149,4 @@ public enum RobotEnd
          return "no documentation available";
       }
    }
-
-   public RobotEnd[] getDocumentedValues()
-   {
-      return values;
-   }
 }

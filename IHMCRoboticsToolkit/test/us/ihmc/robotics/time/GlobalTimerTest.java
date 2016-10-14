@@ -8,12 +8,12 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class GlobalTimerTest
 {
    private static final long RANDOM_SEED = 1976L;
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testgetElapsedTime()
    {
@@ -42,10 +42,11 @@ public class GlobalTimerTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 5.2)
    @Test(timeout = 30000)
    public void testgetElapsedTime2()
    {
+      GlobalTimer.clearTimers();
       GlobalTimer globalTimer = null;
       String timerName = "timer";
       
@@ -75,7 +76,7 @@ public class GlobalTimerTest
 
       ArrayList<GlobalTimer> listOfTimers = new ArrayList<>();
       globalTimer.getAlltimers(listOfTimers);
-      assertEquals(6, listOfTimers.size());
+      assertEquals(5, listOfTimers.size());
       
    }
 

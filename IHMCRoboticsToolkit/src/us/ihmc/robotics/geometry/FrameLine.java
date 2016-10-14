@@ -103,11 +103,22 @@ public class FrameLine extends AbstractFrameObject<FrameLine, TransformableLine3
       return new Vector3d(direction);
    }
 
+   @Override
    public boolean epsilonEquals(FrameLine otherLine, double epsilon)
    {
       checkReferenceFrameMatch(otherLine);
 
       return origin.epsilonEquals(otherLine.origin, epsilon) && direction.epsilonEquals(otherLine.direction, epsilon);
+   }
+   
+   public void setFromTwoPoints(FramePoint point1, FramePoint point2)
+   {
+      checkReferenceFrameMatch(point1);
+      checkReferenceFrameMatch(point2);
+      
+      origin.set(point1.getPoint());
+      direction.sub(point2.getPoint(), point1.getPoint());
+      direction.normalize();
    }
 
    public void setOrigin(FramePoint origin)

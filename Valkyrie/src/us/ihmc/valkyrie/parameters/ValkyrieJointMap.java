@@ -2,7 +2,6 @@ package us.ihmc.valkyrie.parameters;
 
 import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.jointNames;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -13,12 +12,12 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.JointRole;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.LimbName;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -34,10 +33,10 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private final String fullPelvisNameInSdf = pelvisName;
    private final String headName = "upperNeckPitchLink";
 
-   private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
+   private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
    private final ArmJointName[] armJoints;
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_YAW, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_ROLL };
-   private final NeckJointName[] neckJoints = { NeckJointName.LOWER_NECK_PITCH, NeckJointName.NECK_YAW, NeckJointName.UPPER_NECK_PITCH };
+   private final NeckJointName[] neckJoints = { NeckJointName.PROXIMAL_NECK_PITCH, NeckJointName.DISTAL_NECK_YAW, NeckJointName.DISTAL_NECK_PITCH };
 
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
    private final LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>>();
@@ -77,7 +76,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipYaw], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipRoll], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipPitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftKneePitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
+         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftKneePitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE_PITCH));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnklePitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
          legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnkleRoll], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
 
@@ -104,9 +103,9 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       spineJointNames.put(jointNames[ValkyrieOrderedJointMap.TorsoPitch], SpineJointName.SPINE_PITCH);
       spineJointNames.put(jointNames[ValkyrieOrderedJointMap.TorsoRoll], SpineJointName.SPINE_ROLL);
 
-      neckJointNames.put(jointNames[ValkyrieOrderedJointMap.LowerNeckPitch], NeckJointName.LOWER_NECK_PITCH);
-      neckJointNames.put(jointNames[ValkyrieOrderedJointMap.NeckYaw], NeckJointName.NECK_YAW);
-      neckJointNames.put(jointNames[ValkyrieOrderedJointMap.UpperNeckPitch], NeckJointName.UPPER_NECK_PITCH);
+      neckJointNames.put(jointNames[ValkyrieOrderedJointMap.LowerNeckPitch], NeckJointName.PROXIMAL_NECK_PITCH);
+      neckJointNames.put(jointNames[ValkyrieOrderedJointMap.NeckYaw], NeckJointName.DISTAL_NECK_YAW);
+      neckJointNames.put(jointNames[ValkyrieOrderedJointMap.UpperNeckPitch], NeckJointName.DISTAL_NECK_PITCH);
 
       for (String legJointString : legJointNames.keySet())
       {
@@ -378,36 +377,15 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    {
       String[] ret = new String[]
       {
-            getNeckJointName(NeckJointName.UPPER_NECK_PITCH),
-            getNeckJointName(NeckJointName.LOWER_NECK_PITCH),
-            getNeckJointName(NeckJointName.NECK_YAW),
-            
-            "rightIndexFingerPitch1",
-            "rightIndexFingerPitch2",
-            "rightIndexFingerPitch3",
-            "rightMiddleFingerPitch1",
-            "rightMiddleFingerPitch2",
-            "rightMiddleFingerPitch3",
-            "rightPinkyPitch1",
-            "rightPinkyPitch2",
-            "rightPinkyPitch3",
-            "rightThumbRoll",
-            "rightThumbPitch1",
-            "rightThumbPitch2",
-            "rightThumbPitch3",
-            "leftIndexFingerPitch1",
-            "leftIndexFingerPitch2",
-            "leftIndexFingerPitch3",
-            "leftMiddleFingerPitch1",
-            "leftMiddleFingerPitch2",
-            "leftMiddleFingerPitch3",
-            "leftPinkyPitch1",
-            "leftPinkyPitch2",
-            "leftPinkyPitch3",
-            "leftThumbRoll",
-            "leftThumbPitch1",
-            "leftThumbPitch2",
-            "leftThumbPitch3"
+            getNeckJointName(NeckJointName.DISTAL_NECK_PITCH),
+            getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH),
+            getNeckJointName(NeckJointName.DISTAL_NECK_YAW),
+            getArmJointName(RobotSide.LEFT, ArmJointName.ELBOW_ROLL),
+            getArmJointName(RobotSide.LEFT, ArmJointName.WRIST_ROLL),
+            getArmJointName(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH),
+            getArmJointName(RobotSide.RIGHT, ArmJointName.ELBOW_ROLL),
+            getArmJointName(RobotSide.RIGHT, ArmJointName.WRIST_ROLL),
+            getArmJointName(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH),
       };
       
       return ret;
@@ -423,5 +401,31 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    public String[] getJointNamesBeforeFeet()
    {
       return jointNamesBeforeFeet;
+   }
+   
+   @Override
+   public Enum<?>[] getRobotSegments()
+   {
+      return RobotSide.values;
+   }
+   
+   @Override
+   public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
+   {
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         String jointBeforeFootName = getJointBeforeFootName(robotSide);
+         if(jointBeforeFootName != null && jointBeforeFootName.equals(joineNameBeforeEndEffector))
+         {
+            return robotSide;
+         }
+         
+         String endOfArm = armJointStrings.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH);
+         if(endOfArm != null && endOfArm.equals(joineNameBeforeEndEffector))
+         {
+            return robotSide;
+         }
+      }
+      throw new IllegalArgumentException(joineNameBeforeEndEffector + " was not listed as an end effector in " + this.getClass().getSimpleName());
    }
 }

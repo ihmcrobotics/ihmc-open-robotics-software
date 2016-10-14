@@ -1,11 +1,13 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class YoPIDGains extends YoPDGains
 {
-   private final DoubleYoVariable ki, maxIntegralError;
+   protected final DoubleYoVariable ki;
+   private final DoubleYoVariable maxIntegralError, integralLeakRatio;
 
    public YoPIDGains(String suffix, YoVariableRegistry registry)
    {
@@ -13,6 +15,8 @@ public class YoPIDGains extends YoPDGains
 
       ki = new DoubleYoVariable("ki" + suffix, registry);
       maxIntegralError = new DoubleYoVariable("maxIntegralError" + suffix, registry);
+      integralLeakRatio = new DoubleYoVariable("integralLeakRatio" + suffix, registry);
+      integralLeakRatio.set(1.0);
    }
 
    public void setPIDGains(double kp, double zeta, double ki, double maxIntegralError)
@@ -32,6 +36,11 @@ public class YoPIDGains extends YoPDGains
       this.maxIntegralError.set(maxIntegralError);
    }
 
+   public void setIntegralLeakRatio(double integralLeakRatio)
+   {
+      this.integralLeakRatio.set(MathTools.clipToMinMax(integralLeakRatio, 0.0, 1.0));
+   }
+
    public DoubleYoVariable getYoKi()
    {
       return ki;
@@ -40,5 +49,10 @@ public class YoPIDGains extends YoPDGains
    public DoubleYoVariable getYoMaxIntegralError()
    {
       return maxIntegralError;
+   }
+
+   public DoubleYoVariable getYoIntegralLeakRatio()
+   {
+      return integralLeakRatio;
    }
 }

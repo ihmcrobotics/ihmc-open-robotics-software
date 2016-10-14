@@ -1,15 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller;
 
-import us.ihmc.quadrupedRobotics.controller.state.QuadrupedControllerState;
-import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
 
-public abstract class QuadrupedController extends State<QuadrupedControllerState>
+public interface QuadrupedController extends FiniteStateMachineState<ControllerEvent>
 {
-   public QuadrupedController(QuadrupedControllerState stateEnum)
-   {
-      super(stateEnum);
-   }
-   
-   public abstract RobotMotionStatus getMotionStatus();
 }

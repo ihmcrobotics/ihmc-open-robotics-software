@@ -3,27 +3,26 @@ package us.ihmc.darpaRoboticsChallenge.gazebo;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ComponentBasedVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationInputHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.robotController.GazeboThreadedRobotController;
+import us.ihmc.darpaRoboticsChallenge.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -70,7 +69,7 @@ public class GazeboControllerFactory
       /*
        * Create controllers
        */
-      MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, dataProducer);
+      MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, controllerCommunicator);
       /*
        * Create sensors
        */
@@ -130,7 +129,8 @@ public class GazeboControllerFactory
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
 
       new UiPacketToRosMsgRedirector(robotModel, rosURI, rosAPI_communicator, networkProcessor.getPacketRouter(), nameSpace + "/" + robotName);
-      new ThePeoplesGloriousNetworkProcessor(rosURI, rosAPI_communicator, null, ppsOffsetProvider, robotModel, nameSpace + "/" + robotName, tfPrefix);
+      new ThePeoplesGloriousNetworkProcessor(rosURI, rosAPI_communicator, null, ppsOffsetProvider, robotModel, nameSpace + "/" + robotName, tfPrefix,
+            Collections.<Class>emptySet());
 
       yoVariableServer.start();
 
@@ -157,7 +157,7 @@ public class GazeboControllerFactory
 
    }
 
-   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel, HumanoidGlobalDataProducer dataProducer)
+   private MomentumBasedControllerFactory createDRCControllerFactory(DRCRobotModel robotModel, PacketCommunicator packetCommunicator)
    {
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 
@@ -165,29 +165,23 @@ public class GazeboControllerFactory
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       final HighLevelState initialBehavior;
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
       initialBehavior = HighLevelState.WALKING; // HERE!!
 
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForSlowWalkingOnRobot(walkingControllerParameters);
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, initialBehavior);
+            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
+            initialBehavior);
+      controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), packetCommunicator);
+      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
 //      controllerFactory.addHighLevelBehaviorFactory(new JointPositionControllerFactory(true));
 
-      if (USE_GUI)
-      {
-         VariousWalkingProviderFactory variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters, new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"));
-         controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
-
-      }
-      else
-      {
-         VariousWalkingProviderFactory variousWalkingProviderFactory = new ComponentBasedVariousWalkingProviderFactory(true, null, robotModel.getControllerDT());
-         controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
-      }
+      if (!USE_GUI)
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator(true, null);
 
       return controllerFactory;
    }

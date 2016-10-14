@@ -9,8 +9,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -63,38 +63,38 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public abstract InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel fullRobotModel, SDFRobot sdfRobot);
-   
+   public abstract InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(FullRobotModel fullRobotModel, FloatingRootJointRobot sdfRobot);
+
    // 150313: This test currently fails, seemingly due to some sort of problem in the MomentumBasedController or InverseDynamicsCalculator. Trying to fix it...
-	@DeployableTestMethod(estimatedDuration = 39.1)
-   @Test(timeout = 200000)
+	@ContinuousIntegrationTest(estimatedDuration = 38.0)
+   @Test(timeout = 190000)
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
    {
       // March 2015: Low pelvis orientation gains cause the pelvis to flip out. Trying to track down why this happens.
 
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       // Use perfect sensors and run single threaded to make sure state estimation isn't what's causing the problem.
       simulationTestingParameters.setUsePefectSensors(true);
       simulationTestingParameters.setRunMultiThreaded(false);
-      
+
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       DRCRobotModel robotModel = getRobotModel();
-      
+
       // Disable joint damping to make sure that damping isn't causing the problem.
       robotModel.setEnableJointDamping(false);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCPelvisFlippingOutBugTest", "", selectedLocation, simulationTestingParameters,
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCPelvisFlippingOutBugTest", selectedLocation, simulationTestingParameters,
               robotModel);
-      
+
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 
       // This is used for doing extra crazy debugging by spawing a whole new visualizer or analyzer to spy on the inverse dynamics calculator.
       // But is not needed for the test itself. So return null if you aren't debugging.
       InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener = getInverseDynamicsCalculatorListener(drcSimulationTestHelper.getControllerFullRobotModel(), drcSimulationTestHelper.getRobot());
       if (inverseDynamicsCalculatorListener != null) drcSimulationTestHelper.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
-      
+
       setupCameraForElvisPelvis();
 
       ThreadTools.sleep(1000);
@@ -132,7 +132,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    public abstract String getZetaPelvisOrientationName();

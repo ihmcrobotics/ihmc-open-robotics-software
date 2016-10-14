@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Random;
 
 public class RecyclingArrayList<T> implements List<T>
 {
@@ -30,6 +31,14 @@ public class RecyclingArrayList<T> implements List<T>
    public RecyclingArrayList(int initialSize, Class<T> clazz)
    {
       this(initialSize, GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz));
+   }
+
+   public void shuffle(Random random)
+   {
+      for (int i=size; i>1; i--)
+      {
+         unsafeSwap(i-1, random.nextInt(i));
+      }
    }
 
    @SuppressWarnings("unchecked")
@@ -185,7 +194,7 @@ public class RecyclingArrayList<T> implements List<T>
    /**
     * Removes the element at the specified position in this list.
     * This method is faster than {@link RecyclingArrayList#remove(int)} but the ith element is swapped with the last element changing the ordering of the list.
-    * 
+    *
     * @param index the index of the element to be removed
     */
    public void fastRemove(int index)
@@ -233,7 +242,7 @@ public class RecyclingArrayList<T> implements List<T>
     * Removes the element at the specified position in this list.
     * Shifts any subsequent elements to the left (subtracts one from their
     * indices).
-    * 
+    *
     * @param index the index of the element to be removed
     * @return null.
     */
@@ -330,7 +339,7 @@ public class RecyclingArrayList<T> implements List<T>
          throw new IndexOutOfBoundsException("Index cannot be negative: " + index);
    }
 
-   
+
 
    /**
     * Returns <tt>true</tt> if this list contains the specified element.

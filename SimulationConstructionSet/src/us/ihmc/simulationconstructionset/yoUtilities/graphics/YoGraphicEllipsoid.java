@@ -44,16 +44,16 @@ public class YoGraphicEllipsoid extends YoGraphicCoordinateSystem
    protected void computeRotationTranslation(Transform3d transform3D)
    {
       reshapingMatrix.setIdentity();
-      reshapingMatrix.m00 = reshapingMatrix.m00 * radii.getX();
-      reshapingMatrix.m11 = reshapingMatrix.m11 * radii.getY();
-      reshapingMatrix.m22 = reshapingMatrix.m22 * radii.getZ();
+      reshapingMatrix.setM00(reshapingMatrix.getM00() * radii.getX());
+      reshapingMatrix.setM11(reshapingMatrix.getM11() * radii.getY());
+      reshapingMatrix.setM22(reshapingMatrix.getM22() * radii.getZ());
       reshapingTransform.setRotationAndZeroTranslation(reshapingMatrix);
 
       transform3D.setIdentity();
       translationVector.set(x.getDoubleValue(), y.getDoubleValue(), z.getDoubleValue());
 
       transform3D.setScale(scale);
-      transform3D.setEuler(roll.getDoubleValue(), pitch.getDoubleValue(), yaw.getDoubleValue());
+      transform3D.setRotationEulerAndZeroTranslation(roll.getDoubleValue(), pitch.getDoubleValue(), yaw.getDoubleValue());
       transform3D.setTranslation(translationVector);
 
       transform3D.multiply(reshapingTransform);

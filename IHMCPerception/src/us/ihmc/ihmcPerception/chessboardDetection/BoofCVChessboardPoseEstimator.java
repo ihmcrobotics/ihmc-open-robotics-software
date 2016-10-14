@@ -100,7 +100,7 @@ public class BoofCVChessboardPoseEstimator
       Vector3d translation = new Vector3d();
       transform.getRotation(rotation);
       transform.getTranslation(translation);
-      Se3_F64 targetToSensor = new Se3_F64(rotation,new Vector3D_F64(translation.x, translation.y, translation.z));
+      Se3_F64 targetToSensor = new Se3_F64(rotation,new Vector3D_F64(translation.getX(), translation.getY(), translation.getZ()));
 
       Graphics2D g2 = image.createGraphics();
       g2.setStroke(new BasicStroke(4));

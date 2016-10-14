@@ -1,8 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.controllers.LockPelvisController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
@@ -15,13 +14,12 @@ public class DRCSteeringWheelDemo
 {
    private final DRCSimulationFactory drcSimulationFactory;
 
-   public DRCSteeringWheelDemo(DRCRobotModel model, DRCNetworkModuleParameters networkParameters, DRCRobotInitialSetup<SDFHumanoidRobot> initialSetup, double
+   public DRCSteeringWheelDemo(DRCRobotModel model, DRCNetworkModuleParameters networkParameters, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup, double
          percentOfSteeringWheelRadius)
    {
       CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(percentOfSteeringWheelRadius);
 
       DRCSimulationStarter simStarter = new DRCSimulationStarter(model, environment);
-      simStarter.registerHighLevelController(new JointPositionControllerFactory(true));
 
       simStarter.setRunMultiThreaded(true);      
       simStarter.setUsePerfectSensors(true);
@@ -30,7 +28,7 @@ public class DRCSteeringWheelDemo
       simStarter.startSimulation(networkParameters, true);
       
       drcSimulationFactory = simStarter.getDRCSimulationFactory();
-      SDFRobot robot = drcSimulationFactory.getRobot();
+      FloatingRootJointRobot robot = drcSimulationFactory.getRobot();
       
       LockPelvisController controller = new LockPelvisController(robot, drcSimulationFactory.getSimulationConstructionSet(), model.createFullRobotModel(), 0.0);
       robot.setController(controller);

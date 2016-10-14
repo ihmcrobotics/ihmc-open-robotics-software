@@ -6,13 +6,14 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.SwingWorker;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
@@ -39,7 +40,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
    private final DiagnosticsWhenHangingController controller;
    private final boolean computeTorqueOffsetsBasedOnAverages;
    
-   public HumanoidDiagnosticsWhenHangingSimulation(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, DRCRobotModel model, DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup, boolean computeTorqueOffsetsBasedOnAverages)
+   public HumanoidDiagnosticsWhenHangingSimulation(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, DRCRobotModel model, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, boolean computeTorqueOffsetsBasedOnAverages)
    {
       this.computeTorqueOffsetsBasedOnAverages = computeTorqueOffsetsBasedOnAverages;
       
@@ -57,6 +58,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
+      ICPOptimizationParameters icpOptimizationParameters = model.getICPOptimizationParameters();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       MomentumBasedControllerFactory momentumBasedControllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, footSensorNames,
@@ -65,6 +67,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
       diagnosticsWhenHangingControllerFactory.setTransitionRequested(true);
       momentumBasedControllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingControllerFactory);
+      momentumBasedControllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       HumanoidGlobalDataProducer globalDataProducer = null;
 

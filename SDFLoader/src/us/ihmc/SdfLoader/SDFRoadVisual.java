@@ -51,12 +51,12 @@ public class SDFRoadVisual extends Graphics3DObject
             Vector3d directionNext = getDirection(startNext, endNext);
             Vector3d nextSide = getPerpendicularVectorOfLength(width, directionNext);
 
-            Vector2d toSide2d = new Vector2d(toSide.x, toSide.y);
-            Vector2d nextSide2d = new Vector2d(nextSide.x, nextSide.y);
+            Vector2d toSide2d = new Vector2d(toSide.getX(), toSide.getY());
+            Vector2d nextSide2d = new Vector2d(nextSide.getX(), nextSide.getY());
             double angle = GeometryTools.getAngleFromFirstToSecondVector(toSide2d, nextSide2d);
             
             RigidBodyTransform rotZ = new RigidBodyTransform();
-            rotZ.rotZ(angle/2.0);
+            rotZ.setRotationYawAndZeroTranslation(angle/2.0);
             
             rotZ.transform(toSide);
             toSide.normalize();
@@ -76,7 +76,7 @@ public class SDFRoadVisual extends Graphics3DObject
 
    private Vector3d getPerpendicularVectorOfLength(double width, Vector3d direction)
    {
-      Vector3d toSide = new Vector3d(-direction.y, direction.x, 0);
+      Vector3d toSide = new Vector3d(-direction.getY(), direction.getX(), 0);
       toSide.normalize();
       toSide.scale(width/2.0);
       return toSide;

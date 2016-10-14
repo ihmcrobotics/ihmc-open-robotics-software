@@ -13,26 +13,37 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- * Currently under development. Trying to fix this trajectory properly but it is not usable yet.
- * Two useful references from the web:
- * <p> a) <a href="http://www.geometrictools.com/Documentation/Quaternions.pdf">(SLERP & SQUAD methods)</a> </p>
- * <p> b) <a href="http://www.cim.mcgill.ca/~mpersson/docs/quat_calc_notes.pdf">(Proper quaternion calculus)</a> </p>
+ * This trajectory generator aims at interpolating between two orientations q0 and qf for given angular velocities at the limits w0 and wf.
+ * It does a nice job for "long distance" type trajectories but totally fails when used for interpolating between, it generates extra accelerations instead of being "lazy".
+ * Look at {@link HermiteCurveBasedOrientationTrajectoryGenerator} for interpolating between waypoints.
  * 
- * I got inspired by the first reference with the SQUAD method, but watch out there the math is totally WRONG.
+ * To build this trajectory generator, I got inspired by the two following refs.
+ * <p> a) <a href="http://www.geometrictools.com/Documentation/Quaternions.pdf">(SLERP & SQUAD methods)</a> </p>
+ * <p> b) <a href="http://www.cim.mcgill.ca/~mpersson/docs/quat_calc_notes.pdf">(Proper quaternion calculus, this link seems to be dead, but I can't find a new one. Ask me for the PDF file.)</a> </p>
+ * 
+ * I got inspired by the first reference with the SQUAD method, but watch out there the math seems to be totally wrong.
  * The second reference provides a proper approach to general quaternion calculus. I used it a lot to derive time derivatives with quaternion & angular velocity. Really useful ref.
- *
- * <p>
- * This class needs a total cleanup and probably to extract several methods to a "tool" class.
- * I'll do so as soon as the math is right and it works.
- * </p>
- *
+ * 
+ * The method I'm using here is as follows:
+ * - I interpolated from the initial orientation to the final orientation using the classic SLERP method using a fifth-order polynomial function to avoid generating angular velocity at the limits.
+ * - To induce the initial and final desired angular velocities I make the initial and final orientations drift at a constant velocity (the initial and final angular velocities respectively).
+ * 
+ * I ended up giving up on computing the angular velocity analytically. It seems that computing the derivative of a quaternion q raised to the power alpha where both q and alpha depend on time is still an open problem.
+ * So I'm just computing the angular velocity and angular acceleration using finite difference.
+ * Also, I had some issues when the initial and/or final angular velocity are large.
+ * As soon as the integrated (initial or final) velocity over the trajectory goes beyond 2 Pi, there is some flip going.
+ * It seems that it is totally doable to deal with those flips, but I thought that on a robot you probably don't want to flip a hand or a foot for instance.
+ * So I ended up saturating the drifted orientation when the angular velocity at the bounds are too high.
+ * 
  * @author Sylvain 
  */
-public class VelocityConstrainedOrientationTrajectoryGenerator implements OrientationTrajectoryGenerator
+public class VelocityConstrainedOrientationTrajectoryGenerator extends OrientationTrajectoryGeneratorInMultipleFrames
 {
    private static final double PI = 1.0 * Math.PI;
    private final YoVariableRegistry registry;
@@ -47,9 +58,9 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
    private final YoFrameQuaternion finalOrientationDrifted;
    private final YoFrameVector finalAngularVelocity;
 
-   private final YoFrameQuaternion desiredOrientation;
-   private final YoFrameVector desiredAngularVelocity;
-   private final YoFrameVector desiredAngularAcceleration;
+   private final YoFrameQuaternion currentOrientation;
+   private final YoFrameVector currentAngularVelocity;
+   private final YoFrameVector currentAngularAcceleration;
 
    private final YoPolynomial saturationPolynomial;
    private final DoubleYoVariable maxAngularVelocityMagnitudeAtLimits;
@@ -71,22 +82,69 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
 
    public VelocityConstrainedOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
+      this(namePrefix, false, referenceFrame, parentRegistry);
+   }
+
+   public VelocityConstrainedOrientationTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   {
+      super(allowMultipleFrames, referenceFrame);
+
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       trajectoryTime = new DoubleYoVariable(namePrefix + "TrajectoryTime", registry);
       currentTime = new DoubleYoVariable(namePrefix + "Time", registry);
       parameterPolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);
       trajectoryFrame = referenceFrame;
 
-      initialOrientation = new YoFrameQuaternion(namePrefix + "InitialOrientation", trajectoryFrame, registry);
-      initialOrientationDrifted = new YoFrameQuaternion(namePrefix + "InitialOrientationDrifted", trajectoryFrame, registry);
-      initialAngularVelocity = new YoFrameVector(namePrefix + "InitialAngularVelocity", trajectoryFrame, registry);
-      finalOrientation = new YoFrameQuaternion(namePrefix + "FinalOrientation", trajectoryFrame, registry);
-      finalOrientationDrifted = new YoFrameQuaternion(namePrefix + "FinalOrientationDrifted", trajectoryFrame, registry);
-      finalAngularVelocity = new YoFrameVector(namePrefix + "FinalAngularVelocity", trajectoryFrame, registry);
+      String initialOrientationName = "InitialOrientation";
+      String initialOrientationDriftedName = "InitialOrientationDrifted";
+      String initialAngularVelocityName = "InitialAngularVelocity";
+      String finalOrientationName = "FinalOrientation";
+      String finalOrientationDriftedName = "FinalOrientationDrifted";
+      String finalAngularVelocityName = "FinalAngularVelocity";
+      String currentOrientationName = "CurrentOrientation";
+      String currentAngularVelocityName = "CurrentAngularVelocity";
+      String currentAngularAccelerationName = "CurrentAngularAcceleration";
 
-      desiredOrientation = new YoFrameQuaternion(namePrefix + "DesiredOrientation", trajectoryFrame, registry);
-      desiredAngularVelocity = new YoFrameVector(namePrefix + "DesiredAngularVelocity", trajectoryFrame, registry);
-      desiredAngularAcceleration = new YoFrameVector(namePrefix + "DesiredAngularAcceleration", trajectoryFrame, registry);
+      if (allowMultipleFrames)
+      {
+         YoFrameQuaternionInMultipleFrames initialOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + initialOrientationName, registry, trajectoryFrame);
+         YoFrameQuaternionInMultipleFrames initialOrientationDrifted = new YoFrameQuaternionInMultipleFrames(namePrefix + initialOrientationDriftedName, registry, trajectoryFrame);
+         YoFrameVectorInMultipleFrames initialAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + initialAngularVelocityName, registry, trajectoryFrame);
+         YoFrameQuaternionInMultipleFrames finalOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + finalOrientationName, registry, trajectoryFrame);
+         YoFrameQuaternionInMultipleFrames finalOrientationDrifted = new YoFrameQuaternionInMultipleFrames(namePrefix + finalOrientationDriftedName, registry, trajectoryFrame);
+         YoFrameVectorInMultipleFrames finalAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + finalAngularVelocityName, registry, trajectoryFrame);
+
+         YoFrameQuaternionInMultipleFrames currentOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + currentOrientationName, registry, trajectoryFrame);
+         YoFrameVectorInMultipleFrames currentAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + currentAngularVelocityName, registry, trajectoryFrame);
+         YoFrameVectorInMultipleFrames currentAngularAcceleration = new YoFrameVectorInMultipleFrames(namePrefix + currentAngularAccelerationName, registry, trajectoryFrame);
+
+         registerMultipleFramesHolders(initialOrientation, initialOrientationDrifted, initialAngularVelocity);
+         registerMultipleFramesHolders(finalOrientation, finalOrientationDrifted, finalAngularVelocity);
+         registerMultipleFramesHolders(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
+
+         this.initialOrientation = initialOrientation;
+         this.initialOrientationDrifted = initialOrientationDrifted;
+         this.initialAngularVelocity = initialAngularVelocity;
+         this.finalOrientation = finalOrientation;
+         this.finalOrientationDrifted = finalOrientationDrifted;
+         this.finalAngularVelocity = finalAngularVelocity;
+         this.currentOrientation = currentOrientation;
+         this.currentAngularVelocity = currentAngularVelocity;
+         this.currentAngularAcceleration = currentAngularAcceleration;
+      }
+      else
+      {
+         initialOrientation = new YoFrameQuaternion(namePrefix + initialOrientationName, trajectoryFrame, registry);
+         initialOrientationDrifted = new YoFrameQuaternion(namePrefix + initialOrientationDriftedName, trajectoryFrame, registry);
+         initialAngularVelocity = new YoFrameVector(namePrefix + initialAngularVelocityName, trajectoryFrame, registry);
+         finalOrientation = new YoFrameQuaternion(namePrefix + finalOrientationName, trajectoryFrame, registry);
+         finalOrientationDrifted = new YoFrameQuaternion(namePrefix + finalOrientationDriftedName, trajectoryFrame, registry);
+         finalAngularVelocity = new YoFrameVector(namePrefix + finalAngularVelocityName, trajectoryFrame, registry);
+
+         currentOrientation = new YoFrameQuaternion(namePrefix + currentOrientationName, trajectoryFrame, registry);
+         currentAngularVelocity = new YoFrameVector(namePrefix + currentAngularVelocityName, trajectoryFrame, registry);
+         currentAngularAcceleration = new YoFrameVector(namePrefix + currentAngularAccelerationName, trajectoryFrame, registry);
+      }
 
       saturationPolynomial = new YoPolynomial(namePrefix + "SaturationPolynomial", 6, registry);
       saturationPolynomial.setQuintic(0, PI, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
@@ -117,6 +175,13 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
       this.initialOrientation.set(tempOrientation);
    }
 
+   public void setInitialOrientation(YoFrameQuaternion initialOrientation)
+   {
+      initialOrientation.getFrameOrientationIncludingFrame(tempOrientation);
+      tempOrientation.changeFrame(trajectoryFrame);
+      this.initialOrientation.set(tempOrientation);
+   }
+
    public void setFinalOrientation(FrameOrientation finalOrientation)
    {
       tempOrientation.setIncludingFrame(finalOrientation);
@@ -131,12 +196,29 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
       this.finalOrientation.set(tempOrientation);
    }
 
+   public void setFinalOrientation(YoFrameQuaternion finalOrientation)
+   {
+      finalOrientation.getFrameOrientationIncludingFrame(tempOrientation);
+      tempOrientation.changeFrame(trajectoryFrame);
+      this.finalOrientation.set(tempOrientation);
+   }
+
    public void setInitialAngularVelocity(FrameVector initialAngularVelocity)
    {
       this.initialAngularVelocity.setAndMatchFrame(initialAngularVelocity);
    }
 
+   public void setInitialAngularVelocity(YoFrameVector initialAngularVelocity)
+   {
+      this.initialAngularVelocity.setAndMatchFrame(initialAngularVelocity);
+   }
+
    public void setFinalAngularVelocity(FrameVector finalAngularVelocity)
+   {
+      this.finalAngularVelocity.setAndMatchFrame(finalAngularVelocity);
+   }
+
+   public void setFinalAngularVelocity(YoFrameVector finalAngularVelocity)
    {
       this.finalAngularVelocity.setAndMatchFrame(finalAngularVelocity);
    }
@@ -157,7 +239,19 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
       setInitialAngularVelocity(initialAngularVelocity);
    }
 
+   public void setInitialConditions(YoFrameQuaternion initialOrientation, YoFrameVector initialAngularVelocity)
+   {
+      setInitialOrientation(initialOrientation);
+      setInitialAngularVelocity(initialAngularVelocity);
+   }
+
    public void setFinalConditions(FrameOrientation finalOrientation, FrameVector finalAngularVelocity)
+   {
+      setFinalOrientation(finalOrientation);
+      setFinalAngularVelocity(finalAngularVelocity);
+   }
+
+   public void setFinalConditions(YoFrameQuaternion finalOrientation, YoFrameVector finalAngularVelocity)
    {
       setFinalOrientation(finalOrientation);
       setFinalAngularVelocity(finalAngularVelocity);
@@ -180,9 +274,9 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
       if (initialOrientation.dot(finalOrientation) < 0.0)
          finalOrientation.negate();
 
-      desiredOrientation.set(initialOrientation);
-      desiredAngularVelocity.set(initialAngularVelocity);
-      desiredAngularAcceleration.setToZero();
+      currentOrientation.set(initialOrientation);
+      currentAngularVelocity.set(initialAngularVelocity);
+      currentAngularAcceleration.setToZero();
    }
 
    private final Quat4d initialQuaternionDrifted = new Quat4d();
@@ -205,38 +299,37 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
 
       if (isDone())
       {
-         desiredOrientation.set(finalOrientation);
-         desiredAngularVelocity.set(finalAngularVelocity);
-         desiredAngularAcceleration.setToZero();
+         currentOrientation.set(finalOrientation);
+         currentAngularVelocity.set(finalAngularVelocity);
+         currentAngularAcceleration.setToZero();
          return;
       }
       else if (currentTime.getDoubleValue() < 0.0)
       {
-         desiredOrientation.set(initialOrientation);
-         desiredAngularVelocity.set(initialAngularVelocity);
-         desiredAngularAcceleration.setToZero();
+         currentOrientation.set(initialOrientation);
+         currentAngularVelocity.set(initialAngularVelocity);
+         currentAngularAcceleration.setToZero();
          return;
       }
 
       time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
 
+      interpolateOrientation(time - dtForFiniteDifference, initialQuaternionDrifted, finalQuaternionDrifted, qInterpolatedPrevious);
+      interpolateOrientation(time + dtForFiniteDifference, initialQuaternionDrifted, finalQuaternionDrifted, qInterpolatedNext);
       interpolateOrientation(time, initialQuaternionDrifted, finalQuaternionDrifted, qInterpolated);
 
       initialOrientationDrifted.set(initialQuaternionDrifted);
       finalOrientationDrifted.set(finalQuaternionDrifted);
 
-      interpolateOrientation(time - dtForFiniteDifference, initialQuaternionDrifted, finalQuaternionDrifted, qInterpolatedPrevious);
-      interpolateOrientation(time + dtForFiniteDifference, initialQuaternionDrifted, finalQuaternionDrifted, qInterpolatedNext);
-
       quaternionCalculus.computeQDotByFiniteDifferenceCentral(qInterpolatedPrevious, qInterpolatedNext, dtForFiniteDifference, qDot);
       quaternionCalculus.computeQDDotByFiniteDifferenceCentral(qInterpolatedPrevious, qInterpolated, qInterpolatedNext, dtForFiniteDifference, qDDot);
 
-      quaternionCalculus.computeAngularVelocity(qInterpolated, qDot, tempAngularVelocity);
+      quaternionCalculus.computeAngularVelocityInWorldFrame(qInterpolated, qDot, tempAngularVelocity);
       quaternionCalculus.computeAngularAcceleration(qInterpolated, qDot, qDDot, tempAngularAcceleration);
 
-      desiredOrientation.set(qInterpolated);
-      desiredAngularVelocity.set(tempAngularVelocity);
-      desiredAngularAcceleration.set(tempAngularAcceleration);
+      currentOrientation.set(qInterpolated);
+      currentAngularVelocity.set(tempAngularVelocity);
+      currentAngularAcceleration.set(tempAngularAcceleration);
    }
 
    private final Quat4d initialDrift = new Quat4d();
@@ -246,7 +339,6 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
    private void interpolateOrientation(double time, Quat4d initialQuaternionDriftedToPack, Quat4d finalQuaternionDriftedToPack, Quat4d qInterpolated)
    {
       parameterPolynomial.compute(time);
-
       double alpha = parameterPolynomial.getPosition();
 
       if (initialDriftSaturated.getBooleanValue())
@@ -259,7 +351,8 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
       }
       else
       {
-         computeDrift(time, initialAngularVelocity, initialDrift);
+         double alphaDecay = MathTools.clipToMinMax(2.0 * time / trajectoryTime.getDoubleValue(), 0.0, 1.0);
+         computeDrift(time, alphaDecay, initialAngularVelocity, initialDrift);
       }
 
       double finalDriftIntegrationTime = time - trajectoryTime.getDoubleValue();
@@ -273,7 +366,8 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
       }
       else
       {
-         computeDrift(finalDriftIntegrationTime, finalAngularVelocity, finalDrift);
+         double alphaDecay = MathTools.clipToMinMax(1.0 - 2.0 * time / trajectoryTime.getDoubleValue(), 0.0, 1.0);
+         computeDrift(finalDriftIntegrationTime, alphaDecay, finalAngularVelocity, finalDrift);
       }
 
       initialOrientation.get(initialQuaternionDriftedToPack);
@@ -288,9 +382,10 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
 
    private final Vector3d tempAngularVelocityForDrift = new Vector3d();
 
-   private void computeDrift(double time, YoFrameVector angularVelocity, Quat4d driftToPack)
+   private void computeDrift(double time, double alphaDecay, YoFrameVector angularVelocity, Quat4d driftToPack)
    {
       angularVelocity.get(tempAngularVelocityForDrift);
+      tempAngularVelocity.scale(alphaDecay);
       RotationTools.integrateAngularVelocity(tempAngularVelocityForDrift, time, driftToPack);
    }
 
@@ -323,19 +418,19 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
    @Override
    public void getOrientation(FrameOrientation orientationToPack)
    {
-      desiredOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
    @Override
    public void getAngularVelocity(FrameVector velocityToPack)
    {
-      desiredAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
+      currentAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
    @Override
    public void getAngularAcceleration(FrameVector accelerationToPack)
    {
-      desiredAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
+      currentAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
    @Override
@@ -344,5 +439,17 @@ public class VelocityConstrainedOrientationTrajectoryGenerator implements Orient
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);
       getAngularAcceleration(angularAccelerationToPack);
+   }
+
+   @Override
+   public String toString()
+   {
+      String ret = "";
+
+      ret += "Current time: " + currentTime.getDoubleValue() + ", trajectory time: " + trajectoryTime.getDoubleValue();
+      ret += "\nCurrent orientation: " + currentOrientation.toString();
+      ret += "\nCurrent angular velocity: " + currentAngularVelocity.toString();
+      ret += "\nCurrent angular acceleration: " + currentAngularAcceleration.toString();
+      return ret;
    }
 }

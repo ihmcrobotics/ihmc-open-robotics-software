@@ -2,15 +2,15 @@ package us.ihmc.steppr.hardware.output;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
 import us.ihmc.acsell.springs.HystereticSpringCalculator;
 import us.ihmc.acsell.springs.HystereticSpringProperties;
 import us.ihmc.acsell.springs.LinearSpringCalculator;
 import us.ihmc.acsell.springs.SpringCalculator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -66,10 +66,10 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    private final EnumMap<StepprJoint, DoubleYoVariable> yoMotorDamping = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> desiredQddFeedForwardGain = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> desiredJointQ = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
-   private final EnumYoVariable<WalkingState>  yoWalkingState = new EnumYoVariable<WalkingState>("sow_walkingState", registry, WalkingState.class);
-   
+   private final EnumYoVariable<WalkingStateEnum>  yoWalkingState = new EnumYoVariable<WalkingStateEnum>("sow_walkingState", registry, WalkingStateEnum.class);
+
    private final DoubleYoVariable masterMotorDamping = new DoubleYoVariable("masterMotorDamping", registry);
-   
+
    private final HystereticSpringProperties leftHipXSpringProperties = new StepprLeftHipXSpringProperties();
    private final HystereticSpringProperties rightHipXSpringProperties = new StepprRightHipXSpringProperties();
    private final SpringCalculator leftHipXSpringCalculator;
@@ -78,7 +78,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    private final HystereticSpringProperties rightAnkleSpringProperties = new StepprRightAnkleSpringProperties();
    private final SpringCalculator leftAnkleSpringCalculator;
    private final SpringCalculator rightAnkleSpringCalculator;
-   
+
 
    enum JointControlMode
    {
@@ -87,13 +87,13 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
 
    private final EnumMap<StepprJoint, EnumYoVariable<JointControlMode>> jointControlMode = new EnumMap<StepprJoint, EnumYoVariable<JointControlMode>>(
          StepprJoint.class);
-         
-   private WalkingState currentWalkingState;
+
+   private WalkingStateEnum currentWalkingState;
 
    public StepprOutputWriter(DRCRobotModel robotModel)
    {
 
-      SDFFullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
+      FullRobotModel standPrepFullRobotModel = robotModel.createFullRobotModel();
       standPrepJoints = StepprUtil.createJointMap(standPrepFullRobotModel.getOneDoFJoints());
 
       tauControllerOutput = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
@@ -101,11 +101,11 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       {
          tauControllerOutput.put(joint, new DoubleYoVariable(joint.getSdfName() + "tauControllerOutput", registry));
          yoMotorDamping.put(joint, new DoubleYoVariable(joint.getSdfName() + "motorDamping", registry));
-         
-         
+
+
          DoubleYoVariable inertia = new DoubleYoVariable(joint.getSdfName()+"ReflectedMotorInertia", registry);
          inertia.set(joint.getActuators()[0].getMotorInertia()*joint.getRatio()*joint.getRatio()); //hacky
-         yoReflectedMotorInertia.put(joint, inertia);  
+         yoReflectedMotorInertia.put(joint, inertia);
          yoTauInertiaViz.put(joint, new DoubleYoVariable(joint.getSdfName()+"TauInertia", registry));
          desiredQddFeedForwardGain.put(joint, new DoubleYoVariable(joint.getSdfName()+"QddFeedForwardGain", registry));
          desiredJointQ.put(joint, new DoubleYoVariable(joint.getSdfName()+"_Q_desired",registry));
@@ -123,12 +123,12 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       yoAngleSpring.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName() + "_q_Spring", registry));
       yoAngleSpring.put(StepprJoint.LEFT_ANKLE_Y, new DoubleYoVariable(StepprJoint.LEFT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
       yoAngleSpring.put(StepprJoint.RIGHT_ANKLE_Y, new DoubleYoVariable(StepprJoint.RIGHT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
-      
+
       leftHipXSpringCalculator = new HystereticSpringCalculator(leftHipXSpringProperties,StepprJoint.LEFT_HIP_X.getSdfName(),registry);
       rightHipXSpringCalculator = new HystereticSpringCalculator(rightHipXSpringProperties,StepprJoint.RIGHT_HIP_X.getSdfName(),registry);
       leftAnkleSpringCalculator = new LinearSpringCalculator(leftAnkleSpringProperties);
       rightAnkleSpringCalculator = new LinearSpringCalculator(rightAnkleSpringProperties);
-            
+
       initializeJointControlMode(robotModel.getWalkingControllerParameters().getJointsToIgnoreInController());
       initializeMotorDamping();
       initializeFeedForwardTorqueFromDesiredAcceleration();
@@ -155,9 +155,9 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       yoMotorDamping.get(StepprJoint.RIGHT_HIP_Y).set(1.0);
       yoMotorDamping.get(StepprJoint.RIGHT_HIP_X).set(10.0);
       masterMotorDamping.set(1.0);
-      
+
    }
-   
+
    private void initializeFeedForwardTorqueFromDesiredAcceleration()
    {
       desiredQddFeedForwardGain.get(StepprJoint.LEFT_ANKLE_Y).set(0.5);
@@ -192,13 +192,13 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
             outputEnabled = false;
          }
          computeOutputCommand(timestamp);
-            
+
       }
 
       outputWriter.write();
 
    }
-   
+
    private void computeOutputCommand(long timestamp)
    {
          /*
@@ -226,7 +226,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
             RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlJoint);
 
             double controlRatio = getControlRatioByJointControlMode(joint);
-            
+
             double desiredAcceleration = wholeBodyControlJoint.getQddDesired();
             double motorReflectedInertia = yoReflectedMotorInertia.get(joint).getDoubleValue();
             double motorInertiaTorque = motorReflectedInertia * desiredAcceleration;
@@ -247,9 +247,9 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
                tauSpring = calcSpringTorque(joint, rawSensorData.getQ_raw());
                yoTauSpringCorrection.get(joint).set(tauSpring);
                yoTauTotal.get(joint).set(tau);
-            } 
+            }
             jointCommand.setTauDesired(tau - tauSpring, wholeBodyControlJoint.getQddDesired(), rawSensorData);
-                        
+
             jointCommand.setDamping(kd);
 
          }
@@ -315,15 +315,15 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       {
         yoAngleSpring.get(joint).set(q);
         leftAnkleSpringCalculator.update(q);
-        return (USE_LEFT_ANKLE_SPRING && (currentWalkingState != WalkingState.RIGHT_SUPPORT)) ? 
-              leftAnkleSpringCalculator.getSpringForce() : 
+        return (USE_LEFT_ANKLE_SPRING && (currentWalkingState != WalkingStateEnum.WALKING_RIGHT_SUPPORT)) ?
+              leftAnkleSpringCalculator.getSpringForce() :
               leftAnkleSpringCalculator.getSpringForce()*0.75;
       }
       case RIGHT_ANKLE_Y:
       {
         yoAngleSpring.get(joint).set(q);
         rightAnkleSpringCalculator.update(q);
-        return (USE_RIGHT_ANKLE_SPRING && (currentWalkingState != WalkingState.LEFT_SUPPORT)) ?
+        return (USE_RIGHT_ANKLE_SPRING && (currentWalkingState != WalkingStateEnum.WALKING_LEFT_SUPPORT)) ?
               rightAnkleSpringCalculator.getSpringForce() :
               rightAnkleSpringCalculator.getSpringForce()*0.75;
       }
@@ -333,7 +333,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    }
 
    @Override
-   public void setFullRobotModel(SDFFullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       wholeBodyControlJoints = StepprUtil.createJointMap(controllerModel.getOneDoFJoints());
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
@@ -350,13 +350,13 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    {
       return registry;
    }
-   
+
    @Override
    public void controllerStateHasChanged(Enum<?> oldState, Enum<?> newState)
    {
-      if(newState instanceof WalkingState)
+      if(newState instanceof WalkingStateEnum)
       {
-         currentWalkingState = (WalkingState)newState;
+         currentWalkingState = (WalkingStateEnum)newState;
          yoWalkingState.set(currentWalkingState);
       }
    }
@@ -365,10 +365,10 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    public void controllerFailed(FrameVector2d framevector)
    {
       enableOutput.set(false);
-      yoWalkingState.set(WalkingState.DOUBLE_SUPPORT);
+      yoWalkingState.set(WalkingStateEnum.TO_STANDING);
       //((EnumYoVariable<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
       //((BooleanYoVariable)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
    }
-   
+
 
 }

@@ -170,7 +170,7 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
 
       combinedTerrainObject.addBox(-5.0, -30.0, 5.0, 5.0, -0.05, 0.0, YoAppearance.DarkGray());
       combinedTerrainObject.addBox(-1.2192, -0.025, 0, 0.025, WALL_HEIGHT, YoAppearance.Beige());
-      combinedTerrainObject.addBox(0.0 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.x, -0.025, 1.2192 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.x,
+      combinedTerrainObject.addBox(0.0 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), -0.025, 1.2192 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
             0.025, WALL_HEIGHT, YoAppearance.Beige());
       return combinedTerrainObject;
    }
@@ -293,7 +293,7 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
       double rampRise = cinderBlockLength * Math.sin(cinderBlockTiltRadians);
 
       RigidBodyTransform blockSupportLocation = new RigidBodyTransform();
-      blockSupportLocation.rotZ(Math.toRadians(yawDegrees));
+      blockSupportLocation.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
       double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] { (cinderBlockLength - rampRise) / 2, 0 }, yawDegrees);
       blockSupportLocation.setTranslation(new Vector3d(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1], rampRise / 2
             + numberFlatSupports * cinderBlockHeight));
@@ -316,10 +316,10 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
       AppearanceDefinition app = cinderBlockAppearance;
 
       RigidBodyTransform location = new RigidBodyTransform();
-      location.rotZ(Math.toRadians(yawDegrees));
+      location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       RigidBodyTransform tilt = new RigidBodyTransform();
-      tilt.rotY(-cinderBlockTiltRadians);
+      tilt.setRotationPitchAndZeroTranslation(-cinderBlockTiltRadians);
       location.multiply(tilt);
 
       double zCenter = (cinderBlockHeight * Math.cos(cinderBlockTiltRadians) + cinderBlockLength * Math.sin(cinderBlockTiltRadians)) / 2;
@@ -371,7 +371,7 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
       double yCenter = centerPoint[1];
 
       RigidBodyTransform location = new RigidBodyTransform();
-      location.rotZ(Math.toRadians(yawDegrees));
+      location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
       RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength + overlapToPreventGaps,

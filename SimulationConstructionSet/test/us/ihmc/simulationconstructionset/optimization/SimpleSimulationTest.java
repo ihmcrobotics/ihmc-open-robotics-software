@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
 import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
 import us.ihmc.utilities.parameterOptimization.OptimizationProblem;
@@ -15,7 +15,7 @@ import us.ihmc.utilities.parameterOptimization.SimpleRandomGradientDecentParamet
 public class SimpleSimulationTest
 {
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 1.4)
 	@Test(timeout=300000)
    public void testSimpleSimulation()
    {

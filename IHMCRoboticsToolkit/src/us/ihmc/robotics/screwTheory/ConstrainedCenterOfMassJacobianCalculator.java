@@ -13,7 +13,7 @@ public class ConstrainedCenterOfMassJacobianCalculator
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final DenseMatrix64F constrainedCenterOfMassJacobian = new DenseMatrix64F(1, 1);
 
-   public ConstrainedCenterOfMassJacobianCalculator(SixDoFJoint rootJoint)
+   public ConstrainedCenterOfMassJacobianCalculator(FloatingInverseDynamicsJoint rootJoint)
    {
       this.dynamicallyConsistentNullspaceCalculator = new OriginalDynamicallyConsistentNullspaceCalculator(rootJoint, true);
       this.centerOfMassJacobian = new CenterOfMassJacobian(rootJoint.getSuccessor());

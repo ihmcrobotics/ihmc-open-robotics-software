@@ -60,7 +60,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    private final DoubleYoVariable currentTime;
    private final DoubleYoVariable trajectoryTime;
-   
+
    private final FramePoint tempPosition = new FramePoint();
    private final FrameOrientation tempOrientation = new FrameOrientation();
 
@@ -71,7 +71,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    private final FramePoint ballPosition = new FramePoint();
    private final int numberOfBalls = 50;
 
-   /** Use a BooleanYoVariable to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */ 
+   /** Use a BooleanYoVariable to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
    private final BooleanYoVariable showViz;
 
    private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
@@ -83,14 +83,13 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       this(namePrefix, false, referenceFrame, parentRegistry, false, null);
    }
 
-   public StraightLinePoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry,
-         boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public StraightLinePoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry, boolean visualize,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(namePrefix, false, referenceFrame, parentRegistry, visualize, yoGraphicsListRegistry);
    }
 
-   public StraightLinePoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry)
+   public StraightLinePoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       this(namePrefix, allowMultipleFrames, referenceFrame, parentRegistry, false, null);
    }
@@ -104,7 +103,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
       initialPosition = new YoFramePointInMultipleFrames(namePrefix + "InitialPosition", registry, referenceFrame);
       finalPosition = new YoFramePointInMultipleFrames(namePrefix + "FinalPosition", registry, referenceFrame);
-      
+
       currentPosition = new YoFramePointInMultipleFrames(namePrefix + "CurrentPosition", registry, referenceFrame);
       currentVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentVelocity", registry, referenceFrame);
       currentAcceleration = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAcceleration", registry, referenceFrame);
@@ -114,7 +113,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       initialOrientationForViz = new YoFrameOrientation(namePrefix + "InitialOrientationForViz", ReferenceFrame.getWorldFrame(), registry);
       finalOrientationForViz = new YoFrameOrientation(namePrefix + "FinalOrientationForViz", ReferenceFrame.getWorldFrame(), registry);
       currentOrientationForViz = new YoFrameOrientation(namePrefix + "CurrentOrientationForViz", ReferenceFrame.getWorldFrame(), registry);
-      
+
       currentOrientation = new YoFrameQuaternionInMultipleFrames(namePrefix + "CurrentOrientation", registry, referenceFrame);
       currentAngularVelocity = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAngularVelocity", registry, referenceFrame);
       currentAngularAcceleration = new YoFrameVectorInMultipleFrames(namePrefix + "CurrentAngularAcceleration", registry, referenceFrame);
@@ -138,9 +137,12 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
          final YoGraphicPosition initialPositionViz = new YoGraphicPosition(namePrefix + "InitialPosition", initialPosition, 0.02, YoAppearance.BlueViolet());
          final YoGraphicPosition finalPositionViz = new YoGraphicPosition(namePrefix + "FinalPosition", finalPosition, 0.02, YoAppearance.Red());
 
-         final YoGraphicCoordinateSystem initialPoseViz = new YoGraphicCoordinateSystem(namePrefix + "InitialPose", initialPosition.buildUpdatedYoFramePointForVisualizationOnly(), initialOrientationForViz, 0.1);
-         final YoGraphicCoordinateSystem finalPoseViz = new YoGraphicCoordinateSystem(namePrefix + "FinalPose", finalPosition.buildUpdatedYoFramePointForVisualizationOnly(), finalOrientationForViz, 0.1);
-         final YoGraphicCoordinateSystem currentPoseViz = new YoGraphicCoordinateSystem(namePrefix + "CurrentPose", currentPosition.buildUpdatedYoFramePointForVisualizationOnly(), currentOrientationForViz, 0.25);
+         final YoGraphicCoordinateSystem initialPoseViz = new YoGraphicCoordinateSystem(namePrefix + "InitialPose",
+               initialPosition.buildUpdatedYoFramePointForVisualizationOnly(), initialOrientationForViz, 0.1);
+         final YoGraphicCoordinateSystem finalPoseViz = new YoGraphicCoordinateSystem(namePrefix + "FinalPose",
+               finalPosition.buildUpdatedYoFramePointForVisualizationOnly(), finalOrientationForViz, 0.1);
+         final YoGraphicCoordinateSystem currentPoseViz = new YoGraphicCoordinateSystem(namePrefix + "CurrentPose",
+               currentPosition.buildUpdatedYoFramePointForVisualizationOnly(), currentOrientationForViz, 0.25);
          yoGraphicsList = new YoGraphicsList(namePrefix + "StraightLineTrajectory");
          yoGraphicsList.add(currentPositionViz);
          yoGraphicsList.add(initialPositionViz);
@@ -243,7 +245,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    public void setFinalPose(FramePose finalPose)
    {
       finalPose.getPoseIncludingFrame(tempPosition, tempOrientation);
-      
+
       finalPosition.set(tempPosition);
       finalOrientation.set(tempOrientation);
 
@@ -254,9 +256,9 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    {
       this.finalPosition.set(finalPosition);
       this.finalOrientation.set(finalOrientation);
-      
+
       finalOrientationForViz.setAndMatchFrame(finalOrientation);
-      
+
       tempPosition.setIncludingFrame(finalPosition);
       tempOrientation.setIncludingFrame(finalOrientation);
       finalOrientationForViz.setAndMatchFrame(tempOrientation);
@@ -266,7 +268,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    {
       MathTools.checkIfInRange(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
       quinticParameterPolynomial.setQuintic(0.0, trajectoryTime.getDoubleValue(), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
-      
+
       reset();
 
       if (visualize)
@@ -335,14 +337,16 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    public void showVisualization()
    {
-      if (!visualize) return;
+      if (!visualize)
+         return;
 
       showViz.set(true);
    }
 
    public void hideVisualization()
    {
-      if (!visualize) return;
+      if (!visualize)
+         return;
 
       showViz.set(false);
    }
@@ -392,16 +396,16 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    }
 
    private final Quat4d temp = new Quat4d();
-   
+
    public void getPose(FramePose framePoseToPack)
    {
       framePoseToPack.changeFrame(currentPosition.getReferenceFrame());
       framePoseToPack.setPosition(currentPosition.getFrameTuple());
-      
+
       currentOrientation.get(temp);
       framePoseToPack.setOrientation(temp);
    }
-   
+
    public boolean isDone()
    {
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
@@ -416,9 +420,9 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    public String toString()
    {
       String ret = "";
-      
+
       ReferenceFrame currentFrame = initialPosition.getReferenceFrame();
-      
+
       ret += "Current time: " + currentTime.getDoubleValue() + ", trajectory time: " + trajectoryTime.getDoubleValue();
       ret += "\nCurrent position: " + currentPosition.toStringForASingleReferenceFrame(currentFrame);
       ret += "\nCurrent velocity: " + currentVelocity.toStringForASingleReferenceFrame(currentFrame);

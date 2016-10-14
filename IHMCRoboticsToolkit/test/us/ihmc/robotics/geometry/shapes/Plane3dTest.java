@@ -2,8 +2,8 @@ package us.ihmc.robotics.geometry.shapes;
 
 import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 public class Plane3dTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void test()
    {
@@ -30,20 +30,20 @@ public class Plane3dTest
       assertTrue(plane2.epsilonEquals(plane, 1e-17));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testEmptyConstructor()
    {
       Plane3d plane = new Plane3d();
-      assertTrue(plane.getNormalCopy().x == 0.0);
-      assertTrue(plane.getNormalCopy().y == 0.0);
-      assertTrue(plane.getNormalCopy().z == 1.0);
-      assertTrue(plane.getPointCopy().x == 0.0);
-      assertTrue(plane.getPointCopy().y == 0.0);
-      assertTrue(plane.getPointCopy().z == 0.0);
+      assertTrue(plane.getNormalCopy().getX() == 0.0);
+      assertTrue(plane.getNormalCopy().getY() == 0.0);
+      assertTrue(plane.getNormalCopy().getZ() == 1.0);
+      assertTrue(plane.getPointCopy().getX() == 0.0);
+      assertTrue(plane.getPointCopy().getY() == 0.0);
+      assertTrue(plane.getPointCopy().getZ() == 0.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsOnOrAbove()
    {
@@ -56,7 +56,7 @@ public class Plane3dTest
       assertFalse(plane.isOnOrAbove(Q));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsOnOrBelow()
    {
@@ -67,7 +67,7 @@ public class Plane3dTest
       assertFalse(plane.isOnOrBelow(Q));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjection()
    {
@@ -83,7 +83,7 @@ public class Plane3dTest
       assertTrue(v.equals(plane.orthogonalProjectionCopy(q)));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetZOnPlane()
    {
@@ -106,7 +106,7 @@ public class Plane3dTest
       assertTrue(Double.isNaN(z));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDistance()
    {
@@ -115,12 +115,12 @@ public class Plane3dTest
       assertEquals(1.0, plane.distance(q), 1e-14);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransform()
    {
       RigidBodyTransform transformation = new RigidBodyTransform();
-      transformation.rotZ(2.3);
+      transformation.setRotationYawAndZeroTranslation(2.3);
       Plane3d plane = new Plane3d();
       plane.applyTransform(transformation);
       JUnitTools.assertTuple3dEquals(plane.getNormalCopy(), new Vector3d(0.0, 0.0, 1.0), 1e-14);
@@ -134,7 +134,7 @@ public class Plane3dTest
       JUnitTools.assertTuple3dEquals(plane2.getPointCopy(), new Point3d(1.0, 2.0, 3.0), 1e-14);
 
       RigidBodyTransform transformation3 = new RigidBodyTransform();
-      transformation3.rotY(Math.PI / 2);
+      transformation3.setRotationPitchAndZeroTranslation(Math.PI / 2);
       transformation3.setTranslation(new Vector3d(1.0, 2.0, 3.0));
       Plane3d plane3 = new Plane3d();
       plane3.applyTransform(transformation3);
@@ -142,7 +142,7 @@ public class Plane3dTest
       JUnitTools.assertTuple3dEquals(plane3.getPointCopy(), new Point3d(1.0, 2.0, 3.0), 1e-14);
 
       RigidBodyTransform transformation4 = new RigidBodyTransform();
-      transformation4.rotY(Math.PI / 2);
+      transformation4.setRotationPitchAndZeroTranslation(Math.PI / 2);
       transformation4.setTranslation(new Vector3d(1.0, 2.0, 3.0));
       Plane3d plane4 = new Plane3d();
       Plane3d plane5 = plane4.applyTransformCopy(transformation4);

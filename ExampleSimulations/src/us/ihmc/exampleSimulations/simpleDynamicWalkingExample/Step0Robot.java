@@ -162,17 +162,17 @@ public class Step0Robot extends Robot
    
    public void setKneeForce(double desiredTau)
    {
-      this.kneeJoint.tau.set(desiredTau);
+      this.kneeJoint.setTau(desiredTau);
    }
    
    public double getKneePositionZ()
    {
-      return kneeJoint.q.getDoubleValue();
+      return kneeJoint.getQ();
    }
    
    public double getKneeVelocityZ()
    {
-      return kneeJoint.qd.getDoubleValue();
+      return kneeJoint.getQD();
    }
    
    public double getBodyPositionZ()

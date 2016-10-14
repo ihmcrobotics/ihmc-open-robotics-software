@@ -4,15 +4,16 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.robotics.controllers.YoOrientationPIDGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -22,7 +23,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.wanderer.parameters.WandererPhysicalProperties;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class WandererWalkingControllerParameters implements WalkingControllerParameters
+public class WandererWalkingControllerParameters extends WalkingControllerParameters
 {
 
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
@@ -69,12 +70,6 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    public boolean doToeOffIfPossibleInSingleSupport()
    {
       return false;
-   }
-
-   @Override
-   public boolean checkTrailingLegJacobianDeterminantToTriggerToeOff()
-   {
-      return true;
    }
 
    @Override
@@ -363,41 +358,19 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public ICPControlGains getICPControlGains()
+   public ICPControlGains createICPControlGains(YoVariableRegistry registry)
    {
-      ICPControlGains gains = new ICPControlGains();
+      ICPControlGains gains = new ICPControlGains("", registry);
 
-//      double kp = 1.5;
-//      double ki = 4.0;
-//      double kiBleedOff = 0.9;
-//      boolean useRawCMP = false;
-//      double cmpFilterBreakFrequencyInHertz = 16.0;
-//      double cmpRateLimit = 6.0;
-//      double cmpAccelerationLimit = 200.0;
-//
-//      gains.setKpParallelToMotion(kp);
-//      gains.setKpOrthogonalToMotion(kp);
-//      gains.setKi(ki);
-//      gains.setKiBleedOff(kiBleedOff);
-//      gains.setUseRawCMP(useRawCMP);
-//      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
-//      gains.setCMPRateLimit(cmpRateLimit);
-//      gains.setCMPAccelerationLimit(cmpAccelerationLimit);
-
-      // TODO Try using similar parameters to Atlas:
       double kpParallel = 2.5;
       double kpOrthogonal = 1.5;
       double ki = 0.0;
       double kiBleedOff = 0.9;
-      boolean useRawCMP = true;
-      boolean useHackToReduceFeedForward = false;
 
       gains.setKpParallelToMotion(kpParallel);
       gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
-      gains.setUseRawCMP(useRawCMP);
-      gains.setUseHackToReduceFeedForward(useHackToReduceFeedForward);
 
       return gains;
    }
@@ -414,8 +387,8 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
 
       gains.setKp(kp);
       gains.setZeta(zeta);
-      gains.setMaximumAcceleration(maxAcceleration);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAcceleration);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
@@ -439,7 +412,7 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
@@ -454,34 +427,23 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
       gains.setDampingRatio(zeta);
       gains.setIntegralGain(ki);
       gains.setMaximumIntegralError(maxIntegralError);
-      gains.setMaximumAcceleration(maxAccel);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAccel);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
 
    @Override
-   public YoOrientationPIDGains createHeadOrientationControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
    {
-      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
+      return null;
+   }
 
-      double kp = 40.0;
-      double zeta = 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = Double.POSITIVE_INFINITY;
-      double maxJerk = Double.POSITIVE_INFINITY;
-
-      gains.setProportionalGain(kp);
-      gains.setDampingRatio(zeta);
-      gains.setIntegralGain(ki);
-      gains.setMaximumIntegralError(maxIntegralError);
-      gains.setMaximumAcceleration(maxAccel);
-      gains.setMaximumJerk(maxJerk);
-      gains.createDerivativeGainUpdater(true);
-
-      return gains;
+   @Override
+   public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
+   {
+      return null;
    }
 
    @Override
@@ -508,15 +470,15 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
 
       gains.setKp(kp);
       gains.setZeta(zeta);
-      gains.setMaximumAcceleration(maxAcceleration);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAcceleration);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
 
    @Override
-   public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
+   public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
 
@@ -531,15 +493,15 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
       gains.setDampingRatio(zeta);
       gains.setIntegralGain(ki);
       gains.setMaximumIntegralError(maxIntegralError);
-      gains.setMaximumAcceleration(maxAccel);
-      gains.setMaximumJerk(maxJerk);
+      gains.setMaximumFeedback(maxAccel);
+      gains.setMaximumFeedbackRate(maxJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
 
    @Override
-   public YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
@@ -557,17 +519,17 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxPositionAcceleration, maxPositionJerk);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxPositionAcceleration, maxPositionJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatios(zetaXYOrientation, zetaZOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxOrientationAcceleration, maxOrientationJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
 
    @Override
-   public YoSE3PIDGains createHoldPositionFootControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
 
@@ -584,17 +546,17 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
 
    @Override
-   public YoSE3PIDGains createToeOffFootControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("ToeOffFoot", registry);
 
@@ -611,17 +573,17 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
 
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
 
    @Override
-   public YoSE3PIDGains createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("EdgeTouchdownFoot", registry);
 
@@ -637,25 +599,13 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
 
       gains.setPositionProportionalGains(kp, kp);
       gains.setPositionDampingRatio(zetaXYZ);
-      gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
+      gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
       gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
       gains.setOrientationDampingRatio(zetaOrientation);
-      gains.setOrientationMaxAccelerationAndJerk(maxAngularAcceleration, maxAngularJerk);
+      gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
       gains.createDerivativeGainUpdater(true);
 
       return gains;
-   }
-
-   @Override
-   public double getSupportSingularityEscapeMultiplier()
-   {
-      return 30;
-   }
-
-   @Override
-   public double getSwingSingularityEscapeMultiplier()
-   {
-      return runningOnRealRobot ? 50.0 : 200.0;
    }
 
    @Override
@@ -818,14 +768,10 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public void setupMomentumOptimizationSettings(MomentumOptimizationSettings momentumOptimizationSettings)
+   public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
-      momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
-      momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
-      momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.01);
-      momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
+      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      return momentumOptimizationSettings;
    }
 
    @Override
@@ -858,13 +804,6 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
       return 0.025;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public double getDurationToCancelOutDesiredICPVelocityWhenStuckInTransfer()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
-
    @Override
    public boolean finishSingleSupportWhenICPPlannerIsDone()
    {
@@ -872,29 +811,11 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public double minimumHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0;
-   }
-
-   @Override
-   public double nominalHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0;
-   }
-
-   @Override
-   public double maximumHeightBetweenAnkleAndPelvisForHeightAdjustment()
-   {
-      return 0;
-   }
-
-   @Override
    public double pelvisToAnkleThresholdForWalking()
    {
       return 0;
    }
-   
+
    @Override
    public boolean controlHeadAndHandsWithSliders()
    {
@@ -915,9 +836,33 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
 
    /** {@inheritDoc} */
    @Override
-   public boolean useICPPlannerHackN13()
+   public double getHighCoPDampingDurationToPreventFootShakies()
    {
-      // TODO When using new ICP planner, set that one to false.
+      return -1.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getCoPErrorThresholdForHighCoPDamping()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   @Override
+   public boolean useOptimizationBasedICPController()
+   {
       return false;
+   }
+
+   @Override
+   public void useInverseDynamicsControlCore()
+   {
+      // once another mode is implemented, use this to change the default gains for inverse dynamics
+   }
+
+   @Override
+   public void useVirtualModelControlCore()
+   {
+      // once another mode is implemented, use this to change the default gains for virtual model control
    }
 }

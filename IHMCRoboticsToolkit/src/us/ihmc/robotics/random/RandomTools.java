@@ -53,6 +53,15 @@ public class RandomTools
       return new Point3d(x, y, z);
    }
 
+   public static Point3d generateRandomPoint3d(Random random, double min, double max)
+   {
+      double x = generateRandomDoubleInRange(random, min, max);
+      double y = generateRandomDoubleInRange(random, min, max);
+      double z = generateRandomDoubleInRange(random, min, max);
+      
+      return new Point3d(x, y, z);
+   }
+   
    public static Point3d generateRandomPoint3d(Random random, double[] min, double[] max)
    {
       double x = generateRandomDoubleInRange(random, min[0], max[0]);
@@ -64,9 +73,9 @@ public class RandomTools
 
    public static Point3f generateRandomPoint3f(Random random, Point3f min, Point3f max)
    {
-      float x = generateRandomFloatInRange(random, min.x, max.x);
-      float y = generateRandomFloatInRange(random, min.y, max.y);
-      float z = generateRandomFloatInRange(random, min.z, max.z);
+      float x = generateRandomFloatInRange(random, min.getX(), max.getX());
+      float y = generateRandomFloatInRange(random, min.getY(), max.getY());
+      float z = generateRandomFloatInRange(random, min.getZ(), max.getZ());
 
       return new Point3f(x, y, z);
    }
@@ -195,9 +204,9 @@ public class RandomTools
    public static Matrix3d generateRandomDiagonalMatrix3d(Random random)
    {
       Matrix3d ret = new Matrix3d();
-      ret.m00 = random.nextDouble();
-      ret.m11 = random.nextDouble();
-      ret.m22 = random.nextDouble();
+      ret.setM00(random.nextDouble());
+      ret.setM11(random.nextDouble());
+      ret.setM22(random.nextDouble());
 
       return ret;
    }

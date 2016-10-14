@@ -5,21 +5,17 @@ import javax.vecmath.Matrix3d;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
+import us.ihmc.robotics.screwTheory.Twist;
 
 public class EuclideanPositionController implements PositionController
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoVariableRegistry registry;
 
-   private final DoubleYoVariable positionErrorMagnitude;
    private final YoFrameVector positionError;
    private final YoFrameVector positionErrorCumulated;
    private final YoFrameVector velocityError;
@@ -28,133 +24,173 @@ public class EuclideanPositionController implements PositionController
    private final Matrix3d derivativeGainMatrix;
    private final Matrix3d integralGainMatrix;
 
-   //TODO: Take the filtering out of here if it doesn't make sense to be here.
-   // If it does make sense, then clean it up and support it better.
-   private final AlphaFilteredYoFrameVector filteredVelocity;
-   private final FrameVector filteredVelocityTemp;
-   private final DoubleYoVariable alphaVelocityFilter;
-
    private final ReferenceFrame bodyFrame;
    private final FrameVector proportionalTerm;
    private final FrameVector derivativeTerm;
    private final FrameVector integralTerm;
-   private final FramePoint currentPosition;
+   
+   private final FramePoint desiredPosition = new FramePoint();
+   private final FrameVector desiredVelocity = new FrameVector();
+   private final FrameVector feedForwardLinearAction = new FrameVector();
+   private final FrameVector actionFromPositionController = new FrameVector();
 
-   private final boolean visualize;
-   private final YoFramePoint currentPositionViz, desiredPositionViz;
+   private final YoFrameVector feedbackLinearAction;
+   private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAction;
 
-   private final YoFrameVector preLimitedOutput;
-   private final RateLimitedYoFrameVector rateLimitedOutput;
-
+   private final EuclideanTangentialDampingCalculator tangentialDampingCalculator;
    private final double dt;
 
-   private final YoPositionPIDGains gains;
+   private final YoPositionPIDGainsInterface gains;
 
    public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry parentRegistry)
    {
-      this(prefix, bodyFrame, dt, false, parentRegistry);
+      this(prefix, bodyFrame, dt, null, parentRegistry);
    }
 
-   public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, boolean visualize, YoVariableRegistry parentRegistry)
+   public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoPositionPIDGainsInterface gains, YoVariableRegistry parentRegistry)
    {
-      this(prefix, bodyFrame, dt, null, visualize, parentRegistry);
-   }
-
-   public EuclideanPositionController(String prefix, ReferenceFrame bodyFrame, double dt, YoPositionPIDGains gains, boolean visualize, YoVariableRegistry parentRegistry)
-   {
-      this.visualize = visualize;
-
       this.dt = dt;
 
       this.bodyFrame = bodyFrame;
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
-      if (gains == null) gains = new YoEuclideanPositionGains(prefix, registry);
+      if (gains == null)
+         gains = new YoEuclideanPositionGains(prefix, registry);
 
       this.gains = gains;
       proportionalGainMatrix = gains.createProportionalGainMatrix();
       derivativeGainMatrix = gains.createDerivativeGainMatrix();
       integralGainMatrix = gains.createIntegralGainMatrix();
 
-      positionErrorMagnitude = new DoubleYoVariable(prefix + "PositionErrorMagnitude", registry);
       positionError = new YoFrameVector(prefix + "PositionError", bodyFrame, registry);
       positionErrorCumulated = new YoFrameVector(prefix + "PositionErrorCumulated", bodyFrame, registry);
       velocityError = new YoFrameVector(prefix + "LinearVelocityError", bodyFrame, registry);
 
-      currentPosition = new FramePoint(bodyFrame);
       proportionalTerm = new FrameVector(bodyFrame);
       derivativeTerm = new FrameVector(bodyFrame);
       integralTerm = new FrameVector(bodyFrame);
 
-      alphaVelocityFilter = new DoubleYoVariable(prefix + "AlphaPosVel", registry);
-      alphaVelocityFilter.set(0.0);
-      filteredVelocity = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, "FiltVelocity", registry, alphaVelocityFilter, bodyFrame);
-      filteredVelocityTemp = new FrameVector(bodyFrame);
+      feedbackLinearAction = new YoFrameVector(prefix + "FeedbackLinearAction", bodyFrame, registry);
+      rateLimitedFeedbackLinearAction = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackLinearAction", "",
+            registry, gains.getYoMaximumFeedbackRate(), dt, feedbackLinearAction);
 
-      preLimitedOutput = new YoFrameVector(prefix + "PositionPreLimitedOutput", bodyFrame, registry);
-      rateLimitedOutput = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "PositionRateLimitedOutput", "", registry, gains.getYoMaximumJerk(), dt, preLimitedOutput);
-
-      currentPositionViz = visualize ? new YoFramePoint(prefix + "CurrentPosition", worldFrame, registry) : null;
-      desiredPositionViz = visualize ? new YoFramePoint(prefix + "DesiredPosition", worldFrame, registry) : null;
+      tangentialDampingCalculator = new EuclideanTangentialDampingCalculator(prefix, bodyFrame, gains.getTangentialDampingGains());
 
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
-      rateLimitedOutput.reset();
+      rateLimitedFeedbackLinearAction.reset();
    }
 
+   public void resetIntegrator()
+   {
+      positionErrorCumulated.setToZero();
+   }
+
+   @Override
    public void compute(FrameVector output, FramePoint desiredPosition, FrameVector desiredVelocity, FrameVector currentVelocity, FrameVector feedForward)
    {
-      currentVelocity.changeFrame(bodyFrame);
-      filteredVelocity.update(currentVelocity);
-      filteredVelocity.getFrameTuple(filteredVelocityTemp);
-
       computeProportionalTerm(desiredPosition);
-      computeDerivativeTerm(desiredVelocity, filteredVelocityTemp);
+      if (currentVelocity != null)
+         computeDerivativeTerm(desiredVelocity, currentVelocity);
+
       computeIntegralTerm();
       output.setToNaN(bodyFrame);
       output.add(proportionalTerm, derivativeTerm);
       output.add(integralTerm);
 
-      
       // Limit the max acceleration of the feedback, but not of the feedforward...
       // JEP changed 150430 based on Atlas hitting limit stops.
-      double outputLength = output.length();
-      if (outputLength > gains.getMaximumAcceleration())
+      double feedbackLinearActionMagnitude = output.length();
+      if (feedbackLinearActionMagnitude > gains.getMaximumFeedback())
       {
-         output.scale(gains.getMaximumAcceleration() / outputLength);
+         output.scale(gains.getMaximumFeedback() / feedbackLinearActionMagnitude);
       }
-      
-      preLimitedOutput.set(output);
-      rateLimitedOutput.update();
-      rateLimitedOutput.getFrameTuple(output);
+
+      feedbackLinearAction.set(output);
+      rateLimitedFeedbackLinearAction.update();
+      rateLimitedFeedbackLinearAction.getFrameTuple(output);
 
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
    }
+   
+   /**
+    * Computes linear portion of twist to pack
+    */
+   public void compute(Twist twistToPack, FramePose desiredPose, Twist desiredTwist)
+   {
+      checkBodyFrames(desiredTwist, twistToPack);
+      checkBaseFrames(desiredTwist, twistToPack);
+      checkExpressedInFrames(desiredTwist, twistToPack);
+
+      twistToPack.setToZero(bodyFrame, desiredTwist.getBaseFrame(), bodyFrame);
+
+      desiredPose.getPositionIncludingFrame(desiredPosition);
+      desiredTwist.getLinearPart(desiredVelocity);
+      desiredTwist.getLinearPart(feedForwardLinearAction);
+      compute(actionFromPositionController, desiredPosition, desiredVelocity, null, feedForwardLinearAction);
+      twistToPack.setLinearPart(actionFromPositionController.getVector());
+   }
+   
+   private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
+   }
+
+   private void checkBaseFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getBaseFrame().checkReferenceFrameMatch(currentTwist.getBaseFrame());
+   }
+
+   private void checkExpressedInFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
+   }
 
    private void computeProportionalTerm(FramePoint desiredPosition)
    {
-      visualizeDesiredAndActualPositions(desiredPosition);
-
       desiredPosition.changeFrame(bodyFrame);
-      positionErrorMagnitude.set(desiredPosition.distance(currentPosition));
       positionError.set(desiredPosition);
 
-      proportionalTerm.set(desiredPosition);
+      // Limit the maximum position error considered for control action
+      double maximumError = gains.getMaximumProportionalError();
+      double errorMagnitude = positionError.length();
+      positionError.getFrameTuple(proportionalTerm);
+      if (errorMagnitude > maximumError)
+      {
+         proportionalTerm.scale(maximumError / errorMagnitude);
+      }
+
       proportionalGainMatrix.transform(proportionalTerm.getVector());
    }
 
+   private final Matrix3d tempMatrix = new Matrix3d();
    private void computeDerivativeTerm(FrameVector desiredVelocity, FrameVector currentVelocity)
    {
       desiredVelocity.changeFrame(bodyFrame);
       currentVelocity.changeFrame(bodyFrame);
 
       derivativeTerm.sub(desiredVelocity, currentVelocity);
+
+      // Limit the maximum velocity error considered for control action
+      double maximumVelocityError = gains.getMaximumDerivativeError();
+      double velocityErrorMagnitude = derivativeTerm.length();
+      if (velocityErrorMagnitude > maximumVelocityError)
+      {
+         derivativeTerm.scale(maximumVelocityError / velocityErrorMagnitude);
+      }
+
       velocityError.set(derivativeTerm);
-      derivativeGainMatrix.transform(derivativeTerm.getVector());
+
+      tempMatrix.set(derivativeGainMatrix);
+      tangentialDampingCalculator.compute(positionError, tempMatrix);
+
+      tempMatrix.transform(derivativeTerm.getVector());
    }
 
    private void computeIntegralTerm()
@@ -178,15 +214,6 @@ public class EuclideanPositionController implements PositionController
 
       positionErrorCumulated.getFrameTuple(integralTerm);
       integralGainMatrix.transform(integralTerm.getVector());
-   }
-
-   private void visualizeDesiredAndActualPositions(FramePoint desiredPosition)
-   {
-      if (visualize)
-      {
-         desiredPositionViz.setAndMatchFrame(desiredPosition);
-         currentPositionViz.setAndMatchFrame(currentPosition);
-      }
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
@@ -224,21 +251,29 @@ public class EuclideanPositionController implements PositionController
       positionError.getFrameTuple(positionErrorToPack);
    }
 
+   @Override
    public ReferenceFrame getBodyFrame()
    {
       return bodyFrame;
    }
 
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      gains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      gains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
-   public void setGains(YoPositionPIDGains gains)
+   public void setMaxDerivativeError(double maxDerivativeError)
    {
-      setProportionalGains(gains.getProportionalGains());
-      setDerivativeGains(gains.getDerivativeGains());
-      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      gains.setMaxDerivativeError(maxDerivativeError);
+   }
+
+   public void setMaxProportionalError(double maxProportionalError)
+   {
+      gains.setMaxProportionalError(maxProportionalError);
+   }
+
+   public void setGains(PositionPIDGainsInterface gains)
+   {
+      this.gains.set(gains);
    }
 }

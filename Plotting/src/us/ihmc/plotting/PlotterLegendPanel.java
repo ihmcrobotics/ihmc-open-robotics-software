@@ -4,35 +4,29 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
+import javax.vecmath.Point2d;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2008</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
+import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.plotting.artifact.ArtifactsChangedListener;
+
 public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListener
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = -8268027977270506164L;
    private ArrayList<Artifact> artifacts = new ArrayList<Artifact>();
+   private final Plotter2DAdapter graphics2dAdapter;
+   
+   private final Point2d drawOrigin = new Point2d();
 
-   public PlotterLegendPanel()
+   public PlotterLegendPanel(Plotter2DAdapter graphics2dAdapter)
    {
       super.setBackground(new Color(180, 220, 240));
+      
+      this.graphics2dAdapter = graphics2dAdapter;
    }
-
 
    public void setArtifacts(ArrayList<Artifact> artifacts)
    {
@@ -41,8 +35,11 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
       repaint();
    }
 
+   @Override
    public void paintComponent(Graphics g)
    {
+      graphics2dAdapter.setGraphics2d((Graphics2D) g);
+      
       super.paintComponent(g);
 
       int deltaY = 30;
@@ -62,17 +59,9 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
          y = y + deltaY;
          g.setFont(f);
 
-         double scale = 500;
+         drawOrigin.set(artifactX, y);
          
-         
-         // TODO: Get the desired scale factor from the artifact itself.
-         
-         if (artifact.getID().equals("FinalDesiredSwing"))
-         {
-            scale = 200;
-         }
-
-         artifact.drawLegend(g, artifactX, y, scale);
+         artifact.drawLegend(graphics2dAdapter, drawOrigin);
 
          g.setColor(Color.black);
 //         String newName = "";
@@ -96,6 +85,7 @@ public class PlotterLegendPanel extends JPanel implements ArtifactsChangedListen
       }
    }
 
+   @Override
    public void artifactsChanged(ArrayList<Artifact> newArtifacts)
    {
       setArtifacts(newArtifacts);

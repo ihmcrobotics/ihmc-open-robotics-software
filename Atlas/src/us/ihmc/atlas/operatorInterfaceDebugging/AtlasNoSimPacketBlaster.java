@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModelUtils;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.communication.net.NetStateListener;
@@ -39,7 +39,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
    private AtlasRobotModel atlasRobotModel;
    private boolean includeFingerJoints;
    private OneDoFJoint[] jointList;
-   private SDFFullHumanoidRobotModel fullRobotModel;
+   private FullHumanoidRobotModel fullRobotModel;
    private int numberOfJoints;
    private double[] jointLowerLimits;
    private double[] jointUpperLimits;

@@ -6,12 +6,12 @@ import java.io.IOException;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
 {
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 1.2)
 	@Test(timeout=300000)
    public void testLocalYoWhiteBoardOne() throws IOException
    {
@@ -24,7 +24,7 @@ public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 1000, 2000);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 2.7)
 	@Test(timeout=300000)
    public void testLocalYoWhiteBoardTwo() throws IOException
    {

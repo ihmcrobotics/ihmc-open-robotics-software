@@ -53,9 +53,8 @@ public class CollisionExampleSimulation
 
       // sim.setupEntryBox("ef_fy");
 
-      Thread myThread = new Thread(sim);
-      myThread.start();
-
+      sim.startOnAThread();
+      sim.simulate(2.0);
    }
 
    public static void main(String[] args)

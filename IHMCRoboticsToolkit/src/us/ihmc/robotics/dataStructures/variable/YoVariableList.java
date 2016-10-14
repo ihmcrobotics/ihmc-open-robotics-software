@@ -31,6 +31,7 @@ public class YoVariableList implements java.io.Serializable, java.lang.Comparabl
       return this.name;
    }
 
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
@@ -273,6 +274,7 @@ public class YoVariableList implements java.io.Serializable, java.lang.Comparabl
     * //  * @return indicates > = < as 1 0 -1 respectively
     * /
     */
+   @Override
    public int compareTo(YoVariableList other)
    {
       return (int) Math.signum(this.getName().compareToIgnoreCase(other.getName()));

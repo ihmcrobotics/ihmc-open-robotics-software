@@ -4,13 +4,13 @@ import javax.vecmath.Vector3d;
 
 import com.martiansoftware.jsap.JSAPException;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSCSInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.validation.YoVariableThreadAccessValidator;
@@ -47,7 +47,7 @@ public class AtlasPushRecoveryTrack
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
       double initialYaw = 0.3;
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight, initialYaw);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight, initialYaw);
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
@@ -55,9 +55,9 @@ public class AtlasPushRecoveryTrack
       DRCFlatGroundWalkingTrack track = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
             cheatWithGroundHeightAtForFootstep, model);
 
-      SDFRobot robot = track.getDrcSimulation().getRobot();
-      SDFFullHumanoidRobotModel fullRobotModel = model.createFullRobotModel();
-      DRCPushRobotController pushRobotController = new DRCPushRobotController(robot, fullRobotModel);
+      FloatingRootJointRobot robot = track.getDrcSimulation().getRobot();
+      FullHumanoidRobotModel fullRobotModel = model.createFullRobotModel();
+      PushRobotController pushRobotController = new PushRobotController(robot, fullRobotModel);
 
       pushRobotController.addPushButtonToSCS(track.getSimulationConstructionSet());
       

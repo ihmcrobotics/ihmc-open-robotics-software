@@ -6,6 +6,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class JointLowLevelPositionControlSimulator implements RobotController
 {
@@ -17,8 +18,8 @@ public class JointLowLevelPositionControlSimulator implements RobotController
    private final OneDegreeOfFreedomJoint simulatedJoint;
    private final OneDoFJoint highLevelControllerOutputJoint;
 
-   public JointLowLevelPositionControlSimulator(OneDegreeOfFreedomJoint simulatedJoint, OneDoFJoint highLevelControllerOutputJoint, boolean isUpperBodyJoint, boolean isBackJoint,
-         double controlDT)
+   public JointLowLevelPositionControlSimulator(OneDegreeOfFreedomJoint simulatedJoint, OneDoFJoint highLevelControllerOutputJoint, boolean isUpperBodyJoint,
+         boolean isBackJoint, boolean isExoJoint, double controlDT)
    {
       registry = new YoVariableRegistry(simulatedJoint.getName() + name);
       this.controlDT = controlDT;
@@ -32,11 +33,11 @@ public class JointLowLevelPositionControlSimulator implements RobotController
       if (isUpperBodyJoint)
       {
          double subtreeMass = TotalMassCalculator.computeSubTreeMass(highLevelControllerOutputJoint.getSuccessor());
-         jointController.setProportionalGain(50.0 * subtreeMass);
+         jointController.setProportionalGain(15.0 * subtreeMass);
          jointController.setIntegralGain(35.0 * subtreeMass);
          jointController.setMaxIntegralError(0.3);
          jointController.setIntegralLeakRatio(integralLeakRatio);
-         jointController.setDerivativeGain(7.0 * subtreeMass);
+         jointController.setDerivativeGain(2.0 * subtreeMass);
          jointController.setMaximumOutputLimit(40.0 * subtreeMass);
       }
       else if (isBackJoint)
@@ -46,6 +47,15 @@ public class JointLowLevelPositionControlSimulator implements RobotController
          jointController.setMaxIntegralError(0.2);
          jointController.setIntegralLeakRatio(integralLeakRatio);
          jointController.setDerivativeGain(500.0);
+         jointController.setMaximumOutputLimit(400.0);
+      }
+      else if (isExoJoint)
+      {
+         jointController.setProportionalGain(8000.0);
+         jointController.setIntegralGain(1000.0 * 50.0);
+         jointController.setMaxIntegralError(0.2);
+         jointController.setIntegralLeakRatio(integralLeakRatio);
+         jointController.setDerivativeGain(200.0);
          jointController.setMaximumOutputLimit(400.0);
       }
       else
@@ -63,13 +73,18 @@ public class JointLowLevelPositionControlSimulator implements RobotController
    {
       if (highLevelControllerOutputJoint.isUnderPositionControl())
       {
-         double currentPosition = simulatedJoint.getQ().getDoubleValue();
+         double currentPosition = simulatedJoint.getQYoVariable().getDoubleValue();
          double desiredPosition = highLevelControllerOutputJoint.getqDesired();
-         double currentRate = simulatedJoint.getQD().getDoubleValue();
+         double currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
          double desiredRate = highLevelControllerOutputJoint.getQdDesired();
          double desiredTau = jointController.compute(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
          simulatedJoint.setTau(desiredTau);
       }
+   }
+
+   public void resetIntegrator()
+   {
+      jointController.resetIntegrator();
    }
 
    public void initialize()

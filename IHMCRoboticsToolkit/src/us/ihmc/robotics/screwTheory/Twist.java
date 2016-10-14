@@ -119,6 +119,16 @@ public class Twist extends SpatialMotionVector
    }
 
    /**
+    * Packs the angular velocity of the body frame with respect to the base frame, expressed in the base frame.
+    * The vector is computed by simply rotating the angular velocity part of this twist to base frame.
+    */
+   public void getAngularVelocityInBaseFrame(FrameVector vectorToPack)
+   {
+      vectorToPack.setToZero(baseFrame);
+      getAngularVelocityInBaseFrame(vectorToPack.getVector());
+   }
+
+   /**
     * Packs a version of the linear velocity, rotated to the base frame.
     */
    public void getBodyOriginLinearPartInBaseFrame(Vector3d linearVelocityAtBodyOriginToPack)
@@ -130,7 +140,7 @@ public class Twist extends SpatialMotionVector
       else
       {
          RigidBodyTransform transformFromBody = bodyFrame.getTransformToDesiredFrame(expressedInFrame);
-         transformFromBody.get(tempVector);
+         transformFromBody.getTranslation(tempVector);
 
          linearVelocityAtBodyOriginToPack.cross(angularPart, tempVector);    // omega x p
          linearVelocityAtBodyOriginToPack.add(linearPart);    // omega x p + v
@@ -227,7 +237,7 @@ public class Twist extends SpatialMotionVector
       // essentially using the Adjoint operator, Ad_H = [R, 0; tilde(p) * R, R] (Matlab notation), but without creating a 6x6 matrix
       // compute the relevant rotations and translations
       expressedInFrame.getTransformToDesiredFrame(temporaryTransformToDesiredFrame, newReferenceFrame);
-      temporaryTransformToDesiredFrame.get(tempVector);    // p
+      temporaryTransformToDesiredFrame.getTranslation(tempVector);    // p
 
       // transform the velocities so that they are expressed in newReferenceFrame
       temporaryTransformToDesiredFrame.transform(angularPart);    // only rotates, since we're passing in a vector
@@ -330,6 +340,7 @@ public class Twist extends SpatialMotionVector
    }
 
    ///CLOVER:OFF
+   @Override
    public String toString()
    {
       String ret = new String("Twist of " + bodyFrame + ", with respect to " + baseFrame + ", expressed in " + expressedInFrame + "\n" + "Linear part: "

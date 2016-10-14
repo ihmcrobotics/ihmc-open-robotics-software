@@ -32,7 +32,7 @@ public class FootstepUtils
 
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public static Footstep generateStandingFootstep(RobotSide side, SideDependentList<ContactablePlaneBody> bipedFeet)
+   public static Footstep generateStandingFootstep(RobotSide side, SideDependentList<? extends ContactablePlaneBody> bipedFeet)
    {
       ContactablePlaneBody endEffector = bipedFeet.get(side);
 
@@ -100,7 +100,7 @@ public class FootstepUtils
    }
 
    //used in 1 other class
-   public static RobotSide getFrontFootRobotSideBasedOnSoleCenters(SideDependentList<ContactablePlaneBody> bipedFeet, FramePoint destination)
+   public static RobotSide getFrontFootRobotSideBasedOnSoleCenters(SideDependentList<? extends ContactablePlaneBody> bipedFeet, FramePoint destination)
    {
       FramePoint destinationInWorld = new FramePoint(destination);
       destinationInWorld.changeFrame(worldFrame);

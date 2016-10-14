@@ -52,8 +52,8 @@ public class HarmonographPaperJPanel extends JPanel
       double width = 600.0;
       double scale =  12.0 * HarmonographRobot.INCHES;
       
-      int x = (int) (width * (0.5 + (point.x / scale)));
-      int y = (int) (width * (0.5 + (point.y / scale)));
+      int x = (int) (width * (0.5 + (point.getX() / scale)));
+      int y = (int) (width * (0.5 + (point.getY() / scale)));
       
       return new int[]{x, y};
    }

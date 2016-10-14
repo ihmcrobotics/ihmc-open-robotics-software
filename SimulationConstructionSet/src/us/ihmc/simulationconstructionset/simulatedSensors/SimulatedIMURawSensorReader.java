@@ -181,7 +181,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
 
    protected void updatePerfectOrientation()
    {
-      imuFrame.getTransformToDesiredFrame(worldFrame).get(orientation);
+      imuFrame.getTransformToDesiredFrame(worldFrame).getRotation(orientation);
 
       perfM00.set(orientation.getM00());
       perfM01.set(orientation.getM01());

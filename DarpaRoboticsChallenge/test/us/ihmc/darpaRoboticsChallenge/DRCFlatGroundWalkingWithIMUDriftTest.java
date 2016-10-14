@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Before;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
@@ -136,7 +136,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
          checkNothingChanged(nothingChangedVerifier);
 
       createVideo(scs);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
  
    private void initiateMotion(SimulationConstructionSet scs, double standingTimeDuration, BlockingSimulationRunner runner)
@@ -168,7 +168,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
       if (cheatWithGroundHeightAtForFootstep)
          scsInitialSetup.setInitializeEstimatorToActual(true);
 
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup,
                                                                scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel);
@@ -211,5 +211,10 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
       cameraConfiguration.setCameraDolly(true, true, true, false);
       scs.setupCamera(cameraConfiguration);
       scs.selectCamera("testCamera");
+   }
+
+   public static SimulationTestingParameters getSimulationTestingParameters()
+   {
+      return simulationTestingParameters;
    }
 }

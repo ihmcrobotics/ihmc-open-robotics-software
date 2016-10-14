@@ -2,165 +2,135 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.plotting.Artifact;
-import us.ihmc.plotting.PlotterGraphics;
+import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoArtifactLineSegment2d extends Artifact implements RemoteYoGraphic
+public class YoArtifactLineSegment2d extends YoArtifact
 {
-   private static final long serialVersionUID = -2067732984899803547L;
+   private static final BasicStroke STROKE = new BasicStroke(2);
 
-   private final YoFrameLineSegment2d yoFrameLineSegment2d;
-   private final PlotterGraphics plotterGraphics = new PlotterGraphics();
-   private final Color color;
-   private static final int pixels = 2;
-   private static final BasicStroke stroke = new BasicStroke(pixels);
+   private final YoFrameLineSegment2d lineSegment;
+   
+   private final Point2d tempFirstEndpoint = new Point2d();
+   private final LineSegment2d tempLineSegment = new LineSegment2d();
+   private final ConvexPolygon2d tempArrowPolygon = new ConvexPolygon2d(new double[][] {{0.0, 0.0}, {0.0, 0.0}, {0.0, 0.0}});
+   
+   private final boolean drawArrow;
 
-   private final boolean drawAsAnArrow;
-   private final double arrowHeadWidth;
-   private final double arrowHeadHeight;
-
-   public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d yoFrameLineSegment2d, Color color)
+   // Arrow only object
+   private double arrowHeadWidth;
+   private double arrowHeadHeight;
+   private Vector2d arrowHeadVector;
+   private Vector2d arrowHeadLateralVector;
+   
+   public YoArtifactLineSegment2d(String name, YoFramePoint2d startPoint, YoFramePoint2d endPoint, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
-      super(name);
-      this.yoFrameLineSegment2d = yoFrameLineSegment2d;
-      this.color = color;
-      this.drawAsAnArrow = false;
-      this.arrowHeadWidth = Double.NaN;
-      this.arrowHeadHeight = Double.NaN;
+      this(name, startPoint.getYoX(), startPoint.getYoY(), endPoint.getYoX(), endPoint.getYoY(), color, arrowHeadWidth, arrowHeadHeight);
    }
 
-   public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d yoFrameLineSegment2d, Color color, double arrowHeadWidth, double arrowHeadHeight)
+   private YoArtifactLineSegment2d(String name, DoubleYoVariable startX, DoubleYoVariable startY, DoubleYoVariable endX, DoubleYoVariable endY, Color color, double arrowHeadWidth, double arrowHeadHeight)
    {
-      super(name);
-      this.yoFrameLineSegment2d = yoFrameLineSegment2d;
-      this.color = color;
-      this.drawAsAnArrow = true;
+      this(name, new YoFrameLineSegment2d(startX, startY, endX, endY, ReferenceFrame.getWorldFrame()), color, arrowHeadWidth, arrowHeadHeight);
+   }
+   
+   public YoArtifactLineSegment2d(String name, YoFramePoint2d start, YoFramePoint2d end, Color color)
+   {
+      this(name, new YoFrameLineSegment2d(start.getYoX(), start.getYoY(), end.getYoX(), end.getYoY(), ReferenceFrame.getWorldFrame()), color);
+   }
+   
+   public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d lineSegment, Color color, double arrowHeadWidth, double arrowHeadHeight)
+   {
+      super(name, new double[0], color,
+            lineSegment.getYoFirstEndpointX(), lineSegment.getYoFirstEndpointY(), lineSegment.getYoSecondEndpointX(), lineSegment.getYoSecondEndpointY());
+      this.lineSegment = lineSegment;
+      this.drawArrow = true;
+      instatiateArrowObjects(arrowHeadWidth, arrowHeadHeight);
+   }
+
+   public YoArtifactLineSegment2d(String name, YoFrameLineSegment2d lineSegment, Color color)
+   {
+      super(name, new double[0], color,
+            lineSegment.getYoFirstEndpointX(), lineSegment.getYoFirstEndpointY(), lineSegment.getYoSecondEndpointX(), lineSegment.getYoSecondEndpointY());
+      this.lineSegment = lineSegment;
+      this.drawArrow = false;
+   }
+
+   public void instatiateArrowObjects(double arrowHeadWidth, double arrowHeadHeight)
+   {
       this.arrowHeadWidth = arrowHeadWidth;
       this.arrowHeadHeight = arrowHeadHeight;
+      arrowHeadVector = new Vector2d();
+      arrowHeadLateralVector = new Vector2d();
    }
-
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
-   {
-      if (isVisible)
-      {
-         graphics.setColor(color);
-
-         if (stroke != null)
-            ((Graphics2D) graphics).setStroke(stroke);
-
-         plotterGraphics.setCenter(Xcenter, Ycenter);
-         plotterGraphics.setScale(scaleFactor);
-
-         double x0 = yoFrameLineSegment2d.getX0();
-         double x1 = yoFrameLineSegment2d.getX1();
-         double y0 = yoFrameLineSegment2d.getY0();
-         double y1 = yoFrameLineSegment2d.getY1();
-
-         if (yoFrameLineSegment2d.containsNaN())
-            return;
-
-         plotterGraphics.drawLineSegment(graphics, x0, y0, x1, y1);
-
-         if (drawAsAnArrow)
-         {
-            computeArrowHeadPoints(arrowHeadPoints, x0, y0, x1, y1);
-            plotterGraphics.fillPolygon(graphics, arrowHeadPoints);
-         }
-      }
-   }
-
-   private ArrayList<Point2d> arrowHeadPoints = null;
-   private Vector2d arrowHeadVector = null;
-   private Vector2d arrowHeadLateralVector = null;
-
-   private void computeArrowHeadPoints(ArrayList<Point2d> arrowHeadPointsToPack, double x0, double y0, double x1, double y1)
-   {
-      if (arrowHeadPoints == null)
-      {
-         arrowHeadPoints = new ArrayList<>();
-         arrowHeadVector = new Vector2d();
-         arrowHeadLateralVector = new Vector2d();
-      }
-
-      arrowHeadVector.set(x1 - x0, y1 - y0);
-      arrowHeadVector.normalize();
-      arrowHeadLateralVector.set(arrowHeadVector.getY(), -arrowHeadVector.getX());
-
-      arrowHeadVector.scale(arrowHeadHeight);
-      arrowHeadLateralVector.scale(arrowHeadWidth);
-
-      int i = 0;
-      Point2d arrowHeadTopCorner = getOrCreate(arrowHeadPointsToPack, i++);
-      arrowHeadTopCorner.set(x1, y1);
-
-      Point2d arrowHeadLeftCorner = getOrCreate(arrowHeadPointsToPack, i++);
-      arrowHeadLeftCorner.set(x1, y1);
-      arrowHeadLeftCorner.sub(arrowHeadVector);
-      arrowHeadLeftCorner.add(arrowHeadLateralVector);
-
-      Point2d arrowHeadRightCorner = getOrCreate(arrowHeadPointsToPack, i++);
-      arrowHeadRightCorner.set(x1, y1);
-      arrowHeadRightCorner.sub(arrowHeadVector);
-      arrowHeadRightCorner.sub(arrowHeadLateralVector);
-   }
-
-   private Point2d getOrCreate(ArrayList<Point2d> arrowHeadPointsToPack, int index)
-   {
-      while (index >= arrowHeadPoints.size())
-         arrowHeadPoints.add(new Point2d());
-      return arrowHeadPoints.get(index);
-   }
-
-   public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   
+   @Override
+   public void draw(Graphics2DAdapter graphics)
    {
       graphics.setColor(color);
-      if (stroke != null)
-         ((Graphics2D) graphics).setStroke(stroke);
+      graphics.setStroke(STROKE);
 
-      plotterGraphics.setCenter(Xcenter, Ycenter);
-      plotterGraphics.setScale(scaleFactor);
-      plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.1);
+      if (lineSegment.areEndpointsTheSame())
+      {
+         tempFirstEndpoint.set(lineSegment.getFirstEndpointX(), lineSegment.getFirstEndpointY());
+         graphics.drawPoint(tempFirstEndpoint);
+      }
+      else
+      {
+         lineSegment.getFrameLineSegment2d().get(tempLineSegment);
+         graphics.drawLineSegment(tempLineSegment);
+      }
+
+      if (drawArrow)
+      {
+         arrowHeadVector.set(lineSegment.getSecondEndpointX() - lineSegment.getFirstEndpointX(), lineSegment.getSecondEndpointY() - lineSegment.getFirstEndpointY());
+         arrowHeadVector.normalize();
+         arrowHeadLateralVector.set(arrowHeadVector.getY(), -arrowHeadVector.getX());
+         
+         arrowHeadVector.scale(arrowHeadHeight);
+         arrowHeadLateralVector.scale(arrowHeadWidth / 2.0);
+         
+         tempArrowPolygon.getVertex(0).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
+         
+         tempArrowPolygon.getVertex(1).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
+         tempArrowPolygon.getVertex(1).sub(arrowHeadVector);
+         tempArrowPolygon.getVertex(1).sub(arrowHeadLateralVector);
+         
+         tempArrowPolygon.getVertex(2).set(lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY());
+         tempArrowPolygon.getVertex(2).sub(arrowHeadVector);
+         tempArrowPolygon.getVertex(2).add(arrowHeadLateralVector);
+         
+         graphics.drawPolygonFilled(tempArrowPolygon);
+      }
    }
 
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   @Override
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
-      throw new RuntimeException("Not implemented!");
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+
+      graphics.drawLineSegment(graphics.getScreenFrame(), -20.0 + origin.getX(), -5.0 + origin.getY(), 20.0 + origin.getX(), 5.0 + origin.getY());
    }
 
-   public void takeHistorySnapshot()
+   @Override
+   public void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry)
    {
-      throw new RuntimeException("Not implemented!");
+      tempLineSegment.set(entry[0], entry[1], entry[2], entry[3]);
    }
 
+   @Override
    public RemoteGraphicType getRemoteGraphicType()
    {
       return RemoteGraphicType.LINE_SEGMENT_2D_ARTIFACT;
-   }
-
-   public DoubleYoVariable[] getVariables()
-   {
-      return yoFrameLineSegment2d.getDoubleYoVariables();
-   }
-
-   public double[] getConstants()
-   {
-      return new double[] {};
-   }
-
-   public AppearanceDefinition getAppearance()
-   {
-      return new YoAppearanceRGBColor(color, 0.0);
    }
 }

@@ -24,7 +24,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepVisualizer;
@@ -61,15 +61,15 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class FootstepSnapperTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFootstepAndPointsFromDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
@@ -84,7 +84,7 @@ public class FootstepSnapperTest
       InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(resourceName);
 
       FootstepPointsDataReader dataReader = new FootstepPointsDataReader(resourceAsStream);
-      FootstepData footstepData = new FootstepData();
+      FootstepDataMessage footstepData = new FootstepDataMessage();
       FootSpoof spoof = new FootSpoof("basicSpoof");
       FramePose2d desiredPose = new FramePose2d(ReferenceFrame.getWorldFrame());
 
@@ -92,7 +92,7 @@ public class FootstepSnapperTest
       while (dataReader.hasAnotherFootstepAndPoints())
       {
          listOfPoints = dataReader.getNextSetPointsAndFootstep(footstepData);
-         desiredPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), footstepData.getLocation().x, footstepData.getLocation().y,
+         desiredPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), footstepData.getLocation().getX(), footstepData.getLocation().getY(),
                                            RotationTools.computeYaw(footstepData.getOrientation()));
          Footstep footstep = footstepSnapper.generateFootstepUsingHeightMap(desiredPose, spoof.getRigidBody(), spoof.getSoleFrame(),
                                 footstepData.getRobotSide(), listOfPoints, 0.0);
@@ -101,8 +101,8 @@ public class FootstepSnapperTest
       }
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
       boolean assertPositionConditions = true;
@@ -169,7 +169,7 @@ public class FootstepSnapperTest
    }
 
 
-   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 300000)
    public void testSimpleFootstepSnapperOnListOfPoints() throws InsufficientDataException, IOException
    {
@@ -237,7 +237,7 @@ public class FootstepSnapperTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testSimpleFootstepSnapperOnBumpyGround() throws InsufficientDataException
    {
@@ -274,7 +274,7 @@ public class FootstepSnapperTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSimpleFootstepSnapperOnSteps() throws InsufficientDataException
    {
@@ -322,7 +322,7 @@ public class FootstepSnapperTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testConvexHullFootstepSnapperOnSteps() throws InsufficientDataException
    {
@@ -365,7 +365,7 @@ public class FootstepSnapperTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.8)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testConvexHullFootstepSnapperOnOddTerrain() throws InsufficientDataException
    {
@@ -409,7 +409,7 @@ public class FootstepSnapperTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 4.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testAdjustingFootstepSnapperOnOddTerrain() throws InsufficientDataException
    {
@@ -526,7 +526,7 @@ public class FootstepSnapperTest
          return false;
       }
 
-      public List<Point3d> getNextSetPointsAndFootstep(FootstepData footstepData) throws IOException
+      public List<Point3d> getNextSetPointsAndFootstep(FootstepDataMessage footstepData) throws IOException
       {
          if (hasAnotherFootstepAndPoints())
          {
@@ -575,9 +575,9 @@ public class FootstepSnapperTest
                      tokenizer.nextToken();
                   }
 
-                  position.x = Double.parseDouble(tokenizer.nextToken());
-                  position.y = Double.parseDouble(tokenizer.nextToken());
-                  position.z = Double.parseDouble(tokenizer.nextToken());
+                  position.setX(Double.parseDouble(tokenizer.nextToken()));
+                  position.setY(Double.parseDouble(tokenizer.nextToken()));
+                  position.setZ(Double.parseDouble(tokenizer.nextToken()));
                   footstepData.location = position;
                }
 
@@ -838,7 +838,7 @@ public class FootstepSnapperTest
             assertTrue((generatedSnappedFootstep.getPredictedContactPoints() == null) || (generatedSnappedFootstep.getPredictedContactPoints().size() > 2));
             boolean pointsBelowPlane = pointsBelowPlane(footstepSnapper.getPointList(), solePlane, tolerance);
             assertTrue("queryPoint = " + queryPoint + " yaw = " + soleYaw.getDoubleValue() + " planeNormal = " + planeNormal + ", pointsBelowPlane = "
-                       + pointsBelowPlane, (planeNormal.z >= 0.98) || pointsBelowPlane);
+                       + pointsBelowPlane, (planeNormal.getZ() >= 0.98) || pointsBelowPlane);
          }
 
          if (visualize)
@@ -966,7 +966,7 @@ public class FootstepSnapperTest
       double x = xy[0];
       double y = xy[1];
       RigidBodyTransform location = new RigidBodyTransform();
-      location.rotZ(Math.toRadians(yawDegrees));
+      location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(x, y, height / 2));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);

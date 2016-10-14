@@ -38,6 +38,7 @@ public class DesiredJointDataHolder
          DesiredJointData data = desiredJointData.getRight();
          data.setQddDesired(joint.getQddDesired());
          data.setTauDesired(joint.getTau());
+         data.setPositionDesired(joint.getqDesired());
       }
    }
 
@@ -55,6 +56,7 @@ public class DesiredJointDataHolder
    {
       private double qddDesired;
       private double tauDesired;
+      private double positionDesired;
 
       public double getQddDesired()
       {
@@ -76,10 +78,21 @@ public class DesiredJointDataHolder
          this.tauDesired = tauDesired;
       }
 
+      public double getPositionDesired()
+      {
+         return positionDesired;
+      }
+
+      public void setPositionDesired(double positionDesired)
+      {
+         this.positionDesired = positionDesired;
+      }
+
       public void set(DesiredJointData desiredJointData)
       {
          setTauDesired(desiredJointData.getTauDesired());
          setQddDesired(desiredJointData.getQddDesired());
+         setPositionDesired(desiredJointData.getPositionDesired());
       }
 
    }

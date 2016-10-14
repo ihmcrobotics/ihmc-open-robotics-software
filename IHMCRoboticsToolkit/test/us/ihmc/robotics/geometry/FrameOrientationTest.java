@@ -14,8 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class FrameOrientationTest
 {
@@ -29,9 +29,9 @@ public class FrameOrientationTest
    {
       testTransform = new RigidBodyTransform();
       testTransform.setTranslation(new Vector3d(0.0, 0.0, 1.0));
-      testTransform.rotX(0.2);
-      testTransform.rotY(0.6);
-      testTransform.rotZ(0.8);
+      testTransform.setRotationRollAndZeroTranslation(0.2);
+      testTransform.setRotationPitchAndZeroTranslation(0.6);
+      testTransform.setRotationYawAndZeroTranslation(0.8);
       testFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("testFrame", ReferenceFrame.getWorldFrame(), new RigidBodyTransform(), false, false,
               false);
    }
@@ -43,8 +43,8 @@ public class FrameOrientationTest
       testFrame = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.04)
-	@Test(timeout = 3000)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
    public void testOrientationOrientation()
    {
       FrameOrientation original = new FrameOrientation(testFrame);
@@ -66,8 +66,8 @@ public class FrameOrientationTest
       assertEquals(original.getReferenceFrame(), test.getReferenceFrame());
    }
 	
-	@DeployableTestMethod(estimatedDuration = 0.01)
-	@Test(timeout = 3000)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
 	public void testSetOrientationFromOneToTwo()
 	{
 	   Random random = new Random(1776L);
@@ -252,7 +252,7 @@ public class FrameOrientationTest
 //      fail("Not yet implemented");    // TODO
 //   }
 
-   @DeployableTestMethod(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout=1000)
    public void testApplyTransform()
    {
@@ -274,7 +274,7 @@ public class FrameOrientationTest
          RigidBodyTransform randomTransformToWorld = randomFrame_B.getTransformToDesiredFrame(worldFrame);
          randomTransformToWorld.setTranslation(0.0, 0.0, 0.0);
          Quat4d randomQuaternionForTransformToWorld = new Quat4d();
-         randomTransformToWorld.get(randomQuaternionForTransformToWorld);
+         randomTransformToWorld.getRotation(randomQuaternionForTransformToWorld);
 
          testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
          testedFrameOrientation.applyTransform(randomTransformToWorld);
@@ -287,7 +287,7 @@ public class FrameOrientationTest
          RigidBodyTransform randomTransformToA = randomFrame_B.getTransformToDesiredFrame(randomFrame_A);
          randomTransformToA.setTranslation(0.0, 0.0, 0.0);
          Quat4d randomQuaternionForTransformToA = new Quat4d();
-         randomTransformToA.get(randomQuaternionForTransformToA);
+         randomTransformToA.getRotation(randomQuaternionForTransformToA);
 
          testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
          testedFrameOrientation.applyTransform(randomTransformToA);
@@ -299,7 +299,7 @@ public class FrameOrientationTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout=1000)
    public void testChangeFrame()
    {
@@ -321,7 +321,7 @@ public class FrameOrientationTest
          RigidBodyTransform randomTransformToWorld = randomFrame_B.getTransformToDesiredFrame(worldFrame);
          randomTransformToWorld.setTranslation(0.0, 0.0, 0.0);
          Quat4d randomQuaternionForTransformToWorld = new Quat4d();
-         randomTransformToWorld.get(randomQuaternionForTransformToWorld);
+         randomTransformToWorld.getRotation(randomQuaternionForTransformToWorld);
 
          testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
          testedFrameOrientation.changeFrame(worldFrame);
@@ -334,7 +334,7 @@ public class FrameOrientationTest
          RigidBodyTransform randomTransformToA = randomFrame_B.getTransformToDesiredFrame(randomFrame_A);
          randomTransformToA.setTranslation(0.0, 0.0, 0.0);
          Quat4d randomQuaternionForTransformToA = new Quat4d();
-         randomTransformToA.get(randomQuaternionForTransformToA);
+         randomTransformToA.getRotation(randomQuaternionForTransformToA);
 
          testedFrameOrientation.setIncludingFrame(randomFrame_B, originalTransform);
          testedFrameOrientation.changeFrame(randomFrame_A);
@@ -346,8 +346,8 @@ public class FrameOrientationTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.001)
-	@Test(timeout = 3000)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@Test(timeout = 30000)
    public void testChangeFrameCopy()
    {
       FrameOrientation origOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());

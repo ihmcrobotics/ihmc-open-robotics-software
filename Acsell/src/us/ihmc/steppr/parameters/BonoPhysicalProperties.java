@@ -30,12 +30,12 @@ public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double ankleHeight = 3.0 * 0.0254;
    public static final double shiftFootForward = 0.001;
    public static final double shortenFoot = 0.0;//0.025;
-   public static final double footForward = 0.202 + shiftFootForward - shortenFoot;
+   public static final double footForward = 0.202 + shiftFootForward - shortenFoot - 0.005;
    public static final double heelExtension = 2*0.0254;
-   public static final double footBack = 0.092;//0.05 + heelExtension - shiftFootForward;
+   public static final double footBack = 0.092 - 0.005;//0.05 + heelExtension - shiftFootForward;
    public static final double footLength = footForward + footBack;
-   public static final double toeWidth = 0.152;
-   public static final double footWidth = toeWidth - 0.022;
+   public static final double toeWidth = 0.152 - 0.02;
+   public static final double footWidth = toeWidth - 0.022 - 0.02;
    public static final double thighLength = 0.37694;
    public static final double shinLength = 0.42164-0.6*0.0254;
    public static final double legLength = 1.01 * (thighLength + shinLength);
@@ -58,7 +58,7 @@ public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
       return ankleHeight;
    }
 
-   public static RigidBodyTransform getAnkleToSoleFrameTransform(RobotSide side)
+   public static RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide side)
    {
       return soleToAnkleFrameTransforms.get(side);
    }

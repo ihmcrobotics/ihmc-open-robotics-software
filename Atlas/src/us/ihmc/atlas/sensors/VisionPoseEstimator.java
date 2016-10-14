@@ -16,22 +16,22 @@ import javax.vecmath.Point3f;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import bubo.clouds.FactoryPointCloudShape;
-import bubo.clouds.detect.CloudShapeTypes;
-import bubo.clouds.detect.PointCloudShapeFinder;
-import bubo.clouds.detect.PointCloudShapeFinder.Shape;
-import bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
-import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point3D_F64;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.sensors.DetectedObjectId;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder.Shape;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
@@ -47,10 +47,10 @@ public class VisionPoseEstimator implements DRCStereoListener
 
    PacketCommunicator communicator;
    LinkedBlockingQueue<ImmutablePair<CameraData, RigidBodyTransform>> imagesToProcess = new LinkedBlockingQueue<>(2);
-   SDFFullHumanoidRobotModelFactory modelFactory;
+   FullHumanoidRobotModelFactory modelFactory;
    PointCloudDataReceiver pointCloudDataReceiver;
 
-   public VisionPoseEstimator(PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver, SDFFullHumanoidRobotModelFactory modelFactory,
+   public VisionPoseEstimator(PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver, FullHumanoidRobotModelFactory modelFactory,
          RobotConfigurationDataBuffer robotConfigurationDataBuffer, boolean runningOnRealRobot)
    {
       if (runningOnRealRobot)
@@ -144,8 +144,8 @@ public class VisionPoseEstimator implements DRCStereoListener
                int counter = 0;
                for (Point3f tmpPoint : fullPoints)
                {
-                  if (!Double.isNaN(tmpPoint.z) & counter % pointDropFactor == 0 && tmpPoint.distance(head) < searchRadius)
-                     pointsNearBy.add(new Point3D_F64(tmpPoint.x, tmpPoint.y, tmpPoint.z));
+                  if (!Double.isNaN(tmpPoint.getZ()) & counter % pointDropFactor == 0 && tmpPoint.distance(head) < searchRadius)
+                     pointsNearBy.add(new Point3D_F64(tmpPoint.getX(), tmpPoint.getY(), tmpPoint.getZ()));
                   counter++;
                }
                PrintTools.debug(DEBUG, this, "Points around center " + pointsNearBy.size());
@@ -232,7 +232,7 @@ public class VisionPoseEstimator implements DRCStereoListener
                   {
                      RigidBodyTransform cameraToWorld = data.getRight();
                      RigidBodyTransform opticalFrameToCameraFrame = new RigidBodyTransform();
-                     opticalFrameToCameraFrame.setEuler(-Math.PI / 2.0, 0.0, -Math.PI / 2);
+                     opticalFrameToCameraFrame.setRotationEulerAndZeroTranslation(-Math.PI / 2.0, 0.0, -Math.PI / 2);
                      RigidBodyTransform targetToWorld = new RigidBodyTransform();
 
                      targetToWorld.multiply(cameraToWorld, opticalFrameToCameraFrame);

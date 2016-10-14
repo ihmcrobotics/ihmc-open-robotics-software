@@ -5,62 +5,45 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.DocumentedEnum;
 
 /**
  * User: Matt
  * Date: 1/18/13
  */
-@ClassDocumentation("This message gives the status of the current footstep from the controller as well as the position\n"
-                                  + "and orientation of the footstep in world cooredinates. ")
-public class FootstepStatus extends IHMCRosApiPacket<FootstepStatus>
+@RosMessagePacket(documentation = "This message gives the status of the current footstep from the controller as well as the position\n"
+                                  + "and orientation of the footstep in world cooredinates. ",
+                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
+                  topic = "/output/footstep_status")
+public class FootstepStatus extends StatusPacket<FootstepStatus>
 {
-   public enum Status implements DocumentedEnum<Status>
+   public enum Status
    {
-      STARTED, COMPLETED;
-      
-      @Override
-      public String getDocumentation(Status var)
-      {
-         switch (var)
-         {
-         case STARTED:
-            return "execution of a footstep has begun. actualFootPositionInWorld and actualFootOrientationInWorld should be ignored in this state";
-         case COMPLETED:
-            return "a footstep is completed";
-
-         default:
-            return "no documentation available";
-         }
-      }
-
-      @Override
-      public Status[] getDocumentedValues()
-      {
-         return values();
-      }
+      @RosEnumValueDocumentation(documentation = "execution of a footstep has begun. actualFootPositionInWorld and actualFootOrientationInWorld should be ignored in this state")
+      STARTED,
+      @RosEnumValueDocumentation(documentation = "a footstep is completed")
+      COMPLETED
    }
 
+   @RosExportedField(documentation = "The current footstep status enum value.")
    public Status status;
-   @FieldDocumentation("footstepIndex starts at 0 and monotonically increases with each completed footstep in a given\n"
+   @RosExportedField(documentation = "footstepIndex starts at 0 and monotonically increases with each completed footstep in a given\n"
                                      + "FootstepDataListMessage.")
    public int footstepIndex;
 
+   @RosExportedField(documentation = "The robot side (left or right) that this footstep status correlates to.")
    public RobotSide robotSide;
-   @FieldDocumentation("actualFootPositionInWorld gives the position of where the foot actually landed as opposed\n"
+   @RosExportedField(documentation = "actualFootPositionInWorld gives the position of where the foot actually landed as opposed\n"
                                      + "to the desired position sent to the controller")
    public Point3d actualFootPositionInWorld;
-   @FieldDocumentation("actualFootOrientationInWorld gives the orientation the foot is actually in as opposed to"
+   @RosExportedField(documentation = "actualFootOrientationInWorld gives the orientation the foot is actually in as opposed to"
                                      + "the desired orientation sent to the controller\n")
    public Quat4d actualFootOrientationInWorld;
-   @FieldDocumentation("isDoneWalking will be set to true when in double-support and there are no footsteps queued. If\n"
-                                     + "isDoneWalking is set to true, the rest of the fields in this packet should be ignored")
-   public boolean isDoneWalking;
 
    public FootstepStatus()
    {
@@ -70,7 +53,6 @@ public class FootstepStatus extends IHMCRosApiPacket<FootstepStatus>
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
-      this.isDoneWalking = false;
       this.actualFootPositionInWorld = null;
       this.actualFootOrientationInWorld = null;
       this.robotSide = null;
@@ -80,7 +62,6 @@ public class FootstepStatus extends IHMCRosApiPacket<FootstepStatus>
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
-      this.isDoneWalking = false;
       this.actualFootPositionInWorld = actualFootPositionInWorld;
       this.actualFootOrientationInWorld = actualFootOrientationInWorld;
       
@@ -91,28 +72,32 @@ public class FootstepStatus extends IHMCRosApiPacket<FootstepStatus>
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
-      this.isDoneWalking = false;
       this.actualFootPositionInWorld = actualFootPositionInWorld;
       this.actualFootOrientationInWorld = actualFootOrientationInWorld;
       this.robotSide = robotSide;
    }
 
-   public static FootstepStatus createWalkingIsDonePacket()
+   @Override
+   public void set(FootstepStatus other)
    {
-      FootstepStatus footstepStatus = new FootstepStatus();
-      footstepStatus.isDoneWalking = true;
-      footstepStatus.footstepIndex = 0;
-      footstepStatus.status = null;
-      footstepStatus.actualFootPositionInWorld = null;
-      footstepStatus.actualFootOrientationInWorld = null;
-      footstepStatus.robotSide = null;
-      
-      return footstepStatus;
-   }
+      status = other.status;
+      footstepIndex = other.footstepIndex;
+      robotSide = other.robotSide;
 
-   public boolean isDoneWalking()
-   {
-      return isDoneWalking;
+      if (actualFootPositionInWorld == null)
+         actualFootPositionInWorld = new Point3d();
+      if (actualFootOrientationInWorld == null)
+         actualFootOrientationInWorld = new Quat4d();
+
+      if (other.actualFootPositionInWorld == null)
+         actualFootPositionInWorld.set(Double.NaN, Double.NaN, Double.NaN);
+      else
+         actualFootPositionInWorld.set(other.actualFootPositionInWorld);
+
+      if (other.actualFootOrientationInWorld == null)
+         actualFootOrientationInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+      else
+         actualFootOrientationInWorld.set(other.actualFootOrientationInWorld);
    }
 
    public Status getStatus()

@@ -3,10 +3,13 @@ package us.ihmc.robotDataCommunication.visualizer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.nio.ByteBuffer;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.AbstractButton;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
@@ -37,7 +40,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<>();
    private volatile boolean recording = true;
-   private YoVariableClient client;
+   private YoVariableClient yoVariableClient;
    private ArrayList<SCSVisualizerStateListener> stateListeners = new ArrayList<>();
 
    private int displayOneInNPackets = DISPLAY_ONE_IN_N_PACKETS;
@@ -46,7 +49,13 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    private final JButton disconnectButton = new JButton("Disconnect");
    private final JButton clearLogButton = new JButton("Clear log");
+   
+   private final DecimalFormat delayFormat = new DecimalFormat("0000");
+   private final JLabel delayValue = new JLabel();
 
+   
+   private volatile long lastTimestamp;
+   
    private int bufferSize;
    private boolean showGUI;
    private boolean hideViewport;
@@ -70,8 +79,12 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       addSCSVisualizerStateListener(this);
    }
 
+   @Override
    public void receivedTimestampAndData(long timestamp, ByteBuffer buffer)
    {
+      long delay = TimeTools.nanoSecondsToMillis(lastTimestamp - timestamp);
+      delayValue.setText(delayFormat.format(delay));
+      
       if (recording)
       {
          for (int i = 0; i < jointUpdaters.size(); i++)
@@ -83,22 +96,24 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       }
    }
 
+   @Override
    public void disconnected()
    {
       System.out.println("DISCONNECTED. SLIDERS NOW ENABLED");
       scs.setScrollGraphsEnabled(true);
    }
 
+   @Override
    public void setYoVariableClient(final YoVariableClient client)
    {
 
-      this.client = client;
+      this.yoVariableClient = client;
    }
 
    private void disconnect(final JButton disconnectButton)
    {
       disconnectButton.setEnabled(false);
-      client.requestStop();
+      yoVariableClient.requestStop();
    }
 
    public void addButton(String yoVariableName, double newValue)
@@ -106,17 +121,20 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       buttons.put(yoVariableName, newValue);
    }
 
+   @Override
    public boolean changesVariables()
    {
       return true;
    }
 
+   @Override
    public void receiveTimedOut()
    {
       System.out.println("Connection lost, closing client.");
-      client.disconnected();
+      yoVariableClient.disconnected();
    }
 
+   @Override
    public boolean populateRegistry()
    {
       return true;
@@ -132,13 +150,18 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       return scs.getDataBuffer();
    }
 
+   public void addButtonToSimulationConstructionSetGUI(AbstractButton button)
+   {
+      scs.addButton(button);
+   }
+
    @Override
    public void exitActionPerformed()
    {
       recording = false;
-      if (client != null)
+      if (yoVariableClient != null)
       {
-         client.requestStop();
+         yoVariableClient.requestStop();
       }
    }
 
@@ -169,6 +192,11 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       this.showOverheadView = showOverheadView;
    }
 
+   public SimulationConstructionSet getSimulationConstructionSet()
+   {
+      return scs;
+   }
+
    @Override
    public final void start(LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
@@ -195,6 +223,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       scs.addButton(disconnectButton);
       disconnectButton.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             disconnect(disconnectButton);
@@ -208,13 +237,17 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            if (client != null)
+            if (yoVariableClient != null)
             {
-               client.sendClearLogRequest();
+               yoVariableClient.sendClearLogRequest();
             }
          }
       });
-
+      
+      scs.addJLabel(new JLabel("Delay: "));
+      scs.addJLabel(delayValue);
+      scs.addJLabel(new JLabel("ms"));
+      
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
 
@@ -242,6 +275,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             {
                synchronized (this)
                {
+                  yoVariableClient.setSendingVariableChanges(false);
                   recording = false;
                   record.setText("Resume recording");
                   scs.setScrollGraphsEnabled(true);                  
@@ -254,7 +288,8 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                   scs.gotoOutPointNow();
                   recording = true;
                   record.setText("Pause recording");
-                  scs.setScrollGraphsEnabled(false);                  
+                  scs.setScrollGraphsEnabled(false);
+                  yoVariableClient.setSendingVariableChanges(true);
                }
             }
          }
@@ -279,6 +314,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       new Thread(scs).start();
    }
 
+   @Override
    public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
    }
@@ -295,6 +331,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void receivedTimestampOnly(long timestamp)
    {
+      lastTimestamp = timestamp;
    }
 
    @Override
@@ -307,4 +344,5 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    {
       return recording;
    }
+
 }

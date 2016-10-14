@@ -52,7 +52,7 @@ public class Graphics3DWorld implements Graphics3DFrameListener
    {
       checkCameraIsNotNull();
 
-      cameraController.setFixPosition(node.getTranslation().x, node.getTranslation().y, node.getTranslation().z);
+      cameraController.setFixPosition(node.getTranslation().getX(), node.getTranslation().getY(), node.getTranslation().getZ());
    }
 
    public void setCameraPosition(double x, double y, double z)

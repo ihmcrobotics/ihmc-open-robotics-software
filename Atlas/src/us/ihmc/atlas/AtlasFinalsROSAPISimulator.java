@@ -9,7 +9,7 @@ import java.util.Map;
 
 import com.martiansoftware.jsap.JSAPException;
 
-import ihmc_msgs.FingerStatePacketMessage;
+import ihmc_msgs.HandDesiredConfigurationRosMessage;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageFactoryProvider;
@@ -56,8 +56,8 @@ public class AtlasFinalsROSAPISimulator extends ROSAPISimulator
 
       if(robotModel.getDRCHandType().isHandSimulated())
       {
-         FingerStatePacketMessage message = messageFactory.newFromType("ihmc_msgs/FingerStatePacketMessage");
-         RosTopicSubscriberInterface<FingerStatePacketMessage> sub = IHMCMsgToPacketSubscriber.createIHMCMsgToPacketSubscriber(message, communicator, PacketDestination.CONTROLLER.ordinal());
+         HandDesiredConfigurationRosMessage message = messageFactory.newFromType("ihmc_msgs/FingerStateRosMessage");
+         RosTopicSubscriberInterface<HandDesiredConfigurationRosMessage> sub = IHMCMsgToPacketSubscriber.createIHMCMsgToPacketSubscriber(message, communicator, PacketDestination.CONTROLLER.ordinal());
          Map.Entry<String, RosTopicSubscriberInterface<? extends Message>> pair = new AbstractMap.SimpleEntry<String, RosTopicSubscriberInterface<? extends Message>>(nameSpace + "/control/finger_state", sub);
          subscribers.add(pair);
       }

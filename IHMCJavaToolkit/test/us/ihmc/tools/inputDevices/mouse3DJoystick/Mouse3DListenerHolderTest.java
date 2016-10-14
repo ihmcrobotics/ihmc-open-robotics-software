@@ -4,19 +4,19 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
-@DeployableTestClass(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class Mouse3DListenerHolderTest
 {
    int count1 = 0;
    int count2 = 0;
    
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testListenersGetNotified()
    {

@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
-
 import java.util.ArrayList;
 import java.util.List;
 

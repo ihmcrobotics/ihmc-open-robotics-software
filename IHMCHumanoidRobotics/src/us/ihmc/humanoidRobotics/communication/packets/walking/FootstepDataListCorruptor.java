@@ -23,11 +23,11 @@ public class FootstepDataListCorruptor
       this.maxRotationCorruption = maxRotationCorruption;
    }
    
-   public FootstepDataList corruptDataList(FootstepDataList footstepDataList)
+   public FootstepDataListMessage corruptDataList(FootstepDataListMessage footstepDataList)
    {
-      FootstepDataList ret = new FootstepDataList(footstepDataList.swingTime, footstepDataList.transferTime);
+      FootstepDataListMessage ret = new FootstepDataListMessage(footstepDataList.swingTime, footstepDataList.transferTime);
       
-      for (FootstepData footstepData : footstepDataList)
+      for (FootstepDataMessage footstepData : footstepDataList)
       {
          ret.add(corruptFootstepData(footstepData));
       }
@@ -35,9 +35,9 @@ public class FootstepDataListCorruptor
       return ret;
    }
    
-   public FootstepData corruptFootstepData(FootstepData footstepData)
+   public FootstepDataMessage corruptFootstepData(FootstepDataMessage footstepData)
    {
-      FootstepData ret = footstepData.clone();
+      FootstepDataMessage ret = footstepData.clone();
       
       Point3d location = new Point3d();
       Quat4d orientation = new Quat4d();

@@ -8,7 +8,7 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
@@ -32,7 +32,7 @@ public class TransformInterpolationCalculatorTest
 {
    public TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationOne() throws Exception
    {
@@ -51,7 +51,7 @@ public class TransformInterpolationCalculatorTest
       assertTrue(t2.equals(t3));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationForTranslation() throws Exception
    {
@@ -67,18 +67,18 @@ public class TransformInterpolationCalculatorTest
       RigidBodyTransform t3 =  new RigidBodyTransform();
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, 0.0);
       Vector3d interpolatedVector = new Vector3d();
-      t3.get(interpolatedVector);
+      t3.getTranslation(interpolatedVector);
       assertTrue(vector1.epsilonEquals(interpolatedVector, 1e-8));
 
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, 1.0);
       interpolatedVector = new Vector3d();
-      t3.get(interpolatedVector);
+      t3.getTranslation(interpolatedVector);
       assertTrue(vector2.epsilonEquals(interpolatedVector, 1e-8));
 
       double alpha = 0.25;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
       interpolatedVector = new Vector3d();
-      t3.get(interpolatedVector);
+      t3.getTranslation(interpolatedVector);
 
       Vector3d expectedVector = new Vector3d();
       expectedVector.scaleAdd((1- alpha), vector1, expectedVector);
@@ -87,7 +87,7 @@ public class TransformInterpolationCalculatorTest
       assertTrue(expectedVector.epsilonEquals(interpolatedVector, 1e-8));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationForRotationYaw() throws Exception
    {
@@ -107,8 +107,8 @@ public class TransformInterpolationCalculatorTest
       pitch2 = 0.0;
       roll2 = 0.0;
 
-      t1.setEuler(new Vector3d(roll1, pitch1, yaw1));
-      t2.setEuler(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
 
       alpha = 0.0;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
@@ -132,8 +132,8 @@ public class TransformInterpolationCalculatorTest
       pitch2 = 0.0;
       roll2 = 0.0;
 
-      t1.setEuler(new Vector3d(roll1, pitch1, yaw1));
-      t2.setEuler(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
 
       alpha = 0.0;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
@@ -150,7 +150,7 @@ public class TransformInterpolationCalculatorTest
       assertEquals(yawPitchRoll[0], (alpha-1)*yaw1 + alpha * yaw2, 1e-6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationForRotationRoll() throws Exception
    {
@@ -170,8 +170,8 @@ public class TransformInterpolationCalculatorTest
       pitch2 = 0.0;
       roll2 = 1.0;
 
-      t1.setEuler(new Vector3d(roll1, pitch1, yaw1));
-      t2.setEuler(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
 
       alpha = 0.0;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
@@ -188,7 +188,7 @@ public class TransformInterpolationCalculatorTest
       assertEquals(yawPitchRoll[2], (alpha-1)*roll1 + alpha * roll2, 1e-6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationForRotationPitch() throws Exception
    {
@@ -208,8 +208,8 @@ public class TransformInterpolationCalculatorTest
       pitch2 = 1.0;
       roll2 = 0.0;
 
-      t1.setEuler(new Vector3d(roll1, pitch1, yaw1));
-      t2.setEuler(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
 
       alpha = 0.0;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
@@ -226,7 +226,7 @@ public class TransformInterpolationCalculatorTest
       assertEquals(yawPitchRoll[1], (alpha-1)*pitch1 + alpha * pitch2, 1e-6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationForRotationYawEdgeCases() throws Exception
    {
@@ -250,8 +250,8 @@ public class TransformInterpolationCalculatorTest
       pitch2 = 0.0;
       roll2 = 0.0;
 
-      t1.setEuler(new Vector3d(roll1, pitch1, yaw1));
-      t2.setEuler(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
 
       alpha = 0.0;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
@@ -280,8 +280,8 @@ public class TransformInterpolationCalculatorTest
       pitch2 = 0.0;
       roll2 = 0.0;
 
-      t1.setEuler(new Vector3d(roll1, pitch1, yaw1));
-      t2.setEuler(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
 
       alpha = 0.0;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
@@ -303,7 +303,7 @@ public class TransformInterpolationCalculatorTest
       assertEquals(yawPitchRoll[0], (alpha-1)*yaw1 + alpha * yaw2, 1e-6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testComputeInterpolationForRotationCombined() throws Exception
    {
@@ -323,18 +323,18 @@ public class TransformInterpolationCalculatorTest
       pitch2 = -1.0;
       roll2 = 1.6;
 
-      t1.setEuler(new Vector3d(roll1, pitch1, yaw1));
-      t2.setEuler(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
 
       AxisAngle4d axist1 = new AxisAngle4d();
       Matrix3d maxtrixt1 = new Matrix3d();
-      t1.get(maxtrixt1);
+      t1.getRotation(maxtrixt1);
 //      axist1.set(maxtrixt1);
       RotationTools.convertMatrixToAxisAngle(maxtrixt1, axist1);
 
       AxisAngle4d axist2 = new AxisAngle4d();
       Matrix3d maxtrixt2 = new Matrix3d();
-      t2.get(maxtrixt2);
+      t2.getRotation(maxtrixt2);
 //      axist2.set(maxtrixt2);
       RotationTools.convertMatrixToAxisAngle(maxtrixt2, axist2);
       
@@ -347,7 +347,7 @@ public class TransformInterpolationCalculatorTest
 
       AxisAngle4d axist3 = new AxisAngle4d();
       Matrix3d maxtrixt3 = new Matrix3d();
-      t3.get(maxtrixt3);
+      t3.getRotation(maxtrixt3);
       axist3.set(maxtrixt3);
 
       //Since t1 has no rotation, t3 rotation should be in the same direction as t2 with the angle controlled by alpha
@@ -373,10 +373,10 @@ public class TransformInterpolationCalculatorTest
    {
       // This seems to work much better than going to quaternions first, especially when yaw is large...
       Matrix3d rotationMatrix = new Matrix3d();
-      transform3D.get(rotationMatrix);
-      yawPitchRoll[0] = Math.atan2(rotationMatrix.m10, rotationMatrix.m00);
-      yawPitchRoll[1] = Math.asin(-rotationMatrix.m20);
-      yawPitchRoll[2] = Math.atan2(rotationMatrix.m21, rotationMatrix.m22);
+      transform3D.getRotation(rotationMatrix);
+      yawPitchRoll[0] = Math.atan2(rotationMatrix.getM10(), rotationMatrix.getM00());
+      yawPitchRoll[1] = Math.asin(-rotationMatrix.getM20());
+      yawPitchRoll[2] = Math.atan2(rotationMatrix.getM21(), rotationMatrix.getM22());
 
       if (Double.isNaN(yawPitchRoll[0]) || Double.isNaN(yawPitchRoll[1]) || Double.isNaN(yawPitchRoll[2]))
       {
@@ -385,7 +385,7 @@ public class TransformInterpolationCalculatorTest
    }
 
 
-   @DeployableTestMethod(estimatedDuration = 0.05)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInterpolationWithFramePoses()
    {
@@ -433,7 +433,7 @@ public class TransformInterpolationCalculatorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.001)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInterpolationForTimeStampedTransform()
    {

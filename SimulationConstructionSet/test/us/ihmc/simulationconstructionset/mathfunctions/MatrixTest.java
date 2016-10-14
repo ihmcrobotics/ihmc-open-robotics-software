@@ -7,8 +7,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import Jama.Matrix;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class MatrixTest
 {
@@ -20,7 +20,7 @@ public class MatrixTest
    Matrix matrix;
    Matrix matrixInverted;
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testInvert()
    {

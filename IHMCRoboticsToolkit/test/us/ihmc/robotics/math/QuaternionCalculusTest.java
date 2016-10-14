@@ -1,9 +1,11 @@
 package us.ihmc.robotics.math;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -11,19 +13,48 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class QuaternionCalculusTest
 {
    private static final double EPSILON = 1.0e-10;
 
-   @DeployableTestMethod(estimatedDuration = 0.07)
-   @Test(timeout = 500)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testLogAndExpAlgebra() throws Exception
+   {
+      Random random = new Random(651651961L);
+
+      for (int i = 0; i < 10000; i++)
+      {
+         QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
+         Quat4d q = RandomTools.generateRandomQuaternion(random);
+
+         Quat4d qLog = new Quat4d();
+         Quat4d vExp = new Quat4d();
+         
+         quaternionCalculus.log(q, qLog);
+         Vector3d v = new Vector3d(qLog.getX(),qLog.getY(),qLog.getZ()); 
+         
+         quaternionCalculus.exp(v, vExp);
+
+         assertTrue(Math.abs(q.getX() - vExp.getX()) < 10e-10);
+         assertTrue(Math.abs(q.getY() - vExp.getY()) < 10e-10);
+         assertTrue(Math.abs(q.getZ() - vExp.getZ()) < 10e-10);
+         assertTrue(Math.abs(q.getW() - vExp.getW()) < 10e-10);
+
+      }
+   }
+   
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testConversionQDotToAngularVelocityBackAndForth() throws Exception
    {
       Random random = new Random(651651961L);
@@ -40,14 +71,14 @@ public class QuaternionCalculusTest
          Quat4d qDot = new Quat4d();
 
          quaternionCalculus.computeQDot(q, expectedAngularVelocity, qDot);
-         quaternionCalculus.computeAngularVelocity(q, qDot, actualAngularVelocity);
+         quaternionCalculus.computeAngularVelocityInWorldFrame(q, qDot, actualAngularVelocity);
 
          assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, EPSILON));
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.04)
-   @Test(timeout = 300)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testConversionQDDotToAngularAccelerationBackAndForth() throws Exception
    {
       Random random = new Random(651651961L);
@@ -87,8 +118,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
-   @Test(timeout = 1000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testVelocityFromFDAgainstTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -127,14 +158,63 @@ public class QuaternionCalculusTest
          orientation.getQuaternion(qNext);
 
          quaternionCalculus.computeQDotByFiniteDifferenceCentral(qPrevious, qNext, dtForFD, qDot);
-         quaternionCalculus.computeAngularVelocity(q, qDot, actualAngularVelocity);
+         quaternionCalculus.computeAngularVelocityInWorldFrame(q, qDot, actualAngularVelocity);
 
          assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, 1.0e-8));
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.07)
-   @Test(timeout = 500)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testFDSimpleCase() throws Exception
+   {
+      QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
+      Random random = new Random(65265L);
+      double integrationTime = 1.0;
+      double angleVelocity = RandomTools.generateRandomDouble(random, 0.0, 2.0 * Math.PI) / integrationTime;
+      Vector3d expectedAngularVelocity = new Vector3d(angleVelocity, 0.0, 0.0);
+      Vector3d expectedAngularAcceleration = new Vector3d();
+      AxisAngle4d axisAnglePrevious = new AxisAngle4d(1.0, 0.0, 0.0, 0.0);
+      AxisAngle4d axisAngleCurrent = new AxisAngle4d(1.0, 0.0, 0.0, 0.0);
+      AxisAngle4d axisAngleNext = new AxisAngle4d(1.0, 0.0, 0.0, 0.0);
+      Quat4d qPrevious = new Quat4d();
+      Quat4d qCurrent = new Quat4d();
+      Quat4d qNext = new Quat4d();
+      Quat4d qDot = new Quat4d();
+      Quat4d qDDot = new Quat4d();
+
+      Vector3d actualAngularVelocity = new Vector3d();
+      Vector3d actualAngularAcceleration = new Vector3d();
+
+      double dt = 1.0e-4;
+      for (double time = dt; time < integrationTime; time += dt)
+      {
+         axisAnglePrevious.setAngle(AngleTools.trimAngleMinusPiToPi(angleVelocity * (time - dt)) - Math.PI);
+         qPrevious.set(axisAnglePrevious);
+         axisAngleCurrent.setAngle(AngleTools.trimAngleMinusPiToPi(angleVelocity * time) - Math.PI);
+         qCurrent.set(axisAngleCurrent);
+         axisAngleNext.setAngle(AngleTools.trimAngleMinusPiToPi(angleVelocity * (time + dt)) - Math.PI);
+         qNext.set(axisAngleNext);
+
+         quaternionCalculus.computeQDotByFiniteDifferenceCentral(qPrevious, qNext, dt, qDot);
+         quaternionCalculus.computeAngularVelocityInWorldFrame(qCurrent, qDot, actualAngularVelocity);
+
+         quaternionCalculus.computeQDDotByFiniteDifferenceCentral(qPrevious, qCurrent, qNext, dt, qDDot);
+         quaternionCalculus.computeAngularAcceleration(qCurrent, qDot, qDDot, actualAngularAcceleration);
+
+         boolean sameVelocity = expectedAngularVelocity.epsilonEquals(actualAngularVelocity, 1.0e-7);
+         if (!sameVelocity)
+         {
+            System.out.println("Expected angular velocity: " + expectedAngularVelocity);
+            System.out.println("Actual   angular velocity: " + actualAngularVelocity);
+         }
+         assertTrue(sameVelocity);
+         assertTrue(expectedAngularAcceleration.epsilonEquals(actualAngularAcceleration, 1.0e-7));
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testAccelerationFromFDAgainstTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -181,8 +261,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.5)
-   @Test(timeout = 3000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test(timeout = 30000)
    public void testInterpolateAgainstQuat4d() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -201,8 +281,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.02)
-   @Test(timeout = 200)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTransformOnVector() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -231,8 +311,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.02)
-   @Test(timeout = 200)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testInvertTransformOnVector() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -262,8 +342,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.005)
-   @Test(timeout = 100)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTransformOnQuaternion() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -297,8 +377,8 @@ public class QuaternionCalculusTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.005)
-   @Test(timeout = 100)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testInvertTransformOnQuaternion() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();

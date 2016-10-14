@@ -1,5 +1,13 @@
 package us.ihmc.SdfLoader;
 
+import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
+import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.jme.JMEGeneratedHeightMap;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,17 +17,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
-
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
-import us.ihmc.graphics3DAdapter.HeightMap;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.jme.JMEGeneratedHeightMap;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 
 public class SDFWorldLoader
 {
@@ -63,16 +60,6 @@ public class SDFWorldLoader
       return groundProfile;
    }
 
-   public ImmutablePair<SDFHumanoidRobot, SDFFullHumanoidRobotModel> createRobotAndRemoveFromWorld(SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
-   {
-      removeVisualFromWorld(sdfJointNameMap.getModelName());
-
-      ImmutablePair<SDFHumanoidRobot, SDFFullHumanoidRobotModel> ret = new ImmutablePair<SDFHumanoidRobot, SDFFullHumanoidRobotModel>(jaxbSDFLoader.createRobot(sdfJointNameMap, useCollisionMeshes),
-            jaxbSDFLoader.createFullRobotModel(sdfJointNameMap));
-
-      return ret;
-   }
-
    private void removeVisualFromWorld(String modelName)
    {
       if (!visuals.containsKey(modelName))
@@ -81,7 +68,7 @@ public class SDFWorldLoader
       }
       visuals.remove(modelName);
    }
-   
+
    public GeneralizedSDFRobotModel getGeneralizedRobotModelAndRemoveFromWorld(String modelName)
    {
       removeVisualFromWorld(modelName);
@@ -95,7 +82,7 @@ public class SDFWorldLoader
       {
          ret.combine(visual);
       }
-      
+
       return ret;
    }
 

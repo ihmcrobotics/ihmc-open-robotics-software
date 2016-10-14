@@ -1,6 +1,6 @@
 package us.ihmc.robotics.lists;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameTuple;
@@ -49,7 +49,7 @@ public class FrameTupleArrayList<T extends FrameTuple<?, ?>> extends RecyclingAr
       }
    }
 
-   public void copyFromListAndTrimSize(ArrayList<? extends FrameTuple<?, ?>> otherList)
+   public void copyFromListAndTrimSize(List<? extends FrameTuple<?, ?>> otherList)
    {
       ensureCapacity(otherList.size());
       size = otherList.size();

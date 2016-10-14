@@ -172,7 +172,14 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
             slider.addChangeListener(new SliderChangeListener(slider, this));
 
             JPanel sliderPanel = new JPanel(new BorderLayout());
-            sliderPanel.setBorder(new TitledBorder(slider.midiControl.var.getName()));
+            if (slider.midiControl.name != null)
+            {
+               sliderPanel.setBorder(new TitledBorder(slider.midiControl.name));
+            }
+            else
+            {
+               sliderPanel.setBorder(new TitledBorder(slider.midiControl.var.getName()));
+            }
             sliderPanel.add(slider, BorderLayout.CENTER);
             slider.value = new JTextField(slider.midiControl.var.getNumericValueAsAString());
             sliders.add(slider);
@@ -265,6 +272,11 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
       {
          frame.setSize(sliderWidth * (sliders.size() / numRow), sliderHeight * numRow);
       }
+   }
+
+   public void setTitle(String name)
+   {
+      frame.setTitle(name);
    }
 
    public void setFrameLocation(int x, int y)

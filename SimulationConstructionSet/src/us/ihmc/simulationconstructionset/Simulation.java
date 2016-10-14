@@ -49,12 +49,12 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
    public void initPhysics(ScsPhysics physics)
    {
-      mySimulator.setCollisions(physics.collisionDetector, physics.visualize);
+      mySimulator.setCollisions(physics.collisionDetector, physics.collisionHandler, physics.visualize);
 
       for (Robot robot : robots)
       {
          if (physics.collisionConfigure != null)
-            physics.collisionConfigure.setup(robot, physics.collisionDetector);
+            physics.collisionConfigure.setup(robot, physics.collisionDetector, physics.collisionHandler);
       }
    }
 
@@ -416,11 +416,6 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       {
          (simulateDoneListeners.get(i)).simulationDone();
       }
-   }
-
-   protected void updateState()
-   {
-      mySimulator.updateState();
    }
 
    protected void doControl()

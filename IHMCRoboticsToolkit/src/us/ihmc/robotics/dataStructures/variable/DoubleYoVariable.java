@@ -79,6 +79,7 @@ public class DoubleYoVariable extends YoVariable<DoubleYoVariable>
     *
     * @return String representation
     */
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
@@ -176,7 +177,7 @@ public class DoubleYoVariable extends YoVariable<DoubleYoVariable>
    //   I should probably use the change listener stuff instead, but this is nice for eavesdropping
    //   to catch when a variable changes or in order to compare two runs that should be identical
    //   to discover the first time their YoVariables differ...
-   //   
+   //
    //   private static boolean startDisplaying = false;
    //   private static boolean stopDisplaying = false;
    //   private static DoubleYoVariable time;
@@ -200,7 +201,7 @@ public class DoubleYoVariable extends YoVariable<DoubleYoVariable>
    //      }
    //
    //      if ((time != null) && (time.getDoubleValue() >= 1.656-1e-7)) startDisplaying = true;
-   //      if ((time != null) && (time.getDoubleValue() >= 1.6632+1e-7)) 
+   //      if ((time != null) && (time.getDoubleValue() >= 1.6632+1e-7))
    //      {
    //         stopDisplaying = true; //1.6705
    //         writer.close();
@@ -229,21 +230,25 @@ public class DoubleYoVariable extends YoVariable<DoubleYoVariable>
     *
     * @param stringBuffer StringBuffer to which the value will be appended
     */
+   @Override
    public void getValueString(StringBuffer stringBuffer)
    {
       getValueStringFromDouble(stringBuffer, val);
    }
 
+   @Override
    public void getValueStringFromDouble(StringBuffer stringBuffer, double doubleValue)
    {
       DOUBLE_FORMAT.format(doubleValue, stringBuffer, FIELD_POSITION); // Add the variable value to it
    }
 
+   @Override
    public double getValueAsDouble()
    {
       return getDoubleValue();
    }
 
+   @Override
    public void setValueFromDouble(double value, boolean notifyListeners)
    {
       set(value, notifyListeners);
@@ -273,5 +278,11 @@ public class DoubleYoVariable extends YoVariable<DoubleYoVariable>
    public boolean setValue(DoubleYoVariable value, boolean notifyListeners)
    {
       return set(value.getDoubleValue(), notifyListeners);
+   }
+
+   public void setToNaN()
+   {
+      this.set(Double.NaN);
+
    }
 }

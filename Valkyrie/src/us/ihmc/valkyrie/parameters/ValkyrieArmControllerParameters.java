@@ -1,27 +1,31 @@
 package us.ihmc.valkyrie.parameters;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.robotics.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGains;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-
-public class ValkyrieArmControllerParameters implements ArmControllerParameters
+public class ValkyrieArmControllerParameters extends ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
+   private final DRCRobotJointMap jointMap;
 
-   public ValkyrieArmControllerParameters(boolean runningOnRealRobot)
+   public ValkyrieArmControllerParameters(boolean runningOnRealRobot, DRCRobotJointMap jointMap)
    {
       this.runningOnRealRobot = runningOnRealRobot;
+      this.jointMap = jointMap;
    }
 
    @Override
@@ -33,22 +37,22 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
       double zeta = runningOnRealRobot ? 1.0 : 0.7;
       double ki = runningOnRealRobot ? 0.0 : 0.0;
       double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 15.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxAccel = runningOnRealRobot ? 50.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 750.0 : Double.POSITIVE_INFINITY;
 
       jointspaceControlGains.setKp(kp);
       jointspaceControlGains.setZeta(zeta);
       jointspaceControlGains.setKi(ki);
       jointspaceControlGains.setMaximumIntegralError(maxIntegralError);
-      jointspaceControlGains.setMaximumAcceleration(maxAccel);
-      jointspaceControlGains.setMaximumJerk(maxJerk);
+      jointspaceControlGains.setMaximumFeedback(maxAccel);
+      jointspaceControlGains.setMaximumFeedbackRate(maxJerk);
       jointspaceControlGains.createDerivativeGainUpdater(true);
-      
+
       return jointspaceControlGains;
    }
 
    @Override
-   public YoSE3PIDGains createTaskspaceControlGains(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createTaskspaceControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains taskspaceControlGains = new YoSymmetricSE3PIDGains("ArmTaskspace", registry);
 
@@ -63,15 +67,15 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
       taskspaceControlGains.setDampingRatio(zeta);
       taskspaceControlGains.setIntegralGain(ki);
       taskspaceControlGains.setMaximumIntegralError(maxIntegralError);
-      taskspaceControlGains.setMaximumAcceleration(maxAccel);
-      taskspaceControlGains.setMaximumJerk(maxJerk);
+      taskspaceControlGains.setMaximumFeedback(maxAccel);
+      taskspaceControlGains.setMaximumFeedbackRate(maxJerk);
       taskspaceControlGains.createDerivativeGainUpdater(true);
 
       return taskspaceControlGains;
    }
 
    @Override
-   public YoSE3PIDGains createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry)
+   public YoSE3PIDGainsInterface createTaskspaceControlGainsForLoadBearing(YoVariableRegistry registry)
    {
       YoIndependentSE3PIDGains taskspaceControlGains = new YoIndependentSE3PIDGains("ArmLoadBearing", registry);
       taskspaceControlGains.reset();
@@ -79,15 +83,69 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
    }
 
    @Override
-   public boolean useInverseKinematicsTaskspaceControl()
+   public String[] getPositionControlledJointNames(RobotSide robotSide)
    {
-      return false;
+      if (runningOnRealRobot)
+      {
+         String[] positionControlledJointNames = new String[3];
+
+         int i = 0;
+         positionControlledJointNames[i++] = jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL);
+         positionControlledJointNames[i++] = jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH);
+         positionControlledJointNames[i++] = jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL);
+
+         return positionControlledJointNames;
+      }
+      else
+      {
+         return null;
+      }
    }
 
+   private Map<ArmJointName, DoubleYoVariable> jointAccelerationIntegrationAlphaPosition;
+
+   /** {@inheritDoc} */
    @Override
-   public boolean doLowLevelPositionControl()
+   public Map<ArmJointName, DoubleYoVariable> getOrCreateAccelerationIntegrationAlphaPosition(YoVariableRegistry registry)
    {
-      return false;
+      if (jointAccelerationIntegrationAlphaPosition != null)
+         return jointAccelerationIntegrationAlphaPosition;
+
+      DoubleYoVariable elbow = new DoubleYoVariable("elbowAccelerationIntegrationAlphaPosition", registry);
+      DoubleYoVariable wrist = new DoubleYoVariable("wristAccelerationIntegrationAlphaPosition", registry);
+
+      elbow.set(0.999);
+      wrist.set(0.999);
+
+      jointAccelerationIntegrationAlphaPosition = new HashMap<>();
+      jointAccelerationIntegrationAlphaPosition.put(ArmJointName.ELBOW_ROLL, elbow);
+      jointAccelerationIntegrationAlphaPosition.put(ArmJointName.FIRST_WRIST_PITCH, wrist);
+      jointAccelerationIntegrationAlphaPosition.put(ArmJointName.WRIST_ROLL, wrist);
+
+      return jointAccelerationIntegrationAlphaPosition;
+   }
+
+   private Map<ArmJointName, DoubleYoVariable> jointAccelerationIntegrationAlphaVelocity;
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<ArmJointName, DoubleYoVariable> getOrCreateAccelerationIntegrationAlphaVelocity(YoVariableRegistry registry)
+   {
+      if (jointAccelerationIntegrationAlphaVelocity != null)
+         return jointAccelerationIntegrationAlphaVelocity;
+
+      DoubleYoVariable elbow = new DoubleYoVariable("elbowAccelerationIntegrationAlphaVelocity", registry);
+      DoubleYoVariable wrist = new DoubleYoVariable("wristAccelerationIntegrationAlphaVelocity", registry);
+
+      elbow.set(0.83);
+      wrist.set(0.83);
+
+      jointAccelerationIntegrationAlphaVelocity = new HashMap<>();
+      jointAccelerationIntegrationAlphaVelocity.put(ArmJointName.ELBOW_ROLL, elbow);
+      jointAccelerationIntegrationAlphaVelocity.put(ArmJointName.FIRST_WRIST_PITCH, wrist);
+      jointAccelerationIntegrationAlphaVelocity.put(ArmJointName.WRIST_ROLL, wrist);
+
+      return jointAccelerationIntegrationAlphaVelocity;
    }
 
    @Override
@@ -103,14 +161,6 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
       jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.FIRST_WRIST_PITCH), 0.0);
       jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), 0.0);
 
-      
       return jointPositions;
-   }
-
-   @Override
-   public double getWristHandCenterOffset()
-   {
-      // TODO Auto-generated method stub
-      return 0.0;
    }
 }

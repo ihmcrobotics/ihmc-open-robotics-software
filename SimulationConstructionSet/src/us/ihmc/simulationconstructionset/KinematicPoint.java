@@ -6,11 +6,11 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector4d;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 
 
@@ -28,7 +28,6 @@ public class KinematicPoint implements java.io.Serializable
 
    public final String name;
 
-   private final Vector3d offset;
    private final Point3d temp = new Point3d();
 
    private final YoFramePoint position;
@@ -68,26 +67,16 @@ public class KinematicPoint implements java.io.Serializable
       position = new YoFramePoint(name + "_", "", ReferenceFrame.getWorldFrame(), registry);
       velocity = new YoFrameVector(name + "_d", "", ReferenceFrame.getWorldFrame(), registry);
 
-      if (offset == null)
-      {
-         this.offsetYoFrameVector = new YoFrameVector(name + "off", "", ReferenceFrame.getWorldFrame(), registry);
-         this.offset = null;
-      }
-      else
-      {
-         this.offset = new Vector3d(offset);
-         this.offsetYoFrameVector = null;
-      }
+      this.offsetYoFrameVector = new YoFrameVector(name + "off", "", ReferenceFrame.getWorldFrame(), registry);
+      if (offset != null)
+         offsetYoFrameVector.set(offset);
    }
 
    public void reset()
    {
       parentJoint = null;
 
-      if (offset == null)
-      {
-         offsetYoFrameVector.set(0, 0, 0);
-      }
+      offsetYoFrameVector.set(0, 0, 0);
 
       offsetFromCOM.set(0, 0, 0);
       wXr.set(0, 0, 0);
@@ -127,39 +116,30 @@ public class KinematicPoint implements java.io.Serializable
 
    public void setOffsetJoint(double x, double y, double z)
    {
-      if (offsetYoFrameVector == null)
-      {
-         throw new RuntimeException("Cannot set offset on " + getName() + ". Should have constructed it without a Vector3d offset to make it changeable!");
-      }
-
       this.offsetYoFrameVector.set(x, y, z);
    }
 
    public void setOffsetJoint(Vector3d newOffset)
    {
-      if (offsetYoFrameVector == null)
-      {
-         throw new RuntimeException("Cannot set offset on " + getName() + ". Should have constructed it without a Vector3d offset to make it changeable!");
-      }
-
       this.offsetYoFrameVector.set(newOffset);
    }
-
 
    public void setOffsetWorld(Tuple3d offsetInWorld)
    {
       setOffsetWorld(offsetInWorld.getX(), offsetInWorld.getY(), offsetInWorld.getZ());
    }
 
-
    public void setOffsetWorld(double x, double y, double z)
    {
+//      System.out.println("Setting offset World: " + x + ", " + y + ", " + z);
       tempTransformFromWorldToJoint.set(parentJoint.transformToNext);
       tempTransformFromWorldToJoint.invert();
       offsetPlus.set(x, y, z, 1.0);
       tempTransformFromWorldToJoint.transform(offsetPlus);
 
-      setOffsetJoint(offsetPlus.x, offsetPlus.y, offsetPlus.z);
+      setOffsetJoint(offsetPlus.getX(), offsetPlus.getY(), offsetPlus.getZ());
+//      System.out.println("Setting offset Joint: " + offsetPlus.getX() + ", " + offsetPlus.getY() + ", " + offsetPlus.getZ());
+
    }
 
    public void updatePointVelocity(Matrix3d R0_i, Vector3d comOffset, Vector3d v_i, Vector3d w_i)
@@ -196,14 +176,7 @@ public class KinematicPoint implements java.io.Serializable
 
    public void getOffset(Tuple3d offsetToPack)
    {
-      if (offset != null)
-      {
-         offsetToPack.set(offset);
-      }
-      else
-      {
-         offsetYoFrameVector.get(offsetToPack);
-      }
+      offsetYoFrameVector.get(offsetToPack);
    }
 
    public Vector3d getOffsetCopy()
@@ -269,12 +242,12 @@ public class KinematicPoint implements java.io.Serializable
 
       return velocityToReturn;
    }
-   
+
    public void setVelocity(Vector3d velocity)
    {
       this.velocity.set(velocity);
    }
-   
+
    public void setPosition(Point3d position)
    {
       this.position.set(position);

@@ -14,13 +14,13 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class AlphaFilteredYoFrameQuaternionTest
 {
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testInitialValue()
    {
@@ -40,7 +40,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       JUnitTools.assertQuaternionsEqual(qMeasured, qFiltered, 1e-12);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAlpha1()
    {
@@ -64,7 +64,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       JUnitTools.assertQuaternionsEqualUsingDifference(qInitial, qFiltered, 1e-12);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAlpha0()
    {
@@ -88,7 +88,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       JUnitTools.assertQuaternionsEqualUsingDifference(qFinal, qFiltered, 1e-12);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testStepChange()
    {

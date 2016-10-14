@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.physics.engine.jerry.JointPhysics;
 
 public class ExternalForcePoint extends KinematicPoint
 {
@@ -46,7 +47,7 @@ public class ExternalForcePoint extends KinematicPoint
    /**
     * @param name
     * @param offset in world when all of the robot's joints are at zero
-    * @param robot
+    * @param registry
     */
    public ExternalForcePoint(String name, Vector3d offset, YoVariableRegistry registry)
    {
@@ -89,8 +90,10 @@ public class ExternalForcePoint extends KinematicPoint
    }
 
 
-   public void resolveCollision(ExternalForcePoint externalForcePoint, Vector3d normal_world, double epsilon, double mu, Vector3d p_world)
-   {
+   public boolean resolveCollision(ExternalForcePoint externalForcePoint, Vector3d normal_world, double epsilon, double mu, Vector3d p_world)
+   {      
+//      System.out.println("Resolving collision with other object");
+
       computeRotationFromNormalVector(R0_coll, normal_world);
       Rcoll_0.set(R0_coll);
       Rcoll_0.transpose();
@@ -99,13 +102,13 @@ public class ExternalForcePoint extends KinematicPoint
                  getZVelocity() - externalForcePoint.getZVelocity());
       Rcoll_0.transform(u_coll);
 
-      if (u_coll.z > 0.0)    // -0.001) // Moving slowly together or moving apart...
+      if (u_coll.getZ() > 0.0)    // -0.001) // Moving slowly together or moving apart...
       {
          p_world.set(0.0, 0.0, 0.0);
          impulse.setToZero();
          externalForcePoint.impulse.setToZero();
 
-         return;
+         return false;
       }
 
       Rk_coll.set(this.parentJoint.physics.Ri_0);
@@ -122,73 +125,72 @@ public class ExternalForcePoint extends KinematicPoint
 
       parentJoint.physics.applyImpulse(p_world);
       p_world.scale(-1.0);
-      externalForcePoint.parentJoint.physics.applyImpulse(p_world);    // Equal and opposite impulses;
+      JointPhysics<?> jointPhysics = externalForcePoint.parentJoint.physics;
+      
+      jointPhysics.applyImpulse(p_world);    // Equal and opposite impulses;
 
       // Rotate into world coordinates:
       R0_coll.transform(p_world);
-      impulse.set(-p_world.x, -p_world.y, -p_world.z);
-
+      impulse.set(-p_world.getX(), -p_world.getY(), -p_world.getZ());
       externalForcePoint.impulse.set(p_world);
 
       // +++JEP.  After collision, recalculate velocities in case another collision occurs before velocities are calculated:
       parentJoint.rob.updateVelocities();
       externalForcePoint.parentJoint.rob.updateVelocities();
-//      robot.updateVelocities();
+      
+      return true;
    }
 
-   public void resolveCollision(Vector3d vel_world, Vector3d normal_world, double epsilon, double mu, Vector3d p_world)
+   public boolean resolveCollision(Vector3d velocityOfOtherObjectInWorld, Vector3d collisionNormalInWorld, double epsilon, double mu, Vector3d impulseInWorldToPack)
    {
-      computeRotationFromNormalVector(R0_coll, normal_world);
+//      System.out.println("Resolving collision with ground");
+//      System.out.println("Normal Vector = " + normal_world);
+      
+      computeRotationFromNormalVector(R0_coll, collisionNormalInWorld);
+//      System.out.println("R0_coll = " + R0_coll);
+
       Rcoll_0.set(R0_coll);
       Rcoll_0.transpose();
 
-      u_coll.set(getXVelocity() - vel_world.x, getYVelocity() - vel_world.y, getZVelocity() - vel_world.z);
+      u_coll.set(getXVelocity() - velocityOfOtherObjectInWorld.getX(), getYVelocity() - velocityOfOtherObjectInWorld.getY(), getZVelocity() - velocityOfOtherObjectInWorld.getZ());
       Rcoll_0.transform(u_coll);
 
-      // System.out.println("normal_world: " + normal_world);
-      // System.out.println("u_world: " + dx.val + ", " + dy.val + ", " + dz.val);
-      // System.out.println("Rcoll_0" + Rcoll_0);
-
-      if (u_coll.z > 0.0)    // -0.001) // Moving slowly together or moving apart...
+      if (u_coll.getZ() > 0.0)    // -0.001) // Moving slowly together or moving apart...
       {
-         p_world.set(0.0, 0.0, 0.0);
+         impulseInWorldToPack.set(0.0, 0.0, 0.0);
          impulse.setToZero();
 
-         return;
+         return false;
       }
 
-      // Rk_coll.set(Ri_0);
-
-      /*
-       * Rk_coll.set(R0_i);
-       * Rk_coll.transpose();
-       */
       Rk_coll.set(this.parentJoint.physics.Ri_0);
-
       Rk_coll.mul(R0_coll);
 
-      parentJoint.physics.resolveCollision(offsetFromCOM, Rk_coll, u_coll, epsilon, mu, p_world);    // Returns the impulse in collision coordinates
+      parentJoint.physics.resolveCollision(offsetFromCOM, Rk_coll, u_coll, epsilon, mu, impulseInWorldToPack);    // Returns the impulse in collision coordinates
 
       // Rotate into world coordinates:
-      R0_coll.transform(p_world);
-      impulse.set(p_world);
+      R0_coll.transform(impulseInWorldToPack);
+      impulse.set(impulseInWorldToPack);
 
       // +++JEP.  After collision, recalculate velocities in case another collision occurs before velocities are calculated:
-    parentJoint.rob.updateVelocities();
-//      robot.updateVelocities();
+      parentJoint.rob.updateVelocities();
+      
+      return true;
    }
 
 
    public void resolveMicroCollision(double penetration_squared, Vector3d vel_world, Vector3d normal_world, double epsilon, double mu, Vector3d p_world)
    {
+//      System.out.println("External force point: Resolving micro collision");
+
       computeRotationFromNormalVector(R0_coll, normal_world);
       Rcoll_0.set(R0_coll);
       Rcoll_0.transpose();
 
-      u_coll.set(getXVelocity() - vel_world.x, getYVelocity() - vel_world.y, getZVelocity() - vel_world.z);
+      u_coll.set(getXVelocity() - vel_world.getX(), getYVelocity() - vel_world.getY(), getZVelocity() - vel_world.getZ());
       Rcoll_0.transform(u_coll);
 
-      if (u_coll.z > 0.0)    // Moving slowly together or moving apart...
+      if (u_coll.getZ() > 0.0)    // Moving slowly together or moving apart...
       {
          p_world.set(0.0, 0.0, 0.0);
 
@@ -286,7 +288,7 @@ public class ExternalForcePoint extends KinematicPoint
 
       // if (Math.abs(yAxis.dot(zAxis)) > 0.99){yAxis = new Vector3d(1.0,0.0,0.0);}
 //    if (Math.abs(zAxis.y) > 0.99){yAxis = new Vector3d(1.0,0.0,0.0);}
-      if (Math.abs(zAxis.y) > 0.99)
+      if (Math.abs(zAxis.getY()) > 0.99)
       {
          yAxis.set(1.0, 0.0, 0.0);
       }
@@ -296,14 +298,14 @@ public class ExternalForcePoint extends KinematicPoint
 
       yAxis.cross(zAxis, xAxis);
 
-      rot.m00 = xAxis.x;
-      rot.m01 = yAxis.x;
-      rot.m02 = zAxis.x;
-      rot.m10 = xAxis.y;
-      rot.m11 = yAxis.y;
-      rot.m12 = zAxis.y;
-      rot.m20 = xAxis.z;
-      rot.m21 = yAxis.z;
-      rot.m22 = zAxis.z;
+      rot.setM00(xAxis.getX());
+      rot.setM01(yAxis.getX());
+      rot.setM02(zAxis.getX());
+      rot.setM10(xAxis.getY());
+      rot.setM11(yAxis.getY());
+      rot.setM12(zAxis.getY());
+      rot.setM20(xAxis.getZ());
+      rot.setM21(yAxis.getZ());
+      rot.setM22(zAxis.getZ());
    }
 }

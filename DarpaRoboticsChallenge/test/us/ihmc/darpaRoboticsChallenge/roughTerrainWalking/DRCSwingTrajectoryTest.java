@@ -12,12 +12,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
@@ -31,7 +32,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -132,11 +133,13 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 78.0)
-   @Test(timeout = 390000)
+	@ContinuousIntegrationTest(estimatedDuration = 76.4)
+   @Test(timeout = 380000)
    public void testMultipleHeightFootsteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters.setRunMultiThreaded(false);
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double[] heights = {0.1, 0.2, 0.3};
       double[] maxHeights = new double[heights.length];
@@ -145,9 +148,8 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       {
          double currentHeight = heights[i];
          DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-         simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-         simulationTestingParameters.setRunMultiThreaded(false);
-         drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation, simulationTestingParameters,
+         FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
+         drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
                  getRobotModel());
          FullHumanoidRobotModel estimatorRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
          TestController testController = new TestController(estimatorRobotModel);
@@ -159,7 +161,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          ThreadTools.sleep(1000);
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
-         FootstepDataList footstepDataList = createBasicFootstepFromDefaultForSwingHeightTest(currentHeight);
+         FootstepDataListMessage footstepDataList = createBasicFootstepFromDefaultForSwingHeightTest(currentHeight);
          drcSimulationTestHelper.send(footstepDataList);
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
          maxHeights[i] = testController.getMaxFootHeight();
@@ -181,27 +183,28 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          }
       }
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 35.9)
+	@ContinuousIntegrationTest(estimatedDuration = 36.0)
    @Test(timeout = 180000)
    public void testReallyHighFootstep() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters.setRunMultiThreaded(false);
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success;
       double currentHeight = 0.6;
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-      simulationTestingParameters.setRunMultiThreaded(false);
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation, simulationTestingParameters,
+      FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
               getRobotModel());
 
       ThreadTools.sleep(1000);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
+      FootstepDataListMessage footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
       drcSimulationTestHelper.send(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
       assertTrue(success);
@@ -211,27 +214,28 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 32.0)
+	@ContinuousIntegrationTest(estimatedDuration = 32.9)
    @Test(timeout = 160000)
    public void testNegativeSwingHeight() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters.setRunMultiThreaded(false);
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success;
       double currentHeight = -0.1;
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-      simulationTestingParameters.setRunMultiThreaded(false);
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation, simulationTestingParameters,
+      FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
             getRobotModel());
 
       ThreadTools.sleep(1000);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
+      FootstepDataListMessage footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
       drcSimulationTestHelper.send(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
       assertTrue(success);
@@ -241,13 +245,13 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private FootstepDataList createBasicFootstepFromDefaultForSwingHeightTest(double swingHeight)
+   private FootstepDataListMessage createBasicFootstepFromDefaultForSwingHeightTest(double swingHeight)
    {
-      FootstepDataList desiredFootsteps = new FootstepDataList(0.0, 0.0);
-      FootstepData footstep = new FootstepData(RobotSide.RIGHT, new Point3d(0.4, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
+      FootstepDataListMessage desiredFootsteps = new FootstepDataListMessage(0.0, 0.0);
+      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3d(0.4, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
@@ -255,20 +259,20 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       return desiredFootsteps;
    }
 
-   private FootstepDataList createFootstepsForSwingHeightTest(double swingHeight)
+   private FootstepDataListMessage createFootstepsForSwingHeightTest(double swingHeight)
    {
-      FootstepDataList desiredFootsteps = new FootstepDataList(0.0, 0.0);
-      FootstepData footstep = new FootstepData(RobotSide.RIGHT, new Point3d(0.6, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
+      FootstepDataListMessage desiredFootsteps = new FootstepDataListMessage(0.0, 0.0);
+      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3d(0.6, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
 
-      footstep = new FootstepData(RobotSide.LEFT, new Point3d(1.2, 0.125, 0.085), new Quat4d(0, 0, 0, 1));
+      footstep = new FootstepDataMessage(RobotSide.LEFT, new Point3d(1.2, 0.125, 0.085), new Quat4d(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
 
-      footstep = new FootstepData(RobotSide.RIGHT, new Point3d(1.2, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
+      footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3d(1.2, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);

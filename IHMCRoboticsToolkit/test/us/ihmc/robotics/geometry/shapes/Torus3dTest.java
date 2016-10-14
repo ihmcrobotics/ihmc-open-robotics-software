@@ -2,8 +2,8 @@ package us.ihmc.robotics.geometry.shapes;
 
 import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -20,7 +20,7 @@ public class Torus3dTest
    private final double epsilon = 0.0001;
    private final int iterations = 1000;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testExapleUsage()
    {
@@ -28,7 +28,7 @@ public class Torus3dTest
       double thickness = 0.1;
       
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotX(Math.PI/2.0);
+      transform.setRotationRollAndZeroTranslation(Math.PI/2.0);
       transform.setTranslation(new Vector3d(2.0, 0.0, 3.0));
       
       Torus3d torus3d = new Torus3d(transform, radius, thickness);
@@ -37,7 +37,7 @@ public class Torus3dTest
       assertTrue(torus3d.isInsideOrOnSurface(pointToCheck));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimplePointOnOrInside()
    {
@@ -48,7 +48,7 @@ public class Torus3dTest
       testPointsInsideWhenOffsetBy(torus3d, 0.0, 0.0, 0.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTranslatedPointsOnOrInside()
    {
@@ -58,7 +58,7 @@ public class Torus3dTest
       testPointsInsideWhenTranslated(radius, thickness);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testPointsInsideRandomSizesAndThicknesses()
    {
@@ -81,7 +81,7 @@ public class Torus3dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjection()
    {
@@ -126,7 +126,7 @@ public class Torus3dTest
       assertEquals(0.0, projectedPoint.getZ(), 1e-7); 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testClosestPointAndNormalAt()
    {
@@ -234,7 +234,7 @@ public class Torus3dTest
       assertTrue(normalToPack.epsilonEquals(new Vector3d(0.0, 0.0, -1.0), 10e-7));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void test90DegRotation()
    {
@@ -279,7 +279,7 @@ public class Torus3dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testSimpleRotations()
    {
@@ -478,24 +478,24 @@ public class Torus3dTest
       assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx, ty-(radius-(thickness+epsilon)), tz)));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIndependenceOfCopiedTransforms()
    {
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotX(Math.PI / 6);
+      transform.setRotationRollAndZeroTranslation(Math.PI / 6);
       Torus3d torus = new Torus3d(transform, 7.0, 2.0);
       
       Torus3d torusCopy = new Torus3d(torus);
       RigidBodyTransform transformAppliedOnlyToCopy = new RigidBodyTransform();
-      transformAppliedOnlyToCopy.rotY(Math.PI / 4);
+      transformAppliedOnlyToCopy.setRotationPitchAndZeroTranslation(Math.PI / 4);
       torusCopy.applyTransform(transformAppliedOnlyToCopy);
       assertFalse(torusCopy.getTransform().equals(torus.getTransform()));
       
       Torus3d torusCopyBySet = new Torus3d(5.0, 1.0);
       torusCopyBySet.set(torus);
       RigidBodyTransform transformAppliedOnlyToCopyBySet = new RigidBodyTransform();
-      transformAppliedOnlyToCopyBySet.rotZ(Math.PI / 5);
+      transformAppliedOnlyToCopyBySet.setRotationYawAndZeroTranslation(Math.PI / 5);
       torusCopyBySet.applyTransform(transformAppliedOnlyToCopyBySet);      
       assertFalse(torusCopyBySet.getTransform().equals(torus.getTransform()));
    }

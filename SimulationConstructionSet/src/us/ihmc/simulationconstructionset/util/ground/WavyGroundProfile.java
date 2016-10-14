@@ -35,16 +35,16 @@ public class WavyGroundProfile implements GroundProfile3D, HeightMapWithNormals
 
    public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
    {
-      normal.x = 0.0;
-      normal.y = 0.0;
-      normal.z = 1.0;
+      normal.setX(0.0);
+      normal.setY(0.0);
+      normal.setZ(1.0);
    }
 
    public void closestIntersectionTo(double x, double y, double z, Point3d point)
    {
-      point.x = x;
-      point.y = y;
-      point.z = heightAt(x, y, z);
+      point.setX(x);
+      point.setY(y);
+      point.setZ(heightAt(x, y, z));
    }
 
    public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d point, Vector3d normal)

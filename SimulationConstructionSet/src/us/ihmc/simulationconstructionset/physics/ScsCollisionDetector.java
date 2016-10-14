@@ -1,20 +1,20 @@
 package us.ihmc.simulationconstructionset.physics;
 
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 
 /**
  * High level interface for collision detection
  *
- * @author Peter Abeles
  */
 public interface ScsCollisionDetector
 {
    /**
     * Call to initialize collision detection.
     *
-    * @param handler Function used to handle collisions
     */
-   public void initialize(CollisionHandler handler);
+   public void initialize();
 
    /**
     * Returns a factory for creating collision shapes that are attached to Links.
@@ -32,9 +32,8 @@ public interface ScsCollisionDetector
    public CollisionShape lookupCollisionShape(Link link);
 
    /**
-    * Call after each simulation step to check for collisions. This function must call
-    * {@link us.ihmc.simulationconstructionset.physics.CollisionHandler#maintenance()}
-    * after all collision detection has been performed
+    * Checks for collisions. Puts the results of the collision detection process into result
     */
-   public void performCollisionDetection();
+   public void performCollisionDetection(CollisionDetectionResult result);
+
 }

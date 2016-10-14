@@ -5,10 +5,10 @@ import java.util.List;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -17,7 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRobot>
+public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    private double groundZ;
    private double initialYaw;
@@ -34,7 +34,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRob
    }
 
    @Override
-   public void initializeRobot(SDFHumanoidRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       if(!robotInitialized)
       {
@@ -44,12 +44,12 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRob
       }
    }
    
-   private void setActuatorPositions(SDFRobot robot, DRCRobotJointMap jointMap)
+   private void setActuatorPositions(FloatingRootJointRobot robot, DRCRobotJointMap jointMap)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
          String hipPitch = jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH);
-         String knee = jointMap.getLegJointName(robotSide, LegJointName.KNEE);
+         String knee = jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH);
          String anklePitch = jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH);
          String hipRoll = jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL);
          String ankleRoll = jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL);
@@ -77,7 +77,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRob
       robot.update();
    }
    
-   private void positionRobotInWorld(SDFHumanoidRobot robot)
+   private void positionRobotInWorld(HumanoidFloatingRootJointRobot robot)
    {
       robot.getRootJointToWorldTransform(rootToWorld);
       rootToWorld.get(rotation, positionInWorld);
@@ -94,7 +94,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFHumanoidRob
       robot.update();
    }
    
-   private double getPelvisToFoot(SDFHumanoidRobot robot)
+   private double getPelvisToFoot(HumanoidFloatingRootJointRobot robot)
    {
       List<GroundContactPoint> contactPoints = robot.getFootGroundContactPoints(RobotSide.LEFT);
       double height = Double.POSITIVE_INFINITY;

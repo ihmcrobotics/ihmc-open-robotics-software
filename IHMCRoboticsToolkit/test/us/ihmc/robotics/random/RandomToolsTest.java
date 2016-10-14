@@ -10,11 +10,11 @@ import javax.vecmath.Point3f;
 import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class RandomToolsTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomFloatArray()
    {
@@ -35,7 +35,7 @@ public class RandomToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomIntArray()
    {
@@ -56,7 +56,7 @@ public class RandomToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomPoint3f()
    {
@@ -70,13 +70,13 @@ public class RandomToolsTest
       {
          randomPoint3f = RandomTools.generateRandomPoint3f(random, min, max);
 
-         assertTrue((randomPoint3f.x >= -7.0f) && (randomPoint3f.x <= 5.0));
-         assertTrue((randomPoint3f.y >= -5.0f) && (randomPoint3f.y <= 4.0));
-         assertTrue((randomPoint3f.z >= -6.0f) && (randomPoint3f.z <= 8.0));
+         assertTrue((randomPoint3f.getX() >= -7.0f) && (randomPoint3f.getX() <= 5.0));
+         assertTrue((randomPoint3f.getY() >= -5.0f) && (randomPoint3f.getY() <= 4.0));
+         assertTrue((randomPoint3f.getZ() >= -6.0f) && (randomPoint3f.getZ() <= 8.0));
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomPoint3fCloud()
    {
@@ -88,13 +88,13 @@ public class RandomToolsTest
 
       for (int i = 0; i < 1000; i++)
       {
-         assertTrue((randomPoint3fCloud[i].x >= -7.0f) && (randomPoint3fCloud[i].x <= 5.0));
-         assertTrue((randomPoint3fCloud[i].y >= -5.0f) && (randomPoint3fCloud[i].y <= 4.0));
-         assertTrue((randomPoint3fCloud[i].z >= -6.0f) && (randomPoint3fCloud[i].z <= 8.0));
+         assertTrue((randomPoint3fCloud[i].getX() >= -7.0f) && (randomPoint3fCloud[i].getX() <= 5.0));
+         assertTrue((randomPoint3fCloud[i].getY() >= -5.0f) && (randomPoint3fCloud[i].getY() <= 4.0));
+         assertTrue((randomPoint3fCloud[i].getZ() >= -6.0f) && (randomPoint3fCloud[i].getZ() <= 8.0));
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomPoint3d()
    {
@@ -105,7 +105,7 @@ public class RandomToolsTest
       RandomTools.generateRandomPoint3d(random, range1, range2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomDoubleInRange()
    {
@@ -120,7 +120,7 @@ public class RandomToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomFloatInRange()
    {
@@ -135,7 +135,7 @@ public class RandomToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomBoolean()
    {

@@ -11,7 +11,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -296,13 +296,13 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          internalPriorWalkingDuration = walking_time.getDoubleValue();      
    }
    
-   private void manageWalkingStateChanged(EnumYoVariable<WalkingState> walkingState)
+   private void manageWalkingStateChanged(EnumYoVariable<WalkingStateEnum> walkingState)
    {
       switch(walkingState.getEnumValue())
       {
-         case TRANSFER_TO_LEFT_SUPPORT:
-         case TRANSFER_TO_RIGHT_SUPPORT:
-         case DOUBLE_SUPPORT:
+         case TO_WALKING_LEFT_SUPPORT:
+         case TO_WALKING_RIGHT_SUPPORT:
+         case TO_STANDING:
             stepCount++;
             break;
          default:

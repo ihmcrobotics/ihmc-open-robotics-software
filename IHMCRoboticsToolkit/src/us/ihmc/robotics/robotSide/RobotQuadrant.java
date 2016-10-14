@@ -2,16 +2,18 @@ package us.ihmc.robotics.robotSide;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.EnumSet;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-public enum RobotQuadrant
+public enum RobotQuadrant implements RobotSegment<RobotQuadrant>
 {
    FRONT_LEFT(RobotEnd.FRONT, RobotSide.LEFT),
    FRONT_RIGHT(RobotEnd.FRONT, RobotSide.RIGHT),
    HIND_RIGHT(RobotEnd.HIND, RobotSide.RIGHT),
    HIND_LEFT(RobotEnd.HIND, RobotSide.LEFT);
    
+   public static final EnumSet<RobotQuadrant> enumSet = EnumSet.allOf(RobotQuadrant.class);
    public static final RobotQuadrant[] values = values();
    public static final RobotQuadrant[] reversedValues = values();
    static 
@@ -536,12 +538,10 @@ public enum RobotQuadrant
             return RobotQuadrant.FRONT_RIGHT;
       }
 
-//      throw new RuntimeException("Could not find an associated quadrant for " + name);
-      System.err.println("Could not find an associated quadrant for " + name);
       return null;
    }
 
-   public String getCamelCaseNameForMiddleOfExpression()
+   public String getPascalCaseName()
    {
       switch (this)
       {
@@ -572,7 +572,7 @@ public enum RobotQuadrant
       }
    }
    
-   public String getCamelCaseNameForStartOfExpression()
+   public String getCamelCaseName()
    {
       switch (this)
       {
@@ -603,13 +603,62 @@ public enum RobotQuadrant
       }
    }
    
-   public String getPascalCaseName()
+   public String getUnderBarName()
    {
-      return getCamelCaseNameForMiddleOfExpression();
+      switch (this)
+      {
+         case FRONT_LEFT:
+         {
+            return "front_left";
+         }
+   
+         case FRONT_RIGHT:
+         {
+            return "front_right";
+         }
+   
+         case HIND_RIGHT:
+         {
+            return "hind_right";
+         }
+   
+         case HIND_LEFT:
+         {
+            return "hind_left";
+         }
+   
+         default:
+         {
+            throw new RuntimeException();
+         }
+      }
    }
    
-   public String getCamelCaseName()
+   /**
+    * @deprecated Use getPascalCaseName() instead.
+    */
+   public String getCamelCaseNameForMiddleOfExpression()
    {
-      return getCamelCaseNameForStartOfExpression();
+      return getPascalCaseName();
+   }
+   
+   /**
+    * @deprecated Use getCamelCaseName() instead.
+    */
+   public String getCamelCaseNameForStartOfExpression()
+   {
+      return getCamelCaseName();
+   }
+
+   @Override
+   public EnumSet<RobotQuadrant> getEnumSet()
+   {
+      return enumSet;
+   }
+
+   @Override
+   public RobotQuadrant[] getValues()
+   {
+      return values;
    }
 }

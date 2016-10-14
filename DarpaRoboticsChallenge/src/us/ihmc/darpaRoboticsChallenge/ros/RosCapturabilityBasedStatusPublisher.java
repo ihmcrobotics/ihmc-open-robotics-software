@@ -79,19 +79,19 @@ public class RosCapturabilityBasedStatusPublisher implements PacketConsumer<Capt
             centerOfMassPublisher.publish(capturabilityBasedStatus.centerOfMass);
             isInDoubleSupportPublisher.publish(capturabilityBasedStatus.isInDoubleSupport());
 
-            for (RobotSide value : RobotSide.values)
-            {
-               RosSupportPolygonPublisher rosSupportPolygonPublisher = supportPolygonPublishers.get(value);
-               switch (value)
-               {
-               case LEFT:
-                  rosSupportPolygonPublisher.publish(capturabilityBasedStatus.leftFootSupportPolygonStore, capturabilityBasedStatus.leftFootSupportPolygonLength);
-                  break;
-               case RIGHT:
-                  rosSupportPolygonPublisher.publish(capturabilityBasedStatus.rightFootSupportPolygonStore, capturabilityBasedStatus.rightFootSupportPolygonLength);
-                  break;
-               }
-            }
+//            for (RobotSide value : RobotSide.values)
+//            {
+//               RosSupportPolygonPublisher rosSupportPolygonPublisher = supportPolygonPublishers.get(value);
+//               switch (value)
+//               {
+//               case LEFT:
+//                  rosSupportPolygonPublisher.publish(capturabilityBasedStatus.leftFootSupportPolygonStore, capturabilityBasedStatus.leftFootSupportPolygonLength);
+//                  break;
+//               case RIGHT:
+//                  rosSupportPolygonPublisher.publish(capturabilityBasedStatus.rightFootSupportPolygonStore, capturabilityBasedStatus.rightFootSupportPolygonLength);
+//                  break;
+//               }
+//            }
          }
       }
    }

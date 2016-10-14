@@ -13,10 +13,10 @@ import us.ihmc.simulationconstructionset.util.graphs.JFreePlot.PlotTypes;
 
 public class GraphTester
 {
-   YoVariableRegistry registry = new YoVariableRegistry("registry");
-   DataBuffer buffer = new DataBuffer();
-   DoubleYoVariable xPlot = new DoubleYoVariable("xPlot", registry);
-   DoubleYoVariable yPlot = new DoubleYoVariable("yPlot", registry);
+   private final YoVariableRegistry registry = new YoVariableRegistry("registry");
+   private final DataBuffer buffer = new DataBuffer(10);
+   private final DoubleYoVariable xPlot = new DoubleYoVariable("xPlot", registry);
+   private final DoubleYoVariable yPlot = new DoubleYoVariable("yPlot", registry);
 
    public GraphTester()
    {
@@ -27,7 +27,6 @@ public class GraphTester
       }
       catch (RepeatDataBufferEntryException e)
       {
-         // TODO Auto-generated catch block
          e.printStackTrace();
       }
 
@@ -72,11 +71,10 @@ public class GraphTester
          plot4.setType(PlotTypes.Dot);
          JFreeGraph graph = new JFreeGraph("x vs y", "x", "y");
          graph.addPlot(plot1);
-         graph.addPlot(plot2);
-         graph.addPlot(plot3);
-         graph.addPlot(plot4);
+//         graph.addPlot(plot2);
+//         graph.addPlot(plot3);
+//         graph.addPlot(plot4);
          graph.setXAxisRange(30, 40);
-
 
          graph.setXAxisTickUnit(1);
 
@@ -90,7 +88,6 @@ public class GraphTester
 
          setupData(1);
          JFreeGraph graph2 = JFreeGraph.createDataVsTimeGraph(buffer.getEntry(xPlot), buffer.getEntry(yPlot), Color.RED);
-
 
          setupData(2);
          JFreeGraph graph3 = JFreeGraph.createDataVsTimeGraph(buffer.getEntry(xPlot), buffer.getEntry(yPlot), Color.GREEN);
@@ -107,7 +104,6 @@ public class GraphTester
 
 
          JFrame testframe = new JFrame();
-
 
          ArrayList<JFreeGraph> graphs = new ArrayList<JFreeGraph>();
 

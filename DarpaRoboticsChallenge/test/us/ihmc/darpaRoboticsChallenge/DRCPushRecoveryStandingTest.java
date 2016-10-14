@@ -1,19 +1,23 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
-import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
+import us.ihmc.commonWalkingControlModules.pushRecovery.PushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -22,7 +26,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInterface
@@ -33,7 +37,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
    private final static boolean VISUALIZE_FORCE = true;
 
-   private DRCPushRobotController pushRobotController;
+   private PushRobotController pushRobotController;
    private RobotVisualizer robotVisualizer;
 
    @Before
@@ -76,11 +80,11 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
    }
    
   
-	@DeployableTestMethod(estimatedDuration = 30.6)
-	@Test(timeout = 150000)
+	@ContinuousIntegrationTest(estimatedDuration = 25.3)
+	@Test(timeout = 130000)
    public void testPushForwardInDoubleSupport() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       setupTest(getRobotModel());
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
@@ -91,7 +95,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -103,14 +107,16 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 5.0);
 
-      BambooTools.reportTestFinishedMessage();
+      assertRobotDidNotFall();
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 46.6)
-	@Test(timeout = 230000)
+	@ContinuousIntegrationTest(estimatedDuration = 33.4)
+	@Test(timeout = 170000)
    public void testPushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       setupTest(getRobotModel());
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
@@ -121,7 +127,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -133,18 +139,23 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 4.0);
 
+      assertRobotDidNotFall();
+
       //re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
 
-      BambooTools.reportTestFinishedMessage();
+      assertRobotDidNotFall();
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 49.1)
+	@Ignore("Needs to be improved")
+	@ContinuousIntegrationTest(estimatedDuration = 49.1)
 	@Test(timeout = 250000)
    public void testDoublePushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       setupTest(getRobotModel());
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
@@ -156,7 +167,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -174,18 +185,22 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 2.0);
 
+      assertRobotDidNotFall();
+
       //re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
 
-      BambooTools.reportTestFinishedMessage();
+      assertRobotDidNotFall();
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 44.8)
-	@Test(timeout = 220000)
+	@ContinuousIntegrationTest(estimatedDuration = 30.8)
+	@Test(timeout = 150000)
    public void testPushBackwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       setupTest(getRobotModel());
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
@@ -196,7 +211,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -208,18 +223,22 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 3.0);
 
+      assertRobotDidNotFall();
+
       //re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
 
-      BambooTools.reportTestFinishedMessage();
+      assertRobotDidNotFall();
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 52.2)
-	@Test(timeout = 260000)
+	@ContinuousIntegrationTest(estimatedDuration = 48.6)
+	@Test(timeout = 240000)
    public void testPushBackwardForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       setupTest(getRobotModel());
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
@@ -231,7 +250,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
-      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("ComponentBasedFootstepDataMessageGenerator", "walk");
 
       // disable walking
       walk.set(false);
@@ -251,11 +270,15 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 3.0);
 
+      assertRobotDidNotFall();
+
       //re-enable walking
       walk.set(true);
       blockingSimulationRunner.simulateAndBlock(6.0);
 
-      BambooTools.reportTestFinishedMessage();
+      assertRobotDidNotFall();
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
@@ -263,7 +286,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       boolean runMultiThreaded = false;
       setupTrack(runMultiThreaded, robotModel);
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      pushRobotController = new DRCPushRobotController(drcFlatGroundWalkingTrack.getDrcSimulation().getRobot(), fullRobotModel);
+      pushRobotController = new PushRobotController(drcFlatGroundWalkingTrack.getDrcSimulation().getRobot(), fullRobotModel);
 
       if (VISUALIZE_FORCE)
       {
@@ -289,9 +312,17 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       scsInitialSetup.setDrawGroundProfile(true);
       scsInitialSetup.setRunMultiThreaded(runMultiThreaded);
       
-      DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
 
       drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false,
             robotModel);
+   }
+
+   public void assertRobotDidNotFall()
+   {
+      Point3d center = new Point3d(0.0, 0.0, 0.8882009563211146);
+      Vector3d plusMinusVector = new Vector3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      DRCSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox, drcFlatGroundWalkingTrack.getDrcSimulation().getRobot());
    }
 }

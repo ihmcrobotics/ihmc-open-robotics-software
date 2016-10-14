@@ -7,7 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class MultiplicativeDoubleGlobalParameterTest
 {
@@ -26,7 +26,7 @@ public class MultiplicativeDoubleGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetThrowsException()
    {
@@ -56,7 +56,7 @@ public class MultiplicativeDoubleGlobalParameterTest
       }
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testMultiplicativeDoubleGlobalParameter()
    {
@@ -80,7 +80,7 @@ public class MultiplicativeDoubleGlobalParameterTest
       assertEquals(valueA * valueB, multiplicativeDoubleGlobalParameter.getValue(), eps);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testMultiplicativeDoubleGlobalParameterUpdate()
    {
@@ -117,7 +117,7 @@ public class MultiplicativeDoubleGlobalParameterTest
       assertEquals(valueA * valueB, multiplicativeDoubleGlobalParameter.getValue(), eps);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testFamilyTree()
    {

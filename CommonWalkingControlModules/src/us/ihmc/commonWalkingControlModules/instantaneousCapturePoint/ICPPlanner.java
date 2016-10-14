@@ -1,5 +1,9 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCapturePointPosition;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCapturePointVelocity;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCornerPoints;
+
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -36,7 +40,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactL
 
 public class ICPPlanner
 {
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    private static final double ICP_CORNER_POINT_SIZE = 0.004;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -47,7 +51,6 @@ public class ICPPlanner
    private final BooleanYoVariable isStanding = new BooleanYoVariable(namePrefix + "IsStanding", registry);
    private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable(namePrefix + "IsInitialTransfer", registry);
    private final BooleanYoVariable isDoubleSupport = new BooleanYoVariable(namePrefix + "IsDoubleSupport", registry);
-   private final BooleanYoVariable hasBeenWokenUp = new BooleanYoVariable(namePrefix + "HasBeenWokenUp", registry);
    private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(namePrefix + "TimeInCurrentState", registry);
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable(namePrefix + "DoubleSupportTime", registry);
    private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable(namePrefix + "SingleSupportTime", registry);
@@ -58,6 +61,9 @@ public class ICPPlanner
    private final DoubleYoVariable remainingTime = new DoubleYoVariable(namePrefix + "RemainingTime", registry);
    private final IntegerYoVariable numberFootstepsToConsider = new IntegerYoVariable(namePrefix + "NumberFootstepsToConsider", registry);
 
+   private final DoubleYoVariable velocityDecayDurationWhenDone = new DoubleYoVariable(namePrefix + "VelocityDecayDurationWhenDone", registry);
+   private final DoubleYoVariable velocityReductionFactor = new DoubleYoVariable(namePrefix + "VelocityReductionFactor", registry);
+
    private final YoFramePointInMultipleFrames singleSupportInitialICP;
    private final YoFrameVector singleSupportInitialICPVelocity = new YoFrameVector(namePrefix + "SingleSupportInitialICPVelocity", worldFrame, registry);
 
@@ -65,8 +71,10 @@ public class ICPPlanner
    private final YoFrameVector singleSupportFinalICPVelocity = new YoFrameVector(namePrefix + "SingleSupportFinalICPVelocity", worldFrame, registry);
 
    private final YoFramePoint desiredCentroidalMomentumPivotPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
+   private final YoFrameVector desiredCentroidalMomentumPivotVelocity = new YoFrameVector(namePrefix + "DesiredCentroidalMomentumVelocity", worldFrame, registry);
    private final YoFramePoint desiredCapturePointPosition = new YoFramePoint(namePrefix + "DesiredCapturePointPosition", worldFrame, registry);
    private final YoFrameVector desiredCapturePointVelocity = new YoFrameVector(namePrefix + "DesiredCapturePointVelocity", worldFrame, registry);
+   private final YoFrameVector desiredCapturePointAcceleration = new YoFrameVector(namePrefix + "DesiredCapturePointAcceleration", worldFrame, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable(namePrefix + "Omega0", registry);
 
    private final BooleanYoVariable requestedHoldPosition = new BooleanYoVariable(namePrefix + "RequestedHoldPosition", registry);
@@ -87,7 +95,7 @@ public class ICPPlanner
    private final ReferenceCentroidalMomentumPivotLocationsCalculator referenceCMPsCalculator;
 
    private final ReferenceFrame midFeetZUpFrame;
-   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> soleZUpFrames;
 
    private final FramePoint tempConstantCMP = new FramePoint();
    private final FramePoint tempICP = new FramePoint();
@@ -96,13 +104,13 @@ public class ICPPlanner
          CapturePointPlannerParameters icpPlannerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       isStanding.set(true);
-      hasBeenWokenUp.set(false);
 
       actualICPToHold.setToNaN();
       isHoldingPosition.set(false);
 
       icpDoubleSupportTrajectoryGenerator = new ICPPlannerTrajectoryGenerator(namePrefix + "DoubleSupport", worldFrame, registry);
-      icpSingleSupportTrajectoryGenerator = new ICPPlannerSegmentedTrajectoryGenerator(namePrefix + "SingleSupport", worldFrame, omega0, yoGraphicsListRegistry, registry);
+      icpSingleSupportTrajectoryGenerator = new ICPPlannerSegmentedTrajectoryGenerator(namePrefix + "SingleSupport", worldFrame, omega0, yoGraphicsListRegistry,
+            registry);
       icpSingleSupportTrajectoryGenerator.setMaximumSplineDuration(icpPlannerParameters.getMaxDurationForSmoothingEntryToExitCMPSwitch());
       icpSingleSupportTrajectoryGenerator.setMinimumTimeToSpendOnExitCMP(icpPlannerParameters.getMinTimeToSpendOnExitCMPInSingleSupport());
 
@@ -111,22 +119,23 @@ public class ICPPlanner
       doubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
       exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getTimeSpentOnExitCMPInPercentOfStepTime());
       useTwoConstantCMPsPerSupport.set(icpPlannerParameters.useTwoCMPsPerSupport());
-      
+
+      velocityDecayDurationWhenDone.set(icpPlannerParameters.getVelocityDecayDurationWhenDone());
+      velocityReductionFactor.set(Double.NaN);
+
       // Initialize omega0 to NaN to force the user to explicitly set it.
       omega0.set(Double.NaN);
 
       minSingleSupportDuration.set(0.3); // TODO Need to be extracted
 
-      referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet, numberFootstepsToConsider.getIntegerValue(), registry);
+      referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet,
+            numberFootstepsToConsider.getIntegerValue(), registry);
       referenceCMPsCalculator.initializeParameters(icpPlannerParameters);
 
       midFeetZUpFrame = bipedSupportPolygons.getMidFeetZUpFrame();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         soleFrames.put(robotSide, contactableFeet.get(robotSide).getSoleFrame());
-      }
+      soleZUpFrames = bipedSupportPolygons.getSoleZUpFrames();
 
-      ReferenceFrame[] framesToRegister = new ReferenceFrame[]{worldFrame, midFeetZUpFrame, soleFrames.get(RobotSide.LEFT), soleFrames.get(RobotSide.RIGHT)};
+      ReferenceFrame[] framesToRegister = new ReferenceFrame[] {worldFrame, midFeetZUpFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT)};
       singleSupportInitialICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialICP", registry, framesToRegister);
       singleSupportFinalICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalICP", registry, framesToRegister);
 
@@ -141,7 +150,7 @@ public class ICPPlanner
 
       parentRegistry.addChild(registry);
 
-      if (VISUALIZE && yoGraphicsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
       {
          setupVisualizers(yoGraphicsListRegistry);
       }
@@ -149,33 +158,40 @@ public class ICPPlanner
 
    private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      YoGraphicsList yoGraphicsList = new YoGraphicsList("ICPPlanner");
-      ArtifactList artifactList = new ArtifactList("ICPPlanner");
+      YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
       referenceCMPsCalculator.createVisualizerForConstantCMPs(yoGraphicsList, artifactList);
 
       for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
       {
-         YoGraphicPosition icpEarlyCornerPointsViz = new YoGraphicPosition("EntryCornerPoints" + i, entryCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly(), ICP_CORNER_POINT_SIZE, YoAppearance.Blue(), GraphicType.SOLID_BALL);
+         YoGraphicPosition icpEarlyCornerPointsViz = new YoGraphicPosition("EntryCornerPoints" + i,
+               entryCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly(), ICP_CORNER_POINT_SIZE, YoAppearance.Blue(), GraphicType.SOLID_BALL);
 
          yoGraphicsList.add(icpEarlyCornerPointsViz);
          artifactList.add(icpEarlyCornerPointsViz.createArtifact());
 
-         YoGraphicPosition lateCornerPointsViz = new YoGraphicPosition("ExitCornerPoints" + i, exitCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly(), ICP_CORNER_POINT_SIZE, YoAppearance.Blue(), GraphicType.BALL);
+         YoGraphicPosition lateCornerPointsViz = new YoGraphicPosition("ExitCornerPoints" + i,
+               exitCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly(), ICP_CORNER_POINT_SIZE, YoAppearance.Blue(), GraphicType.BALL);
 
          yoGraphicsList.add(lateCornerPointsViz);
          artifactList.add(lateCornerPointsViz.createArtifact());
       }
 
-      YoGraphicPosition singleSupportInitialICPViz = new YoGraphicPosition("singleSupportInitialICP", singleSupportInitialICP.buildUpdatedYoFramePointForVisualizationOnly(), 0.004, YoAppearance.Chocolate(), GraphicType.SOLID_BALL);
+      YoGraphicPosition singleSupportInitialICPViz = new YoGraphicPosition("singleSupportInitialICP",
+            singleSupportInitialICP.buildUpdatedYoFramePointForVisualizationOnly(), 0.004, YoAppearance.Chocolate(), GraphicType.SOLID_BALL);
       yoGraphicsList.add(singleSupportInitialICPViz);
       artifactList.add(singleSupportInitialICPViz.createArtifact());
 
-      YoGraphicPosition singleSupportFinalICPViz = new YoGraphicPosition("singleSupportFinalICP", singleSupportFinalICP.buildUpdatedYoFramePointForVisualizationOnly(), 0.004, YoAppearance.Chocolate(), GraphicType.BALL);
+      YoGraphicPosition singleSupportFinalICPViz = new YoGraphicPosition("singleSupportFinalICP",
+            singleSupportFinalICP.buildUpdatedYoFramePointForVisualizationOnly(), 0.004, YoAppearance.Chocolate(), GraphicType.BALL);
       yoGraphicsList.add(singleSupportFinalICPViz);
       artifactList.add(singleSupportFinalICPViz.createArtifact());
 
       icpSingleSupportTrajectoryGenerator.createVisualizers(yoGraphicsList, artifactList);
+
+      artifactList.setVisible(VISUALIZE);
+      yoGraphicsList.setVisible(VISUALIZE);
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
       yoGraphicsListRegistry.registerArtifactList(artifactList);
@@ -184,6 +200,22 @@ public class ICPPlanner
    public void clearPlan()
    {
       referenceCMPsCalculator.clear();
+   }
+
+   public void setSupportLeg(RobotSide robotSide)
+   {
+      supportSide.set(robotSide);
+   }
+
+   public void setTransferToSide(RobotSide robotSide)
+   {
+      transferToSide.set(robotSide);
+   }
+
+   public void setTransferFromSide(RobotSide robotSide)
+   {
+      if (robotSide != null)
+         transferToSide.set(robotSide.getOppositeSide());
    }
 
    public void addFootstepToPlan(Footstep footstep)
@@ -233,20 +265,32 @@ public class ICPPlanner
       requestedHoldPosition.set(true);
    }
 
-   public void initializeDoubleSupport(double initialTime, RobotSide transferToSide)
+   public void initializeForStanding(double initialTime)
    {
-      this.transferToSide.set(transferToSide);
-      this.supportSide.set(null);
-
-      if (transferToSide == null) transferToSide = RobotSide.LEFT;
-      RobotSide transferFromSide = transferToSide.getOppositeSide();
-      ReferenceFrame transferFromSoleFrame = soleFrames.get(transferFromSide);
-      ReferenceFrame transferToSoleFrame = soleFrames.get(transferToSide);
-
+      clearPlan();
+      isStanding.set(true);
       isDoubleSupport.set(true);
-      icpSingleSupportTrajectoryGenerator.hideVisualization();
-
       this.initialTime.set(initialTime);
+      updateTransferPlan();
+   }
+
+   public void initializeForTransfer(double initialTime)
+   {
+      isDoubleSupport.set(true);
+      this.initialTime.set(initialTime);
+      updateTransferPlan();
+   }
+
+   private void updateTransferPlan()
+   {
+      RobotSide transferToSide = this.transferToSide.getEnumValue();
+      if (transferToSide == null)
+         transferToSide = RobotSide.LEFT;
+      RobotSide transferFromSide = transferToSide.getOppositeSide();
+      ReferenceFrame transferFromSoleFrame = soleZUpFrames.get(transferFromSide);
+      ReferenceFrame transferToSoleFrame = soleZUpFrames.get(transferToSide);
+
+      icpSingleSupportTrajectoryGenerator.hideVisualization();
 
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
       referenceCMPsCalculator.computeReferenceCMPsStartingFromDoubleSupport(isStanding.getBooleanValue(), transferToSide);
@@ -276,7 +320,7 @@ public class ICPPlanner
          tempICP.setToZero(transferFromSoleFrame);
          tempICP.changeFrame(worldFrame);
          double distanceFromDesiredICPToTransferFromSoleFrame = desiredCapturePointPosition.getXYPlaneDistance(tempICP);
-         
+
          if (distanceFromDesiredICPToMidfeetZUpFrame < distanceFromDesiredICPToTransferFromSoleFrame)
             initialFrame = midFeetZUpFrame;
          else
@@ -307,23 +351,26 @@ public class ICPPlanner
       }
       else
       {
+         double omega0 = this.omega0.getDoubleValue();
+
          if (useTwoConstantCMPsPerSupport.getBooleanValue())
          {
             double exitPointToDoubleSupportDuration = steppingDuration * exitCMPDurationInPercentOfStepTime.getDoubleValue() - doubleSupportTimeSpentAfterEntryCornerPoint;
 
-            CapturePointTools.computeDesiredCornerPoints(entryCornerPoints, exitCornerPoints, entryCMPs, exitCMPs, steppingDuration, exitCMPDurationInPercentOfStepTime.getDoubleValue(), omega0.getDoubleValue());
-            CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), exitPointToDoubleSupportDuration, exitCornerPoints.get(1), exitCMPs.get(1), singleSupportFinalICP);
+            computeDesiredCornerPoints(entryCornerPoints, exitCornerPoints, entryCMPs, exitCMPs, steppingDuration, exitCMPDurationInPercentOfStepTime.getDoubleValue(), omega0);
+            computeDesiredCapturePointPosition(omega0, exitPointToDoubleSupportDuration, exitCornerPoints.get(1), exitCMPs.get(1), singleSupportFinalICP);
             exitCornerPoints.get(0).changeFrame(initialFrame);
             exitCornerPoints.get(1).changeFrame(finalFrame);
          }
          else
          {
-            CapturePointTools.computeDesiredCornerPoints(entryCornerPoints, entryCMPs, false, steppingDuration, omega0.getDoubleValue());
-            CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), doubleSupportTimeSpentBeforeEntryCornerPoint + singleSupportDuration.getDoubleValue(), entryCornerPoints.get(1), entryCMPs.get(1), singleSupportFinalICP);
+            computeDesiredCornerPoints(entryCornerPoints, entryCMPs, false, steppingDuration, omega0);
+            double timeToNextCornerPoint = doubleSupportTimeSpentBeforeEntryCornerPoint + singleSupportDuration.getDoubleValue();
+            computeDesiredCapturePointPosition(omega0, timeToNextCornerPoint, entryCornerPoints.get(1), entryCMPs.get(1), singleSupportFinalICP);
          }
 
-         CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), doubleSupportTimeSpentBeforeEntryCornerPoint, entryCornerPoints.get(1), entryCMPs.get(1), singleSupportInitialICP);
-         CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), 0.0, singleSupportInitialICP, entryCMPs.get(1), singleSupportInitialICPVelocity);
+         computeDesiredCapturePointPosition(omega0, doubleSupportTimeSpentBeforeEntryCornerPoint, entryCornerPoints.get(1), entryCMPs.get(1), singleSupportInitialICP);
+         computeDesiredCapturePointVelocity(omega0, 0.0, singleSupportInitialICP, entryCMPs.get(1), singleSupportInitialICPVelocity);
 
          entryCornerPoints.get(0).changeFrame(initialFrame);
          entryCornerPoints.get(1).changeFrame(finalFrame);
@@ -334,36 +381,35 @@ public class ICPPlanner
       singleSupportInitialICP.changeFrame(finalFrame);
       singleSupportFinalICP.changeFrame(worldFrame);
 
-      DoubleYoVariable doubleSupportTimeToUse = isStanding.getBooleanValue() ? doubleSupportInitialTransferDuration : doubleSupportDuration;
-
-      icpDoubleSupportTrajectoryGenerator.setTrajectoryTime(doubleSupportTimeToUse.getDoubleValue());
-
-      icpDoubleSupportTrajectoryGenerator.setInitialConditions(desiredCapturePointPosition, desiredCapturePointVelocity, initialFrame);
-      icpDoubleSupportTrajectoryGenerator.setFinalConditions(singleSupportInitialICP, singleSupportInitialICPVelocity, finalFrame);
-      icpDoubleSupportTrajectoryGenerator.initialize();
-
       if (isStanding.getBooleanValue() && !isDoneWalking)
       {
          isInitialTransfer.set(true);
          isStanding.set(false);
       }
+
+      DoubleYoVariable doubleSupportTimeToUse = isInitialTransfer.getBooleanValue() ? doubleSupportInitialTransferDuration : doubleSupportDuration;
+
+      icpDoubleSupportTrajectoryGenerator.setTrajectoryTime(doubleSupportTimeToUse.getDoubleValue());
+      icpDoubleSupportTrajectoryGenerator.setInitialConditions(desiredCapturePointPosition, desiredCapturePointVelocity, initialFrame);
+      icpDoubleSupportTrajectoryGenerator.setFinalConditions(singleSupportInitialICP, singleSupportInitialICPVelocity, finalFrame);
+      icpDoubleSupportTrajectoryGenerator.initialize();
    }
 
-   public void initializeSingleSupport(double initialTime, RobotSide supportSide)
+   public void initializeForSingleSupport(double initialTime)
    {
-      initializeSingleSupport(initialTime, supportSide, true);
-   }
-
-   public void initializeSingleSupport(double initialTime, RobotSide supportSide, boolean startFromCurrentDesiredICP)
-   {
-      this.transferToSide.set(null);
-      this.supportSide.set(supportSide);
       isHoldingPosition.set(false);
 
-
+      isStanding.set(false);
       isInitialTransfer.set(false);
       isDoubleSupport.set(false);
       this.initialTime.set(initialTime);
+
+      updateSingleSupportPlan();
+   }
+
+   private void updateSingleSupportPlan()
+   {
+      RobotSide supportSide = this.supportSide.getEnumValue();
 
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
       referenceCMPsCalculator.computeReferenceCMPsStartingFromSingleSupport(supportSide);
@@ -380,26 +426,19 @@ public class ICPPlanner
       singleSupportInitialICP.switchCurrentReferenceFrame(worldFrame);
       singleSupportFinalICP.switchCurrentReferenceFrame(worldFrame);
 
-      ReferenceFrame supportSoleFrame = soleFrames.get(supportSide);
+      ReferenceFrame supportSoleFrame = soleZUpFrames.get(supportSide);
+      double omega0 = this.omega0.getDoubleValue();
       if (useTwoConstantCMPsPerSupport.getBooleanValue())
       {
          double timeRemainingOnEntryCMP = totalTimeSpentOnEntryCMP - doubleSupportTimeSpentBeforeEntryCornerPoint;
          double timeToSpendOnFinalCMPBeforeDoubleSupport = totalTimeSpentOnExitCMP - doubleSupportTimeSpentAfterEntryCornerPoint;
 
-         CapturePointTools.computeDesiredCornerPoints(entryCornerPoints, exitCornerPoints, entryCMPs, exitCMPs, steppingDuration, exitCMPDurationInPercentOfStepTime.getDoubleValue(), omega0.getDoubleValue());
-         if (startFromCurrentDesiredICP)
-         {
-            singleSupportInitialICP.setIncludingFrame(desiredCapturePointPosition);
-            singleSupportInitialICPVelocity.set(desiredCapturePointVelocity);
-         }
-         else
-         {
-            CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), doubleSupportTimeSpentBeforeEntryCornerPoint, entryCornerPoints.get(0), entryCMPs.get(0), singleSupportInitialICP);
-            CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), doubleSupportTimeSpentBeforeEntryCornerPoint, entryCornerPoints.get(0), entryCMPs.get(0), singleSupportInitialICPVelocity);
-         }
+         computeDesiredCornerPoints(entryCornerPoints, exitCornerPoints, entryCMPs, exitCMPs, steppingDuration, exitCMPDurationInPercentOfStepTime.getDoubleValue(), omega0);
+         computeDesiredCapturePointPosition(omega0, doubleSupportTimeSpentBeforeEntryCornerPoint, entryCornerPoints.get(0), entryCMPs.get(0), singleSupportInitialICP);
+         computeDesiredCapturePointVelocity(omega0, doubleSupportTimeSpentBeforeEntryCornerPoint, entryCornerPoints.get(0), entryCMPs.get(0), singleSupportInitialICPVelocity);
 
-         CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeToSpendOnFinalCMPBeforeDoubleSupport, exitCornerPoints.get(0), exitCMPs.get(0), singleSupportFinalICP);
-         CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeToSpendOnFinalCMPBeforeDoubleSupport, exitCornerPoints.get(0), exitCMPs.get(0), singleSupportFinalICPVelocity);
+         computeDesiredCapturePointPosition(omega0, timeToSpendOnFinalCMPBeforeDoubleSupport, exitCornerPoints.get(0), exitCMPs.get(0), singleSupportFinalICP);
+         computeDesiredCapturePointVelocity(omega0, timeToSpendOnFinalCMPBeforeDoubleSupport, exitCornerPoints.get(0), exitCMPs.get(0), singleSupportFinalICPVelocity);
 
          icpSingleSupportTrajectoryGenerator.setBoundaryICP(singleSupportInitialICP, singleSupportFinalICP);
          icpSingleSupportTrajectoryGenerator.setCornerPoints(entryCornerPoints.get(0), exitCornerPoints.get(0));
@@ -412,9 +451,9 @@ public class ICPPlanner
       }
       else
       {
-         CapturePointTools.computeDesiredCornerPoints(entryCornerPoints, entryCMPs, false, steppingDuration, omega0.getDoubleValue());
-         CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), doubleSupportTimeSpentBeforeEntryCornerPoint, entryCornerPoints.get(0), entryCMPs.get(0), singleSupportInitialICP);
-         CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), doubleSupportTimeSpentBeforeEntryCornerPoint + singleSupportDuration.getDoubleValue(), entryCornerPoints.get(0), entryCMPs.get(0), singleSupportFinalICP);
+         computeDesiredCornerPoints(entryCornerPoints, entryCMPs, false, steppingDuration, omega0);
+         computeDesiredCapturePointPosition(omega0, doubleSupportTimeSpentBeforeEntryCornerPoint, entryCornerPoints.get(0), entryCMPs.get(0), singleSupportInitialICP);
+         computeDesiredCapturePointPosition(omega0, doubleSupportTimeSpentBeforeEntryCornerPoint + singleSupportDuration.getDoubleValue(), entryCornerPoints.get(0), entryCMPs.get(0), singleSupportFinalICP);
       }
 
       singleSupportInitialICP.changeFrame(supportSoleFrame);
@@ -447,9 +486,23 @@ public class ICPPlanner
          exitCornerPoints.get(i).changeFrame(desiredFrame);
    }
 
-   public void updatePlanForSingleSupportDisturbances(double time, FramePoint actualCapturePointPosition)
+   public void updateCurrentPlan()
    {
-      initializeSingleSupport(initialTime.getDoubleValue(), supportSide.getEnumValue(), false);
+      if (isDoubleSupport.getBooleanValue())
+      {
+         if (isHoldingPosition.getBooleanValue())
+            requestedHoldPosition.set(true);
+         updateTransferPlan();
+      }
+      else
+      {
+         updateSingleSupportPlan();
+      }
+   }
+
+   public void updatePlanForSingleSupportDisturbances(double time, FramePoint2d actualCapturePointPosition)
+   {
+      initializeForSingleSupport(initialTime.getDoubleValue());
 
       if (isDone(time))
          return;
@@ -467,7 +520,7 @@ public class ICPPlanner
       initialTime.sub(deltaTimeToBeAccounted);
    }
 
-   public double estimateTimeRemainingForStateUnderDisturbance(double time, FramePoint actualCapturePointPosition)
+   public double estimateTimeRemainingForStateUnderDisturbance(double time, FramePoint2d actualCapturePointPosition)
    {
       if (isDone(time))
          return 0.0;
@@ -489,7 +542,7 @@ public class ICPPlanner
    private final FrameLineSegment2d desiredICPToFinalICPLineSegment = new FrameLineSegment2d();
    private final FramePoint2d actualICP2d = new FramePoint2d();
 
-   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(double time, FramePoint actualCapturePointPosition)
+   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(double time, FramePoint2d actualCapturePointPosition)
    {
       computeDesiredCapturePoint(computeAndReturnTimeInCurrentState(time));
       computeDesiredCentroidalMomentumPivot();
@@ -500,7 +553,7 @@ public class ICPPlanner
          return Double.NaN;
 
       desiredICPToFinalICPLineSegment.set(desiredICP2d, finalICP2d);
-      actualICP2d.setByProjectionOntoXYPlaneIncludingFrame(actualCapturePointPosition);
+      actualICP2d.setIncludingFrame(actualCapturePointPosition);
       double percentAlongLineSegmentICP = desiredICPToFinalICPLineSegment.percentageAlongLineSegment(actualICP2d);
       if (percentAlongLineSegmentICP < 0.0)
       {
@@ -534,12 +587,14 @@ public class ICPPlanner
          icpDoubleSupportTrajectoryGenerator.compute(timeInCurrentState);
          icpDoubleSupportTrajectoryGenerator.get(desiredCapturePointPosition);
          icpDoubleSupportTrajectoryGenerator.getVelocity(desiredCapturePointVelocity);
+         icpDoubleSupportTrajectoryGenerator.getAcceleration(desiredCapturePointAcceleration);
       }
       else if (useTwoConstantCMPsPerSupport.getBooleanValue())
       {
          icpSingleSupportTrajectoryGenerator.compute(timeInCurrentState);
          icpSingleSupportTrajectoryGenerator.get(desiredCapturePointPosition);
          icpSingleSupportTrajectoryGenerator.getVelocity(desiredCapturePointVelocity);
+         icpSingleSupportTrajectoryGenerator.getAcceleration(desiredCapturePointAcceleration);
       }
       else
       {
@@ -549,6 +604,36 @@ public class ICPPlanner
          timeInCurrentState = MathTools.clipToMinMax(timeInCurrentState, 0.0, singleSupportDuration.getDoubleValue());
          CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP, desiredCapturePointPosition);
          CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP, desiredCapturePointVelocity);
+         CapturePointTools.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), timeInCurrentState, tempICP, tempConstantCMP, desiredCapturePointAcceleration);
+      }
+
+      decayDesiredVelocityIfNeeded(timeInCurrentState);
+   }
+
+   private void decayDesiredVelocityIfNeeded(double timeInCurrentState)
+   {
+      if (velocityDecayDurationWhenDone.isNaN() || isStanding.getBooleanValue())
+      {
+         velocityReductionFactor.set(Double.NaN);
+         return;
+      }
+
+      double hasBeenDoneForDuration = timeInCurrentState;
+      if (isInitialTransfer.getBooleanValue())
+         hasBeenDoneForDuration -= doubleSupportInitialTransferDuration.getDoubleValue();
+      else if (isDoubleSupport.getBooleanValue())
+         hasBeenDoneForDuration -= doubleSupportDuration.getDoubleValue();
+      else
+         hasBeenDoneForDuration -= singleSupportDuration.getDoubleValue();
+
+      if (hasBeenDoneForDuration <= 0.0)
+      {
+         velocityReductionFactor.set(Double.NaN);
+      }
+      else
+      {
+         velocityReductionFactor.set(MathTools.clipToMinMax(1.0 - hasBeenDoneForDuration / velocityDecayDurationWhenDone.getDoubleValue(), 0.0, 1.0));
+         desiredCapturePointVelocity.scale(velocityReductionFactor.getDoubleValue());
       }
    }
 
@@ -565,10 +650,22 @@ public class ICPPlanner
 
    private void computeDesiredCentroidalMomentumPivot()
    {
-      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePointPosition, desiredCapturePointVelocity, omega0.getDoubleValue(), desiredCentroidalMomentumPivotPosition);
+      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePointPosition, desiredCapturePointVelocity, omega0.getDoubleValue(),
+            desiredCentroidalMomentumPivotPosition);
    }
 
-   public void getDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack, double time)
+   public void getDesiredCapturePointPositionAndVelocity(FramePoint2d desiredCapturePointPositionToPack, FrameVector2d desiredCapturePointVelocityToPack,
+         double time)
+   {
+      computeTimeInCurrentState(time);
+      computeDesiredCapturePoint(timeInCurrentState.getDoubleValue());
+
+      desiredCapturePointPosition.getFrameTuple2dIncludingFrame(desiredCapturePointPositionToPack);
+      desiredCapturePointVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocityToPack);
+   }
+
+   public void getDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack,
+         double time)
    {
       computeTimeInCurrentState(time);
       computeDesiredCapturePoint(timeInCurrentState.getDoubleValue());
@@ -577,7 +674,8 @@ public class ICPPlanner
       desiredCapturePointVelocity.getFrameTupleIncludingFrame(desiredCapturePointVelocityToPack);
    }
 
-   public void getDesiredCapturePointPositionAndVelocity(YoFramePoint desiredCapturePointPositionToPack, YoFrameVector desiredCapturePointVelocityToPack, double time)
+   public void getDesiredCapturePointPositionAndVelocity(YoFramePoint desiredCapturePointPositionToPack, YoFrameVector desiredCapturePointVelocityToPack,
+         double time)
    {
       computeTimeInCurrentState(time);
       computeDesiredCapturePoint(timeInCurrentState.getDoubleValue());
@@ -589,8 +687,25 @@ public class ICPPlanner
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack)
    {
       computeDesiredCentroidalMomentumPivot();
-
       desiredCentroidalMomentumPivotPosition.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
+   }
+
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint2d desiredCentroidalMomentumPivotPositionToPack)
+   {
+      computeDesiredCentroidalMomentumPivot();
+      desiredCentroidalMomentumPivotPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
+   }
+
+   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector desiredCentroidalMomentumPivotVelocityToPack)
+   {
+      CapturePointTools.computeDesiredCentroidalMomentumPivotVelocity(desiredCapturePointVelocity, desiredCapturePointAcceleration, omega0.getDoubleValue(), desiredCentroidalMomentumPivotVelocity);
+      desiredCentroidalMomentumPivotVelocity.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
+   }
+
+   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2d desiredCentroidalMomentumPivotVelocityToPack)
+   {
+      CapturePointTools.computeDesiredCentroidalMomentumPivotVelocity(desiredCapturePointVelocity, desiredCapturePointAcceleration, omega0.getDoubleValue(), desiredCentroidalMomentumPivotVelocity);
+      desiredCentroidalMomentumPivotVelocity.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
    }
 
    protected void computeTimeInCurrentState(double time)
@@ -653,6 +768,16 @@ public class ICPPlanner
       return isDoubleSupport.getBooleanValue();
    }
 
+   public boolean isInStanding()
+   {
+      return isStanding.getBooleanValue();
+   }
+
+   public boolean isInInitialTranfer()
+   {
+      return isInitialTransfer.getBooleanValue();
+   }
+
    public void getSingleSupportInitialCapturePointPosition(FramePoint capturePointPositionToPack)
    {
       singleSupportInitialICP.getFrameTupleIncludingFrame(capturePointPositionToPack);
@@ -666,30 +791,29 @@ public class ICPPlanner
 
    public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
    {
-      entryCornerPoints.get(1).getFrameTupleIncludingFrame(finalDesiredCapturePointPositionToPack);
+      if (isStanding.getBooleanValue())
+         referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
+      else
+         entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
+      tempFinalICP.changeFrame(worldFrame);
+      finalDesiredCapturePointPositionToPack.setIncludingFrame(tempFinalICP);
    }
 
-   public void reset(double time)
-   {
-      isStanding.set(true);
+   private final FramePoint tempFinalICP = new FramePoint();
 
-      clearPlan();
-      initializeDoubleSupport(time, null);
+   public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
+   {
+      if (isStanding.getBooleanValue())
+         referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
+      else
+         entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
+      tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
+      finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
    }
 
    public void getNextExitCMP(FramePoint entryCMPToPack)
    {
       referenceCMPsCalculator.getNextExitCMP(entryCMPToPack);
-   }
-
-   public boolean getHasBeenWokenUp()
-   {
-      return hasBeenWokenUp.getBooleanValue();
-   }
-
-   public void wakeUp()
-   {
-      hasBeenWokenUp.set(true);
    }
 
    public boolean isDone(double time)

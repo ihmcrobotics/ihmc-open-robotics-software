@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
@@ -17,7 +17,7 @@ public class GeoregressionConversionToolsTest
 {
    private final static double eps = 1e-7;
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testTransformConversionFromGeoregressionToVecmath()
    {
@@ -49,13 +49,13 @@ public class GeoregressionConversionToolsTest
          Point3D_F64 georegressionTransformResultPoint = new Point3D_F64();
          SePointOps_F64.transform(georegressionTransform, georegressionPoint, georegressionTransformResultPoint);
          
-         assertEquals(georegressionTransformResultPoint.x, vecmathPoint.x, eps);
-         assertEquals(georegressionTransformResultPoint.y, vecmathPoint.y, eps);
-         assertEquals(georegressionTransformResultPoint.z, vecmathPoint.z, eps);
+         assertEquals(georegressionTransformResultPoint.x, vecmathPoint.getX(), eps);
+         assertEquals(georegressionTransformResultPoint.y, vecmathPoint.getY(), eps);
+         assertEquals(georegressionTransformResultPoint.z, vecmathPoint.getZ(), eps);
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testTransformConversionFromVecmathToGeoregression()
    {
@@ -82,9 +82,9 @@ public class GeoregressionConversionToolsTest
          Point3D_F64 georegressionTransformResultPoint = new Point3D_F64();
          SePointOps_F64.transform(georegressionTransform, georegressionPoint, georegressionTransformResultPoint);
          
-         assertEquals(georegressionTransformResultPoint.x, vecmathPoint.x, eps);
-         assertEquals(georegressionTransformResultPoint.y, vecmathPoint.y, eps);
-         assertEquals(georegressionTransformResultPoint.z, vecmathPoint.z, eps);
+         assertEquals(georegressionTransformResultPoint.x, vecmathPoint.getX(), eps);
+         assertEquals(georegressionTransformResultPoint.y, vecmathPoint.getY(), eps);
+         assertEquals(georegressionTransformResultPoint.z, vecmathPoint.getZ(), eps);
       }
    }
 

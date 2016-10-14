@@ -5,18 +5,20 @@ import javax.vecmath.Matrix3d;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-
-public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
+public class YoAxisAngleOrientationGains implements YoOrientationPIDGainsInterface
 {
-   private static final String[] directionNames = new String[] { "x", "y", "z" };
+   private static final String[] directionNames = new String[] {"x", "y", "z"};
 
    private final DoubleYoVariable[] proportionalGains = new DoubleYoVariable[3];
    private final DoubleYoVariable[] derivativeGains = new DoubleYoVariable[3];
    private final DoubleYoVariable[] integralGains = new DoubleYoVariable[3];
-   private final DoubleYoVariable maxIntegralError;
 
-   private final DoubleYoVariable maxAcceleration;
-   private final DoubleYoVariable maxJerk;
+   private final DoubleYoVariable maxIntegralError;
+   private final DoubleYoVariable maxDerivativeError;
+   private final DoubleYoVariable maxProportionalError;
+
+   private final DoubleYoVariable maxFeedback;
+   private final DoubleYoVariable maxFeedbackRate;
 
    public YoAxisAngleOrientationGains(String prefix, YoVariableRegistry registry)
    {
@@ -32,12 +34,16 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
       }
 
       maxIntegralError = new DoubleYoVariable(prefix + "OrientationMaxIntegralError", registry);
+      maxDerivativeError = new DoubleYoVariable(prefix + "OrientationMaxDerivativeError", registry);
+      maxProportionalError = new DoubleYoVariable(prefix + "OrientationMaxProportionalError", registry);
 
-      maxAcceleration = new DoubleYoVariable(prefix + "OrientationMaxAcceleration", registry);
-      maxJerk = new DoubleYoVariable(prefix + "OrientationMaxJerk", registry);
+      maxFeedback = new DoubleYoVariable(prefix + "OrientationMaxFeedback", registry);
+      maxFeedbackRate = new DoubleYoVariable(prefix + "OrientationMaxFeedbackRate", registry);
 
-      maxAcceleration.set(Double.POSITIVE_INFINITY);
-      maxJerk.set(Double.POSITIVE_INFINITY);
+      maxFeedback.set(Double.POSITIVE_INFINITY);
+      maxFeedbackRate.set(Double.POSITIVE_INFINITY);
+      maxDerivativeError.set(Double.POSITIVE_INFINITY);
+      maxProportionalError.set(Double.POSITIVE_INFINITY);
    }
 
    public void reset()
@@ -48,12 +54,16 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
          derivativeGains[i].set(0.0);
          integralGains[i].set(0.0);
       }
-      
+
       maxIntegralError.set(0.0);
-      maxAcceleration.set(Double.POSITIVE_INFINITY);
-      maxJerk.set(Double.POSITIVE_INFINITY);
+      maxDerivativeError.set(Double.POSITIVE_INFINITY);
+      maxProportionalError.set(Double.POSITIVE_INFINITY);
+
+      maxFeedback.set(Double.POSITIVE_INFINITY);
+      maxFeedbackRate.set(Double.POSITIVE_INFINITY);
    }
 
+   @Override
    public Matrix3d createProportionalGainMatrix()
    {
       Matrix3d proportionalGainMatrix = new Matrix3d();
@@ -67,6 +77,7 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
       return proportionalGainMatrix;
    }
 
+   @Override
    public Matrix3d createDerivativeGainMatrix()
    {
       Matrix3d derivativeGainMatrix = new Matrix3d();
@@ -80,6 +91,7 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
       return derivativeGainMatrix;
    }
 
+   @Override
    public Matrix3d createIntegralGainMatrix()
    {
       Matrix3d integralGainMatrix = new Matrix3d();
@@ -93,6 +105,7 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
       return integralGainMatrix;
    }
 
+   @Override
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
    {
       proportionalGains[0].set(proportionalGainX);
@@ -100,6 +113,7 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
       proportionalGains[2].set(proportionalGainZ);
    }
 
+   @Override
    public void setDerivativeGains(double derivativeGainX, double derivativeGainY, double derivativeGainZ)
    {
       derivativeGains[0].set(derivativeGainX);
@@ -107,15 +121,17 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
       derivativeGains[2].set(derivativeGainZ);
    }
 
+   @Override
    public void setIntegralGains(double integralGainX, double integralGainY, double integralGainZ, double maxIntegralError)
    {
       integralGains[0].set(integralGainX);
       integralGains[1].set(integralGainY);
       integralGains[2].set(integralGainZ);
-      
+
       this.maxIntegralError.set(maxIntegralError);
    }
 
+   @Override
    public void setProportionalGains(double[] proportionalGains)
    {
       for (int i = 0; i < proportionalGains.length; i++)
@@ -124,6 +140,7 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
       }
    }
 
+   @Override
    public void setDerivativeGains(double[] derivativeGains)
    {
       for (int i = 0; i < derivativeGains.length; i++)
@@ -132,33 +149,74 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
       }
    }
 
+   @Override
    public void setIntegralGains(double[] integralGains, double maxIntegralError)
    {
       for (int i = 0; i < integralGains.length; i++)
       {
          this.integralGains[i].set(integralGains[i]);
       }
-      
+
       this.maxIntegralError.set(maxIntegralError);
    }
 
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   @Override
+   public void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      this.maxAcceleration.set(maxAcceleration);
-      this.maxJerk.set(maxJerk);
+      this.maxFeedback.set(maxFeedback);
+      this.maxFeedbackRate.set(maxFeedbackRate);
    }
 
-   public DoubleYoVariable getYoMaximumAcceleration()
+   @Override
+   public void setMaxDerivativeError(double maxDerivativeError)
    {
-      return maxAcceleration;
+      this.maxDerivativeError.set(maxDerivativeError);
    }
 
-   public DoubleYoVariable getYoMaximumJerk()
+   @Override
+   public void setMaxProportionalError(double maxProportionalError)
    {
-      return maxJerk;
+      this.maxProportionalError.set(maxProportionalError);
+   }
+
+   @Override
+   public void set(OrientationPIDGainsInterface gains)
+   {
+      setProportionalGains(gains.getProportionalGains());
+      setDerivativeGains(gains.getDerivativeGains());
+      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
+      setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
+      setMaxDerivativeError(gains.getMaximumDerivativeError());
+      setMaxProportionalError(gains.getMaximumProportionalError());
+   }
+
+   @Override
+   public DoubleYoVariable getYoMaximumFeedback()
+   {
+      return maxFeedback;
+   }
+
+   @Override
+   public DoubleYoVariable getYoMaximumFeedbackRate()
+   {
+      return maxFeedbackRate;
+   }
+
+   @Override
+   public DoubleYoVariable getYoMaximumDerivativeError()
+   {
+      return maxDerivativeError;
+   }
+
+   @Override
+   public DoubleYoVariable getYoMaximumProportionalError()
+   {
+      return maxProportionalError;
    }
 
    private double[] tempPropotionalGains = new double[3];
+
+   @Override
    public double[] getProportionalGains()
    {
       for (int i = 0; i < 3; i++)
@@ -167,6 +225,8 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
    }
 
    private double[] tempDerivativeGains = new double[3];
+
+   @Override
    public double[] getDerivativeGains()
    {
       for (int i = 0; i < 3; i++)
@@ -175,6 +235,8 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
    }
 
    private double[] tempIntegralGains = new double[3];
+
+   @Override
    public double[] getIntegralGains()
    {
       for (int i = 0; i < 3; i++)
@@ -182,18 +244,34 @@ public class YoAxisAngleOrientationGains implements YoOrientationPIDGains
       return tempIntegralGains;
    }
 
+   @Override
    public double getMaximumIntegralError()
    {
       return maxIntegralError.getDoubleValue();
    }
 
-   public double getMaximumAcceleration()
+   @Override
+   public double getMaximumFeedback()
    {
-      return maxAcceleration.getDoubleValue();
+      return maxFeedback.getDoubleValue();
    }
 
-   public double getMaximumJerk()
+   @Override
+   public double getMaximumFeedbackRate()
    {
-      return maxJerk.getDoubleValue();
+      return maxFeedbackRate.getDoubleValue();
    }
+
+   @Override
+   public double getMaximumDerivativeError()
+   {
+      return maxDerivativeError.getDoubleValue();
+   }
+
+   @Override
+   public double getMaximumProportionalError()
+   {
+      return maxProportionalError.getDoubleValue();
+   }
+
 }

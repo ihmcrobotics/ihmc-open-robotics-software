@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.utilities;
 
 import static org.junit.Assert.assertTrue;
 
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -20,7 +20,7 @@ public class TimeBasedStopThreadUpdatable extends StopThreadUpdatable
    private final double resumeTime;
    private final double stopTime;
 
-   public TimeBasedStopThreadUpdatable(HumanoidRobotDataReceiver robotDataReceiver, BehaviorInterface behavior, double pauseTime, double pauseDuration, double stopTime,
+   public TimeBasedStopThreadUpdatable(HumanoidRobotDataReceiver robotDataReceiver, AbstractBehavior behavior, double pauseTime, double pauseDuration, double stopTime,
          ReferenceFrame frameToKeepTrackOf)
    {
       super(robotDataReceiver, behavior, frameToKeepTrackOf);

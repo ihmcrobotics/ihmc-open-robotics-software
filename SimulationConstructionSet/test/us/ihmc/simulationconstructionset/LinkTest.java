@@ -6,14 +6,14 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.InertiaTools;
 
 public class LinkTest
 {
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testLinkInertia()
    {
@@ -31,9 +31,9 @@ public class LinkTest
       double mass = 1.7;
       link.setMass(mass);
       Matrix3d momentOfInertia = new Matrix3d();
-      momentOfInertia.m00 = 0.1;
-      momentOfInertia.m11 = 0.1;
-      momentOfInertia.m22 = 0.001;
+      momentOfInertia.setM00(0.1);
+      momentOfInertia.setM11(0.1);
+      momentOfInertia.setM22(0.001);
       
       Vector3d rotationAxis = new Vector3d(0.0, 0.0, 1.0);
       

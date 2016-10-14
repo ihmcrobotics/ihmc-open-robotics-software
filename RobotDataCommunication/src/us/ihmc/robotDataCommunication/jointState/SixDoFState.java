@@ -41,14 +41,14 @@ public class SixDoFState extends JointState<FloatingJoint>
 
    public void get(double[] array)
    {
-      array[0] = rotation.w;
-      array[1] = rotation.x;
-      array[2] = rotation.y;
-      array[3] = rotation.z;
+      array[0] = rotation.getW();
+      array[1] = rotation.getX();
+      array[2] = rotation.getY();
+      array[3] = rotation.getZ();
 
-      array[4] = translation.x;
-      array[5] = translation.y;
-      array[6] = translation.z;
+      array[4] = translation.getX();
+      array[5] = translation.getY();
+      array[6] = translation.getZ();
 
       twist.getArray(array, 7);
    }
@@ -56,13 +56,13 @@ public class SixDoFState extends JointState<FloatingJoint>
    public void update(LongBuffer buffer)
    {
       
-      rotation.w    = Double.longBitsToDouble(buffer.get());
-      rotation.x    = Double.longBitsToDouble(buffer.get());
-      rotation.y    = Double.longBitsToDouble(buffer.get());
-      rotation.z    = Double.longBitsToDouble(buffer.get());
-      translation.x = Double.longBitsToDouble(buffer.get());
-      translation.y = Double.longBitsToDouble(buffer.get());
-      translation.z = Double.longBitsToDouble(buffer.get());
+      rotation.setW(Double.longBitsToDouble(buffer.get()));
+      rotation.setX(Double.longBitsToDouble(buffer.get()));
+      rotation.setY(Double.longBitsToDouble(buffer.get()));
+      rotation.setZ(Double.longBitsToDouble(buffer.get()));
+      translation.setX(Double.longBitsToDouble(buffer.get()));
+      translation.setY(Double.longBitsToDouble(buffer.get()));
+      translation.setZ(Double.longBitsToDouble(buffer.get()));
       
       twist.setAngularPartX(Double.longBitsToDouble(buffer.get()));
       twist.setAngularPartY(Double.longBitsToDouble(buffer.get()));

@@ -80,19 +80,19 @@ public class DummyOneDegreeOfFreedomJoint extends OneDegreeOfFreedomJoint
    }
 
    @Override
-   public DoubleYoVariable getQDD()
+   public DoubleYoVariable getQDDYoVariable()
    {
       return qdd;
    }
 
    @Override
-   public DoubleYoVariable getQD()
+   public DoubleYoVariable getQDYoVariable()
    {
       return qd;
    }
 
    @Override
-   public DoubleYoVariable getQ()
+   public DoubleYoVariable getQYoVariable()
    {
       return q;
    }
@@ -120,7 +120,7 @@ public class DummyOneDegreeOfFreedomJoint extends OneDegreeOfFreedomJoint
    }
 
    @Override
-   public DoubleYoVariable getTau()
+   public DoubleYoVariable getTauYoVariable()
    {
       return tau;
    }
@@ -165,5 +165,29 @@ public class DummyOneDegreeOfFreedomJoint extends OneDegreeOfFreedomJoint
    public double getJointStiction()
    {
       return 0.0;
+   }
+
+   @Override
+   public double getQDD()
+   {
+      return qdd.getDoubleValue();
+   }
+
+   @Override
+   public double getQD()
+   {
+      return qd.getDoubleValue();
+   }
+
+   @Override
+   public double getQ()
+   {
+      return q.getDoubleValue();
+   }
+
+   @Override
+   public double getTau()
+   {
+      return tau.getDoubleValue();
    }
 }

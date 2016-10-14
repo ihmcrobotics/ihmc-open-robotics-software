@@ -13,9 +13,8 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ComHeightPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListCorruptor;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -23,7 +22,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterface 
@@ -57,14 +56,14 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    }
    
    // The default height seems to be a bit too low for the ramp
-   private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
+//   private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
 
 
-	@DeployableTestMethod(estimatedDuration = 46.7)
-	@Test(timeout = 230000)
+	@ContinuousIntegrationTest(estimatedDuration = 57.9)
+	@Test(timeout = 290000)
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       doUpRampTest(null, StepLength.SHORT);
       
       Point3d center = new Point3d(6.135997212353164, 0.008329425009630976, 1.3724038542384285);
@@ -72,18 +71,18 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 57.0)
-	@Test(timeout = 280000)
+	@ContinuousIntegrationTest(estimatedDuration = 73.5)
+	@Test(timeout = 370000)
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_TOP;
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingDownRampWithMediumSteps", "", selectedLocation,  simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingDownRampWithMediumSteps", selectedLocation,  simulationTestingParameters, getRobotModel());
       
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -93,7 +92,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForWalkingDownRampMediumSteps(scriptedFootstepGenerator);
+      FootstepDataListMessage footstepDataList = createFootstepsForWalkingDownRampMediumSteps(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(18.0);
@@ -108,14 +107,14 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 49.3)
-	@Test(timeout = 250000)
+	@ContinuousIntegrationTest(estimatedDuration = 61.8)
+	@Test(timeout = 310000)
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       doUpRampTest(null, StepLength.MEDIUM);
       
       Point3d center = new Point3d(7.579638943201888, 0.020725665285290903, 1.46537366331119);
@@ -123,14 +122,14 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 46.4)
-	@Test(timeout = 230000)
+	@ContinuousIntegrationTest(estimatedDuration = 76.9)
+	@Test(timeout = 380000)
    public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Vector3d minLocationCorruption = new Vector3d(0.0, 0.0, 0.0);
       Vector3d maxLocationCorruption = new Vector3d(0.0, 0.0, 0.05);
@@ -144,14 +143,14 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@DeployableTestMethod(estimatedDuration = 43.9)
-	@Test(timeout = 220000)
+	@ContinuousIntegrationTest(estimatedDuration = 68.7)
+	@Test(timeout = 340000)
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Vector3d minLocationCorruption = new Vector3d(0.0, 0.0, -0.06);
       Vector3d maxLocationCorruption = new Vector3d(0.0, 0.0, 0.0);
@@ -165,7 +164,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private enum StepLength
@@ -177,19 +176,19 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    {
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpRampTest", "", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpRampTest", selectedLocation, simulationTestingParameters, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
-      drcSimulationTestHelper.send(comHeightPacket);
+//      drcSimulationTestHelper.send(comHeightPacket);
 
       setupCameraForWalkingOverRamp(simulationConstructionSet);
       ThreadTools.sleep(1000);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
-      FootstepDataList footstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator, stepLength);
+      FootstepDataListMessage footstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator, stepLength);
 
       if (footstepDataListCorruptor != null)
       {
@@ -206,7 +205,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       assertTrue(success);
    }
 
-   private FootstepDataList createFootstepsForWalkingUpRamp(ScriptedFootstepGenerator scriptedFootstepGenerator, StepLength stepLength)
+   private FootstepDataListMessage createFootstepsForWalkingUpRamp(ScriptedFootstepGenerator scriptedFootstepGenerator, StepLength stepLength)
    {
       switch(stepLength)
       {
@@ -246,7 +245,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    }
 
    
-   private FootstepDataList createFootstepsForWalkingUpRampShortSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingUpRampShortSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
       {
@@ -319,7 +318,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    }
 
    
-   private FootstepDataList createFootstepsForWalkingUpRampMediumSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingUpRampMediumSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
    {{{2.96830428414849, -0.09766543994755546, 0.08399999999999998}, {-2.720672111457406E-20, 5.415915594351002E-20, 0.0018763016130482887, 0.9999982397445792}},
@@ -342,7 +341,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
    
-   private FootstepDataList createFootstepsForWalkingUpRampLongSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingUpRampLongSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
    {{{}}
@@ -352,7 +351,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
    }
    
-   private FootstepDataList createFootstepsForWalkingDownRampMediumSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingDownRampMediumSteps(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {{{6.954747596485718, 0.11524925726571199, 0.7119679417361913}, {-0.004756259680920303, -1.677100279548098E-5, 0.9999824722629655, 0.003526028846796884}},

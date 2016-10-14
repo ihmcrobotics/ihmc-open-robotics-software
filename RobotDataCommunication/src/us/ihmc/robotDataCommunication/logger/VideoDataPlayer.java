@@ -140,7 +140,7 @@ public class VideoDataPlayer
       return videoTimestamp;
    }
 
-   private void parseTimestampData(File timestampFile)
+   private void parseTimestampData(File timestampFile) throws IOException
    {
       BufferedReader reader = null;
       try
@@ -156,7 +156,7 @@ public class VideoDataPlayer
             }
             else
             {
-               throw new RuntimeException("Cannot read numerator");
+               throw new IOException("Cannot read numerator");
             }
 
             if ((line = reader.readLine()) != null)
@@ -165,7 +165,7 @@ public class VideoDataPlayer
             }
             else
             {
-               throw new RuntimeException("Cannot read denumerator");
+               throw new IOException("Cannot read denumerator");
             }
          }
 
@@ -195,10 +195,7 @@ public class VideoDataPlayer
       {
          throw new RuntimeException(e);
       }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      } finally
+      finally
       {
          try
          {

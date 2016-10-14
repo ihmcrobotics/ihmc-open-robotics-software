@@ -4,6 +4,7 @@
 /bin
 /out
 /target
+/pit-reports
 
 # Top level directories in sub-projects
 */classes
@@ -11,6 +12,7 @@
 */out
 */target
 */build
+*/pit-reports
 
 # directories to always ignore
 **/.gradle
@@ -32,6 +34,7 @@
 **/.kdev4
 **/.LSOverride
 **/.AppleDouble
+**/pitest
 
 
 # File types to ignore

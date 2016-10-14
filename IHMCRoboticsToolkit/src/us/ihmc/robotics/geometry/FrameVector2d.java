@@ -20,6 +20,8 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, TransformableVect
 {
    private static final long serialVersionUID = -610124454205790361L;
 
+   private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
+   
    /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
    public FrameVector2d(ReferenceFrame referenceFrame, double x, double y, String name)
    {
@@ -41,7 +43,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, TransformableVect
    /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
    public FrameVector2d(ReferenceFrame referenceFrame, Tuple2d tuple)
    {
-      this(referenceFrame, tuple.x, tuple.y);
+      this(referenceFrame, tuple.getX(), tuple.getY());
    }
 
    /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
@@ -59,13 +61,13 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, TransformableVect
    /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
    public FrameVector2d(FrameTuple2d<?, ?> frameTuple2d)
    {
-      this(frameTuple2d.referenceFrame, frameTuple2d.tuple.x, frameTuple2d.tuple.y, frameTuple2d.name);
+      this(frameTuple2d.referenceFrame, frameTuple2d.tuple.getX(), frameTuple2d.tuple.getY(), frameTuple2d.name);
    }
 
    /** FrameVector2d <p/> A normal vector2d associated with a specific reference frame. */
    public FrameVector2d(FramePoint2d startFramePoint, FramePoint2d endFramePoint)
    {
-      this(endFramePoint.referenceFrame, endFramePoint.tuple.x, endFramePoint.tuple.y, endFramePoint.name);
+      this(endFramePoint.referenceFrame, endFramePoint.tuple.getX(), endFramePoint.tuple.getY(), endFramePoint.name);
       startFramePoint.checkReferenceFrameMatch(endFramePoint);
       sub(startFramePoint);
    }
@@ -130,7 +132,7 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, TransformableVect
    {
       checkReferenceFrameMatch(frameVector);
 
-      return this.tuple.x * frameVector.tuple.y - tuple.y * frameVector.tuple.x;
+      return this.tuple.getX() * frameVector.tuple.getY() - tuple.getY() * frameVector.tuple.getX();
    }
 
    public double angle(FrameVector2d frameVector)
@@ -170,4 +172,13 @@ public class FrameVector2d extends FrameTuple2d<FrameVector2d, TransformableVect
       scale(maxLength / length);
    }
 
+   public void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame)
+   {
+      if (desiredFrame == referenceFrame)
+         return;
+
+      referenceFrame.getTransformToDesiredFrame(temporaryTransformToDesiredFrame, desiredFrame);
+      getGeometryObject().applyTransform(temporaryTransformToDesiredFrame, false);
+      this.referenceFrame = desiredFrame;
+   }
 }

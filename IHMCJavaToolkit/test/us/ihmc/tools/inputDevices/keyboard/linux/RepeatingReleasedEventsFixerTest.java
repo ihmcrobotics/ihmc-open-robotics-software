@@ -2,12 +2,16 @@ package us.ihmc.tools.inputDevices.keyboard.linux;
 
 import org.junit.Test;
 
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.inputDevices.keyboard.linux.RepeatingReleasedEventsFixer;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
+@ContinuousIntegrationPlan(categories ={IntegrationCategory.IN_DEVELOPMENT})
 public class RepeatingReleasedEventsFixerTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInstallAndRemove()
    {

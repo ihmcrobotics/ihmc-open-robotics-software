@@ -6,22 +6,22 @@ import java.util.Random;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
+public class CapturabilityBasedStatus extends StatusPacket<CapturabilityBasedStatus>
 {
    public static final int MAXIMUM_NUMBER_OF_VERTICES = 8;
-   
+
    public Point2d capturePoint = new Point2d();
    public Point2d desiredCapturePoint = new Point2d();
 
    public Point3d centerOfMass = new Point3d();
-   
+
    public int leftFootSupportPolygonLength;
    public Point2d[] leftFootSupportPolygonStore = new Point2d[MAXIMUM_NUMBER_OF_VERTICES];
    public int rightFootSupportPolygonLength;
@@ -33,7 +33,7 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
       capturePoint = RandomTools.generateRandomPoint2d(random, max, max);
       desiredCapturePoint = RandomTools.generateRandomPoint2d(random, max, max);
       centerOfMass = RandomTools.generateRandomPoint(random, max, max, max);
-      
+
       leftFootSupportPolygonLength = Math.abs(random.nextInt(MAXIMUM_NUMBER_OF_VERTICES));
       for (int i = 0; i < leftFootSupportPolygonLength; i++)
       {
@@ -49,24 +49,38 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
    public CapturabilityBasedStatus()
    {
       // Empty constructor for serialization
-      for(int i = 0; i < MAXIMUM_NUMBER_OF_VERTICES; i++)
+      for (int i = 0; i < MAXIMUM_NUMBER_OF_VERTICES; i++)
       {
          leftFootSupportPolygonStore[i] = new Point2d();
          rightFootSupportPolygonStore[i] = new Point2d();
-         
+
       }
    }
-   
+
+   @Override
+   public void set(CapturabilityBasedStatus other)
+   {
+      capturePoint.set(other.capturePoint);
+      desiredCapturePoint.set(other.desiredCapturePoint);
+      leftFootSupportPolygonLength = other.leftFootSupportPolygonLength;
+      rightFootSupportPolygonLength = other.rightFootSupportPolygonLength;
+      for (int i = 0; i < MAXIMUM_NUMBER_OF_VERTICES; i++)
+      {
+         leftFootSupportPolygonStore[i].set(other.leftFootSupportPolygonStore[i]);
+         rightFootSupportPolygonStore[i].set(other.rightFootSupportPolygonStore[i]);
+      }
+   }
+
    public void setSupportPolygon(RobotSide robotSide, FrameConvexPolygon2d footPolygon)
    {
       int numberOfVertices = footPolygon.getNumberOfVertices();
-      
-      if(numberOfVertices > MAXIMUM_NUMBER_OF_VERTICES)
+
+      if (numberOfVertices > MAXIMUM_NUMBER_OF_VERTICES)
       {
          numberOfVertices = MAXIMUM_NUMBER_OF_VERTICES;
       }
-      
-      if(robotSide == RobotSide.LEFT)
+
+      if (robotSide == RobotSide.LEFT)
       {
          leftFootSupportPolygonLength = numberOfVertices;
       }
@@ -74,10 +88,10 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
       {
          rightFootSupportPolygonLength = numberOfVertices;
       }
-      
-      for(int i = 0; i < numberOfVertices; i++)
+
+      for (int i = 0; i < numberOfVertices; i++)
       {
-         if(robotSide == RobotSide.LEFT)
+         if (robotSide == RobotSide.LEFT)
          {
             footPolygon.getVertex(i, leftFootSupportPolygonStore[i]);
          }
@@ -87,7 +101,6 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
          }
       }
    }
-
 
    public FramePoint2d getCapturePoint()
    {
@@ -125,7 +138,7 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 
       ret &= this.leftFootSupportPolygonLength == other.leftFootSupportPolygonLength;
       ret &= this.rightFootSupportPolygonLength == other.rightFootSupportPolygonLength;
-      
+
       if (leftFootSupportPolygonStore == null || other.leftFootSupportPolygonStore == null)
       {
          ret &= leftFootSupportPolygonStore == null && other.leftFootSupportPolygonStore == null;

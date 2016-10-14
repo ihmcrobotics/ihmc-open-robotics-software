@@ -7,19 +7,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ShipCorridorGroundProfileTest 
 {
    private ShipCorridorGroundProfile groundProfile;
    private final double epsilon = 1e-6;
    private final boolean debug = false;
-  
-   public ShipCorridorGroundProfileTest()
-   {
-      
-   }
 
    @Before
    public void setUp()
@@ -27,7 +22,7 @@ public class ShipCorridorGroundProfileTest
       groundProfile = new ShipCorridorGroundProfile(100.0, -10.0, 5.0, -5.0, 0.8, -0.8, 0.0, 3.0, Math.toRadians( 2.0 ));
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSurfaceNormalAlongYAxis()
    {
@@ -65,12 +60,12 @@ public class ShipCorridorGroundProfileTest
             
             if(((initialHeight == 3.0)&&(finalHeight != 3.0)) || ((initialHeight != 3.0)&&(finalHeight == 3.0)) || ((initialHeight != 0.0)&&(finalHeight == 0.0)) || ((initialHeight == 0.0)&&(finalHeight != 0.0)))
             {
-               surfaceNormalFromGroundProfile.x = 0.0;
-               surfaceNormalFromGroundProfile.y = 0.0;
-               surfaceNormalFromGroundProfile.z = 1.0;
-               numericalSurfaceNormal.x = 0.0;
-               numericalSurfaceNormal.y = 0.0;
-               numericalSurfaceNormal.z = 1.0;         
+               surfaceNormalFromGroundProfile.setX(0.0);
+               surfaceNormalFromGroundProfile.setY(0.0);
+               surfaceNormalFromGroundProfile.setZ(1.0);
+               numericalSurfaceNormal.setX(0.0);
+               numericalSurfaceNormal.setY(0.0);
+               numericalSurfaceNormal.setZ(1.0);         
             }
             
             if(debug)
@@ -86,8 +81,6 @@ public class ShipCorridorGroundProfileTest
   
             JUnitTools.assertTuple3dEquals(numericalSurfaceNormal, surfaceNormalFromGroundProfile, epsilon);
          }
-
       }
    }
-   
 }

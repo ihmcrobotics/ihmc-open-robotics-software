@@ -1,43 +1,33 @@
 package us.ihmc.valkyrieRosControl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
-import org.yaml.snakeyaml.Yaml;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.valkyrie.imu.MicroStrainData;
-import us.ihmc.valkyrieRosControl.dataHolders.YoForceTorqueSensorHandle;
-import us.ihmc.valkyrieRosControl.dataHolders.YoIMUHandleHolder;
-import us.ihmc.valkyrieRosControl.dataHolders.YoJointHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.*;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
+import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
 
 public class ValkyrieRosControlSensorReader implements SensorReader, JointTorqueOffsetProcessor
 {
@@ -45,7 +35,9 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
    private final TimestampProvider timestampProvider;
 
-   private final List<YoJointHandleHolder> yoJointHandleHolders;
+   private final List<YoEffortJointHandleHolder> yoEffortJointHandleHolders;
+   private final List<YoPositionJointHandleHolder> yoPositionJointHandleHolders;
+   private final List<YoJointStateHandleHolder> yoJointStateHandleHolders;
    private final List<YoIMUHandleHolder> yoIMUHandleHolders;
    private final List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles;
 
@@ -54,101 +46,32 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    private final Quat4d orientation = new Quat4d();
 
    private final DenseMatrix64F torqueForce = new DenseMatrix64F(6, 1);
-
-   private final ArrayList<ValkyrieRosControlJointControlCommandCalculator> controlCommandCalculators = new ArrayList<>();
-   private final LinkedHashMap<String, ValkyrieRosControlJointControlCommandCalculator> jointToControlCommandCalculatorMap = new LinkedHashMap<>();
-
-   private final DoubleYoVariable doIHMCControlRatio;
-   private final DoubleYoVariable timeInStandprep;
-   private final DoubleYoVariable masterGain;
-
-   private final BooleanYoVariable startStandPrep;
-   private long standPrepStartTime = -1;
-
    private final Matrix3d quaternionConversionMatrix = new Matrix3d();
    private final Matrix3d orientationMatrix = new Matrix3d();
 
-   private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
-   private final ValkyrieAccelerationIntegration accelerationIntegration;
+   private final ValkyrieRosControlLowLevelController lowlLevelController;
 
-   @SuppressWarnings("unchecked")
-   public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
-         TimestampProvider timestampProvider, List<YoJointHandleHolder> yoJointHandleHolders, List<YoIMUHandleHolder> yoIMUHandleHolders,
-         List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, YoVariableRegistry registry)
+   public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
+         SensorProcessingConfiguration sensorProcessingConfiguration, TimestampProvider timestampProvider,
+         List<YoEffortJointHandleHolder> yoEffortJointHandleHolders, List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, List<YoJointStateHandleHolder> yoJointStateHandleHolders,
+         List<YoIMUHandleHolder> yoIMUHandleHolders, List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, YoVariableRegistry registry)
    {
 
       this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
       this.timestampProvider = timestampProvider;
-      this.yoJointHandleHolders = yoJointHandleHolders;
+      this.yoEffortJointHandleHolders = yoEffortJointHandleHolders;
+      this.yoPositionJointHandleHolders = yoPositionJointHandleHolders;
+      this.yoJointStateHandleHolders = yoJointStateHandleHolders;
       this.yoIMUHandleHolders = yoIMUHandleHolders;
       this.yoForceTorqueSensorHandles = yoForceTorqueSensorHandles;
 
-      doIHMCControlRatio = new DoubleYoVariable("doIHMCControlRatio", registry);
-      masterGain = new DoubleYoVariable("StandPrepMasterGain", registry);
-      timeInStandprep = new DoubleYoVariable("timeInStandprep", registry);
-      startStandPrep = new BooleanYoVariable("startStandPrep", registry);
-      startStandPrep.set(true);
-      masterGain.set(0.3);
-
-      double updateDT = sensorProcessingConfiguration.getEstimatorDT();
-      torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(yoJointHandleHolders, timeInStandprep, registry);
-      accelerationIntegration = new ValkyrieAccelerationIntegration(yoJointHandleHolders, updateDT, registry);
-
-      Yaml yaml = new Yaml();
-
-      InputStream gainStream = getClass().getClassLoader().getResourceAsStream("standPrep/gains.yaml");
-      InputStream setpointsStream = getClass().getClassLoader().getResourceAsStream("standPrep/setpoints.yaml");
-      InputStream offsetsStream;
-      try
-      {
-         offsetsStream = new FileInputStream(new File(ValkyrieTorqueOffsetPrinter.IHMC_TORQUE_OFFSET_FILE));
-      }
-      catch (FileNotFoundException e1)
-      {
-         offsetsStream = null;
-      }
-
-      Map<String, Map<String, Double>> gainMap = (Map<String, Map<String, Double>>) yaml.load(gainStream);
-      Map<String, Double> setPointMap = (Map<String, Double>) yaml.load(setpointsStream);
-      Map<String, Double> offsetMap = null;
-      if (offsetsStream != null)
-         offsetMap = (Map<String, Double>) yaml.load(offsetsStream);
-
-      try
-      {
-         gainStream.close();
-         setpointsStream.close();
-         if (offsetsStream != null)
-            offsetsStream.close();
-      }
-      catch (IOException e)
-      {
-      }
-
-      for (YoJointHandleHolder jointHandleHolder : yoJointHandleHolders)
-      {
-         String jointName = jointHandleHolder.getName();
-         Map<String, Double> standPrepGains = gainMap.get(jointName);
-         double torqueOffset = 0.0;
-         if (offsetMap != null && offsetMap.containsKey(jointName))
-            torqueOffset = offsetMap.get(jointName);
-
-         double standPrepAngle = 0.0;
-         if (setPointMap.containsKey(jointName))
-         {
-            standPrepAngle = setPointMap.get(jointName);
-         }
-         ValkyrieRosControlJointControlCommandCalculator controlCommandCalculator = new ValkyrieRosControlJointControlCommandCalculator(jointHandleHolder,
-               standPrepGains, torqueOffset, standPrepAngle, updateDT, registry);
-         controlCommandCalculators.add(controlCommandCalculator);
-
-         jointToControlCommandCalculatorMap.put(jointName, controlCommandCalculator);
-      }
+      double estimatorDT = sensorProcessingConfiguration.getEstimatorDT();
+      lowlLevelController = new ValkyrieRosControlLowLevelController(timestampProvider, estimatorDT, yoEffortJointHandleHolders, yoPositionJointHandleHolders, registry);
    }
 
    public void setDoIHMCControlRatio(double controlRatio)
    {
-      doIHMCControlRatio.set(MathTools.clipToMinMax(controlRatio, 0.0, 1.0));
+      lowlLevelController.setDoIHMCControlRatio(controlRatio);
    }
 
    @Override
@@ -158,16 +81,42 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       writeCommandsToRobot();
    }
 
+   public void writeCommandsToRobot()
+   {
+      lowlLevelController.doControl();
+   }
+
    public void readSensors()
    {
-      for (int i = 0; i < yoJointHandleHolders.size(); i++)
+      for (int i = 0; i < yoEffortJointHandleHolders.size(); i++)
       {
-         YoJointHandleHolder yoJointHandleHolder = yoJointHandleHolders.get(i);
-         yoJointHandleHolder.update();
+         YoEffortJointHandleHolder yoEffortJointHandleHolder = yoEffortJointHandleHolders.get(i);
+         yoEffortJointHandleHolder.update();
 
-         sensorProcessing.setJointPositionSensorValue(yoJointHandleHolder.getOneDoFJoint(), yoJointHandleHolder.getQ());
-         sensorProcessing.setJointVelocitySensorValue(yoJointHandleHolder.getOneDoFJoint(), yoJointHandleHolder.getQd());
-         sensorProcessing.setJointTauSensorValue(yoJointHandleHolder.getOneDoFJoint(), yoJointHandleHolder.getTauMeasured());
+         sensorProcessing.setJointPositionSensorValue(yoEffortJointHandleHolder.getOneDoFJoint(), yoEffortJointHandleHolder.getQ());
+         sensorProcessing.setJointVelocitySensorValue(yoEffortJointHandleHolder.getOneDoFJoint(), yoEffortJointHandleHolder.getQd());
+         sensorProcessing.setJointTauSensorValue(yoEffortJointHandleHolder.getOneDoFJoint(), yoEffortJointHandleHolder.getTauMeasured());
+      }
+
+      for (int i = 0; i < yoPositionJointHandleHolders.size(); i++)
+      {
+         YoPositionJointHandleHolder yoPositionJointHandleHolder = yoPositionJointHandleHolders.get(i);
+         yoPositionJointHandleHolder.update();
+
+         sensorProcessing.setJointPositionSensorValue(yoPositionJointHandleHolder.getOneDoFJoint(), yoPositionJointHandleHolder.getQ());
+         sensorProcessing.setJointVelocitySensorValue(yoPositionJointHandleHolder.getOneDoFJoint(), yoPositionJointHandleHolder.getQd());
+         sensorProcessing.setJointTauSensorValue(yoPositionJointHandleHolder.getOneDoFJoint(),
+               0.0); // TODO: Should be NaN eventually as the position control joints won't be able to return a measured torque
+      }
+      
+      for(int i = 0; i < yoJointStateHandleHolders.size(); i++)
+      {
+         YoJointStateHandleHolder yoJointStateHandleHolder = yoJointStateHandleHolders.get(i);
+         yoJointStateHandleHolder.update();
+
+         sensorProcessing.setJointPositionSensorValue(yoJointStateHandleHolder.getOneDoFJoint(), yoJointStateHandleHolder.getQ());
+         sensorProcessing.setJointVelocitySensorValue(yoJointStateHandleHolder.getOneDoFJoint(), yoJointStateHandleHolder.getQd());
+         sensorProcessing.setJointTauSensorValue(yoJointStateHandleHolder.getOneDoFJoint(), yoJointStateHandleHolder.getTauMeasured());
       }
 
       for (int i = 0; i < yoIMUHandleHolders.size(); i++)
@@ -178,10 +127,6 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
          yoIMUHandleHolder.packLinearAcceleration(linearAcceleration);
          yoIMUHandleHolder.packAngularVelocity(angularVelocity);
          yoIMUHandleHolder.packOrientation(orientation);
-
-         quaternionConversionMatrix.set(orientation);
-         orientationMatrix.mul(MicroStrainData.MICROSTRAIN_TO_ZUP_WORLD, quaternionConversionMatrix);
-         RotationTools.convertMatrixToQuaternion(orientationMatrix, orientation);
 
          sensorProcessing.setLinearAccelerationSensorValue(yoIMUHandleHolder.getImuDefinition(), linearAcceleration);
          sensorProcessing.setAngularVelocitySensorValue(yoIMUHandleHolder.getImuDefinition(), angularVelocity);
@@ -199,36 +144,6 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
 
       long timestamp = timestampProvider.getTimestamp();
       sensorProcessing.startComputation(timestamp, timestamp, -1);
-   }
-
-   public void writeCommandsToRobot()
-   {
-      long timestamp = timestampProvider.getTimestamp();
-
-      if (standPrepStartTime > 0)
-      {
-         timeInStandprep.set(TimeTools.nanoSecondstoSeconds(timestamp - standPrepStartTime));
-         
-         torqueHysteresisCompensator.compute();
-         if (ValkyrieRosControlController.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
-            accelerationIntegration.compute();
-
-         for (int i = 0; i < controlCommandCalculators.size(); i++)
-         {
-            ValkyrieRosControlJointControlCommandCalculator commandCalculator = controlCommandCalculators.get(i);
-            commandCalculator.computeAndUpdateJointTorque(timeInStandprep.getDoubleValue(), doIHMCControlRatio.getDoubleValue(), masterGain.getDoubleValue());
-         }
-
-      }
-      else if (startStandPrep.getBooleanValue())
-      {
-         standPrepStartTime = timestamp;
-         for (int i = 0; i < controlCommandCalculators.size(); i++)
-         {
-            ValkyrieRosControlJointControlCommandCalculator commandCalculator = controlCommandCalculators.get(i);
-            commandCalculator.initialize();
-         }
-      }
    }
 
    @Override
@@ -252,10 +167,26 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    @Override
    public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffset)
    {
-      ValkyrieRosControlJointControlCommandCalculator jointCommandCalculator = jointToControlCommandCalculatorMap.get(oneDoFJoint.getName());
-      if (jointCommandCalculator != null)
-         jointCommandCalculator.subtractTorqueOffset(torqueOffset);
-      else
-         PrintTools.error("Command calculator is NULL for the joint: " + oneDoFJoint.getName());
+      lowlLevelController.subtractTorqueOffset(oneDoFJoint, torqueOffset);
+   }
+
+   public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)
+   {
+      lowlLevelController.attachControllerAPI(commandInputManager, statusOutputManager);
+   }
+
+   public void attachForceSensorCalibrationModule(DRCRobotSensorInformation sensorInformation, ForceSensorCalibrationModule forceSensorCalibrationModule)
+   {
+      lowlLevelController.attachForceSensorCalibrationModule(sensorInformation, forceSensorCalibrationModule);
+   }
+
+   public void attachJointTorqueOffsetEstimator(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)
+   {
+      lowlLevelController.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimator);
+   }
+
+   public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)
+   {
+      lowlLevelController.setupLowLevelControlWithPacketCommunicator(packetCommunicator);
    }
 }

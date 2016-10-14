@@ -10,12 +10,12 @@ import us.ihmc.simulationconstructionset.Robot;
 
 public class DataExporterDirectoryFinder
 {
-   public static File findSimulationRootLocation(Robot robot)
+   public static File findSimulationRootLocation(Class<?> rootClassForDirectory)
    {
-      Component component = null;    // TODO
-      if (robot != null)
+      Component component = null;
+      if (rootClassForDirectory != null)
       {
-         URL robotClassURL = robot.getClass().getResource(".");
+         URL robotClassURL = rootClassForDirectory.getResource(".");
          if (robotClassURL == null)
          {
             JOptionPane.showMessageDialog(null, "Your robot class path URL is null", "Error Robot URL", JOptionPane.ERROR_MESSAGE);
@@ -84,9 +84,9 @@ public class DataExporterDirectoryFinder
       return null;
    }
 
-   public static File findSimulationDataAndVideoRootLocation(File simulationRootDirectory, Robot robot)
+   public static File findSimulationDataAndVideoRootLocation(File simulationRootDirectory, String subdirectoryName)
    {
-      File ret = new File(simulationRootDirectory.getParentFile(), "DataAndVideos" + File.separator + robot.getClass().getSimpleName());
+      File ret = new File(simulationRootDirectory.getParentFile(), "DataAndVideos" + File.separator + subdirectoryName);
       if (!ret.exists())
          ret.mkdir();
       return ret;

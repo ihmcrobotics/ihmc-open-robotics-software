@@ -2,8 +2,8 @@ package us.ihmc.quadrupedRobotics.controller;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.OutputWriter;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.robotModels.OutputWriter;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
@@ -17,7 +17,7 @@ public class QuadrupedSimulationController implements RobotController
    private static final Vector3d zeroAngularVelocity = new Vector3d();
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final SDFRobot sdfRobot;
+   private final FloatingRootJointRobot sdfRobot;
    private final SensorReader sensorReader;
    private final OutputWriter outputWriter;
    private final RobotController gaitControlManager;
@@ -26,7 +26,7 @@ public class QuadrupedSimulationController implements RobotController
    private final DRCPoseCommunicator poseCommunicator;
    private boolean firstTick = true;
    
-   public QuadrupedSimulationController(SDFRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, DRCKinematicsBasedStateEstimator stateEstimator,
+   public QuadrupedSimulationController(FloatingRootJointRobot simulationRobot, SensorReader sensorReader, OutputWriter outputWriter, RobotController gaitControlManager, DRCKinematicsBasedStateEstimator stateEstimator,
          DRCPoseCommunicator poseCommunicator, RobotController headController)
    {
       this.sdfRobot = simulationRobot;
@@ -37,6 +37,8 @@ public class QuadrupedSimulationController implements RobotController
       this.stateEstimator = stateEstimator;
       this.headController = headController;
       registry.addChild(gaitControlManager.getYoVariableRegistry());
+      if (headController != null)
+         registry.addChild(headController.getYoVariableRegistry());
    }
 
    @Override

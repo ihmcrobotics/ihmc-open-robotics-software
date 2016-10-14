@@ -1,28 +1,24 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.vecmath.Vector3d;
 
 import com.github.quickhull3d.Point3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.CarIngressEgressControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.YoVariableVariousWalkingProviderFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CarIngressEgressController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.communication.PacketRouter;
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -33,12 +29,12 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
-import us.ihmc.darpaRoboticsChallenge.scriptEngine.VariousWalkingProviderFromScriptFactory;
+import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCRenderedSceneVideoHandler;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.humanoidBehaviors.BehaviorVisualizer;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -65,18 +61,22 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    private final DRCSCSInitialSetup scsInitialSetup;
 
    private DRCGuiInitialSetup guiInitialSetup;
-   private DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup;
+   private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
 
-   private SDFHumanoidRobot sdfRobot;
+   private HumanoidFloatingRootJointRobot sdfRobot;
    private MomentumBasedControllerFactory controllerFactory;
    private DRCSimulationFactory drcSimulationFactory;
    private SimulationConstructionSet simulationConstructionSet;
 
-   private String scriptFileName;
+   private ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator;
    private boolean createSCSSimulatedSensors;
 
    private boolean deactivateWalkingFallDetector = false;
-   
+
+   private boolean addFootstepMessageGenerator = false;
+   private boolean useHeadingAndVelocityScript = false;
+   private boolean cheatWithGroundHeightAtForFootstep = false;
+
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber;
 
    /**
@@ -88,9 +88,12 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    /** The output PacketCommunicator of the simulation carries sensor information (LIDAR, camera, etc.) and is used as input of the network processor. */
    private LocalObjectCommunicator scsSensorOutputPacketCommunicator;
 
+   private boolean setupControllerNetworkSubscriber = true;
+
    private final WalkingControllerParameters walkingControllerParameters;
    private final ArmControllerParameters armControllerParameters;
    private final CapturePointPlannerParameters capturePointPlannerParameters;
+   private final ICPOptimizationParameters icpOptimizationParameters;
    private final RobotContactPointParameters contactPointParameters;
 
    private final Point3d scsCameraPosition = new Point3d(6.0, -2.0, 4.5);
@@ -101,16 +104,18 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
 
+   private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
+
    public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
       this.robotModel = robotModel;
       this.environment = environment;
-      
+
       this.guiInitialSetup = new DRCGuiInitialSetup(false, false);
       this.robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
 
       this.createSCSSimulatedSensors = true;
-      
+
       scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
       scsInitialSetup.setInitializeEstimatorToActual(false);
       scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
@@ -119,6 +124,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
       this.armControllerParameters = robotModel.getArmControllerParameters();
       this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      this.icpOptimizationParameters = robotModel.getICPOptimizationParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
    }
 
@@ -141,7 +147,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    /**
     * Register a controller to be created in addition to the walking controller.
     * For instance, the {@link CarIngressEgressController} can be created by passing its factory, i.e. {@link CarIngressEgressControllerFactory}.
-    * The active controller can then be switched by either changing the variable {@code requestedHighLevelState} from SCS or by sending a {@link HighLevelStatePacket} to the controller.
+    * The active controller can then be switched by either changing the variable {@code requestedHighLevelState} from SCS or by sending a {@link HighLevelStateMessage} to the controller.
     * @param controllerFactory a factory to create an additional controller.
     */
    @Override
@@ -169,17 +175,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    }
 
    /**
-    * Mostly used for unit tests.
-    * Set the file name of a script to be loaded and executed by the controller.
-    * @param scriptFileName
-    */
-   @Override
-   public void setScriptFile(String scriptFileName)
-   {
-      this.scriptFileName = scriptFileName;
-   }
-
-   /**
     * Sets whether the estimator and the controller are running on the same thread or multiThreaded. Defaults to multiThreaded.
     * Need to set to false if you want the simulation to be rewindable.
     * @param runMultiThreaded
@@ -190,9 +185,14 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       scsInitialSetup.setRunMultiThreaded(runMultiThreaded);
    }
 
+   public void setupControllerNetworkSubscriber(boolean setup)
+   {
+      setupControllerNetworkSubscriber = setup;
+   }
+
    /**
     * Set whether state estimation as on the the real robot or perfect sensors coming from the simulated robot should be used.
-    * By default the state estimator is used. 
+    * By default the state estimator is used.
     * @param usePerfectSensors
     */
    @Override
@@ -238,7 +238,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
     * @param robotInitialSetup
     */
    @Override
-   public void setRobotInitialSetup(DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup)
+   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       this.robotInitialSetup = robotInitialSetup;
    }
@@ -305,7 +305,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    /**
     * Creates a default output PacketCommunicator for the network processor.
     * This PacketCommunicator is also set to be used as input for the controller.
-    * @param networkParameters 
+    * @param networkParameters
     */
    private void createControllerCommunicator(DRCNetworkModuleParameters networkParameters)
    {
@@ -314,7 +314,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
          return;
 
       networkParameters.enableLocalControllerCommunicator(true);
-      
+
       IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
       controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList);
       try
@@ -325,7 +325,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       {
          throw new RuntimeException(e);
       }
-      
+
    }
 
 
@@ -350,11 +350,11 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    @Override
    public void startSimulation(DRCNetworkModuleParameters networkParameters, boolean automaticallyStartSimulation)
    {
-      if ((networkParameters != null)) // && (networkParameters.useController())) 
+      if ((networkParameters != null)) // && (networkParameters.useController()))
       {
          createControllerCommunicator(networkParameters);
       }
-      
+
       createSimulationFactory();
 
       if (automaticallyStartSimulation)
@@ -364,6 +364,12 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       {
          startNetworkProcessor(networkParameters);
       }
+   }
+
+
+   public ScriptBasedControllerCommandGenerator getScriptBasedControllerCommandGenerator()
+   {
+      return scriptBasedControllerCommandGenerator;
    }
 
    private void createSimulationFactory()
@@ -383,14 +389,24 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames, wristForceSensorNames,
             walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
-      
+      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
+      if (setupControllerNetworkSubscriber)
+         controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), controllerPacketCommunicator);
+
       for (int i = 0; i < highLevelBehaviorFactories.size(); i++)
          controllerFactory.addHighLevelBehaviorFactory(highLevelBehaviorFactories.get(i));
 
       if (deactivateWalkingFallDetector)
          controllerFactory.setFallbackControllerForFailure(null);
 
-      registerWalkingProviderFactory(dataProducer, controllerFactory);
+      controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
+
+      scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands);
+
+      if (addFootstepMessageGenerator && cheatWithGroundHeightAtForFootstep)
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, scsInitialSetup.getHeightMap());
+      else if (addFootstepMessageGenerator)
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript);
 
       drcSimulationFactory = new DRCSimulationFactory(robotModel, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup, dataProducer);
 
@@ -409,28 +425,9 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       drcSimulationFactory.start();
    }
 
-   private void registerWalkingProviderFactory(HumanoidGlobalDataProducer dataProducer, MomentumBasedControllerFactory controllerFactory)
+   public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()
    {
-      if ((scriptFileName != null) && (!scriptFileName.equals("")))
-      {
-         // Create providers that read a script file with command to be executed by the controller.
-         InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptFileName);
-         VariousWalkingProviderFromScriptFactory variousWalkingProviderFactory = new VariousWalkingProviderFromScriptFactory(scriptInputStream);
-         controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
-      }
-      else if (dataProducer != null)
-      {
-         // Create providers that listen to incoming packets through the HumanoidGlobalDataProducer, some of the producers are also able to send feedback.
-         FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControllerParameters);
-         VariousWalkingProviderFactory variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters, new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"));
-         controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
-      }
-      else
-      {
-         // Create providers that use YoVariables instead of packets or scripts. Mostly used for debugging or when the operator interface is inaccessible.
-         YoVariableVariousWalkingProviderFactory variousWalkingProviderFactory = new YoVariableVariousWalkingProviderFactory();
-         controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
-      }
+      return controllerCommands;
    }
 
    @Override
@@ -443,7 +440,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
          DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
          DRCRobotJointMap jointMap = robotModel.getJointMap();
          TimestampProvider timeStampProvider = drcSimulationFactory.getTimeStampProvider();
-         SDFHumanoidRobot robot = drcSimulationFactory.getRobot();
+         HumanoidFloatingRootJointRobot robot = drcSimulationFactory.getRobot();
          Graphics3DAdapter graphics3dAdapter = simulationConstructionSet.getGraphics3dAdapter();
 
          printIfDebug("Streaming SCS Video");
@@ -451,8 +448,8 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
          if (cameraParameters != null)
          {
             String cameraName = cameraParameters.getSensorNameInSdf();
-            int width = sdfRobot.getCamera(cameraName).getWidth();
-            int height = sdfRobot.getCamera(cameraName).getHeight();
+            int width = sdfRobot.getCameraMount(cameraName).getImageWidth();
+            int height = sdfRobot.getCameraMount(cameraName).getImageHeight();
 
             CameraConfiguration cameraConfiguration = new CameraConfiguration(cameraName);
             cameraConfiguration.setCameraMount(cameraName);
@@ -480,7 +477,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
     * Creates and starts the network processor.
     * The network processor is necessary to run the behavior module and/or the operator interface.
     * It has to be created after the simulation.
-    * @param networkModuleParams 
+    * @param networkModuleParams
     */
    private void startNetworkProcessor(DRCNetworkModuleParameters networkModuleParams)
    {
@@ -489,7 +486,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
          LocalObjectCommunicator simulatedSensorCommunicator = createSimulatedSensorsPacketCommunicator();
          networkModuleParams.setSimulatedSensorCommunicator(simulatedSensorCommunicator);
       }
-      
+
       networkProcessor = new DRCNetworkProcessor(robotModel, networkModuleParams);
    }
 
@@ -506,7 +503,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    }
 
    @Override
-   public SDFHumanoidRobot getSDFRobot()
+   public HumanoidFloatingRootJointRobot getSDFRobot()
    {
       return sdfRobot;
    }
@@ -534,5 +531,12 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       {
          controllerPacketCommunicator.close();
       }
+   }
+
+   public void addFootstepMessageGenerator(boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep)
+   {
+      addFootstepMessageGenerator = true;
+      this.useHeadingAndVelocityScript = useHeadingAndVelocityScript;
+      this.cheatWithGroundHeightAtForFootstep = cheatWithGroundHeightAtForFootstep;
    }
 }

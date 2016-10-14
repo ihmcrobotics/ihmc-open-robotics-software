@@ -9,7 +9,7 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableType;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -36,7 +36,7 @@ public class LongYoVariableTest
       longYoVariable = null;
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetAndGet()
    {
@@ -49,7 +49,7 @@ public class LongYoVariableTest
       }
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testIncrementDecrementAddSubtract()
    {
@@ -69,7 +69,7 @@ public class LongYoVariableTest
       assertEquals(value, longYoVariable.getLongValue());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testLargeValue()
    {
@@ -78,7 +78,7 @@ public class LongYoVariableTest
       assertEquals(value, longYoVariable.getLongValue());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testValueEquals()
    {
@@ -89,7 +89,7 @@ public class LongYoVariableTest
       assertTrue(longYoVariable.valueEquals(number));
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetFinal()
    {
@@ -102,7 +102,7 @@ public class LongYoVariableTest
       assertEquals(value, longYoVariable.getLongValue());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetValueFromDouble()
    {
@@ -113,7 +113,7 @@ public class LongYoVariableTest
       assertEquals(intValue, longYoVariable.getLongValue());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValueAsDouble()
    {
@@ -124,14 +124,14 @@ public class LongYoVariableTest
       assertEquals(15.0, result, EPSILON);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testToString()
    {
       assertEquals(longYoVariable.getName() + ": " + longYoVariable.getLongValue(), longYoVariable.toString());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValueString()
    {
@@ -143,7 +143,7 @@ public class LongYoVariableTest
       assertEquals("" + value, stringBuffer.toString());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValueStringFromDouble()
    {
@@ -156,14 +156,14 @@ public class LongYoVariableTest
       assertEquals("" + value, stringBuffer.toString());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetYoVariableType()
    {
       assertEquals(YoVariableType.LONG, longYoVariable.getYoVariableType());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetAndSetValueAsLongBits()
    {
@@ -178,7 +178,7 @@ public class LongYoVariableTest
       assertEquals(longValue, longYoVariable.getValueAsLongBits());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDuplicate()
    {
@@ -191,7 +191,7 @@ public class LongYoVariableTest
       assertEquals(longYoVariable2.getManualScalingMax(), duplicate.getManualScalingMax(), EPSILON);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetValue()
    {

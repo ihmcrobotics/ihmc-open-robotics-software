@@ -67,4 +67,13 @@ public class LidarMount implements SimulatedSensor
       return parentJoint;
    }
 
+   public RigidBodyTransform getTransformToHere()
+   {
+      return transformToHere;
+   }
+
+   public void updateTransformFromJoint(RigidBodyTransform transformFromJoint)
+   {
+      this.transformFromJoint.multiply(transformFromJoint);
+   }
 }

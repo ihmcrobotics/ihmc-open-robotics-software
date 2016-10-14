@@ -8,7 +8,7 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * Created by nathan on 8/12/15.
@@ -27,8 +27,8 @@ public class GenericCRC32Test
       CRC_32_BITSET = BitSet.valueOf(CRC_32_BYTE_BUFFER);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testUpdateLong()
    {
       Random random = new Random(4271L);

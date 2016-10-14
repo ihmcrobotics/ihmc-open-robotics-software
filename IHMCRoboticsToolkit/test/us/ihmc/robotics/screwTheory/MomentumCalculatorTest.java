@@ -9,8 +9,8 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -24,7 +24,7 @@ public class MomentumCalculatorTest
 {
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSingleRigidBodyTranslation()
    {
@@ -55,7 +55,7 @@ public class MomentumCalculatorTest
       assertTrue(linearMomentum.length() > epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSingleRigidBodyRotation()
    {
@@ -92,7 +92,7 @@ public class MomentumCalculatorTest
       assertTrue(angularMomentum.length() > epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChainAgainstCentroidalMomentumMatrix()
    {

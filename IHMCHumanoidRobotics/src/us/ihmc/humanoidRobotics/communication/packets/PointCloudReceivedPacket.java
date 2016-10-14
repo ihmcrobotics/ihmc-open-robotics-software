@@ -6,7 +6,7 @@ import us.ihmc.communication.packets.PacketDestination;
 public class PointCloudReceivedPacket extends Packet<PointCloudReceivedPacket>
 {
    public long latestCompleteReceivedPointCloudPacket;
-   
+
    public PointCloudReceivedPacket()
    {
       setDestination(PacketDestination.TRAFFIC_SHAPER);

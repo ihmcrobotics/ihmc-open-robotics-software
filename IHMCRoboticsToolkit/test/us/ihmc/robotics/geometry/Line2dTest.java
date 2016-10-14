@@ -17,8 +17,9 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.testing.MutationTestingTools;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class Line2dTest
 {
@@ -40,7 +41,7 @@ public class Line2dTest
       return new Point2d(randomDouble(random, 1.0e5), randomDouble(random, 1.0e5));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructors()
    {
@@ -68,8 +69,48 @@ public class Line2dTest
       }
 
    }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsPointInFrontOfLine2d()
+   {
+      Line2d line2d = new Line2d();
+      Point2d point1 = new Point2d();
+      Point2d point2 = new Point2d();
+      Point2d point3 = new Point2d();
+      Vector2d frontDirection = new Vector2d();
+      
+      point1.set(0.0, 0.0);
+      point2.set(1.0, 1.0);
+      line2d.set(point1, point2);
+      frontDirection.set(0.0, 1.0);
+      
+      point3.set(0.0, 1.0);
+      assertEquals("not equal", true, line2d.isPointInFrontOfLine(frontDirection, point3));
+      
+      point3.set(0.0, -1.0);
+      assertEquals("not equal", false, line2d.isPointInFrontOfLine(frontDirection, point3));
+      
+      point1.set(0.0, 0.0);
+      point2.set(-1.0, 1.0);
+      line2d.set(point1, point2);
+      
+      point3.set(0.0, 1.0);
+      assertEquals("not equal", true, line2d.isPointInFrontOfLine(frontDirection, point3));
+      
+      point3.set(0.0, -1.0);
+      assertEquals("not equal", false, line2d.isPointInFrontOfLine(frontDirection, point3));
+      
+      frontDirection.set(0.0, -1.0);
+      
+      point3.set(0.0, 1.0);
+      assertEquals("not equal", false, line2d.isPointInFrontOfLine(frontDirection, point3));
+      
+      point3.set(0.0, -1.0);
+      assertEquals("not equal", true, line2d.isPointInFrontOfLine(frontDirection, point3));
+   }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testPointVectorConstructorForException()
    {
@@ -79,7 +120,7 @@ public class Line2dTest
       new Line2d(firstPointOnLine, vector);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testPointPointConstructorForException()
    {
@@ -88,7 +129,7 @@ public class Line2dTest
       new Line2d(firstPointOnLine, firstPointOnLine);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetPoint()
    {
@@ -99,7 +140,7 @@ public class Line2dTest
       assertEquals(firstPointOnLine, line2d.getPoint());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetNormalizedVector()
    {
@@ -119,7 +160,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetNormalizedVectorCopy()
    {
@@ -137,7 +178,7 @@ public class Line2dTest
       assertFalse(line2d.getNormalizedVector() == normalizedVector2);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetSlope()
    {
@@ -163,7 +204,7 @@ public class Line2dTest
       assertEquals(Double.NEGATIVE_INFINITY, horizontalLine.getSlope(), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetXIntercept()
    {
@@ -194,7 +235,7 @@ public class Line2dTest
       assertEquals(Double.POSITIVE_INFINITY, line2d.getXIntercept(), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetYIntercept()
    {
@@ -226,7 +267,7 @@ public class Line2dTest
       assertEquals(Double.POSITIVE_INFINITY, line2d.getYIntercept(), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegateDirection()
    {
@@ -246,7 +287,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegateDirectionCopy()
    {
@@ -263,7 +304,7 @@ public class Line2dTest
       assertFalse(line2d.getNormalizedVector() == line2dNegated.getNormalizedVector());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPointPoint()
    {
@@ -290,7 +331,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSetPointPointException()
    {
@@ -300,7 +341,7 @@ public class Line2dTest
       line2d.set(firstPointOnLine, firstPointOnLine);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPointArray()
    {
@@ -328,7 +369,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPointArrayExceptions()
    {
@@ -373,7 +414,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetLine()
    {
@@ -400,7 +441,7 @@ public class Line2dTest
       assertFalse(secondLine2d.getNormalizedVector() == line2d.getNormalizedVector());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSetDoubleException()
    {
@@ -412,7 +453,7 @@ public class Line2dTest
       line2d.set(5.0, 6.0, 0.0, 0.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPoint2d()
    {
@@ -426,7 +467,7 @@ public class Line2dTest
       assertFalse(newPoint == line2d.getPoint());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRotate()
    {
@@ -447,7 +488,7 @@ public class Line2dTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testShiftToLeftAndRight()
    {
@@ -535,7 +576,7 @@ public class Line2dTest
       assertEquals(lineVector.getY(), shiftedLineVector.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInteriorBisector()
    {
@@ -585,7 +626,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPerpendicularVector()
    {
@@ -603,7 +644,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testContainsEpsilon()
    {
@@ -646,7 +687,7 @@ public class Line2dTest
       assertFalse(line2d.containsEpsilon(pointNearLine, epsilon));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPerpendicularLineThroughPoint()
    {
@@ -668,7 +709,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjection()
    {
@@ -685,20 +726,20 @@ public class Line2dTest
          Point2d pointOnLine = new Point2d(firstPointOnLine);
          double distance = randomDouble(random, 10.0);
          double perpendicularDistance = randomDouble(random, 10.0);
-         pointOnLine.x = pointOnLine.x + distance * normalizedVector.x;
-         pointOnLine.y = pointOnLine.y + distance * normalizedVector.y;
+         pointOnLine.setX(pointOnLine.getX() + distance * normalizedVector.getX());
+         pointOnLine.setY(pointOnLine.getY() + distance * normalizedVector.getY());
          Point2d pointOffLine = new Point2d(pointOnLine);
-         pointOffLine.x = pointOffLine.x + perpendicularDistance * perpendicular.x;
-         pointOffLine.y = pointOffLine.y + perpendicularDistance * perpendicular.y;
+         pointOffLine.setX(pointOffLine.getX() + perpendicularDistance * perpendicular.getX());
+         pointOffLine.setY(pointOffLine.getY() + perpendicularDistance * perpendicular.getY());
 
          line2d.orthogonalProjection(pointOffLine);
 
-         assertEquals(pointOnLine.x, pointOffLine.x, delta);
-         assertEquals(pointOnLine.y, pointOffLine.y, delta);
+         assertEquals(pointOnLine.getX(), pointOffLine.getX(), delta);
+         assertEquals(pointOnLine.getY(), pointOffLine.getY(), delta);
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjectionCopy()
    {
@@ -715,22 +756,22 @@ public class Line2dTest
          Point2d pointOnLine = new Point2d(firstPointOnLine);
          double distance = randomDouble(random, 10.0);
          double perpendicularDistance = randomDouble(random, 10.0);
-         pointOnLine.x = pointOnLine.x + distance * normalizedVector.x;
-         pointOnLine.y = pointOnLine.y + distance * normalizedVector.y;
+         pointOnLine.setX(pointOnLine.getX() + distance * normalizedVector.getX());
+         pointOnLine.setY(pointOnLine.getY() + distance * normalizedVector.getY());
          Point2d pointOffLine = new Point2d(pointOnLine);
-         pointOffLine.x = pointOffLine.x + perpendicularDistance * perpendicular.x;
-         pointOffLine.y = pointOffLine.y + perpendicularDistance * perpendicular.y;
+         pointOffLine.setX(pointOffLine.getX() + perpendicularDistance * perpendicular.getX());
+         pointOffLine.setY(pointOffLine.getY() + perpendicularDistance * perpendicular.getY());
 
          Point2d orthogonalCopy = line2d.orthogonalProjectionCopy(pointOffLine);
 
-         assertEquals(pointOnLine.x, orthogonalCopy.x, delta);
-         assertEquals(pointOnLine.y, orthogonalCopy.y, delta);
+         assertEquals(pointOnLine.getX(), orthogonalCopy.getX(), delta);
+         assertEquals(pointOnLine.getY(), orthogonalCopy.getY(), delta);
          assertNotSame(pointOnLine, orthogonalCopy);
          assertNotSame(pointOffLine, orthogonalCopy);
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionWithLineSegment2d()
    {
@@ -756,8 +797,8 @@ public class Line2dTest
          Vector2d direction = new Vector2d(randomDouble(random, 10.0), randomDouble(random, 10.0));
          Line2d lineThroughEndPoint = new Line2d(firstPoint, direction);
          Point2d intersection = lineThroughEndPoint.intersectionWith(lineSegment2d);
-         assertEquals(firstPoint.x, intersection.x, delta);
-         assertEquals(firstPoint.y, intersection.y, delta);
+         assertEquals(firstPoint.getX(), intersection.getX(), delta);
+         assertEquals(firstPoint.getY(), intersection.getY(), delta);
          lineThroughEndPoint.setPoint2d(secondPoint);
          intersection = lineThroughEndPoint.intersectionWith(lineSegment2d);
 
@@ -771,12 +812,12 @@ public class Line2dTest
 
          Line2d intersectingLine = new Line2d(midPoint, direction);
          intersection = intersectingLine.intersectionWith(lineSegment2d);
-         assertEquals(midPoint.x, intersection.x, delta);
-         assertEquals(midPoint.y, intersection.y, delta);
+         assertEquals(midPoint.getX(), intersection.getX(), delta);
+         assertEquals(midPoint.getY(), intersection.getY(), delta);
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInterSectionWithLine2d()
    {
@@ -795,11 +836,11 @@ public class Line2dTest
          Point2d intersectionFirstWithSecond = firstLine.intersectionWith(secondLine);
          Point2d intersectionSecondWithFirst = secondLine.intersectionWith(firstLine);
 
-         assertEquals(secondPointOnFirstLine.x, intersectionFirstWithSecond.x, delta);
-         assertEquals(secondPointOnFirstLine.y, intersectionFirstWithSecond.y, delta);
+         assertEquals(secondPointOnFirstLine.getX(), intersectionFirstWithSecond.getX(), delta);
+         assertEquals(secondPointOnFirstLine.getY(), intersectionFirstWithSecond.getY(), delta);
 
-         assertEquals(secondPointOnFirstLine.x, intersectionSecondWithFirst.x, delta);
-         assertEquals(secondPointOnFirstLine.y, intersectionSecondWithFirst.y, delta);
+         assertEquals(secondPointOnFirstLine.getX(), intersectionSecondWithFirst.getX(), delta);
+         assertEquals(secondPointOnFirstLine.getY(), intersectionSecondWithFirst.getY(), delta);
 
          Line2d firstLineCopy = new Line2d(firstLine);
          Point2d intersectionWithParallel = firstLine.intersectionWith(firstLineCopy);
@@ -818,7 +859,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDistancePoint2d()
    {
@@ -836,15 +877,15 @@ public class Line2dTest
 
          Line2d orthogonalLine = line2d.perpendicularLineThroughPoint(firstPointOnLine);
          Point2d orthogonalProjection = orthogonalLine.orthogonalProjectionCopy(distantPoint);
-         double xdiff = orthogonalProjection.x - firstPointOnLine.x;
-         double ydiff = orthogonalProjection.y - firstPointOnLine.y;
+         double xdiff = orthogonalProjection.getX() - firstPointOnLine.getX();
+         double ydiff = orthogonalProjection.getY() - firstPointOnLine.getY();
          double distance = Math.sqrt(xdiff * xdiff + ydiff * ydiff);
 
          assertEquals(distance, calculatedDistance, delta);
       }
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testDistanceLine2d()
    {
@@ -852,7 +893,7 @@ public class Line2dTest
       fail("Has not been implemented yet.");
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testDistanceLineSegment2d()
    {
@@ -860,7 +901,7 @@ public class Line2dTest
       fail("Has not been implemented yet.");
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testDistanceConvexPolygon2d()
    {
@@ -868,7 +909,7 @@ public class Line2dTest
       fail("Has not been implemented yet.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void isPointOnLineTest()
    {
@@ -884,7 +925,7 @@ public class Line2dTest
       assertTrue(line.isPointOnLine(point4));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void areLinesPerpendicularTest()
    {
@@ -908,7 +949,7 @@ public class Line2dTest
       assertTrue(line1.areLinesPerpendicular(line3));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointOnLeftSideOfLine()
    {
@@ -939,7 +980,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointOnRightSideOfLine()
    {
@@ -971,7 +1012,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSideConsistency()
    {
@@ -995,7 +1036,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointInFrontOfLine()
    {
@@ -1007,16 +1048,16 @@ public class Line2dTest
          Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
          Point2d checkPoint = new Point2d(secondPointOnLine);
          double shift = (randomDouble(random) + maxRandomValue) / 2.0 + 1.0;    // Makes sure the shift is strictly positive.
-         checkPoint.x = checkPoint.x + shift;
+         checkPoint.setX(checkPoint.getX() + shift);
          assertTrue(line2d.isPointInFrontOfLine(checkPoint));
-         checkPoint.x = checkPoint.x - 2.0 * shift;
+         checkPoint.setX(checkPoint.getX() - 2.0 * shift);
          assertFalse(line2d.isPointInFrontOfLine(checkPoint));
 
          // TODO: is a test necessary where the point is exactly on the line? These kind of tests might fail due to floating point errors.
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointInFrontOfLineException()
    {
@@ -1038,7 +1079,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointBehindLine()
    {
@@ -1050,16 +1091,16 @@ public class Line2dTest
          Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
          Point2d checkPoint = new Point2d(secondPointOnLine);
          double shift = (randomDouble(random) - maxRandomValue) / 2.0 - 1.0;    // Makes sure the shift is strictly negative.
-         checkPoint.x = checkPoint.x + shift;
+         checkPoint.setX(checkPoint.getX() + shift);
          assertTrue(line2d.isPointBehindLine(checkPoint));
-         checkPoint.x = checkPoint.x - 2.0 * shift;
+         checkPoint.setX(checkPoint.getX() - 2.0 * shift);
          assertFalse(line2d.isPointBehindLine(checkPoint));
 
          // TODO: is a test necessary where the point is exactly on the line? These kind of tests might fail due to floating point errors.
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointBehindLineException()
    {
@@ -1081,7 +1122,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFrontBehindConsistency()
    {
@@ -1093,12 +1134,12 @@ public class Line2dTest
          Line2d line2d = new Line2d(firstPointOnLine, secondPointOnLine);
          Point2d checkPoint = new Point2d(secondPointOnLine);
          double shift = randomDouble(random);
-         checkPoint.x = checkPoint.x + shift;
+         checkPoint.setX(checkPoint.getX() + shift);
          assertFalse(line2d.isPointBehindLine(checkPoint) == line2d.isPointInFrontOfLine(checkPoint));
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetParameterGivenPointEpsilon()
    {
@@ -1123,7 +1164,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetParameterGivenPointEpsilonException()
    {
@@ -1154,7 +1195,7 @@ public class Line2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionWithConvexPolygon()
    {
@@ -1211,7 +1252,7 @@ public class Line2dTest
       // assertEquals(2, intersections.length);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testcontainsNaN()
    {
@@ -1225,62 +1266,62 @@ public class Line2dTest
          assertFalse(line2d.containsNaN());
 
          Point2d point = line2d.getPoint();
-         point.x = Double.NaN;
+         point.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         point.y = Double.NaN;
+         point.setY(Double.NaN);
          assertTrue(line2d.containsNaN());
 
          Vector2d vector = line2d.getNormalizedVector();
          Vector2d vectorCopy = new Vector2d();
          line2d.getNormalizedVector(vectorCopy);
-         vector.x = Double.NaN;
+         vector.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = vectorCopy.x;
-         vector.y = Double.NaN;
+         vector.setX(vectorCopy.getX());
+         vector.setY(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = Double.NaN;
+         vector.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = vectorCopy.x;
-         point.y = Double.NaN;
+         vector.setX(vectorCopy.getX());
+         point.setY(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         point.x = Double.NaN;
+         point.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.y = vectorCopy.y;
-         vector.x = Double.NaN;
+         vector.setY(vectorCopy.getY());
+         vector.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         point.y = Double.NaN;
+         point.setY(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = vectorCopy.x;
-         point.x = Double.NaN;
+         vector.setX(vectorCopy.getX());
+         point.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = Double.NaN;
+         vector.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = vectorCopy.x;
-         vector.y = Double.NaN;
+         vector.setX(vectorCopy.getX());
+         vector.setY(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         vector.x = Double.NaN;
+         vector.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         point.y = Double.NaN;
+         point.setY(Double.NaN);
          assertTrue(line2d.containsNaN());
 
-         point.x = Double.NaN;
+         point.setX(Double.NaN);
          assertTrue(line2d.containsNaN());
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetParallelThroughPoint()
    {
@@ -1297,14 +1338,14 @@ public class Line2dTest
          Point2d checkPoint = randomPoint(random);
          parallelLine.setParallelLineThroughPoint(checkPoint);
 
-         assertEquals(line2d.getNormalizedVector().x, parallelLine.getNormalizedVector().x, delta);
-         assertEquals(line2d.getNormalizedVector().y, parallelLine.getNormalizedVector().y, delta);
+         assertEquals(line2d.getNormalizedVector().getX(), parallelLine.getNormalizedVector().getX(), delta);
+         assertEquals(line2d.getNormalizedVector().getY(), parallelLine.getNormalizedVector().getY(), delta);
 
          assertTrue(parallelLine.containsEpsilon(checkPoint, delta));
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransformTranslation()
    {
@@ -1317,7 +1358,7 @@ public class Line2dTest
       Vector3d translation = new Vector3d(random.nextDouble(), random.nextDouble(), 0.0);
       Vector3d eulerAngles = new Vector3d(0.0, 0.0, 0.0);
 
-      transform.setEuler(eulerAngles);
+      transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
       Point2d firstPointOnLine = randomPoint(random);
@@ -1329,13 +1370,13 @@ public class Line2dTest
       line.getNormalizedVector(vector);
 
       line.applyTransform(transform);
-      assertEquals("pure translation failed", point.x + translation.x, line.point.x, delta);
-      assertEquals("pure translation failed", point.y + translation.y, line.point.y, delta);
-      assertEquals("pure translation failed", vector.x, line.normalizedVector.x, delta);
-      assertEquals("pure translation failed", vector.y, line.normalizedVector.y, delta);
+      assertEquals("pure translation failed", point.getX() + translation.getX(), line.point.getX(), delta);
+      assertEquals("pure translation failed", point.getY() + translation.getY(), line.point.getY(), delta);
+      assertEquals("pure translation failed", vector.getX(), line.normalizedVector.getX(), delta);
+      assertEquals("pure translation failed", vector.getY(), line.normalizedVector.getY(), delta);
    }
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testApplyTransformTranslationException()
    {
@@ -1346,7 +1387,7 @@ public class Line2dTest
       Vector3d translation = new Vector3d(random.nextDouble(), random.nextDouble(), 1.0);
       Vector3d eulerAngles = new Vector3d(0.0, 0.0, 0.0);
 
-      transform.setEuler(eulerAngles);
+      transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
 
@@ -1360,7 +1401,7 @@ public class Line2dTest
       line.applyTransform(transform);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransformRotation()
    {
@@ -1375,7 +1416,7 @@ public class Line2dTest
       Vector3d translation = new Vector3d(0.0, 0.0, 0.0);
       Vector3d eulerAngles = new Vector3d(0.0, 0.0, randomDouble(random, 2.0 * Math.PI));
 
-      transform.setEuler(eulerAngles);
+      transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
       Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
@@ -1386,17 +1427,17 @@ public class Line2dTest
 
       line.applyTransform(transform);
 
-      double alpha = eulerAngles.z;
+      double alpha = eulerAngles.getZ();
       double sina = Math.sin(alpha);
       double cosa = Math.cos(alpha);
 
-      assertEquals("pure rotation failed", point.x * cosa - point.y * sina, line.point.x, delta);
-      assertEquals("pure rotation failed", point.x * sina + point.y * cosa, line.point.y, delta);
-      assertEquals("pure rotation failed", vector.x * cosa - vector.y * sina, line.normalizedVector.x, delta);
-      assertEquals("pure rotation failed", vector.x * sina + vector.y * cosa, line.normalizedVector.y, delta);
+      assertEquals("pure rotation failed", point.getX() * cosa - point.getY() * sina, line.point.getX(), delta);
+      assertEquals("pure rotation failed", point.getX() * sina + point.getY() * cosa, line.point.getY(), delta);
+      assertEquals("pure rotation failed", vector.getX() * cosa - vector.getY() * sina, line.normalizedVector.getX(), delta);
+      assertEquals("pure rotation failed", vector.getX() * sina + vector.getY() * cosa, line.normalizedVector.getY(), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testApplyTransformRotationXaxisException()
    {
@@ -1409,7 +1450,7 @@ public class Line2dTest
       Vector3d translation = new Vector3d(0.0, 0.0, 0.0);
       Vector3d eulerAngles = new Vector3d(randomDouble(random, 2.0 * Math.PI), 0.0, 0.0);
 
-      transform.setEuler(eulerAngles);
+      transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
       Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
@@ -1417,7 +1458,7 @@ public class Line2dTest
       line.applyTransform(transform);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testApplyTransformRotationYaxisException()
    {
@@ -1430,7 +1471,7 @@ public class Line2dTest
       Vector3d translation = new Vector3d(0.0, 0.0, 0.0);
       Vector3d eulerAngles = new Vector3d(0.0, randomDouble(random, 2.0 * Math.PI), 0.0);
 
-      transform.setEuler(eulerAngles);
+      transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
       Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
@@ -1438,7 +1479,7 @@ public class Line2dTest
       line.applyTransform(transform);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransformCombination()
    {
@@ -1453,7 +1494,7 @@ public class Line2dTest
       Vector3d translation = new Vector3d(randomDouble(random), randomDouble(random), 0.0);
       Vector3d eulerAngles = new Vector3d(0.0, 0.0, randomDouble(random, 2.0 * Math.PI));
 
-      transform.setEuler(eulerAngles);
+      transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
       Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
@@ -1464,17 +1505,17 @@ public class Line2dTest
 
       line.applyTransform(transform);
 
-      double alpha = eulerAngles.z;
+      double alpha = eulerAngles.getZ();
       double sina = Math.sin(alpha);
       double cosa = Math.cos(alpha);
 
-      assertEquals("pure rotation failed", point.x * cosa - point.y * sina + translation.x, line.point.x, delta);
-      assertEquals("pure rotation failed", point.x * sina + point.y * cosa + translation.y, line.point.y, delta);
-      assertEquals("pure rotation failed", vector.x * cosa - vector.y * sina, line.normalizedVector.x, delta);
-      assertEquals("pure rotation failed", vector.x * sina + vector.y * cosa, line.normalizedVector.y, delta);
+      assertEquals("pure rotation failed", point.getX() * cosa - point.getY() * sina + translation.getX(), line.point.getX(), delta);
+      assertEquals("pure rotation failed", point.getX() * sina + point.getY() * cosa + translation.getY(), line.point.getY(), delta);
+      assertEquals("pure rotation failed", vector.getX() * cosa - vector.getY() * sina, line.normalizedVector.getX(), delta);
+      assertEquals("pure rotation failed", vector.getX() * sina + vector.getY() * cosa, line.normalizedVector.getY(), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransformCopy()
    {
@@ -1489,7 +1530,7 @@ public class Line2dTest
       Vector3d translation = new Vector3d(randomDouble(random), randomDouble(random), 0.0);
       Vector3d eulerAngles = new Vector3d(0.0, 0.0, randomDouble(random, 2.0 * Math.PI));
 
-      transform.setEuler(eulerAngles);
+      transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
       Line2d line = new Line2d(firstPointOnLine, secondPointOnLine);
@@ -1503,13 +1544,13 @@ public class Line2dTest
       assertNotSame(transformedCopy, line);
       assertNotSame(transformedCopy.point, line.point);
       assertNotSame(transformedCopy.normalizedVector, line.normalizedVector);
-      assertEquals(line.point.x, transformedCopy.point.x, delta);
-      assertEquals(line.point.y, transformedCopy.point.y, delta);
-      assertEquals(line.normalizedVector.x, transformedCopy.normalizedVector.x, delta);
-      assertEquals(line.normalizedVector.y, transformedCopy.normalizedVector.y, delta);
+      assertEquals(line.point.getX(), transformedCopy.point.getX(), delta);
+      assertEquals(line.point.getY(), transformedCopy.point.getY(), delta);
+      assertEquals(line.normalizedVector.getX(), transformedCopy.normalizedVector.getX(), delta);
+      assertEquals(line.normalizedVector.getY(), transformedCopy.normalizedVector.getY(), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjectionCopyPoint2dLine2d()
    {
@@ -1552,7 +1593,7 @@ public class Line2dTest
       assertEquals(new Point2d(5.0, 0.0), projectedPoint);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionLine2dLine2d()
    {
@@ -1585,7 +1626,7 @@ public class Line2dTest
       assertEquals(null, line1.intersectionWith(line9));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDistancePointLineTwo()
    {
@@ -1606,6 +1647,13 @@ public class Line2dTest
       distance = line.distance(point);
       delta = 1e-12;
       assertEquals("Distance to a horizontal line not calculated correctly", 3.0, distance, delta);
+   }
+	
+	public static void main(String[] args)
+   {
+	   String targetTests = "us.ihmc.robotics.geometry.Line2dTest";
+	   String targetClasses = "us.ihmc.robotics.geometry.FrameTuple,us.ihmc.robotics.geometry.Line2d";
+	   MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
    }
 
 }

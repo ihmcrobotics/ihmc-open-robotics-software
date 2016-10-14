@@ -12,7 +12,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -28,8 +29,8 @@ public class ContactableDoorRobotTest
    
    RigidBodyTransform doorToWorldTransform = new RigidBodyTransform();
    
-   @DeployableTestMethod
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPointIsClose()
    {      
       double epsilon = 1e-4;
@@ -43,13 +44,13 @@ public class ContactableDoorRobotTest
       assertFalse(door.isClose(new Point3d(1e4, -1e4, 1e4)));
       assertTrue(door.isPointOnOrInside(tempPos));
       Point3d diagonal = new Point3d(
-            tempPos.x + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.x, 
-            tempPos.y + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.y, 
-            tempPos.z + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.z);
+            tempPos.getX() + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 
+            tempPos.getY() + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getY(), 
+            tempPos.getZ() + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getZ());
       assertTrue(door.isPointOnOrInside(diagonal));
    }
    
-   @DeployableTestMethod
+   @ContinuousIntegrationTest(estimatedDuration = 1.4)
    @Test(timeout=300000)
    public void testDoorIsClosing()
    {
@@ -80,7 +81,7 @@ public class ContactableDoorRobotTest
       }
       catch (Exception e)
       {
-         System.err.println("Caught exception in SimulationTestHelper.simulateAndBlockAndCatchExceptions. Exception = " + e);
+         PrintTools.error(this, e.getMessage());
       }
        
       assertTrue(Math.abs(door.getHingeYaw()) < 1e-3);

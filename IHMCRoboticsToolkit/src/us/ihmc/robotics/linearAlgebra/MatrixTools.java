@@ -10,12 +10,14 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4d;
 import javax.vecmath.Vector4f;
 
+import org.ejml.alg.dense.misc.TransposeAlgs;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixIO;
@@ -24,10 +26,13 @@ import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.robotics.math.frames.YoFrameTuple;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MatrixTools
@@ -681,21 +686,21 @@ public class MatrixTools
     */
    public static void setTildeTimesTilde(Matrix3d M, Tuple3d a, Tuple3d b)
    {
-      double axbx = a.x * b.x;
-      double ayby = a.y * b.y;
-      double azbz = a.z * b.z;
+      double axbx = a.getX() * b.getX();
+      double ayby = a.getY() * b.getY();
+      double azbz = a.getZ() * b.getZ();
 
-      M.m00 = -azbz - ayby;
-      M.m01 = a.y * b.x;
-      M.m02 = a.z * b.x;
+      M.setM00(-azbz - ayby);
+      M.setM01(a.getY() * b.getX());
+      M.setM02(a.getZ() * b.getX());
 
-      M.m10 = a.x * b.y;
-      M.m11 = -axbx - azbz;
-      M.m12 = a.z * b.y;
+      M.setM10(a.getX() * b.getY());
+      M.setM11(-axbx - azbz);
+      M.setM12(a.getZ() * b.getY());
 
-      M.m20 = a.x * b.z;
-      M.m21 = a.y * b.z;
-      M.m22 = -axbx - ayby;
+      M.setM20(a.getX() * b.getZ());
+      M.setM21(a.getY() * b.getZ());
+      M.setM22(-axbx - ayby);
    }
 
    public static void setDenseMatrixFromMatrix3d(int startRow, int startColumn, Matrix3d fromMatrix3d, DenseMatrix64F denseMatrix)
@@ -793,6 +798,12 @@ public class MatrixTools
       matrixToPack.set(startRow + 2, startColumn, tuple.getZ());
    }
 
+   public static void setDenseMatrixFromTuple2d(DenseMatrix64F matrixToPack, Tuple2d tuple, int startRow, int startColumn)
+   {
+      matrixToPack.set(startRow + 0, startColumn, tuple.getX());
+      matrixToPack.set(startRow + 1, startColumn, tuple.getY());
+   }
+
    public static int denseMatrixToArrayColumnMajor(DenseMatrix64F src, int srcStartRow, int srcStartCol, int numRows, int numCols, double[] dest,
          int destStartIndex)
    {
@@ -850,6 +861,33 @@ public class MatrixTools
       frameTuple.setZ(ejmlVector.get(startIndex + 2, 0));
    }
 
+   public static void extractYoFrameTupleFromEJMLVector(YoFrameTuple<?, ?> yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
+   {
+      yoFrameTuple.setX(ejmlVector.get(startIndex + 0, 0));
+      yoFrameTuple.setY(ejmlVector.get(startIndex + 1, 0));
+      yoFrameTuple.setZ(ejmlVector.get(startIndex + 2, 0));
+   }
+
+   public static void extractYoFrameQuaternionFromEJMLVector(YoFrameQuaternion yoFrameQuaternion, DenseMatrix64F matrix, int rowStart)
+   {
+      int index = rowStart;
+      double x = matrix.get(index++, 0);
+      double y = matrix.get(index++, 0);
+      double z = matrix.get(index++, 0);
+      double w = matrix.get(index++, 0);
+      yoFrameQuaternion.set(x, y, z, w);
+   }
+
+   public static void extractFrameOrientationFromEJMLVector(FrameOrientation frameOrientation, DenseMatrix64F matrix, int rowStart)
+   {
+      int index = rowStart;
+      double x = matrix.get(index++, 0);
+      double y = matrix.get(index++, 0);
+      double z = matrix.get(index++, 0);
+      double w = matrix.get(index++, 0);
+      frameOrientation.set(x, y, z, w);
+   }
+
    public static void extractQuat4dFromEJMLVector(Quat4d quaternion, DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
@@ -879,6 +917,31 @@ public class MatrixTools
       ejmlVector.set(startIndex + 0, 0, frameTuple.getX());
       ejmlVector.set(startIndex + 1, 0, frameTuple.getY());
       ejmlVector.set(startIndex + 2, 0, frameTuple.getZ());
+   }
+
+   public static void insertYoFrameTupleIntoEJMLVector(YoFrameTuple<?, ?> yoFrameTuple, DenseMatrix64F ejmlVector, int startIndex)
+   {
+      ejmlVector.set(startIndex + 0, 0, yoFrameTuple.getX());
+      ejmlVector.set(startIndex + 1, 0, yoFrameTuple.getY());
+      ejmlVector.set(startIndex + 2, 0, yoFrameTuple.getZ());
+   }
+
+   public static void insertYoFrameQuaternionIntoEJMLVector(YoFrameQuaternion yoFrameQuaternion, DenseMatrix64F matrix, int rowStart)
+   {
+      int index = rowStart;
+      matrix.set(index++, 0, yoFrameQuaternion.getQx());
+      matrix.set(index++, 0, yoFrameQuaternion.getQy());
+      matrix.set(index++, 0, yoFrameQuaternion.getQz());
+      matrix.set(index++, 0, yoFrameQuaternion.getQs());
+   }
+
+   public static void insertFrameOrientationIntoEJMLVector(FrameOrientation frameOrientation, DenseMatrix64F matrix, int rowStart)
+   {
+      int index = rowStart;
+      matrix.set(index++, 0, frameOrientation.getQx());
+      matrix.set(index++, 0, frameOrientation.getQy());
+      matrix.set(index++, 0, frameOrientation.getQz());
+      matrix.set(index++, 0, frameOrientation.getQs());
    }
 
    public static void insertQuat4dIntoEJMLVector(DenseMatrix64F matrix, Quat4d quaternion, int rowStart)
@@ -991,13 +1054,13 @@ public class MatrixTools
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      double x = point.x;
-      double y = point.y;
-      double z = point.z;
+      double x = point.getX();
+      double y = point.getY();
+      double z = point.getZ();
 
-      point.x = matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z;
-      point.y = matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z;
-      point.z = matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z;
+      point.setX(matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z);
+      point.setY(matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z);
+      point.setZ(matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z);
    }
 
    /**
@@ -1011,13 +1074,13 @@ public class MatrixTools
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      double x = point.x;
-      double y = point.y;
-      double z = point.z;
+      double x = point.getX();
+      double y = point.getY();
+      double z = point.getZ();
 
-      point.x = (float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z);
-      point.y = (float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z);
-      point.z = (float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z);
+      point.setX((float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z));
+      point.setY((float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z));
+      point.setZ((float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z));
    }
 
    /**
@@ -1031,13 +1094,13 @@ public class MatrixTools
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      double x = vector.x;
-      double y = vector.y;
-      double z = vector.z;
+      double x = vector.getX();
+      double y = vector.getY();
+      double z = vector.getZ();
 
-      vector.x = matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z;
-      vector.y = matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z;
-      vector.z = matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z;
+      vector.setX(matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z);
+      vector.setY(matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z);
+      vector.setZ(matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z);
    }
 
    /**
@@ -1051,13 +1114,13 @@ public class MatrixTools
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      float x = vector.x;
-      float y = vector.y;
-      float z = vector.z;
+      float x = vector.getX();
+      float y = vector.getY();
+      float z = vector.getZ();
 
-      vector.x = (float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z);
-      vector.y = (float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z);
-      vector.z = (float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z);
+      vector.setX((float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z));
+      vector.setY((float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z));
+      vector.setZ((float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z));
    }
 
    /**
@@ -1071,15 +1134,15 @@ public class MatrixTools
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      double x = vector.x;
-      double y = vector.y;
-      double z = vector.z;
-      double w = vector.w;
+      double x = vector.getX();
+      double y = vector.getY();
+      double z = vector.getZ();
+      double w = vector.getW();
 
-      vector.x = matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z + matrix.get(0, 3) * w;
-      vector.y = matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z + matrix.get(1, 3) * w;
-      vector.z = matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z + matrix.get(2, 3) * w;
-      vector.w = matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * w;
+      vector.setX(matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z + matrix.get(0, 3) * w);
+      vector.setY(matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z + matrix.get(1, 3) * w);
+      vector.setZ(matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z + matrix.get(2, 3) * w);
+      vector.setW(matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * w);
    }
 
    /**
@@ -1093,15 +1156,15 @@ public class MatrixTools
       {
          throw new RuntimeException("Improperly sized matrices.");
       }
-      float x = vector.x;
-      float y = vector.y;
-      float z = vector.z;
-      float w = vector.w;
+      float x = vector.getX();
+      float y = vector.getY();
+      float z = vector.getZ();
+      float w = vector.getW();
 
-      vector.x = (float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z + matrix.get(0, 3) * w);
-      vector.y = (float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z + matrix.get(1, 3) * w);
-      vector.z = (float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z + matrix.get(2, 3) * w);
-      vector.w = (float) (matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * w);
+      vector.setX((float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z + matrix.get(0, 3) * w));
+      vector.setY((float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z + matrix.get(1, 3) * w));
+      vector.setZ((float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z + matrix.get(2, 3) * w));
+      vector.setW((float) (matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * w));
    }
 
    public static void removeRow(DenseMatrix64F matrixToRemoveRowTo, int indexOfRowToRemove)
@@ -1139,6 +1202,56 @@ public class MatrixTools
       }
    }
 
+   /**
+    * <p>
+    * Transposes matrix 'a' and stores the results in 'b':<br>
+    * <br>
+    * b<sub>ij</sub> = &alpha;*a<sub>ji</sub><br>
+    * where 'b' is the scaled transpose of 'a'.
+    * </p>
+    * 
+    * Transpose algorithm taken from {@link TransposeAlgs#standard(org.ejml.data.RowD1Matrix64F, org.ejml.data.RowD1Matrix64F)}.
+    * @param alpha the amount each element is multiplied by.
+    * @param a The matrix that is to be scaled and transposed.  Not modified.
+    * @param b Where the scaled transpose is stored. Modified.
+    */
+   public static void scaleTranspose(double alpha, DenseMatrix64F a, DenseMatrix64F b)
+   {
+      if (a.getNumRows() != b.getNumCols() || a.getNumCols() != b.getNumRows())
+         throw new IllegalArgumentException("Incompatible matrix dimensions");
+
+      int index = 0;
+      for (int i = 0; i < b.numRows; i++)
+      {
+         int index2 = i;
+
+         int end = index + b.numCols;
+         while (index < end)
+         {
+            b.data[index++] = alpha * a.data[index2];
+            index2 += a.numCols;
+         }
+      }
+   }
+
+   public static void scaleColumn(double alpha, int column, DenseMatrix64F matrix)
+   {
+      if( column < 0 || column >= matrix.getNumCols())
+         throw new IllegalArgumentException("Specified column index is out of bounds: " + column + ", number of columns in matrix: " + matrix.getNumCols());
+
+      for (int row = 0; row < matrix.getNumRows(); row++)
+         matrix.unsafe_set(row, column, alpha * matrix.unsafe_get(row, column));
+   }
+
+   public static void scaleRow(double alpha, int row, DenseMatrix64F matrix)
+   {
+      if( row < 0 || row >= matrix.getNumRows())
+         throw new IllegalArgumentException("Specified row index is out of bounds: " + row + ", number of rows in matrix: " + matrix.getNumRows());
+      
+      for (int column = 0; column < matrix.getNumCols(); column++)
+         matrix.unsafe_set(row, column, alpha * matrix.unsafe_get(row, column));
+   }
+   
    public static void printJavaForConstruction(String name, DenseMatrix64F matrix)
    {
       StringBuffer stringBuffer = new StringBuffer();

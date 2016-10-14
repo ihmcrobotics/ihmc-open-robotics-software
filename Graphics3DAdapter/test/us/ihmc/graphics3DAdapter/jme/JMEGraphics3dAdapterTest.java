@@ -5,15 +5,15 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.examples.Graphics3DAdapterExampleOne;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets={TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMEGraphics3dAdapterTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 6.2)
+	@ContinuousIntegrationTest(estimatedDuration = 6.2)
 	@Test(timeout = 31000)
    public void testSimpleObject()
    {

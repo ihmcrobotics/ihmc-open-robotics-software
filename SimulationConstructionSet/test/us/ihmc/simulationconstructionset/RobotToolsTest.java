@@ -11,7 +11,7 @@ import org.junit.Test;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class RobotToolsTest
 {
@@ -27,7 +27,7 @@ public class RobotToolsTest
       return randomFloatingChain;
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testScsRobotFromInverseDynamicsRobotModel()
    {
@@ -37,7 +37,7 @@ public class RobotToolsTest
       assertNotNull(scsRobotFromInverseDynamicsRobotModel);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testAddScsJointUsingIDJoint()
    {

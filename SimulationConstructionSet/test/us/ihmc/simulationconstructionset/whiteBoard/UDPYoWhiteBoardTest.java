@@ -5,12 +5,12 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
 {
-
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 2.7)
 	@Test(timeout=300000)
    public void testUDPWhiteBoardOne() throws IOException
    {
@@ -23,26 +23,17 @@ public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
       UDPYoWhiteBoard leftWhiteBoard = new UDPYoWhiteBoard("leftTest", true, IPAddress, leftSendRightReceivePort, leftReceiveRightSendPort, throwOutStalePackets);
       UDPYoWhiteBoard rightWhiteBoard = new UDPYoWhiteBoard("rightTest", false, IPAddress, leftReceiveRightSendPort, leftSendRightReceivePort, throwOutStalePackets);
 
-      Thread leftWhiteBoardThread = new Thread(leftWhiteBoard);
-      Thread rightWhiteBoardThread = new Thread(rightWhiteBoard);
+      leftWhiteBoard.startUDPThread();
 
-      leftWhiteBoardThread.start();
+      ThreadTools.sleepSeconds(2.0);
 
-      try
-      {
-         Thread.sleep(2000);
-      }
-      catch (InterruptedException e)
-      {
-      }
-
-      rightWhiteBoardThread.start();
+      rightWhiteBoard.startUDPThread();
 
       int numberOfTests = 500;
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 203, 207);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 3.9)
 	@Test(timeout=300000)
    public void testUDPWhiteBoardTwo() throws IOException
    {
@@ -55,24 +46,13 @@ public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
       UDPYoWhiteBoard leftWhiteBoard = new UDPYoWhiteBoard("leftTest", true, IPAddress, leftSendRightReceivePort, leftReceiveRightSendPort, throwOutStalePackets);
       UDPYoWhiteBoard rightWhiteBoard = new UDPYoWhiteBoard("rightTest", false, IPAddress, leftReceiveRightSendPort, leftSendRightReceivePort, throwOutStalePackets);
 
-      Thread leftWhiteBoardThread = new Thread(leftWhiteBoard);
-      Thread rightWhiteBoardThread = new Thread(rightWhiteBoard);
+      leftWhiteBoard.startUDPThread();
 
-      leftWhiteBoardThread.start();
+      ThreadTools.sleepSeconds(2.0);
 
-      try
-      {
-         Thread.sleep(2000);
-      }
-      catch (InterruptedException e)
-      {
-      }
-
-      rightWhiteBoardThread.start();
+      rightWhiteBoard.startUDPThread();
 
       int numberOfTests = 500;
       this.doAnAsynchronousTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 234, 179);
    }
-
-
 }

@@ -1,8 +1,6 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -11,6 +9,7 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
@@ -23,11 +22,11 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class MatrixToolsTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaNDenseMatrix()
    {
@@ -43,7 +42,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToZeroDenseMatrix()
    {
@@ -59,7 +58,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetMatrixColumnFromArrayDenseMatrix()
    {
@@ -74,7 +73,7 @@ public class MatrixToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetMatrixFromOneBasedArrayDenseMatrix()
    {
@@ -89,7 +88,7 @@ public class MatrixToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDiffDenseMatrixIntIntDenseMatrix()
    {
@@ -105,7 +104,7 @@ public class MatrixToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDiffDoubleArrayDenseMatrix()
    {
@@ -121,7 +120,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void tranformSe3IntoTransform3D()
    {
@@ -139,12 +138,12 @@ public class MatrixToolsTest
 
       b.transform(p1);
 
-      assertEquals(p0.x, p1.x, 1e-8);
-      assertEquals(p0.y, p1.y, 1e-8);
-      assertEquals(p0.z, p1.z, 1e-8);
+      assertEquals(p0.x, p1.getX(), 1e-8);
+      assertEquals(p0.y, p1.getY(), 1e-8);
+      assertEquals(p0.z, p1.getZ(), 1e-8);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.02)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRemoveRow()
    {
@@ -176,7 +175,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.02)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRemoveZeroRows()
    {
@@ -220,7 +219,31 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testScaleTranspose() throws Exception
+   {
+      Random random = new Random(165156L);
+      for (int i = 0; i < 200; i++)
+      {
+         int numRows = RandomTools.generateRandomInt(random, 1, 100);
+         int numCols = RandomTools.generateRandomInt(random, 1, 100);
+         DenseMatrix64F randomMatrix = RandomMatrices.createRandom(numRows, numCols, 1.0, 100.0, random);
+         double randomAlpha = RandomTools.generateRandomDouble(random, 100.0);
+         DenseMatrix64F expectedMatrix = new DenseMatrix64F(numCols, numRows);
+         DenseMatrix64F actualMatrix = new DenseMatrix64F(numCols, numRows);
+
+         CommonOps.transpose(randomMatrix, expectedMatrix);
+         CommonOps.scale(randomAlpha, expectedMatrix);
+
+         MatrixTools.scaleTranspose(randomAlpha, randomMatrix, actualMatrix);
+
+         boolean areMatricesEqual = MatrixFeatures.isEquals(expectedMatrix, actualMatrix, 1.0e-10);
+         assertTrue(areMatricesEqual);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testInsertFrameTupleIntoEJMLVector()
    {
@@ -239,7 +262,7 @@ public class MatrixToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testExtractFrameTupleFromEJMLVector()
    {
@@ -259,7 +282,7 @@ public class MatrixToolsTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testCheckDenseMatrixDimensions()
    {

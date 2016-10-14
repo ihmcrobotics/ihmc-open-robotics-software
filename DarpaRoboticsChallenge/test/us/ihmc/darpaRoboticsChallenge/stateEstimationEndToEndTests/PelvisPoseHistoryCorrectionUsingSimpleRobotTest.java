@@ -40,7 +40,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrection;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 {
@@ -297,11 +298,11 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 0.015 , 0.015);
    }
 
-	@DeployableTestMethod(estimatedDuration = 25.0)
-	@Test(timeout = 130000)
+	@ContinuousIntegrationTest(estimatedDuration = 27.3)
+	@Test(timeout = 140000)
    public void testRandomInterpolationFinals() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       Random random = new Random(1984L);
 
       setupRobot();
@@ -320,7 +321,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          assertTrue(testInterpolationForTranslationToRandomTargetsFromSpecificLocations(random, externalPelvisPoseCreator, registry, 10));
          assertTrue(testYawForTranslation(random, externalPelvisPoseCreator, registry, 10));
       }
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private RigidBodyTransform[] createRandomCorrectionTargets(Random random, int numOfTargets)
@@ -366,8 +367,8 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
       for (int i = 0; i < targets.length; i++)
       {
-         targets[i].get(targetTranslation);
-         targets[i].get(targetRotation);
+         targets[i].getTranslation(targetTranslation);
+         targets[i].getRotation(targetRotation);
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
 
@@ -432,8 +433,8 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       
       for (int i = 0; i < targets.length; i++)
       {
-         targets[i].get(targetTranslation);
-         targets[i].get(targetRotation);
+         targets[i].getTranslation(targetTranslation);
+         targets[i].getRotation(targetRotation);
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
          
@@ -496,8 +497,8 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
       for (int i = 0; i < targets.length; i++)
       {
-         targets[i].get(targetTranslation);
-         targets[i].get(targetRotation);
+         targets[i].getTranslation(targetTranslation);
+         targets[i].getRotation(targetRotation);
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
 
@@ -564,8 +565,8 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       
       for (int i = 0; i < targets.length; i++)
       {
-         targets[i].get(targetTranslation);
-         targets[i].get(targetRotation);
+         targets[i].getTranslation(targetTranslation);
+         targets[i].getRotation(targetRotation);
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
          
@@ -631,8 +632,8 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       for (int i = 0; i < targets.length; i++)
       {
          targets[i].setTranslation(i, i, i / numTargets);
-         targets[i].get(targetTranslation);
-         targets[i].get(targetRotation);
+         targets[i].getTranslation(targetTranslation);
+         targets[i].getRotation(targetRotation);
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
 
@@ -700,8 +701,8 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       for (int i = 0; i < targets.length; i++)
       {
          targets[i].setTranslation(i, i, i / numTargets);
-         targets[i].get(targetTranslation);
-         targets[i].get(targetRotation);
+         targets[i].getTranslation(targetTranslation);
+         targets[i].getRotation(targetRotation);
          targetYaw = RotationTools.computeYaw(targetRotation);
          error.set(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ(), targetYaw);
          
@@ -820,7 +821,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       }
       catch (SimulationExceededMaximumTimeException | ControllerFailureException e)
       {
-         System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
+         PrintTools.error(this, e.getMessage());
          throw e;
       }
    }

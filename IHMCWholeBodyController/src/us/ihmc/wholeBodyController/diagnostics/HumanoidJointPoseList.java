@@ -2,14 +2,11 @@ package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidArmPose;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidLegPose;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidSpinePose;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -73,7 +70,7 @@ public class HumanoidJointPoseList
          legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW));
          legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL));
          legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH));
-         legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE));
+         legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH));
          legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH));
          legJoints.add(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL));
          
@@ -180,6 +177,11 @@ public class HumanoidJointPoseList
       }
    }
    
+   public void createCalibrationPose()
+   {
+      humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));
+   }
+
    public void createPoseSetters()
    {
       humanoidJointPoses.add(new HumanoidJointPose(HumanoidArmPose.STAND_PREP, HumanoidSpinePose.STAND_PREP, HumanoidLegPose.STAND_PREP));

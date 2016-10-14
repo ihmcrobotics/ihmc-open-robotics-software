@@ -561,17 +561,17 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 
       double largeNumber = scale * 100; // 1.0e3;
 
-      double X2 = point.x + largeNumber * vector.x;
-      double Y2 = point.y + largeNumber * vector.y;
+      double X2 = point.getX() + largeNumber * vector.getX();
+      double Y2 = point.getY() + largeNumber * vector.getY();
 
-      drawLine(point.x, point.y, X2, Y2, graphics);
+      drawLine(point.getX(), point.getY(), X2, Y2, graphics);
    }
 
    private void drawLineSegment(FrameLineSegment2d frameLineSegment2d, Graphics graphics)
    {
       Point2d[] points = frameLineSegment2d.lineSegment.getEndpointsCopy();
 
-      drawLine(points[0].x, points[0].y, points[1].x, points[1].y, graphics);
+      drawLine(points[0].getX(), points[0].getY(), points[1].getX(), points[1].getY(), graphics);
    }
 
    private void drawPoint(FramePoint2d framePoint2d, Graphics graphics)

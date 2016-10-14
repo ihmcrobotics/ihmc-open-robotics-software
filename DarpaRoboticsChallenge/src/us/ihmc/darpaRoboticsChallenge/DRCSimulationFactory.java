@@ -8,11 +8,11 @@ import javax.vecmath.Quat4d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.partNames.JointRole;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCSimulatedIMUPublisher;
@@ -48,6 +48,7 @@ import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
 import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -69,39 +70,44 @@ public class DRCSimulationFactory
 
    public static final boolean DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET = false;
    private static final boolean DO_SMOOTH_JOINT_TORQUES_AT_CONTROLLER_STATE_CHANGES = false;
-   
+   private static final boolean ADD_ACTUAL_CMP_VIZ = true;
+
+   private final ActualCMPComputer cmpViz;
+
    private static final double gravity = -9.81;
 
+   private static final double headIMUMeasurmentRate = 400.0;
+
    private final SimulationConstructionSet scs;
-   private final SDFHumanoidRobot simulatedRobot;
+   private final HumanoidFloatingRootJointRobot simulatedRobot;
    private final MomentumBasedControllerFactory controllerFactory;
-   
+
    private DRCEstimatorThread drcEstimatorThread;
    private DRCControllerThread drcControllerThread;
    private AbstractThreadedRobotController multiThreadedRobotController;
-   
-   private final DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup;
+
+   private final DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
 
    private final SimulatedDRCRobotTimeProvider simulatedDRCRobotTimeProvider;
-   
+
    private final YoVariableServer yoVariableServer;
 
    private ThreadDataSynchronizerInterface threadDataSynchronizer;
 
    private HumanoidGlobalDataProducer globalDataProducer;
-   
+
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
-   
+
    public DRCSimulationFactory(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, CommonAvatarEnvironmentInterface environment,
-         DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+         DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCSCSInitialSetup scsInitialSetup, DRCGuiInitialSetup guiInitialSetup,
          HumanoidGlobalDataProducer globalDataProducer)
    {
       this.globalDataProducer = globalDataProducer;
-      
+
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
 
       boolean createCollisionMeshes = false;
-      simulatedRobot = drcRobotModel.createSdfRobot(createCollisionMeshes);
+      simulatedRobot = drcRobotModel.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
 
       this.controllerFactory = controllerFactory;
 
@@ -115,29 +121,33 @@ public class DRCSimulationFactory
       }
 
       Robot[] allSimulatedRobots = setupEnvironmentAndListSimulatedRobots(simulatedRobot, environment);
-      
+
       SimulationConstructionSetParameters simulationConstructionSetParameters = guiInitialSetup.getSimulationConstructionSetParameters();
       simulationConstructionSetParameters.setDataBufferSize(scsInitialSetup.getSimulationDataBufferSize());
       scs = new SimulationConstructionSet(allSimulatedRobots, guiInitialSetup.getGraphics3DAdapter(), simulationConstructionSetParameters);
       scs.setDT(drcRobotModel.getSimulateDT(), 1);
-      
+
       simulatedRobot.setGravity(scsInitialSetup.getGravity());
       createRobotController(drcRobotModel, controllerFactory, globalDataProducer, simulatedRobot, scs, scsInitialSetup, robotInitialSetup);
 
+      cmpViz = new ActualCMPComputer(ADD_ACTUAL_CMP_VIZ, scs, simulatedRobot);
+      if (ADD_ACTUAL_CMP_VIZ)
+         simulatedRobot.setController(cmpViz);
+
       SimulatedRobotCenterOfMassVisualizer simulatedRobotCenterOfMassVisualizer = new SimulatedRobotCenterOfMassVisualizer(simulatedRobot, drcRobotModel.getSimulateDT());
       simulatedRobot.setController(simulatedRobotCenterOfMassVisualizer);
-      
+
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
 
       scsInitialSetup.initializeSimulation(scs);
 
       if (guiInitialSetup.isGuiShown())
       {
-         VisualizerUtils.createOverheadPlotter(scs, guiInitialSetup.isShowOverheadView(), drcControllerThread.getDynamicGraphicObjectsListRegistry(),
-               drcEstimatorThread.getDynamicGraphicObjectsListRegistry());
+         VisualizerUtils.createOverheadPlotter(scs, guiInitialSetup.isShowOverheadView(), "centerOfMass", drcControllerThread.getDynamicGraphicObjectsListRegistry(),
+               drcEstimatorThread.getDynamicGraphicObjectsListRegistry(), cmpViz.getYoGraphicsListRegistry());
+         guiInitialSetup.initializeGUI(scs, simulatedRobot, drcRobotModel);
       }
 
-      guiInitialSetup.initializeGUI(scs, simulatedRobot, drcRobotModel);
 
       if (environment != null && environment.getTerrainObject3D() != null)
       {
@@ -147,13 +157,13 @@ public class DRCSimulationFactory
       scsInitialSetup.initializeRobot(simulatedRobot, drcRobotModel, null);
       robotInitialSetup.initializeRobot(simulatedRobot, drcRobotModel.getJointMap());
       simulatedRobot.update();
-      
+
       // We store these in case we need to update the environment later
       this.robotInitialSetup = robotInitialSetup;
 
 //      setupJointDamping(simulatedRobot, drcRobotModel);
    }
-   
+
    public void updateEnvironment(CommonAvatarEnvironmentInterface environment)
    {
 	   setupEnvironmentAndListSimulatedRobots(simulatedRobot, environment);
@@ -163,7 +173,7 @@ public class DRCSimulationFactory
        }
    }
 
-   private Robot[] setupEnvironmentAndListSimulatedRobots(SDFRobot simulatedRobot, CommonAvatarEnvironmentInterface environment)
+   private Robot[] setupEnvironmentAndListSimulatedRobots(FloatingRootJointRobot simulatedRobot, CommonAvatarEnvironmentInterface environment)
    {
       List<Robot> allSimulatedRobotList = new ArrayList<Robot>();
       allSimulatedRobotList.add(simulatedRobot);
@@ -181,10 +191,10 @@ public class DRCSimulationFactory
    {
       return drcControllerThread.getFullRobotModelCorruptor();
    }
-   
+
    private void createRobotController(DRCRobotModel drcRobotModel, MomentumBasedControllerFactory controllerFactory, HumanoidGlobalDataProducer globalDataProducer,
-         SDFHumanoidRobot simulatedRobot, SimulationConstructionSet scs, DRCSCSInitialSetup scsInitialSetup,
-         DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup)
+         HumanoidFloatingRootJointRobot simulatedRobot, SimulationConstructionSet scs, DRCSCSInitialSetup scsInitialSetup,
+         DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
 
@@ -220,19 +230,19 @@ public class DRCSimulationFactory
          controllerFactory.attachControllerStateChangedListener(drcOutputWriterWithStateChangeSmoother.createControllerStateChangedListener());
          drcOutputWriter = drcOutputWriterWithStateChangeSmoother;
       }
- 
+
       if (DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET)
       {
          DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets = new DRCOutputWriterWithTorqueOffsets(drcOutputWriter, drcRobotModel.getControllerDT());
          drcOutputWriter = outputWriterWithTorqueOffsets;
       }
-      
-      
+
+
       drcEstimatorThread = new DRCEstimatorThread(drcRobotModel.getSensorInformation(), drcRobotModel.getContactPointParameters(), drcRobotModel.getStateEstimatorParameters(),
     		  sensorReaderFactory, threadDataSynchronizer, new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"), globalDataProducer, yoVariableServer, gravity);
-      
+
       PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator = null;
-      
+
       if (globalDataProducer != null)
       {
     	  pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(globalDataProducer);
@@ -242,7 +252,7 @@ public class DRCSimulationFactory
 
       drcControllerThread = new DRCControllerThread(drcRobotModel, drcRobotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer, drcOutputWriter,
             globalDataProducer, yoVariableServer, gravity, drcRobotModel.getEstimatorDT());
-      
+
 
       if (scsInitialSetup.getRunMultiThreaded())
       {
@@ -292,14 +302,14 @@ public class DRCSimulationFactory
          for (String jointName : positionControlledJoints)
          {
             OneDegreeOfFreedomJoint simulatedJoint = simulatedRobot.getOneDegreeOfFreedomJoint(jointName);
-            SDFFullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
+            FullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
             OneDoFJoint controllerJoint = controllerFullRobotModel.getOneDoFJointByName(jointName);
-            
+
             JointRole jointRole = jointMap.getJointRole(jointName);
             boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
             boolean isBackJoint = jointRole == JointRole.SPINE;
-            
-            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, isUpperBodyJoint, isBackJoint, drcRobotModel.getSimulateDT());
+
+            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, isUpperBodyJoint, isBackJoint, false, drcRobotModel.getSimulateDT());
             simulatedRobot.setController(positionControlSimulator);
          }
       }
@@ -319,12 +329,12 @@ public class DRCSimulationFactory
 
       simulatedRobot.setController(simulatedDRCRobotTimeProvider);
    }
-   
-   private static void initializeEstimatorToActual(DRCEstimatorThread drcStateEstimator, DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup,
-         SDFHumanoidRobot simulatedRobot, DRCRobotJointMap jointMap)
+
+   private static void initializeEstimatorToActual(DRCEstimatorThread drcStateEstimator, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup,
+         HumanoidFloatingRootJointRobot simulatedRobot, DRCRobotJointMap jointMap)
    {
-      // The following is to get the initial CoM position from the robot. 
-      // It is cheating for now, and we need to move to where the 
+      // The following is to get the initial CoM position from the robot.
+      // It is cheating for now, and we need to move to where the
       // robot itself determines coordinates, and the sensors are all
       // in the robot-determined world coordinates..
       Point3d initialCoMPosition = new Point3d();
@@ -333,11 +343,11 @@ public class DRCSimulationFactory
 
       simulatedRobot.computeCenterOfMass(initialCoMPosition);
 
-      Joint estimationJoint = simulatedRobot.getPelvisJoint();
+      Joint estimationJoint = simulatedRobot.getRootJoint();
 
       RigidBodyTransform estimationLinkTransform3D = estimationJoint.getJointTransform3D();
       Quat4d initialEstimationLinkOrientation = new Quat4d();
-      estimationLinkTransform3D.get(initialEstimationLinkOrientation);
+      estimationLinkTransform3D.getRotation(initialEstimationLinkOrientation);
 
       if (drcStateEstimator != null)
          drcStateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
@@ -366,17 +376,17 @@ public class DRCSimulationFactory
    {
       return controllerFactory;
    }
-   
+
    public void start()
    {
       if(yoVariableServer != null)
       {
-         yoVariableServer.start();         
+         yoVariableServer.start();
       }
       Thread simThread = new Thread(scs, "SCS simulation thread");
       simThread.start();
    }
-   
+
    public void simulate()
    {
       scs.simulate();
@@ -388,18 +398,18 @@ public class DRCSimulationFactory
       if (globalDataProducer != null) globalDataProducer.stop();
       drcEstimatorThread.dispose();
       drcEstimatorThread = null;
-      
+
       drcControllerThread.dispose();
       drcControllerThread = null;
-      
+
       multiThreadedRobotController = null;
       globalDataProducer = null;
-      
+
       closeableAndDisposableRegistry.closeAndDispose();
       closeableAndDisposableRegistry = null;
    }
 
-   public SDFHumanoidRobot getRobot()
+   public HumanoidFloatingRootJointRobot getRobot()
    {
       return simulatedRobot;
    }
@@ -408,21 +418,29 @@ public class DRCSimulationFactory
    {
       return simulatedDRCRobotTimeProvider;
    }
-   
+
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
    {
       drcEstimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
    }
-   
+
    public ThreadDataSynchronizerInterface getThreadDataSynchronizer()
    {
       return threadDataSynchronizer;
    }
-   
-   public SDFFullHumanoidRobotModel getControllerFullRobotModel()
+
+   public FullHumanoidRobotModel getControllerFullRobotModel()
    {
       return threadDataSynchronizer.getControllerFullRobotModel();
    }
-   
-   
+
+   /**
+    * For unit testing only
+    *
+    * @param controller
+    */
+   public void addRobotControllerOnControllerThread(RobotController controller)
+   {
+      drcControllerThread.addRobotController(controller);
+   }
 }

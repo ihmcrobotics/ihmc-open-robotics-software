@@ -7,20 +7,20 @@ import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
-import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.FingerStatePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
+import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.utilities.ros.RosTools;
 
 public class ROSiRobotCommandDispatcher implements Runnable
 {
-   private final FingerStateProvider fingerStateProvider = new FingerStateProvider(null);
+   private final HandDesiredConfigurationMessageSubscriber handDesiredConfigurationMessageSubscriber = new HandDesiredConfigurationMessageSubscriber(null);
 
    private final ROSiRobotCommunicator rosHandCommunicator;
 
-   public ROSiRobotCommandDispatcher(PacketCommunicator objectCommunicator, String rosHostIP)
+   public ROSiRobotCommandDispatcher(PacketCommunicator ihmcMessageCommunicator, String rosHostIP)
    {
-      objectCommunicator.attachListener(FingerStatePacket.class, fingerStateProvider);
+      ihmcMessageCommunicator.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationMessageSubscriber);
       
       String rosURI = "http://" + rosHostIP + ":11311";
       
@@ -43,10 +43,10 @@ public class ROSiRobotCommandDispatcher implements Runnable
    {
       while (true)
       {
-         if (fingerStateProvider.isNewFingerStateAvailable())
+         if (handDesiredConfigurationMessageSubscriber.isNewDesiredConfigurationAvailable())
          {
-            FingerStatePacket packet = fingerStateProvider.pullPacket();
-            rosHandCommunicator.sendHandCommand(packet);
+            HandDesiredConfigurationMessage ihmcMessage = handDesiredConfigurationMessageSubscriber.pollMessage();
+            rosHandCommunicator.sendHandCommand(ihmcMessage);
          }
       }
    }

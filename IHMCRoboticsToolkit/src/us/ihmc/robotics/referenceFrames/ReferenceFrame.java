@@ -8,14 +8,15 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.FrameObject;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 
 /**
  * <p>ReferenceFrame </p>
@@ -25,10 +26,11 @@ import us.ihmc.robotics.geometry.RotationTools;
  * to a parent.  HumanoidReferenceFrames are used in classes like FramePoint to indicate which frame the point is defined in.</p>
  *
  */
-public abstract class ReferenceFrame implements Serializable
+public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeHolder
 {
    private static final long serialVersionUID = 9129810880579453658L;
    protected final String frameName;
+   private final long nameBasedHashCode;
    protected final ReferenceFrame parentFrame;
    private final ReferenceFrame[] framesStartingWithRootEndingWithThis;
 
@@ -52,6 +54,7 @@ public abstract class ReferenceFrame implements Serializable
       {
          private static final long serialVersionUID = -8828178814213025690L;
 
+         @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
          }
@@ -71,6 +74,7 @@ public abstract class ReferenceFrame implements Serializable
       {
          private static final long serialVersionUID = -6427490298776551499L;
 
+         @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
          }
@@ -183,6 +187,7 @@ public abstract class ReferenceFrame implements Serializable
       {
          private static final long serialVersionUID = 5370847059108953557L;
 
+         @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
          }
@@ -230,6 +235,7 @@ public abstract class ReferenceFrame implements Serializable
       {
          private static final long serialVersionUID = 4694374344134623529L;
 
+         @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
          }
@@ -250,6 +256,7 @@ public abstract class ReferenceFrame implements Serializable
    {
       this.frameName = frameName;
       this.parentFrame = parentFrame;
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame);
       this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
 
       this.transformToRoot = new RigidBodyTransform();
@@ -291,6 +298,7 @@ public abstract class ReferenceFrame implements Serializable
    public ReferenceFrame(String frameName, boolean isBodyCenteredFrame, boolean isWorldFrame, boolean isZupFrame)
    {
       this.frameName = frameName;
+      nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(frameName);
       this.parentFrame = null;
       this.transformToRootID = 0;
 
@@ -318,6 +326,7 @@ public abstract class ReferenceFrame implements Serializable
    public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isBodyCenteredFrame, boolean isWorldFrame,
          boolean isZupFrame)
    {
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame);
       this.frameName = frameName;
       this.parentFrame = parentFrame;
       this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
@@ -325,7 +334,7 @@ public abstract class ReferenceFrame implements Serializable
       this.transformToRoot = new RigidBodyTransform();
       this.inverseTransformToRoot = new RigidBodyTransform();
 
-      transformToParent.normalize();
+      transformToParent.normalizeRotationPart();
       this.transformToParent = transformToParent;
 
       this.isBodyCenteredFrame = isBodyCenteredFrame;
@@ -335,6 +344,7 @@ public abstract class ReferenceFrame implements Serializable
 
    public ReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isBodyCenteredFrame, boolean isWorldFrame, boolean isZupFrame)
    {
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame);
       this.frameName = frameName;
       this.parentFrame = parentFrame;
       this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
@@ -580,7 +590,7 @@ public abstract class ReferenceFrame implements Serializable
                   referenceFrame.transformToRoot.multiply(referenceFrame.postCorruptionTransform);
                }
                
-               referenceFrame.transformToRoot.normalize();
+               referenceFrame.transformToRoot.normalizeRotationPart();
                referenceFrame.inverseTransformToRoot.invert(referenceFrame.transformToRoot);
 
                referenceFrame.transformToRootID = nextTransformToRootID;
@@ -591,6 +601,7 @@ public abstract class ReferenceFrame implements Serializable
       }
    }
 
+   @Override
    public String toString()
    {
       return frameName; // + "\nTransform to Parent = " + this.transformToParent;
@@ -707,7 +718,7 @@ public abstract class ReferenceFrame implements Serializable
       // true if the transform preserves the z axis direction and magnitude, paying no heed to transformations.
       // for SO(3) matrices (orthogonal with determinant 1, equivalent to rotations)
       Matrix3d rotation = new Matrix3d();
-      transform.get(rotation);
+      transform.getRotation(rotation);
 
       return isRotationInPlane(rotation);
    }
@@ -719,8 +730,12 @@ public abstract class ReferenceFrame implements Serializable
       RotationTools.checkProperRotationMatrix(rotation);
       double epsilon = 1e-14;
 
-      return ((Math.abs(rotation.m02) <= epsilon) && (Math.abs(rotation.m12) <= epsilon) && (Math.abs(rotation.m22 - 1.0) <= epsilon));
+      return ((Math.abs(rotation.getM02()) <= epsilon) && (Math.abs(rotation.getM12()) <= epsilon) && (Math.abs(rotation.getM22() - 1.0) <= epsilon));
    }
 
-
+   @Override
+   public long nameBasedHashCode()
+   {
+      return nameBasedHashCode;
+   }
 }

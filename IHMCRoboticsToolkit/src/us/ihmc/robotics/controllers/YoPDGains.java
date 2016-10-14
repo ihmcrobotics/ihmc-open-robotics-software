@@ -5,13 +5,15 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
-public class YoPDGains
+public class YoPDGains implements PDGainsInterface
 {
-   private final DoubleYoVariable kp;
+   protected final DoubleYoVariable kp;
    private final DoubleYoVariable zeta;
-   private final DoubleYoVariable kd;
-   private final DoubleYoVariable maximumAcceleration;
-   private final DoubleYoVariable maximumJerk;
+   protected final DoubleYoVariable kd;
+   private final DoubleYoVariable maximumOutput;
+   private final DoubleYoVariable maximumFeedback;
+   private final DoubleYoVariable maximumFeedbackRate;
+   private final DoubleYoVariable positionDeadband;
 
    public YoPDGains(String suffix, YoVariableRegistry registry)
    {
@@ -19,11 +21,15 @@ public class YoPDGains
       zeta = new DoubleYoVariable("zeta" + suffix, registry);
       kd = new DoubleYoVariable("kd" + suffix, registry);
 
-      maximumAcceleration = new DoubleYoVariable("maximumAcceleration" + suffix, registry);
-      maximumJerk = new DoubleYoVariable("maximumJerk" + suffix, registry);
+      maximumOutput = new DoubleYoVariable("maximumOutput" + suffix, registry);
+      maximumFeedback = new DoubleYoVariable("maximumFeedback" + suffix, registry);
+      maximumFeedbackRate = new DoubleYoVariable("maximumFeedbackRate" + suffix, registry);
 
-      maximumAcceleration.set(Double.POSITIVE_INFINITY);
-      maximumJerk.set(Double.POSITIVE_INFINITY);
+      positionDeadband = new DoubleYoVariable("positionDeadband" + suffix, registry);
+
+      maximumOutput.set(Double.POSITIVE_INFINITY);
+      maximumFeedback.set(Double.POSITIVE_INFINITY);
+      maximumFeedbackRate.set(Double.POSITIVE_INFINITY);
    }
 
    public void setPDGains(double kp, double zeta)
@@ -47,22 +53,33 @@ public class YoPDGains
       this.zeta.set(zeta);
    }
 
-   public void setMaximumAcceleration(double maxAcceleration)
+   public void setMaximumOutput(double maximumOutput)
    {
-      this.maximumAcceleration.set(maxAcceleration);
+      this.maximumOutput.set(maximumOutput);
    }
 
-   public void setMaximumJerk(double maxJerk)
+   public void setMaximumFeedback(double maxFeedback)
    {
-      this.maximumJerk.set(maxJerk);
+      this.maximumFeedback.set(maxFeedback);
    }
 
-   public void setMaximumAccelerationAndMaximumJerk(double maxAcceleration, double maxJerk)
+   public void setMaximumFeedbackRate(double maxFeedbackRate)
    {
-      maximumAcceleration.set(maxAcceleration);
-      maximumJerk.set(maxJerk);
+      this.maximumFeedbackRate.set(maxFeedbackRate);
    }
 
+   public void setMaximumFeedbackAndMaximumFeedbackRate(double maxFeedback, double maxFeedbackRate)
+   {
+      maximumFeedback.set(maxFeedback);
+      maximumFeedbackRate.set(maxFeedbackRate);
+   }
+
+   public void setPositionDeadband(double deadband)
+   {
+      positionDeadband.set(deadband);
+   }
+
+   @Override
    public double getKp()
    {
       return kp.getDoubleValue();
@@ -73,19 +90,27 @@ public class YoPDGains
       return zeta.getDoubleValue();
    }
 
+   @Override
    public double getKd()
    {
       return kd.getDoubleValue();
    }
 
-   public double getMaximumAcceleration()
+   public double getMaximumOutput()
    {
-      return maximumAcceleration.getDoubleValue();
+      return maximumOutput.getDoubleValue();
    }
 
-   public double getMaximumJerk()
+   @Override
+   public double getMaximumFeedback()
    {
-      return maximumJerk.getDoubleValue();
+      return maximumFeedback.getDoubleValue();
+   }
+
+   @Override
+   public double getMaximumFeedbackRate()
+   {
+      return maximumFeedbackRate.getDoubleValue();
    }
 
    public DoubleYoVariable getYoKp()
@@ -103,14 +128,24 @@ public class YoPDGains
       return kd;
    }
 
-   public DoubleYoVariable getYoMaximumAcceleration()
+   public DoubleYoVariable getYoMaximumOutput()
    {
-      return maximumAcceleration;
+      return maximumOutput;
    }
 
-   public DoubleYoVariable getYoMaximumJerk()
+   public DoubleYoVariable getYoMaximumFeedback()
    {
-      return maximumJerk;
+      return maximumFeedback;
+   }
+
+   public DoubleYoVariable getYoMaximumFeedbackRate()
+   {
+      return maximumFeedbackRate;
+   }
+
+   public DoubleYoVariable getPositionDeadband()
+   {
+      return positionDeadband;
    }
 
    public void createDerivativeGainUpdater(boolean updateNow)

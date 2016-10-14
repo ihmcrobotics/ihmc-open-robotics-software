@@ -6,11 +6,11 @@ import java.rmi.registry.Registry;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = TestPlanTarget.Manual)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.MANUAL)
 public class SimulationDispatcherClientTest
 {
    private static final String pwd = "***REMOVED***";
@@ -24,7 +24,7 @@ public class SimulationDispatcherClientTest
    
 // private static final String serverURL = "//10.100.0.74/RemoteSimulationRunner0";
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void test()
    {

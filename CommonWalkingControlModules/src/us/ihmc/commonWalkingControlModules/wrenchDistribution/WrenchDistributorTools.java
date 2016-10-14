@@ -8,10 +8,10 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
 
@@ -34,9 +34,9 @@ public class WrenchDistributorTools
    public static FramePoint computePseudoCMP3d(FramePoint centerOfMass, FramePoint2d cmp, double fZ, double totalMass, double omega0)
    {
       FramePoint pseudoCMP3d = new FramePoint();
-      
+
       computePseudoCMP3d(pseudoCMP3d, centerOfMass, cmp, fZ, totalMass, omega0);
-      
+
       return pseudoCMP3d;
    }
 
@@ -51,7 +51,7 @@ public class WrenchDistributorTools
    public static FrameVector computeForce(FramePoint centerOfMass, FramePoint cmp, double fZ)
    {
       FrameVector force = new FrameVector(centerOfMass);
-      
+
       computeForce(force, centerOfMass, cmp, fZ);
 
       return force;
@@ -88,7 +88,7 @@ public class WrenchDistributorTools
    }
 
    public static void computeSupportVectorMatrixBlock(DenseMatrix64F supportVectorMatrixBlock, ArrayList<FrameVector> normalizedSupportVectors,
-           ReferenceFrame referenceFrame)
+         ReferenceFrame referenceFrame)
    {
       for (int i = 0; i < normalizedSupportVectors.size(); i++)
       {

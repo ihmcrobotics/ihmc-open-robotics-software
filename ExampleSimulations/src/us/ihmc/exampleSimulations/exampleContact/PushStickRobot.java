@@ -86,9 +86,9 @@ public class PushStickRobot extends Robot
       pushJoint.setLink(link);
       
       ef_PushStickTip = new ExternalForcePoint("ef_PushStickTip", new Vector3d(), this);
-      pushJoint.physics.addExternalForcePoint(ef_PushStickTip);
+      pushJoint.addExternalForcePoint(ef_PushStickTip);
       kp_PushStickBackEnd = new ExternalForcePoint("kp_PushStickBackEnd", new Vector3d(-LENGTH/2.0, 0.0, 0.0), this);
-      pushJoint.physics.addKinematicPoint(kp_PushStickBackEnd);
+      pushJoint.addKinematicPoint(kp_PushStickBackEnd);
       
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoGraphicPosition pushStickForcePosition = new YoGraphicPosition("pushStickForce", ef_PushStickTip.getYoPosition(), 0.01, YoAppearance.Red());

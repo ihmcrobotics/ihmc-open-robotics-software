@@ -93,8 +93,13 @@ public class YoFrameOrientation extends AbstractReferenceFrameHolder
 
    public void set(Quat4d quaternion)
    {
+      set(quaternion, true);
+   }
+
+   public void set(Quat4d quaternion, boolean notifyListeners)
+   {
       tempFrameOrientation.setIncludingFrame(getReferenceFrame(), quaternion);
-      set(tempFrameOrientation);
+      set(tempFrameOrientation, notifyListeners);
    }
 
    public void set(RigidBodyTransform transform3D)

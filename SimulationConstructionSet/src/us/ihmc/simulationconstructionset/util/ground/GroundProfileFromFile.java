@@ -190,7 +190,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
                   point3d.set(x, y, z);
                   transform3D.transform(point3d);
 
-                  double[] point = new double[] {point3d.x, point3d.y, point3d.z};
+                  double[] point = new double[] {point3d.getX(), point3d.getY(), point3d.getZ()};
 
                   // System.out.println("(" + point[0] + ", " + point[1] + ", " + point[2] + ")");
 
@@ -273,7 +273,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
       @SuppressWarnings("unused") double unitScale = 0.01;
 
       RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.rotZ(Math.PI / 8.0);
+      transform3D.setRotationYawAndZeroTranslation(Math.PI / 8.0);
 
       GroundProfileFromFile groundProfile = new GroundProfileFromFile(datafile, 10, transform3D, new VariableType[] {VariableType.X, VariableType.Z,
               VariableType.Y});

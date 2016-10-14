@@ -21,17 +21,17 @@ public class PointToLineUnProjector
       difference.sub(point1, point0);
       zA = point0z;
       zDifference = point1z - point0z;
-      useX = Math.abs(difference.x) > Math.abs(difference.y);
+      useX = Math.abs(difference.getX()) > Math.abs(difference.getY());
 
       if (useX)
       {
-         qA = pointA.x;
-         qMult = 1 / difference.x;
+         qA = pointA.getX();
+         qMult = 1 / difference.getX();
       }
       else
       {
-         qA = pointA.y;
-         qMult = 1 / difference.y;
+         qA = pointA.getY();
+         qMult = 1 / difference.getY();
       }
 
       if (!MathTools.isFinite(qMult))

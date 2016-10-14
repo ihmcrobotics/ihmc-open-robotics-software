@@ -9,20 +9,18 @@ import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- * <p>Title: </p>
- *
- * <p>Description: a line segment must have two distinct endpoints by definition</p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
+ * A line segment must have two distinct endpoints by definition.
  *
  * @author Twan Koolen
- * @version 1.0
  */
 public class LineSegment2d implements Geometry2d<LineSegment2d>
 {
    protected TransformablePoint2d[] endpoints = new TransformablePoint2d[2];
+   
+   private final Point2d tempPoint2d = new Point2d();
+   
+   private final Vector2d tempVector2dOne = new Vector2d(); 
+   private final Vector2d tempVector2dTwo = new Vector2d();
 
    public LineSegment2d()
    {
@@ -30,10 +28,10 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       endpoints[1] = new TransformablePoint2d(Double.MAX_VALUE, Double.MAX_VALUE);
    }
 
-   public LineSegment2d(double x0, double y0, double x1, double y1)
+   public LineSegment2d(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
    {
-      endpoints[0] = new TransformablePoint2d(x0, y0);
-      endpoints[1] = new TransformablePoint2d(x1, y1);
+      endpoints[0] = new TransformablePoint2d(firstEndpointX, firstEndpointY);
+      endpoints[1] = new TransformablePoint2d(secondEndpointX, secondEndpointY);
       checkEndpointsDistinct(endpoints);
    }
 
@@ -66,40 +64,50 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       endpoint0.set(endpoints[0]);
       endpoint1.set(endpoints[1]);
    }
+   
+   public Point2d getFirstEndpoint()
+   {
+      return endpoints[0];
+   }
+   
+   public Point2d getSecondEndpoint()
+   {
+      return endpoints[1];
+   }
 
    public Point2d[] getEndpoints()
    {
       return endpoints;
    }
 
-   public Point2d getFirstEndPointCopy()
+   public Point2d getFirstEndpointCopy()
    {
       return new Point2d(endpoints[0]);
    }
 
-   public Point2d getSecondEndPointCopy()
+   public Point2d getSecondEndpointCopy()
    {
       return new Point2d(endpoints[1]);
    }
 
-   public double getX0()
+   public double getFirstEndpointX()
    {
-      return endpoints[0].x;
+      return endpoints[0].getX();
    }
 
-   public double getY0()
+   public double getFirstEndpointY()
    {
-      return endpoints[0].y;
+      return endpoints[0].getY();
    }
 
-   public double getX1()
+   public double getSecondEndpointX()
    {
-      return endpoints[1].x;
+      return endpoints[1].getX();
    }
 
-   public double getY1()
+   public double getSecondEndpointY()
    {
-      return endpoints[1].y;
+      return endpoints[1].getY();
    }
 
    public void set(Point2d endpoint0, Point2d endpoint1)
@@ -117,10 +125,10 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       checkEndpointsDistinct(endpoints);
    }
 
-   public void set(double x0, double y0, double x1, double y1)
+   public void set(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
    {
-      endpoints[0].set(x0, y0);
-      endpoints[1].set(x1, y1);
+      endpoints[0].set(firstEndpointX, firstEndpointY);
+      endpoints[1].set(secondEndpointX, secondEndpointY);
       checkEndpointsDistinct(endpoints);
    }
 
@@ -134,6 +142,7 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
    }
 
+   @Override
    public void set(LineSegment2d lineSegment)
    {
       endpoints[0].set(lineSegment.endpoints[0]);
@@ -142,8 +151,8 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
    public void flipDirection()
    {
-      double xTemp = endpoints[0].x;
-      double yTemp = endpoints[0].y;
+      double xTemp = endpoints[0].getX();
+      double yTemp = endpoints[0].getY();
 
       endpoints[0].set(endpoints[1]);
       endpoints[1].set(xTemp, yTemp);
@@ -151,10 +160,17 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
    public Point2d midpoint()
    {
-      double x = (endpoints[0].x + endpoints[1].x) / 2.0;
-      double y = (endpoints[0].y + endpoints[1].y) / 2.0;
+      Point2d point2d = new Point2d();
+      
+      getMidpoint(point2d);
 
-      return new Point2d(x, y);
+      return point2d;
+   }
+   
+   public void getMidpoint(Point2d midpointToPack)
+   {
+      midpointToPack.setX((endpoints[0].getX() + endpoints[1].getX()) / 2.0);
+      midpointToPack.setY((endpoints[0].getY() + endpoints[1].getY()) / 2.0);
    }
 
    public double length()
@@ -164,16 +180,20 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
    public double dotProduct(LineSegment2d lineSegment2d)
    {
-      double dotProduct = (endpoints[1].x - endpoints[0].x) * (lineSegment2d.endpoints[1].x - lineSegment2d.endpoints[0].x)
-                          + (endpoints[1].y - endpoints[0].y) * (lineSegment2d.endpoints[1].y - lineSegment2d.endpoints[0].y);
+      double dotProduct = (endpoints[1].getX() - endpoints[0].getX()) * (lineSegment2d.endpoints[1].getX() - lineSegment2d.endpoints[0].getX())
+                          + (endpoints[1].getY() - endpoints[0].getY()) * (lineSegment2d.endpoints[1].getY() - lineSegment2d.endpoints[0].getY());
 
       return dotProduct;
    }
 
-
    public boolean isBetweenEndpoints(Point2d point2d, double epsilon)
    {
-      double alpha = percentageAlongLineSegment(point2d);
+      return isBetweenEndpoints(point2d.getX(), point2d.getY(), epsilon);
+   }
+   
+   private boolean isBetweenEndpoints(double x, double y, double epsilon)
+   {
+      double alpha = percentageAlongLineSegment(x, y);
 
       if (alpha < epsilon)
          return false;
@@ -185,10 +205,20 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
    public boolean isPointOnLeftSideOfLineSegment(Point2d point)
    {
+      return isPointOnLeftSideOfLineSegment(point.getX(), point.getY());
+   }
+   
+   public boolean isPointOnRightSideOfLineSegment(Point2d point)    // also returns true if the point is on the line
+   {
+      return !isPointOnLeftSideOfLineSegment(point.getX(), point.getY());
+   }
+
+   private boolean isPointOnLeftSideOfLineSegment(double x, double y)
+   {
       double vectorX = endpoints[1].getX() - endpoints[0].getX();
       double vectorY = endpoints[1].getY() - endpoints[0].getY();
-      double pointToPointX = point.x - endpoints[0].getX();
-      double pointToPointY = point.y - endpoints[0].getY();
+      double pointToPointX = x - endpoints[0].getX();
+      double pointToPointY = y - endpoints[0].getY();
 
       double crossProduct = vectorX * pointToPointY - pointToPointX * vectorY;
       if (crossProduct > 0.0)
@@ -199,11 +229,6 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       {
          return false;
       }
-   }
-
-   public boolean isPointOnRightSideOfLineSegment(Point2d point)    // also returns true if the point is on the line
-   {
-      return !isPointOnLeftSideOfLineSegment(point);
    }
 
    public LineSegment2d shiftToLeftCopy(double distanceToShift)
@@ -270,19 +295,24 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       vectorXPerpToRight = distanceToShift * vectorXPerpToRight / vectorPerpToRightLength;
       vectorYPerpToRight = distanceToShift * vectorYPerpToRight / vectorPerpToRightLength;
 
-      endpoints[0].x += vectorXPerpToRight;
-      endpoints[0].y += vectorYPerpToRight;
-      endpoints[1].x += vectorXPerpToRight;
-      endpoints[1].y += vectorYPerpToRight;
+      endpoints[0].setX(endpoints[0].getX() + vectorXPerpToRight);
+      endpoints[0].setY(endpoints[0].getY() + vectorYPerpToRight);
+      endpoints[1].setX(endpoints[1].getX() + vectorXPerpToRight);
+      endpoints[1].setY(endpoints[1].getY() + vectorYPerpToRight);
    }
-
+   
    public double percentageAlongLineSegment(Point2d point2d)
    {
-      double vx0 = point2d.x - endpoints[0].x;
-      double vy0 = point2d.y - endpoints[0].y;
+      return percentageAlongLineSegment(point2d.getX(), point2d.getY());
+   }
 
-      double vx1 = endpoints[1].x - endpoints[0].x;
-      double vy1 = endpoints[1].y - endpoints[0].y;
+   private double percentageAlongLineSegment(double x, double y)
+   {
+      double vx0 = x - endpoints[0].getX();
+      double vy0 = y - endpoints[0].getY();
+
+      double vx1 = endpoints[1].getX() - endpoints[0].getX();
+      double vy1 = endpoints[1].getY() - endpoints[0].getY();
 
       double dot = vx0 * vx1 + vy0 * vy1;
       double lengthSquared = vx1 * vx1 + vy1 * vy1;
@@ -294,91 +324,65 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
    public boolean isPointOnLineSegment(Point2d point2d)
    {
-      double vx0 = point2d.x - endpoints[0].x;
-      double vy0 = point2d.y - endpoints[0].y;
+      return isPointOnLineSegment(point2d.getX(), point2d.getY());
+   }
+   
+   private boolean isPointOnLineSegment(double x, double y)
+   {
+      double vx0 = x - endpoints[0].getX();
+      double vy0 = y - endpoints[0].getY();
 
-      double vx1 = endpoints[1].x - endpoints[0].x;
-      double vy1 = endpoints[1].y - endpoints[0].y;
+      double vx1 = endpoints[1].getX() - endpoints[0].getX();
+      double vy1 = endpoints[1].getY() - endpoints[0].getY();
 
       double cross = vx0 * vy1 - vy0 * vx1;
       boolean pointIsOnLine = Math.abs(cross) < 1e-7;
 
-      return pointIsOnLine && isBetweenEndpoints(point2d, 0.0);
+      return pointIsOnLine && isBetweenEndpoints(x, y, 0.0);
    }
-
-// public boolean containsEpsilon(Point2d point, double epsilon)
-// {
-//    // Dot product squared should be the product of the lengths and the vector to the point should be shorter than the segment length,
-//
-//    double vx1 = endpoints[1].x - endpoints[0].x;
-//    double vy1 = endpoints[1].y - endpoints[0].y;
-//
-//    double vx2 = point.x - endpoints[0].x;
-//    double vy2 = point.y - endpoints[0].y;
-//
-//    double dotProduct = vx1 * vx2 + vy1 * vy2;
-//
-//    double length1Squared = (vx1 * vx1 + vy1 * vy1);
-//    double length2Squared = (vx2 * vx2 + vy2 * vy2);
-//
-//    if (dotProduct < epsilon) return false;
-//
-//    if (dotProduct*dotProduct > length1Squared * length2Squared -epsilon) return false;
-//
-//    if (length2Squared > length1Squared - epsilon) return false;
-//
-//    return true;
-
-//    // 1. Cross product should be zero-ish (point is on the line through the endpoints):
-//    double crossProduct = (endpoints[1].x - endpoints[0].x) * (point.y - endpoints[0].y) -
-//        (point.x - endpoints[0].x) * (endpoints[1].y - endpoints[0].y);
-//    if (Math.abs(crossProduct) > epsilon)
-//    {
-//       return false;
-//    }
-//
-//    // 2. Projection should be between the endpoints:
-//    double dotProduct = (endpoints[1].x - endpoints[0].x) * (point.x - endpoints[0].x) +
-//        (endpoints[1].y - endpoints[0].y) * (point.y - endpoints[0].y);
-//    double length1 = (endpoints[1].x - endpoints[0].x) * (endpoints[1].x - endpoints[0].x) + (endpoints[1].y - endpoints[0].y) * (endpoints[1].y - endpoints[0].y);
-//    double length2 = (point.x - endpoints[0].x) * (point.x - endpoints[0].x) + (point.y - endpoints[0].y) * (point.y - endpoints[0].y);
-//    double projectionLength = dotProduct / (length1 * length2);
-//    if (projectionLength > length1 || projectionLength < 0)
-//    {
-//       return false;
-//    }
-//
-//    return true;
-// }
 
    private final double[] tempAlphaBeta = new double[2];
    
    @Override
    public Point2d intersectionWith(LineSegment2d secondLineSegment2d)
    {
-      Point2d[] endPoints0 = endpoints;
+      Point2d returnPoint2d = new Point2d();
+      
+      intersectionWith(secondLineSegment2d, returnPoint2d);
 
-      double x0 = endPoints0[0].x;
-      double y0 = endPoints0[0].y;
+      if (Double.isNaN(returnPoint2d.getX()) || Double.isNaN(returnPoint2d.getY()))
+      {
+         return null;
+      }
+      else
+      {
+         return returnPoint2d;
+      }
+   }
+   
+   public void intersectionWith(LineSegment2d lineSegment, Point2d intersectionToPack)
+   {
+      intersectionToPack.set(intersectionWithLineSegment(lineSegment.getFirstEndpointX(), lineSegment.getFirstEndpointY(),
+                                                         lineSegment.getSecondEndpointX(), lineSegment.getSecondEndpointY()));
+   }
+   
+   private Point2d intersectionWithLineSegment(double x0, double y0, double x1, double y1)
+   {
+      double vx0 = endpoints[1].getX() - endpoints[0].getX();
+      double vy0 = endpoints[1].getY() - endpoints[0].getY();
 
-      double vx0 = endPoints0[1].x - x0;
-      double vy0 = endPoints0[1].y - y0;
+      double vx1 = x1 - x0;
+      double vy1 = y1 - y0;
 
-      Point2d[] endPoints1 = secondLineSegment2d.endpoints;
-
-      double x1 = endPoints1[0].x;
-      double y1 = endPoints1[0].y;
-
-      double vx1 = endPoints1[1].x - x1;
-      double vy1 = endPoints1[1].y - y1;
-
-      GeometryTools.intersection(x0, y0, vx0, vy0, x1, y1, vx1, vy1, tempAlphaBeta);
+      GeometryTools.intersection(endpoints[0].getX(), endpoints[0].getY(), vx0, vy0, x0, y0, vx1, vy1, tempAlphaBeta);
       if (Double.isNaN(tempAlphaBeta[0]))
       {
-         if (endPoints0[0].equals(endPoints1[0]))
+         if (endpoints[0].getX() == x0 && endpoints[0].getY() == y0)
          {
-            Vector2d v1 = new Vector2d(endPoints0[0].x - endPoints0[1].x, endPoints0[0].y - endPoints0[1].y);
-            Vector2d v2 = new Vector2d(endPoints1[0].x - endPoints1[1].x, endPoints1[0].y - endPoints1[1].y);
+            Vector2d v1 = tempVector2dOne;
+            v1.set(endpoints[0].getX() - endpoints[1].getX(), endpoints[0].getY() - endpoints[1].getY());
+            Vector2d v2 = tempVector2dTwo;
+            v2.set(x0 - x1, y0 - y1);
             double length1 = v1.length();
 
             v1.add(v2);
@@ -388,12 +392,17 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
             // if other points go in opposit directions
             // System.out.println("A " + length1 + " " + length2);
             if (length1 > length2)
-               return endPoints0[0];
+            {
+               tempPoint2d.set(endpoints[0].getX(), endpoints[0].getY());
+               return tempPoint2d;
+            }
          }
-         else if (endPoints0[0].equals(endPoints1[1]))
+         else if (endpoints[0].getX() == x1 && endpoints[0].getY() == y1)
          {
-            Vector2d v1 = new Vector2d(endPoints0[0].x - endPoints0[1].x, endPoints0[0].y - endPoints0[1].y);
-            Vector2d v2 = new Vector2d(endPoints1[1].x - endPoints1[0].x, endPoints1[1].y - endPoints1[0].y);
+            Vector2d v1 = tempVector2dOne;
+            v1.set(endpoints[0].getX() - endpoints[1].getX(), endpoints[0].getY() - endpoints[1].getY());
+            Vector2d v2 = tempVector2dTwo;
+            v2.set(x1 - x0, y1 - y0);
             double length1 = v1.length();
 
             v1.add(v2);
@@ -403,13 +412,17 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
             // if other points go in opposit directions
             // System.out.println("B " + length1 + " " + length2);
             if (length1 > length2)
-               return endPoints0[0];
+            {
+               tempPoint2d.set(endpoints[0].getX(), endpoints[0].getY());
+               return tempPoint2d;
+            }
          }
-
-         else if (endPoints0[1].equals(endPoints1[0]))
+         else if (endpoints[1].getX() == x0 && endpoints[1].getY() == y0)
          {
-            Vector2d v1 = new Vector2d(endPoints0[1].x - endPoints0[0].x, endPoints0[1].y - endPoints0[0].y);
-            Vector2d v2 = new Vector2d(endPoints1[0].x - endPoints1[1].x, endPoints1[0].y - endPoints1[1].y);
+            Vector2d v1 = tempVector2dOne;
+            v1.set(endpoints[1].getX() - endpoints[0].getX(), endpoints[1].getY() - endpoints[0].getY());
+            Vector2d v2 = tempVector2dTwo;
+            v2.set(x0 - x1, y0 - y1);
             double length1 = v1.length();
 
             v1.add(v2);
@@ -419,12 +432,17 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
             // if other points go in opposit directions
             // System.out.println("C " + length1 + " " + length2);
             if (length1 > length2)
-               return endPoints0[1];
+            {
+               tempPoint2d.set(endpoints[1].getX(), endpoints[1].getY());
+               return tempPoint2d;
+            }
          }
-         else if (endPoints0[1].equals(endPoints1[1]))
+         else if (endpoints[1].getX() == x1 && endpoints[1].getY() == y1)
          {
-            Vector2d v1 = new Vector2d(endPoints0[1].x - endPoints0[0].x, endPoints0[1].y - endPoints0[0].y);
-            Vector2d v2 = new Vector2d(endPoints1[1].x - endPoints1[0].x, endPoints1[1].y - endPoints1[0].y);
+            Vector2d v1 = tempVector2dOne;
+            v1.set(endpoints[1].getX() - endpoints[0].getX(), endpoints[1].getY() - endpoints[0].getY());
+            Vector2d v2 = tempVector2dTwo;
+            v2.set(x1 - x0, y1 - y0);
             double length1 = v1.length();
 
             v1.add(v2);
@@ -434,58 +452,76 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
             // if other points go in opposit directions
             // System.out.println("D " + length1 + " " + length2);
             if (length1 > length2)
-               return endPoints0[0];
+            {
+               tempPoint2d.set(endpoints[0].getX(), endpoints[0].getY());
+               return tempPoint2d;
+            }
          }
 
          // should check to see if they shair a common endpoint
          // if endpoints are the same check that non matching end points point in opposit directions
 
-         return null;
+         tempPoint2d.set(Double.NaN, Double.NaN);
+         return tempPoint2d;
       }
 
       double alpha = tempAlphaBeta[0];
       double beta = tempAlphaBeta[1];
 
       if ((alpha < 0.0) || (alpha > 1.0))
-         return null;
+      {
+         tempPoint2d.set(Double.NaN, Double.NaN);
+         return tempPoint2d;
+      }
       if ((beta < 0.0) || (beta > 1.0))
-         return null;
+      {
+         tempPoint2d.set(Double.NaN, Double.NaN);
+         return tempPoint2d;
+      }
 
-      Point2d returnPoint2d = new Point2d(x0 + vx0 * tempAlphaBeta[0], y0 + vy0 * tempAlphaBeta[0]);
-
-      return returnPoint2d;
+      tempPoint2d.set(endpoints[0].getX() + vx0 * tempAlphaBeta[0], endpoints[0].getY() + vy0 * tempAlphaBeta[0]);
+      return tempPoint2d;
    }
 
    @Override
    public Point2d intersectionWith(Line2d line2d)
    {
-      double x0 = line2d.point.x;
-      double y0 = line2d.point.y;
-
-      double vx0 = line2d.normalizedVector.x;
-      double vy0 = line2d.normalizedVector.y;
-
-      Point2d[] endPoints1 = endpoints;
-
-      double x1 = endPoints1[0].x;
-      double y1 = endPoints1[0].y;
-
-      double vx1 = endPoints1[1].x - x1;
-      double vy1 = endPoints1[1].y - y1;
-
-      GeometryTools.intersection(x0, y0, vx0, vy0, x1, y1, vx1, vy1, tempAlphaBeta);
-      if (Double.isNaN(tempAlphaBeta[0]))
+      Point2d returnPoint2d =  intersectionWithLine(line2d.getPoint().getX(), line2d.getPoint().getY(),
+                                                    line2d.getNormalizedVector().getX(), line2d.getNormalizedVector().getY());
+      
+      if (Double.isNaN(returnPoint2d.getX()) || Double.isNaN(returnPoint2d.getY()))
+      {
          return null;
+      }
+      else
+      {
+         return returnPoint2d;
+      }
+   }
+   
+   private Point2d intersectionWithLine(double originX, double originY, double directionX, double directionY)
+   {
+      double vx1 = endpoints[1].getX() - endpoints[0].getX();
+      double vy1 = endpoints[1].getY() - endpoints[0].getY();
+
+      GeometryTools.intersection(originX, originY, directionX, directionY, endpoints[0].getX(), endpoints[0].getY(), vx1, vy1, tempAlphaBeta);
+      if (Double.isNaN(tempAlphaBeta[0]))
+      {
+         tempPoint2d.set(Double.NaN, Double.NaN);
+         return tempPoint2d;
+      }
 
       double alpha = tempAlphaBeta[0];
       double beta = tempAlphaBeta[1];
 
       if ((beta < 0.0) || (beta > 1.0))
-         return null;
-
-      Point2d returnPoint2d = new Point2d(x0 + vx0 * alpha, y0 + vy0 * alpha);
-
-      return returnPoint2d;
+      {
+         tempPoint2d.set(Double.NaN, Double.NaN);
+         return tempPoint2d;
+      }
+      
+      tempPoint2d.set(originX + directionX * alpha, originY + directionY * alpha);
+      return tempPoint2d;
    }
 
    @Override
@@ -512,12 +548,22 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       throw new RuntimeException("Not yet implemented");
    }
 
-   private void checkEndpointsDistinct(Point2d[] endpoints)
+   private static void checkEndpointsDistinct(Point2d[] endpoints)
    {
-      if ((endpoints[0].x == endpoints[1].x) && (endpoints[0].y == endpoints[1].y))
+      if (areEndpointsTheSame(endpoints[0], endpoints[1]))
       {
          throw new RuntimeException("Line segment must have two distinct endpoints");
       }
+   }
+
+   public static boolean areEndpointsTheSame(Point2d firstEndpoint, Point2d secondEndpoint)
+   {
+      return areEndpointsTheSame(firstEndpoint.getX(), firstEndpoint.getY(), secondEndpoint.getX(), secondEndpoint.getY());
+   }
+   
+   public static boolean areEndpointsTheSame(double firstEndpointX, double firstEndpointY, double secondEndpointX, double secondEndpointY)
+   {
+      return (firstEndpointX == secondEndpointX) && (firstEndpointY == secondEndpointY);
    }
 
    @Override
@@ -543,9 +589,9 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
       for (int i = 0; i < endpoints.length; i++)
       {
-         tempTransformedPoint.set(endpoints[0].x, endpoints[0].y, 0.0);
+         tempTransformedPoint.set(endpoints[0].getX(), endpoints[0].getY(), 0.0);
          transform.transform(tempTransformedPoint);
-         endpoints[0].set(tempTransformedPoint.x, tempTransformedPoint.y);
+         endpoints[0].set(tempTransformedPoint.getX(), tempTransformedPoint.getY());
       }
    }
 
@@ -572,8 +618,8 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
          throw new RuntimeException("Parameter out of range. Parameter = " + parameter);
       }
 
-      double x = endpoints[0].x + (endpoints[1].x - endpoints[0].x) * parameter;
-      double y = endpoints[0].y + (endpoints[1].y - endpoints[0].y) * parameter;
+      double x = endpoints[0].getX() + (endpoints[1].getX() - endpoints[0].getX()) * parameter;
+      double y = endpoints[0].getY() + (endpoints[1].getY() - endpoints[0].getY()) * parameter;
 
       pointToPack.set(x, y);
    }
@@ -591,7 +637,7 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
    private boolean isTransformationInPlane(RigidBodyTransform transform)
    {
       // arguably not a sufficient condition. ReferenceFrame2d needed!
-      transform.get(tempRotation);
+      transform.getRotation(tempRotation);
 
       return ReferenceFrame.isRotationInPlane(tempRotation);
    }
@@ -663,7 +709,7 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
       }
       else
       {
-         projectedPointToPack.set(endpoints[1].x - endpoints[0].x, endpoints[1].y - endpoints[0].y);
+         projectedPointToPack.set(endpoints[1].getX() - endpoints[0].getX(), endpoints[1].getY() - endpoints[0].getY());
          projectedPointToPack.scale(alpha);
          projectedPointToPack.add(endpoints[0]);
       }
@@ -700,8 +746,8 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
    public void getPerpendicularBisector(Vector2d perpendicularBisectorToPack, double bisectorLengthDesired)
    {
-      double x = endpoints[0].x - endpoints[1].x;
-      double y = endpoints[0].y - endpoints[1].y;
+      double x = endpoints[0].getX() - endpoints[1].getX();
+      double y = endpoints[0].getY() - endpoints[1].getY();
       
       perpendicularBisectorToPack.set(-y, x);
       perpendicularBisectorToPack.normalize();
@@ -739,5 +785,4 @@ public class LineSegment2d implements Geometry2d<LineSegment2d>
 
       return false;
    }
-
 }

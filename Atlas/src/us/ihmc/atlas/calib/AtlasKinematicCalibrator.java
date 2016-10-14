@@ -7,9 +7,9 @@ import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
-import us.ihmc.SdfLoader.FullRobotModelVisualizer;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelVisualizer;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -19,8 +19,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class AtlasKinematicCalibrator
 {
-   private final SDFRobot robot;
-   protected final SDFFullHumanoidRobotModel fullRobotModel;
+   private final FloatingRootJointRobot robot;
+   protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final OneDoFJoint[] joints;
    protected final ArrayList<Map<String, Double>> q = new ArrayList<>();
@@ -37,7 +37,7 @@ public class AtlasKinematicCalibrator
    public AtlasKinematicCalibrator(DRCRobotModel robotModel)
    {
       //load robot
-      robot = robotModel.createSdfRobot(false);
+      robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       registry = robot.getRobotsYoVariableRegistry();
       fullRobotModel = robotModel.createFullRobotModel();
       joints = fullRobotModel.getOneDoFJoints();

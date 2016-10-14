@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
@@ -32,32 +33,26 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
    private BlockingSimulationRunner blockingSimulationRunner;
+   private AssertionError assertionError;
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
+      assertionError = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
@@ -86,7 +81,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
    private static final boolean DO_ASSERTS = true;
    private static final boolean DO_TWIST_ASSERTS = true;
 
-	@DeployableTestMethod(estimatedDuration = 2.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.6)
 	@Test(timeout = 30000)
    public void testSinglePinJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -117,10 +112,12 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       scs.startOnAThread();
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      blockingSimulationRunner.simulateAndBlock(2.0);
+      boolean success = blockingSimulationRunner.simulateAndBlockAndCatchExceptions(2.0);
+      if (assertionError != null) throw assertionError;
+      assertTrue(success);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.6)
+	@ContinuousIntegrationTest(estimatedDuration = 1.6)
 	@Test(timeout = 30000)
    public void testTwoPinJoints() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -170,10 +167,12 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       scs.startOnAThread();
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      blockingSimulationRunner.simulateAndBlock(2.0);
+      boolean success = blockingSimulationRunner.simulateAndBlockAndCatchExceptions(2.0);
+      if (assertionError != null) throw assertionError;
+      assertTrue(success);
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.7)
+	@ContinuousIntegrationTest(estimatedDuration = 1.5)
 	@Test(timeout = 30000)
    public void testSingleFloatingJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -208,10 +207,12 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       scs.startOnAThread();
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
-      blockingSimulationRunner.simulateAndBlock(2.0);
+      boolean success = blockingSimulationRunner.simulateAndBlockAndCatchExceptions(2.0);
+      if (assertionError != null) throw assertionError;
+      assertTrue(success);
    }
 
-	@DeployableTestMethod(estimatedDuration = 4.1)
+	@ContinuousIntegrationTest(estimatedDuration = 3.9)
 	@Test(timeout = 30000)
    public void testRandomLinearChainRobot() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -337,6 +338,21 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
       public void doControl()
       {
+         if (assertionError != null)
+            return;
+
+         try
+         {
+            test();
+         }
+         catch(AssertionError e)
+         {
+            assertionError = e;
+         }
+      }
+
+      private void test()
+      {
          // First randomly generate torques:
          for (int i = 0; i < pinJoints.size(); i++)
          {
@@ -366,7 +382,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          for (int i = 0; i < pinJoints.size(); i++)
          {
             OneDegreeOfFreedomJoint pinJoint = pinJoints.get(i);
-            double appliedTau = pinJoint.getTau().getDoubleValue();
+            double appliedTau = pinJoint.getTauYoVariable().getDoubleValue();
 
             OneDoFJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint);
             DoubleYoVariable inverseDynamicsTau = inverseDynamicsTaus.get(i);
@@ -392,6 +408,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
                   FramePoint comOffsetCheck = new FramePoint();
                   revoluteJoint.getSuccessor().getCoMOffset(comOffsetCheck);
+                  comOffsetCheck.changeFrame(revoluteJoint.getFrameAfterJoint());
                   JUnitTools.assertTuple3dEquals(comOffset, comOffsetCheck.getVectorCopy(), 1e-7);
 
                   Twist revoluteJointTwist = new Twist();
@@ -412,7 +429,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          {
             FloatingJoint floatingJoint = floatingJoints.get(i);
             
-            SixDoFJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
+            FloatingInverseDynamicsJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
             
             Wrench wrench = new Wrench();
             sixDoFJoint.getWrench(wrench);
@@ -442,7 +459,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
          lastJoint.getTransformToWorld(transformToWorld);
          Matrix3d rotationMatrix = new Matrix3d();
-         transformToWorld.get(rotationMatrix);
+         transformToWorld.getRotation(rotationMatrix);
          lastFrameOrientation.set(rotationMatrix);
          
          transformToWorld.invert();
@@ -451,7 +468,6 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          assertEquals(0.0, yawPitchRoll[0], 1e-7);
          assertEquals(0.0, yawPitchRoll[1], 1e-7);
          assertEquals(0.0, yawPitchRoll[2], 1e-7);
-         
       }
    }
 

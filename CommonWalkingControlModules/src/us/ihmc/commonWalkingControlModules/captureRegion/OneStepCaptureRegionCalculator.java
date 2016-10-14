@@ -15,7 +15,6 @@ import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-
 public class OneStepCaptureRegionCalculator
 {
    private final CaptureRegionMathTools captureRegionMath = new CaptureRegionMathTools();
@@ -48,8 +47,7 @@ public class OneStepCaptureRegionCalculator
    }
 
    public OneStepCaptureRegionCalculator(double midFootAnkleXOffset, double footWidth, double kinematicStepRange,
-         SideDependentList<ReferenceFrame> ankleZUpFrames, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+         SideDependentList<ReferenceFrame> ankleZUpFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.kinematicStepRange = kinematicStepRange;
       this.ankleZUpFrames = ankleZUpFrames;
@@ -114,7 +112,7 @@ public class OneStepCaptureRegionCalculator
       {
          // change the support foot polygon only if the swing side changed to avoid garbage every tick.
          this.supportFootPolygon.setIncludingFrameAndUpdate(footPolygon);
-         this.supportFootPolygon.changeFrame(supportAnkleZUp);
+         this.supportFootPolygon.changeFrameAndProjectToXYPlane(supportAnkleZUp);
          previousSwingSide = swingSide;
       }
       capturePoint.setIncludingFrame(icp);
@@ -131,7 +129,7 @@ public class OneStepCaptureRegionCalculator
       captureRegionPolygon.clear(supportAnkleZUp);
 
       // 2. Get extreme CoP positions
-      ArrayList<FramePoint2d> extremesOfFeasibleCOP = supportFootPolygon.getAllVisibleVerticesFromOutsideLeftToRight(capturePoint);
+      ArrayList<FramePoint2d> extremesOfFeasibleCOP = supportFootPolygon.getAllVisibleVerticesFromOutsideLeftToRightCopy(capturePoint);
       if (extremesOfFeasibleCOP == null)
       {
          // If the ICP is in the support polygon return the whole reachable region.

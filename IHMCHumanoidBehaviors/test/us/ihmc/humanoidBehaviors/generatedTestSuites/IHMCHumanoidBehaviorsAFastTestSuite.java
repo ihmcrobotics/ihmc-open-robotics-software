@@ -3,18 +3,17 @@ package us.ihmc.humanoidBehaviors.generatedTestSuites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
-import us.ihmc.tools.testing.TestPlanSuite;
-import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
-@RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@RunWith(ContinuousIntegrationSuite.class)
+@ContinuousIntegrationSuiteCategory(IntegrationCategory.FAST)
 @SuiteClasses
 ({
-   us.ihmc.humanoidBehaviors.behaviors.primitives.FootStateBehaviorTest.class,
-   us.ihmc.humanoidBehaviors.behaviors.primitives.HandStateBehaviorTest.class,
-   us.ihmc.humanoidBehaviors.behaviors.primitives.ThighStateBehaviorTest.class
+   us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehaviorTest.class,
+   us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElementYoWhiteBoardSynchronizerTest.class
 })
 
 public class IHMCHumanoidBehaviorsAFastTestSuite

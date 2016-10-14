@@ -26,14 +26,14 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.enableBehaviorVisualizer(false);
 
 //      uncomment these for the sensors
-//      URI rosuri = NetworkParameters.getROSURI();
-//      if(rosuri != null)
-//      {
-//         networkModuleParams.enableRosModule(true);
-//         networkModuleParams.setRosUri(rosuri);
-//         networkModuleParams.enableSensorModule(true);
-//         System.out.println("ROS_MASTER_URI="+rosuri);
-//      }
+      URI rosuri = NetworkParameters.getROSURI();
+      if(rosuri != null)
+      {
+         networkModuleParams.enableRosModule(true);
+         networkModuleParams.setRosUri(rosuri);
+         networkModuleParams.enableSensorModule(true);
+         System.out.println("ROS_MASTER_URI="+rosuri);
+      }
       
       new DRCNetworkProcessor(model, networkModuleParams);
    }

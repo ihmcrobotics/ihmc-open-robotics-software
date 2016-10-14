@@ -2,71 +2,61 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 
-import us.ihmc.plotting.Artifact;
-import us.ihmc.plotting.PlotterGraphics;
+import javax.vecmath.Point2d;
+
+import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
+import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.math.frames.YoFrameLine2d;
 
-public class YoArtifactLine2d extends Artifact
+public class YoArtifactLine2d extends YoArtifact
 {
-   private static final long serialVersionUID = 5741633846461834438L;
+   private static final BasicStroke STROKE = new BasicStroke(2);
+   
    private final YoFrameLine2d yoFrameLine2d;
-   private final PlotterGraphics plotterGraphics = new PlotterGraphics();
-   private final Color color;
-
-   private static final int pixels = 2;
-   private static final BasicStroke stroke = new BasicStroke(pixels);
-
+   
+   private final Line2d tempLine = new Line2d();
+   
    public YoArtifactLine2d(String name, YoFrameLine2d yoFrameLine2d, Color color)
    {
-      super(name);
+      super(name, new double[0], color,
+            yoFrameLine2d.getYoPointX(), yoFrameLine2d.getYoPointY(), yoFrameLine2d.getYoVectorX(), yoFrameLine2d.getYoVectorY());
       this.yoFrameLine2d = yoFrameLine2d;
-      this.color = color;
    }
 
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
-   {
-      if (isVisible)
-      {
-         graphics.setColor(color);
-         if (stroke != null)
-            ((Graphics2D) graphics).setStroke(stroke);
-
-         double x0 = yoFrameLine2d.getX0();
-         double y0 = yoFrameLine2d.getY0();
-         double vx = yoFrameLine2d.getVx();
-         double vy = yoFrameLine2d.getVy();
-
-         plotterGraphics.setCenter(Xcenter, Ycenter);
-         plotterGraphics.setScale(scaleFactor);
-
-         plotterGraphics.drawLineGivenStartAndVector(graphics, x0, y0, vx, vy);
-      }
-   }
-
-   public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   @Override
+   public void draw(Graphics2DAdapter graphics)
    {
       graphics.setColor(color);
+      graphics.setStroke(STROKE);
 
-      //    int pixels = 2;
-      if (stroke != null)
-         ((Graphics2D) graphics).setStroke(stroke);
-
-      plotterGraphics.setCenter(Xcenter, Ycenter);
-      plotterGraphics.setScale(scaleFactor);
-      plotterGraphics.drawLineSegment(graphics, 0.0, 0.0, 0.1, 0.1);
+      yoFrameLine2d.getFrameLine2d().get(tempLine);
+      graphics.drawLine(tempLine);
    }
 
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   @Override
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
-      throw new RuntimeException("Not implemented!");
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+
+      graphics.drawLineSegment(graphics.getScreenFrame(), -20.0 + origin.getX(), -5.0 + origin.getY(), 20.0 + origin.getX(), 5.0 + origin.getY());
    }
 
-   public void takeHistorySnapshot()
+   @Override
+   public void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry)
    {
-      throw new RuntimeException("Not implemented!");
+      graphics.setColor(color);
+      graphics.setStroke(STROKE);
+
+      tempLine.set(entry[0], entry[1], entry[2], entry[3]);
+      graphics.drawLine(tempLine);
    }
 
+   @Override
+   public RemoteGraphicType getRemoteGraphicType()
+   {
+      return RemoteGraphicType.LINE_ARTIFACT;
+   }
 }

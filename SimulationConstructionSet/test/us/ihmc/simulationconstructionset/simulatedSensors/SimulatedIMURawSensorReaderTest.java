@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -77,7 +77,7 @@ public class SimulatedIMURawSensorReaderTest
       simulatedIMURawSensorReader.initialize();
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void testRead()
    {
@@ -140,8 +140,8 @@ public class SimulatedIMURawSensorReaderTest
    {
       Matrix3d randomTransformBodyToWorldMatrix = new Matrix3d();
       Matrix3d transformIMUToJointMatrix = new Matrix3d();
-      randomTransformBodyToWorld.get(randomTransformBodyToWorldMatrix);
-      transformIMUToJoint.get(transformIMUToJointMatrix);
+      randomTransformBodyToWorld.getRotation(randomTransformBodyToWorldMatrix);
+      transformIMUToJoint.getRotation(transformIMUToJointMatrix);
       
       expectedIMUOrientation.mul(randomTransformBodyToWorldMatrix, transformIMUToJointMatrix);
    }
@@ -374,7 +374,7 @@ public class SimulatedIMURawSensorReaderTest
       
       public FrameVector getReferenceFrameTransInWorldFrame(ReferenceFrame frame) {
          Vector3d trans = new Vector3d();
-         frame.getTransformToDesiredFrame(worldFrame).get(trans);
+         frame.getTransformToDesiredFrame(worldFrame).getTranslation(trans);
          FrameVector ret = new FrameVector(worldFrame, trans);
          return ret;
       }

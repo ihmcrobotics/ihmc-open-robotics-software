@@ -12,8 +12,8 @@ import javax.vecmath.Point3d;
 
 import com.esotericsoftware.kryo.Kryo;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModelUtils;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.communication.net.PacketConsumer;
@@ -48,7 +48,7 @@ public class PointCloudDataReceiverSimulation implements Runnable, PacketConsume
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.REAL_ROBOT, true);
       robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       robotConfigurationData = new RobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), fullRobotModel.getForceSensorDefinitions(), null, fullRobotModel.getIMUDefinitions());
       PPSTimestampOffsetProvider ppsTimestampOffsetProvider = new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
 
@@ -65,7 +65,7 @@ public class PointCloudDataReceiverSimulation implements Runnable, PacketConsume
             robotModel.getJointMap(), robotConfigurationDataBuffer, sensorSuitePacketCommunicatorServer);
       pointCloudDataReceiver.start();
       pointCloudDataReceiver.setLidarState(LidarState.ENABLE);
-      lidarFrame = pointCloudDataReceiver.getLidarFrame(robotModel.getSensorInformation().getLidarParameters(0).getSensorNameInSdf());
+      lidarFrame = fullRobotModel.getLidarBaseFrame(robotModel.getSensorInformation().getLidarParameters()[0].getSensorNameInSdf());
 
       executor.scheduleAtFixedRate(this, 0, 25000000, TimeUnit.NANOSECONDS);
    }

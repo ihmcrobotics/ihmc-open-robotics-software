@@ -9,7 +9,7 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.HysteresisFilteredYoVariable;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class HysteresisFilteredYoVariableTest
 {
@@ -28,8 +28,8 @@ public class HysteresisFilteredYoVariableTest
    {
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testNoHysteresis()
    {
       guideLineHysteresis.set(0.0);
@@ -51,8 +51,8 @@ public class HysteresisFilteredYoVariableTest
       //    plot(x, new double[][]{unfilteredValues, filteredValues}, "No Hysteresis");
    }
 
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSomeHysteresis()
    {
       guideLineHysteresis.set(0.2);

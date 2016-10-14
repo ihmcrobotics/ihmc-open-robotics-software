@@ -84,8 +84,8 @@ public class AlphaFilteredYoFramePoint2d extends YoFramePoint2d
 
    public void update(Point2d point2dUnfiltered)
    {
-      x.update(point2dUnfiltered.x);
-      y.update(point2dUnfiltered.y);
+      x.update(point2dUnfiltered.getX());
+      y.update(point2dUnfiltered.getY());
    }
 
    public void update(FramePoint2d point2dUnfiltered)

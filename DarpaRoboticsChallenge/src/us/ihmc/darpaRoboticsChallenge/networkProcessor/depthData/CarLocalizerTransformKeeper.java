@@ -83,7 +83,7 @@ public class CarLocalizerTransformKeeper
 
    public void packTransformFromBasePelvisToWheel(RigidBodyTransform transformToPack)
    {
-      transformFromOldBasePelvisToWheel.setEuler(WHEEL_FRAME_XX, WHEEL_FRAME_YY, WHEEL_FRAME_ZZ);
+      transformFromOldBasePelvisToWheel.setRotationEulerAndZeroTranslation(WHEEL_FRAME_XX, WHEEL_FRAME_YY, WHEEL_FRAME_ZZ);
       transformFromOldBasePelvisToWheel.setTranslation(new Vector3d(WHEEL_FRAME_X, WHEEL_FRAME_Y, WHEEL_FRAME_Z));
       transformToPack.multiply(transformFromNewPelvisToOldPelvis, transformFromOldBasePelvisToWheel);
    }
@@ -139,9 +139,9 @@ public class CarLocalizerTransformKeeper
    {
       tempPoint.set(x, y, z);
       inverseTransformFromSomeframeToWheel.transform(tempPoint);
-      x = tempPoint.x;
-      y = tempPoint.y;
-      z = tempPoint.z;
+      x = tempPoint.getX();
+      y = tempPoint.getY();
+      z = tempPoint.getZ();
 
       return isPointNearWheel(x, y, z, fudgeFactor);
    }
@@ -166,9 +166,9 @@ public class CarLocalizerTransformKeeper
       transformToDesiredPelvis.transform(tempPoint);
 
 //    inverseTransformFromNewPelvisToOldPelvis.transform(tempPoint);
-      x = tempPoint.x;
-      y = tempPoint.y;
-      z = tempPoint.z;
+      x = tempPoint.getX();
+      y = tempPoint.getY();
+      z = tempPoint.getZ();
 
       return isPointInCarFrameWithinTemplateBounds(x, y, z);
    }

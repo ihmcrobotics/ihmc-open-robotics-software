@@ -98,7 +98,7 @@ public class ContactableCylinderRobot extends ContactableRobot
       if (yoGraphicsListRegistry == null)
          return;
 
-      GroundContactPointGroup groundContactPointGroup = floatingJoint.physics.getGroundContactPointGroup(groupIdentifier);
+      GroundContactPointGroup groundContactPointGroup = floatingJoint.getGroundContactPointGroup(groupIdentifier);
       System.out.println("GroundContactPointGroup" + groundContactPointGroup.getGroundContactPoints());
       ArrayList<GroundContactPoint> groundContactPoints = groundContactPointGroup.getGroundContactPoints();
 

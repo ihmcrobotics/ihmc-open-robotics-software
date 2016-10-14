@@ -1,7 +1,7 @@
 package us.ihmc.tools.inputDevices.joystick;
 
 import static org.junit.Assert.*;
-import static us.ihmc.tools.testing.TestPlanTarget.*;
+import static us.ihmc.tools.continuousIntegration.IntegrationCategory.*;
 
 import java.io.IOException;
 
@@ -10,15 +10,15 @@ import org.junit.Test;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Event;
 import net.java.games.input.test.ControllerReadTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.inputDevices.joystick.virtualJoystick.VirtualJoystick;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class JoystickTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testCreateJoystick()
    {
@@ -50,8 +50,8 @@ public class JoystickTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
-   @Test(timeout = 10000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testCreateVirtualJoystick()
    {
       final Object monitor = new Object();
@@ -99,7 +99,7 @@ public class JoystickTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindNonExistentJoystick()
    {
@@ -116,7 +116,7 @@ public class JoystickTest
    boolean madCatz5Status = false;
    boolean madCatz1Status = false;
 
-   @DeployableTestMethod(estimatedDuration = 10.0, targets = Manual)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = MANUAL)
    @Test(timeout = 300000)
    public void testCreateTwoJoysticks()
    {

@@ -15,12 +15,42 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class LeastSquaresZPlaneFitterTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testPointsWithSamePitchAndDifferentPositionGetSameAnswer()
+   {
+      LeastSquaresZPlaneFitter leastSquaresZPlaneFitter = new LeastSquaresZPlaneFitter();
+
+      List<Point3d> pointListA = new ArrayList<Point3d>();
+      Plane3d plane3dA = new Plane3d();
+
+      pointListA.add(new Point3d( 1.0,  1.0,  0.1));
+      pointListA.add(new Point3d( 1.0, -1.0,  0.1));
+      pointListA.add(new Point3d(-1.0,  1.0, -0.1));
+      pointListA.add(new Point3d(-1.0, -1.0, -0.1));
+      
+      leastSquaresZPlaneFitter.fitPlaneToPoints(pointListA, plane3dA);
+      Vector3d normalA = plane3dA.getNormalCopy();
+      
+      List<Point3d> pointListB = new ArrayList<Point3d>();
+      Plane3d plane3dB = new Plane3d();
+      pointListB.add(new Point3d( 1.0 + 4.0,  1.0 + 4.0,  0.1));
+      pointListB.add(new Point3d( 1.0 + 4.0, -1.0 + 4.0,  0.1));
+      pointListB.add(new Point3d(-1.0 + 4.0,  1.0 + 4.0, -0.1));
+      pointListB.add(new Point3d(-1.0 + 4.0, -1.0 + 4.0, -0.1));
+      
+      leastSquaresZPlaneFitter.fitPlaneToPoints(pointListB, plane3dB);
+      Vector3d normalB = plane3dB.getNormalCopy();
+      
+      assertTrue(normalA.epsilonEquals(normalB, 1e-7));
+   }
+   
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleFlatCase()
    {
@@ -38,7 +68,7 @@ public class LeastSquaresZPlaneFitterTest
       JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, 1.0), plane3d.getNormalCopy(), 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testRandomlyGeneratedPointsOnRandomPlanes()
    {
@@ -107,7 +137,7 @@ public class LeastSquaresZPlaneFitterTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCornerCaseWithOnlyTwoPoints()
    {
@@ -125,7 +155,7 @@ public class LeastSquaresZPlaneFitterTest
       assertTrue(isNaN(plane3d.getNormalCopy()));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCornerCaseWithColinearPoints()
    {
@@ -155,7 +185,7 @@ public class LeastSquaresZPlaneFitterTest
    }
 
    // Straight up and down fails with LeastSquaresZPlaneFitter since it assumes equation Ax + By + z + C = 0
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testStraightUpAndDownPlane()
    {

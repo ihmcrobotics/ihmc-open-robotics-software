@@ -3,20 +3,13 @@ package us.ihmc.humanoidRobotics.communication.packets;
 public enum LowLevelDrivingAction
 {
    /** [0,1] 0 = off 1 = max */
-   GASPEDAL,
-   /** [0,1] 0 = off 1 = max */
-   FOOTBRAKE,
-   /** [-pi,pi] */
-   STEERING,
-   /** -1 reverse, 1 forward */
-   DIRECTION,
-   /** -1 disengage, 1 engage, -2.0 redisengage, 2 enage */
-   HANDBRAKE,
-   /** in seconds */
-   DO_NOTHING,
-   /** Stop, let go of steering wheel and press brake */
-   REINITIALIZE,
-   /** Easy cheat mode */
+   GASPEDAL, /** [0,1] 0 = off 1 = max */
+   FOOTBRAKE, /** [-pi,pi] */
+   STEERING, /** -1 reverse, 1 forward */
+   DIRECTION, /** -1 disengage, 1 engage, -2.0 redisengage, 2 enage */
+   HANDBRAKE, /** in seconds */
+   DO_NOTHING, /** Stop, let go of steering wheel and press brake */
+   REINITIALIZE, /** Easy cheat mode */
    GET_IN_CAR;
 
    public int toInt()

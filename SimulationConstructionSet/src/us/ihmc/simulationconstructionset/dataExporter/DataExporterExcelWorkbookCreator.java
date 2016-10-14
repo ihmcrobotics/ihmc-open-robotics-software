@@ -48,12 +48,12 @@ public class DataExporterExcelWorkbookCreator
    private final WritableCellFormat headerCellFormat;
    private final WritableCellFormat defaultNumberFormat;
    private final WritableCellFormat smallNumberFormat;
-   
+
 // TODO: currently only does PinJoints
    public DataExporterExcelWorkbookCreator(Robot robot, DataBuffer dataBuffer)
    {
       this.robot = robot;
-      
+
       for (Joint rootJoint : robot.getRootJoints())
       {
          recursivelyAddPinJoints(rootJoint, pinJoints);
@@ -77,22 +77,24 @@ public class DataExporterExcelWorkbookCreator
       File workbookFile = new File(dataAndVideosTagDirectory, fileHeader + "_TorqueSpeedPowerEstimates.xls");
       WritableWorkbook writableWorkBook = createWorkbook(workbookFile);
 
-      writeInfoToWorkBook(writableWorkBook);
-      writeVelocityAndTorqueNumbersToWorkBook(writableWorkBook);
-      writeRobotConfigurationToWorkbook(writableWorkBook);
-      writeJointDataToWorkbook(writableWorkBook);
+      if (writableWorkBook != null)
+      {
+         writeInfoToWorkBook(writableWorkBook);
+         writeVelocityAndTorqueNumbersToWorkBook(writableWorkBook);
+         writeRobotConfigurationToWorkbook(writableWorkBook);
+         writeJointDataToWorkbook(writableWorkBook);
 
-      // save and close Excel workbook
-      try
-      {
-         writableWorkBook.write();
-         writableWorkBook.close();
-         System.out.println("Done creating Excel workbook");
-      }
-      catch (Exception ex)
-      {
-         ex.printStackTrace();
-         System.err.println("Trouble saving Excel workbook");
+         // save and close Excel workbook
+         try
+         {
+            writableWorkBook.write();
+            writableWorkBook.close();
+            System.out.println("Done creating Excel workbook");
+         }
+         catch (Exception ex)
+         {
+            PrintTools.error(this, "Trouble saving Excel workbook " + workbookFile.getAbsolutePath());
+         }
       }
    }
 
@@ -105,8 +107,7 @@ public class DataExporterExcelWorkbookCreator
       }
       catch (IOException ex)
       {
-         ex.printStackTrace();
-         System.err.println("Failed to open Excel workbook.");
+         PrintTools.error(this, "Failed to open Excel workbook. " + workbookFile);
       }
 
       return writableWorkBook;
@@ -154,9 +155,9 @@ public class DataExporterExcelWorkbookCreator
       {
          int column = 0;
 
-         DataBufferEntry position = dataBuffer.getEntry(joint.getQ());
-         DataBufferEntry speed = dataBuffer.getEntry(joint.getQD());
-         DataBufferEntry torque = dataBuffer.getEntry(joint.getTau());
+         DataBufferEntry position = dataBuffer.getEntry(joint.getQYoVariable());
+         DataBufferEntry speed = dataBuffer.getEntry(joint.getQDYoVariable());
+         DataBufferEntry torque = dataBuffer.getEntry(joint.getTauYoVariable());
 
          addHeaderEntry(dataSheet, column, "Joint");
          String jointName = joint.getName();
@@ -228,17 +229,17 @@ public class DataExporterExcelWorkbookCreator
       totalDistance.setZ(zPosition[dataLength-1]-zPosition[0]);
 
       cot = cot / (robotMass * gravity.length() * totalDistance.length());
-      
+
       return cot;
    }
-   
+
    private double computeTotalMechanicalEnergy()
    {
       double ret = 0.0;
       double[] mechanicalPower = computeTotalUnsignedMechanicalPower();
       double simulationTime = dataBuffer.getEntry(robot.getYoTime()).getMax();
       double simulationDT = simulationTime / dataBuffer.getBufferSize();
-      
+
       for (int i = 0; i < mechanicalPower.length; i++)
       {
          ret += simulationDT * Math.abs(mechanicalPower[i]);
@@ -256,11 +257,11 @@ public class DataExporterExcelWorkbookCreator
 
       for (PinJoint joint : pinJoints)
       {
-         double[] speed = dataBuffer.getEntry(joint.getQD()).getData();
-         double[] torque = dataBuffer.getEntry(joint.getTau()).getData();
-         
+         double[] speed = dataBuffer.getEntry(joint.getQDYoVariable()).getData();
+         double[] torque = dataBuffer.getEntry(joint.getTauYoVariable()).getData();
+
          double[] jointMechincalPower = computeMechanicalPower(speed, torque);
-         
+
          for (int i = 0; i < dataLength; i++)
          {
             ret[i] += Math.abs(jointMechincalPower[i]);
@@ -269,7 +270,7 @@ public class DataExporterExcelWorkbookCreator
 
       return ret;
    }
-   
+
    private double[] computeMechanicalPower(double[] speed, double[] torque)
    {
       if (speed.length != torque.length)
@@ -378,12 +379,13 @@ public class DataExporterExcelWorkbookCreator
    {
       WritableSheet jointDataSheet = workbook.createSheet("Joint Data", workbook.getNumberOfSheets());
       int column = 0;
-
+      writeJointDataColumn(jointDataSheet, column++, dataBuffer.getEntry("t"), true);
+      
       for (PinJoint joint : pinJoints)
       {
-         DataBufferEntry position = dataBuffer.getEntry(joint.getQ());
-         DataBufferEntry speed = dataBuffer.getEntry(joint.getQD());
-         DataBufferEntry torque = dataBuffer.getEntry(joint.getTau());
+         DataBufferEntry position = dataBuffer.getEntry(joint.getQYoVariable());
+         DataBufferEntry speed = dataBuffer.getEntry(joint.getQDYoVariable());
+         DataBufferEntry torque = dataBuffer.getEntry(joint.getTauYoVariable());
 
          writeJointDataColumn(jointDataSheet, column++, position, false);
          writeJointDataColumn(jointDataSheet, column++, speed, false);

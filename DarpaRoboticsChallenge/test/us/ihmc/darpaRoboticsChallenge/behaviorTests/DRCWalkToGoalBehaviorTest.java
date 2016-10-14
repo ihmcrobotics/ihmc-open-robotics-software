@@ -14,8 +14,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -24,8 +24,8 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket.WalkToGoalAction;
@@ -48,9 +48,9 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterface
@@ -110,7 +110,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
    private BehaviorCommunicationBridge communicationBridge;
 
-   private SDFHumanoidRobot robot;
+   private HumanoidFloatingRootJointRobot robot;
    private FullHumanoidRobotModel fullRobotModel;
 
    private PacketCommunicator behaviorCommunicatorServer;
@@ -133,7 +133,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       {
          throw new RuntimeException(e);
       }
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, getSimpleRobotName(), null,
+      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, getSimpleRobotName(),
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
 
       Robot robotToTest = drcSimulationTestHelper.getRobot();
@@ -157,11 +157,11 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer, robotToTest.getRobotsYoVariableRegistry());
    }
 
-   @DeployableTestMethod(estimatedDuration = 50.0, targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 300000)
    public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -173,7 +173,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       assertTrue(walkToGoalBehavior.isDone());
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    private WalkToGoalBehavior testWalkToGoalBehavior(double walkDistance, Vector2d walkDirection, double trajectoryTime)
@@ -223,7 +223,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       return ret;
    }
 
-   private boolean executeBehavior(final BehaviorInterface behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   private boolean executeBehavior(final AbstractBehavior behavior, double trajectoryTime) throws SimulationExceededMaximumTimeException
    {
       final double simulationRunTime = trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING;
 
@@ -285,7 +285,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       return ret;
    }
 
-   private FramePose2d getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(SDFHumanoidRobot robot)
+   private FramePose2d getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(HumanoidFloatingRootJointRobot robot)
    {
       FramePose midFeetPose = getRobotMidFeetPose(robot);
 
@@ -295,7 +295,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       return ret;
    }
 
-   private FramePose getRobotMidFeetPose(SDFHumanoidRobot robot)
+   private FramePose getRobotMidFeetPose(HumanoidFloatingRootJointRobot robot)
    {
       FramePose leftFootPose = getRobotFootPose(robot, RobotSide.LEFT);
       FramePose rightFootPose = getRobotFootPose(robot, RobotSide.RIGHT);
@@ -306,7 +306,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       return ret;
    }
 
-   private FramePose getRobotFootPose(SDFHumanoidRobot robot, RobotSide robotSide)
+   private FramePose getRobotFootPose(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
    {
       List<GroundContactPoint> gcPoints = robot.getFootGroundContactPoints(robotSide);
       Joint ankleJoint = gcPoints.get(0).getParentJoint();

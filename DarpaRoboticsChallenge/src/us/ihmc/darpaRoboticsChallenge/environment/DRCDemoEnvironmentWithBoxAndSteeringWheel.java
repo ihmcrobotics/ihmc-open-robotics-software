@@ -5,10 +5,10 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.DRCVehicleModelObjects;
+import us.ihmc.darpaRoboticsChallenge.VehicleModelObjects;
+import us.ihmc.darpaRoboticsChallenge.VehicleObject;
 import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -35,7 +35,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
 
    public DRCDemoEnvironmentWithBoxAndSteeringWheel(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      DRCVehicleModelObjects drcVehicleModelObjects = new DRCVehicleModelObjects();
+      VehicleModelObjects drcVehicleModelObjects = new VehicleModelObjects();
 
 
 
@@ -48,7 +48,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
       createBars(environmentRobots, contactables);
    }
 
-   private static ContactableToroidRobot createSteeringWheel(DRCVehicleModelObjects drcVehicleModelObjects)
+   private static ContactableToroidRobot createSteeringWheel(VehicleModelObjects drcVehicleModelObjects)
    {
       RigidBodyTransform steeringWheelTransform = drcVehicleModelObjects.getTransform(VehicleObject.STEERING_WHEEL);
 
@@ -87,7 +87,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
                                             double z, double roll, double pitch, double yaw, double radius, double height)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setEuler(roll, pitch, yaw);
+      transform.setRotationEulerAndZeroTranslation(roll, pitch, yaw);
 
       Vector3d position = new Vector3d(x, y, z);
       Vector3d baseToCenter = new Vector3d(0.0, 0.0, -height / 2.0);
@@ -130,7 +130,7 @@ public class DRCDemoEnvironmentWithBoxAndSteeringWheel implements CommonAvatarEn
    private void addBox(double x, double y, double z, double roll, double pitch, double yaw, double sizeX, double sizeY, double sizeZ, CombinedTerrainObject3D terrainObject)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setEuler(roll, pitch, yaw);
+      transform.setRotationEulerAndZeroTranslation(roll, pitch, yaw);
       transform.setTranslation(new Vector3d(x, y, z));
       Box3d box = new Box3d(transform, sizeX, sizeY, sizeZ);
       terrainObject.addRotatableBox(box, YoAppearance.DarkGray());

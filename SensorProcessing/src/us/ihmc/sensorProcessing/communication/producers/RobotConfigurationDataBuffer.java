@@ -8,12 +8,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModelUtils;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
@@ -84,7 +84,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       updateLock.unlock();
    }
 
-   private long getNewestTimestamp()
+   public long getNewestTimestamp()
    {
       RobotConfigurationData newestConfigurationData = configurationBuffer[currentIndex.get()];
       if(newestConfigurationData == null)
@@ -167,7 +167,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
    {
       FullRobotModelCache fullRobotModelCache = getFullRobotModelCache(model);
 
-      SixDoFJoint rootJoint = model.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = model.getRootJoint();
       if (robotConfigurationData.jointNameHash != fullRobotModelCache.jointNameHash)
       {
          System.out.println(robotConfigurationData.jointNameHash);
@@ -182,9 +182,9 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       }
 
       Vector3f translation = robotConfigurationData.getPelvisTranslation();
-      rootJoint.setPosition(translation.x, translation.y, translation.z);
+      rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
       Quat4f orientation = robotConfigurationData.getPelvisOrientation();
-      rootJoint.setRotation(orientation.x, orientation.y, orientation.z, orientation.w);
+      rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getW());
       rootJoint.getPredecessor().updateFramesRecursively();
 
       if (forceSensorDataHolder != null)

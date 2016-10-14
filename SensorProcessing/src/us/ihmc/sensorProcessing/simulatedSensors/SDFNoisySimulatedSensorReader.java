@@ -5,8 +5,8 @@ import java.util.Random;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 
@@ -24,7 +24,7 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
    private final Quat4d rotationFilter = new Quat4d();
    private final Vector3d positionFilter = new Vector3d();
 
-   public SDFNoisySimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
+   public SDFNoisySimulatedSensorReader(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
       super(robot, fullRobotModel, referenceFrames);
    }
@@ -45,18 +45,18 @@ public class SDFNoisySimulatedSensorReader extends SDFPerfectSimulatedSensorRead
    }
 
    @Override
-   protected void packRootTransform(SDFRobot robot, RigidBodyTransform transformToPack)
+   protected void packRootTransform(FloatingRootJointRobot robot, RigidBodyTransform transformToPack)
    {
       super.packRootTransform(robot, transformToPack);
-      rotationError.w = 1;
-      rotationError.x = rand.nextGaussian() * quaternionNoiseStd;
-      rotationError.y = rand.nextGaussian() * quaternionNoiseStd;
-      rotationError.z = rand.nextGaussian() * quaternionNoiseStd;
+      rotationError.setW(1);
+      rotationError.setX(rand.nextGaussian() * quaternionNoiseStd);
+      rotationError.setY(rand.nextGaussian() * quaternionNoiseStd);
+      rotationError.setZ(rand.nextGaussian() * quaternionNoiseStd);
       rotationError.normalize();
 
-      positionError.x = rand.nextGaussian() * positionNoiseStd;
-      positionError.y = rand.nextGaussian() * positionNoiseStd;
-      positionError.z = rand.nextGaussian() * positionNoiseStd;
+      positionError.setX(rand.nextGaussian() * positionNoiseStd);
+      positionError.setY(rand.nextGaussian() * positionNoiseStd);
+      positionError.setZ(rand.nextGaussian() * positionNoiseStd);
 
       RigidBodyTransform disturbanceTransform = new RigidBodyTransform();
       if (addNoiseFiltering)

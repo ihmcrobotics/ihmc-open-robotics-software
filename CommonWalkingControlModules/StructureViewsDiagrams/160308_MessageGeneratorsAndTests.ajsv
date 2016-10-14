@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2016-Mar-08 16:49" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20151019-2113">
+        <filterScript>
+
+// no filter script yet defined for this class diagram
+// use CTRL+SPACE for completion suggestions
+hide all methods
+hide all fields
+
+</filterScript>
+        <class className="us.ihmc.commonWalkingControlModules.controllerAPI.output.ControllerStatusOutputManager" project="CommonWalkingControlModules" xLocation="786" yLocation="788"/>
+        <class className="us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator" project="CommonWalkingControlModules" xLocation="307" yLocation="578"/>
+        <class className="us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator" project="CommonWalkingControlModules" xLocation="-135" yLocation="573"/>
+        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory" project="CommonWalkingControlModules" xLocation="376" yLocation="437"/>
+        <class className="us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerCommandInputManager" project="CommonWalkingControlModules" xLocation="348" yLocation="786"/>
+        <class className="us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber" project="CommonWalkingControlModules" xLocation="870" yLocation="580"/>
+        <class className="us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper" project="DarpaRoboticsChallenge" xLocation="1276" yLocation="344"/>
+    </diagram>
+</ajsv>

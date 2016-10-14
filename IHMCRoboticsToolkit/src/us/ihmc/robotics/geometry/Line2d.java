@@ -5,26 +5,17 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.transformables.TransformablePoint2d;
 import us.ihmc.robotics.geometry.transformables.TransformableVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
  * @author Twan Koolen
- * @version 1.0
  */
 public class Line2d implements Geometry2d<Line2d>
 {
    // TODO: think about usage of epsilons in the methods.
-
 
    protected final TransformablePoint2d point = new TransformablePoint2d();
    protected final TransformableVector2d normalizedVector = new TransformableVector2d();
@@ -122,27 +113,27 @@ public class Line2d implements Geometry2d<Line2d>
 
    public double getSlope()
    {
-      if ((normalizedVector.x == 0.0) && (normalizedVector.y > 0.0))
+      if ((normalizedVector.getX() == 0.0) && (normalizedVector.getY() > 0.0))
       {
          return Double.POSITIVE_INFINITY;
       }
 
-      if ((normalizedVector.x == 0.0) && (normalizedVector.y < 0.0))
+      if ((normalizedVector.getX() == 0.0) && (normalizedVector.getY() < 0.0))
       {
          return Double.NEGATIVE_INFINITY;
       }
 
-      return normalizedVector.y / normalizedVector.x;
+      return normalizedVector.getY() / normalizedVector.getX();
    }
 
    public void getPointGivenParameter(double t, Point2d pointToPack)
    {
       pointToPack.set(point);
-      
+
       pointToPack.setX(pointToPack.getX() + t * normalizedVector.getX());
       pointToPack.setY(pointToPack.getY() + t * normalizedVector.getY());
    }
-   
+
    public Point2d getPointGivenParameter(double t)
    {
       Point2d pointToReturn = new Point2d();
@@ -167,27 +158,27 @@ public class Line2d implements Geometry2d<Line2d>
 
    public double getXIntercept()
    {
-      double parameterAtIntercept = -point.y / normalizedVector.y;
+      double parameterAtIntercept = -point.getY() / normalizedVector.getY();
 
-      return getPointGivenParameter(parameterAtIntercept).x;
+      return getPointGivenParameter(parameterAtIntercept).getX();
    }
 
    public double getYIntercept()
    {
-      double parameterAtIntercept = -point.x / normalizedVector.x;
+      double parameterAtIntercept = -point.getX() / normalizedVector.getX();
 
-      return getPointGivenParameter(parameterAtIntercept).y;
+      return getPointGivenParameter(parameterAtIntercept).getY();
    }
 
    public boolean containsEpsilon(Point2d point, double epsilon)
    {
       // TODO: possibility to reduce code duplication by calling Geometry2dCalculator.distanceSquared
       // TODO: Refactor such that it is clear that this checks wether the point is within distance epsilon^2 from the line
-      double vx1 = normalizedVector.x;
-      double vy1 = normalizedVector.y;
+      double vx1 = normalizedVector.getX();
+      double vy1 = normalizedVector.getY();
 
-      double vx2 = point.x - this.point.x;
-      double vy2 = point.y - this.point.y;
+      double vx2 = point.getX() - this.point.getX();
+      double vy2 = point.getY() - this.point.getY();
 
       double dotProduct = vx1 * vx2 + vy1 * vy2;
 
@@ -225,7 +216,7 @@ public class Line2d implements Geometry2d<Line2d>
 
    public void set(Point2d endpoint0, Point2d endpoint1)
    {
-      if ((endpoint0.x == endpoint1.x) && (endpoint0.y == endpoint1.y))
+      if ((endpoint0.getX() == endpoint1.getX()) && (endpoint0.getY() == endpoint1.getY()))
       {
          throw new RuntimeException("Tried to set a line from two coincidal points.");
       }
@@ -236,15 +227,15 @@ public class Line2d implements Geometry2d<Line2d>
       normalizedVector.normalize();
    }
 
-   public void set(double x0, double y0, double vx, double vy)
+   public void set(double pointX, double pointY, double vectorX, double vectorY)
    {
-      if ((Math.abs(vx) < minAllowableVectorPart) && (Math.abs(vy) < minAllowableVectorPart))
+      if ((Math.abs(vectorX) < minAllowableVectorPart) && (Math.abs(vectorY) < minAllowableVectorPart))
       {
          throw new RuntimeException("Line length must be greater than zero");
       }
 
-      point.set(x0, y0);
-      normalizedVector.set(vx, vy);
+      point.set(pointX, pointY);
+      normalizedVector.set(vectorX, vectorY);
       normalizedVector.normalize();
    }
 
@@ -265,11 +256,11 @@ public class Line2d implements Geometry2d<Line2d>
 
    public void rotate(double radians)
    {
-      double vXOld = normalizedVector.x;
-      @SuppressWarnings("unused") double vYOld = normalizedVector.y;
+      double vXOld = normalizedVector.getX();
+      @SuppressWarnings("unused") double vYOld = normalizedVector.getY();
 
-      double vXNew = Math.cos(radians) * vXOld - Math.sin(radians) * normalizedVector.y;
-      double vYNew = Math.sin(radians) * vXOld + Math.cos(radians) * normalizedVector.y;
+      double vXNew = Math.cos(radians) * vXOld - Math.sin(radians) * normalizedVector.getY();
+      double vYNew = Math.sin(radians) * vXOld + Math.cos(radians) * normalizedVector.getY();
 
       normalizedVector.set(vXNew, vYNew);
    }
@@ -286,8 +277,8 @@ public class Line2d implements Geometry2d<Line2d>
 
    private void shift(boolean shiftToLeft, double distanceToShift)
    {
-      double vectorX = normalizedVector.x;
-      double vectorY = normalizedVector.y;
+      double vectorX = normalizedVector.getX();
+      double vectorY = normalizedVector.getY();
 
       double vectorXPerpToRight = -vectorY;
       double vectorYPerpToRight = vectorX;
@@ -301,8 +292,8 @@ public class Line2d implements Geometry2d<Line2d>
       vectorXPerpToRight = distanceToShift * vectorXPerpToRight;
       vectorYPerpToRight = distanceToShift * vectorYPerpToRight;
 
-      point.x += vectorXPerpToRight;
-      point.y += vectorYPerpToRight;
+      point.setX(point.getX() + vectorXPerpToRight);
+      point.setY(point.getY() + vectorYPerpToRight);
    }
 
    public Line2d interiorBisector(Line2d secondLine)
@@ -333,9 +324,9 @@ public class Line2d implements Geometry2d<Line2d>
 
    public void perpendicularVector(Vector2d vectorToPack)
    {
-      vectorToPack.set(normalizedVector.y, -normalizedVector.x);
+      vectorToPack.set(normalizedVector.getY(), -normalizedVector.getX());
    }
-   
+
    public Vector2d perpendicularVector()
    {
       Vector2d vectorToReturn = new Vector2d();
@@ -364,17 +355,17 @@ public class Line2d implements Geometry2d<Line2d>
    @Override
    public Point2d intersectionWith(Line2d secondLine)
    {
-      double x0 = point.x;
-      double y0 = point.y;
+      double x0 = point.getX();
+      double y0 = point.getY();
 
-      double vx0 = normalizedVector.x;
-      double vy0 = normalizedVector.y;
+      double vx0 = normalizedVector.getX();
+      double vy0 = normalizedVector.getY();
 
-      double x1 = secondLine.point.x;
-      double y1 = secondLine.point.y;
+      double x1 = secondLine.point.getX();
+      double y1 = secondLine.point.getY();
 
-      double vx1 = secondLine.normalizedVector.x;
-      double vy1 = secondLine.normalizedVector.y;
+      double vx1 = secondLine.normalizedVector.getX();
+      double vy1 = secondLine.normalizedVector.getY();
 
       GeometryTools.intersection(x0, y0, vx0, vy0, x1, y1, vx1, vy1, tempAlphaBeta);
       if (Double.isNaN(tempAlphaBeta[0]))
@@ -387,17 +378,17 @@ public class Line2d implements Geometry2d<Line2d>
 
    public boolean intersectionWith(Point2d intersectionToPack, Line2d secondLine)
    {
-      double x0 = point.x;
-      double y0 = point.y;
+      double x0 = point.getX();
+      double y0 = point.getY();
 
-      double vx0 = normalizedVector.x;
-      double vy0 = normalizedVector.y;
+      double vx0 = normalizedVector.getX();
+      double vy0 = normalizedVector.getY();
 
-      double x1 = secondLine.point.x;
-      double y1 = secondLine.point.y;
+      double x1 = secondLine.point.getX();
+      double y1 = secondLine.point.getY();
 
-      double vx1 = secondLine.normalizedVector.x;
-      double vy1 = secondLine.normalizedVector.y;
+      double vx1 = secondLine.normalizedVector.getX();
+      double vy1 = secondLine.normalizedVector.getY();
 
       GeometryTools.intersection(x0, y0, vx0, vy0, x1, y1, vx1, vy1, tempAlphaBeta);
       if (Double.isNaN(tempAlphaBeta[0]))
@@ -406,6 +397,28 @@ public class Line2d implements Geometry2d<Line2d>
       intersectionToPack.set(x0 + vx0 * tempAlphaBeta[0], y0 + vy0 * tempAlphaBeta[0]);
 
       return true;
+   }
+
+   public void intersectionWith(Line2d line, Point3d intersectionToPack)
+   {
+      intersectionWith(line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
+      intersectionToPack.set(tempPoint2d.getX(), tempPoint2d.getY(), intersectionToPack.getZ());
+   }
+
+   public void intersectionWith(Line2d line, Point2d intersectionToPack)
+   {
+      intersectionWith(line.getPoint().getX(), line.getPoint().getY(), line.getNormalizedVector().getX(), line.getNormalizedVector().getY());
+      intersectionToPack.set(tempPoint2d);
+   }
+
+   private Point2d intersectionWith(double x1, double y1, double vx1, double vy1)
+   {
+      GeometryTools.intersection(point.getX(), point.getY(), normalizedVector.getX(), normalizedVector.getY(), x1, y1, vx1, vy1, tempAlphaBeta);
+      if (Double.isNaN(tempAlphaBeta[0]))
+         throw new RuntimeException("Lines are parallel");
+
+      tempPoint2d.set(point.getX() + normalizedVector.getX() * tempAlphaBeta[0], point.getY() + normalizedVector.getY() * tempAlphaBeta[0]);
+      return tempPoint2d;
    }
 
    @Override
@@ -419,7 +432,7 @@ public class Line2d implements Geometry2d<Line2d>
    {
       tempPoint2d.set(this.point);
       tempPoint2d.add(normalizedVector);
-      
+
       return GeometryTools.distanceFromPointToLine(point, this.point, tempPoint2d);
    }
 
@@ -468,14 +481,14 @@ public class Line2d implements Geometry2d<Line2d>
    @Override
    public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform)
    {
-      Point3d resultPoint = new Point3d(point.x, point.y, 0.0);
+      Point3d resultPoint = new Point3d(point.getX(), point.getY(), 0.0);
       transform.transform(resultPoint);
 
-      Vector3d resultVector = new Vector3d(normalizedVector.x, normalizedVector.y, 0.0);
+      Vector3d resultVector = new Vector3d(normalizedVector.getX(), normalizedVector.getY(), 0.0);
       transform.transform(resultVector);
 
-      point.set(resultPoint.x, resultPoint.y);
-      normalizedVector.set(resultVector.x, resultVector.y);
+      point.set(resultPoint.getX(), resultPoint.getY());
+      normalizedVector.set(resultVector.getX(), resultVector.getY());
    }
 
    @Override
@@ -496,34 +509,74 @@ public class Line2d implements Geometry2d<Line2d>
 
    public boolean isPointOnLine(Point2d point)
    {
+      double epsilon = 1e-8;
+      if (Math.abs(normalizedVector.getX()) < 10E-10)
+         return MathTools.epsilonEquals(point.x, this.point.getX(), epsilon);
+
       // y = A*x + b with point = (x,y)
       double A = normalizedVector.getY()/normalizedVector.getX();
       double b = this.point.getY()-A*this.point.getX();
 
       double value = point.getY() - A*point.getX() - b;
 
-      return 1e-8 > value;
+      return epsilon > Math.abs(value);
    }
 
    public boolean isPointOnLeftSideOfLine(Point2d point)
    {
-      return isPointOnSideOfLine(point, RobotSide.LEFT);
+      return isPointOnSideOfLine(point.getX(), point.getY(), RobotSide.LEFT);
    }
 
    public boolean isPointOnRightSideOfLine(Point2d point)
    {
-      return isPointOnSideOfLine(point, RobotSide.RIGHT);
+      return isPointOnSideOfLine(point.getX(), point.getY(), RobotSide.RIGHT);
    }
 
    public boolean isPointOnSideOfLine(Point2d point, RobotSide side)
    {
-      double vectorX = normalizedVector.x;
-      double vectorY = normalizedVector.y;
-      double pointToPointX = point.x - this.point.x;
-      double pointToPointY = point.y - this.point.y;
+      return isPointOnSideOfLine(point.getX(), point.getY(), side);
+   }
 
-      double crossProduct = vectorX * pointToPointY - pointToPointX * vectorY;
+   private boolean isPointOnSideOfLine(double x, double y, RobotSide side)
+   {
+      return isPointOnSideOfLine(x, y, normalizedVector.getX(), normalizedVector.getY(), point.getX(), point.getY(), side);
+   }
+
+   /**
+    * Checks whether a point is on the specified side of a line. If the direction of the line is zero this will return false.
+    */
+   public static boolean isPointOnSideOfLine(double pointX, double pointY, double directionX, double directionY, double pointOnLineX, double pointOnLineY,
+         RobotSide side)
+   {
+      double pointToPointX = pointX - pointOnLineX;
+      double pointToPointY = pointY - pointOnLineY;
+      double crossProduct = directionX * pointToPointY - pointToPointX * directionY;
       return side.negateIfRightSide(crossProduct) > 0.0;
+   }
+
+   /**
+    * This method could be improved but must be tested better first.
+    */
+   public boolean isPointInFrontOfLine(Vector2d frontDirection, Point2d point)
+   {
+      double lineAngle = MathTools.angleFromZeroToTwoPi(normalizedVector.getX(), normalizedVector.getY());
+      double frontAngle = MathTools.angleFromZeroToTwoPi(frontDirection.getX(), frontDirection.getY());
+      double pointAngle = MathTools.angleFromZeroToTwoPi(point.getX() - this.point.getX(), point.getY() - this.point.getY());
+
+      double lineToFront = frontAngle - lineAngle;
+      double lineToPoint = pointAngle - lineAngle;
+
+      if (Math.abs(lineToFront) > Math.PI) lineToFront = -(lineToFront % Math.PI);
+      if (Math.abs(lineToPoint) > Math.PI) lineToPoint = -(lineToPoint % Math.PI);
+
+      if (lineToFront > 0.0 == lineToPoint > 0.0)
+      {
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    /**
@@ -535,10 +588,15 @@ public class Line2d implements Geometry2d<Line2d>
     */
    public boolean isPointInFrontOfLine(Point2d point)
    {
-      if (normalizedVector.y > 0.0)
-         return isPointOnRightSideOfLine(point);
-      else if (normalizedVector.y < 0.0)
-         return isPointOnLeftSideOfLine(point);
+      return isPointInFrontOfLine(point.getX(), point.getY());
+   }
+
+   private boolean isPointInFrontOfLine(double x, double y)
+   {
+      if (normalizedVector.getY() > 0.0)
+         return isPointOnSideOfLine(x, y, RobotSide.RIGHT);
+      else if (normalizedVector.getY() < 0.0)
+         return isPointOnSideOfLine(x, y, RobotSide.LEFT);
       else
          throw new RuntimeException("Not defined when line is pointing exactly along the x-axis");
    }
@@ -557,13 +615,13 @@ public class Line2d implements Geometry2d<Line2d>
    @Override
    public boolean containsNaN()
    {
-      if (Double.isNaN(point.x))
+      if (Double.isNaN(point.getX()))
          return true;
-      if (Double.isNaN(point.y))
+      if (Double.isNaN(point.getY()))
          return true;
-      if (Double.isNaN(normalizedVector.x))
+      if (Double.isNaN(normalizedVector.getX()))
          return true;
-      if (Double.isNaN(normalizedVector.y))
+      if (Double.isNaN(normalizedVector.getY()))
          return true;
 
       return false;
@@ -603,11 +661,11 @@ public class Line2d implements Geometry2d<Line2d>
 //    Point2d[] endPoints = lineSegment.endpoints;
       Point2d endPoint = point;
 
-      double vx0 = point2d.x - endPoint.x;
-      double vy0 = point2d.y - endPoint.y;
+      double vx0 = point2d.getX() - endPoint.getX();
+      double vy0 = point2d.getY() - endPoint.getY();
 
-      double vx1 = normalizedVector.x;
-      double vy1 = normalizedVector.y;
+      double vx1 = normalizedVector.getX();
+      double vy1 = normalizedVector.getY();
 
       double dot = vx0 * vx1 + vy0 * vy1;
       double lengthSquared = vx1 * vx1 + vy1 * vy1;
@@ -617,11 +675,11 @@ public class Line2d implements Geometry2d<Line2d>
 //    if (alpha < 0.0) alpha = 0.0;
 //    if (alpha > 1.0) alpha = 1.0;
 
-      double x = endPoint.x + alpha * vx1;
-      double y = endPoint.y + alpha * vy1;
+      double x = endPoint.getX() + alpha * vx1;
+      double y = endPoint.getY() + alpha * vy1;
 
-      point2d.x = x;
-      point2d.y = y;
+      point2d.setX(x);
+      point2d.setY(y);
    }
 
 // TODO move to Line2d
@@ -641,7 +699,7 @@ public class Line2d implements Geometry2d<Line2d>
 
    private void checkReasonableVector(Vector2d localVector)
    {
-      if ((Math.abs(localVector.x) < minAllowableVectorPart) && (Math.abs(localVector.y) < minAllowableVectorPart))
+      if ((Math.abs(localVector.getX()) < minAllowableVectorPart) && (Math.abs(localVector.getY()) < minAllowableVectorPart))
       {
          throw new RuntimeException("Line length must be greater than zero");
       }
@@ -649,7 +707,7 @@ public class Line2d implements Geometry2d<Line2d>
 
    private void checkDistinctPoints(Point2d firstPointOnLine, Point2d secondPointOnLine)
    {
-      if ((firstPointOnLine.x == secondPointOnLine.x) && (firstPointOnLine.y == secondPointOnLine.y))
+      if ((firstPointOnLine.getX() == secondPointOnLine.getX()) && (firstPointOnLine.getY() == secondPointOnLine.getY()))
       {
          throw new RuntimeException("Tried to create a line from two coincidal points");
       }
@@ -674,8 +732,7 @@ public class Line2d implements Geometry2d<Line2d>
    {
       if (!this.point.epsilonEquals(other.point, epsilon)) return false;
       if (!this.normalizedVector.epsilonEquals(other.normalizedVector, epsilon)) return false;
-      
+
       return true;
    }
-
 }

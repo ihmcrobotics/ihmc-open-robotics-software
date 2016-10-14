@@ -12,7 +12,6 @@ import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-
 public class FinalApproachPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
    private final FinalApproachPositionTrajectoryGenerator positionTrajectoryGenerator;
@@ -26,24 +25,24 @@ public class FinalApproachPoseTrajectoryGenerator implements PoseTrajectoryGener
       this(namePrefix, false, referenceFrame, parentRegistry, false, null);
    }
 
-   public FinalApproachPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry,
-         boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FinalApproachPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry, boolean visualize,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(namePrefix, false, referenceFrame, parentRegistry, visualize, yoGraphicsListRegistry);
    }
 
-   public FinalApproachPoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry)
+   public FinalApproachPoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       this(namePrefix, allowMultipleFrames, referenceFrame, parentRegistry, false, null);
    }
 
-   public FinalApproachPoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry, boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FinalApproachPoseTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry,
+         boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      positionTrajectoryGenerator = new FinalApproachPositionTrajectoryGenerator(namePrefix, allowMultipleFrames, referenceFrame, registry, visualize, yoGraphicsListRegistry);
+      positionTrajectoryGenerator = new FinalApproachPositionTrajectoryGenerator(namePrefix, allowMultipleFrames, referenceFrame, registry, visualize,
+            yoGraphicsListRegistry);
       orientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator(namePrefix, allowMultipleFrames, referenceFrame, registry);
    }
 
@@ -170,13 +169,13 @@ public class FinalApproachPoseTrajectoryGenerator implements PoseTrajectoryGener
       getAngularVelocity(angularVelocityToPack);
       getAngularAcceleration(angularAccelerationToPack);
    }
-      
+
    public void getPose(FramePose framePoseToPack)
    {
       positionTrajectoryGenerator.getPosition(tempPosition);
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());
       framePoseToPack.setPosition(tempPosition);
-      
+
       orientationTrajectoryGenerator.getOrientation(tempOrientation);
       framePoseToPack.setOrientation(tempOrientation);
    }

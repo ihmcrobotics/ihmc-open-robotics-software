@@ -15,14 +15,14 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 {
-   private static boolean DEBUG = false;
+   private static boolean DEBUG = true;
 
-   @DeployableTestMethod(estimatedDuration = 2.0)
-   @Test(timeout = 10000)
+   @ContinuousIntegrationTest(estimatedDuration = 2.2)
+   @Test(timeout = 30000)
    public void testDerivativesConsistency() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -84,8 +84,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.3)
-   @Test(timeout = 2000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
    public void testLimitConditions() throws Exception
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -145,8 +145,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.6)
-   @Test(timeout = 2000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @Test(timeout = 30000)
    public void testContinuityForSlowTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -247,8 +247,8 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.4)
-   @Test(timeout = 2000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test(timeout = 30000)
    public void testContinuityForFastishTrajectory() throws Exception
    {
       QuaternionCalculus quaternionCalculus = new QuaternionCalculus();
@@ -360,10 +360,10 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 
    private String toStringFrameOrientationForVizualizer(FrameOrientation frameOrientation)
    {
-      double qx = frameOrientation.getQuaternionCopy().x;
-      double qy = frameOrientation.getQuaternionCopy().y;
-      double qz = frameOrientation.getQuaternionCopy().z;
-      double qs = frameOrientation.getQuaternionCopy().w;
+      double qx = frameOrientation.getQuaternionCopy().getX();
+      double qy = frameOrientation.getQuaternionCopy().getY();
+      double qz = frameOrientation.getQuaternionCopy().getZ();
+      double qs = frameOrientation.getQuaternionCopy().getW();
       return " = new FrameOrientation(worldFrame, " + qx + ", " + qy + ", " + qz + ", " + qs + ");";
    }
 

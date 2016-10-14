@@ -7,7 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class IntGlobalParameterTest
 {
@@ -26,7 +26,7 @@ public class IntGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetValue()
    {
@@ -38,7 +38,7 @@ public class IntGlobalParameterTest
       assertEquals(DEFAULT_VALUE, intGlobalParameter.getValue());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testSetValue()
    {
@@ -66,7 +66,7 @@ public class IntGlobalParameterTest
       assertEquals(newValue, intGlobalParameter.getValue());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
@@ -77,7 +77,7 @@ public class IntGlobalParameterTest
       parent.set(1);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantSetChild()
    {

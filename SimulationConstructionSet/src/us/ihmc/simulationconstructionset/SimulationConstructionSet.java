@@ -20,6 +20,7 @@ import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JApplet;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -53,6 +54,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.robotics.stateMachines.StateMachinesJPanel;
 import us.ihmc.robotics.time.GlobalTimer;
+import us.ihmc.robotics.time.RealTimeRateEnforcer;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
@@ -257,6 +259,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    private boolean simulationThreadIsUpAndRunning = false;
    private boolean isSimulating = false;
+   private boolean simulateNoFasterThanRealTime = false;
+   private final RealTimeRateEnforcer realTimeRateEnforcer = new RealTimeRateEnforcer();
    private boolean isPlaying = false;
    private boolean fastSimulate = false;
    private int numberOfTicksBeforeUpdatingGraphs = 15;
@@ -279,6 +283,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    private ScsPhysics physics;
 
    private final SimulationConstructionSetParameters parameters;
+
+   private final DynamicGraphicMenuManager dynamicGraphicMenuManager;
 
    public static SimulationConstructionSet generateSimulationFromDataFile(File chosenFile)
    {
@@ -392,11 +398,17 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          EventDispatchThreadHelper.invokeAndWait(new Runnable()
          {
+            @Override
             public void run()
             {
                createFrame(showGUI);
             }
          });
+         this.dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
+      }
+      else
+      {
+         this.dynamicGraphicMenuManager = null;
       }
 
       mySimulation = simulation;
@@ -439,7 +451,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          EventDispatchThreadHelper.invokeAndWait(new Runnable()
          {
-
+            @Override
             public void run()
             {
                createGUI(graphicsAdapter);
@@ -498,6 +510,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       YoVariableRegistryChangedListener listener = new YoVariableRegistryChangedListener()
       {
+         @Override
          public void yoVariableWasRegistered(YoVariableRegistry registry, YoVariable<?> registeredYoVariable)
          {
             // System.err.println("Registering YoVariable to the SCS root Registry after the SCS has been started! yoVariableWasRegistered: "
@@ -514,11 +527,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             }
          }
 
+         @Override
          public void yoVariableRegistryWasCleared(YoVariableRegistry clearedYoVariableRegistry)
          {
             throw new RuntimeException("Clearing the SCS root Registry after the SCS has been started! Probably shouldn't do that...");
          }
 
+         @Override
          public void yoVariableRegistryWasAdded(YoVariableRegistry addedRegistry)
          {
             // System.err.println("Adding a child YoVariableRegistry to the SCS root Registry after the SCS has been started! yoVariableRegistryWasAdded: "
@@ -591,11 +606,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @return Simulation index
     */
+   @Override
    public int getIndex()
    {
       return myDataBuffer.getIndex();
    }
 
+   @Override
    public boolean isIndexBetweenInAndOutPoint(int indexToCheck)
    {
       return myDataBuffer.isIndexBetweenInAndOutPoint(indexToCheck);
@@ -704,11 +721,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       rootRegistry.addChild(registry);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getAllVariables()
    {
       return mySimulation.getAllVariables();
    }
 
+   @Override
    public YoVariable<?>[] getAllVariablesArray()
    {
       return mySimulation.getAllVariablesArray();
@@ -717,36 +736,43 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    // Every time you call this in a control system, an angel loses its wings. Only call this for reflection and testing type purposes, such as
    // trying to compare if two simulations ran the same way.
    // For control systems, write a method to get the specific variable you need. Saves tons of work when refactoring later
+   @Override
    public YoVariable<?> getVariable(String varname)
    {
       return mySimulation.getVariable(varname);
    }
 
+   @Override
    public YoVariable<?> getVariable(String nameSpace, String varname)
    {
       return mySimulation.getVariable(nameSpace, varname);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(String nameSpace, String varname)
    {
       return mySimulation.getVariables(nameSpace, varname);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(String varname)
    {
       return mySimulation.getVariables(varname);
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(NameSpace nameSpace)
    {
       return mySimulation.getVariables(nameSpace);
    }
 
+   @Override
    public boolean hasUniqueVariable(String varname)
    {
       return mySimulation.hasUniqueVariable(varname);
    }
 
+   @Override
    public boolean hasUniqueVariable(String nameSpace, String varname)
    {
       return mySimulation.hasUniqueVariable(nameSpace, varname);
@@ -836,6 +862,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @param realTimeRate The desired playback rate in percentage of real time where 100% is specified as 1.0.
     */
+   @Override
    public void setPlaybackRealTimeRate(double realTimeRate)
    {
       REAL_TIME_RATE = realTimeRate;
@@ -871,6 +898,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @return The current playback rate as a percentage of real time.
     */
+   @Override
    public double getPlaybackRealTimeRate()
    {
       return REAL_TIME_RATE;
@@ -955,12 +983,15 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
-   public void addStaticLinkGraphics(ArrayList<Graphics3DObject> staticLinkGraphics)
+   public ArrayList<Graphics3DNode> addStaticLinkGraphics(ArrayList<Graphics3DObject> staticLinkGraphics)
    {
+      ArrayList<Graphics3DNode> ret = new ArrayList<>(staticLinkGraphics.size());
       for (Graphics3DObject linkGraphics : staticLinkGraphics)
       {
-         this.addStaticLinkGraphics(linkGraphics);
+         ret.add(addStaticLinkGraphics(linkGraphics));
       }
+
+      return ret;
    }
 
    /**
@@ -1134,15 +1165,24 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
+   @Override
    public void closeAndDispose()
    {
-      EventDispatchThreadHelper.invokeAndWait(new Runnable()
+      if(myGUI != null)
       {
-         public void run()
+         EventDispatchThreadHelper.invokeAndWait(new Runnable()
          {
-            closeAndDisposeLocal();
-         }
-      });
+            @Override
+            public void run()
+            {
+               closeAndDisposeLocal();
+            }
+         });
+      }
+      else
+      {
+         closeAndDisposeLocal();
+      }
    }
 
    private void closeAndDisposeLocal()
@@ -1239,6 +1279,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (myGUI != null)
       {
          myGUI.addButton(button);
+      }
+   }
+
+   public void addComboBox(JComboBox<?> comboBox)
+   {
+      if (myGUI != null)
+      {
+         myGUI.addComboBox(comboBox);
       }
    }
 
@@ -1408,11 +1456,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return ret;
    }
 
+   @Override
    public boolean tickButDoNotNotifySimulationRewoundListeners(int ticks)
    {
       return tick(ticks, false);
    }
 
+   @Override
    public boolean tick(int ticks)
    {
       return tick(ticks, true);
@@ -1979,6 +2029,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * If the GUI exists, stop whatever it is doing and disable user actions.
     */
+   @Override
    public void disableGUIComponents()
    {
       if (myGUI != null)
@@ -1993,6 +2044,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * If the GUI exists, enable user actions.
     */
+   @Override
    public void enableGUIComponents()
    {
       if (myGUI != null)
@@ -2081,6 +2133,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Function to run both the simulation and playback of the data. The robot and GUI are updated before simulation cycles begin.
     */
+   @Override
    public void run()
    {
       // myGUI.setupConfiguration("all", "all", "all", "all");
@@ -2140,7 +2193,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          if (parameters.getShowWindows()) myGUI.show();
          
-         if (!parameters.getShowYoGraphicObjects())
+         if (!parameters.getShowYoGraphicObjects() && dynamicGraphicMenuManager != null)
          {
             dynamicGraphicMenuManager.hideAllGraphics();
          }
@@ -2165,6 +2218,11 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          {
             try
             {
+               if (simulateNoFasterThanRealTime)
+               {
+                  realTimeRateEnforcer.sleepIfNecessaryToEnforceRealTimeRate(this.getTime());
+               }
+   
                simulateCycle();
             }
             catch (UnreasonableAccelerationException ex)
@@ -2252,6 +2310,21 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     */
    private int ticksSimulated = 0; // 1;
 
+   private boolean synchronizeGraphicsAndCamerasWhileSimulating = false;
+
+   /**
+    * Temporary method for telling a sim to synchronize its graphics and cameras while simulating.
+    * Only set to true if you are creating a game like simulation where the user is driving a vehicle from
+    * a camera mount while simulating. This method should go away once we internally make camera updates
+    * synched with GraphicsRobot, or part of GraphicsRobot...
+    * 
+    * @param synchronizeGraphicsAndCamerasWhileSimulating
+    */
+   public void setSynchronizeGraphicsAndCamerasWhileSimulating(boolean synchronizeGraphicsAndCamerasWhileSimulating)
+   {
+      this.synchronizeGraphicsAndCamerasWhileSimulating = synchronizeGraphicsAndCamerasWhileSimulating;
+   }
+   
    /**
     * Internal function which controls simulation.  This function is synchronized.
     *
@@ -2275,7 +2348,19 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          // for(int i=0;i<RECORD_FREQ;i++)
          for (int i = 0; i < ticksThisCycle; i++)
          {
-            mySimulation.simulate();
+            if (synchronizeGraphicsAndCamerasWhileSimulating)
+            {
+               synchronized (myGUI.getGraphicsConch())
+               {
+                  mySimulation.simulate();
+                  myGUI.updateSimulationGraphics();
+               }
+            }
+
+            else
+            {
+               mySimulation.simulate();
+            }
          }
 
          // Update the tick counts.
@@ -2323,12 +2408,15 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
                }
             }
 
-            myGUI.updateSimulationGraphics();
+            synchronized (simulationSynchronizer) // Synched so we don't update during a graphics redraw...
+            {
+               myGUI.updateSimulationGraphics();
+            }
          }
       }
    }
 
-   private boolean updateGraphs = true;
+   private boolean updateGraphsDuringPlayback = true;
 
    /**
     * Enables or disables graph updates during playback. Disabling updates may grant some improved performance but the current data point will nolonger be highlighted on the graphs.
@@ -2336,9 +2424,9 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @param updateGraphs Specify whether or not graphs should update during playback.
     */
-   public void setGraphsUpdatedDuringPlayback(boolean updateGraphs)
+   public void setGraphsUpdatedDuringPlayback(boolean updateGraphsDuringPlayback)
    {
-      this.updateGraphs = updateGraphs;
+      this.updateGraphsDuringPlayback = updateGraphsDuringPlayback;
    }
 
    /**
@@ -2347,9 +2435,30 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @return Are graph updates enabled during playback?
     * @see #setGraphsUpdatedDuringPlayback setGraphsUpdatedDuringPlayback
     */
-   public boolean isGraphsUpdatedDuringPlayback()
+   public boolean areGraphsUpdatedDuringPlayback()
    {
-      return updateGraphs;
+      return updateGraphsDuringPlayback;
+   }
+
+   /**
+    * If true, will slow down simulations that are faster than real time to simulate at exactly real time rate.
+    * 
+    * @param simulateNoFasterThanRealTime
+    */
+   public void setSimulateNoFasterThanRealTime(boolean simulateNoFasterThanRealTime)
+   {
+      this.simulateNoFasterThanRealTime = simulateNoFasterThanRealTime;
+      this.realTimeRateEnforcer.reset();
+   }
+
+   /**
+    * Return whether simulation will slow down when faster than real time to simulate at exactly real time rate.
+    * 
+    * @param simulateNoFasterThanRealTime
+    */
+   public boolean getSimulateNoFasterThanRealTime()
+   {
+      return this.simulateNoFasterThanRealTime;
    }
 
    private long nextWakeMillis;
@@ -2410,7 +2519,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
 
       // if (updateGraphs) myGUI.updateGraphsLeisurely(20);
-      if (updateGraphs)
+      if (updateGraphsDuringPlayback)
       {
          myGUI.updateGraphs();
       }
@@ -2470,7 +2579,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             myGUI.allowTickUpdatesNow();
          }
 
-         if (updateGraphs)
+         if (updateGraphsDuringPlayback)
          {
             myGUI.updateGraphs();
          }
@@ -2504,10 +2613,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * This function halts playback and simulation along with any playbackListeners that are enabled.  It also gives the GUI a chance to update.
     * Currently the only implementation of a playback listener is the StateMachinesJPanel class.
     */
+   @Override
    public void stop()
    {
       isPlaying = false;
       isSimulating = false;
+      realTimeRateEnforcer.reset();
       ticksToSimulate = 0;
       setScrollGraphsEnabled(true);
 
@@ -2543,6 +2654,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * @return true if the simulation is simulating
     */
+   @Override
    public boolean isSimulating()
    {
       return isSimulating;
@@ -2583,6 +2695,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * This method causes the GUI to enter play mode assuming it is not already in run (simulate) mode.
     */
+   @Override
    public void play()
    {
       if (isSimulating || isPlaying)
@@ -2719,13 +2832,9 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          ticksToSimulate += numTicks;
          isPlaying = false;
          isSimulating = true;
+         realTimeRateEnforcer.reset();
       }
 
-      /*
-       * while(numTicks > 0) { for(int i=0;i<RECORD_FREQ;i++) {
-       * mySimulator.simulate(); } myDataBuffer.tickAndUpdate(); numTicks -=
-       * RECORD_FREQ; }
-       */
    }
 
    /**
@@ -2741,6 +2850,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Begin simulation mode, unless playback mode is currently enabled.
     */
+   @Override
    public void simulate()
    {
       setScrollGraphsEnabled(false);
@@ -2771,15 +2881,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public double getSimulateDuration()
    {
       return simulateDurationInSeconds;
-   }
-
-   /**
-    * Updates the state of the robots contained in the underlying Simulator. Step 1/3 of Simulator.simulate().
-    * Should only be used for testing purposes.
-    */
-   public void updateState()
-   {
-      mySimulation.updateState();
    }
 
    /**
@@ -2844,6 +2945,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Move the current data point to inPoint.  This has no effect while the simulation is running but will effect playback.
     */
+   @Override
    public void gotoInPoint()
    {
       standardAllCommandsExecutor.gotoInPoint();
@@ -2867,6 +2969,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Moves the current data point to the outPoint.  This has no effect while simulating but will effect playback.
     */
+   @Override
    public void gotoOutPoint()
    {
       standardAllCommandsExecutor.gotoOutPoint();
@@ -2887,6 +2990,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Makes the current data point the in point. This works in all modes.
     */
+   @Override
    public void setInPoint()
    {
       standardAllCommandsExecutor.setInPoint();
@@ -2900,6 +3004,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Makes the current data point a KeyPoint.  If the point is already a KeyPoint it ceases to be one.  KeyPoints are essentially bookmarks.  When they are enabled single steps will move between KeyPoints instead of traveling through the data in a continuous fashion.
     */
+   @Override
    public void addKeyPoint()
    {
       standardAllCommandsExecutor.addKeyPoint();
@@ -2918,6 +3023,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Makes the current data point a CameraKeyPoint.  If the point is already a CameraKeyPoint then it is replaced with the new CameraKeyPoint.  CameraKeyPoints are recorded positions for the camera to move to at a given time.
     */
+   @Override
    public void addCameraKey()
    {
       standardAllCommandsExecutor.addCameraKey();
@@ -2936,6 +3042,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Removes the CameraKeyPoint at the current data point.
     */
+   @Override
    public void removeCameraKey()
    {
       standardAllCommandsExecutor.removeCameraKey();
@@ -2944,6 +3051,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Removes the CameraKeyPoint at the current data point.
     */
+   @Override
    public void nextCameraKey()
    {
       standardAllCommandsExecutor.nextCameraKey();
@@ -2952,6 +3060,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Removes the CameraKeyPoint at the current data point.
     */
+   @Override
    public void previousCameraKey()
    {
       standardAllCommandsExecutor.previousCameraKey();
@@ -2960,6 +3069,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Makes the current data point the out point.  This has no effect in simulation mode as the current point is always the out point.
     */
+   @Override
    public void setOutPoint()
    {
       standardAllCommandsExecutor.setOutPoint();
@@ -2968,6 +3078,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Step backward one tick.  If KeyPoints are enabled step back to the first KeyPoint smaller than the current point.  This method has no effect while the simulation is running.
     */
+   @Override
    public void stepBackward()
    {
       standardAllCommandsExecutor.stepBackward();
@@ -3008,6 +3119,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Step forward one tick.  If KeyPoints are enabled, step forward to the first KeyPoint larger than the current point.  This method has no effect while the simulation is running.
     */
+   @Override
    public void stepForward()
    {
       standardAllCommandsExecutor.stepForward();
@@ -3054,11 +3166,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * Crops the data buffer to the current in and out points.  All data outside of this range is discarded and the graphs are redrawn to fit the existing set.
     * Once the data is cropped the current index is moved to the new start point.  This method operates during all modes, if triggered during simulation the transition between the current point and the new start point may result in anomalous behavior.
     */
+   @Override
    public void cropBuffer()
    {
       standardAllCommandsExecutor.cropBuffer();
    }
    
+   @Override
    public void cutBuffer()
    {
       standardAllCommandsExecutor.cutBuffer();
@@ -3072,6 +3186,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Packs the data buffer based on the current inPoint.  Essentially this shifts the data such that the inPoint is at index zero.  This method can operate during simulation which under some conditions may cause abnormal behavior.
     */
+   @Override
    public void packBuffer()
    {
       standardAllCommandsExecutor.packBuffer();
@@ -3139,6 +3254,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @param snapshotFile File to which the image is saved.
     */
+   @Override
    public void exportSnapshot(File snapshotFile)
    {
       CaptureDevice capturableCanvas = myGUI.getActiveCaptureDevice();
@@ -3268,6 +3384,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @param compress   Specify the presence of compression.
     * @param chosenFile File to which data will be saved
     */
+   @Override
    public void writeData(ArrayList<YoVariable<?>> vars, boolean binary, boolean compress, File chosenFile)
    {
       DataFileWriter dataWriter = new DataFileWriter(chosenFile);
@@ -3487,6 +3604,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          {
             EventDispatchThreadHelper.invokeLater(new Runnable()
             {
+               @Override
                public void run()
                {
                   JOptionPane.showMessageDialog(jFrame, "File not valid data file!");
@@ -3623,16 +3741,19 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
+   @Override
    public GraphArrayWindow getGraphArrayWindow(String windowName)
    {
       return standardAllCommandsExecutor.getGraphArrayWindow(windowName);
    }
 
+   @Override
    public ViewportWindow getViewportWindow(String windowName)
    {
       return standardAllCommandsExecutor.getViewportWindow(windowName);
    }
 
+   @Override
    public GraphArrayWindow createNewGraphWindow()
    {
       return standardAllCommandsExecutor.createNewGraphWindow();
@@ -3643,6 +3764,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @param graphGroupName Name of the desired graph group.
     */
+   @Override
    public GraphArrayWindow createNewGraphWindow(String graphGroupName)
    {
       return standardAllCommandsExecutor.createNewGraphWindow(graphGroupName);
@@ -3661,11 +3783,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return createNewGraphWindow(graphGroupName, screenID, null, null, maximizeWindow);
    }
    
+   @Override
    public GraphArrayWindow createNewGraphWindow(String graphGroupName, int screenID, Point windowLocation, Dimension windowSize, boolean maximizeWindow)
    {
       return standardAllCommandsExecutor.createNewGraphWindow(graphGroupName, screenID, windowLocation, windowSize, maximizeWindow);
    }
 
+   @Override
    public ViewportWindow createNewViewportWindow()
    {
       return standardAllCommandsExecutor.createNewViewportWindow();
@@ -3678,6 +3802,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @return The new ViewportWindow.
     * @see ViewportConfiguration ViewportConfiguration
     */
+   @Override
    public ViewportWindow createNewViewportWindow(String viewportName)
    {
       return standardAllCommandsExecutor.createNewViewportWindow(viewportName);
@@ -3693,6 +3818,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @return ViewportWindow The new ViewportWindow
     * @see ViewportConfiguration ViewportConfiguration
     */
+   @Override
    public ViewportWindow createNewViewportWindow(String viewportName, int screenID, boolean maximizeWindow)
    {
       return standardAllCommandsExecutor.createNewViewportWindow(viewportName, screenID, maximizeWindow);
@@ -3923,6 +4049,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @return Are key points in use?
     */
+   @Override
    public boolean isKeyPointModeToggled()
    {
       return standardAllCommandsExecutor.isKeyPointModeToggled();
@@ -3931,11 +4058,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Toggle between enabling and disabling the use of KeyPoints.   Key points are bookmarks in the data, when KeyPoints are in use steps during playback will only  move between KeyPoints.
     */
+   @Override
    public void toggleKeyPointMode()
    {
       standardAllCommandsExecutor.toggleKeyPointMode();
    }
 
+   @Override
    public void registerToggleKeyPointModeCommandListener(ToggleKeyPointModeCommandListener listener)
    {
       standardAllCommandsExecutor.registerToggleKeyPointModeCommandListener(listener);
@@ -3944,6 +4073,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Toggle between enabling and disabling the use of CameraKeyPoints.
     */
+   @Override
    public void toggleCameraKeyMode()
    {
       standardAllCommandsExecutor.toggleCameraKeyMode();
@@ -4019,6 +4149,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       runningName = name;
    }
 
+   @Override
    public double getTime()
    {
       return robots[0].getTime();
@@ -4042,21 +4173,25 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return "12.06.22";
    }
 
+   @Override
    public int getInPoint()
    {
       return myDataBuffer.getInPoint();
    }
 
+   @Override
    public void setIndex(int index)
    {
       myDataBuffer.setIndex(index);
    }
 
+   @Override
    public void setIndexButDoNotNotifySimulationRewoundListeners(int index)
    {
       myDataBuffer.setIndexButDoNotNotifySimulationRewoundListeners(index);
    }
 
+   @Override
    public int getOutPoint()
    {
       return myDataBuffer.getOutPoint();
@@ -4115,10 +4250,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       List<YoGraphicsList> yoGraphicsLists = yoGraphicsListRegistry.getYoGraphicsLists();
       
       if (yoGraphicsLists == null) return;
-      
-      addCheckBoxesToDynamicGraphicCheckBoxMenuItem(yoGraphicsLists);
 
-      displayYoGraphicMenu();
+      if(dynamicGraphicMenuManager != null)
+      {
+         addCheckBoxesToDynamicGraphicCheckBoxMenuItem(yoGraphicsLists);
+         displayYoGraphicMenu();
+      }
+
       yoGraphicListRegistries.add(yoGraphicsListRegistry);
    }
    
@@ -4126,6 +4264,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             for (YoGraphicsList yoGraphicsList : yoGraphicsLists)
@@ -4203,12 +4342,11 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return yoGraphicListRegistries;
    }
 
-   private final DynamicGraphicMenuManager dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
-
    private void displayYoGraphicMenu()
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             JMenuBar menuBar = new JMenuBar();
@@ -4268,10 +4406,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void initPhysics(ScsPhysics physics)
    {
       this.physics = physics;
-      if (physics.visualize != null)
-      {
-         physics.visualize.init(this);
-      }
       mySimulation.initPhysics(physics);
    }
 

@@ -10,7 +10,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface Path
 {
-   public ArrayList<Footstep> generateFootsteps(HeightMapWithPoints heightMap, SideDependentList<ContactablePlaneBody> contactableFeet);
+   public ArrayList<Footstep> generateFootsteps(HeightMapWithPoints heightMap, SideDependentList<? extends ContactablePlaneBody> contactableFeet);
 
    public void cancel();
 

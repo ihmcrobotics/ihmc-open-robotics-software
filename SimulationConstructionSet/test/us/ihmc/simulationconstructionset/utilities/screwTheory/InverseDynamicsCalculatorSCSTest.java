@@ -42,8 +42,8 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 /**
  * This currently needs to be here because it uses SCS classes to test the inverse dynamics calculator, and SCS isn't on the IHMCUtilities build path
@@ -66,7 +66,7 @@ public class InverseDynamicsCalculatorSCSTest
    {
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOneFreeRigidBody()
    {
@@ -132,7 +132,7 @@ public class InverseDynamicsCalculatorSCSTest
       compareWrenches(inputWrench, outputWrench);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testChainNoGravity()
    {
@@ -152,7 +152,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testTreeWithNoGravity()
    {
@@ -178,7 +178,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testTreeWithGravity()
    {
@@ -204,7 +204,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testDoingInverseDynamicsTermPerTerm()
    {
@@ -248,7 +248,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testDoingNothing()
    {
@@ -278,7 +278,7 @@ public class InverseDynamicsCalculatorSCSTest
       }
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGravityCompensationForChain()
    {
@@ -297,7 +297,7 @@ public class InverseDynamicsCalculatorSCSTest
       assertZeroAccelerations(jointMap);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testChainWithGravity()
    {
@@ -379,7 +379,7 @@ public class InverseDynamicsCalculatorSCSTest
       {
          OneDegreeOfFreedomJoint revoluteJoint = jointMap.get(idJoint);
 
-         DoubleYoVariable qddVariable = revoluteJoint.getQDD();
+         DoubleYoVariable qddVariable = revoluteJoint.getQDDYoVariable();
          double qdd = qddVariable.getDoubleValue();
          double qddInverse = idJoint.getQddDesired();
 
@@ -396,7 +396,7 @@ public class InverseDynamicsCalculatorSCSTest
       double epsilon = 1e-12;
       for (OneDegreeOfFreedomJoint joint : jointMap.values())
       {
-         double qdd = joint.getQDD().getDoubleValue();
+         double qdd = joint.getQDDYoVariable().getDoubleValue();
          assertEquals(0.0, qdd, epsilon);
       }
    }

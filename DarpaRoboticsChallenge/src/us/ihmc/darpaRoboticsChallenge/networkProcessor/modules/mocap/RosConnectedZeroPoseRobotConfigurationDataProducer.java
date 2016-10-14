@@ -17,8 +17,8 @@ import org.ros.node.NodeMainExecutor;
 import org.ros.node.topic.Subscriber;
 
 import sensor_msgs.JointState;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -40,7 +40,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
    private Subscriber<JointState> jointSubscriber;
 
    private final DRCRobotModel robotModel;
-   private final SDFFullHumanoidRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final ForceSensorDefinition[] forceSensorDefinitions;
    private final HumanoidReferenceFrames referenceFrames;
    private final ReferenceFrame pelvisFrame;
@@ -56,7 +56,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       
       pelvisFrame = referenceFrames.getPelvisFrame();
-      headFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
+      headFrame = referenceFrames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
       
       forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       

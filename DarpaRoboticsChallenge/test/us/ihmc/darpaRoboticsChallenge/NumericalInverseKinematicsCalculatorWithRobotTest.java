@@ -10,9 +10,9 @@ import javax.vecmath.AxisAngle4d;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.JointAnglesWriter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -38,7 +38,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
@@ -61,14 +61,14 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    private final EnumMap<JointNames, Double> jointAnglesInitial = new EnumMap<JointNames, Double>(JointNames.class);
 
    private final ArrayList<Long> solvingTime = new ArrayList<Long>();
-   private final SDFFullHumanoidRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final ReferenceFrame worldFrame;
    private GeometricJacobian leftHandJacobian;
    private InverseKinematicsCalculator inverseKinematicsCalculator;
    private InverseKinematicsStepListener inverseKinematicsStepListener;
 
    private SimulationConstructionSet scs;
-   private SDFRobot sdfRobot;
+   private FloatingRootJointRobot sdfRobot;
    private JointAnglesWriter jointAnglesWriter;
 
    private final YoFramePoint testPositionForwardKinematics = new YoFramePoint("testPositionForwardKinematics", ReferenceFrame.getWorldFrame(), registry);
@@ -97,7 +97,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.PETER_SOLVER;
       DRCRobotModel robotModel = getRobotModel();
 
-      sdfRobot = robotModel.createSdfRobot(false);
+      sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       if (VISUALIZE)
       {
@@ -195,7 +195,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCase()
    {
@@ -215,8 +215,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
 
 
-	@DeployableTestMethod(estimatedDuration = 13.5)
-   @Test(timeout = 68000)
+	@ContinuousIntegrationTest(estimatedDuration = 13.2)
+   @Test(timeout = 66000)
    public void testRandomFeasibleRobotPoses()
    {
       Random random = new Random(1776L);

@@ -79,34 +79,34 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
 
    public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
    {
-      normal.x = 0.0;
-      normal.y = 0.0;
-      normal.z = 1.0;
+      normal.setX(0.0);
+      normal.setY(0.0);
+      normal.setZ(1.0);
    }
 
 
    public void closestIntersectionTo(double x, double y, double z, Point3d intersection)
    {
-      intersection.x = x;    // Go Straight Up for now...
-      intersection.y = y;
-      intersection.z = heightAt(x, y, z);
+      intersection.setX(x);    // Go Straight Up for now...
+      intersection.setY(y);
+      intersection.setZ(heightAt(x, y, z));
    }
 
 
    public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
    {
-      intersection.x = x;    // Go Straight Up for now...
-      intersection.y = y;
-      intersection.z = heightAt(x, y, z);
+      intersection.setX(x);    // Go Straight Up for now...
+      intersection.setY(y);
+      intersection.setZ(heightAt(x, y, z));
 
       surfaceNormalAt(x, y, z, normal);
    }
    
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
-      intersectionToPack.x = x;    // Go Straight Up for now...
-      intersectionToPack.y = y;
-      intersectionToPack.z = heightAt(x, y, z);
+      intersectionToPack.setX(x);    // Go Straight Up for now...
+      intersectionToPack.setY(y);
+      intersectionToPack.setZ(heightAt(x, y, z));
 
       surfaceNormalAt(x, y, z, normalToPack);
       

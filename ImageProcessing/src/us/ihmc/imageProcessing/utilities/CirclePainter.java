@@ -49,7 +49,7 @@ public class CirclePainter implements PostProcessor
 
       for (Vector3d circle : circles)
       {
-         graphics.drawOval(new Double(circle.x).intValue(), new Double(circle.y).intValue(), new Double(circle.z).intValue(), new Double(circle.z).intValue());
+         graphics.drawOval(new Double(circle.getX()).intValue(), new Double(circle.getY()).intValue(), new Double(circle.getZ()).intValue(), new Double(circle.getZ()).intValue());
       }
 
       graphics.setColor(originalGraphicsColor);

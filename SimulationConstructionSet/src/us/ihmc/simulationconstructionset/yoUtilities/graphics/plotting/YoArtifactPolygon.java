@@ -2,129 +2,83 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
+import java.awt.geom.Rectangle2D;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.plotting.Artifact;
-import us.ihmc.plotting.PlotterGraphics;
+import javax.vecmath.Point2d;
+
+import us.ihmc.plotting.Graphics2DAdapter;
+import us.ihmc.plotting.Plotter2DAdapter;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 
-public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
+public class YoArtifactPolygon extends YoArtifact
 {
-   private static final long serialVersionUID = 1595929952165656135L;
+   private final YoFrameConvexPolygon2d convexPolygon;
+   
+   private final ConvexPolygon2d tempConvexPolygon = new ConvexPolygon2d();
 
-   private final YoFrameConvexPolygon2d yoConvexPolygon2d;
-   private final ConvexPolygon2d convexPolygon2d = new ConvexPolygon2d();
-
-   private final PlotterGraphics plotterGraphics = new PlotterGraphics();
-
-   // private final Color color;
    private final boolean fill;
-
-   private final int pixels;
    private final BasicStroke stroke;
-
+   
+   private final Point2d legendStringPosition = new Point2d();
+   
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill)
    {
-      super(name);
-      this.yoConvexPolygon2d = yoConvexPolygon2d;
-      this.color = color;
-      this.fill = fill;
-      this.pixels = 2;
-      stroke = createStroke();
+      this(name, yoConvexPolygon2d, color, fill, 2);
    }
-   
+
    public YoArtifactPolygon(String name, YoFrameConvexPolygon2d yoConvexPolygon2d, Color color, boolean fill, int lineWidth)
    {
-      super(name);
-      this.yoConvexPolygon2d = yoConvexPolygon2d;
-      this.color = color;
+      super(name,  new double[] {fill ? 1.0 : 0.0}, color);
+      this.convexPolygon = yoConvexPolygon2d;
       this.fill = fill;
-      this.pixels = lineWidth;
-      stroke = createStroke();
-   }
-   
-   public BasicStroke createStroke()
-   {
-      return new BasicStroke(pixels);
+      this.stroke = new BasicStroke(lineWidth);
    }
 
-   public void drawLegend(Graphics graphics, int Xcenter, int Ycenter, double scaleFactor)
+   @Override
+   public void drawLegend(Plotter2DAdapter graphics, Point2d origin)
    {
       graphics.setColor(color);
-      graphics.drawString("Polygon", Xcenter, Ycenter);
+      String name = "Polygon";
+      Rectangle2D textDimensions = graphics.getFontMetrics().getStringBounds(name, graphics.getGraphicsContext());
+      legendStringPosition.set(origin.getX() - textDimensions.getWidth() / 2.0, origin.getY() + textDimensions.getHeight() / 2.0);
+      graphics.drawString(graphics.getScreenFrame(), name, legendStringPosition);
    }
 
-   public void draw(Graphics graphics, int Xcenter, int Ycenter, double headingOffset, double scaleFactor)
+   @Override
+   public void draw(Graphics2DAdapter graphics)
    {
-      if (isVisible)
+      graphics.setColor(color);
+      graphics.setStroke(stroke);
+
+      convexPolygon.getFrameConvexPolygon2d().get(tempConvexPolygon);
+
+      if (fill)
       {
-         graphics.setColor(color);
-         
-         Stroke previousStroke = ((Graphics2D) graphics).getStroke();
-         ((Graphics2D) graphics).setStroke(stroke);
-
-         plotterGraphics.setCenter(Xcenter, Ycenter);
-         plotterGraphics.setScale(scaleFactor);
-
-         try
-         {
-            FrameConvexPolygon2d frameConvexPolygon2d = yoConvexPolygon2d.getFrameConvexPolygon2d();
-            ConvexPolygon2d convexPolygon2dFromYoConvexPolygon = frameConvexPolygon2d.getConvexPolygon2d();
-            convexPolygon2d.setAndUpdate(convexPolygon2dFromYoConvexPolygon);
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-            return;
-         }
-         
-         if (convexPolygon2d.isEmpty())
-               return;
-
-         if (fill && convexPolygon2d.getNumberOfVertices() > 2)
-         {
-            plotterGraphics.fillPolygon(graphics, convexPolygon2d);
-         }
-         else
-         {
-            plotterGraphics.drawPolygon(graphics, convexPolygon2d);
-         }
-         
-         ((Graphics2D) graphics).setStroke(previousStroke);
+         graphics.drawPolygonFilled(tempConvexPolygon);
+      }
+      else
+      {
+         graphics.drawPolygon(tempConvexPolygon);
       }
    }
 
-   public void drawHistory(Graphics g, int Xcenter, int Ycenter, double scaleFactor)
+   @Override
+   public void drawHistoryEntry(Graphics2DAdapter graphics, double[] entry)
    {
-      throw new RuntimeException("Not implemented!");
+      // not implemented
    }
 
-   public void takeHistorySnapshot()
-   {
-      throw new RuntimeException("Not implemented!");
-   }
-
-   public RemoteGraphicType getRemoteGraphicType()
-   {
-      return RemoteGraphicType.POLYGON_ARTIFACT;
-   }
-
+   @Override
    public YoVariable<?>[] getVariables()
    {
-      YoVariable<?>[] vars = new YoVariable[1 + 2 * yoConvexPolygon2d.getMaxNumberOfVertices()];
+      YoVariable<?>[] vars = new YoVariable[1 + 2 * convexPolygon.getMaxNumberOfVertices()];
       int i = 0;
-      vars[i++] = yoConvexPolygon2d.getYoNumberVertices();
+      vars[i++] = convexPolygon.getYoNumberVertices();
 
-      for (YoFramePoint2d p : yoConvexPolygon2d.getYoFramePoints())
+      for (YoFramePoint2d p : convexPolygon.getYoFramePoints())
       {
          vars[i++] = p.getYoX();
          vars[i++] = p.getYoY();
@@ -133,18 +87,9 @@ public class YoArtifactPolygon extends Artifact implements RemoteYoGraphic
       return vars;
    }
 
-   public double[] getConstants()
+   @Override
+   public RemoteGraphicType getRemoteGraphicType()
    {
-      return new double[] { fill ? 1 : 0 };
-   }
-
-   public AppearanceDefinition getAppearance()
-   {
-      return new YoAppearanceRGBColor(color, 0.0);
-   }
-
-   public String getName()
-   {
-      return getID();
+      return RemoteGraphicType.POLYGON_ARTIFACT;
    }
 }

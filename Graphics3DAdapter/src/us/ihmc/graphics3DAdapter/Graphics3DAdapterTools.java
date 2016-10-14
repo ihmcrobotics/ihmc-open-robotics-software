@@ -29,7 +29,7 @@ public class Graphics3DAdapterTools
       CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder = new SimpleCameraTrackingAndDollyPositionHolder();
       ClassicCameraController classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(viewportAdapter,
                                                            cameraTrackingAndDollyPositionHolder, graphics3DAdapter);
-      classicCameraController.setCameraPosition(initialCameraTranslation.x, initialCameraTranslation.y, initialCameraTranslation.z);
+      classicCameraController.setCameraPosition(initialCameraTranslation.getX(), initialCameraTranslation.getY(), initialCameraTranslation.getZ());
 
       return classicCameraController;
    }

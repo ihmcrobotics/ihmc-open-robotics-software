@@ -18,11 +18,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class HumanEvaluationLine2dTest
 {
    private final boolean WAIT_FOR_BUTTON_PUSH = false;
@@ -44,10 +44,10 @@ public class HumanEvaluationLine2dTest
       assertTrue("Normalized vector not normalized", Math.abs(line2dPointPoint.normalizedVector.length() - 1.0) < epsilon);
       assertTrue("Normalized vector not normalized", Math.abs(line2dLine2d.normalizedVector.length() - 1.0) < epsilon);
 
-      assertEquals("Creating line from other line failed", line2dPointPoint.point.x, line2dLine2d.point.x, EPSILON_FOR_EQUALS);
-      assertEquals("Creating line from other line failed", line2dPointPoint.point.y, line2dLine2d.point.y, EPSILON_FOR_EQUALS);
-      assertEquals("Creating line from other line failed", line2dPointPoint.normalizedVector.x, line2dLine2d.normalizedVector.x, EPSILON_FOR_EQUALS);
-      assertEquals("Creating line from other line failed", line2dPointPoint.normalizedVector.y, line2dLine2d.normalizedVector.y, EPSILON_FOR_EQUALS);
+      assertEquals("Creating line from other line failed", line2dPointPoint.point.getX(), line2dLine2d.point.getX(), EPSILON_FOR_EQUALS);
+      assertEquals("Creating line from other line failed", line2dPointPoint.point.getY(), line2dLine2d.point.getY(), EPSILON_FOR_EQUALS);
+      assertEquals("Creating line from other line failed", line2dPointPoint.normalizedVector.getX(), line2dLine2d.normalizedVector.getX(), EPSILON_FOR_EQUALS);
+      assertEquals("Creating line from other line failed", line2dPointPoint.normalizedVector.getY(), line2dLine2d.normalizedVector.getY(), EPSILON_FOR_EQUALS);
 
       assertNotSame("Line fields not copied", point1, line2dPointVector.point);
       assertNotSame("Line fields not copied", vector, line2dPointVector.normalizedVector);    // this would be really weird, but test anyway
@@ -74,7 +74,7 @@ public class HumanEvaluationLine2dTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout = 30000)
    public void testIsOnLeftSideOfLine()
    {
@@ -118,7 +118,7 @@ public class HumanEvaluationLine2dTest
       testFrame.dispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout = 30000)
    public void testIsInFrontOfLine()
    {
@@ -176,7 +176,7 @@ public class HumanEvaluationLine2dTest
       testFrame.dispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testApplyTransform()
    {
@@ -186,7 +186,7 @@ public class HumanEvaluationLine2dTest
       Vector3d translation = new Vector3d(random.nextDouble(), random.nextDouble(), 0.0);
       Vector3d eulerAngles = new Vector3d(0.0, 0.0, 0.0);
 
-      transform.setEuler(eulerAngles);
+      transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
       Line2d line = new Line2d(line2dPointPoint);
@@ -196,15 +196,15 @@ public class HumanEvaluationLine2dTest
       line.getNormalizedVector(vector);
 
       line.applyTransform(transform);
-      assertEquals("pure translation failed", point.x + translation.x, line.point.x, EPSILON_FOR_EQUALS);
-      assertEquals("pure translation failed", point.y + translation.y, line.point.y, EPSILON_FOR_EQUALS);
-      assertEquals("pure translation failed", vector.x, line.normalizedVector.x, EPSILON_FOR_EQUALS);
-      assertEquals("pure translation failed", vector.y, line.normalizedVector.y, EPSILON_FOR_EQUALS);
+      assertEquals("pure translation failed", point.getX() + translation.getX(), line.point.getX(), EPSILON_FOR_EQUALS);
+      assertEquals("pure translation failed", point.getY() + translation.getY(), line.point.getY(), EPSILON_FOR_EQUALS);
+      assertEquals("pure translation failed", vector.getX(), line.normalizedVector.getX(), EPSILON_FOR_EQUALS);
+      assertEquals("pure translation failed", vector.getY(), line.normalizedVector.getY(), EPSILON_FOR_EQUALS);
 
       // TODO: test rotation
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testContainsEpsilon()
    {
@@ -220,12 +220,12 @@ public class HumanEvaluationLine2dTest
       for (int i = 0; i < 1000; i++)
       {
          double scaleFactor = 10.0 * random.nextDouble() - 5.0;
-         randomPointOnLine.set(point1.x + scaleFactor * (point2.x - point1.x), point1.y + scaleFactor * (point2.y - point1.y));
+         randomPointOnLine.set(point1.getX() + scaleFactor * (point2.getX() - point1.getX()), point1.getY() + scaleFactor * (point2.getY() - point1.getY()));
          assertTrue("Random point on line not handled correctly", line2dPointPoint.containsEpsilon(randomPointOnLine, epsilon));
 
          double deviation = random.nextDouble() - 0.5;
          perp = line2dPointPoint.perpendicularVector();
-         randomPointNotOnLine.set(randomPointOnLine.x + deviation * perp.x, randomPointOnLine.y + deviation * perp.y);
+         randomPointNotOnLine.set(randomPointOnLine.getX() + deviation * perp.getX(), randomPointOnLine.getY() + deviation * perp.getY());
 
          if (deviation != 0.0)
          {
@@ -234,7 +234,7 @@ public class HumanEvaluationLine2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetNormalizedVectorCopy()
    {
@@ -242,26 +242,26 @@ public class HumanEvaluationLine2dTest
       line2dPointPoint.getNormalizedVector(vector);
       assertNotSame("Normalized vector copy is not a copy of the normalized vector", line2dPointPoint.normalizedVector,
             vector);
-      assertEquals("Normalized vector copy doesn't have the same elements as the original", line2dPointPoint.normalizedVector.x,
-            vector.x, EPSILON_FOR_EQUALS);
-      assertEquals("Normalized vector copy doesn't have the same elements as the original", line2dPointPoint.normalizedVector.y,
-            vector.y, EPSILON_FOR_EQUALS);
+      assertEquals("Normalized vector copy doesn't have the same elements as the original", line2dPointPoint.normalizedVector.getX(),
+            vector.getX(), EPSILON_FOR_EQUALS);
+      assertEquals("Normalized vector copy doesn't have the same elements as the original", line2dPointPoint.normalizedVector.getY(),
+            vector.getY(), EPSILON_FOR_EQUALS);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetSlope()
    {
       double slope = line2dPointPoint.getSlope();
       double scaleFactor = 10.0 * random.nextDouble() - 5.0;
-      Point2d shouldBeOnLine = new Point2d(point1.x + scaleFactor * (point2.x - point1.x), point1.y + scaleFactor * (point2.y - point1.y));
-      Point2d shouldBeOnLineToo = new Point2d(point1.x + scaleFactor, point1.y + scaleFactor * slope);
+      Point2d shouldBeOnLine = new Point2d(point1.getX() + scaleFactor * (point2.getX() - point1.getX()), point1.getY() + scaleFactor * (point2.getY() - point1.getY()));
+      Point2d shouldBeOnLineToo = new Point2d(point1.getX() + scaleFactor, point1.getY() + scaleFactor * slope);
       double epsilon = 1E-12;
       assertTrue("You didn't even get this right", line2dPointPoint.containsEpsilon(shouldBeOnLine, epsilon));
       assertTrue("Point should have been on the line", line2dPointPoint.containsEpsilon(shouldBeOnLineToo, epsilon));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testInteriorBisector()
    {
@@ -275,15 +275,15 @@ public class HumanEvaluationLine2dTest
       Line2d secondLine = new Line2d(somePoint, vector2);
       Line2d bisector = firstLine.interiorBisector(secondLine);
 
-      assertEquals("Bisector point on line not correct", bisector.point.x, somePoint.x, EPSILON_FOR_EQUALS);
-      assertEquals("Bisector point on line not correct", bisector.point.y, somePoint.y, EPSILON_FOR_EQUALS);
+      assertEquals("Bisector point on line not correct", bisector.point.getX(), somePoint.getX(), EPSILON_FOR_EQUALS);
+      assertEquals("Bisector point on line not correct", bisector.point.getY(), somePoint.getY(), EPSILON_FOR_EQUALS);
 
 
-      assertTrue("Bisector direction not correct", Math.abs(bisector.normalizedVector.x - Math.sqrt(2.0) / 2.0) < epsilon);
-      assertTrue("Bisector direction not correct", Math.abs(bisector.normalizedVector.x - Math.sqrt(2.0) / 2.0) < epsilon);
+      assertTrue("Bisector direction not correct", Math.abs(bisector.normalizedVector.getX() - Math.sqrt(2.0) / 2.0) < epsilon);
+      assertTrue("Bisector direction not correct", Math.abs(bisector.normalizedVector.getX() - Math.sqrt(2.0) / 2.0) < epsilon);
 
       Line2d parallelLine = new Line2d(firstLine);
-      parallelLine.point.y += 5.0;
+      parallelLine.point.setY(parallelLine.point.getY() + 5.0);
       bisector = firstLine.interiorBisector(parallelLine);
       assertNull(bisector);
 
@@ -302,8 +302,8 @@ public class HumanEvaluationLine2dTest
          }
          else
          {
-            assertEquals("Bisector point on line not correct", intersection.x, bisector.point.x, EPSILON_FOR_EQUALS);
-            assertEquals("Bisector point on line not correct", intersection.y, bisector.point.y, EPSILON_FOR_EQUALS);
+            assertEquals("Bisector point on line not correct", intersection.getX(), bisector.point.getX(), EPSILON_FOR_EQUALS);
+            assertEquals("Bisector point on line not correct", intersection.getY(), bisector.point.getY(), EPSILON_FOR_EQUALS);
             double angleBetweenRandomLines = randomLine1.normalizedVector.angle(randomLine2.normalizedVector);
             double angleBetweenRandomLineAndBisector = randomLine1.normalizedVector.angle(bisector.normalizedVector);
             assertTrue("Angle not correct", Math.abs(angleBetweenRandomLines - 2.0 * angleBetweenRandomLineAndBisector) < epsilon);
@@ -311,24 +311,24 @@ public class HumanEvaluationLine2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegateDirection()
    {
       Line2d someLine = new Line2d(line2dPointPoint);
 
       Vector2d directionVectorBefore = someLine.normalizedVector;
-      double directionBeforeX = someLine.normalizedVector.x;
-      double directionBeforeY = someLine.normalizedVector.y;
+      double directionBeforeX = someLine.normalizedVector.getX();
+      double directionBeforeY = someLine.normalizedVector.getY();
 
       someLine.negateDirection();
 
-      assertEquals(-directionBeforeX, someLine.normalizedVector.x, EPSILON_FOR_EQUALS);
-      assertEquals(-directionBeforeY, someLine.normalizedVector.y, EPSILON_FOR_EQUALS);
+      assertEquals(-directionBeforeX, someLine.normalizedVector.getX(), EPSILON_FOR_EQUALS);
+      assertEquals(-directionBeforeY, someLine.normalizedVector.getY(), EPSILON_FOR_EQUALS);
       assertEquals(directionVectorBefore, someLine.normalizedVector);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testNegateDirectionCopy()
    {
@@ -336,19 +336,19 @@ public class HumanEvaluationLine2dTest
 
       Vector2d directionVectorBefore = someLine.normalizedVector;
       Point2d pointBefore = someLine.point;
-      double directionBeforeX = someLine.normalizedVector.x;
-      double directionBeforeY = someLine.normalizedVector.y;
+      double directionBeforeX = someLine.normalizedVector.getX();
+      double directionBeforeY = someLine.normalizedVector.getY();
 
       Line2d copy = someLine.negateDirectionCopy();
 
-      assertEquals(-directionBeforeX, copy.normalizedVector.x, EPSILON_FOR_EQUALS);
-      assertEquals(-directionBeforeY, copy.normalizedVector.y, EPSILON_FOR_EQUALS);
+      assertEquals(-directionBeforeX, copy.normalizedVector.getX(), EPSILON_FOR_EQUALS);
+      assertEquals(-directionBeforeY, copy.normalizedVector.getY(), EPSILON_FOR_EQUALS);
       assertNotSame(directionVectorBefore, copy.normalizedVector);
       assertNotSame(pointBefore, copy.point);
       assertNotSame(someLine, copy);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testPerpendicularVector()
    {
@@ -365,7 +365,7 @@ public class HumanEvaluationLine2dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testZeroLength()
    {

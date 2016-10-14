@@ -4,7 +4,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
-import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -47,7 +47,7 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
       graphics3dObject.setChangeable(true);
 
       ConvexPolygon2d convexPolygon2d = yoFrameConvexPolygon2d.getConvexPolygon2d();
-      instruction = graphics3dObject.addPolygon(convexPolygon2d, appearance);
+      instruction = graphics3dObject.addExtrudedPolygon(convexPolygon2d, 0.005, appearance);
    }
 
    public Artifact createArtifact()
@@ -60,7 +60,7 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
    {
       if (yoFrameConvexPolygon2d.getHasChangedAndReset())
       {
-         instruction.setMesh(MeshDataGenerator.Polygon(yoFrameConvexPolygon2d.getConvexPolygon2d()));
+         instruction.setMesh(MeshDataGenerator.ExtrudedPolygon(yoFrameConvexPolygon2d.getConvexPolygon2d(), 0.005));
       }
    }
 
