@@ -118,7 +118,7 @@ public abstract class AbstractDataExporter implements ActionListener
       {
          System.out.println("creating data graphs");
          boolean createGraphsJPG = true;
-         boolean createGraphsPDF = true;
+         boolean createGraphsPDF = false;
 
          ArrayList<String> dataVsTimeVariableNames = getDataVsTimeVariableNames();
 
