@@ -7,6 +7,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
+import javax.vecmath.Vector3f;
 
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
@@ -326,11 +327,12 @@ public class MeshDataGenerator
 
       for (int i = 0; i < N; i++)
       {
-         points[i] = new Point3f((float) (radius * Math.cos(i * 2.0 * Math.PI / N)), (float) (radius * Math.sin(i * 2.0 * Math.PI / N)), 0.0f);
-         points[i + N] = new Point3f((float) (radius * Math.cos(i * 2.0 * Math.PI / N)), (float) (radius * Math.sin(i * 2.0 * Math.PI / N)), height);
+         double angle = i * 2.0 * Math.PI / N;
+         points[i] = new Point3f((float) (radius * Math.cos(angle)), (float) (radius * Math.sin(angle)), 0.0f);
+         points[i + N] = new Point3f((float) (radius * Math.cos(angle)), (float) (radius * Math.sin(angle)), height);
          
-         textPoints[i] = new TexCoord2f((float) (0.5f * Math.cos(i * 2.0 * Math.PI / N) + 0.5f), (float) (0.5f * Math.sin(i * 2.0 * Math.PI / N) + 0.5f));
-         textPoints[i + N] = new TexCoord2f((float) (0.5f * Math.cos(i * 2.0 * Math.PI / N) + 0.5f), (float) (0.5f * Math.sin(i * 2.0 * Math.PI / N) + 0.5f));
+         textPoints[i] = new TexCoord2f((float) (0.5f * Math.cos(angle) + 0.5f), (float) (0.5f * Math.sin(angle) + 0.5f));
+         textPoints[i + N] = new TexCoord2f((float) (0.5f * Math.cos(angle) + 0.5f), (float) (0.5f * Math.sin(angle) + 0.5f));
       }
 
       int[] polygonIndices = new int[2 * N + 4 * N];
@@ -370,7 +372,17 @@ public class MeshDataGenerator
          pStripCounts[i] = 4;
       }
 
-      return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts);
+      Vector3f[] polygonNormals = new Vector3f[2 + N];
+
+      polygonNormals[0] = new Vector3f(0.0f, 0.0f, -1.0f);
+      polygonNormals[1] = new Vector3f(0.0f, 0.0f, 1.0f);
+      for (int i = 0; i < N; i++)
+      {
+         double angle = i * 2.0 * Math.PI / N;
+         polygonNormals[i + 2] = new Vector3f((float) (Math.cos(angle)), (float) (Math.sin(angle)), 0.0f);
+      }
+
+      return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts, polygonNormals);
    }
 
    public static MeshDataHolder Cone(double height, double radius, int N)

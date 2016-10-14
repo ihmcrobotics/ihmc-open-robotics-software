@@ -187,8 +187,6 @@ public class CylinderMeshGenerator
          faces[fIndex + 5] = t2;
          fIndex += 6;
       }
-      System.out.println(fIndex);
-      System.out.println(faces.length);
 
       return faces;
    }
