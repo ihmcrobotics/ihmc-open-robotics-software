@@ -60,7 +60,9 @@ public abstract class AbstractDataExporter implements ActionListener
 
       // Crop the Buffer to In/Out. This is important because of how we use the DataBuffer later and we assume that in point is at index=0:
       scs.cropBuffer();
-      scs.gotoInPointNow();
+      
+      // For some reason external YoVariable Visualizers freeze up if we do scs.gotoInPointNow(). Not sure why.
+//      scs.gotoInPointNow();
 
       // confirm directory structure is correct
       if (simulationRootDirectory == null)
