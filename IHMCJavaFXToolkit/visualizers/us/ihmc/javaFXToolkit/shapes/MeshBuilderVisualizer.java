@@ -40,33 +40,33 @@ public class MeshBuilderVisualizer extends Application
       scene.setFill(Color.GRAY);
       setupCamera(rootNode, scene);
 
-      JavaFXCoordinateSystem worldCoordinateSystem = new JavaFXCoordinateSystem(0.3);
-      rootNode.getChildren().add(worldCoordinateSystem);
+//      JavaFXCoordinateSystem worldCoordinateSystem = new JavaFXCoordinateSystem(0.3);
+//      rootNode.getChildren().add(worldCoordinateSystem);
 
       MeshBuilder meshBuilder = new MeshBuilder();
-//      switch (MESH_TO_DISPLAY)
-//      {
-//      case BOX:
-//         addRandomBoxes(meshBuilder);
-//         break;
-//      case LINE:
-//         addLines(meshBuilder);
-//         break;
-//      case CYLINDER:
-//         addCylinders(meshBuilder);
-//         break;
-//      case CONE:
-//         addCones(meshBuilder);
-//         break;
-//      default:
-//         break;
-//      }
+      switch (MESH_TO_DISPLAY)
+      {
+      case BOX:
+         addRandomBoxes(meshBuilder);
+         break;
+      case LINE:
+         addLines(meshBuilder);
+         break;
+      case CYLINDER:
+         addCylinders(meshBuilder);
+         break;
+      case CONE:
+         addCones(meshBuilder);
+         break;
+      default:
+         break;
+      }
 
-      MeshView meshView = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Cone(0.3, 0.1, 64)));
+//      MeshView meshView = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Cone(0.3, 0.1, 64)));
 //      MeshView meshView = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.GenTruncatedCone(0.3, 0.1, 0.1, 0.1, 0.1, 64)));
 //      MeshView meshView = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.GenTruncatedCone(0.3, 0.1, 0.1, 0.1, 0.1, 64)));
 //      MeshView meshView = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Cylinder(0.1, 0.3, 64)));
-//      MeshView meshView = new MeshView(meshBuilder.generateMesh());
+      MeshView meshView = new MeshView(meshBuilder.generateMesh());
       PhongMaterial material = new PhongMaterial();
       material.setDiffuseColor(Color.CYAN);
       material.setSpecularColor(Color.CYAN.brighter());
@@ -115,7 +115,7 @@ public class MeshBuilderVisualizer extends Application
       double height = 0.3;
       double radius = 0.1;
       meshBuilder.addCone(height, radius, conePosition);
-      meshBuilder.addMesh(MeshDataGenerator.ArcTorus(0.0, 2.0 * Math.PI, 0.3, 0.01, 128));
+//      meshBuilder.addMesh(MeshDataGenerator.ArcTorus(0.0, 2.0 * Math.PI, 0.3, 0.01, 128));
       meshBuilder.addMesh(MeshDataGenerator.Cone(height, radius, 64));
    }
 

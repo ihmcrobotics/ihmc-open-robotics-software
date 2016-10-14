@@ -3,7 +3,6 @@ package us.ihmc.graphics3DAdapter.graphics;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
-import javax.vecmath.Vector3f;
 
 public class MeshDataHolder
 {
@@ -11,20 +10,13 @@ public class MeshDataHolder
    private final TexCoord2f[] texturePoints;
    private final int[] polygonIndices;
    private final int[] polygonStripCounts;
-   private final Vector3f[] polygonNormals;
 
    public MeshDataHolder(Point3f[] vertices, TexCoord2f[] textPoints, int[] polygonIndices, int[] polygonStripCounts)
-   {
-      this(vertices, textPoints, polygonIndices, polygonStripCounts, null);
-   }
-
-   public MeshDataHolder(Point3f[] vertices, TexCoord2f[] textPoints, int[] polygonIndices, int[] polygonStripCounts, Vector3f[] polygonNormals)
    {
       this.vertices = vertices;
       this.texturePoints = textPoints;
       this.polygonIndices = polygonIndices;
       this.polygonStripCounts = polygonStripCounts;
-      this.polygonNormals = polygonNormals;
    }
 
    public static MeshDataHolder createEmptyMeshDataHolder()
@@ -86,10 +78,5 @@ public class MeshDataHolder
    public int[] getPolygonStripCounts()
    {
       return polygonStripCounts;
-   }
-
-   public Vector3f[] getPolygonNormals()
-   {
-      return polygonNormals;
    }
 }
