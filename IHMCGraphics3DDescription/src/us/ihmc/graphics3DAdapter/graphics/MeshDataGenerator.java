@@ -7,7 +7,6 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
-import javax.vecmath.Vector3f;
 
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
@@ -327,12 +326,11 @@ public class MeshDataGenerator
 
       for (int i = 0; i < N; i++)
       {
-         double angle = i * 2.0 * Math.PI / N;
-         points[i] = new Point3f((float) (radius * Math.cos(angle)), (float) (radius * Math.sin(angle)), 0.0f);
-         points[i + N] = new Point3f((float) (radius * Math.cos(angle)), (float) (radius * Math.sin(angle)), height);
+         points[i] = new Point3f((float) (radius * Math.cos(i * 2.0 * Math.PI / N)), (float) (radius * Math.sin(i * 2.0 * Math.PI / N)), 0.0f);
+         points[i + N] = new Point3f((float) (radius * Math.cos(i * 2.0 * Math.PI / N)), (float) (radius * Math.sin(i * 2.0 * Math.PI / N)), height);
          
-         textPoints[i] = new TexCoord2f((float) (0.5f * Math.cos(angle) + 0.5f), (float) (0.5f * Math.sin(angle) + 0.5f));
-         textPoints[i + N] = new TexCoord2f((float) (0.5f * Math.cos(angle) + 0.5f), (float) (0.5f * Math.sin(angle) + 0.5f));
+         textPoints[i] = new TexCoord2f((float) (0.5f * Math.cos(i * 2.0 * Math.PI / N) + 0.5f), (float) (0.5f * Math.sin(i * 2.0 * Math.PI / N) + 0.5f));
+         textPoints[i + N] = new TexCoord2f((float) (0.5f * Math.cos(i * 2.0 * Math.PI / N) + 0.5f), (float) (0.5f * Math.sin(i * 2.0 * Math.PI / N) + 0.5f));
       }
 
       int[] polygonIndices = new int[2 * N + 4 * N];
@@ -372,17 +370,7 @@ public class MeshDataGenerator
          pStripCounts[i] = 4;
       }
 
-      Vector3f[] polygonNormals = new Vector3f[2 + N];
-
-      polygonNormals[0] = new Vector3f(0.0f, 0.0f, -1.0f);
-      polygonNormals[1] = new Vector3f(0.0f, 0.0f, 1.0f);
-      for (int i = 0; i < N; i++)
-      {
-         double angle = i * 2.0 * Math.PI / N;
-         polygonNormals[i + 2] = new Vector3f((float) (Math.cos(angle)), (float) (Math.sin(angle)), 0.0f);
-      }
-
-      return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts, polygonNormals);
+      return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts);
    }
 
    public static MeshDataHolder Cone(double height, double radius, int N)
@@ -397,32 +385,32 @@ public class MeshDataGenerator
 
       for (int i = 0; i < N; i++)
       {
-         double angle = i * 2.0 * Math.PI / N;
-         points[i] = new Point3f((float) (radius * Math.cos(angle)), (float) (radius * Math.sin(angle)), 0.0f);
-         textPoints[i] = new TexCoord2f((float) (0.5f * Math.cos(angle) + 0.5f), (float) (0.5f * Math.sin(angle) + 0.5f));
+         points[i] = new Point3f((float) (radius * Math.cos(i * 2.0 * Math.PI / N)), (float) (radius * Math.sin(i * 2.0 * Math.PI / N)), 0.0f);
+         textPoints[i] = new TexCoord2f((float) (0.5f * Math.cos(i * 2.0 * Math.PI / N) + 0.5f), (float) (0.5f * Math.sin(i * 2.0 * Math.PI / N) + 0.5f));
       }
 
       points[N] = new Point3f(0.0f, 0.0f, height);
       textPoints[N] = new TexCoord2f(0.5f, 0.5f);
-
+      
       int[] polygonIndices = new int[N + 3 * N];
 
       int index = 0;
 
-      for (int i = N - 1; i >= 0; i--)
+      for (int i = 0; i < N; i++)
       {
-         polygonIndices[index++] = i;
+         polygonIndices[index] = N - 1 - i;
+         index = index + 1;
       }
 
       for (int i = 0; i < N - 1; i++)
       {
-         polygonIndices[index    ] = i;
+         polygonIndices[index] = i;
          polygonIndices[index + 1] = i + 1;
          polygonIndices[index + 2] = N;
          index = index + 3;
       }
 
-      polygonIndices[index    ] = N - 1;
+      polygonIndices[index] = N - 1;
       polygonIndices[index + 1] = 0;
       polygonIndices[index + 2] = N;
 

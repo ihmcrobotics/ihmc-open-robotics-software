@@ -453,7 +453,7 @@ public class MeshBuilder
       mesh.getPoints().addAll(points.toArray());
       mesh.getTexCoords().addAll(texCoords.toArray());
       mesh.getFaces().addAll(faces.toArray());
-//      mesh.getFaceSmoothingGroups().addAll(faceSmoothingGroups.toArray());
+      mesh.getFaceSmoothingGroups().addAll(faceSmoothingGroups.toArray());
       return mesh;
    }
 }
