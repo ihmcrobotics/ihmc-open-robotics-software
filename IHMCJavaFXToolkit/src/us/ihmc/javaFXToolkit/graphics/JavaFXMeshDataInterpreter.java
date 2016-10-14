@@ -11,8 +11,6 @@ import javax.vecmath.Tuple2f;
 import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3f;
 
-import org.apache.commons.lang3.tuple.Triple;
-
 import gnu.trove.list.array.TIntArrayList;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
@@ -29,6 +27,7 @@ public class JavaFXMeshDataInterpreter
       TexCoord2f[] texturePoints = meshData.getTexturePoints();
       int[] polygonIndices = meshData.getPolygonIndices();
       int[] pointsPerPolygonCount = meshData.getPolygonStripCounts();
+      Vector3f[] polygonNormals = meshData.getPolygonNormals();
 
       TIntArrayList facesVertexOnlyIndices = new TIntArrayList();
       TIntArrayList facesIndices = new TIntArrayList();
@@ -39,15 +38,14 @@ public class JavaFXMeshDataInterpreter
          int pointsForThisPolygon = pointsPerPolygonCount[index];
          int[] polygon = new int[pointsForThisPolygon];
 
+         if (polygonIndices.length == polygonIndicesStart)
+            break;
          for (int i = 0; i < pointsForThisPolygon; i++)
          {
             polygon[i] = polygonIndices[polygonIndicesStart + i];
          }
 
-         Triple<int[], Point3f[], TexCoord2f[]> newPolygonData = splitPolygonIntoTriangles(polygon, vertices, texturePoints);
-         int[] splitIntoTriangles = newPolygonData.getLeft();
-         vertices = newPolygonData.getMiddle();
-         texturePoints = newPolygonData.getRight();
+         int[] splitIntoTriangles = splitPolygonIntoTriangles(polygon);
 
          for (int i : splitIntoTriangles)
          {
@@ -61,14 +59,21 @@ public class JavaFXMeshDataInterpreter
       }
 
       int[] indices = facesIndices.toArray();
-      float[] normals = findNormalsPerVertex(facesVertexOnlyIndices.toArray(), vertices);
 
       TriangleMesh triangleMesh = new TriangleMesh(VertexFormat.POINT_NORMAL_TEXCOORD);
       triangleMesh.getPoints().addAll(convertToFloatArray(vertices));
       triangleMesh.getTexCoords().addAll(convertToFloatArray(texturePoints));
       triangleMesh.getFaces().addAll(indices);
       triangleMesh.getFaceSmoothingGroups().addAll(new int[indices.length / triangleMesh.getFaceElementSize()]);
-      triangleMesh.getNormals().addAll(normals);
+      if (polygonNormals == null)
+      {
+         float[] normals = findNormalsPerVertex(facesVertexOnlyIndices.toArray(), vertices);
+         triangleMesh.getNormals().addAll(normals);
+      }
+      else
+      {
+         triangleMesh.getNormals().addAll(convertToFloatArray(polygonNormals));
+      }
 
       return triangleMesh;
    }
@@ -149,38 +154,22 @@ public class JavaFXMeshDataInterpreter
       return normalsPerFace;
    }
 
-   private static Triple<int[], Point3f[], TexCoord2f[]> splitPolygonIntoTriangles(int[] polygonIndices, Point3f[] vertices, TexCoord2f[] textCoords)
+   private static int[] splitPolygonIntoTriangles(int[] polygonIndices)
    {
       if (polygonIndices.length <= 3)
-         return Triple.of(polygonIndices, vertices, textCoords);
+         return polygonIndices;
 
       // Do a naive way of splitting a polygon into triangles. Assumes convexity and ccw ordering.
-      int[] triangleIndices = new int[3 * (polygonIndices.length + 1)];
-      Point3f[] newVertices = new Point3f[vertices.length + 1];
-      System.arraycopy(vertices, 0, newVertices, 0, vertices.length);
-      Point3f averageVertex = newVertices[vertices.length] = new Point3f();
-      TexCoord2f[] newTextCoords = new TexCoord2f[textCoords.length + 1];
-      System.arraycopy(textCoords, 0, newTextCoords, 0, textCoords.length);
-      TexCoord2f averageTextCoord = newTextCoords[textCoords.length] = new TexCoord2f();
-
+      int[] ret = new int[3 * (polygonIndices.length - 2)];
       int i = 0;
-
-      averageVertex.add(vertices[polygonIndices[0]]);
-      averageTextCoord.add(textCoords[polygonIndices[0]]);
-
-      for (int j = 0; j < polygonIndices.length; j++)
+      for (int j = 2; j < polygonIndices.length; j++)
       {
-         triangleIndices[i++] = vertices.length;
-         triangleIndices[i++] = polygonIndices[j];
-         triangleIndices[i++] = polygonIndices[(j + 1) % polygonIndices.length];
-
-         averageVertex.add(vertices[polygonIndices[j]]);
-         averageTextCoord.add(textCoords[polygonIndices[j]]);
+         ret[i++] = polygonIndices[0];
+         ret[i++] = polygonIndices[j - 1];
+         ret[i++] = polygonIndices[j];
       }
-      averageVertex.scale(1.0f / polygonIndices.length);
-      averageTextCoord.scale(1.0f / polygonIndices.length);
 
-      return Triple.of(triangleIndices, newVertices, newTextCoords);
+      return ret;
    }
 
    private static float[] convertToFloatArray(Tuple3f[] tuple3fs)
