@@ -1,15 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ComponentBasedVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.YoVariableVariousWalkingProviderFactory;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.HeightMap;
@@ -26,14 +24,14 @@ public class DRCFlatGroundWalkingTrack
    // looking for CREATE_YOVARIABLE_WALKING_PROVIDERS ?  use the second constructor and pass in WalkingProvider = YOVARIABLE_PROVIDER
 
    private final DRCSimulationFactory drcSimulation;
-   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
+   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
       this(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model, 
             WalkingProvider.VELOCITY_HEADING_COMPONENT); // should always be committed as VELOCITY_HEADING_COMPONENT
    }
 
-   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
+   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model, WalkingProvider walkingProvider)
    {
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
@@ -49,6 +47,7 @@ public class DRCFlatGroundWalkingTrack
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       RobotContactPointParameters contactPointParameters = model.getContactPointParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
+      ICPOptimizationParameters icpOptimizationParameters = model.getICPOptimizationParameters();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
       DRCRobotSensorInformation sensorInformation = model.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -57,29 +56,18 @@ public class DRCFlatGroundWalkingTrack
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
             feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
-            HighLevelState.WALKING);
+             HighLevelState.WALKING);
+      controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
-      HeightMap heightMapForCheating = null;
+      
+      HeightMap heightMapForFootstepZ = null;
       if (cheatWithGroundHeightAtForFootstep)
       {
-         heightMapForCheating = scsInitialSetup.getHeightMap();
+         heightMapForFootstepZ = scsInitialSetup.getHeightMap();
       }
-
-      VariousWalkingProviderFactory variousWalkingProviderFactory=null;
-      switch(walkingProvider)
-      {
-      case YOVARIABLE:
-         variousWalkingProviderFactory = new YoVariableVariousWalkingProviderFactory();
-         break;
-      case VELOCITY_HEADING_COMPONENT:
-         variousWalkingProviderFactory = new ComponentBasedVariousWalkingProviderFactory(useVelocityAndHeadingScript, heightMapForCheating, model.getControllerDT());
-         break;
-      case  DATA_PRODUCER:
-         throw new RuntimeException("Please run ObstacleCourseDemo instead");
-      }
-
-      controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
       
+      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, heightMapForFootstepZ);
+
       drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 
       drcSimulation.start();

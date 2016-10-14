@@ -13,47 +13,33 @@ package us.ihmc.commonWalkingControlModules.configurations;
  * 
  * <p>
  * When using the new ICP planner ({@link #useNewICPPlanner()} == true), there is the possibility to use a different mode for planning the ICP trajectory.
- * The mode considers for each single support, an initial CMP (referred here as entryCMP) location that is used at the beginning of single support, and a final CMP location that is used at the end of single support (referred here as exitCMP).
+ * The mode considers for each single support, an initial CMP (referred here as entryCMP) location that is used at the beginning of single support, and a CMP location that is used at the end of single support (referred here as exitCMP).
  * This mode is referred as using two CMPs per support ({@link #useTwoCMPsPerSupport()} == true) and is preferable as it helps the robot moving more towards the walking heading direction.
  * It also helps triggering the toe off earlier, and helps stepping down obstacles.
  * However, it requires to tune some more parameters.
  * </p>
  */
-public interface CapturePointPlannerParameters
+public abstract class CapturePointPlannerParameters
 {
    /** Refers to the duration of the first transfer when starting to walk. */
    public abstract double getDoubleSupportInitialTransferDuration();
 
-   /** TODO Not the right place to get this value from and it is not really used. */
-   @Deprecated
-   public abstract double getDoubleSupportDuration();
-
    /** FIXME That's a hack which makes the planner slower than the swing foot. Need to get rid of it. */
    @Deprecated
-   public abstract double getAdditionalTimeForSingleSupport();
-
-   /** TODO Not the right place to get this value from and it is not really used. */
-   @Deprecated
-   public abstract double getSingleSupportDuration();
+   public double getAdditionalTimeForSingleSupport()
+   {
+      return 0.0;
+   }
 
    /**
     * How many footsteps the ICP planner will use to build the plan.
     * The more the better, but will increase the number of YoVariables and increase the computation time.
     * The values 3 and 4 seem to be good.
     */
-   public abstract int getNumberOfFootstepsToConsider();
-
-   /** TODO Dangerous parameter, should be set to 4. */
-   @Deprecated
-   public abstract int getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory();
-
-   /** TODO This is not a parameter, where it is used it is supposed to be equal to 2. */
-   @Deprecated
-   public abstract int getNumberOfFootstepsToStop();
-
-   /** TODO That is not a user parameter, should be less than the control DT. */
-   @Deprecated
-   public abstract double getIsDoneTimeThreshold();
+   public int getNumberOfFootstepsToConsider()
+   {
+      return 3;
+   }
 
    /**
     * Represents in percent of the current double support duration, how much time the transfer will spend before reaching the next entry CMP.
@@ -62,41 +48,44 @@ public interface CapturePointPlannerParameters
     * <li> 1.0 is equivalent to spend the entire double support on the next entry CMP. </li>
     * <p> A value close to 0.5 is preferable. </p>
     */
-   public abstract double getDoubleSupportSplitFraction();
+   public double getDoubleSupportSplitFraction()
+   {
+      return 0.5;
+   }
 
    /**
     * Slow down factor on the time when doing partial time freeze
     */
-   public abstract double getFreezeTimeFactor();
+   public double getFreezeTimeFactor()
+   {
+      return 0.9;
+   }
 
    /**
     * Threshold on the ICP error used to trigger the complete time freeze.
     */
-   public abstract double getMaxInstantaneousCapturePointErrorForStartingSwing();
+   public double getMaxInstantaneousCapturePointErrorForStartingSwing()
+   {
+      return 0.025;
+   }
 
    /**
     * Threshold on the ICP error used to trigger the partial time freeze which consists in slowing down time.
     */
-   public abstract double getMaxAllowedErrorWithoutPartialTimeFreeze();
+   public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+   {
+      return 0.03;
+   }
 
    /**
     * Enable / disable time freezing.
     * When enabled, the time freezer will first slow down time when the actual ICP is behind the plan, and totally freeze time if the actual ICP is far behing the plan.
     * In summary, this makes the plan wait for the actual ICP when there is a lag.
     */
-   public abstract boolean getDoTimeFreezing();
-
-   /**
-    * Used only with the old planner (inherent in the new planner).
-    * Enable/disable foot slip compensation.
-    */
-   public abstract boolean getDoFootSlipCompensation();
-
-   /**
-    * Used only with the old planner (inherent in the new planner).
-    * Refers on how fast a foot slipping error should be corrected.
-    */
-   public abstract double getAlphaDeltaFootPositionForFootslipCompensation();
+   public boolean getDoTimeFreezing()
+   {
+      return false;
+   }
 
    /**
     * This parameter forces the entry CMPs to be more inside or outside in the foot.
@@ -121,14 +110,6 @@ public interface CapturePointPlannerParameters
    public abstract double getExitCMPForwardOffset();
 
    /**
-    * Switch between the old and new ICP planner.
-    * The new ICP planner has the advantage of exploiting way more the current feet locations.
-    * By doing so, it is inherently robust to foot slipping, stepping error, and potential drift in the state estimator when using an external corrector as LIDAR localization.
-    * It also allows the use of two reference CMPs per support.
-    */
-   public abstract boolean useNewICPPlanner();
-
-   /**
     * Only used when using the new ICP planner.
     * Refers to whether use one or two CMPs reference locations per support.
     * Using two CMPs is preferable as it helps the robot moving more towards the walking heading direction.
@@ -144,7 +125,10 @@ public interface CapturePointPlannerParameters
     * <li> 1.0 is equivalent to never use the entry CMP. </li>
     * <p> A value close to 0.5 is preferable. </p>
     */
-   public abstract double getTimeSpentOnExitCMPInPercentOfStepTime();
+   public double getTimeSpentOnExitCMPInPercentOfStepTime()
+   {
+      return 0.5;
+   }
 
    /**
     * This parameter indicates how far front in the foot the entry CMP can be.
@@ -173,53 +157,86 @@ public interface CapturePointPlannerParameters
    /**
     * This parameter is used when computing the entry CMP and exit CMP to make sure they are contained inside a safe support polygon.
     */
-   public abstract double getCMPSafeDistanceAwayFromSupportEdges();
+   public double getCMPSafeDistanceAwayFromSupportEdges()
+   {
+      return 0.01;
+   }
 
    /**
-    *  Pretty refers to how fast the CMP should move from the entry CMP to the exit CMP in single support. 0.5sec seems reasonable.
+    *  Pretty much refers to how fast the CMP should move from the entry CMP to the exit CMP in single support. 0.5sec seems reasonable.
     *  This parameter allows to reduce unexpected behaviors due to smoothing the exponentially unstable motion of the ICP with a minimum acceleration trajectory (cubic).
     */
-   public abstract double getMaxDurationForSmoothingEntryToExitCMPSwitch();
-
-   /** TODO Hack that reduces the desired ICP velocity only at the end of transfer. It is just terrible and makes the robot cry. */
-   @Deprecated
-   public abstract boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer();
+   public double getMaxDurationForSmoothingEntryToExitCMPSwitch()
+   {
+      return 0.5;
+   }
 
    /**
     * Only used when using the new ICP planner with two CMPs per support.
     * The forward offset of the CMPs is computed according to the upcoming step length times the returned factor
     * One third seems to be a reasonable value.
-    */ 
-   public abstract double getStepLengthToCMPOffsetFactor();
+    */
+   public double getStepLengthToCMPOffsetFactor()
+   {
+      return 1.0 / 3.0;
+   }
 
    /**
     * Only used when using the new ICP planner with two CMPs per support.
     * If true, the ICP planner will put the exit CMP on the toes of the trailing foot when stepping down and forward.
     */
-   public abstract boolean useExitCMPOnToesForSteppingDown();
-   
+   public boolean useExitCMPOnToesForSteppingDown()
+   {
+      return false;
+   }
+
    /**
     * Only used when using the new ICP planner with two CMPs per support.
     * Threshold used to figure out if the exit CMP should be put on the toes.
     */
-   public abstract double getStepLengthThresholdForExitCMPOnToesWhenSteppingDown();
+   public double getStepLengthThresholdForExitCMPOnToesWhenSteppingDown()
+   {
+      return 0.15;
+   }
 
    /**
     * Only used when using the new ICP planner with two CMPs per support.
     * Threshold used to figure out if the exit CMP should be put on the toes.
     * An absolute value is expected.
     */
-   public abstract double getStepHeightThresholdForExitCMPOnToesWhenSteppingDown();
+   public double getStepHeightThresholdForExitCMPOnToesWhenSteppingDown()
+   {
+      return 0.10;
+   }
 
    /**
     * Only used when using the new ICP planner with two CMPs per support.
     * If set to zero, the exit CMP will be on the toes' edge when stepping, a positive value will pull back the exit CMP towards the foot center.
     */
-   public abstract double getCMPSafeDistanceAwayFromToesWhenSteppingDown();
+   public double getCMPSafeDistanceAwayFromToesWhenSteppingDown()
+   {
+      return 0.0;
+   }
 
    /**
     * For doing toe off in single support. Set it to 0.0 if not using this feature.
     * @return
     */
-   public abstract double getMinTimeToSpendOnExitCMPInSingleSupport();
+   public double getMinTimeToSpendOnExitCMPInSingleSupport()
+   {
+      return 0.0;
+   }
+
+   /**
+    * When the plan is done for the current state, the desired ICP velocity then linearly decays to reach 0.0 in the given duration.
+    * This is particularly useful when the robot gets stuck in transfer state because the ICP error is too large to switch to swing.
+    * Even in that state, the ICP planner is still giving a desired ICP velocity preventing the ICP convergence to a certain extent.
+    * This parameter allows to cancel out this desired velocity when stuck in the transfer state helping the convergence of the ICP and will help to get the robot to switch to swing.
+    * Set to {@link Double#NaN} or {@link Double#POSITIVE_INFINITY} to not use this feature.
+    * A value around 0.5sec to 1.0sec seems reasonable.
+    */
+   public double getVelocityDecayDurationWhenDone()
+   {
+      return Double.NaN;
+   }
 }

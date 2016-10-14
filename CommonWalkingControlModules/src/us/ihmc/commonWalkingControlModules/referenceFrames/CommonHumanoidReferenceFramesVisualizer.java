@@ -2,23 +2,20 @@ package us.ihmc.commonWalkingControlModules.referenceFrames;
 
 import java.util.ArrayList;
 
-import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class CommonHumanoidReferenceFramesVisualizer implements Updatable, RobotController
+public class CommonHumanoidReferenceFramesVisualizer
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final ArrayList<YoGraphicReferenceFrame> referenceFramesVisualizers = new ArrayList<YoGraphicReferenceFrame>();
 
-   public CommonHumanoidReferenceFramesVisualizer(CommonHumanoidReferenceFrames referenceFrames,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+   public CommonHumanoidReferenceFramesVisualizer(CommonHumanoidReferenceFrames referenceFrames, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       String vizName = referenceFrames.getClass().getSimpleName();
       for (RobotSide robotSide : RobotSide.values)
@@ -38,44 +35,14 @@ public class CommonHumanoidReferenceFramesVisualizer implements Updatable, Robot
       yoGraphicsListRegistry.registerYoGraphic(vizName, pelvisFrame);
       referenceFramesVisualizers.add(pelvisFrame);
 
+      parentRegistry.addChild(registry);
    }
 
-   @Override
-   public void initialize()
-   {
-      doControl();
-   }
-
-   @Override
-   public void doControl()
+   public void update()
    {
       for (int i = 0; i < referenceFramesVisualizers.size(); i++)
       {
          referenceFramesVisualizers.get(i).update();
       }
-   }
-
-   @Override
-   public void update(double time)
-   {
-      doControl();
-   }
-
-   @Override
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
-   }
-
-   @Override
-   public String getName()
-   {
-      return name;
-   }
-
-   @Override
-   public String getDescription()
-   {
-      return getName();
    }
 }

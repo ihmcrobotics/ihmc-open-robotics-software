@@ -33,15 +33,15 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class QuadTreeForGroundHeightMapTest
 {
    private static final boolean DO_ASSERTS = true;
 
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout = 300000)
    public void testPointsFromAFile() throws NumberFormatException, IOException
    {
@@ -101,7 +101,7 @@ public class QuadTreeForGroundHeightMapTest
          ThreadTools.sleepForever();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOnSomeSlopes()
    {
@@ -125,7 +125,7 @@ public class QuadTreeForGroundHeightMapTest
       if (visualizeAndKeepUp) ThreadTools.sleepForever();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOnSomeStairCases()
    {
@@ -153,7 +153,7 @@ public class QuadTreeForGroundHeightMapTest
       if (visualizeAndKeepUp) ThreadTools.sleepForever();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testUsingStairGroundProfile()
    {
@@ -621,7 +621,7 @@ public class QuadTreeForGroundHeightMapTest
       double x = xy[0];
       double y = xy[1];
       RigidBodyTransform location = new RigidBodyTransform();
-      location.rotZ(Math.toRadians(yawDegrees));
+      location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
       location.setTranslation(new Vector3d(x, y, height / 2));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);

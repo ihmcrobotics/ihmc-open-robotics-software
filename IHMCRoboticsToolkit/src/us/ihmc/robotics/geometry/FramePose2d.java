@@ -84,10 +84,10 @@ public class FramePose2d extends AbstractReferenceFrameHolder implements FrameOb
    
    public void setPose(RigidBodyTransform transformToWorld)
    {
-      transformToWorld.get(tempVector);
-      transformToWorld.get(tempQuat);
+      transformToWorld.getTranslation(tempVector);
+      transformToWorld.getRotation(tempQuat);
 
-      setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), tempVector.x, tempVector.y, RotationTools.computeYaw(tempQuat));
+      setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), tempVector.getX(), tempVector.getY(), RotationTools.computeYaw(tempQuat));
    }
    
    public void setPoseIncludingFrame(ReferenceFrame referenceFrame, double x, double y, double yaw)

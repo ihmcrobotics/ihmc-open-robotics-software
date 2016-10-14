@@ -5,7 +5,7 @@ import org.junit.Test;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Quat4f;
@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 public class AngleToolsTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor()
            throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
@@ -33,7 +33,7 @@ public class AngleToolsTest
       constructor.newInstance();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeAngleDifferenceMinusTwoPiToZero()
    {
@@ -57,7 +57,7 @@ public class AngleToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeAngleDifferenceMinusPiToPi()
    {
@@ -81,7 +81,7 @@ public class AngleToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeAngleDifferenceMinusPiToPiUsingTrim()
    {
@@ -105,7 +105,7 @@ public class AngleToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindClosestNinetyDegreeYaw()
    {
@@ -140,7 +140,7 @@ public class AngleToolsTest
       assertEquals(expectedReturn, actualReturn);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateRandomAngle()
    {
@@ -154,7 +154,7 @@ public class AngleToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGenerateArrayOfTestAngles()
    {
@@ -263,7 +263,7 @@ public class AngleToolsTest
       assertEquals("Should have found one angle equal to -2PI!", 1, numberOfAnglesEqualToMinus2PI);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testShiftAngleToStartOfRange()
    {
@@ -288,7 +288,49 @@ public class AngleToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testShiftAngleToStartOfRangeUnitless()
+   {
+      double range = Math.pow(2.0, 13.0);
+
+      double endOfAngleRange = range;
+      double angleToShift = 1.6 * range;
+      double expectedReturn = 0.6 * range;
+      double actualReturn = AngleTools.shiftAngleToStartOfRange(angleToShift, 0.0, endOfAngleRange);
+      assertEquals(expectedReturn, actualReturn, 1e-12);
+
+      angleToShift = -0.4 * range;
+      expectedReturn = 0.6 * range;
+      actualReturn = AngleTools.shiftAngleToStartOfRange(angleToShift, 0.0, endOfAngleRange);
+      assertEquals(expectedReturn, actualReturn, 1e-12);
+
+      angleToShift = 0.4 * range;
+      expectedReturn = 0.4 * range;
+      actualReturn = AngleTools.shiftAngleToStartOfRange(angleToShift, 0.0, endOfAngleRange);
+      assertEquals(expectedReturn, actualReturn, 1e-12);
+
+      int iters = 1000;
+      Random random = new Random();
+      for (int i = 0; i < iters; i++)
+      {
+         double ratio = -6.0 + 12.0 * random.nextDouble();
+
+         angleToShift = ratio * range;
+         expectedReturn = angleToShift;
+
+         if (angleToShift < 0.0)
+            expectedReturn = angleToShift + Math.ceil((-angleToShift) / endOfAngleRange) * endOfAngleRange;
+
+         if (angleToShift >= endOfAngleRange)
+            expectedReturn = angleToShift - Math.floor((angleToShift) / endOfAngleRange) * endOfAngleRange;
+
+         actualReturn = AngleTools.shiftAngleToStartOfRange(angleToShift, 0.0, endOfAngleRange);
+         assertEquals(expectedReturn, actualReturn, 1e-12);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTrimAngleMinusPiToPi()
    {
@@ -303,7 +345,7 @@ public class AngleToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testComputeAngleAverage()
    {
@@ -345,7 +387,7 @@ public class AngleToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAngleMinusPiToPi()
    {
@@ -380,7 +422,7 @@ public class AngleToolsTest
       assertTrue(Double.isNaN(expected));
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCalculateHeading()
    {

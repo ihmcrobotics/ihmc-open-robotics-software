@@ -20,6 +20,7 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicCoordinateSystem;
@@ -40,7 +41,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
    
-   private final SixDoFJoint rootJoint;
+   private final FloatingInverseDynamicsJoint rootJoint;
    private final ReferenceFrame pelvisReferenceFrame;
    private final ClippedSpeedOffsetErrorInterpolator offsetErrorInterpolator;
    private final OutdatedPoseToUpToDateReferenceFrameUpdater outdatedPoseUpdater;
@@ -106,7 +107,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseSubscriber);
    }
    
-   public NewPelvisPoseHistoryCorrection(SixDoFJoint sixDofJoint, final double estimatorDT, YoVariableRegistry parentRegistry, int pelvisBufferSize,
+   public NewPelvisPoseHistoryCorrection(FloatingInverseDynamicsJoint sixDofJoint, final double estimatorDT, YoVariableRegistry parentRegistry, int pelvisBufferSize,
          YoGraphicsListRegistry yoGraphicsListRegistry, PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       
@@ -310,8 +311,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private void sendCorrectionUpdatePacket()
    {
-      errorBetweenCorrectedAndLocalizationTransform.get(translationalResidualError);
-      totalErrorBetweenPelvisAndLocalizationTransform.get(translationalTotalError);
+      errorBetweenCorrectedAndLocalizationTransform.getTranslation(translationalResidualError);
+      totalErrorBetweenPelvisAndLocalizationTransform.getTranslation(translationalTotalError);
       
       double absoluteResidualError = translationalResidualError.length();
       double absoluteTotalError = translationalTotalError.length();

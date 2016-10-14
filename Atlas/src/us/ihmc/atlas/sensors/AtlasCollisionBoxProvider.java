@@ -1,9 +1,9 @@
 package us.ihmc.atlas.sensors;
 
 import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.collisions.SDFCollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;
@@ -30,9 +30,9 @@ public class AtlasCollisionBoxProvider extends SDFCollisionBoxProvider
          addCollisionShape(joint, hand);
          
          // Add extra collision sphere around the knee, to avoid hitting points there on the real robot
-         String kneeJoint = jointMap.getLegJointName(robotSide, LegJointName.KNEE);
+         String kneeJoint = jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH);
          RigidBodyTransform kneePose = new RigidBodyTransform();
-         kneePose.rotX(Math.PI / 2.0);
+         kneePose.setRotationRollAndZeroTranslation(Math.PI / 2.0);
          kneePose.setTranslation(0.05, 0, 0.03);
          CollisionCylinder knee = new CollisionCylinder(kneePose, 0.11, 0.15 + 2.0 * extent);
          addCollisionShape(kneeJoint, knee);

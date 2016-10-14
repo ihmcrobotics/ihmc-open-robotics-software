@@ -2,13 +2,13 @@ package us.ihmc.humanoidRobotics.frames;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.LimbName;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.RobotSpecificJointNames;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
@@ -49,13 +49,14 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
+   private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<ReferenceFrame>();
    private final MidFrameZUpFrame midFeetZUpFrame;
    private final ReferenceFrame midFeetZUpWalkDirectionFrame;
    private final ReferenceFrame midFeetUnderPelvisWalkDirectionFrame;
 
    private final ReferenceFrame centerOfMassFrame;
 
-   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel) 
+   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
    {
       this.fullRobotModel = fullRobotModel;
 
@@ -118,10 +119,12 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
      {
          ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, getFootFrame(robotSide), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
 
-         soleFrames.put(robotSide, fullRobotModel.getSoleFrame(robotSide));
+         ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
+         soleFrames.put(robotSide, soleFrame);
+         soleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, soleFrame, soleFrame.getName() + "ZUp"));
       }
 
-      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", pelvisZUpFrame, getFootFrame(RobotSide.LEFT), getFootFrame(RobotSide.RIGHT));
+      midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", pelvisZUpFrame, getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
 
       //this is a frame that is directly between the 2 feet but faces forward instead of perpendicular to the line between the feet
       midFeetZUpWalkDirectionFrame = new ReferenceFrame("midFeetZUpWalkDirectionFrame", ReferenceFrame.getWorldFrame())
@@ -270,7 +273,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    public ReferenceFrame getKneeFrame(RobotSide robotSide)
    {
-      return getLegJointFrame(robotSide, LegJointName.KNEE);
+      return getLegJointFrame(robotSide, LegJointName.KNEE_PITCH);
    }
 
    public ReferenceFrame getAnkleRollFrame(RobotSide robotSide)
@@ -295,7 +298,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       return midFeetZUpFrame;
    }
    /**
-    * Return the ReferenceFrame located between the feet (to remove robot swaying left to right) 
+    * Return the ReferenceFrame located between the feet (to remove robot swaying left to right)
     * but under the pelvis (to remove forward and backwards swaying)
     */
    @Override
@@ -324,6 +327,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          ankleZUpFrames.get(robotSide).update();
          soleFrames.get(robotSide).update();
+         soleZUpFrames.get(robotSide).update();
       }
 
       centerOfMassFrame.update();
@@ -357,5 +361,17 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public SideDependentList<ReferenceFrame> getSoleFrames()
    {
       return soleFrames;
+   }
+
+   @Override
+   public ReferenceFrame getSoleZUpFrame(RobotSide robotSide)
+   {
+      return soleZUpFrames.get(robotSide);
+   }
+
+   @Override
+   public SideDependentList<ReferenceFrame> getSoleZUpFrames()
+   {
+      return soleZUpFrames;
    }
 }

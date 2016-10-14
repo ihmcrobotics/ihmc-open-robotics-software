@@ -22,9 +22,7 @@ import us.ihmc.simulationconstructionset.SpatialTransformationMatrix;
 import us.ihmc.simulationconstructionset.SpatialVector;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 
-/**
- * @author Peter Abeles
- */
+
 public abstract class JointPhysics< J extends Joint>
 {
    protected J owner;
@@ -652,10 +650,10 @@ public abstract class JointPhysics< J extends Joint>
 
    private SpatialTransformationMatrix k_X_hat_coll = new SpatialTransformationMatrix();
 
-   private Vector3d goob = new Vector3d();
+   private Vector3d tempVector = new Vector3d();
 
    /**
-    * This method calculates the multibody collision matrix Ki which relates the applied impluse
+    * This method calculates the multibody collision matrix Ki which relates the applied impulse
     * to the the change in contact point velocity.  This is solved for both bodies involved in the
     * collision and then combined to form the final matrix K.
     *
@@ -666,24 +664,12 @@ public abstract class JointPhysics< J extends Joint>
     */
    public Matrix3d computeKiCollision(Vector3d offsetFromCOM, Matrix3d Rk_coll)
    {
-      goob.set(offsetFromCOM);
-      goob.scale(-1.0);
+      tempVector.set(offsetFromCOM);
+      tempVector.scale(-1.0);
 
-      k_X_hat_coll.setFromOffsetAndRotation(goob, Rk_coll);
+      k_X_hat_coll.setFromOffsetAndRotation(tempVector, Rk_coll);
 
-      // Compute Ki
       computeMultibodyKi(k_X_hat_coll, Ki);    // Ki is in collision coordinates.
-
-      // +++JEP:  For now, make K constant for testing purposes:
-
-      /*
-       * Ki.m00 = 3.5; Ki.m01 = 0.0; Ki.m02 = 0.0;
-       * Ki.m10 = 0.0; Ki.m11 = 3.5; Ki.m12 = 0.0;
-       * Ki.m20 = 0.0; Ki.m21 = 0.0; Ki.m22 = 1.0;
-       */
-
-      // System.out.println("Ki: ");System.out.println(Ki);
-
       return Ki;
    }
 
@@ -792,18 +778,11 @@ public abstract class JointPhysics< J extends Joint>
    public void resolveMicroCollision(double penetration_squared, Vector3d offsetFromCOM, Matrix3d Rk_coll, Vector3d u_coll, double epsilon, double mu,
                                      Vector3d p_coll)
    {
-      goob.set(offsetFromCOM);
-      goob.scale(-1.0);
-
-      k_X_hat_coll.setFromOffsetAndRotation(goob, Rk_coll);
-
-      // Compute Ki
-      computeMultibodyKi(k_X_hat_coll, Ki);    // Ki is in collision coordinates.
-
+      computeKiCollision(offsetFromCOM, Rk_coll);      
       collisionIntegrator.setup(Ki, u_coll, epsilon, mu);
       collisionIntegrator.computeMicroImpulse(p_coll);    // impulse is in collision coordinates.  Need to rotate into joint com coordinates:
 
-      if (Math.abs(Math.sqrt(p_coll.x * p_coll.x + p_coll.y * p_coll.y) / p_coll.z) > mu)    // If slipping, just do it the normal way...
+      if (Math.abs(Math.sqrt(p_coll.getX() * p_coll.getX() + p_coll.getY() * p_coll.getY()) / p_coll.getZ()) > mu)    // If slipping, just do it the normal way...
       {
          // Slipping MicroCollision:
          // System.out.println("Slipping Micro Collision:  " + p_coll);
@@ -913,24 +892,19 @@ public abstract class JointPhysics< J extends Joint>
 
          // delta_v_hat_return is my delta_v_hat.  Give it to my other children directly.
       }
-
-
    }
 
-
-
-   private SpatialVector
-         p_hat_coll = new SpatialVector(), delta_v_hat_k = new SpatialVector();
-   private SpatialTransformationMatrix coll_X_hat_k = new SpatialTransformationMatrix();
+   private final SpatialVector p_hat_coll = new SpatialVector(), delta_v_hat_k = new SpatialVector();
+   private final SpatialTransformationMatrix coll_X_hat_k = new SpatialTransformationMatrix();
 
    /**
     * Computes Ki for this joint using the three basis vectors describing collision space as test impulses.  The
     * calculated collision matrix is stored in Ki.  For further information see Mirtich p. 144
     *
     * @param k_X_hat_coll Spatial transformation matrix between this joint and collision space.
-    * @param Ki Matrix3d in which the collision matrix will be stored.
+    * @param kiToPack Matrix3d in which the collision matrix will be stored.
     */
-   private void computeMultibodyKi(SpatialTransformationMatrix k_X_hat_coll, Matrix3d Ki)
+   private void computeMultibodyKi(SpatialTransformationMatrix k_X_hat_coll, Matrix3d kiToPack)
    {
       // Mirtich p. 144.  Compute the multi-body Ki for this Joint, given the SpatialTransformationMatrix from the contact frame to the joint COM frame.
       // Articulated inertias are already computed from the dynamics.  k_X_hat_coll is given.
@@ -942,49 +916,49 @@ public abstract class JointPhysics< J extends Joint>
       // System.out.println("k_X_hat_coll:  " + k_X_hat_coll);
 
       // x axis:
-      p_hat_coll.top.x = 1.0;
-      p_hat_coll.top.y = 0.0;
-      p_hat_coll.top.z = 0.0;
-      p_hat_coll.bottom.x = 0.0;
-      p_hat_coll.bottom.y = 0.0;
-      p_hat_coll.bottom.z = 0.0;
+      p_hat_coll.top.setX(1.0);
+      p_hat_coll.top.setY(0.0);
+      p_hat_coll.top.setZ(0.0);
+      p_hat_coll.bottom.setX(0.0);
+      p_hat_coll.bottom.setY(0.0);
+      p_hat_coll.bottom.setZ(0.0);
       k_X_hat_coll.transform(p_hat_coll);
 
       this.impulseResponse(p_hat_coll, delta_v_hat_k);
       coll_X_hat_k.transform(delta_v_hat_k);
-      Ki.m00 = delta_v_hat_k.bottom.x;
-      Ki.m10 = delta_v_hat_k.bottom.y;
-      Ki.m20 = delta_v_hat_k.bottom.z;
+      kiToPack.setM00(delta_v_hat_k.bottom.getX());
+      kiToPack.setM10(delta_v_hat_k.bottom.getY());
+      kiToPack.setM20(delta_v_hat_k.bottom.getZ());
 
       // y axis:
-      p_hat_coll.top.x = 0.0;
-      p_hat_coll.top.y = 1.0;
-      p_hat_coll.top.z = 0.0;
-      p_hat_coll.bottom.x = 0.0;
-      p_hat_coll.bottom.y = 0.0;
-      p_hat_coll.bottom.z = 0.0;
+      p_hat_coll.top.setX(0.0);
+      p_hat_coll.top.setY(1.0);
+      p_hat_coll.top.setZ(0.0);
+      p_hat_coll.bottom.setX(0.0);
+      p_hat_coll.bottom.setY(0.0);
+      p_hat_coll.bottom.setZ(0.0);
       k_X_hat_coll.transform(p_hat_coll);
 
       this.impulseResponse(p_hat_coll, delta_v_hat_k);
       coll_X_hat_k.transform(delta_v_hat_k);
-      Ki.m01 = delta_v_hat_k.bottom.x;
-      Ki.m11 = delta_v_hat_k.bottom.y;
-      Ki.m21 = delta_v_hat_k.bottom.z;
+      kiToPack.setM01(delta_v_hat_k.bottom.getX());
+      kiToPack.setM11(delta_v_hat_k.bottom.getY());
+      kiToPack.setM21(delta_v_hat_k.bottom.getZ());
 
       // z axis:
-      p_hat_coll.top.x = 0.0;
-      p_hat_coll.top.y = 0.0;
-      p_hat_coll.top.z = 1.0;
-      p_hat_coll.bottom.x = 0.0;
-      p_hat_coll.bottom.y = 0.0;
-      p_hat_coll.bottom.z = 0.0;
+      p_hat_coll.top.setX(0.0);
+      p_hat_coll.top.setY(0.0);
+      p_hat_coll.top.setZ(1.0);
+      p_hat_coll.bottom.setX(0.0);
+      p_hat_coll.bottom.setY(0.0);
+      p_hat_coll.bottom.setZ(0.0);
       k_X_hat_coll.transform(p_hat_coll);
 
       this.impulseResponse(p_hat_coll, delta_v_hat_k);
       coll_X_hat_k.transform(delta_v_hat_k);
-      Ki.m02 = delta_v_hat_k.bottom.x;
-      Ki.m12 = delta_v_hat_k.bottom.y;
-      Ki.m22 = delta_v_hat_k.bottom.z;
+      kiToPack.setM02(delta_v_hat_k.bottom.getX());
+      kiToPack.setM12(delta_v_hat_k.bottom.getY());
+      kiToPack.setM22(delta_v_hat_k.bottom.getZ());
 
 
       // +++JEP Run a bunch of test cases here:
@@ -997,8 +971,8 @@ public abstract class JointPhysics< J extends Joint>
 
    }
 
-   public SpatialVector Y_hat_i = new SpatialVector();
-   SpatialVector Y_hat_parent = new SpatialVector();
+   protected final  SpatialVector Y_hat_i = new SpatialVector();
+   private final SpatialVector Y_hat_parent = new SpatialVector();
 
    // SpatialVector delta_v_hat_i = new SpatialVector();
 
@@ -1086,7 +1060,7 @@ public abstract class JointPhysics< J extends Joint>
 
    }
 
-   SpatialVector delta_v_temp1 = new SpatialVector(), delta_v_temp2 = new SpatialVector();
+   private final SpatialVector delta_v_temp1 = new SpatialVector(), delta_v_temp2 = new SpatialVector();
 
    /**
     * Compute the change in velocity for this joint as described in Mirtich p. 141.
@@ -1183,7 +1157,7 @@ public abstract class JointPhysics< J extends Joint>
       }
    }
 
-   Point3d tempCOMPoint = new Point3d();
+   private final Point3d tempCOMPoint = new Point3d();
 
    /**
     * Calculates center of mass position as well as the total mass of all joints beginning with
@@ -1380,7 +1354,7 @@ public abstract class JointPhysics< J extends Joint>
       return translationalKineticEnergy;
    }
 
-   private Point3d tempPE_COMPoint = new Point3d();
+   private final Point3d tempPE_COMPoint = new Point3d();
 
    private boolean doFreezeFrame = false;
 
@@ -1397,8 +1371,8 @@ public abstract class JointPhysics< J extends Joint>
       owner.transformToNext.transform(tempPE_COMPoint);
 
       double gravitationalPotentialEnergy = owner.link.getMass()
-            * (-owner.rob.gravityX.getDoubleValue() * tempPE_COMPoint.x - owner.rob.gravityY.getDoubleValue() * tempPE_COMPoint.y
-            - owner.rob.gravityZ.getDoubleValue() * tempPE_COMPoint.z);
+            * (-owner.rob.gravityX.getDoubleValue() * tempPE_COMPoint.getX() - owner.rob.gravityY.getDoubleValue() * tempPE_COMPoint.getY()
+            - owner.rob.gravityZ.getDoubleValue() * tempPE_COMPoint.getZ());
 
       // Add the children
 

@@ -16,17 +16,17 @@ import org.junit.Test;
 
 import com.esotericsoftware.minlog.Log;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = {TestPlanTarget.Flaky})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FLAKY})
 public class KryoObjectCommunicatorTest
 {
 
    // This test causes problems on Linux due to a bug in the way Java does its epoll wrapper
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testAutomaticReconnect() throws IOException, InterruptedException
    {
@@ -97,7 +97,7 @@ public class KryoObjectCommunicatorTest
       server.close();
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000) 
    public void testStateListener() throws IOException, InterruptedException
    {
@@ -149,7 +149,7 @@ public class KryoObjectCommunicatorTest
       client.close();
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void testConnectionLimiter() throws IOException, InterruptedException
    {
@@ -223,7 +223,7 @@ public class KryoObjectCommunicatorTest
       
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout=300000)
    public void testSendAndReceive() throws IOException, InterruptedException
    {

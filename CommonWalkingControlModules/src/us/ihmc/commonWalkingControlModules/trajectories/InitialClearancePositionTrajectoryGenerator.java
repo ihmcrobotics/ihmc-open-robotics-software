@@ -16,19 +16,18 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class InitialClearancePositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -76,8 +75,8 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this(namePrefix, false, referenceFrame, parentRegistry, false, null);
    }
 
-   public InitialClearancePositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry,
-         boolean visualize, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public InitialClearancePositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry, boolean visualize,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(namePrefix, false, referenceFrame, parentRegistry, visualize, yoGraphicsListRegistry);
    }
@@ -157,7 +156,8 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
                finalPositionViz.setVisible(visible);
                initialDirectionViz.setVisible(visible);
                bagOfBalls.setVisible(visible);
-               if (!visible) bagOfBalls.hideAll();
+               if (!visible)
+                  bagOfBalls.hideAll();
             }
          });
          showViz.notifyVariableChangedListeners();
@@ -327,14 +327,16 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
 
    public void showVisualization()
    {
-      if (!visualize) return;
+      if (!visualize)
+         return;
 
       showViz.set(true);
    }
 
    public void hideVisualization()
    {
-      if (!visualize) return;
+      if (!visualize)
+         return;
 
       showViz.set(false);
    }

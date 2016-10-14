@@ -18,7 +18,7 @@ public class SimulatedOneDoFJointVelocitySensor extends SimulatedSensor<MutableD
 
    public void startComputation()
    {
-      jointVelocity.setValue(joint.getQD().getDoubleValue());
+      jointVelocity.setValue(joint.getQDYoVariable().getDoubleValue());
       corrupt(jointVelocity);
       jointVelocityOutputPort.setData(jointVelocity);
    }

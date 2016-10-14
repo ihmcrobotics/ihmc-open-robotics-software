@@ -1,6 +1,6 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
-import us.ihmc.rosControl.valkyrie.IMUHandle;
+import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.valkyrie.imu.MicroStrainData;
 
 import java.util.HashMap;
@@ -32,72 +32,86 @@ public class SwitchableFilterModeIMUHandle implements IMUHandle
       this.filterTypeToUse = filterTypeToUse;
    }
 
-   @Override public void getLinearAccelerationCovariance(double[] linearAccelerationCovariance)
+   @Override
+   public void getLinearAccelerationCovariance(double[] linearAccelerationCovariance)
    {
       imuHandles.get(filterTypeToUse).getLinearAccelerationCovariance(linearAccelerationCovariance);
    }
 
-   @Override public double getZdd()
+   @Override
+   public double getZdd()
    {
       return imuHandles.get(filterTypeToUse).getZdd();
    }
 
-   @Override public double getYdd()
+   @Override
+   public double getYdd()
    {
       return imuHandles.get(filterTypeToUse).getYdd();
    }
 
-   @Override public double getXdd()
+   @Override
+   public double getXdd()
    {
       return imuHandles.get(filterTypeToUse).getXdd();
    }
 
-   @Override public void getAngularVelocityCovariance(double[] angularVelocityCovariance)
+   @Override
+   public void getAngularVelocityCovariance(double[] angularVelocityCovariance)
    {
       imuHandles.get(filterTypeToUse).getAngularVelocityCovariance(angularVelocityCovariance);
    }
 
-   @Override public double getTheta_z()
+   @Override
+   public double getTheta_z()
    {
       return imuHandles.get(filterTypeToUse).getTheta_z();
    }
 
-   @Override public double getTheta_y()
+   @Override
+   public double getTheta_y()
    {
       return imuHandles.get(filterTypeToUse).getTheta_y();
    }
 
-   @Override public double getTheta_x()
+   @Override
+   public double getTheta_x()
    {
       return imuHandles.get(filterTypeToUse).getTheta_x();
    }
 
-   @Override public void getOrientationCovariance(double[] orientationCovariance)
+   @Override
+   public void getOrientationCovariance(double[] orientationCovariance)
    {
       imuHandles.get(filterTypeToUse).getOrientationCovariance(orientationCovariance);
    }
 
-   @Override public double getQ_w()
+   @Override
+   public double getQ_w()
    {
       return imuHandles.get(filterTypeToUse).getQ_w();
    }
 
-   @Override public double getQ_z()
+   @Override
+   public double getQ_z()
    {
       return imuHandles.get(filterTypeToUse).getQ_z();
    }
 
-   @Override public double getQ_y()
+   @Override
+   public double getQ_y()
    {
       return imuHandles.get(filterTypeToUse).getQ_y();
    }
 
-   @Override public double getQ_x()
+   @Override
+   public double getQ_x()
    {
       return imuHandles.get(filterTypeToUse).getQ_x();
    }
 
-   @Override public String getName()
+   @Override
+   public String getName()
    {
       return this.name;
    }

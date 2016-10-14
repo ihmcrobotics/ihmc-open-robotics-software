@@ -5,159 +5,174 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
+import us.ihmc.robotics.screwTheory.Twist;
 
 public class AxisAngleOrientationController
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoVariableRegistry registry;
 
-   private final YoFrameVector axisAngleErrorInBody;
-   private final DoubleYoVariable orientationErrorMagnitude;
-   private final YoFrameVector orientationErrorCumulated;
+   private final YoFrameVector rotationErrorInBody;
+   private final YoFrameVector rotationErrorCumulated;
    private final YoFrameVector velocityError;
 
    private final Matrix3d proportionalGainMatrix;
    private final Matrix3d derivativeGainMatrix;
    private final Matrix3d integralGainMatrix;
 
-   //TODO: Take the filtering out of here if it doesn't make sense to be here.
-   // If it does make sense, then clean it up and support it better.
-   private final AlphaFilteredYoFrameVector filteredVelocity;
-   private final FrameVector filteredVelocityTemp;
-   private final DoubleYoVariable alphaVelocityFilter;
-
    private final ReferenceFrame bodyFrame;
    private final FrameVector proportionalTerm;
    private final FrameVector derivativeTerm;
    private final FrameVector integralTerm;
+   
+   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameVector desiredAngularVelocity = new FrameVector();
+   private final FrameVector feedForwardAngularAction = new FrameVector();
+   private final FrameVector angularActionFromOrientationController = new FrameVector();
 
-   private final AxisAngle4d desiredAngleAxis = new AxisAngle4d();
-   private final Quat4d desiredQuaternion = new Quat4d();
+   private final AxisAngle4d errorAngleAxis = new AxisAngle4d();
+   private final Quat4d errorQuaternion = new Quat4d();
 
-   private final YoFrameVector preLimitedOutput;
-   private final RateLimitedYoFrameVector rateLimitedOutput;
+   private final YoFrameVector feedbackAngularAction;
+   private final RateLimitedYoFrameVector rateLimitedFeedbackAngularAction;
 
    private final double dt;
 
-   private final boolean visualize;
-   private final YoFrameOrientation currentOrientationViz, desiredOrientationViz;
-   private final FrameOrientation currentOrientation;
-
-   private final YoOrientationPIDGains gains;
+   private final YoOrientationPIDGainsInterface gains;
 
    public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry parentRegistry)
    {
-      this(prefix, bodyFrame, dt, false, parentRegistry);
+      this(prefix, bodyFrame, dt, null, parentRegistry);
    }
 
-   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
+   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGainsInterface gains,
+         YoVariableRegistry parentRegistry)
    {
-      this(prefix, bodyFrame, dt, gains, false, parentRegistry);
-   }
-
-   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, boolean visualize, YoVariableRegistry parentRegistry)
-   {
-      this(prefix, bodyFrame, dt, null, visualize, parentRegistry);
-   }
-
-   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGains gains, boolean visualize, YoVariableRegistry parentRegistry)
-   {
-      this.visualize = visualize;
-
       this.dt = dt;
       this.bodyFrame = bodyFrame;
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
-      if (gains == null) gains = new YoAxisAngleOrientationGains(prefix, registry);
+      if (gains == null)
+         gains = new YoAxisAngleOrientationGains(prefix, registry);
 
       this.gains = gains;
       proportionalGainMatrix = gains.createProportionalGainMatrix();
       derivativeGainMatrix = gains.createDerivativeGainMatrix();
       integralGainMatrix = gains.createIntegralGainMatrix();
 
-      axisAngleErrorInBody = new YoFrameVector(prefix + "AxisAngleErrorInBody", bodyFrame, registry);
-      orientationErrorMagnitude = new DoubleYoVariable(prefix + "OrientationErrorMagnitude", registry);
-      orientationErrorCumulated = new YoFrameVector(prefix + "OrientationErrorCumulated", bodyFrame, registry);
+      rotationErrorInBody = new YoFrameVector(prefix + "RotationErrorInBody", bodyFrame, registry);
+      rotationErrorCumulated = new YoFrameVector(prefix + "RotationErrorCumulated", bodyFrame, registry);
       velocityError = new YoFrameVector(prefix + "AngularVelocityError", bodyFrame, registry);
 
       proportionalTerm = new FrameVector(bodyFrame);
       derivativeTerm = new FrameVector(bodyFrame);
       integralTerm = new FrameVector(bodyFrame);
 
-      alphaVelocityFilter = new DoubleYoVariable(prefix + "AlphaAngleVel", registry);
-      alphaVelocityFilter.set(0.0);
-      filteredVelocity = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(prefix, "FiltAngularVelocity", registry, alphaVelocityFilter, bodyFrame);
-      filteredVelocityTemp = new FrameVector(bodyFrame);
-
-      preLimitedOutput = new YoFrameVector(prefix + "OrientationPreLimitedOutput", bodyFrame, registry);
-      rateLimitedOutput = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "OrientationRateLimitedOutput", "", registry,
-            gains.getYoMaximumJerk(), dt, preLimitedOutput);
-
-      currentOrientationViz = visualize ? new YoFrameOrientation(prefix + "CurrentOrientation", worldFrame, registry) : null;
-      desiredOrientationViz = visualize ? new YoFrameOrientation(prefix + "DesiredOrientation", worldFrame, registry) : null;
-      currentOrientation = visualize ? new FrameOrientation(bodyFrame) : null;
+      feedbackAngularAction = new YoFrameVector(prefix + "FeedbackAngularAction", bodyFrame, registry);
+      rateLimitedFeedbackAngularAction = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAction", "",
+            registry, gains.getYoMaximumFeedbackRate(), dt, feedbackAngularAction);
 
       parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
-      rateLimitedOutput.reset();
+      rateLimitedFeedbackAngularAction.reset();
+   }
+
+   public void resetIntegrator()
+   {
+      rotationErrorCumulated.setToZero();
    }
 
    public void compute(FrameVector output, FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector currentAngularVelocity,
          FrameVector feedForward)
    {
-      filteredVelocity.update(currentAngularVelocity);
-      filteredVelocity.getFrameTuple(filteredVelocityTemp);
-
       computeProportionalTerm(desiredOrientation);
-      computeDerivativeTerm(desiredAngularVelocity, filteredVelocityTemp);
+      if (currentAngularVelocity != null)
+         computeDerivativeTerm(desiredAngularVelocity, currentAngularVelocity);
       computeIntegralTerm();
+
       output.setToZero(proportionalTerm.getReferenceFrame());
-      output.add(proportionalTerm, derivativeTerm);
+      output.add(proportionalTerm);
+      output.add(derivativeTerm);
       output.add(integralTerm);
 
       // Limit the max acceleration of the feedback, but not of the feedforward...
       // JEP changed 150430 based on Atlas hitting limit stops.
-      double outputLength = output.length();
-      if (outputLength > gains.getMaximumAcceleration())
+      double feedbackAngularActionMagnitude = output.length();
+      double maximumAction = gains.getMaximumFeedback();
+      if (feedbackAngularActionMagnitude > maximumAction)
       {
-         output.scale(gains.getMaximumAcceleration() / outputLength);
+         output.scale(maximumAction / feedbackAngularActionMagnitude);
       }
-      
-      preLimitedOutput.set(output);
-      rateLimitedOutput.update();
-      rateLimitedOutput.getFrameTuple(output);
-      
+
+      feedbackAngularAction.set(output);
+      rateLimitedFeedbackAngularAction.update();
+      rateLimitedFeedbackAngularAction.getFrameTuple(output);
+
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
+   }
+   
+   /**
+    * Computes using Twists, ignores linear part
+    */
+   public void compute(Twist twistToPack, FramePose desiredPose, Twist desiredTwist)
+   {
+      checkBodyFrames(desiredTwist, twistToPack);
+      checkBaseFrames(desiredTwist, twistToPack);
+      checkExpressedInFrames(desiredTwist, twistToPack);
+
+      twistToPack.setToZero(bodyFrame, desiredTwist.getBaseFrame(), bodyFrame);
+
+      desiredPose.getOrientationIncludingFrame(desiredOrientation);
+      desiredTwist.getAngularPart(desiredAngularVelocity);
+      desiredTwist.getAngularPart(feedForwardAngularAction);
+      compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, null, feedForwardAngularAction);
+      twistToPack.setAngularPart(angularActionFromOrientationController.getVector());
+   }
+   
+   private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
+   }
+
+   private void checkBaseFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getBaseFrame().checkReferenceFrameMatch(currentTwist.getBaseFrame());
+   }
+
+   private void checkExpressedInFrames(Twist desiredTwist, Twist currentTwist)
+   {
+      desiredTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
+      currentTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
    private void computeProportionalTerm(FrameOrientation desiredOrientation)
    {
-      visualizeDesiredAndActualOrientations(desiredOrientation);
-
       desiredOrientation.changeFrame(bodyFrame);
-      desiredOrientation.getQuaternion(desiredQuaternion);
-      desiredAngleAxis.set(desiredQuaternion);
-      desiredAngleAxis.setAngle(AngleTools.trimAngleMinusPiToPi(desiredAngleAxis.getAngle()));
-      orientationErrorMagnitude.set(desiredAngleAxis.getAngle());
+      desiredOrientation.getQuaternion(errorQuaternion);
+      errorAngleAxis.set(errorQuaternion);
+      errorAngleAxis.setAngle(AngleTools.trimAngleMinusPiToPi(errorAngleAxis.getAngle()));
 
-      proportionalTerm.set(desiredAngleAxis.getX(), desiredAngleAxis.getY(), desiredAngleAxis.getZ());
-      proportionalTerm.scale(desiredAngleAxis.getAngle());
-      axisAngleErrorInBody.set(proportionalTerm);
+      // Limit the maximum position error considered for control action
+      double maximumError = gains.getMaximumProportionalError();
+      if (errorAngleAxis.getAngle() > maximumError)
+      {
+         errorAngleAxis.setAngle(Math.signum(errorAngleAxis.getAngle()) * maximumError);
+      }
+
+      proportionalTerm.set(errorAngleAxis.getX(), errorAngleAxis.getY(), errorAngleAxis.getZ());
+      proportionalTerm.scale(errorAngleAxis.getAngle());
+      rotationErrorInBody.set(proportionalTerm);
 
       proportionalGainMatrix.transform(proportionalTerm.getVector());
    }
@@ -168,6 +183,15 @@ public class AxisAngleOrientationController
       currentAngularVelocity.changeFrame(bodyFrame);
 
       derivativeTerm.sub(desiredAngularVelocity, currentAngularVelocity);
+
+      // Limit the maximum velocity error considered for control action
+      double maximumVelocityError = gains.getMaximumDerivativeError();
+      double velocityErrorMagnitude = derivativeTerm.length();
+      if (velocityErrorMagnitude > maximumVelocityError)
+      {
+         derivativeTerm.scale(maximumVelocityError / velocityErrorMagnitude);
+      }
+
       velocityError.set(derivativeTerm);
       derivativeGainMatrix.transform(derivativeTerm.getVector());
    }
@@ -180,28 +204,20 @@ public class AxisAngleOrientationController
          return;
       }
 
-      double errorIntegratedX = desiredAngleAxis.getX() * desiredAngleAxis.getAngle() * dt;
-      double errorIntegratedY = desiredAngleAxis.getY() * desiredAngleAxis.getAngle() * dt;
-      double errorIntegratedZ = desiredAngleAxis.getZ() * desiredAngleAxis.getAngle() * dt;
-      orientationErrorCumulated.add(errorIntegratedX, errorIntegratedY, errorIntegratedZ);
+      double integratedErrorAngle = errorAngleAxis.getAngle() * dt;
+      double errorIntegratedX = errorAngleAxis.getX() * integratedErrorAngle;
+      double errorIntegratedY = errorAngleAxis.getY() * integratedErrorAngle;
+      double errorIntegratedZ = errorAngleAxis.getZ() * integratedErrorAngle;
+      rotationErrorCumulated.add(errorIntegratedX, errorIntegratedY, errorIntegratedZ);
 
-      double errorMagnitude = orientationErrorCumulated.length();
+      double errorMagnitude = rotationErrorCumulated.length();
       if (errorMagnitude > gains.getMaximumIntegralError())
       {
-         orientationErrorCumulated.scale(gains.getMaximumIntegralError() / errorMagnitude);
+         rotationErrorCumulated.scale(gains.getMaximumIntegralError() / errorMagnitude);
       }
 
-      orientationErrorCumulated.getFrameTuple(integralTerm);
+      rotationErrorCumulated.getFrameTuple(integralTerm);
       integralGainMatrix.transform(integralTerm.getVector());
-   }
-
-   private void visualizeDesiredAndActualOrientations(FrameOrientation desiredOrientation)
-   {
-      if (visualize)
-      {
-         desiredOrientationViz.setAndMatchFrame(desiredOrientation);
-         currentOrientationViz.setAndMatchFrame(currentOrientation);
-      }
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
@@ -234,16 +250,23 @@ public class AxisAngleOrientationController
       gains.setIntegralGains(integralGains, maxIntegralError);
    }
 
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      gains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      gains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
    }
 
-   public void setGains(YoOrientationPIDGains gains)
+   public void setMaxDerivativeError(double maxDerivativeError)
    {
-      setProportionalGains(gains.getProportionalGains());
-      setDerivativeGains(gains.getDerivativeGains());
-      setIntegralGains(gains.getIntegralGains(), gains.getMaximumIntegralError());
-      setMaxAccelerationAndJerk(gains.getMaximumAcceleration(), gains.getMaximumJerk());
+      gains.setMaxDerivativeError(maxDerivativeError);
+   }
+
+   public void setMaxProportionalError(double maxProportionalError)
+   {
+      gains.setMaxProportionalError(maxProportionalError);
+   }
+
+   public void setGains(OrientationPIDGainsInterface gains)
+   {
+      this.gains.set(gains);
    }
 }

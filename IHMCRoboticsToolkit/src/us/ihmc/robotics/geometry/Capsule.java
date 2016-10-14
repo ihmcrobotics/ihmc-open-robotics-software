@@ -33,21 +33,21 @@ public class Capsule
    }
 
    static private double dot( Vector3d u, Vector3d v){
-      return ( u.x * v.x + u.y * v.y + u.z * v.z);
+      return ( u.getX() * v.getX() + u.getY() * v.getY() + u.getZ() * v.getZ());
    }
    
    static private Vector3d diff( Point3d u, Point3d v){
-      return new Vector3d( u.x - v.x, u.y - v.y, u.z - v.z);
+      return new Vector3d( u.getX() - v.getX(), u.getY() - v.getY(), u.getZ() - v.getZ());
    }
    
    static private void sum( Point3d u, Vector3d v, Point3d res){
-      res.set( u.x + v.x, u.y + v.y, u.z + v.z);
+      res.set( u.getX() + v.getX(), u.getY() + v.getY(), u.getZ() + v.getZ());
    }
    
    static private double dist(Point3d u, Point3d v ){
-      double dx = u.x - v.x;
-      double dy = u.y - v.y;
-      double dz = u.z - v.z;
+      double dx = u.getX() - v.getX();
+      double dy = u.getY() - v.getY();
+      double dz = u.getZ() - v.getZ();
       return Math.sqrt(dx*dx + dy*dy + dz*dz);
    }
 

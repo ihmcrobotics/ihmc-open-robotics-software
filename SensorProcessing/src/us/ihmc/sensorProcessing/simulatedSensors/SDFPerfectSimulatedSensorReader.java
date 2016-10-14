@@ -7,18 +7,14 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -35,8 +31,8 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorOutputMapReadOnly, SensorRawOutputMapReadOnly
 {
    private final String name;
-   private final SDFRobot robot;
-   private final SixDoFJoint rootJoint;
+   private final FloatingRootJointRobot robot;
+   private final FloatingInverseDynamicsJoint rootJoint;
    private final ReferenceFrames referenceFrames;
 
    private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
@@ -50,18 +46,18 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
+   public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel, null, referenceFrames);
    }
 
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderToUpdate,
+   public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderToUpdate,
          ReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel.getRootJoint(), forceSensorDataHolderToUpdate, referenceFrames);
    }
 
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, SixDoFJoint rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
+   public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FloatingInverseDynamicsJoint rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
          ReferenceFrames referenceFrames)
    {
       name = robot.getName() + "SimulatedSensorReader";
@@ -151,7 +147,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       FrameVector linearVelocity = robot.getRootJointVelocity();
       linearVelocity.changeFrame(pelvisFrame);
 
-      FrameVector angularVelocity = robot.getPelvisAngularVelocityInPelvisFrame(pelvisFrame);
+      FrameVector angularVelocity = robot.getRootJointAngularVelocityInRootJointFrame(pelvisFrame);
       angularVelocity.changeFrame(pelvisFrame);
 
       Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity.getVector(), angularVelocity.getVector());
@@ -173,7 +169,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private void readAndUpdateRootJointPositionAndOrientation()
    {
       packRootTransform(robot, temporaryRootToWorldTransform);
-      temporaryRootToWorldTransform.normalize();
+      temporaryRootToWorldTransform.normalizeRotationPart();
       rootJoint.setPositionAndRotation(temporaryRootToWorldTransform);
    }
 
@@ -187,13 +183,13 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
          if (pinJoint == null) continue;
 
-         revoluteJoint.setQ(pinJoint.getQ().getDoubleValue());
-         revoluteJoint.setQd(pinJoint.getQD().getDoubleValue());
-         revoluteJoint.setQdd(pinJoint.getQDD().getDoubleValue());
+         revoluteJoint.setQ(pinJoint.getQYoVariable().getDoubleValue());
+         revoluteJoint.setQd(pinJoint.getQDYoVariable().getDoubleValue());
+         revoluteJoint.setQdd(pinJoint.getQDDYoVariable().getDoubleValue());
       }
    }
 
-   protected void packRootTransform(SDFRobot robot, RigidBodyTransform transformToPack)
+   protected void packRootTransform(FloatingRootJointRobot robot, RigidBodyTransform transformToPack)
    {
       robot.getRootJointToWorldTransform(transformToPack);
    }

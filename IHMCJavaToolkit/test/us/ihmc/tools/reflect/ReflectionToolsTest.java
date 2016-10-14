@@ -8,8 +8,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.reflect.ReflectionTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class ReflectionToolsTest
 {
@@ -24,7 +24,7 @@ public class ReflectionToolsTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public final void testPrintDeclaredFields() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException
    {

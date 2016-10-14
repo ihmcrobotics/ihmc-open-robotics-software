@@ -2,8 +2,8 @@ package us.ihmc.robotics.lidar;
 
 import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -15,7 +15,7 @@ public class AbstractLidarScanTest
    Random rand = new Random(1098L);
    private static final double eps = 1e-7;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIdentityScan()
    {
@@ -36,7 +36,7 @@ public class AbstractLidarScanTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleScanRotating()
    {
@@ -59,13 +59,13 @@ public class AbstractLidarScanTest
       {
          Point3d p = new Point3d(ranges[i], 0, 0);
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.rotZ(params.sweepYawMin + i * sweepPerStep);
+         transform.setRotationYawAndZeroTranslation(params.sweepYawMin + i * sweepPerStep);
          transform.transform(p);
          JUnitTools.assertTuple3dEquals(p, lidarScan.getPoint(i), eps);
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testInterpolationWhileRotating()
    {
@@ -77,8 +77,8 @@ public class AbstractLidarScanTest
       LidarScanParameters params = new LidarScanParameters(numPoints, 0, 0, 0, 0, 0, 0);
       RigidBodyTransform startTransform = new RigidBodyTransform();
       RigidBodyTransform endTransform = new RigidBodyTransform();
-      startTransform.rotZ(sweepMin);
-      endTransform.rotZ(sweepMax);
+      startTransform.setRotationYawAndZeroTranslation(sweepMin);
+      endTransform.setRotationYawAndZeroTranslation(sweepMax);
 
       float[] ranges = new float[numPoints];
       for (int i = 0; i < ranges.length; i++)
@@ -93,7 +93,7 @@ public class AbstractLidarScanTest
       {
          Point3d p = new Point3d(ranges[i], 0, 0);
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.rotZ(sweepMin + i * sweepPerStep);
+         transform.setRotationYawAndZeroTranslation(sweepMin + i * sweepPerStep);
          transform.transform(p);
          JUnitTools.assertTuple3dEquals(p, lidarScan.getPoint(i), eps);
       }
@@ -109,14 +109,14 @@ public class AbstractLidarScanTest
 
 	
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLineSegment()
    {
       // TODO Write test case
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRay()
    {

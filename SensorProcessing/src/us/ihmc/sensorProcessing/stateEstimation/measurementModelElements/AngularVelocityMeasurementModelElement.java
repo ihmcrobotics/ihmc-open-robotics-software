@@ -66,7 +66,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
    private void computeAngularVelocityStateOutputBlock()
    {
       estimationFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
-      tempTransform.get(tempMatrix);
+      tempTransform.getRotation(tempMatrix);
       MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(angularVelocityStatePort));
    }
 

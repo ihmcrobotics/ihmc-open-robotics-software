@@ -3,8 +3,8 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap;
 import java.util.HashMap;
 
 import optiTrack.MocapRigidBody;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
@@ -65,10 +65,10 @@ public class MocapToStateEstimatorFrameConverter
    
    public MocapToStateEstimatorFrameConverter(DRCRobotModel robotModel, PacketCommunicator mocapModulePacketCommunicator)
    {
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, null);
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
-      robotHeadFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
+      robotHeadFrame = referenceFrames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
       
 
       mocapHeadFrame = new ReferenceFrame("headInMocapFrame", mocapOrigin)

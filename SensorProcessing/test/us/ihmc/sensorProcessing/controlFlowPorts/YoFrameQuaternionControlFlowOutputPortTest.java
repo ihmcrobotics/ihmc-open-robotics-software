@@ -9,18 +9,18 @@ import org.junit.Test;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class YoFrameQuaternionControlFlowOutputPortTest
 {
 
    private static final double EPS = 1e-15;
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void simpleWritingReadingTest()
    {

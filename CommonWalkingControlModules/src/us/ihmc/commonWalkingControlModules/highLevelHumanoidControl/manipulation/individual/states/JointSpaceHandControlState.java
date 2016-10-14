@@ -1,213 +1,367 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
+import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
+
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.PIDController;
+import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
+import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
-import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.OneDoFJointTrajectoryGenerator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
+import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.stateMachines.State;
+import us.ihmc.tools.io.printing.PrintTools;
 
-public class JointSpaceHandControlState extends State<HandControlState>
+public class JointSpaceHandControlState extends HandControlState
 {
-   private final OneDoFJoint[] oneDoFJoints;
-   private Map<OneDoFJoint, ? extends OneDoFJointTrajectoryGenerator> trajectories;
-   private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
-
-   private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
-
-   private final DoubleYoVariable maxAcceleration;
-
-   private final BooleanYoVariable setDesiredJointAccelerations;
+   private final OneDoFJoint[] controlledJoints;
+   private final Map<OneDoFJoint, Double> homeConfiguration;
+   private final Map<OneDoFJoint, MultipleWaypointsTrajectoryGenerator> jointTrajectoryGenerators;
+   private final JointspaceFeedbackControlCommand jointspaceFeedbackControlCommand = new JointspaceFeedbackControlCommand();
 
    private final YoVariableRegistry registry;
-   private final MomentumBasedController momentumBasedController;
-   private final BooleanYoVariable initialized;
+   private final YoPIDGains gains;
+   private final DoubleYoVariable weight;
 
-   private final boolean doPositionControl;
+   private final BooleanYoVariable abortJointspaceControlState;
+   private final LongYoVariable lastCommandId;
 
-   private final double dt;
-   private final boolean[] doIntegrateDesiredAccelerations;
+   private final BooleanYoVariable isReadyToHandleQueuedCommands;
+   private final Map<OneDoFJoint, IntegerYoVariable> numberOfQueuedCommands = new HashMap<>();
+   private final Map<OneDoFJoint, CommandArrayDeque<OneDoFJointTrajectoryCommand>> commandQueues = new LinkedHashMap<>();
 
-   public JointSpaceHandControlState(String namePrefix, InverseDynamicsJoint[] controlledJoints, boolean doPositionControl,
-         MomentumBasedController momentumBasedController, YoPIDGains gains, double dt, YoVariableRegistry parentRegistry)
+   public JointSpaceHandControlState(String namePrefix, Map<OneDoFJoint, Double> homeConfiguration, OneDoFJoint[] controlledJoints, YoPIDGains gains,
+         YoVariableRegistry parentRegistry)
    {
-      super(HandControlState.JOINT_SPACE);
-
-      this.dt = dt;
-      this.doPositionControl = doPositionControl;
+      super(HandControlMode.JOINTSPACE);
+      this.homeConfiguration = homeConfiguration;
+      this.gains = gains;
 
       String name = namePrefix + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
 
-      this.oneDoFJoints = ScrewTools.filterJoints(controlledJoints, RevoluteJoint.class);
-      initialized = new BooleanYoVariable(name + "Initialized", registry);
-      initialized.set(false);
+      this.controlledJoints = controlledJoints;
 
-      if (!doPositionControl)
+      weight = new DoubleYoVariable(namePrefix + "JointspaceWeight", registry);
+      weight.set(SolverWeightLevels.ARM_JOINTSPACE_WEIGHT);
+
+      jointspaceFeedbackControlCommand.setGains(gains);
+
+      for (int i = 0; i < controlledJoints.length; i++)
       {
-         setDesiredJointAccelerations = null;
-
-         maxAcceleration = gains.getYoMaximumAcceleration();
-         pidControllers = new LinkedHashMap<OneDoFJoint, PIDController>();
-         rateLimitedAccelerations = new LinkedHashMap<OneDoFJoint, RateLimitedYoVariable>();
-
-         for (OneDoFJoint joint : oneDoFJoints)
-         {
-            String suffix = StringUtils.uncapitalize(joint.getName());
-            PIDController pidController = new PIDController(gains.getYoKp(), gains.getYoKi(), gains.getYoKd(), gains.getYoMaxIntegralError(), suffix, registry);
-            pidControllers.put(joint, pidController);
-
-            RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(suffix + "FeedbackAcceleration", registry, gains.getYoMaximumJerk(), dt);
-            rateLimitedAccelerations.put(joint, rateLimitedAcceleration);
-         }
-      }
-      else
-      {
-         setDesiredJointAccelerations = new BooleanYoVariable(namePrefix + "SetDesiredJointAccelerations", registry);
-         setDesiredJointAccelerations.set(false);
-
-         maxAcceleration = null;
-         pidControllers = null;
-         rateLimitedAccelerations = null;
+         OneDoFJoint joint = controlledJoints[i];
+         jointspaceFeedbackControlCommand.addJoint(joint, Double.NaN, Double.NaN, Double.NaN);
       }
 
-      this.momentumBasedController = momentumBasedController;
+      jointTrajectoryGenerators = new LinkedHashMap<>();
 
-      doIntegrateDesiredAccelerations = new boolean[oneDoFJoints.length];
-
-      for (int i = 0; i < oneDoFJoints.length; i++)
+      for (OneDoFJoint joint : controlledJoints)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
-         doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
+         MultipleWaypointsTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(joint.getName(), registry);
+         jointTrajectoryGenerators.put(joint, multiWaypointTrajectoryGenerator);
+
+         numberOfQueuedCommands.put(joint, new IntegerYoVariable(joint.getName() + "NumberOfQueuedCommands", registry));
+         commandQueues.put(joint, new CommandArrayDeque<>(OneDoFJointTrajectoryCommand.class));
       }
+
+      isReadyToHandleQueuedCommands = new BooleanYoVariable(namePrefix + "IsReadyToHandleQueuedArmTrajectoryCommands", registry);
+      abortJointspaceControlState = new BooleanYoVariable(namePrefix + "AbortJointspaceControlState", registry);
+      lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
+      lastCommandId.set(Packet.INVALID_MESSAGE_ID);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setWeight(double weight)
+   {
+      this.weight.set(weight);
+   }
+
+   public void goHome(double trajectoryTime, boolean initializeToCurrent)
+   {
+      for (int jointIndex = 0; jointIndex < controlledJoints.length; jointIndex++)
+      {
+         OneDoFJoint joint = controlledJoints[jointIndex];
+         MultipleWaypointsTrajectoryGenerator trajectory = jointTrajectoryGenerators.get(joint);
+         double initialPosition = initializeToCurrent ? joint.getQ() : trajectory.getValue();
+         double initialVelocity = initializeToCurrent ? joint.getQd() : trajectory.getVelocity();
+         trajectory.clear();
+         trajectory.appendWaypoint(0.0, initialPosition, initialVelocity);
+         trajectory.appendWaypoint(trajectoryTime, homeConfiguration.get(joint), 0.0);
+         trajectory.initialize();
+      }
+
+      isReadyToHandleQueuedCommands.set(false);
+      clearCommandQueues(INVALID_MESSAGE_ID);
+   }
+
+   public void holdCurrentConfiguration()
+   {
+      for (OneDoFJoint oneDoFJoint : controlledJoints)
+      {
+         MultipleWaypointsTrajectoryGenerator trajectory = jointTrajectoryGenerators.get(oneDoFJoint);
+         trajectory.clear();
+         trajectory.appendWaypoint(0.0, oneDoFJoint.getQ(), 0.0);
+         trajectory.initialize();
+      }
+
+      isReadyToHandleQueuedCommands.set(false);
+      clearCommandQueues(INVALID_MESSAGE_ID);
+   }
+
+   public boolean handleArmTrajectoryCommand(ArmTrajectoryCommand command, boolean initializeToCurrent)
+   {
+      if (!ControllerCommandValidationTools.checkArmTrajectoryCommand(controlledJoints, command))
+         return false;
+
+      isReadyToHandleQueuedCommands.set(true);
+      clearCommandQueues(command.getCommandId());
+
+      RecyclingArrayList<OneDoFJointTrajectoryCommand> jointTrajectoryCommands = command.getTrajectoryPointLists();
+      int numberOfJoints = command.getNumberOfJoints();
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         OneDoFJointTrajectoryCommand jointTrajectoryCommand = jointTrajectoryCommands.get(jointIndex);
+         initializeTrajectoryGenerator(initializeToCurrent, 0.0, jointIndex, jointTrajectoryCommand);
+      }
+
+      return true;
+   }
+
+   public boolean queueArmTrajectoryCommand(ArmTrajectoryCommand command)
+   {
+      if (!isReadyToHandleQueuedCommands.getBooleanValue())
+      {
+         PrintTools.warn(this, "The very first " + command.getClass().getSimpleName() + " of a series must be " + ExecutionMode.OVERRIDE + ". Aborting motion.");
+         return false;
+      }
+
+      long previousCommandId = command.getPreviousCommandId();
+
+      if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
+      {
+         PrintTools.warn(this, "Previous command ID mismatch: previous ID from command = " + previousCommandId
+               + ", last message ID received by the controller = " + lastCommandId.getLongValue() + ". Aborting motion.");
+         isReadyToHandleQueuedCommands.set(false);
+         clearCommandQueues(INVALID_MESSAGE_ID);
+         abortJointspaceControlState.set(true);
+         return false;
+      }
+
+      for (int jointIndex = 0; jointIndex < command.getNumberOfJoints(); jointIndex++)
+      {
+         OneDoFJoint joint = controlledJoints[jointIndex];
+         OneDoFJointTrajectoryCommand localCommand = commandQueues.get(joint).addLast();
+         numberOfQueuedCommands.get(joint).increment();
+
+         OneDoFJointTrajectoryCommand jointTrajectoryCommand = command.getJointTrajectoryPointList(jointIndex);
+
+         if (jointTrajectoryCommand.getTrajectoryPoint(0).getTime() < 1.0e-5)
+         {
+            PrintTools.warn(this, "Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
+            isReadyToHandleQueuedCommands.set(false);
+            clearCommandQueues(INVALID_MESSAGE_ID);
+            abortJointspaceControlState.set(true);
+            return false;
+         }
+
+         localCommand.set(jointTrajectoryCommand);
+         localCommand.setCommandId(command.getCommandId());
+      }
+
+      lastCommandId.set(command.getCommandId());
+
+      return true;
    }
 
    @Override
    public void doAction()
    {
-      for (int i = 0; i < oneDoFJoints.length; i++)
+      for (int i = 0; i < controlledJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
+         OneDoFJoint joint = controlledJoints[i];
 
-         DoubleTrajectoryGenerator trajectoryGenerator = trajectories.get(joint);
+         MultipleWaypointsTrajectoryGenerator trajectoryGenerator = jointTrajectoryGenerators.get(joint);
+         CommandArrayDeque<OneDoFJointTrajectoryCommand> commandQueue = commandQueues.get(joint);
+
          trajectoryGenerator.compute(getTimeInCurrentState());
 
-         joint.setqDesired(trajectoryGenerator.getValue());
-         joint.setQdDesired(trajectoryGenerator.getVelocity());
-         double feedforwardAcceleration = trajectoryGenerator.getAcceleration();
-
-         if (doPositionControl)
+         if (trajectoryGenerator.isDone() && !commandQueue.isEmpty())
          {
-            enablePositionControl();
-            if (!setDesiredJointAccelerations.getBooleanValue())
-               feedforwardAcceleration = 0.0;
-            momentumBasedController.setOneDoFJointAcceleration(joint, feedforwardAcceleration);
+            double firstWaypointTime = trajectoryGenerator.getLastWaypointTime();
+            OneDoFJointTrajectoryCommand jointTrajectoryCommand = commandQueue.poll();
+            numberOfQueuedCommands.get(joint).decrement();
+            initializeTrajectoryGenerator(false, firstWaypointTime, i, jointTrajectoryCommand);
+            trajectoryGenerator.compute(getTimeInCurrentState());
          }
-         else
-         {
-            double currentPosition = joint.getQ();
-            double currentVelocity = joint.getQd();
 
-            PIDController pidController = pidControllers.get(joint);
-            double desiredAcceleration = pidController.computeForAngles(currentPosition, joint.getqDesired(), currentVelocity, joint.getQdDesired(), dt);
+         double desiredPosition = trajectoryGenerator.getValue();
+         double desiredVelocity = trajectoryGenerator.getVelocity();
+         double feedForwardAcceleration = trajectoryGenerator.getAcceleration();
 
-            desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration.getDoubleValue());
-
-            RateLimitedYoVariable rateLimitedAcceleration = rateLimitedAccelerations.get(joint);
-            rateLimitedAcceleration.update(desiredAcceleration);
-            desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
-
-            momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration + feedforwardAcceleration);
-         }
+         jointspaceFeedbackControlCommand.setOneDoFJoint(i, desiredPosition, desiredVelocity, feedForwardAcceleration);
+         jointspaceFeedbackControlCommand.setGains(gains);
+         jointspaceFeedbackControlCommand.setWeightForSolver(weight.getDoubleValue());
       }
+   }
+
+   private void initializeTrajectoryGenerator(boolean initializeToCurrent, double firstWaypointTime, int jointIndex,
+         OneDoFJointTrajectoryCommand jointTrajectoryCommand)
+   {
+      OneDoFJoint joint = controlledJoints[jointIndex];
+      MultipleWaypointsTrajectoryGenerator trajectoryGenerator = jointTrajectoryGenerators.get(joint);
+
+      jointTrajectoryCommand.addTimeOffset(firstWaypointTime);
+
+      if (jointTrajectoryCommand.getNumberOfTrajectoryPoints() == 0)
+      {
+         if (trajectoryGenerator.isEmpty())
+         {
+            trajectoryGenerator.appendWaypoint(0.0, joint.getQ(), 0.0);
+            trajectoryGenerator.initialize();
+         }
+         return;
+      }
+
+      if (jointTrajectoryCommand.getTrajectoryPoint(0).getTime() > firstWaypointTime + 1.0e-5)
+      {
+         double initialPosition = initializeToCurrent ? joint.getQ() : trajectoryGenerator.getValue();
+         double initialVelocity = initializeToCurrent ? joint.getQd() : trajectoryGenerator.getVelocity();
+         trajectoryGenerator.clear();
+         trajectoryGenerator.appendWaypoint(firstWaypointTime, initialPosition, initialVelocity);
+      }
+      else
+      {
+         trajectoryGenerator.clear();
+      }
+
+      int numberOfTrajectoryPoints = queueExcedingTrajectoryPointsIfNeeded(jointIndex, jointTrajectoryCommand);
+
+      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+         trajectoryGenerator.appendWaypoint(jointTrajectoryCommand.getTrajectoryPoint(i));
+
+      trajectoryGenerator.initialize();
+   }
+
+   private int queueExcedingTrajectoryPointsIfNeeded(int jointIndex, OneDoFJointTrajectoryCommand command)
+   {
+      int numberOfTrajectoryPoints = command.getNumberOfTrajectoryPoints();
+
+      OneDoFJoint joint = controlledJoints[jointIndex];
+      MultipleWaypointsTrajectoryGenerator jointTrajectoryGenerator = jointTrajectoryGenerators.get(joint);
+      int maximumNumberOfWaypoints = jointTrajectoryGenerator.getMaximumNumberOfWaypoints();
+      maximumNumberOfWaypoints -= jointTrajectoryGenerator.getCurrentNumberOfWaypoints();
+
+      if (numberOfTrajectoryPoints <= maximumNumberOfWaypoints)
+         return numberOfTrajectoryPoints;
+
+      OneDoFJointTrajectoryCommand commandForExcedent = commandQueues.get(joint).addFirst();
+      numberOfQueuedCommands.get(joint).increment();
+      commandForExcedent.clear();
+      commandForExcedent.setCommandId(command.getCommandId());
+
+      for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+      {
+         commandForExcedent.addTrajectoryPoint(command.getTrajectoryPoint(trajectoryPointIndex));
+      }
+
+      double timeOffsetToSubtract = command.getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
+      commandForExcedent.subtractTimeOffset(timeOffsetToSubtract);
+
+      return maximumNumberOfWaypoints;
    }
 
    @Override
    public void doTransitionIntoAction()
    {
-      if (!initialized.getBooleanValue() || getPreviousState() != this)
-      {
-         for (int i = 0; i < oneDoFJoints.length; i++)
-         {
-            OneDoFJoint joint = oneDoFJoints[i];
-
-            if (!doPositionControl)
-               pidControllers.get(joint).setCumulativeError(0.0);
-         }
-         initialized.set(true);
-      }
-
-      saveDoAccelerationIntegration();
-
-      if (doPositionControl)
-         enablePositionControl();
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
-      disablePositionControl();
+      abortJointspaceControlState.set(false);
    }
 
-   private void saveDoAccelerationIntegration()
+   private void clearCommandQueues(long lastCommandId)
    {
-      for (int i = 0; i < oneDoFJoints.length; i++)
+      for (int i = 0; i < controlledJoints.length; i++)
       {
-         OneDoFJoint joint = oneDoFJoints[i];
-         doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
+         OneDoFJoint joint = controlledJoints[i];
+         commandQueues.get(joint).clear();
+         numberOfQueuedCommands.get(joint).set(0);
       }
+      this.lastCommandId.set(lastCommandId);
    }
 
-   private void enablePositionControl()
-   {
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         OneDoFJoint joint = oneDoFJoints[i];
-         joint.setIntegrateDesiredAccelerations(false);
-         joint.setUnderPositionControl(true);
-      }
-   }
-
-   private void disablePositionControl()
-   {
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         OneDoFJoint joint = oneDoFJoints[i];
-         joint.setIntegrateDesiredAccelerations(doIntegrateDesiredAccelerations[i]);
-         joint.setUnderPositionControl(false);
-      }
-   }
-
+   @Override
    public boolean isDone()
    {
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0; i < controlledJoints.length; i++)
       {
-         if (!trajectories.get(oneDoFJoint).isDone())
+         if (!commandQueues.get(controlledJoints[i]).isEmpty())
+            return false;
+      }
+
+      return areTrajectoriesDone();
+   }
+
+   private boolean areTrajectoriesDone()
+   {
+      for (OneDoFJoint oneDoFJoint : controlledJoints)
+      {
+         if (!jointTrajectoryGenerators.get(oneDoFJoint).isDone())
             return false;
       }
 
       return true;
    }
 
-   public void setTrajectories(Map<OneDoFJoint, ? extends OneDoFJointTrajectoryGenerator> trajectories)
+   @Override
+   public boolean isAbortRequested()
    {
-      this.trajectories = trajectories;
+      return abortJointspaceControlState.getBooleanValue();
+   }
+
+   public boolean isReadyToHandleQueuedCommands()
+   {
+      return isReadyToHandleQueuedCommands.getBooleanValue();
+   }
+
+   public double getJointDesiredPosition(OneDoFJoint joint)
+   {
+      return jointTrajectoryGenerators.get(joint).getValue();
+   }
+
+   public double getJointDesiredVelocity(OneDoFJoint joint)
+   {
+      return jointTrajectoryGenerators.get(joint).getVelocity();
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return null;
+   }
+
+   @Override
+   public JointspaceFeedbackControlCommand getFeedbackControlCommand()
+   {
+      return jointspaceFeedbackControlCommand;
    }
 }

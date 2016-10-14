@@ -47,12 +47,12 @@ public class VelocityControlEvaluationRobot extends Robot
 
    public double getX()
    {
-      return rootJoint.getQ().getDoubleValue();
+      return rootJoint.getQYoVariable().getDoubleValue();
    }
    
    public double getXDot()
    {
-      return rootJoint.getQD().getDoubleValue();
+      return rootJoint.getQDYoVariable().getDoubleValue();
    }
 
   

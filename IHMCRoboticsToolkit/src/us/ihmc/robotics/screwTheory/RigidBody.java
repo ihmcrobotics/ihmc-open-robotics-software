@@ -1,47 +1,43 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RigidBody
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+
+public class RigidBody implements NameBasedHashCodeHolder
 {
    private final RigidBodyInertia inertia;
    private final ReferenceFrame bodyFixedFrame;
    private final InverseDynamicsJoint parentJoint;
-   private final FrameVector comOffset;
    private final ArrayList<InverseDynamicsJoint> childrenJoints = new ArrayList<InverseDynamicsJoint>();
    private final List<InverseDynamicsJoint> childrenJointsReadOnly = Collections.unmodifiableList(childrenJoints);
    private final String name;
 
-   public RigidBody(String name, ReferenceFrame rootBodyFrame)    // root body constructor
+   private final long nameBasedHashCode;
+
+   public RigidBody(String name, ReferenceFrame rootBodyFrame) // root body constructor
    {
+      nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(name);
       this.name = name;
       this.inertia = null;
       this.bodyFixedFrame = rootBodyFrame;
       this.parentJoint = null;
-      this.comOffset = null;
    }
 
    public RigidBody(String name, RigidBodyInertia inertia, InverseDynamicsJoint parentJoint)
    {
-      inertia.getBodyFrame().checkReferenceFrameMatch(inertia.getExpressedInFrame());    // inertia should be expressed in body frame, otherwise it will change
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, parentJoint);
+      inertia.getBodyFrame().checkReferenceFrameMatch(inertia.getExpressedInFrame()); // inertia should be expressed in body frame, otherwise it will change
       this.name = name;
       this.inertia = inertia;
       this.bodyFixedFrame = inertia.getBodyFrame();
       this.parentJoint = parentJoint;
       this.parentJoint.setSuccessor(this);
-
-      this.comOffset = new FrameVector(parentJoint.getFrameAfterJoint());
-      RigidBodyTransform comTransform = inertia.getBodyFrame().getTransformToDesiredFrame(parentJoint.getFrameAfterJoint());
-      comTransform.get(comOffset.getVector());
-      
-      
    }
 
    public RigidBodyInertia getInertia()
@@ -91,20 +87,20 @@ public class RigidBody
 
    public void getCoMOffset(FramePoint comOffsetToPack)
    {
-      comOffsetToPack.setIncludingFrame(comOffset);
+      inertia.getCenterOfMassOffset(comOffsetToPack);
    }
-   
+
    public void setCoMOffset(FramePoint comOffset)
    {
-      this.comOffset.set(comOffset);
+      inertia.setCenterOfMassOffset(comOffset);
    }
 
    public void updateFramesRecursively()
    {
       this.bodyFixedFrame.update();
 
-//      for (InverseDynamicsJoint joint : childrenJoints)
-      for(int childIndex = 0; childIndex < childrenJoints.size(); childIndex++)
+      //      for (InverseDynamicsJoint joint : childrenJoints)
+      for (int childIndex = 0; childIndex < childrenJoints.size(); childIndex++)
       {
          childrenJoints.get(childIndex).updateFramesRecursively();
       }
@@ -115,30 +111,36 @@ public class RigidBody
    {
       StringBuilder builder = new StringBuilder();
       builder.append(name);
-//      builder.append(name + "\n");
-//      builder.append("Root body: " + isRootBody() + "\n");
+      //      builder.append(name + "\n");
+      //      builder.append("Root body: " + isRootBody() + "\n");
 
-//      builder.append("Children joints: ");
-//
-//      if (childrenJoints.isEmpty())
-//      {
-//         builder.append("none");
-//      }
-//      else
-//      {
-//         Iterator<InverseDynamicsJoint> iterator = childrenJoints.iterator();
-//         while (iterator.hasNext())
-//         {
-//            InverseDynamicsJoint joint = iterator.next();
-//            builder.append(joint.getName());
-//
-//            if (iterator.hasNext())
-//            {
-//               builder.append(", ");
-//            }
-//         }
-//      }
+      //      builder.append("Children joints: ");
+      //
+      //      if (childrenJoints.isEmpty())
+      //      {
+      //         builder.append("none");
+      //      }
+      //      else
+      //      {
+      //         Iterator<InverseDynamicsJoint> iterator = childrenJoints.iterator();
+      //         while (iterator.hasNext())
+      //         {
+      //            InverseDynamicsJoint joint = iterator.next();
+      //            builder.append(joint.getName());
+      //
+      //            if (iterator.hasNext())
+      //            {
+      //               builder.append(", ");
+      //            }
+      //         }
+      //      }
 
       return builder.toString();
+   }
+
+   @Override
+   public long nameBasedHashCode()
+   {
+      return nameBasedHashCode;
    }
 }

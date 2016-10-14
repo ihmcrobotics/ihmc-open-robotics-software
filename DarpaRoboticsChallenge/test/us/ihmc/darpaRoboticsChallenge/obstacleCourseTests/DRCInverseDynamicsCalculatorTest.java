@@ -6,21 +6,21 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTestInterface
 {
-	@DeployableTestMethod(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testInverseDynamicsStartingWithRandomTorquesInSCS() throws UnreasonableAccelerationException
    {
@@ -92,7 +92,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
    }
 
 
-	@DeployableTestMethod(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testInverseDynamicsStartingWithRandomAccelerationsInInverseDynamics() throws UnreasonableAccelerationException
    {
@@ -175,11 +175,11 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
    public DRCInverseDynamicsCalculatorTestHelper createInverseDynamicsCalculatorTestHelper(boolean visualize, double gravityZ)
    {
       DRCRobotModel drcRobotModel = getRobotModel();
-      SDFFullHumanoidRobotModel fullRobotModel = drcRobotModel.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcRobotModel.createFullRobotModel();
 
       boolean createCollisionMeshes = false;
       drcRobotModel.setEnableJointDamping(false);
-      SDFHumanoidRobot robot = drcRobotModel.createSdfRobot(createCollisionMeshes);
+      HumanoidFloatingRootJointRobot robot = drcRobotModel.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
       robot.setGravity(gravityZ);
 
       return new DRCInverseDynamicsCalculatorTestHelper(fullRobotModel, robot, visualize, gravityZ);

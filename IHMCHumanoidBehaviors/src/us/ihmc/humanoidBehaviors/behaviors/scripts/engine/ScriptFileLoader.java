@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +35,6 @@ public class ScriptFileLoader
          {
             return new MapperWrapper(next)
             {
-
                public boolean shouldSerializeMember(@SuppressWarnings("rawtypes") Class definedIn, String fieldName)
                {
                   return definedIn != Object.class ? super.shouldSerializeMember(definedIn, fieldName) : false;
@@ -43,8 +44,13 @@ public class ScriptFileLoader
       };
 
       fileReader = new FileReader(file.getAbsoluteFile());
-      
       inputStream = xStream.createObjectInputStream(fileReader);
+   }
+   
+   
+   public ScriptFileLoader(File file) throws IOException
+   {
+	   this(new BufferedInputStream(new FileInputStream(file)));
    }
    
    public ScriptFileLoader(InputStream scriptInputStream) throws IOException

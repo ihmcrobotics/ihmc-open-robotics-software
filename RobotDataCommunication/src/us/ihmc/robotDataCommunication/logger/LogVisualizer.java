@@ -14,8 +14,9 @@ import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
@@ -23,10 +24,11 @@ import us.ihmc.robotDataCommunication.logger.converters.LogFormatUpdater;
 import us.ihmc.robotDataCommunication.logger.util.FileSelectionDialog;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
-import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class LogVisualizer
@@ -53,12 +55,12 @@ public class LogVisualizer
       if (logFile != null)
       {
          System.out.println("loading log from folder:" + logFile);
-         
+
          SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
          parameters.setCreateGUI(true);
          parameters.setDataBufferSize(bufferSize);
          scs = new SimulationConstructionSet(parameters);
- 
+
          scs.setFastSimulate(true, 50);
          readLogFile(logFile, showOverheadView);
 
@@ -75,7 +77,7 @@ public class LogVisualizer
    {
       YoVariableRegistry rootRegistry = scs.getRootRegistry();
       ArrayList<YoVariable<?>> allVariablesIncludingDescendants = rootRegistry.getAllVariablesIncludingDescendants();
-      
+
       for (YoVariable<?> yoVariable : allVariablesIncludingDescendants)
       {
          System.out.println(yoVariable.getName());
@@ -92,7 +94,7 @@ public class LogVisualizer
       {
          throw new RuntimeException("Cannot find " + logProperties.getHandshakeFile());
       }
-      
+
 
       DataInputStream handshakeStream = new DataInputStream(new FileInputStream(handshake));
       byte[] handshakeData = new byte[(int) handshake.length()];
@@ -130,8 +132,14 @@ public class LogVisualizer
          throw new RuntimeException("No model available for log");
       }
 
+      boolean useCollisionMeshes = false;
+      boolean enableTorqueVelocityLimits = true;
+      boolean enableJointDamping = true;
 
-      robot = new YoVariableLogPlaybackRobot(selectedFile, generalizedSDFRobotModel, parser.getJointStates(), parser.getYoVariablesList(), logProperties ,scs);
+      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+      RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+
+      robot = new YoVariableLogPlaybackRobot(selectedFile, robotDescription, parser.getJointStates(), parser.getYoVariablesList(), logProperties ,scs);
       scs.setTimeVariableName(robot.getRobotsYoVariableRegistry().getName() + ".robotTime");
 
       double dt = parser.getDt();
@@ -165,6 +173,9 @@ public class LogVisualizer
       scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
       YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, logProperties, players, parser, robot, scs);
       scs.getStandardSimulationGUI().addJComponentToMainPanel(gui, BorderLayout.SOUTH);
+      
+//      ErrorPanel errorPanel = new ErrorPanel(scs.getRootRegistry());
+//      scs.getStandardSimulationGUI().addJComponentToMainPanel(errorPanel,  BorderLayout.EAST);
 
       setupReadEveryNTicksTextField();
    }
@@ -194,7 +205,7 @@ public class LogVisualizer
             textField.getParent().requestFocus();
          }
       });
-      
+
       textField.addFocusListener(new FocusListener()
       {
          @Override
@@ -212,7 +223,7 @@ public class LogVisualizer
 
       scs.addTextField(textField);
    }
-   
+
    private void setReadEveryNTicksTextFieldToCurrentValue(final JTextField textField)
    {
       String everyNTicksString = Integer.toString(robot.getReadEveryNTicks());
@@ -224,7 +235,7 @@ public class LogVisualizer
       return scs;
    }
 
-   public SDFRobot getSDFRobot()
+   public FloatingRootJointRobot getSDFRobot()
    {
       return robot;
    }
@@ -238,13 +249,13 @@ public class LogVisualizer
    {
       new Thread(scs).start();
    }
-   
+
    public void addLogPlaybackListener(YoVariableLogPlaybackListener listener)
    {
       listener.setYoVariableRegistry(scs.getRootRegistry());
       robot.addLogPlaybackListener(listener);
    }
-   
+
    public static void main(String[] args) throws IOException
    {
       LogVisualizer visualizer = new LogVisualizer();

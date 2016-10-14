@@ -92,14 +92,14 @@ public class RobotExplorer
    private void printPinJointInformation(OneDegreeOfFreedomJoint pinJoint, StringBuffer buffer)
    {
       buffer.append("Joint is a Pin Joint.\n");
-      DoubleYoVariable q = pinJoint.getQ();
+      DoubleYoVariable q = pinJoint.getQYoVariable();
       buffer.append("Its q variable is named " + q.getName() + "\n");
    }
 
    private void printSliderJointInformation(SliderJoint sliderJoint, StringBuffer buffer)
    {
       buffer.append("Joint is a Slider Joint.\n");
-      DoubleYoVariable q = sliderJoint.getQ();
+      DoubleYoVariable q = sliderJoint.getQYoVariable();
       buffer.append("Its q variable is named " + q.getName() + "\n");
    }
 

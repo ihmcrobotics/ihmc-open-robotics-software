@@ -36,9 +36,9 @@ public class CylinderJoint extends PinJoint
 
       // Set the child r_in value:
 
-      joint2.physics.r_in.x = 0.0;
-      joint2.physics.r_in.y = 0.0;
-      joint2.physics.r_in.z = 0.0;
+      joint2.physics.r_in.setX(0.0);
+      joint2.physics.r_in.setY(0.0);
+      joint2.physics.r_in.setZ(0.0);
    }
 
 

@@ -24,21 +24,21 @@ import java.io.Serializable;
 import java.util.Random;
 
 /**
- * 
+ *
  * This class creates a 4x4 affine, rigid body transformation matrix. The top
  * left 3x3 is an orthogonal rotation matrix, while the top right 3x1 is a vector
- * describing a translation. 
- * 
- * T = | xx yx zx px | 
- *     | xy yy zy py |  
- *     | xz yz zz pz |  
+ * describing a translation.
+ *
+ * T = | xx yx zx px |
+ *     | xy yy zy py |
+ *     | xz yz zz pz |
  *     | 0 0 0 1 |
  */
 
 public class RigidBodyTransform implements Serializable
 {
    private static final long serialVersionUID = 1915106568805908193L;
-   
+
    public double mat00 = 1.0;
    public double mat01 = 0.0;
    public double mat02 = 0.0;
@@ -71,7 +71,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create transformation matrix from Matrix4d
-    * 
+    *
     * @param mat4d
     */
    public RigidBodyTransform(Matrix4d matrix)
@@ -81,7 +81,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create transformation matrix from Matrix4f
-    * 
+    *
     * @param mat4d
     */
    public RigidBodyTransform(Matrix4f matrix)
@@ -91,7 +91,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create transform from 1D array of doubles.
-    * 
+    *
     * @param doubleArray
     */
    public RigidBodyTransform(double[] doubleArray)
@@ -101,7 +101,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create transform from 1D array of floats.
-    * 
+    *
     * @param floatArray
     */
    public RigidBodyTransform(float[] floatArray)
@@ -111,7 +111,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create transform from 4x4 DenseMatrix64F
-    * 
+    *
     * @param matrix
     */
    public RigidBodyTransform(DenseMatrix64F matrix)
@@ -122,7 +122,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Create 4x4 RigidBodyTransform from rotation matrix of type DenseMatrix64F and
     * translational vector of type Vector3d
-    * 
+    *
     * @param matrix
     * @param vector
     */
@@ -137,7 +137,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create transformation matrix from rotation matrix and vector translation
-    * 
+    *
     * @param matrix
     * @param vector
     */
@@ -148,7 +148,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create transformation matrix from rotation matrix and vector translation
-    * 
+    *
     * @param matrix
     * @param vector
     */
@@ -160,7 +160,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Create RigidBodyTransform from quaternion describing a rotation and vector
     * describing a translation.
-    * 
+    *
     * @param quat
     * @param vector
     */
@@ -172,7 +172,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Create RigidBodyTransform from quaternion describing a rotation and vector
     * describing a translation.
-    * 
+    *
     * @param quat
     * @param vector
     */
@@ -183,7 +183,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create RigidBodyTransform from AxisAngle4d and Vector3d
-    * 
+    *
     * @param axisAngle
     * @param vector
     */
@@ -194,7 +194,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Create RigidBodyTransform from AxisAngle4d and Vector3d
-    * 
+    *
     * @param axisAngle
     * @param vector
     */
@@ -213,25 +213,25 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Convert AxisAngle representation to rotation matrix and store as 
+    * Convert AxisAngle representation to rotation matrix and store as
     * rotational component of this transform.
-    * 
+    *
     * @param axisAngle
     */
    public void setRotation(AxisAngle4d axisAngle)
    {
-      setRotationWithAxisAngle(axisAngle.x, axisAngle.y, axisAngle.z, axisAngle.angle);
+      setRotationWithAxisAngle(axisAngle.getX(), axisAngle.getY(), axisAngle.getZ(), axisAngle.getAngle());
    }
 
    /**
-    * Convert AxisAngle representation to rotation matrix and store as 
+    * Convert AxisAngle representation to rotation matrix and store as
     * rotational component of this transform.
-    * 
+    *
     * @param axisAngle
     */
    public void setRotation(AxisAngle4f axisAngle)
    {
-      setRotationWithAxisAngle(axisAngle.x, axisAngle.y, axisAngle.z, axisAngle.angle);
+      setRotationWithAxisAngle(axisAngle.getX(), axisAngle.getY(), axisAngle.getZ(), axisAngle.getAngle());
    }
 
    private void setRotationWithAxisAngle(double axisAngleX, double axisAngleY, double axisAngleZ, double axisAngleTheta)
@@ -272,27 +272,27 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Convert quaternion to rotation matrix and store as rotational 
+    * Convert quaternion to rotation matrix and store as rotational
     * component of this transform.
-    * 
+    *
     * @param quat
     */
    public void setRotation(Quat4d quat)
    {
-      setRotationWithQuaternion(quat.x, quat.y, quat.z, quat.w);
+      setRotationWithQuaternion(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
    }
 
    /**
-    * Convert quaternion to rotation matrix and store as rotational 
+    * Convert quaternion to rotation matrix and store as rotational
     * component of this transform.
-    * 
+    *
     * @param quat
     */
    public void setRotation(Quat4f quat)
    {
-      setRotationWithQuaternion(quat.x, quat.y, quat.z, quat.w);
+      setRotationWithQuaternion(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
    }
-   
+
    public void setRotationWithQuaternion(double qx, double qy, double qz, double qw)
    {
       double yy2 = 2.0 * qy * qy;
@@ -318,44 +318,44 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set the 3x3 rotation matrix equal to mat3d.
-    * 
+    *
     * @param matrix
     */
    public void setRotation(Matrix3d matrix)
    {
-      mat00 = matrix.m00;
-      mat01 = matrix.m01;
-      mat02 = matrix.m02;
-      mat10 = matrix.m10;
-      mat11 = matrix.m11;
-      mat12 = matrix.m12;
-      mat20 = matrix.m20;
-      mat21 = matrix.m21;
-      mat22 = matrix.m22;
+      mat00 = matrix.getM00();
+      mat01 = matrix.getM01();
+      mat02 = matrix.getM02();
+      mat10 = matrix.getM10();
+      mat11 = matrix.getM11();
+      mat12 = matrix.getM12();
+      mat20 = matrix.getM20();
+      mat21 = matrix.getM21();
+      mat22 = matrix.getM22();
    }
 
    /**
     * Set the 3x3 rotation matrix equal to mat3f.
-    * 
+    *
     * @param mat3d
     */
    public void setRotation(Matrix3f matrix)
    {
-      mat00 = matrix.m00;
-      mat01 = matrix.m01;
-      mat02 = matrix.m02;
-      mat10 = matrix.m10;
-      mat11 = matrix.m11;
-      mat12 = matrix.m12;
-      mat20 = matrix.m20;
-      mat21 = matrix.m21;
-      mat22 = matrix.m22;
+      mat00 = matrix.getM00();
+      mat01 = matrix.getM01();
+      mat02 = matrix.getM02();
+      mat10 = matrix.getM10();
+      mat11 = matrix.getM11();
+      mat12 = matrix.getM12();
+      mat20 = matrix.getM20();
+      mat21 = matrix.getM21();
+      mat22 = matrix.getM22();
    }
 
    /**
     * Sets rotation portion equal to the rotation matrix described in the
     * parameter matrix.
-    * 
+    *
     * @param matrix
     */
    public void setRotation(DenseMatrix64F matrix)
@@ -377,12 +377,12 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set translational portion of the transformation matrix
-    * 
+    *
     * @param vector
     */
    public final void setTranslation(Vector3d vector)
    {
-      setTranslation(vector.x, vector.y, vector.z);
+      setTranslation(vector.getX(), vector.getY(), vector.getZ());
    }
 
    public void setTranslation(double x, double y, double z)
@@ -391,10 +391,10 @@ public class RigidBodyTransform implements Serializable
       mat13 = y;
       mat23 = z;
    }
-   
+
    /**
    *  Add a translation to the current transform. It is equivalent to:
-   *  
+   *
    *      transform.setTranslationAndIdentityRotation(translation);
    *      this = this*transform
    */
@@ -402,54 +402,54 @@ public class RigidBodyTransform implements Serializable
    {
       Point3d temp = new Point3d(translation);
       transform(temp);
-      mat03 = temp.x;
-      mat13 = temp.y;
-      mat23 = temp.z;
+      mat03 = temp.getX();
+      mat13 = temp.getY();
+      mat23 = temp.getZ();
    }
-   
+
    /**
-   *  Add a rotation to the current transform. 
+   *  Add a rotation to the current transform.
    */
    public final void applyRotationX(double angle)
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      temp.rotX(angle);    
+      temp.setRotationRollAndZeroTranslation(angle);
       multiply(temp);
    }
-   
+
    /**
-   *  Add a rotation to the current transform. 
+   *  Add a rotation to the current transform.
    */
    public final void applyRotationY(double angle)
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      temp.rotY(angle);   
+      temp.setRotationPitchAndZeroTranslation(angle);
       multiply(temp);
    }
-   
+
    /**
-   *  Add a rotation to the current transform. 
+   *  Add a rotation to the current transform.
    */
    public final void applyRotationZ(double angle)
    {
       RigidBodyTransform temp = new RigidBodyTransform();
-      temp.rotZ(angle);    
+      temp.setRotationYawAndZeroTranslation(angle);
       multiply(temp);
    }
-   
+
    /**
     * Set translational portion of the transformation matrix
-    * 
+    *
     * @param vec3d
     */
    public final void setTranslation(Vector3f vector)
    {
-      setTranslation(vector.x, vector.y, vector.z);
+      setTranslation(vector.getX(), vector.getY(), vector.getZ());
    }
 
    /**
     * Set elements of this transform equal to the elements of transform.
-    * 
+    *
     * @param transform
     */
    public final void set(RigidBodyTransform transform)
@@ -471,7 +471,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Set this transform to have zero translation and a rotation equal to the
     * Matrix3d matrix.
-    * 
+    *
     * @param matrix
     */
    public final void setRotationAndZeroTranslation(Matrix3d matrix)
@@ -481,21 +481,21 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Set this transform to have translation described in vector 
+    * Set this transform to have translation described in vector
     * and a rotation equal to the Matrix3d matrix.
-    * 
+    *
     * @param matrix
     */
    public final void set(Matrix3d matrix, Vector3d vector)
    {
       setRotation(matrix);
-      setTranslation(vector.x, vector.y, vector.z);
+      setTranslation(vector.getX(), vector.getY(), vector.getZ());
    }
 
    /**
     * Set this transform to have zero translation and a rotation equal to the
     * Quat4d quat.
-    * 
+    *
     * @param quat
     */
    public final void setRotationAndZeroTranslation(Quat4d quat)
@@ -507,7 +507,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Set this transform to have translation described in vector and a rotation
     * equal to the Quat4d quat.
-    * 
+    *
     * @param quat
     */
    public final void set(Quat4d quat, Vector3d vector)
@@ -519,7 +519,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Sets this transform to have rotation described by axisAngle and zero
     * translation.
-    * 
+    *
     * @param axisAngle
     */
    public final void setRotationAndZeroTranslation(AxisAngle4d axisAngle)
@@ -529,21 +529,21 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Sets this transform to have rotation described by axisAngle and 
+    * Sets this transform to have rotation described by axisAngle and
     * translation described in the Vector3d argument vector.
-    * 
+    *
     * @param axisAngle
     */
    public final void set(AxisAngle4d axisAngle, Vector3d vector)
    {
       setRotation(axisAngle);
-      setTranslation(vector.x, vector.y, vector.z);
+      setTranslation(vector.getX(), vector.getY(), vector.getZ());
    }
 
    /**
     * Sets this transform to have rotation described by axisAngle and zero
     * translation.
-    * 
+    *
     * @param axisAngle
     */
    public final void setRotationAndZeroTranslation(AxisAngle4f axisAngle)
@@ -553,21 +553,21 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Sets this transform to have rotation described by axisAngle and 
+    * Sets this transform to have rotation described by axisAngle and
     * translation described by the Vector3f vector.
-    * 
+    *
     * @param axisAngle
     */
    public final void set(AxisAngle4f axisAngle, Vector3f vector)
    {
       setRotation(axisAngle);
-      setTranslation(vector.x, vector.y, vector.z);
+      setTranslation(vector.getX(), vector.getY(), vector.getZ());
    }
 
    /**
     * Set this transform to have zero translation and a rotation equal to the
     * Quat4f quat.
-    * 
+    *
     * @param quat
     */
    public final void setRotationAndZeroTranslation(Quat4f quat)
@@ -587,7 +587,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Set this transform to have translation described in vector and a rotation
     * equal to the Quat4f quat.
-    * 
+    *
     * @param quat
     */
    public final void set(Quat4f quat, Vector3f vector)
@@ -599,7 +599,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Set this transform to have zero translation and a rotation equal to the
     * Matrix3f matrix.
-    * 
+    *
     * @param matrix
     */
    public final void setRotationAndZeroTranslation(Matrix3f matrix)
@@ -611,7 +611,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Set this transform to have zero translation and a rotation equal to the
     * Matrix3f matrix.
-    * 
+    *
     * @param matrix
     */
    public final void set(Matrix3f matrix, Vector3f vector)
@@ -623,12 +623,32 @@ public class RigidBodyTransform implements Serializable
    /**
     * Set this transform to have an identity rotation and a translation given
     * by the Vector3d vector.
-    * 
+    *
     * @param vector
     */
    public final void setTranslationAndIdentityRotation(Vector3d vector)
    {
-      setTranslation(vector.x, vector.y, vector.z);
+      setTranslation(vector.getX(), vector.getY(), vector.getZ());
+      mat00 = 1.0;
+      mat01 = 0.0;
+      mat02 = 0.0;
+      mat10 = 0.0;
+      mat11 = 1.0;
+      mat12 = 0.0;
+      mat20 = 0.0;
+      mat21 = 0.0;
+      mat22 = 1.0;
+   }
+
+   /**
+    * Set this transform to have an identity rotation and a translation given
+    * by the x, y, z elements.
+    *
+    * @param vector
+    */
+   public final void setTranslationAndIdentityRotation(double x, double y, double z)
+   {
+      setTranslation(x, y, z);
       mat00 = 1.0;
       mat01 = 0.0;
       mat02 = 0.0;
@@ -642,7 +662,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Sets rotation to the identity, does not effect the translational component of the Transform
-    * 
+    *
     * @param vector
     */
    public final void setRotationToIdentity()
@@ -661,12 +681,12 @@ public class RigidBodyTransform implements Serializable
    /**
     * Set this transform to have an identity rotation and a translation given
     * by the Vector3d vector.
-    * 
+    *
     * @param vector
     */
    public final void setTranslationAndIdentityRotation(Vector3f vector)
    {
-      setTranslation(vector.x, vector.y, vector.z);
+      setTranslation(vector.getX(), vector.getY(), vector.getZ());
       mat00 = 1.0;
       mat01 = 0.0;
       mat02 = 0.0;
@@ -680,7 +700,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set elements of this transform equal to the elements of matrix.
-    * 
+    *
     * @param matrix
     */
    public final void set(DenseMatrix64F matrix)
@@ -706,7 +726,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set elements of this transform equal to the elements of matrix.
-    * 
+    *
     * @param matrix
     */
    public final void set(DenseMatrix64F matrix, Vector3d vector)
@@ -717,13 +737,13 @@ public class RigidBodyTransform implements Serializable
       }
 
       setRotation(matrix);
-      setTranslation(vector.x, vector.y, vector.z);
+      setTranslation(vector.getX(), vector.getY(), vector.getZ());
    }
 
    /**
     * Sets the elements of this transform to the elements of the transform in
     * doubleArray.
-    * 
+    *
     * @param doubleArray
     */
    public final void set(double[] doubleArray)
@@ -745,7 +765,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Sets the elements of this transform to the elements of the transform in
     * floatArray.
-    * 
+    *
     * @param floatArray
     */
    public final void set(float[] floatArray)
@@ -765,11 +785,11 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Sets the elements of this tranform equal to that of the 
-    * transpose of floatArray. This is useful for setting a 
-    * transform from a column-major floatArray describing a 
+    * Sets the elements of this tranform equal to that of the
+    * transpose of floatArray. This is useful for setting a
+    * transform from a column-major floatArray describing a
     * transform.
-    * 
+    *
     * @param floatArray
     */
    public final void setAsTranspose(float[] floatArray)
@@ -798,46 +818,46 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set elements of transform equal to elements of the Matrix4d.
-    * 
+    *
     * @param matrix
     */
    public final void set(Matrix4d matrix)
    {
-      mat00 = matrix.m00;
-      mat01 = matrix.m01;
-      mat02 = matrix.m02;
-      mat03 = matrix.m03;
-      mat10 = matrix.m10;
-      mat11 = matrix.m11;
-      mat12 = matrix.m12;
-      mat13 = matrix.m13;
-      mat20 = matrix.m20;
-      mat21 = matrix.m21;
-      mat22 = matrix.m22;
-      mat23 = matrix.m23;
+      mat00 = matrix.getM00();
+      mat01 = matrix.getM01();
+      mat02 = matrix.getM02();
+      mat03 = matrix.getM03();
+      mat10 = matrix.getM10();
+      mat11 = matrix.getM11();
+      mat12 = matrix.getM12();
+      mat13 = matrix.getM13();
+      mat20 = matrix.getM20();
+      mat21 = matrix.getM21();
+      mat22 = matrix.getM22();
+      mat23 = matrix.getM23();
    }
 
    /**
     * This method is for when the Matrix4d matrix is column major and needs to
     * be transposed.
-    * 
+    *
     * @param matrix
     */
    public void setAsTranspose(Matrix4d matrix)
    {
-      double tmp10 = matrix.m10;
-      double tmp20 = matrix.m20;
-      double tmp21 = matrix.m21;
-      double tmp30 = matrix.m30;
-      double tmp31 = matrix.m31;
-      double tmp32 = matrix.m32;
+      double tmp10 = matrix.getM10();
+      double tmp20 = matrix.getM20();
+      double tmp21 = matrix.getM21();
+      double tmp30 = matrix.getM30();
+      double tmp31 = matrix.getM31();
+      double tmp32 = matrix.getM32();
 
-      mat00 = matrix.m00;
-      mat11 = matrix.m11;
-      mat22 = matrix.m22;
-      mat10 = matrix.m01;
-      mat20 = matrix.m02;
-      mat21 = matrix.m12;
+      mat00 = matrix.getM00();
+      mat11 = matrix.getM11();
+      mat22 = matrix.getM22();
+      mat10 = matrix.getM01();
+      mat20 = matrix.getM02();
+      mat21 = matrix.getM12();
       mat01 = tmp10;
       mat03 = tmp30;
       mat13 = tmp31;
@@ -849,24 +869,24 @@ public class RigidBodyTransform implements Serializable
    /**
     * This method is for when the Matrix4d matrix is column major and needs to
     * be transposed.
-    * 
+    *
     * @param matrix
     */
    public void setAsTranspose(Matrix4f matrix)
    {
-      double tmp10 = matrix.m10;
-      double tmp20 = matrix.m20;
-      double tmp21 = matrix.m21;
-      double tmp30 = matrix.m30;
-      double tmp31 = matrix.m31;
-      double tmp32 = matrix.m32;
+      double tmp10 = matrix.getM10();
+      double tmp20 = matrix.getM20();
+      double tmp21 = matrix.getM21();
+      double tmp30 = matrix.getM30();
+      double tmp31 = matrix.getM31();
+      double tmp32 = matrix.getM32();
 
-      mat00 = matrix.m00;
-      mat11 = matrix.m11;
-      mat22 = matrix.m22;
-      mat10 = matrix.m01;
-      mat20 = matrix.m02;
-      mat21 = matrix.m12;
+      mat00 = matrix.getM00();
+      mat11 = matrix.getM11();
+      mat22 = matrix.getM22();
+      mat10 = matrix.getM01();
+      mat20 = matrix.getM02();
+      mat21 = matrix.getM12();
       mat01 = tmp10;
       mat03 = tmp30;
       mat13 = tmp31;
@@ -877,23 +897,23 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Set elements of transform equal to elements of the Matrix4d matrix.
-    * 
+    *
     * @param mat4d
     */
    public final void set(Matrix4f matrix)
    {
-      mat00 = matrix.m00;
-      mat01 = matrix.m01;
-      mat02 = matrix.m02;
-      mat03 = matrix.m03;
-      mat10 = matrix.m10;
-      mat11 = matrix.m11;
-      mat12 = matrix.m12;
-      mat13 = matrix.m13;
-      mat20 = matrix.m20;
-      mat21 = matrix.m21;
-      mat22 = matrix.m22;
-      mat23 = matrix.m23;
+      mat00 = matrix.getM00();
+      mat01 = matrix.getM01();
+      mat02 = matrix.getM02();
+      mat03 = matrix.getM03();
+      mat10 = matrix.getM10();
+      mat11 = matrix.getM11();
+      mat12 = matrix.getM12();
+      mat13 = matrix.getM13();
+      mat20 = matrix.getM20();
+      mat21 = matrix.getM21();
+      mat22 = matrix.getM22();
+      mat23 = matrix.getM23();
    }
 
    /**
@@ -917,18 +937,34 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
+    * @deprecated use {@link #setRotationEulerAndZeroTranslation(Vector3d)} instead.
+    * @param vector
+    */
+   public final void setEuler(Vector3d vector)
+   {
+      setRotationEulerAndZeroTranslation(vector);
+   }
+   /**
     * Set the rotational component of the transform to the rotation matrix
     * created given an X-Y-Z rotation described by the angles in vector which
     * describe angles of rotation about the X, Y, and Z axis, respectively. The
     * orientation of each rotation is not effected by any of the other
     * rotations. This method sets the translational component of this
     * transform3d to zeros.
-    * 
+    *
     * @param vector
     */
-   public final void setEuler(Vector3d vector)
+   public final void setRotationEulerAndZeroTranslation(Vector3d vector)
    {
-      setEuler(vector.x, vector.y, vector.z);
+      setRotationEulerAndZeroTranslation(vector.getX(), vector.getY(), vector.getZ());
+   }
+
+   /**
+    * @deprecated Use {@link #setRotationEulerAndZeroTranslation(double, double, double)} instead.
+    */
+   public final void setEuler(double rotX, double rotY, double rotZ)
+   {
+      setRotationEulerAndZeroTranslation(rotX, rotY, rotZ);
    }
 
    /**
@@ -938,12 +974,12 @@ public class RigidBodyTransform implements Serializable
     * orientation of each rotation is not effected by any of the other
     * rotations. This method sets the translational component of this
     * transform3d to zeros.
-    * 
+    *
     * @param rotX
     * @param rotY
     * @param rotZ
     */
-   public final void setEuler(double rotX, double rotY, double rotZ)
+   public final void setRotationEulerAndZeroTranslation(double rotX, double rotY, double rotZ)
    {
       double sina = Math.sin(rotX);
       double sinb = Math.sin(rotY);
@@ -967,59 +1003,67 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
+    * @deprecated use {@link #getRotationEuler(Vector3d)} instead.
+    */
+   public void getEulerXYZ(Vector3d vector)
+   {
+      getRotationEuler(vector);
+   }
+
+   /**
     * Computes the RPY angles from the rotation matrix for rotations about the
     * X, Y, and Z axes respectively. Note that this method is here for the
     * purpose of unit testing the method setEuler. This particular solution is
     * only valid for -pi/2 < vector.y < pi/2 and for vector.y != 0.
-    * 
+    *
     * @param vector
     */
-   public void getEulerXYZ(Vector3d vector)
+   public void getRotationEuler(Vector3d vector)
    {
-      vector.x = Math.atan2(mat21, mat22);
-      vector.y = Math.atan2(-mat20, Math.sqrt(mat21 * mat21 + mat22 * mat22));
-      vector.z = Math.atan2(mat10, mat00);
+      vector.setX(Math.atan2(mat21, mat22));
+      vector.setY(Math.atan2(-mat20, Math.sqrt(mat21 * mat21 + mat22 * mat22)));
+      vector.setZ(Math.atan2(mat10, mat00));
    }
 
    /**
     * Return rotation matrix of type Matrix3d
-    * 
+    *
     * @param matrix
     */
    public void getRotation(Matrix3d matrix)
    {
-      matrix.m00 = mat00;
-      matrix.m01 = mat01;
-      matrix.m02 = mat02;
-      matrix.m10 = mat10;
-      matrix.m11 = mat11;
-      matrix.m12 = mat12;
-      matrix.m20 = mat20;
-      matrix.m21 = mat21;
-      matrix.m22 = mat22;
+      matrix.setM00(mat00);
+      matrix.setM01(mat01);
+      matrix.setM02(mat02);
+      matrix.setM10(mat10);
+      matrix.setM11(mat11);
+      matrix.setM12(mat12);
+      matrix.setM20(mat20);
+      matrix.setM21(mat21);
+      matrix.setM22(mat22);
    }
 
    /**
     * Return rotation matrix of type Matrix3f
-    * 
+    *
     * @param matrix
     */
    public void getRotation(Matrix3f matrix)
    {
-      matrix.m00 = (float) mat00;
-      matrix.m01 = (float) mat01;
-      matrix.m02 = (float) mat02;
-      matrix.m10 = (float) mat10;
-      matrix.m11 = (float) mat11;
-      matrix.m12 = (float) mat12;
-      matrix.m20 = (float) mat20;
-      matrix.m21 = (float) mat21;
-      matrix.m22 = (float) mat22;
+      matrix.setM00((float) mat00);
+      matrix.setM01((float) mat01);
+      matrix.setM02((float) mat02);
+      matrix.setM10((float) mat10);
+      matrix.setM11((float) mat11);
+      matrix.setM12((float) mat12);
+      matrix.setM20((float) mat20);
+      matrix.setM21((float) mat21);
+      matrix.setM22((float) mat22);
    }
 
    /**
     * Return rotation matrix of type DenseMatrix64F
-    * 
+    *
     * @param matrix
     */
    public void getRotation(DenseMatrix64F matrix)
@@ -1037,7 +1081,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return rotation in quaternion form.
-    * 
+    *
     * @param quat
     */
    public void getRotation(Quat4d quat)
@@ -1048,44 +1092,44 @@ public class RigidBodyTransform implements Serializable
       if (trace > 0.0)
       {
          val = Math.sqrt(trace + 1.0) * 2.0;
-         quat.x = (mat21 - mat12) / val;
-         quat.y = (mat02 - mat20) / val;
-         quat.z = (mat10 - mat01) / val;
-         quat.w = 0.25 * val;
+         quat.setX((mat21 - mat12) / val);
+         quat.setY((mat02 - mat20) / val);
+         quat.setZ((mat10 - mat01) / val);
+         quat.setW(0.25 * val);
       }
       else if (mat11 > mat22)
       {
          double temp = Math.max(0.0, 1.0 + mat11 - mat00 - mat22);
          val = Math.sqrt(temp) * 2.0;
-         quat.x = (mat01 + mat10) / val;
-         quat.y = 0.25 * val;
-         quat.z = (mat12 + mat21) / val;
-         quat.w = (mat02 - mat20) / val;
+         quat.setX((mat01 + mat10) / val);
+         quat.setY(0.25 * val);
+         quat.setZ((mat12 + mat21) / val);
+         quat.setW((mat02 - mat20) / val);
       }
       else if ((mat00 > mat11) && (mat00 > mat22))
       {
          val = Math.sqrt(1.0 + mat00 - mat11 - mat22) * 2.0;
-         quat.x = 0.25 * val;
-         quat.y = (mat01 + mat10) / val;
-         quat.z = (mat02 + mat20) / val;
-         quat.w = (mat21 - mat12) / val;
+         quat.setX(0.25 * val);
+         quat.setY((mat01 + mat10) / val);
+         quat.setZ((mat02 + mat20) / val);
+         quat.setW((mat21 - mat12) / val);
       }
       else
       {
          val = Math.sqrt(1.0 + mat22 - mat00 - mat11) * 2.0;
-         quat.x = (mat02 + mat20) / val;
-         quat.y = (mat12 + mat21) / val;
-         quat.z = 0.25 * val;
-         quat.w = (mat10 - mat01) / val;
+         quat.setX((mat02 + mat20) / val);
+         quat.setY((mat12 + mat21) / val);
+         quat.setZ(0.25 * val);
+         quat.setW((mat10 - mat01) / val);
       }
       /* Other implementation. Already tested.
-       * 
+       *
       double q0,q1,q2,q3;
       q0 = ( mat00 + mat11 + mat22 + 1.0) / 4.0;
       q1 = ( mat00 - mat11 - mat22 + 1.0) / 4.0;
       q2 = (-mat00 + mat11 - mat22 + 1.0) / 4.0;
       q3 = (-mat00 - mat11 + mat22 + 1.0) / 4.0;
-      
+
       if(q0 < 0.0) q0 = 0.0;
       if(q1 < 0.0) q1 = 0.0;
       if(q2 < 0.0) q2 = 0.0;
@@ -1121,13 +1165,13 @@ public class RigidBodyTransform implements Serializable
       quat.x = q1;
       quat.y = q2;
       quat.z = q3;
-      
+
       quat.normalize();*/
    }
 
    /**
     * Return rotation in quaternion form.
-    * 
+    *
     * @param quat
     */
    public void getRotation(Quat4f quat)
@@ -1137,40 +1181,40 @@ public class RigidBodyTransform implements Serializable
       if (trace > 0.0)
       {
          val = Math.sqrt(trace + 1.0) * 2.0;
-         quat.x = (float) ((mat21 - mat12) / val);
-         quat.y = (float) ((mat02 - mat20) / val);
-         quat.z = (float) ((mat10 - mat01) / val);
-         quat.w = (float) (0.25 * val);
+         quat.setX((float) ((mat21 - mat12) / val));
+         quat.setY((float) ((mat02 - mat20) / val));
+         quat.setZ((float) ((mat10 - mat01) / val));
+         quat.setW((float) (0.25 * val));
       }
       else if (mat11 > mat22)
       {
          val = Math.sqrt(1.0 + mat11 - mat00 - mat22) * 2.0;
-         quat.x = (float) ((mat01 + mat10) / val);
-         quat.y = (float) (0.25 * val);
-         quat.z = (float) ((mat12 + mat21) / val);
-         quat.w = (float) ((mat02 - mat20) / val);
+         quat.setX((float) ((mat01 + mat10) / val));
+         quat.setY((float) (0.25 * val));
+         quat.setZ((float) ((mat12 + mat21) / val));
+         quat.setW((float) ((mat02 - mat20) / val));
       }
       else if ((mat00 > mat11) && (mat00 > mat22))
       {
          val = Math.sqrt(1.0 + mat00 - mat11 - mat22) * 2.0;
-         quat.x = (float) (0.25 * val);
-         quat.y = (float) ((mat01 + mat10) / val);
-         quat.z = (float) ((mat02 + mat20) / val);
-         quat.w = (float) ((mat21 - mat12) / val);
+         quat.setX((float) (0.25 * val));
+         quat.setY((float) ((mat01 + mat10) / val));
+         quat.setZ((float) ((mat02 + mat20) / val));
+         quat.setW((float) ((mat21 - mat12) / val));
       }
       else
       {
          val = Math.sqrt(1.0 + mat22 - mat00 - mat11) * 2.0;
-         quat.x = (float) ((mat02 + mat20) / val);
-         quat.y = (float) ((mat12 + mat21) / val);
-         quat.z = (float) (0.25 * val);
-         quat.w = (float) ((mat10 - mat01) / val);
+         quat.setX((float) ((mat02 + mat20) / val));
+         quat.setY((float) ((mat12 + mat21) / val));
+         quat.setZ((float) (0.25 * val));
+         quat.setW((float) ((mat10 - mat01) / val));
       }
    }
 
    /**
     * Return rotation in AxisAngle form.
-    * 
+    *
     * @param axisAngle
     */
    public void getRotation(AxisAngle4d axisAngle)
@@ -1180,10 +1224,10 @@ public class RigidBodyTransform implements Serializable
 
    public void getRotation(AxisAngle4d axisAngle, double epsilon)
    {
-      axisAngle.x = mat21 - mat12;
-      axisAngle.y = mat02 - mat20;
-      axisAngle.z = mat10 - mat01;
-      double mag = axisAngle.x * axisAngle.x + axisAngle.y * axisAngle.y + axisAngle.z * axisAngle.z;
+      axisAngle.setX(mat21 - mat12);
+      axisAngle.setY(mat02 - mat20);
+      axisAngle.setZ(mat10 - mat01);
+      double mag = axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ();
 
       if (mag > epsilon)
       {
@@ -1191,12 +1235,12 @@ public class RigidBodyTransform implements Serializable
          double sin = 0.5 * mag;
          double cos = 0.5 * (mat00 + mat11 + mat22 - 1.0);
 
-         axisAngle.angle = Math.atan2(sin, cos);
+         axisAngle.setAngle(Math.atan2(sin, cos));
 
          double invMag = 1.0 / mag;
-         axisAngle.x = axisAngle.x * invMag;
-         axisAngle.y = axisAngle.y * invMag;
-         axisAngle.z = axisAngle.z * invMag;
+         axisAngle.setX(axisAngle.getX() * invMag);
+         axisAngle.setY(axisAngle.getY() * invMag);
+         axisAngle.setZ(axisAngle.getZ() * invMag);
       }
       else
       {
@@ -1207,7 +1251,7 @@ public class RigidBodyTransform implements Serializable
          }
          else
          {
-            axisAngle.angle = Math.PI;
+            axisAngle.setAngle(Math.PI);
 
             double xx = (mat00 + 1.0) / 2.0;
             double yy = (mat11 + 1.0) / 2.0;
@@ -1221,73 +1265,73 @@ public class RigidBodyTransform implements Serializable
             { // mat00 is the largest diagonal term
                if (xx < epsilon)
                {
-                  axisAngle.x = 0.0;
-                  axisAngle.y = cos45;
-                  axisAngle.z = cos45;
+                  axisAngle.setX(0.0);
+                  axisAngle.setY(cos45);
+                  axisAngle.setZ(cos45);
                }
                else
                {
-                  axisAngle.x = Math.sqrt(xx);
-                  axisAngle.y = xy / axisAngle.x;
-                  axisAngle.z = xz / axisAngle.x;
+                  axisAngle.setX(Math.sqrt(xx));
+                  axisAngle.setY(xy / axisAngle.getX());
+                  axisAngle.setZ(xz / axisAngle.getX());
                }
             }
             else if (yy > zz)
             { // mat11 is the largest diagonal term
                if (yy < epsilon)
                {
-                  axisAngle.x = cos45;
-                  axisAngle.y = 0.0;
-                  axisAngle.z = cos45;
+                  axisAngle.setX(cos45);
+                  axisAngle.setY(0.0);
+                  axisAngle.setZ(cos45);
                }
                else
                {
-                  axisAngle.y = Math.sqrt(yy);
-                  axisAngle.x = xy / axisAngle.y;
-                  axisAngle.z = yz / axisAngle.y;
+                  axisAngle.setY(Math.sqrt(yy));
+                  axisAngle.setX(xy / axisAngle.getY());
+                  axisAngle.setZ(yz / axisAngle.getY());
                }
             }
             else
             { // mat22 is the largest diagonal term
                if (zz < epsilon)
                {
-                  axisAngle.x = cos45;
-                  axisAngle.y = cos45;
-                  axisAngle.z = 0.0;
+                  axisAngle.setX(cos45);
+                  axisAngle.setY(cos45);
+                  axisAngle.setZ(0.0);
                }
                else
                {
-                  axisAngle.z = Math.sqrt(zz);
-                  axisAngle.x = xz / axisAngle.z;
-                  axisAngle.y = yz / axisAngle.z;
+                  axisAngle.setZ(Math.sqrt(zz));
+                  axisAngle.setX(xz / axisAngle.getZ());
+                  axisAngle.setY(yz / axisAngle.getZ());
                }
             }
          }
       }
    }
-   
+
    public boolean isRotationMatrixSingular(double epsilon)
    {
       return (Math.abs(mat01 - mat10) < epsilon) && (Math.abs(mat02 - mat20) < epsilon) && (Math.abs(mat12 - mat21) < epsilon);
    }
-   
+
    public boolean isRotationMatrixEpsilonIdentity(double epsilon)
-   {     
+   {
       return (Math.abs(mat01 + mat10) < epsilon) && (Math.abs(mat02 + mat20) < epsilon) && (Math.abs(mat12 + mat21) < epsilon)
             && (Math.abs(mat00 + mat11 + mat22 - 3) < epsilon);
    }
 
    /**
     * Return rotation in AxisAngle form.
-    * 
+    *
     * @param axisAngle
     */
    public void getRotation(AxisAngle4f axisAngle)
    {
-      axisAngle.x = (float) (mat21 - mat12);
-      axisAngle.y = (float) (mat02 - mat20);
-      axisAngle.z = (float) (mat10 - mat01);
-      double mag = axisAngle.x * axisAngle.x + axisAngle.y * axisAngle.y + axisAngle.z * axisAngle.z;
+      axisAngle.setX((float) (mat21 - mat12));
+      axisAngle.setY((float) (mat02 - mat20));
+      axisAngle.setZ((float) (mat10 - mat01));
+      double mag = axisAngle.getX() * axisAngle.getX() + axisAngle.getY() * axisAngle.getY() + axisAngle.getZ() * axisAngle.getZ();
 
       if (mag > 1.0e-12)
       {
@@ -1295,61 +1339,61 @@ public class RigidBodyTransform implements Serializable
          double sin = 0.5 * mag;
          double cos = 0.5 * (mat00 + mat11 + mat22 - 1.0);
 
-         axisAngle.angle = (float) Math.atan2(sin, cos);
+         axisAngle.setAngle((float) Math.atan2(sin, cos));
 
          double invMag = 1.0 / mag;
-         axisAngle.x = (float) (axisAngle.x * invMag);
-         axisAngle.y = (float) (axisAngle.y * invMag);
-         axisAngle.z = (float) (axisAngle.z * invMag);
+         axisAngle.setX((float) (axisAngle.getX() * invMag));
+         axisAngle.setY((float) (axisAngle.getY() * invMag));
+         axisAngle.setZ((float) (axisAngle.getZ() * invMag));
       }
       else
       {
-         axisAngle.x = (float) 0.0;
-         axisAngle.y = (float) 1.0;
-         axisAngle.z = (float) 0.0;
-         axisAngle.angle = (float) 0.0;
+         axisAngle.setX((float) 0.0);
+         axisAngle.setY((float) 1.0);
+         axisAngle.setZ((float) 0.0);
+         axisAngle.setAngle((float) 0.0);
       }
    }
 
    /**
     * Return translational part as Vector3d
-    * 
+    *
     * @param vector
     */
    public final void getTranslation(Vector3d vector)
    {
-      vector.x = mat03;
-      vector.y = mat13;
-      vector.z = mat23;
+      vector.setX(mat03);
+      vector.setY(mat13);
+      vector.setZ(mat23);
    }
 
    /**
     * Return translational part as Vector3f
-    * 
+    *
     * @param vector
     */
    public final void getTranslation(Vector3f vector)
    {
-      vector.x = (float) mat03;
-      vector.y = (float) mat13;
-      vector.z = (float) mat23;
+      vector.setX((float) mat03);
+      vector.setY((float) mat13);
+      vector.setZ((float) mat23);
    }
-   
+
    /**
     * Return translational part as Point3d
-    * 
+    *
     * @param point
     */
    public final void getTranslation(Point3d point)
    {
-      point.x = mat03;
-      point.y = mat13;
-      point.z = mat23;
+      point.setX(mat03);
+      point.setY(mat13);
+      point.setZ(mat23);
    }
 
    /**
     * Return RigidBodyTransform as array of doubles
-    * 
+    *
     * @param ret
     */
    public final void get(double[] ret)
@@ -1374,7 +1418,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return RigidBodyTransform as array of floats
-    * 
+    *
     * @param ret
     */
    public final void get(float[] ret)
@@ -1399,57 +1443,57 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Return Transform as Matrix4d type.
-    * 
+    *
     * @param ret
     */
    public final void get(Matrix4d ret)
    {
-      ret.m00 = mat00;
-      ret.m01 = mat01;
-      ret.m02 = mat02;
-      ret.m03 = mat03;
-      ret.m10 = mat10;
-      ret.m11 = mat11;
-      ret.m12 = mat12;
-      ret.m13 = mat13;
-      ret.m20 = mat20;
-      ret.m21 = mat21;
-      ret.m22 = mat22;
-      ret.m23 = mat23;
-      ret.m30 = 0.0;
-      ret.m31 = 0.0;
-      ret.m32 = 0.0;
-      ret.m33 = 1.0;
+      ret.setM00(mat00);
+      ret.setM01(mat01);
+      ret.setM02(mat02);
+      ret.setM03(mat03);
+      ret.setM10(mat10);
+      ret.setM11(mat11);
+      ret.setM12(mat12);
+      ret.setM13(mat13);
+      ret.setM20(mat20);
+      ret.setM21(mat21);
+      ret.setM22(mat22);
+      ret.setM23(mat23);
+      ret.setM30(0.0);
+      ret.setM31(0.0);
+      ret.setM32(0.0);
+      ret.setM33(1.0);
    }
 
    /**
     * Pack transform into Matrix4f
-    * 
+    *
     * @param ret
     */
    public final void get(Matrix4f ret)
    {
-      ret.m00 = (float) mat00;
-      ret.m01 = (float) mat01;
-      ret.m02 = (float) mat02;
-      ret.m03 = (float) mat03;
-      ret.m10 = (float) mat10;
-      ret.m11 = (float) mat11;
-      ret.m12 = (float) mat12;
-      ret.m13 = (float) mat13;
-      ret.m20 = (float) mat20;
-      ret.m21 = (float) mat21;
-      ret.m22 = (float) mat22;
-      ret.m23 = (float) mat23;
-      ret.m30 = 0.0f;
-      ret.m31 = 0.0f;
-      ret.m32 = 0.0f;
-      ret.m33 = 1.0f;
+      ret.setM00((float) mat00);
+      ret.setM01((float) mat01);
+      ret.setM02((float) mat02);
+      ret.setM03((float) mat03);
+      ret.setM10((float) mat10);
+      ret.setM11((float) mat11);
+      ret.setM12((float) mat12);
+      ret.setM13((float) mat13);
+      ret.setM20((float) mat20);
+      ret.setM21((float) mat21);
+      ret.setM22((float) mat22);
+      ret.setM23((float) mat23);
+      ret.setM30(0.0f);
+      ret.setM31(0.0f);
+      ret.setM32(0.0f);
+      ret.setM33(1.0f);
    }
 
    /**
     * Pack transform into DenseMatrix64F
-    * 
+    *
     * @param ret
     */
    public final void get(DenseMatrix64F ret)
@@ -1479,7 +1523,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Pack rotation part into Matrix3d and translation part into Vector3d
-    * 
+    *
     * @param matrix
     * @param vector
     */
@@ -1490,48 +1534,8 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Return rotation portion of this transform.
-    * 
-    * @param matrix
-    */
-   public void get(Matrix3d matrix)
-   {
-      getRotation(matrix);
-   }
-
-   /**
-    * Return rotation portion of this transform.
-    * 
-    * @param matrix
-    */
-   public void get(Matrix3f matrix)
-   {
-      getRotation(matrix);
-   }
-
-   /**
-    * Return translational portion of this transform.
-    * 
-    * @param vector
-    */
-   public final void get(Vector3d vector)
-   {
-      getTranslation(vector);
-   }
-
-   /**
-    * Return translational portion of this transform.
-    * 
-    * @param vector
-    */
-   public final void get(Vector3f vector)
-   {
-      getTranslation(vector);
-   }
-
-   /**
     * Pack rotation part into Matrix3f and translation part into Vector3f
-    * 
+    *
     * @param matrix
     * @param vector
     */
@@ -1544,7 +1548,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Convert and pack rotation part of transform into Quat4d and pack
     * translation into Vector3d.
-    * 
+    *
     * @param quat
     * @param vector
     */
@@ -1553,11 +1557,11 @@ public class RigidBodyTransform implements Serializable
       getRotation(quat);
       getTranslation(vector);
    }
-   
+
    /**
     * Convert and pack rotation part of transform into Quat4d and pack
     * translation into Point3d.
-    * 
+    *
     * @param quat
     * @param point
     */
@@ -1568,31 +1572,9 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Convert and pack rotation part of transform into Quat4d.
-    * 
-    * @param quat
-    * @param vector
-    */
-   public void get(Quat4d quat)
-   {
-      getRotation(quat);
-   }
-
-   /**
-    * Convert and pack rotation part of transform into Quat4f.
-    * 
-    * @param quat
-    * @param vector
-    */
-   public void get(Quat4f quat)
-   {
-      getRotation(quat);
-   }
-
-   /**
     * Convert and pack rotation part of transform into Quat4f and pack
     * translation into Vector3f.
-    * 
+    *
     * @param quat
     * @param vector
     */
@@ -1605,7 +1587,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Multiplies this RigidBodyTransform by transform and stores the result in this,
     * i.e. this = this*transform
-    * 
+    *
     * @param transform
     */
    public final void multiply(RigidBodyTransform transform)
@@ -1616,7 +1598,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Multiplies transform1 and transform2 and puts result into this. this =
     * transform1*transform2
-    * 
+    *
     * @param transform1
     * @param transform2
     */
@@ -1652,8 +1634,8 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Compute the inverse of the RigidBodyTransform passed in as an 
-    * argument exploiting the orthogonality of the rotation matrix 
+    * Compute the inverse of the RigidBodyTransform passed in as an
+    * argument exploiting the orthogonality of the rotation matrix
     * and store the result in this.
     * @param transform
     */
@@ -1695,7 +1677,7 @@ public class RigidBodyTransform implements Serializable
       mat03 = newTransX;
       mat13 = newTransY;
    }
-   
+
    public final void invertRotationButKeepTranslation()
    {
       double tmp01 = mat01;
@@ -1712,12 +1694,21 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Create RigidBodyTransform with zero translation and the rotation matrix being a
-    * rotation about the x-axis by angle.
-    * 
+    * @deprecated use {@link #setRotationRollAndZeroTranslation(double)} instead
     * @param angle
     */
    public void rotX(double angle)
+   {
+      setRotationRollAndZeroTranslation(angle);
+   }
+
+   /**
+    * Create RigidBodyTransform with zero translation and the rotation matrix being a
+    * rotation about the x-axis by angle.
+    *
+    * @param angle
+    */
+   public void setRotationRollAndZeroTranslation(double angle)
    {
       double cosAngle = Math.cos(angle);
       double sinAngle = Math.sin(angle);
@@ -1737,12 +1728,21 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Create RigidBodyTransform with zero translation and the rotation matrix being a
-    * rotation about the y-axis by angle.
-    * 
+    * @deprecated Use {@link #setRotationPitchAndZeroTranslation(double)} instead.
     * @param angle
     */
    public void rotY(double angle)
+   {
+      setRotationPitchAndZeroTranslation(angle);
+   }
+
+   /**
+    * Create RigidBodyTransform with zero translation and the rotation matrix being a
+    * rotation about the y-axis by angle.
+    *
+    * @param angle
+    */
+   public void setRotationPitchAndZeroTranslation(double angle)
    {
       double cosAngle = Math.cos(angle);
       double sinAngle = Math.sin(angle);
@@ -1762,12 +1762,21 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Create RigidBodyTransform with zero translation and the rotation matrix being a
-    * rotation about the z-axis by angle.
-    * 
+    * @deprecated Use {@link #setRotationYawAndZeroTranslation(double)} instead.
     * @param angle
     */
    public void rotZ(double angle)
+   {
+      setRotationYawAndZeroTranslation(angle);
+   }
+
+   /**
+    * Create RigidBodyTransform with zero translation and the rotation matrix being a
+    * rotation about the z-axis by angle.
+    *
+    * @param angle
+    */
+   public void setRotationYawAndZeroTranslation(double angle)
    {
       double cosAngle = Math.cos(angle);
       double sinAngle = Math.sin(angle);
@@ -1789,7 +1798,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Check if the elements of this are within epsilon of the elements of
     * transform.
-    * 
+    *
     * @param transform
     * @param epsilon
     * @return
@@ -1814,7 +1823,7 @@ public class RigidBodyTransform implements Serializable
    /**
     * Returns true if each element of this is equal to each element of
     * transform within a default tolerance of 1e-10.
-    * 
+    *
     * @param transform
     * @return
     */
@@ -1827,9 +1836,9 @@ public class RigidBodyTransform implements Serializable
     * Returns true if the Object o1 is of type Transform3D and all of the data
     * members of o1 are equal to the corresponding data members in this
     * Transform3D.
-    * 
+    *
     * @param o1 the object with which the comparison is made.
-    *            
+    *
     * @return true or false
     */
    @Override
@@ -1841,52 +1850,52 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform vector by multiplying it by this transform and put result back
     * into vector.
-    * 
+    *
     * @param vector
     */
    public final void transform(Vector4d vector)
    {
-      if (vector.w != 1.0)
+      if (vector.getW() != 1.0)
       {
          throw new RuntimeException("Final element of vector must be 1.");
       }
-      double x = mat00 * vector.x + mat01 * vector.y + mat02 * vector.z + mat03;
-      double y = mat10 * vector.x + mat11 * vector.y + mat12 * vector.z + mat13;
-      vector.z = mat20 * vector.x + mat21 * vector.y + mat22 * vector.z + mat23;
-      vector.x = x;
-      vector.y = y;
-      vector.w = 1.0;
+      double x = mat00 * vector.getX() + mat01 * vector.getY() + mat02 * vector.getZ() + mat03;
+      double y = mat10 * vector.getX() + mat11 * vector.getY() + mat12 * vector.getZ() + mat13;
+      vector.setZ(mat20 * vector.getX() + mat21 * vector.getY() + mat22 * vector.getZ() + mat23);
+      vector.setX(x);
+      vector.setY(y);
+      vector.setW(1.0);
    }
 
    /**
     * Transform vector by multiplying it by this transform and put result back
     * into vector.
-    * 
+    *
     * @param vector
     */
    public final void transform(Vector3d vector)
    {
-      double x = mat00 * vector.x + mat01 * vector.y + mat02 * vector.z;
-      double y = mat10 * vector.x + mat11 * vector.y + mat12 * vector.z;
-      vector.z = mat20 * vector.x + mat21 * vector.y + mat22 * vector.z;
+      double x = mat00 * vector.getX() + mat01 * vector.getY() + mat02 * vector.getZ();
+      double y = mat10 * vector.getX() + mat11 * vector.getY() + mat12 * vector.getZ();
+      vector.setZ(mat20 * vector.getX() + mat21 * vector.getY() + mat22 * vector.getZ());
 
-      vector.x = x;
-      vector.y = y;
+      vector.setX(x);
+      vector.setY(y);
    }
 
    /**
     * Transform vector by multiplying it by this transform and put result back
     * into vector.
-    * 
+    *
     * @param vector
     */
    public final void transform(Vector3d vectorIn, Vector3d vectorOut)
    {
       if (vectorIn != vectorOut)
       {
-         vectorOut.x = mat00 * vectorIn.x + mat01 * vectorIn.y + mat02 * vectorIn.z;
-         vectorOut.y = mat10 * vectorIn.x + mat11 * vectorIn.y + mat12 * vectorIn.z;
-         vectorOut.z = mat20 * vectorIn.x + mat21 * vectorIn.y + mat22 * vectorIn.z;
+         vectorOut.setX(mat00 * vectorIn.getX() + mat01 * vectorIn.getY() + mat02 * vectorIn.getZ());
+         vectorOut.setY(mat10 * vectorIn.getX() + mat11 * vectorIn.getY() + mat12 * vectorIn.getZ());
+         vectorOut.setZ(mat20 * vectorIn.getX() + mat21 * vectorIn.getY() + mat22 * vectorIn.getZ());
       }
       else
       {
@@ -1897,55 +1906,55 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform vector by multiplying it by this transform and put result back
     * into vector.
-    * 
+    *
     * @param vector
     */
    public final void transform(Vector4f vector)
    {
-      if (vector.w != 1.0)
+      if (vector.getW() != 1.0)
       {
          throw new RuntimeException("Final element of vector must be 1.");
       }
 
-      double x = mat00 * vector.x + mat01 * vector.y + mat02 * vector.z + mat03;
-      double y = mat10 * vector.x + mat11 * vector.y + mat12 * vector.z + mat13;
-      double z = mat20 * vector.x + mat21 * vector.y + mat22 * vector.z + mat23;
+      double x = mat00 * vector.getX() + mat01 * vector.getY() + mat02 * vector.getZ() + mat03;
+      double y = mat10 * vector.getX() + mat11 * vector.getY() + mat12 * vector.getZ() + mat13;
+      double z = mat20 * vector.getX() + mat21 * vector.getY() + mat22 * vector.getZ() + mat23;
 
-      vector.x = (float) x;
-      vector.y = (float) y;
-      vector.z = (float) z;
-      vector.w = 1.0f;
+      vector.setX((float) x);
+      vector.setY((float) y);
+      vector.setZ((float) z);
+      vector.setW(1.0f);
    }
 
    /**
     * Transform vector by multiplying it by this transform and put result back
     * into vector.
-    * 
+    *
     * @param vector
     */
    public final void transform(Vector3f vector)
    {
-      double x = mat00 * vector.x + mat01 * vector.y + mat02 * vector.z;
-      double y = mat10 * vector.x + mat11 * vector.y + mat12 * vector.z;
-      vector.z = (float) (mat20 * vector.x + mat21 * vector.y + mat22 * vector.z);
+      double x = mat00 * vector.getX() + mat01 * vector.getY() + mat02 * vector.getZ();
+      double y = mat10 * vector.getX() + mat11 * vector.getY() + mat12 * vector.getZ();
+      vector.setZ((float) (mat20 * vector.getX() + mat21 * vector.getY() + mat22 * vector.getZ()));
 
-      vector.x = (float) x;
-      vector.y = (float) y;
+      vector.setX((float) x);
+      vector.setY((float) y);
    }
 
    /**
     * Transform vector by multiplying it by this transform and put result back
     * into vector.
-    * 
+    *
     * @param vector
     */
    public final void transform(Vector3f vectorIn, Vector3f vectorOut)
    {
       if (vectorIn != vectorOut)
       {
-         vectorOut.x = (float) (mat00 * vectorIn.x + mat01 * vectorIn.y + mat02 * vectorIn.z);
-         vectorOut.y = (float) (mat10 * vectorIn.x + mat11 * vectorIn.y + mat12 * vectorIn.z);
-         vectorOut.z = (float) (mat20 * vectorIn.x + mat21 * vectorIn.y + mat22 * vectorIn.z);
+         vectorOut.setX((float) (mat00 * vectorIn.getX() + mat01 * vectorIn.getY() + mat02 * vectorIn.getZ()));
+         vectorOut.setY((float) (mat10 * vectorIn.getX() + mat11 * vectorIn.getY() + mat12 * vectorIn.getZ()));
+         vectorOut.setZ((float) (mat20 * vectorIn.getX() + mat21 * vectorIn.getY() + mat22 * vectorIn.getZ()));
       }
       else
       {
@@ -1955,7 +1964,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Transform vectorIn using this transform and store result in vectorOut.
-    * 
+    *
     * @param vectorIn
     * @param vectorOut
     */
@@ -1963,10 +1972,10 @@ public class RigidBodyTransform implements Serializable
    {
       if (vectorIn != vectorOut)
       {
-         vectorOut.x = mat00 * vectorIn.x + mat01 * vectorIn.y + mat02 * vectorIn.z + mat03;
-         vectorOut.y = mat10 * vectorIn.x + mat11 * vectorIn.y + mat12 * vectorIn.z + mat13;
-         vectorOut.z = mat20 * vectorIn.x + mat21 * vectorIn.y + mat22 * vectorIn.z + mat23;
-         vectorOut.w = 1.0;
+         vectorOut.setX(mat00 * vectorIn.getX() + mat01 * vectorIn.getY() + mat02 * vectorIn.getZ() + mat03);
+         vectorOut.setY(mat10 * vectorIn.getX() + mat11 * vectorIn.getY() + mat12 * vectorIn.getZ() + mat13);
+         vectorOut.setZ(mat20 * vectorIn.getX() + mat21 * vectorIn.getY() + mat22 * vectorIn.getZ() + mat23);
+         vectorOut.setW(1.0);
       }
       else
       {
@@ -1976,7 +1985,7 @@ public class RigidBodyTransform implements Serializable
 
    /**
     * Transform vectorIn using this transform and store result in vectorOut.
-    * 
+    *
     * @param vectorIn
     * @param vectorOut
     */
@@ -1984,10 +1993,10 @@ public class RigidBodyTransform implements Serializable
    {
       if (vectorIn != vectorOut)
       {
-         vectorOut.x = (float) (mat00 * vectorIn.x + mat01 * vectorIn.y + mat02 * vectorIn.z + mat03);
-         vectorOut.y = (float) (mat10 * vectorIn.x + mat11 * vectorIn.y + mat12 * vectorIn.z + mat13);
-         vectorOut.z = (float) (mat20 * vectorIn.x + mat21 * vectorIn.y + mat22 * vectorIn.z + mat23);
-         vectorOut.w = 1.0f;
+         vectorOut.setX((float) (mat00 * vectorIn.getX() + mat01 * vectorIn.getY() + mat02 * vectorIn.getZ() + mat03));
+         vectorOut.setY((float) (mat10 * vectorIn.getX() + mat11 * vectorIn.getY() + mat12 * vectorIn.getZ() + mat13));
+         vectorOut.setZ((float) (mat20 * vectorIn.getX() + mat21 * vectorIn.getY() + mat22 * vectorIn.getZ() + mat23));
+         vectorOut.setW(1.0f);
       }
       else
       {
@@ -1998,32 +2007,32 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform the Point3d point by this transform and place result back in
     * point.
-    * 
+    *
     * @param point
     */
    public final void transform(Point3d point)
    {
-      double x = mat00 * point.x + mat01 * point.y + mat02 * point.z + mat03;
-      double y = mat10 * point.x + mat11 * point.y + mat12 * point.z + mat13;
-      point.z = mat20 * point.x + mat21 * point.y + mat22 * point.z + mat23;
+      double x = mat00 * point.getX() + mat01 * point.getY() + mat02 * point.getZ() + mat03;
+      double y = mat10 * point.getX() + mat11 * point.getY() + mat12 * point.getZ() + mat13;
+      point.setZ(mat20 * point.getX() + mat21 * point.getY() + mat22 * point.getZ() + mat23);
 
-      point.x = x;
-      point.y = y;
+      point.setX(x);
+      point.setY(y);
    }
 
    /**
     * Transform the Point3d pointIn by this transform and place result in
     * pointOut.
-    * 
+    *
     * @param point
     */
    public final void transform(Point3d pointIn, Point3d pointOut)
    {
       if (pointIn != pointOut)
       {
-         pointOut.x = mat00 * pointIn.x + mat01 * pointIn.y + mat02 * pointIn.z + mat03;
-         pointOut.y = mat10 * pointIn.x + mat11 * pointIn.y + mat12 * pointIn.z + mat13;
-         pointOut.z = mat20 * pointIn.x + mat21 * pointIn.y + mat22 * pointIn.z + mat23;
+         pointOut.setX(mat00 * pointIn.getX() + mat01 * pointIn.getY() + mat02 * pointIn.getZ() + mat03);
+         pointOut.setY(mat10 * pointIn.getX() + mat11 * pointIn.getY() + mat12 * pointIn.getZ() + mat13);
+         pointOut.setZ(mat20 * pointIn.getX() + mat21 * pointIn.getY() + mat22 * pointIn.getZ() + mat23);
       }
       else
       {
@@ -2034,32 +2043,32 @@ public class RigidBodyTransform implements Serializable
    /**
     * Transform the Point3f point by this transform and place result back in
     * point.
-    * 
+    *
     * @param point
     */
    public final void transform(Point3f point)
    {
-      float x = (float) (mat00 * point.x + mat01 * point.y + mat02 * point.z + mat03);
-      float y = (float) (mat10 * point.x + mat11 * point.y + mat12 * point.z + mat13);
-      point.z = (float) (mat20 * point.x + mat21 * point.y + mat22 * point.z + mat23);
+      float x = (float) (mat00 * point.getX() + mat01 * point.getY() + mat02 * point.getZ() + mat03);
+      float y = (float) (mat10 * point.getX() + mat11 * point.getY() + mat12 * point.getZ() + mat13);
+      point.setZ((float) (mat20 * point.getX() + mat21 * point.getY() + mat22 * point.getZ() + mat23));
 
-      point.x = x;
-      point.y = y;
+      point.setX(x);
+      point.setY(y);
    }
 
    /**
     * Transform the Point3f pointIn by this transform and place result in
     * pointOut.
-    * 
+    *
     * @param point
     */
    public final void transform(Point3f pointIn, Point3f pointOut)
    {
       if (pointIn != pointOut)
       {
-         pointOut.x = (float) (mat00 * pointIn.x + mat01 * pointIn.y + mat02 * pointIn.z + mat03);
-         pointOut.y = (float) (mat10 * pointIn.x + mat11 * pointIn.y + mat12 * pointIn.z + mat13);
-         pointOut.z = (float) (mat20 * pointIn.x + mat21 * pointIn.y + mat22 * pointIn.z + mat23);
+         pointOut.setX((float) (mat00 * pointIn.getX() + mat01 * pointIn.getY() + mat02 * pointIn.getZ() + mat03));
+         pointOut.setY((float) (mat10 * pointIn.getX() + mat11 * pointIn.getY() + mat12 * pointIn.getZ() + mat13));
+         pointOut.setZ((float) (mat20 * pointIn.getX() + mat21 * pointIn.getY() + mat22 * pointIn.getZ() + mat23));
       }
       else
       {
@@ -2068,19 +2077,36 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
-    * Return the determinant of this transform.
-    * 
+    * @deprecated use {@link #determinantRotationPart()} instead
     * @return
     */
    public final double determinant()
+   {
+      return determinantRotationPart();
+   }
+
+   /**
+    * Return the determinant of this transform.
+    *
+    * @return
+    */
+   public final double determinantRotationPart()
    {
       return (mat00 * (mat11 * mat22 - mat12 * mat21) - mat01 * (mat10 * mat22 - mat12 * mat20) + mat02 * (mat10 * mat21 - mat11 * mat20));
    }
 
    /**
-    * Orthonormalization of the rotation matrix using Gram-Schmidt method.
+    * @deprecated use {@link #normalizeRotationPart()} instead.
     */
    public void normalize()
+   {
+      normalizeRotationPart();
+   }
+
+   /**
+    * Orthonormalization of the rotation matrix using Gram-Schmidt method.
+    */
+   public void normalizeRotationPart()
    {
       double xdoty = mat00 * mat01 + mat10 * mat11 + mat20 * mat21;
       double xdotx = mat00 * mat00 + mat10 * mat10 + mat20 * mat20;
@@ -2124,125 +2150,148 @@ public class RigidBodyTransform implements Serializable
 
    static final ByteArrayOutputStream stream = new ByteArrayOutputStream();
    static final PrintStream out = new PrintStream(stream);
-   
+
    /**
     * Returns the matrix elements of this transform as a string.
-    * 
+    *
     * @return the matrix elements of this transform
-    */  
+    */
    @Override
    synchronized public String toString()
-   {     
+   {
       return toString(8);
    }
-   
+
    synchronized public String toString(int decimals)
-   {     
+   {
       stream.reset();
       String F =" %" + (3+decimals) + "." + decimals + "f ";
       out.format( F + F + F + "|" + F + "\n", mat00, mat01, mat02, mat03);
       out.format( F + F + F + "|" + F + "\n", mat10, mat11, mat12, mat13);
       out.format( F + F + F + "|" + F + "\n", mat20, mat21, mat22, mat23);
-      
+
       F =" %" + (3+decimals) + "." + 0 + "f ";
-      out.format( F + F + F + "|" + F + "\n", 0f,0f,0f,1f );      
+      out.format( F + F + F + "|" + F + "\n", 0f,0f,0f,1f );
       return stream.toString();
    }
-   
-   
-   /**
-    * Simple linear interpolation between two transforms. Note that 0<= alpha <= 1
-    * No bound limit is performed on alpha.
-    */
-   public void interpolate(RigidBodyTransform initialTransform, RigidBodyTransform finalTransform, double alpha)
-   {     
-      Vector3d initialPosition = new Vector3d(); 
-      Vector3d finalPosition   = new Vector3d(); 
-      
-      Quat4d initialRotation = new Quat4d();
-      Quat4d finalRotation   = new Quat4d();
-      
-      initialTransform.get(initialRotation, initialPosition);
-      finalTransform.get(finalRotation, finalPosition);
-      
-      Quat4d computedRotation   = new Quat4d();
-      computedRotation.interpolate(initialRotation, finalRotation, alpha);
-      
-      Vector3d computedPosition = new Vector3d( 
-            initialPosition.x *(1.0 - alpha) + finalPosition.x*alpha,
-            initialPosition.y *(1.0 - alpha) + finalPosition.y*alpha,
-            initialPosition.z *(1.0 - alpha) + finalPosition.z*alpha );
-      
-      this.set( computedRotation, computedPosition);
-   }
-   
-   static public Vector3d getRotationDifference( Quat4d Q1, Quat4d Q2 )
-   { 
-      Matrix3d R1  = new Matrix3d();
-      Matrix3d R2  = new Matrix3d();
-      R1.set(Q1);
-      R2.set(Q2);
-      return getRotationDifference( R1, R2 );
-   }
-   
-   /**
-    * Rotation difference between two rotation matrixes. Translation difference is neglected.
-    * This difference is used often to compute the orientation error during an iterative inverse
-    * kinematics routine.
-    */
-   static public Vector3d getRotationDifference( RigidBodyTransform T1, RigidBodyTransform T2 )
-   {  
-      Matrix3d R1  = new Matrix3d();
-      Matrix3d R2  = new Matrix3d();
-      T1.getRotation( R1 );
-      T2.getRotation( R2 );
-      return getRotationDifference( R1, R2 );
-   }
-   
-   /**
-    * Rotation difference between two rotation matrixes. Translation difference is neglected.
-    * This difference is used often to compute the orientation error during an iterative inverse
-    * kinematics routine.
-    */
-   static public Vector3d getRotationDifference( Matrix3d R1, Matrix3d R2 )
-   {    
-      Matrix3d Rtemp = new Matrix3d();
-      Matrix3d R1t   = new Matrix3d();
-      Vector3d axis  = new Vector3d();
-      
-      R1t.set(R1);
-      R1t.transpose();
-      Rtemp.mul( R1t, R2 );
-      
-      AxisAngle4d axis_angle = new AxisAngle4d();
 
-      RotationTools.convertMatrixToAxisAngle(Rtemp, axis_angle);
-      
-      axis.set( axis_angle.getX(), axis_angle.getY(), axis_angle.getZ() );
-      axis.scale( - axis_angle.getAngle());
-      R1.transform(axis);
-      return  axis ;
+   public void setM00(double m00)
+   {
+      this.mat00 = m00;
    }
-   
-   static public Vector3d getTranslationDifference( RigidBodyTransform T1, RigidBodyTransform T2 )
-   {     
-      Vector3d pos1  = new Vector3d();
-      Vector3d pos2  = new Vector3d();
-      T1.getTranslation( pos1 );
-      T2.getTranslation( pos2 );
-      pos2.sub(pos1);   
-      return pos2;
-   } 
-   
-   public Vector3d cloneTranslation(){
-      return new Vector3d(mat03, mat13, mat23 );
+
+   public void setM01(double m01)
+   {
+      this.mat01 = m01;
    }
-   
-   public Quat4d cloneRotation(){
-      Quat4d output= new Quat4d();
-      getRotation(output);
-      return output;
+
+   public void setM02(double m02)
+   {
+      this.mat02 = m02;
    }
-      
-   
+
+   public void setM03(double m03)
+   {
+      this.mat03 = m03;
+   }
+
+   public void setM10(double m10)
+   {
+      this.mat10 = m10;
+   }
+
+   public void setM11(double m11)
+   {
+      this.mat11 = m11;
+   }
+
+   public void setM13(double m13)
+   {
+      this.mat13 = m13;
+   }
+
+   public void setM12(double m12)
+   {
+      this.mat12 = m12;
+   }
+
+   public void setM20(double m20)
+   {
+      this.mat20 = m20;
+   }
+
+   public void setM21(double m21)
+   {
+      this.mat21 = m21;
+   }
+
+   public void setM22(double m22)
+   {
+      this.mat22 = m22;
+   }
+
+   public void setM23(double m23)
+   {
+      this.mat23 = m23;
+   }
+
+   public double getM00()
+   {
+      return mat00;
+   }
+
+   public double getM01()
+   {
+      return mat01;
+   }
+
+   public double getM02()
+   {
+      return mat02;
+   }
+
+   public double getM03()
+   {
+      return mat03;
+   }
+
+   public double getM10()
+   {
+      return mat10;
+   }
+
+   public double getM11()
+   {
+      return mat11;
+   }
+
+   public double getM13()
+   {
+      return mat13;
+   }
+
+   public double getM12()
+   {
+      return mat12;
+   }
+
+   public double getM20()
+   {
+      return mat20;
+   }
+
+   public double getM21()
+   {
+      return mat21;
+   }
+
+   public double getM22()
+   {
+      return mat22;
+   }
+
+   public double getM23()
+   {
+      return mat23;
+   }
 }

@@ -13,7 +13,7 @@ public interface FootstepGenerator
 
    void setPoseFinderParams(double footstepFittingBufferSize, double boundingBoxForFootstepHeightFindingSideLength);
 
-   void setHeightMap(HeightMapWithPoints heightMap, SideDependentList<ContactablePlaneBody> contactableFeet);
+   void setHeightMap(HeightMapWithPoints heightMap, SideDependentList<? extends ContactablePlaneBody> contactableFeet);
    
    boolean hasDisplacement();
 }

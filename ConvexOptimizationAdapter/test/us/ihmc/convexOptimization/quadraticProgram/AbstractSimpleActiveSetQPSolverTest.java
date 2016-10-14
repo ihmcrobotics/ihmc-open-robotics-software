@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class AbstractSimpleActiveSetQPSolverTest
 {
@@ -19,7 +19,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
 
    public abstract SimpleActiveSetQPSolverInterface createSolverToTest();
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesWithNoInequalityConstraints()
    {
@@ -130,7 +130,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(2.0, objectiveCost, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesWithInequalityConstraints()
    {
@@ -301,7 +301,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(2.0, objectiveCost, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleCasesWithBoundsConstraints()
    {
@@ -379,6 +379,78 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(-1.0, solution[0], 1e-7);
       assertEquals(0.0, lagrangeLowerBoundMultipliers[0], 1e-7);
       assertEquals(2.0, lagrangeUpperBoundMultipliers[0], 1e-7);
+      
+      // Minimize x^T * x subject to 1 + 1e-12 <= x <= 1 - 1e-12 (Should give valid solution given a little epsilon to allow for roundoff)
+      solver.clear();
+      costQuadraticMatrix = new double[][] { { 2.0 } };
+      costLinearVector = new double[] { 0.0 };
+      quadraticCostScalar = 0.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      variableLowerBounds = new double[] { 1.0 + 1e-12};
+      variableUpperBounds = new double[] { 1.0 - 1e-12};
+      solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
+
+      solution = new double[1];
+      lagrangeEqualityMultipliers = new double[0];
+      lagrangeInequalityMultipliers = new double[0];
+      lagrangeLowerBoundMultipliers = new double[1];
+      lagrangeUpperBoundMultipliers = new double[1];
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      assertEquals(2, numberOfIterations);
+
+      assertEquals(1, solution.length);
+      assertEquals(1.0, solution[0], 1e-7);
+      assertEquals(2.0, lagrangeLowerBoundMultipliers[0], 1e-7);
+      assertEquals(0.0, lagrangeUpperBoundMultipliers[0], 1e-7);
+      
+      // Minimize x^T * x subject to -1 + 1e-12 <= x <= -1 - 1e-12 (Should give valid solution given a little epsilon to allow for roundoff)
+      solver.clear();
+      costQuadraticMatrix = new double[][] { { 2.0 } };
+      costLinearVector = new double[] { 0.0 };
+      quadraticCostScalar = 0.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      variableLowerBounds = new double[] { -1.0 + 1e-12};
+      variableUpperBounds = new double[] { -1.0 - 1e-12};
+      solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
+
+      solution = new double[1];
+      lagrangeEqualityMultipliers = new double[0];
+      lagrangeInequalityMultipliers = new double[0];
+      lagrangeLowerBoundMultipliers = new double[1];
+      lagrangeUpperBoundMultipliers = new double[1];
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      assertEquals(2, numberOfIterations);
+
+      assertEquals(1, solution.length);
+      assertEquals(-1.0, solution[0], 1e-7);
+      assertEquals(0.0, lagrangeLowerBoundMultipliers[0], 1e-7);
+      assertEquals(2.0, lagrangeUpperBoundMultipliers[0], 1e-7);
+      
+      // Minimize x^T * x subject to 1 + 1e-7 <= x <= 1 - 1e-7 (Should not give valid solution since this is too much to blame on roundoff)
+      solver.clear();
+      costQuadraticMatrix = new double[][] { { 2.0 } };
+      costLinearVector = new double[] { 0.0 };
+      quadraticCostScalar = 0.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      variableLowerBounds = new double[] { 1.0 + 1e-7 };
+      variableUpperBounds = new double[] { 1.0 - 1e-7 };
+      solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
+
+      solution = new double[1];
+      lagrangeEqualityMultipliers = new double[0];
+      lagrangeInequalityMultipliers = new double[0];
+      lagrangeLowerBoundMultipliers = new double[1];
+      lagrangeUpperBoundMultipliers = new double[1];
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
+      assertEquals(3, numberOfIterations);
+
+      assertEquals(1, solution.length);
+      assertTrue(Double.isNaN(solution[0]));
+      assertTrue(Double.isInfinite(lagrangeLowerBoundMultipliers[0]));
+      assertTrue(Double.isInfinite(lagrangeUpperBoundMultipliers[0]));
 
       // Minimize x^2 + y^2 + z^2 subject to x + y = 2.0, y - z <= -8, -5 <= x <= 5, 6 <= y <= 10, 11 <= z 
       solver.clear();
@@ -468,7 +540,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    }
 
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testClear()
    {
@@ -708,7 +780,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(248.0, objectiveCost, 1e-7);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSolutionMethodsAreAllConsistent()
    {
@@ -821,7 +893,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(10.0, objectiveCost, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void test2DCasesWithPolygonConstraints()
    {
@@ -877,7 +949,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    }
 
    @Ignore // This should pass with a good solver. But a simple one has trouble on it.  
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testChallengingCasesWithPolygonConstraints()
    {
@@ -938,7 +1010,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    }
 
    // This should pass with a good solver. But a simple one has trouble on it.  
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testChallengingCasesWithPolygonConstraintsCheckFailsWithSimpleSolver()
    {
@@ -970,7 +1042,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertTrue(Double.isInfinite(lagrangeInequalityMultipliers[2]) || Double.isNaN(lagrangeInequalityMultipliers[2]));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCaseWithNoSolution()
    {
@@ -1004,7 +1076,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertTrue(Double.isInfinite(lagrangeInequalityMultipliers[0]));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testLargeRandomProblemWithInequalityConstraints()
    {
@@ -1135,7 +1207,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testLargeRandomProblemWithInequalityAndBoundsConstraints()
    {
@@ -1152,7 +1224,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       int numberOfEqualityConstraints = 10;
       int numberOfInequalityConstraints = 36;
 
-      DenseMatrix64F solution = new DenseMatrix64F(numberOfVariables, 1);
+      DenseMatrix64F solution = new DenseMatrix64F(0, 0);
       DenseMatrix64F lagrangeEqualityMultipliers = new DenseMatrix64F(0, 0);
       DenseMatrix64F lagrangeInequalityMultipliers = new DenseMatrix64F(0, 0);
       DenseMatrix64F lagrangeLowerBoundMultipliers = new DenseMatrix64F(0, 0);
@@ -1353,7 +1425,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    /**
     *  Test with dataset from sim that revealed a bug with the variable lower/upper bounds handling.
     */
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindValidSolutionForDataset20160319()
    {
@@ -1368,7 +1440,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertFalse(MatrixTools.containsNaN(solution));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMaxIterations()
    {
@@ -1431,7 +1503,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(248.0, objectiveCost, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSomeExceptions()
    {

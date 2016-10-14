@@ -23,9 +23,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class Footstep
 {
-   public static enum FootstepType {FULL_FOOTSTEP, PARTIAL_FOOTSTEP, BAD_FOOTSTEP}
-
-   ;
+   public static enum FootstepType {FULL_FOOTSTEP, PARTIAL_FOOTSTEP, BAD_FOOTSTEP};
 
    private static int counter = 0;
    private final String id;
@@ -35,14 +33,14 @@ public class Footstep
    private final PoseReferenceFrame ankleReferenceFrame;
    private final ReferenceFrame soleReferenceFrame;
 
-   private List<Point2d> predictedContactPoints = new ArrayList<>();
+   private final List<Point2d> predictedContactPoints = new ArrayList<>();
 
    private final boolean trustHeight;
    private boolean scriptedFootstep;
 
    private final RigidBodyTransform transformFromAnkleToSoleFrame = new RigidBodyTransform();
 
-   // fot trajectory generation
+   // foot trajectory generation
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
    public double swingHeight = 0;
 
@@ -288,25 +286,29 @@ public class Footstep
       ankleReferenceFrame.setPoseAndUpdate(newPosition, newOrientation);
    }
 
+   private RigidBodyTransform transformFromAnkleToWorld;
+
    public void setSolePose(RigidBodyTransform transform)
    {
-      RigidBodyTransform transformFromAnkleToWorld = new RigidBodyTransform();
+      if (transformFromAnkleToWorld == null)
+         transformFromAnkleToWorld = new RigidBodyTransform();
       transformFromAnkleToWorld.multiply(transform, transformFromAnkleToSoleFrame);
 
       this.ankleReferenceFrame.setPoseAndUpdate(transformFromAnkleToWorld);
    }
 
+   private RigidBodyTransform transformFromSoleToWorld;
+
    public void setSolePose(FramePose newSolePoseInWorldFrame)
    {
       newSolePoseInWorldFrame.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      RigidBodyTransform transformFromSoleToWorld = new RigidBodyTransform();
+      if (transformFromSoleToWorld == null)
+         transformFromSoleToWorld = new RigidBodyTransform();
+
       newSolePoseInWorldFrame.getPose(transformFromSoleToWorld);
 
-      RigidBodyTransform transformFromAnkleToWorld = new RigidBodyTransform();
-      transformFromAnkleToWorld.multiply(transformFromSoleToWorld, transformFromAnkleToSoleFrame);
-
-      this.ankleReferenceFrame.setPoseAndUpdate(transformFromAnkleToWorld);
+      setSolePose(transformFromSoleToWorld);
    }
 
    public void setPositionChangeOnlyXY(FramePoint2d position2d)

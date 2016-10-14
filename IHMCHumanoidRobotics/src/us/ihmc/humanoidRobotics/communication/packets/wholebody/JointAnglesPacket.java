@@ -1,55 +1,35 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
-import java.util.Arrays;
-import java.util.Random;
-
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packetAnnotations.FieldDocumentation;
-import us.ihmc.communication.packetAnnotations.IgnoreField;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.FormattingTools;
 
-@ClassDocumentation("This message commands the IHMC joint position controller to move Atlas's joints to the desired angles.")
-public class JointAnglesPacket extends IHMCRosApiPacket<JointAnglesPacket> implements VisualizablePacket
+import java.util.Arrays;
+import java.util.Random;
+
+public class JointAnglesPacket extends Packet<JointAnglesPacket> implements VisualizablePacket
 {
-   @FieldDocumentation("trajectoryTime specifies how fast or how slow to move to the desired joint angles")
    public double trajectoryTime;
-   @FieldDocumentation("neckJointAngle neck_ry")
    public double neckJointAngle;
-   @FieldDocumentation("spineJointAngles back_bky back_bkx back_bkz")
    public double[] spineJointAngle;
-   @FieldDocumentation("rightLegJointAngle r_leg_hpz r_leg_hpx r_leg_hpy r_leg_kny r_leg_aky r_leg_akx")
    public double[] rightLegJointAngle;
-   @FieldDocumentation("leftLegJointAngle l_leg_hpz l_leg_hpx l_leg_hpy l_leg_kny l_leg_aky l_leg_akx")
    public double[] leftLegJointAngle;
-   @FieldDocumentation("rightArmJointAngle r_arm_shz r_arm_shx r_arm_ely r_arm_elx r_arm_wry r_arm_wrx r_arm_wry2")
    public double[] rightArmJointAngle;
-   @FieldDocumentation("leftArmJointAngle l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx l_arm_wry2")
    public double[] leftArmJointAngle;
 
-   @FieldDocumentation("spineJointLimits back_bky back_bkx back_bkz")
    public int[] spineTorqueLimit;
-   @FieldDocumentation("rightLegJointTorqueLimit r_leg_hpz r_leg_hpx r_leg_hpy r_leg_kny r_leg_aky r_leg_akx")
    public int[] rightLegTorqueLimit;
-   @FieldDocumentation("leftLegJointTorqueLimit l_leg_hpz l_leg_hpx l_leg_hpy l_leg_kny l_leg_aky l_leg_akx")
    public int[] leftLegTorqueLimit;
-   @FieldDocumentation("rightArmTorqueLimit l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx l_arm_wry2")
    public int[] rightArmTorqueLimit;
-   @FieldDocumentation("leftArmTorqueLimit l_arm_shz l_arm_shx l_arm_ely l_arm_elx l_arm_wry l_arm_wrx l_arm_wry2")
    public int[] leftArmTorqueLimit;
-   
-   @FieldDocumentation("keepLeftHandInTaskspacePosition specifies whether the position controller should try to maintain the left hand position in task space")
+
    public boolean keepLeftHandInTaskspacePosition;
-   
-   @FieldDocumentation("keepRightHandInTaskspacePosition specifies whether the position controller should try to maintain the right hand position in task space")
+
    public boolean keepRightHandInTaskspacePosition;
-   
-   @IgnoreField
-   @FieldDocumentation("if flattenFeetAtTheEnd is true, the ankles will move at the end of the trajectory to adapt to the inclination of the ground")
+
    public boolean flattenFeetAtTheEnd;
    
    public JointAnglesPacket()

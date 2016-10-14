@@ -1,6 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
 import org.junit.After;
 import org.junit.Test;
@@ -11,11 +12,10 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Matrix4d;
 import javax.vecmath.Vector3d;
 import java.util.Random;
 
@@ -36,7 +36,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * Basic test of constructor, getters and setters
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructionAndGettersAndSetters()
    {
@@ -73,7 +73,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * default constructor
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDefaultConstructor()
    {
@@ -89,7 +89,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * Constructing using a double array
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testConstructUsingArray()
    {
@@ -106,7 +106,7 @@ public class TwistTest extends SpatialMotionVectorTest
       assertArrayEquals(array, arrayBack, 0.0);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingArrayTooSmall()
    {
@@ -114,7 +114,7 @@ public class TwistTest extends SpatialMotionVectorTest
       new Twist(frameC, frameD, frameA, array);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testConstructUsingArrayTooBig()
    {
@@ -126,7 +126,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * Copy constructor
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testCopyConstructor()
    {
@@ -167,21 +167,21 @@ public class TwistTest extends SpatialMotionVectorTest
     * Dot product
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDotProduct()
    {
       WrenchTest.testDotProduct(frameA, frameB, frameC);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testDotProductNotAllowed1()
    {
       WrenchTest.testDotProductNotAllowed1(frameA, frameB, frameC);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testDotProductNotAllowed2()
    {
@@ -193,7 +193,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * You shouldn't be able to add two twists expressed in different frames
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testAddExpressedInDifferentFrames()
    {
@@ -207,7 +207,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * You shouldn't be able to add two twists if the second is not relative to the first
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testAddNotRelative()
    {
@@ -222,7 +222,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * (which is allowed)
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testAdd()
    {
@@ -278,7 +278,7 @@ public class TwistTest extends SpatialMotionVectorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSub()
    {
@@ -299,7 +299,7 @@ public class TwistTest extends SpatialMotionVectorTest
       SpatialMotionVectorTest.assertSpatialMotionVectorEquals(twist1, twist1Back, epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSubWrongExpressedInFrame()
    {
@@ -308,7 +308,7 @@ public class TwistTest extends SpatialMotionVectorTest
       twist1.sub(twist2);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testSubFramesDontMatchUp()
    {
@@ -323,7 +323,7 @@ public class TwistTest extends SpatialMotionVectorTest
     * Duindam, Port-Based Modeling and Control for Efficient Bipedal Walking Robots, page 25, lemma 2.8 (b)
     */
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrame()
    {
@@ -335,16 +335,17 @@ public class TwistTest extends SpatialMotionVectorTest
          Twist twist1 = new Twist(frameB, frameA, frameA, linearVelocity1, angularVelocity1);
 
          // first transform using 2.8 (b)
-         Matrix4d twist1TildeInA = toTildeForm(twist1);
+         DenseMatrix64F twist1TildeInA = toTildeForm(twist1);
          RigidBodyTransform transformFromAToC = frameA.getTransformToDesiredFrame(frameC);
-         Matrix4d transformFromAToCMatrix = new Matrix4d();
+         DenseMatrix64F transformFromAToCMatrix = new DenseMatrix64F(4, 4);
          transformFromAToC.get(transformFromAToCMatrix);
-         Matrix4d transformFromAToCMatrixInv = new Matrix4d(transformFromAToCMatrix);
-         transformFromAToCMatrixInv.invert();
+         DenseMatrix64F transformFromAToCMatrixInv = new DenseMatrix64F(transformFromAToCMatrix);
+         CommonOps.invert(transformFromAToCMatrixInv);
 
-         Matrix4d twist1TildeInC = new Matrix4d(transformFromAToCMatrix);
-         twist1TildeInC.mul(twist1TildeInA);
-         twist1TildeInC.mul(transformFromAToCMatrixInv);
+         DenseMatrix64F twist1TildeInC = new DenseMatrix64F(transformFromAToCMatrix);
+         DenseMatrix64F temp = new DenseMatrix64F(transformFromAToCMatrix);
+         CommonOps.mult(twist1TildeInC, twist1TildeInA, temp);
+         CommonOps.mult(temp, transformFromAToCMatrixInv, twist1TildeInC);
 
          Vector3d omega1InC = new Vector3d();
          Vector3d v1InC = new Vector3d();
@@ -363,7 +364,7 @@ public class TwistTest extends SpatialMotionVectorTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testChangeFrameSameFrame()
    {
@@ -386,7 +387,7 @@ public class TwistTest extends SpatialMotionVectorTest
       assertEquals(twist1.getBaseFrame(), twist2.getBaseFrame());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetMatrix()
    {
@@ -406,7 +407,7 @@ public class TwistTest extends SpatialMotionVectorTest
       assertEquals(linearVelocity1.getZ(), twistMatrix.get(5, 0), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testVelocityOfPointConsistency()
    {
@@ -427,7 +428,7 @@ public class TwistTest extends SpatialMotionVectorTest
       JUnitTools.assertTuple3dEquals(expected, actual.getVectorCopy(), 1e-6);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testBodyOriginLinearPartInBaseFrameAndAngularVelocity()
    {
@@ -446,13 +447,13 @@ public class TwistTest extends SpatialMotionVectorTest
 
       Matrix3d oldRotation = new Matrix3d();
       Matrix3d newRotation = new Matrix3d();
-      transform.get(oldRotation);
-      transform.get(newRotation);
+      transform.getRotation(oldRotation);
+      transform.getRotation(newRotation);
 
       Vector3d oldPosition = new Vector3d();
       Vector3d newPosition = new Vector3d();
-      transform.get(oldPosition);
-      transform.get(newPosition);
+      transform.getTranslation(oldPosition);
+      transform.getTranslation(newPosition);
 
       ScrewTestTools.integrate(newRotation, newPosition, dt, twist);
 
@@ -472,7 +473,7 @@ public class TwistTest extends SpatialMotionVectorTest
       JUnitTools.assertTuple3dEquals(angularVelocityNumerical, angularVelocityInBaseFrame, 1e-5);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testScrewConstruction()
    {
@@ -503,31 +504,31 @@ public class TwistTest extends SpatialMotionVectorTest
     * [tilde(omega), v;
     *             0, 0];
     */
-   private static Matrix4d toTildeForm(Twist twist)
+   private static DenseMatrix64F toTildeForm(Twist twist)
    {
       Vector3d angularVelocity = twist.getAngularPartCopy();
-      Matrix3d omegaTilde = new Matrix3d();
-      MatrixTools.toTildeForm(omegaTilde, angularVelocity);
-
       Vector3d linearVelocity = twist.getLinearPartCopy();
-      Matrix4d ret = new Matrix4d(omegaTilde, linearVelocity, 1.0);
-      ret.m33 = 0.0;
 
+      DenseMatrix64F ret = new DenseMatrix64F(4, 4);
+      MatrixTools.vectorToSkewSymmetricMatrix(ret, angularVelocity);
+      ret.set(0, 3, linearVelocity.getX());
+      ret.set(1, 3, linearVelocity.getY());
+      ret.set(2, 3, linearVelocity.getZ());
       return ret;
    }
 
    /**
     * Converts a twist in tilde form back to twist coordinates (angular velocity and linear velocity)
     */
-   private static void fromTildeForm(Matrix4d twistTilde, Vector3d angularVelocityToPack, Vector3d linearVelocityToPack)
+   private static void fromTildeForm(DenseMatrix64F twistTilde, Vector3d angularVelocityToPack, Vector3d linearVelocityToPack)
    {
-      twistTilde.get(linearVelocityToPack);
-      angularVelocityToPack.set(twistTilde.m21, twistTilde.m02, twistTilde.m10);
+      linearVelocityToPack.set(twistTilde.get(0, 3), twistTilde.get(1, 3), twistTilde.get(2, 3));
+      angularVelocityToPack.set(twistTilde.get(2, 1), twistTilde.get(0, 2), twistTilde.get(1, 0));
    }
 
    private static void fromTildeForm(Vector3d omegaToPack, Matrix3d omegaTilde)
    {
-      omegaToPack.set(omegaTilde.m21, omegaTilde.m02, omegaTilde.m10);
+      omegaToPack.set(omegaTilde.getM21(), omegaTilde.getM02(), omegaTilde.getM10());
    }
 
    @Override

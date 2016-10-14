@@ -16,17 +16,17 @@ import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets={TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.FAST})
 public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
-   @Test(timeout = 3000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGetUpToDateTimeStampedBufferNewestTimeStamp()
    {
       FramePose upToDatePoseInPresent = new FramePose(worldFrame);
@@ -48,8 +48,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
-   @Test(timeout = 3000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGetUpToDateTimeStampedBufferOldestTimeStamp()
    {
       FramePose upToDatePoseInPresent = new FramePose(worldFrame);
@@ -75,8 +75,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.2)
-   @Test(timeout = 3000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testUpdateOutdatedTransformWithKnownOffsets()
    {
       int numberOfUpToDateTransforms = 10;

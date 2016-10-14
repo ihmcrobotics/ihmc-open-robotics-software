@@ -1,9 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
-import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 
-public class SimpleForwardingBehavior extends BehaviorInterface
+public class SimpleForwardingBehavior extends AbstractBehavior
 {
    private final BehaviorCommunicationBridge communicationBridge;
 
@@ -35,17 +35,6 @@ public class SimpleForwardingBehavior extends BehaviorInterface
          communicationBridge.setPacketPassThrough(false);
    }
 
-   @Override
-   public void stop()
-   {
-
-   }
-
-   @Override
-   public void pause()
-   {
-
-   }
 
    @Override
    public boolean isDone()
@@ -53,11 +42,7 @@ public class SimpleForwardingBehavior extends BehaviorInterface
       return false;
    }
 
-   @Override
-   public void enableActions()
-   {
-
-   }
+   
 
    @Override
    public void resume()
@@ -66,17 +51,7 @@ public class SimpleForwardingBehavior extends BehaviorInterface
          communicationBridge.setPacketPassThrough(true);
    }
 
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-
-   }
+  
    
    public boolean hasInputBeenSet() {
 		   return false;

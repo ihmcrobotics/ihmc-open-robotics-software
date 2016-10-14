@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
    public abstract class DRCObstacleCourseStandingYawedTest implements MultiRobotTestInterface
@@ -53,15 +53,15 @@ import us.ihmc.tools.thread.ThreadTools;
       }
 
 
-	@DeployableTestMethod(estimatedDuration = 19.1)
-	@Test(timeout = 95000)
+	@ContinuousIntegrationTest(estimatedDuration = 18.4)
+	@Test(timeout = 92000)
       public void testStandingYawed() throws SimulationExceededMaximumTimeException
       {
-         BambooTools.reportTestStartedMessage();
+         BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
          DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
          
-         drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoRocksTest", "", selectedLocation, simulationTestingParameters, getRobotModel());
+         drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
 
          SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
          ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -82,7 +82,7 @@ import us.ihmc.tools.thread.ThreadTools;
          drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
          
-         BambooTools.reportTestFinishedMessage();
+         BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
       }
       
       

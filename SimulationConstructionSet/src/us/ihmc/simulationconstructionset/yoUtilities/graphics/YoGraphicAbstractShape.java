@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -63,7 +63,7 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
    {
       Vector3d translationToWorld = new Vector3d();
 
-      transformToWorld.get(translationToWorld);
+      transformToWorld.getTranslation(translationToWorld);
 
       this.yoFramePoint.set(translationToWorld);
       FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), transformToWorld);
@@ -109,7 +109,7 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       translationVector.set(yoFramePoint.getX(), yoFramePoint.getY(), yoFramePoint.getZ());
       yoFrameOrientation.getEulerAngles(rotationEulerVector);
 
-      transform3D.setEuler(rotationEulerVector);
+      transform3D.setRotationEulerAndZeroTranslation(rotationEulerVector);
       transform3D.setTranslation(translationVector);
       transform3D.setScale(scale);
    }

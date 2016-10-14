@@ -92,6 +92,11 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       doubleSupportCapturePointTrajectory.getAcceleration(accelerationToPack);
    }
 
+   public void getAcceleration(YoFrameVector accelerationToPack)
+   {
+      doubleSupportCapturePointTrajectory.getAcceleration(accelerationToPack);
+   }
+
    @Override
    public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {

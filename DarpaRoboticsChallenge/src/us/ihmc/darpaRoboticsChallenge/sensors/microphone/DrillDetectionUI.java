@@ -26,7 +26,7 @@ import org.jfree.data.time.TimeSeriesCollection;
 
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.plotting.shapes.PointArtifact;
+import us.ihmc.plotting.artifact.PointListArtifact;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.gui.FFTPlotter;
@@ -113,9 +113,9 @@ public class DrillDetectionUI
       soundDetectorGUI.add(boolPlotterPanel, boolPlotterLayout);
 
       boolPlotter = boolPlotterPanel.getPlotter();
-      boolPlotter.setXoffset(320);
-      boolPlotter.setYoffset(80);
-      boolPlotter.setRange(200);
+      boolPlotter.setFocusPointX((double) 320);
+      boolPlotter.setFocusPointY((double) 80);
+      boolPlotter.setViewRange(200);
 
 
       JFreeChart bandGraph = ChartFactory.createTimeSeriesChart("Band Magnitudes", "Time", "Magnitude(dB)", dataset, true, false, false);
@@ -159,7 +159,7 @@ public class DrillDetectionUI
       double rawValue = result.isOn ? 150.0 : 0.0;
 
       Point2d pRaw = new Point2d(x, rawValue);
-      PointArtifact paRaw = new PointArtifact("drillOn_" + x, pRaw);
+      PointListArtifact paRaw = new PointListArtifact("drillOn_" + x, pRaw);
       boolPlotter.addArtifact(paRaw);
 
       if (numBands != result.averageValues.length)

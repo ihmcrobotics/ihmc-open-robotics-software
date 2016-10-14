@@ -1,12 +1,14 @@
 package us.ihmc.robotics.screwTheory;
 
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 
 public class SpatialForceVector
 {
@@ -99,7 +101,26 @@ public class SpatialForceVector
       this.linearPart.set(linearPart);
       this.angularPart.cross(arm, linearPart);
    }
-   
+
+   public void setIncludingFrame(FrameVector force, FramePoint pointOfApplication)
+   {
+      force.checkReferenceFrameMatch(pointOfApplication);
+      expressedInFrame = force.getReferenceFrame();
+      force.get(linearPart);
+      pointOfApplication.get(tempVector);
+      angularPart.cross(tempVector, linearPart);
+   }
+
+   public void setIncludingFrame(FrameVector force, FrameVector moment, FramePoint pointOfApplication)
+   {
+      force.checkReferenceFrameMatch(pointOfApplication);
+      expressedInFrame = force.getReferenceFrame();
+      force.get(linearPart);
+      pointOfApplication.get(tempVector);
+      angularPart.cross(tempVector, linearPart);
+      angularPart.add(moment.getVector());
+   }
+
    /**
     * @return the frame *in which this spatial force vector is expressed
     */
@@ -358,24 +379,24 @@ public class SpatialForceVector
    {
       MathTools.checkIfInRange(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
       MathTools.checkIfInRange(matrix.getNumCols(), 1, Integer.MAX_VALUE);
-      matrix.set(0, 0, angularPart.x);
-      matrix.set(1, 0, angularPart.y);
-      matrix.set(2, 0, angularPart.z);
-      matrix.set(3, 0, linearPart.x);
-      matrix.set(4, 0, linearPart.y);
-      matrix.set(5, 0, linearPart.z);
+      matrix.set(0, 0, angularPart.getX());
+      matrix.set(1, 0, angularPart.getY());
+      matrix.set(2, 0, angularPart.getZ());
+      matrix.set(3, 0, linearPart.getX());
+      matrix.set(4, 0, linearPart.getY());
+      matrix.set(5, 0, linearPart.getZ());
    }
    
    public void getMatrixColumn(DenseMatrix64F matrix, int column)
    {
       MathTools.checkIfInRange(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
       MathTools.checkIfInRange(matrix.getNumCols(), column+1, Integer.MAX_VALUE);
-      matrix.set(0, column, angularPart.x);
-      matrix.set(1, column, angularPart.y);
-      matrix.set(2, column, angularPart.z);
-      matrix.set(3, column, linearPart.x);
-      matrix.set(4, column, linearPart.y);
-      matrix.set(5, column, linearPart.z);
+      matrix.set(0, column, angularPart.getX());
+      matrix.set(1, column, angularPart.getY());
+      matrix.set(2, column, angularPart.getZ());
+      matrix.set(3, column, linearPart.getX());
+      matrix.set(4, column, linearPart.getY());
+      matrix.set(5, column, linearPart.getZ());
    }
 
 
@@ -469,7 +490,7 @@ public class SpatialForceVector
       // essentially using the transpose of the Adjoint operator, Ad_H = [R, 0; tilde(p) * R, R] (Matlab notation), but without creating a 6x6 matrix
       // compute the relevant rotations and translations
       expressedInFrame.getTransformToDesiredFrame(temporaryTransformHToDesiredFrame, newReferenceFrame);
-      temporaryTransformHToDesiredFrame.get(tempVector); // p
+      temporaryTransformHToDesiredFrame.getTranslation(tempVector); // p
 
       // transform the torques and forces so that they are expressed in newReferenceFrame
       temporaryTransformHToDesiredFrame.transform(linearPart);
@@ -503,6 +524,7 @@ public class SpatialForceVector
       this.angularPart.negate();
    }
    
+   @Override
    public String toString()
    {
       String ret = new String("SpatialForceVector expressed in frame " + expressedInFrame + "\n" + "Angular part: " + angularPart + "\n"
@@ -525,12 +547,12 @@ public class SpatialForceVector
 
    public void getMatrix(double[] matrix)
    {
-      matrix[0] = angularPart.x;
-      matrix[1] = angularPart.y;
-      matrix[2] = angularPart.z;
-      matrix[3] = linearPart.x;
-      matrix[4] = linearPart.y;
-      matrix[5] = linearPart.z;
+      matrix[0] = angularPart.getX();
+      matrix[1] = angularPart.getY();
+      matrix[2] = angularPart.getZ();
+      matrix[3] = linearPart.getX();
+      matrix[4] = linearPart.getY();
+      matrix[5] = linearPart.getZ();
    }
 
    public double getLinearPartX()

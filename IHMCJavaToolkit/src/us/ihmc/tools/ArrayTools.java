@@ -213,26 +213,49 @@ public class ArrayTools
       return ret;
    }
 
-
-   
-   public static double getMaximumAbsoluteChangeBetweenTicks(double[] values)
+   public static int getIndexOfMaximumAbsoluteChangeBetweenTicks(double[] values)
    {
       int length = values.length;
       double maxChange = 0.0;
-      
+      int indexOfMaxChange = -1;
+
       double previousValue = values[0];
-      for (int i=1; i<length; i++)
+
+      for (int i = 1; i < length; i++)
       {
          double nextValue = values[i];
 
          double absoluteChange = Math.abs(nextValue - previousValue);
-         if (absoluteChange > maxChange) maxChange = absoluteChange;
+         if (absoluteChange > maxChange)
+         {
+            maxChange = absoluteChange;
+            indexOfMaxChange = i;
+         }
+         previousValue = nextValue;
+      }
+
+      return indexOfMaxChange;
+   }
+
+   public static double getMaximumAbsoluteChangeBetweenTicks(double[] values)
+   {
+      int length = values.length;
+      double maxChange = 0.0;
+
+      double previousValue = values[0];
+      for (int i = 1; i < length; i++)
+      {
+         double nextValue = values[i];
+
+         double absoluteChange = Math.abs(nextValue - previousValue);
+         if (absoluteChange > maxChange)
+            maxChange = absoluteChange;
          previousValue = nextValue;
       }
 
       return maxChange;
    }
-   
+
    public static boolean isContinuous(double[] values, double maxAllowedChange)
    {
       double maxChange = getMaximumAbsoluteChangeBetweenTicks(values);

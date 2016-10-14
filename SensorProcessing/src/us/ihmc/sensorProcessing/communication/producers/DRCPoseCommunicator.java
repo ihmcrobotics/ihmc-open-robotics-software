@@ -7,12 +7,12 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -45,7 +45,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final GlobalDataProducer dataProducer;
    private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
-   private final SensorTimestampHolder sensorOutputMapReadOnly;
+   private final SensorTimestampHolder sensorTimestampHolder;
    private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
 //   private final SideDependentList<String> wristForceSensorNames;
    private final RobotMotionStatusHolder robotMotionStatusFromController;
@@ -67,7 +67,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    {
       this.dataProducer = dataProducer;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
-      this.sensorOutputMapReadOnly = sensorTimestampHolder;
+      this.sensorTimestampHolder = sensorTimestampHolder;
       this.sensorRawOutputMapReadOnly = sensorRawOutputMapReadOnly;
       this.robotMotionStatusFromController = robotMotionStatusFromController;
       this.scheduler = scheduler;
@@ -194,8 +194,8 @@ public class DRCPoseCommunicator implements RawOutputWriter
          return;
       }
 
-      long timestamp = sensorOutputMapReadOnly.getVisionSensorTimestamp();
-      long pps = sensorOutputMapReadOnly.getSensorHeadPPSTimestamp();
+      long timestamp = sensorTimestampHolder.getVisionSensorTimestamp();
+      long pps = sensorTimestampHolder.getSensorHeadPPSTimestamp();
       jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, pps, state);
       
       if(sensorRawOutputMapReadOnly != null)

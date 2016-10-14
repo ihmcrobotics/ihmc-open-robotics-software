@@ -2,14 +2,17 @@ package us.ihmc.simulationconstructionset;
 
 //import Jama.*;
 
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.*;
 
-import us.ihmc.simulationconstructionset.physics.engine.jerry.FloatingPlanarJointPhysics;
+import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.physics.engine.jerry.FloatingPlanarJointPhysics;
 
 /**
  * Title:        Yobotics! Simulation Construction Set<p>
@@ -19,15 +22,9 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
  * @author Jerry Pratt
  * @version Beta 1.0
  */
-public class FloatingPlanarJoint extends Joint
+public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
 {
-   /**
-    *
-    */
    private static final long serialVersionUID = -1627814016079577790L;
-
-   public static final int
-      XY = 1, YZ = 2, XZ = 3;
 
    public DoubleYoVariable q_t1;
    public DoubleYoVariable q_t2;
@@ -36,7 +33,7 @@ public class FloatingPlanarJoint extends Joint
    public DoubleYoVariable q_rot;
    public DoubleYoVariable qd_rot;
    public DoubleYoVariable qdd_t1, qdd_t2, qdd_rot;
-   public int type = XZ;
+   public Plane type = Plane.XZ;
 
    public DoubleYoVariable getQ_t1()
    {
@@ -79,13 +76,24 @@ public class FloatingPlanarJoint extends Joint
 
    public FloatingPlanarJoint(String jname, Robot rob)
    {
-      this(jname, rob, XZ);
+      this(jname, rob, Plane.XZ);
       physics = new FloatingPlanarJointPhysics(this);
    }
 
-   public FloatingPlanarJoint(String jname, Robot rob, int type)
+   public FloatingPlanarJoint(String jname, Vector3d offset, Robot rob)
    {
-      super(jname, new Vector3d(), rob, 3);
+      this(jname, offset, rob, Plane.XZ);
+      physics = new FloatingPlanarJointPhysics(this);
+   }
+
+   public FloatingPlanarJoint(String jname, Robot rob, Plane type)
+   {
+      this(jname, new Vector3d(), rob, type);
+   }
+
+   public FloatingPlanarJoint(String jname, Vector3d offset, Robot rob, Plane type)
+   {
+      super(jname, offset, rob, 3);
       physics = new FloatingPlanarJointPhysics(this);
 
       this.type = type;
@@ -94,13 +102,13 @@ public class FloatingPlanarJoint extends Joint
 
       String t1_name, t2_name, rot_name;
 
-      if (type == XY)
+      if (type == Plane.XY)
       {
          t1_name = "x";
          t2_name = "y";
          rot_name = "yaw";
       }
-      else if (type == XZ)
+      else if (type == Plane.XZ)
       {
          t1_name = "x";
          t2_name = "z";
@@ -134,10 +142,15 @@ public class FloatingPlanarJoint extends Joint
       physics.u_i = null;
    }
 
-
-   public FloatingPlanarJoint(String jname, String varName, Robot rob, int type)
+   public FloatingPlanarJoint(String jname, String varName, Robot rob, Plane type)
    {
-      super(jname, new Vector3d(), rob, 6);
+      this(jname, varName, new Vector3d(), rob, type);
+   }
+
+
+   public FloatingPlanarJoint(String jname, String varName, Vector3d offset, Robot rob, Plane type)
+   {
+      super(jname, offset, rob, 6);
       physics = new FloatingPlanarJointPhysics(this);
 
       this.type = type;
@@ -146,13 +159,13 @@ public class FloatingPlanarJoint extends Joint
 
       String t1_name, t2_name, rot_name;
 
-      if (type == XY)
+      if (type == Plane.XY)
       {
          t1_name = varName + "_x";
          t2_name = varName + "_y";
          rot_name = varName + "_yaw";
       }
-      else if (type == XZ)
+      else if (type == Plane.XZ)
       {
          t1_name = varName + "x";
          t2_name = varName + "z";
@@ -203,16 +216,22 @@ public class FloatingPlanarJoint extends Joint
 
    public void setCartesianPosition(Tuple2d position, Tuple2d velocity)
    {
-      q_t1.set(position.x);
-      q_t2.set(position.y);
-      qd_t1.set(velocity.x);
-      qd_t2.set(velocity.y);
+      q_t1.set(position.getX());
+      q_t2.set(position.getY());
+      qd_t1.set(velocity.getX());
+      qd_t2.set(velocity.getY());
    }
-   
+
    public void setCartesianVelocity(Tuple2d velocity)
    {
       qd_t1.set(velocity.getX());
       qd_t2.set(velocity.getY());
+   }
+
+   public void setCartesianVelocity(double t1Dot, double t2Dot)
+   {
+      qd_t1.set(t1Dot);
+      qd_t2.set(t2Dot);
    }
 
    public void setRotation(double theta)
@@ -228,7 +247,7 @@ public class FloatingPlanarJoint extends Joint
 
    public void setRotationalVelocity(double thetaDot)
    {
-      this.qd_rot.set(thetaDot);      
+      this.qd_rot.set(thetaDot);
    }
 
 
@@ -247,29 +266,120 @@ public class FloatingPlanarJoint extends Joint
 
    protected void setFloatingTransform3D(RigidBodyTransform t1)
    {
-      if (type == YZ)
+      if (type == Plane.YZ)
       {
          position.set(0.0, q_t1.getDoubleValue(), q_t2.getDoubleValue());
-         t1.rotX(q_rot.getDoubleValue());
+         t1.setRotationRollAndZeroTranslation(q_rot.getDoubleValue());
       }
-      else if (type == XZ)
+      else if (type == Plane.XZ)
       {
          position.set(q_t1.getDoubleValue(), 0.0, q_t2.getDoubleValue());
-         t1.rotY(q_rot.getDoubleValue());
+         t1.setRotationPitchAndZeroTranslation(q_rot.getDoubleValue());
       }
       else
       {
          position.set(q_t1.getDoubleValue(), q_t2.getDoubleValue(), 0.0);
-         t1.rotZ(q_rot.getDoubleValue());
+         t1.setRotationYawAndZeroTranslation(q_rot.getDoubleValue());
       }
 
       t1.setTranslation(position);
    }
 
 
-   public int getType()
+   public Plane getType()
    {
       return type;
    }
 
+   private final double[] yawPitchRoll = new double[3];
+   @Override public void setRotationAndTranslation(RigidBodyTransform transform)
+   {
+      Quat4d rotation = new Quat4d();
+      transform.getRotation(rotation);
+
+      RotationTools.convertQuaternionToYawPitchRoll(rotation, yawPitchRoll);
+
+      Vector3d translation = new Vector3d();
+      transform.getTranslation(translation);
+
+      switch (type)
+      {
+      case XY:
+         setRotation(yawPitchRoll[2]);
+         setCartesianPosition(translation.getX(), translation.getY());
+         break;
+      case XZ:
+         setRotation(yawPitchRoll[1]);
+         setCartesianPosition(translation.getX(), translation.getZ());
+         break;
+      default:
+         setRotation(yawPitchRoll[0]);
+         setCartesianPosition(translation.getY(), translation.getZ());
+         break;
+      }
+   }
+
+   @Override public void setVelocity(Tuple3d velocity)
+   {
+      switch (type)
+      {
+      case XY:
+         setCartesianVelocity(velocity.getX(), velocity.getY());
+         break;
+      case XZ:
+         setCartesianVelocity(velocity.getX(), velocity.getZ());
+         break;
+      default:
+         setCartesianVelocity(velocity.getY(), velocity.getZ());
+         break;
+      }
+   }
+
+   @Override public void setAngularVelocityInBody(Vector3d angularVelocityInBody)
+   {
+      switch (type)
+      {
+      case XY:
+         setRotationalVelocity(angularVelocityInBody.getZ());
+         break;
+      case XZ:
+         setRotationalVelocity(angularVelocityInBody.getY());
+         break;
+      default:
+         setRotationalVelocity(angularVelocityInBody.getX());
+         break;
+      }
+   }
+
+   @Override public void getVelocity(FrameVector linearVelocityToPack)
+   {
+      switch (type)
+      {
+      case XY:
+         linearVelocityToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), qd_t1.getDoubleValue(), qd_t2.getDoubleValue(), 0.0);
+         break;
+      case XZ:
+         linearVelocityToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), qd_t1.getDoubleValue(), 0.0, qd_t2.getDoubleValue());
+         break;
+      default:
+         linearVelocityToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, qd_t1.getDoubleValue(), qd_t2.getDoubleValue());
+         break;
+      }
+   }
+
+   @Override public void getAngularVelocity(FrameVector angularVelocityToPack, ReferenceFrame bodyFrame)
+   {
+      switch (type)
+      {
+      case XY:
+         angularVelocityToPack.setIncludingFrame(bodyFrame, 0.0, 0.0, qd_rot.getDoubleValue());
+         break;
+      case XZ:
+         angularVelocityToPack.setIncludingFrame(bodyFrame, 0.0, qd_rot.getDoubleValue(), 0.0);
+         break;
+      default:
+         angularVelocityToPack.setIncludingFrame(bodyFrame, qd_rot.getDoubleValue(), 0.0, 0.0);
+         break;
+      }
+   }
 }

@@ -94,7 +94,7 @@ public class JMEPointCloudGenerator
 
       Geometry g = new Geometry("Point Cloud", m);
       g.setShadowMode(ShadowMode.CastAndReceive);
-      g.setQueueBucket(Bucket.Translucent);
+      g.setQueueBucket(Bucket.Opaque);
       g.setMaterial(mat);
       g.updateModelBound();
 
@@ -147,7 +147,7 @@ public class JMEPointCloudGenerator
    
    public Node generatePointCloudGraph(Point3f[] pointCoordinates3d)
    {
-      return generatePointCloudGraph(pointCoordinates3d, null);
+      return generatePointCloudGraph(pointCoordinates3d, (ColorRGBA[]) null);
    }
    
    public Node generatePointCloudGraph(Point3f[] pointCoordinates3d, ColorRGBA[] colorsRGBA)
@@ -156,7 +156,7 @@ public class JMEPointCloudGenerator
       
       for (int i = 0; i < pointCoordinates3d.length; i++)
       {
-         vectorArray[i] = new Vector3f(pointCoordinates3d[i].x, pointCoordinates3d[i].y, pointCoordinates3d[i].z);
+         vectorArray[i] = new Vector3f(pointCoordinates3d[i].getX(), pointCoordinates3d[i].getY(), pointCoordinates3d[i].getZ());
       }
 
       return generatePointCloudGraph(vectorArray, colorsRGBA);
@@ -177,7 +177,7 @@ public class JMEPointCloudGenerator
       while (it.hasNext())
       {
          current = it.next();
-         coords.put(current.x).put(current.y).put(current.z);
+         coords.put(current.getX()).put(current.getY()).put(current.getZ());
       }
 
       coords.rewind();
@@ -234,5 +234,32 @@ public class JMEPointCloudGenerator
       colors.rewind();
 
       return generatePointCloudGraph(coords, colors);
+   }
+
+   public Node generatePointCloudGraph(Point3f[] pointCloud, Collection<ColorRGBA> colorsRGBA) throws Exception
+   {
+      if (colorsRGBA == null)
+         throw new Exception("point cloud colors must not be null!");
+
+      if (pointCloud.length != colorsRGBA.size())
+         throw new Exception("There should be a color value for each point, if colors are used!");
+
+      FloatBuffer pointBuffer = BufferUtils.createFloatBuffer(3 * pointCloud.length);
+      for(Point3f point : pointCloud)
+      {
+         pointBuffer.put(point.getX());
+         pointBuffer.put(point.getY());
+         pointBuffer.put(point.getZ());
+      }
+      pointBuffer.rewind();
+
+      FloatBuffer colorBuffer = BufferUtils.createFloatBuffer(4 * colorsRGBA.size());
+      for (ColorRGBA colorRGBA : colorsRGBA)
+      {
+         colorBuffer.put(colorRGBA.getColorArray());
+      }
+      colorBuffer.rewind();
+
+      return generatePointCloudGraph(pointBuffer, colorBuffer);
    }
 }

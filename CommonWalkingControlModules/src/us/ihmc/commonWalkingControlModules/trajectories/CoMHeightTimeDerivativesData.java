@@ -39,14 +39,12 @@ public class CoMHeightTimeDerivativesData
       this.comHeightAcceleration = comHeightAcceleration;
    }
 
-
    public void set(CoMHeightTimeDerivativesData heightZData)
    {
       this.frameOfCenterOfMassHeight = heightZData.frameOfCenterOfMassHeight;
       this.comHeight = heightZData.comHeight;
       this.comHeightVelocity = heightZData.comHeightVelocity;
-      this.comHeightAcceleration = heightZData.comHeightAcceleration;   
+      this.comHeightAcceleration = heightZData.comHeightAcceleration;
    }
-   
-   
+
 }

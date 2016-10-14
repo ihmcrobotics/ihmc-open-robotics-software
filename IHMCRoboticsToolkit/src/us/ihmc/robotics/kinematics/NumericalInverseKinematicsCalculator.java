@@ -209,7 +209,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
       errorTransform.invert(desiredTransform);
       errorTransform.multiply(actualTransform);
 
-      errorTransform.get(errorRotationMatrix);
+      errorTransform.getRotation(errorRotationMatrix);
       RotationTools.convertMatrixToAxisAngle(errorRotationMatrix, errorAxisAngle);
 
       axis.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
@@ -217,7 +217,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
       errorRotationVector.scale(errorAxisAngle.getAngle());
       errorRotationVector.scale(0.2);
       
-      errorTransform.get(errorTranslationVector);
+      errorTransform.getTranslation(errorTranslationVector);
       
       MatrixTools.setDenseMatrixFromTuple3d(spatialError, errorRotationVector, 0, 0);
       MatrixTools.setDenseMatrixFromTuple3d(spatialError, errorTranslationVector, 3, 0);

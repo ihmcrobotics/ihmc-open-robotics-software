@@ -4,9 +4,8 @@ import java.io.IOException;
 
 import net.java.games.input.Component;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.util.CommonNames;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -15,6 +14,9 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.robotDescription.JointDescription;
+import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.joystick.BooleanYoVariableJoystickEventListener;
 import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
@@ -47,24 +49,18 @@ public class ValkyrieSliderBoard
       switch (sliderBoardType)
       {
       case ON_BOARD_POSITION:
-         setupSliderBoardForOnBoardPositionControl(registry, drcRobotModel.getGeneralizedRobotModel(), sliderBoardConfigurationManager);
+         setupSliderBoardForOnBoardPositionControl(registry, drcRobotModel.getRobotDescription(), sliderBoardConfigurationManager);
 
          break;
 
       case TORQUE_PD_CONTROL:
-         setupSliderBoardForForceControl(registry, drcRobotModel.getGeneralizedRobotModel(), sliderBoardConfigurationManager);
+         setupSliderBoardForForceControl(registry, drcRobotModel.getRobotDescription(), sliderBoardConfigurationManager);
 
          break;
 
       case WALKING:
          new WalkControllerSliderBoard(scs, registry, drcRobotModel);
          setupJoyStickAndTreadmill(registry);
-         break;
-      case GRAVITY_COMPENSATION:
-
-         new InverseDynamicsJointController.GravityCompensationSliderBoard(scs, drcRobotModel.createFullRobotModel(), registry,
-               CommonNames.doIHMCControlRatio.toString(), 0.0, 1.0);
-
          break;
       }
 
@@ -80,7 +76,7 @@ public class ValkyrieSliderBoard
       }
       catch (IOException e)
       {
-         e.printStackTrace();
+         System.out.println("No joystick detected.");
          return;
       }
 
@@ -100,7 +96,7 @@ public class ValkyrieSliderBoard
       headingUpdaterThread.start();
       //--------------------
       // Speed and Heading Controller
-      //--------------------            
+      //--------------------
       final BooleanYoVariable isMultisenseControllingSpeedAndHeading = new BooleanYoVariable("isMultisenseControllingSpeedAndHeading", registry);
       final DoubleYoVariable headingDotConstant = new DoubleYoVariable("headingDotConstant", registry);
       final DoubleYoVariable velocityXConstant = new DoubleYoVariable("velocityXConstant", registry);
@@ -116,7 +112,7 @@ public class ValkyrieSliderBoard
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            // Reset heading and speed when toggling controller 
+            // Reset heading and speed when toggling controller
             if (v.getValueAsDouble() != 0)
             {
                desiredVelocityX.set(desiredVelocityX_Bias);
@@ -170,7 +166,7 @@ public class ValkyrieSliderBoard
 
    }
 
-   private void setupSliderBoardForForceControl(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
+   private void setupSliderBoardForForceControl(YoVariableRegistry registry, RobotDescription robotDescription,
          final SliderBoardConfigurationManager sliderBoardConfigurationManager)
    {
       for (ValkyrieSliderBoardSelectableJoints jointId : ValkyrieSliderBoardSelectableJoints.values())
@@ -185,8 +181,9 @@ public class ValkyrieSliderBoard
             sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardSelectableJoints.values().length - 1);
 
             // sliders
+            OneDoFJointDescription jointDescription = (OneDoFJointDescription) robotDescription.getJointDescription(jointName);
             sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
-                  generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
+                  jointDescription.getLowerLimit(), jointDescription.getUpperLimit());
             sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 2000.0);
             sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
 
@@ -206,7 +203,7 @@ public class ValkyrieSliderBoard
       });
    }
 
-   
+
    static final String[] untunableOrNonRotaryJoints = new String[] { "WaistExtensor", "WaistLateral", "Ankle", "Neck", "Forearm", "Wrist" };
 
    private boolean isTunableRotaryJoint(String jointName)
@@ -239,7 +236,7 @@ public class ValkyrieSliderBoard
       return false;
    }
 
-   private void setupSliderBoardForOnBoardPositionControl(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
+   private void setupSliderBoardForOnBoardPositionControl(YoVariableRegistry registry, RobotDescription robotDescription,
          final SliderBoardConfigurationManager sliderBoardConfigurationManager)
    {
       for (ValkyrieSliderBoardSelectableJoints jointId : ValkyrieSliderBoardSelectableJoints.values())
@@ -252,8 +249,9 @@ public class ValkyrieSliderBoard
          sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardSelectableJoints.values().length - 1);
 
          // sliders
-         sliderBoardConfigurationManager.setSlider(1, jointName + CommonNames.q_d, registry, generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(),
-               generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
+         OneDoFJointDescription jointDescription = (OneDoFJointDescription) robotDescription.getJointDescription(jointName);
+         sliderBoardConfigurationManager.setSlider(1, jointName + CommonNames.q_d, registry, jointDescription.getLowerLimit(),
+               jointDescription.getUpperLimit());
          sliderBoardConfigurationManager.setSlider(2, jointName + CommonNames.qd_d, registry, -9, 9);
 
          sliderBoardConfigurationManager.saveConfiguration(jointId.toString());

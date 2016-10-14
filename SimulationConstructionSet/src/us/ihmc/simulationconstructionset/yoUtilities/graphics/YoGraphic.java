@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.yoUtilities.graphics;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.Transform3d;
 

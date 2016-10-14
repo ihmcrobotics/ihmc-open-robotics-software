@@ -34,9 +34,9 @@ public class InPlaceConvexHullCalculator2d
       for (int i = 1; i < n; i++)
       {
          temp = points.get(i);
-         if (temp.x <= firstPoint.x)
+         if (temp.getX() <= firstPoint.getX())
          {
-            if (temp.x != firstPoint.x || temp.y > firstPoint.y)
+            if (temp.getX() != firstPoint.getX() || temp.getY() > firstPoint.getY())
             {
                firstPoint = temp;
                firstIndex = i;
@@ -98,9 +98,9 @@ public class InPlaceConvexHullCalculator2d
       for (int i = 1; i < size; i++)
       {
          temp = points.get(i);
-         if (temp.x <= firstPoint.x)
+         if (temp.getX() <= firstPoint.getX())
          {
-            if (temp.x != firstPoint.x || temp.y > firstPoint.y)
+            if (temp.getX() != firstPoint.getX() || temp.getY() > firstPoint.getY())
             {
                firstPoint = temp;
                bestIndex = i;
@@ -160,7 +160,7 @@ public class InPlaceConvexHullCalculator2d
       if (from.equals(to))
          return 0;
 
-      double angle = Math.atan2(to.y - from.y, to.x - from.x);
+      double angle = Math.atan2(to.getY() - from.getY(), to.getX() - from.getX());
 
       if (angle <= Math.PI / 2)
          angle += Math.PI / 2;

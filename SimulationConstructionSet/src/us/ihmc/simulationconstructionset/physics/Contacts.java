@@ -8,28 +8,29 @@ import javax.vecmath.Vector3d;
  */
 public interface Contacts
 {
+   public abstract CollisionShape getShapeA();
+   public abstract CollisionShape getShapeB();
+
    /**
     * Total number of contacts found between the two shapes.
     */
-   public int getNumContacts();
+   public int getNumberOfContacts();
 
    /**
     * Location on shapeA that the contact occurred.  World coordinates.
     *
     * @param which Contact index.
     * @param location Storage for location.  If null a new instance will be declared.
-    * @return Location of contact in world coordinates.
     */
-   public Point3d getWorldA(int which, Point3d location);
+   public void getWorldA(int which, Point3d locationAToPack);
 
    /**
     * Location on shapeB that the contact occurred.  World coordinates.
     *
     * @param which Contact index.
     * @param location Storage for location.  If null a new instance will be declared.
-    * @return Location of contact in world coordinates.
     */
-   public Point3d getWorldB(int which, Point3d location);
+   public void getWorldB(int which, Point3d locationBToPack);
 
    /**
     * Distance between the two points.
@@ -37,13 +38,13 @@ public interface Contacts
    public double getDistance(int which);
 
    /**
-    * The normal between the collision in world coordintes.  The normal can be in reference to object A or B.  Call {@link #isNormalOnA()}  to
+    * The normal between the collision in world coordinates.  The normal can be in reference to object A or B.  Call {@link #isNormalOnA()}  to
     * determin which one it is.
     *
     * @param which Contact index.
     * @return Normal in world coordinates.
     */
-   public Vector3d getWorldNormal(int which);
+   public void getWorldNormal(int which, Vector3d normalToPack);
 
    /**
     * Is the normal for the surface of A or B.

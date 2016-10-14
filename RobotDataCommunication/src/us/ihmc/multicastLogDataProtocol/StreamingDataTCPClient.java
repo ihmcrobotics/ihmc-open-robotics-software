@@ -9,12 +9,15 @@ import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.robotDataCommunication.LogDataHeader;
 
 public class StreamingDataTCPClient extends Thread
 {
+   private static final AtomicInteger threadNumber = new AtomicInteger(1);
+   
    public static final int TIMEOUT = 45000;
    private volatile boolean running = false;
 
@@ -25,6 +28,8 @@ public class StreamingDataTCPClient extends Thread
 
    public StreamingDataTCPClient(InetAddress dataIP, int port, LogPacketHandler updateHandler, int sendEveryNthTick)
    {
+      super(StreamingDataTCPClient.class.getSimpleName() + "-" + threadNumber.getAndIncrement());
+      
       this.address = new InetSocketAddress(dataIP, port);
       this.updateHandler = updateHandler;
       this.sendEveryNthTick = (byte) sendEveryNthTick;
@@ -82,6 +87,14 @@ public class StreamingDataTCPClient extends Thread
 
       ByteBuffer headerBuffer = ByteBuffer.allocateDirect(LogDataHeader.length());
 
+      try
+      {
+         updateHandler.connected((InetSocketAddress) connection.getLocalAddress());
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
       DATALOOP: while (running)
       {
          try
@@ -116,8 +129,8 @@ public class StreamingDataTCPClient extends Thread
             }
 
             dataBuffer.flip();
+            
             updateHandler.newDataAvailable(header, dataBuffer);
-
          }
          catch (ClosedByInterruptException e)
          {
@@ -134,7 +147,6 @@ public class StreamingDataTCPClient extends Thread
             System.out.println(e.getMessage());
             break DATALOOP;
          }
-
       }
       try
       {

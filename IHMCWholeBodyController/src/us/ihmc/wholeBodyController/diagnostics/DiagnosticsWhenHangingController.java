@@ -6,18 +6,22 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.controllers.PDController;
@@ -35,6 +39,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachines.State;
 import us.ihmc.robotics.stateMachines.StateMachine;
 import us.ihmc.robotics.stateMachines.StateTransition;
@@ -42,7 +47,7 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
-public class DiagnosticsWhenHangingController extends HighLevelBehavior implements RobotController
+public class DiagnosticsWhenHangingController extends HighLevelBehavior implements RobotController, JointTorqueOffsetEstimator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -100,17 +105,20 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    private final HumanoidJointPoseList humanoidJointPoseList;
 
-   private final MomentumBasedController momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox momentumBasedController;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
 
-   public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, BipedSupportPolygons bipedSupportPolygons, boolean useArms, boolean robotIsHanging,
-         MomentumBasedController momentumBasedController, TorqueOffsetPrinter torqueOffsetPrinter)
+   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
+   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
+
+   public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging,
+         HighLevelHumanoidControllerToolbox momentumBasedController, TorqueOffsetPrinter torqueOffsetPrinter)
    {
       super(HighLevelState.DIAGNOSTICS);
 
       this.humanoidJointPoseList = humanoidJointPoseList;
-      this.bipedSupportPolygons = bipedSupportPolygons;
+      this.bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
@@ -138,6 +146,10 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       this.yoTime = momentumBasedController.getYoTime();
       this.fullRobotModel = momentumBasedController.getFullRobotModel();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);
+
+      OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
+      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
+      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(jointArray, LowLevelJointControlMode.FORCE_CONTROL);
 
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
@@ -233,6 +245,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       return fullRobotModel;
    }
 
+   @Override
    public ArrayList<OneDoFJoint> getOneDoFJoints()
    {
       return oneDoFJoints;
@@ -302,6 +315,10 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          printForceSensorsOffsets.set(false);
          printFootSensorsOffset();
       }
+
+      OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
+      lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(jointArray);
+      controllerCoreCommand.completeLowLevelJointData(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    private void callUpdatables()
@@ -313,7 +330,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       }
 
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
-      momentumBasedController.callUpdatables();
+      momentumBasedController.update();
    }
 
    public void updateDiagnosticsWhenHangingHelpers()
@@ -691,8 +708,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       makeLegJointHelper(RobotSide.LEFT, 1.0, false, LegJointName.HIP_ROLL);
       makeLegJointHelper(RobotSide.RIGHT, -1.0, false, LegJointName.HIP_ROLL);
 
-      makeLegJointHelper(RobotSide.LEFT, 1.0, true, LegJointName.KNEE);
-      makeLegJointHelper(RobotSide.RIGHT, -1.0, true, LegJointName.KNEE);
+      makeLegJointHelper(RobotSide.LEFT, 1.0, true, LegJointName.KNEE_PITCH);
+      makeLegJointHelper(RobotSide.RIGHT, -1.0, true, LegJointName.KNEE_PITCH);
 
       makeLegJointHelper(RobotSide.LEFT, 1.0, true, LegJointName.ANKLE_PITCH);
       makeLegJointHelper(RobotSide.RIGHT, 1.0, true, LegJointName.ANKLE_PITCH);
@@ -811,8 +828,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setProportionalGain(165);
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setDerivativeGain(6.0);
 
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE)).setProportionalGain(80.0);
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE)).setDerivativeGain(3.0);
+         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH)).setProportionalGain(80.0);
+         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH)).setDerivativeGain(3.0);
 
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setProportionalGain(20.0);
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setDerivativeGain(2.0);
@@ -941,6 +958,18 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       }
    }
 
+   @Override
+   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
+   {
+      
+   }
+
+   @Override
+   public ControllerCoreCommand getControllerCoreCommand()
+   {
+      return controllerCoreCommand;
+   }
+
    // private void tareFootSensors()
    // {
    //    for (RobotSide robotSide : RobotSide.values)
@@ -956,4 +985,30 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    //       footSwitch.setSensorWrenchOffset(tempWrench);
    //    }
    // }
+
+   @Override
+   public void enableJointTorqueOffsetEstimationAtomic(boolean enable)
+   {
+      adaptTorqueOffset.set(enable);
+   }
+
+   @Override
+   public double getEstimatedJointTorqueOffset(OneDoFJoint joint)
+   {
+      DiagnosticsWhenHangingHelper helper = helpers.get(joint);
+      return helper == null ? Double.NaN : helper.getTorqueOffset();
+   }
+
+   @Override
+   public void resetEstimatedJointTorqueOffset(OneDoFJoint joint)
+   {
+      if (hasTorqueOffsetForJoint(joint))
+         helpers.get(joint).setTorqueOffset(0.0);
+   }
+
+   @Override
+   public boolean hasTorqueOffsetForJoint(OneDoFJoint joint)
+   {
+      return helpers.containsKey(joint);
+   }
 }

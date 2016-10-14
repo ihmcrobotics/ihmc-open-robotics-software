@@ -14,14 +14,14 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class OrientationInterpolationCalculatorTest
 {
 
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
 
    /**
     * Numerically differentiate, then use OrientationInterpolationAngularVelocityCalculator, compare results.
@@ -67,7 +67,7 @@ public class OrientationInterpolationCalculatorTest
          omegaTilde.mul(orientationTranspose);
          JUnitTools.assertSkewSymmetric(omegaTilde, 1e-3);
 
-         Vector3d angularVelocity = new Vector3d(-omegaTilde.m12, omegaTilde.m02, -omegaTilde.m01); // in world frame
+         Vector3d angularVelocity = new Vector3d(-omegaTilde.getM12(), omegaTilde.getM02(), -omegaTilde.getM01()); // in world frame
 
          // compute angular velocity using OrientationInterpolationAngularVelocityCalculator
          OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();

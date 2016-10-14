@@ -2,7 +2,7 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
-public class YoIndependentSE3PIDGains implements YoSE3PIDGains
+public class YoIndependentSE3PIDGains implements YoSE3PIDGainsInterface
 {
    private final YoEuclideanPositionGains positionGains;
    private final YoAxisAngleOrientationGains orientationGains;
@@ -19,11 +19,13 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGains
       orientationGains.reset();
    }
 
+   @Override
    public YoEuclideanPositionGains getPositionGains()
    {
       return positionGains;
    }
 
+   @Override
    public YoAxisAngleOrientationGains getOrientationGains()
    {
       return orientationGains;
@@ -59,9 +61,19 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGains
       positionGains.setIntegralGains(integralGains, maxIntegralError);
    }
 
-   public void setPositionMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setPositionMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      positionGains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      positionGains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
+   }
+
+   public void setPositionMaxDerivativeError(double maxDerivativeError)
+   {
+      positionGains.setMaxDerivativeError(maxDerivativeError);
+   }
+
+   public void setPositionMaxProportionalError(double maxProportionalError)
+   {
+      positionGains.setMaxProportionalError(maxProportionalError);
    }
 
    public void setOrientationProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
@@ -94,8 +106,37 @@ public class YoIndependentSE3PIDGains implements YoSE3PIDGains
       orientationGains.setIntegralGains(integralGains, maxIntegralError);
    }
 
-   public void setOrientationMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
+   public void setOrientationMaxFeedbackAndFeedbackRate(double maxFeedback, double maxFeedbackRate)
    {
-      orientationGains.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
+      orientationGains.setMaxFeedbackAndFeedbackRate(maxFeedback, maxFeedbackRate);
+   }
+
+   public void setOrientationMaxDerivativeError(double maxDerivativeError)
+   {
+      orientationGains.setMaxDerivativeError(maxDerivativeError);
+   }
+
+   public void setOrientationMaxProportionalError(double maxProportionalError)
+   {
+      orientationGains.setMaxProportionalError(maxProportionalError);
+   }
+
+   @Override
+   public void set(SE3PIDGainsInterface gains)
+   {
+      set(gains.getPositionGains());
+      set(gains.getOrientationGains());
+   }
+
+   @Override
+   public void set(PositionPIDGainsInterface positionGains)
+   {
+      this.positionGains.set(positionGains);
+   }
+
+   @Override
+   public void set(OrientationPIDGainsInterface orientationGains)
+   {
+      this.orientationGains.set(orientationGains);
    }
 }

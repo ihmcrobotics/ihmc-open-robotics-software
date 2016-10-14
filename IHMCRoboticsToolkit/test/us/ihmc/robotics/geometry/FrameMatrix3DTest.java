@@ -6,7 +6,7 @@ import org.junit.Test;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -26,7 +26,7 @@ public class FrameMatrix3DTest
    private static final ReferenceFrame bFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("bFrame", worldFrame, RigidBodyTransform
          .generateRandomTransform(random));
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructors()
    {
@@ -56,7 +56,7 @@ public class FrameMatrix3DTest
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetters()
    {
@@ -104,15 +104,15 @@ public class FrameMatrix3DTest
 
       matrixExpected = RandomTools.generateRandomMatrix3d(random, 10.0);
       frameMatrix3D = new FrameMatrix3D();
-      frameMatrix3D.setM00(matrixExpected.m00);
-      frameMatrix3D.setM01(matrixExpected.m01);
-      frameMatrix3D.setM02(matrixExpected.m02);
-      frameMatrix3D.setM10(matrixExpected.m10);
-      frameMatrix3D.setM11(matrixExpected.m11);
-      frameMatrix3D.setM12(matrixExpected.m12);
-      frameMatrix3D.setM20(matrixExpected.m20);
-      frameMatrix3D.setM21(matrixExpected.m21);
-      frameMatrix3D.setM22(matrixExpected.m22);
+      frameMatrix3D.setM00(matrixExpected.getM00());
+      frameMatrix3D.setM01(matrixExpected.getM01());
+      frameMatrix3D.setM02(matrixExpected.getM02());
+      frameMatrix3D.setM10(matrixExpected.getM10());
+      frameMatrix3D.setM11(matrixExpected.getM11());
+      frameMatrix3D.setM12(matrixExpected.getM12());
+      frameMatrix3D.setM20(matrixExpected.getM20());
+      frameMatrix3D.setM21(matrixExpected.getM21());
+      frameMatrix3D.setM22(matrixExpected.getM22());
       frameMatrix3D.getMatrix(matrixTested);
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
       
@@ -135,7 +135,7 @@ public class FrameMatrix3DTest
       {
          Vector3d rowElements = new Vector3d();
          matrixExpected.getRow(row, rowElements);
-         frameMatrix3D.setRow(row, rowElements.x, rowElements.y, rowElements.z);
+         frameMatrix3D.setRow(row, rowElements.getX(), rowElements.getY(), rowElements.getZ());
       }
       frameMatrix3D.getMatrix(matrixTested);
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
@@ -146,13 +146,13 @@ public class FrameMatrix3DTest
       {
          Vector3d columnElements = new Vector3d();
          matrixExpected.getColumn(column, columnElements);
-         frameMatrix3D.setColumn(column, columnElements.x, columnElements.y, columnElements.z);
+         frameMatrix3D.setColumn(column, columnElements.getX(), columnElements.getY(), columnElements.getZ());
       }
       frameMatrix3D.getMatrix(matrixTested);
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetters()
    {
@@ -197,7 +197,7 @@ public class FrameMatrix3DTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToNaN()
    {
@@ -226,7 +226,7 @@ public class FrameMatrix3DTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToZero()
    {
@@ -255,7 +255,7 @@ public class FrameMatrix3DTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetToIdentity()
    {
@@ -293,7 +293,7 @@ public class FrameMatrix3DTest
    /**
     * Check that changing frame applies the expected transformation to the matrix3d held in FrameMatrix3D
     */
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testChangeFrame()
    {
@@ -310,7 +310,7 @@ public class FrameMatrix3DTest
 
          RigidBodyTransform transformToWorldFrame = randomFrame.getTransformToDesiredFrame(bFrame);
          Matrix3d rotationToWorld = new Matrix3d();
-         transformToWorldFrame.get(rotationToWorld);
+         transformToWorldFrame.getRotation(rotationToWorld);
          matrixTransformed.mul(rotationToWorld, matrixOriginal);
          matrixTransformed.mulTransposeRight(matrixTransformed, rotationToWorld);
 
@@ -323,7 +323,7 @@ public class FrameMatrix3DTest
    /**
     * Test the changeFrame method by check that transforming a random vector in two different frames using the FrameMatrix3D ends up being the same.
     */
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testChangeFrameByTransformingAVectorInTwoDifferentFrames()
    {

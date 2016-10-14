@@ -27,9 +27,9 @@ public class UniversalJoint extends PinJoint
 
       // Set the child r_in value:
 
-      joint2.physics.r_in.x = 0.0;
-      joint2.physics.r_in.y = 0.0;
-      joint2.physics.r_in.z = 0.0;
+      joint2.physics.r_in.setX(0.0);
+      joint2.physics.r_in.setY(0.0);
+      joint2.physics.r_in.setZ(0.0);
    }
    
    public PinJoint getFirstJoint()
@@ -141,17 +141,17 @@ public class UniversalJoint extends PinJoint
 
    public void getRotationToWorld(Matrix3d rotation)
    {
-      joint2.transformToNext.get(rotation);
+      joint2.transformToNext.getRotation(rotation);
    }
 
    public void getRotationToWorld(Quat4d rotation)
    {
-      joint2.transformToNext.get(rotation);
+      joint2.transformToNext.getRotation(rotation);
    }
 
    public void getTranslationToWorld(Vector3d translation)
    {
-      joint2.transformToNext.get(translation);
+      joint2.transformToNext.getTranslation(translation);
    }
 
 

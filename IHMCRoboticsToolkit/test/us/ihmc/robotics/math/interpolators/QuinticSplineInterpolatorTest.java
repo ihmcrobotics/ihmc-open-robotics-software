@@ -9,7 +9,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.robotics.math.interpolators.QuinticSplineInterpolator;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class QuinticSplineInterpolatorTest
 {
@@ -20,7 +20,7 @@ public class QuinticSplineInterpolatorTest
     * made in Matlab.
     */
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testQuinticSplineInterpolator()
    {
@@ -78,7 +78,7 @@ public class QuinticSplineInterpolatorTest
     * timing parameters.
     */
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 1.0)
 	@Test(timeout=300000)
    public void testQuinticSplineCalculationSpeed() throws IOException
    {
@@ -150,7 +150,7 @@ public class QuinticSplineInterpolatorTest
 
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testTwoPointsQuinticSpline()
    {

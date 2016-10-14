@@ -6,11 +6,13 @@ public class DepthDataStateCommand extends Packet<DepthDataStateCommand>
 {
    public enum LidarState
    {
-      DISABLE, ENABLE
+      DISABLE, ENABLE, ENABLE_BEHAVIOR_ONLY
    }
-   
+
    public LidarState lidarState;
-   
+
+   public boolean publishLidarPose = false;
+
    public DepthDataStateCommand()
    {
    }
@@ -24,13 +26,19 @@ public class DepthDataStateCommand extends Packet<DepthDataStateCommand>
    {
       return lidarState;
    }
-   
+
+   public boolean isLidarPoseRequested()
+   {
+      return publishLidarPose;
+   }
+
    @Override
    public boolean equals(Object other)
    {
-      if(other instanceof DepthDataStateCommand)
+      if (other instanceof DepthDataStateCommand)
       {
-         return ((DepthDataStateCommand) other).lidarState == lidarState;
+         DepthDataStateCommand depthDataStateCommand = (DepthDataStateCommand) other;
+         return depthDataStateCommand.lidarState == lidarState && depthDataStateCommand.publishLidarPose == publishLidarPose;
       }
       else
       {

@@ -7,7 +7,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 
-
 /**
  * This class resolves where the Center of Pressure is for a given wrench and plane.
  * If the z component of the force is close to zero, then the returned CoP will be
@@ -28,66 +27,68 @@ public class CenterOfPressureResolver
    private final Vector3d torqueAtZeroInPlaneFrame = new Vector3d();
    private final Vector3d forceInPlaneFrame = new Vector3d();
 
-   public double resolveCenterOfPressureAndNormalTorque(FramePoint2d centerOfPressureToPack, SpatialForceVector spatialForceVector, ReferenceFrame centerOfPressurePlaneFrame)
+   public double resolveCenterOfPressureAndNormalTorque(FramePoint2d centerOfPressureToPack, SpatialForceVector spatialForceVector,
+         ReferenceFrame centerOfPressurePlaneFrame)
    {
       // First resolve the wrench at the plane origin:
       wrenchResolvedOnPlane.set(spatialForceVector);
       wrenchResolvedOnPlane.changeFrame(centerOfPressurePlaneFrame);
-      
+
       wrenchResolvedOnPlane.getAngularPart(torqueAtZeroInPlaneFrame);
       wrenchResolvedOnPlane.getLinearPart(forceInPlaneFrame);
-            
+
       double fz = forceInPlaneFrame.getZ();
-      
+
       double vector12x = Double.NaN;
       double vector12y = Double.NaN;
-      
+
       double normalTorqueAtCenterOfPressure;
       if (fz > 1e-7)
       {
          //with sufficient normal force
-         vector12x = -1.0/fz * torqueAtZeroInPlaneFrame.getY();
-         vector12y = 1.0/fz * torqueAtZeroInPlaneFrame.getX();
+         vector12x = -1.0 / fz * torqueAtZeroInPlaneFrame.getY();
+         vector12y = 1.0 / fz * torqueAtZeroInPlaneFrame.getX();
          normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ() - vector12x * forceInPlaneFrame.getY() + vector12y * forceInPlaneFrame.getX();
       }
       else
       {
-        //without normal force
+         //without normal force
          normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ();
       }
-      
+
       centerOfPressureToPack.setIncludingFrame(centerOfPressurePlaneFrame, vector12x, vector12y);
       return normalTorqueAtCenterOfPressure;
    }
 
-   public double resolveCenterOfPressureAndNormalTorque(FramePoint centerOfPressureToPack, SpatialForceVector spatialForceVector, ReferenceFrame centerOfPressurePlaneFrame)
+   public double resolveCenterOfPressureAndNormalTorque(FramePoint centerOfPressureToPack, SpatialForceVector spatialForceVector,
+         ReferenceFrame centerOfPressurePlaneFrame)
    {
       // First resolve the wrench at the plane origin:
       wrenchResolvedOnPlane.set(spatialForceVector);
       wrenchResolvedOnPlane.changeFrame(centerOfPressurePlaneFrame);
-      
+
       wrenchResolvedOnPlane.getAngularPart(torqueAtZeroInPlaneFrame);
       wrenchResolvedOnPlane.getLinearPart(forceInPlaneFrame);
-            
+
       double fz = forceInPlaneFrame.getZ();
-      
+
       double vector12x = Double.NaN;
       double vector12y = Double.NaN;
-      
+
       double normalTorqueAtCenterOfPressure;
       if (fz > 1e-7)
       {
          //with sufficient normal force
-         vector12x = -1.0/fz * torqueAtZeroInPlaneFrame.getY();
-         vector12y = 1.0/fz * torqueAtZeroInPlaneFrame.getX();
+         vector12x = -1.0 / fz * torqueAtZeroInPlaneFrame.getY();
+         vector12y = 1.0 / fz * torqueAtZeroInPlaneFrame.getX();
          normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ() - vector12x * forceInPlaneFrame.getY() + vector12y * forceInPlaneFrame.getX();
       }
       else
       {
-        //without normal force
+         //without normal force
          normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ();
       }
-      
+
       centerOfPressureToPack.setIncludingFrame(centerOfPressurePlaneFrame, vector12x, vector12y, 0.0);
       return normalTorqueAtCenterOfPressure;
    }

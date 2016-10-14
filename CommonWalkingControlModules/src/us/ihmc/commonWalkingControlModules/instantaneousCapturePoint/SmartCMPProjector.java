@@ -1,341 +1,270 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import javax.vecmath.Point2d;
+import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Blue;
+import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.DarkRed;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
-
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
+import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 public class SmartCMPProjector extends CMPProjector
 {
-   private boolean VISUALIZE = false;
-
-   private final YoGraphicPosition icpViz, moveAwayFromEdgeViz, projectedCMPViz, preProjectedCMPViz, edgeOneViz, edgeTwoViz;
-   private final BooleanYoVariable cmpProjected;
-   private final DoubleYoVariable cmpEdgeProjectionInside;
-   private final DoubleYoVariable minICPToCMPProjection;
-
-   private final FrameLine2d icpToCMPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2d(), new Point2d(1.0, 0.0));
-   private final FramePoint2d moveAwayFromEdge = new FramePoint2d();
-   private final FramePoint2d otherEdge = new FramePoint2d();
-   private final FrameVector2d insideEdgeDirection = new FrameVector2d();
-
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   public SmartCMPProjector(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   // local points so changing their frame will not modify the objects passed in
+   private final FramePoint2d desiredCMP = new FramePoint2d();
+   private final FramePoint2d projectedCMP = new FramePoint2d();
+   private final FrameConvexPolygon2d projectionArea = new FrameConvexPolygon2d();
+   private final FramePoint2d capturePoint = new FramePoint2d();
+   private final FramePoint2d finalCapturePoint = new FramePoint2d();
+
+   // visualization
+   private final YoFramePoint2d yoDesiredCMP = new YoFramePoint2d("DesiredCMP", worldFrame, registry);
+   private final YoFramePoint2d yoProjectedCMP = new YoFramePoint2d("ProjectedCMP", worldFrame, registry);
+   private final YoFrameConvexPolygon2d yoProjectionArea = new YoFrameConvexPolygon2d("CMPProjectionArea", worldFrame, 10, registry);
+
+   // debugging and state of the projector
+   private final BooleanYoVariable cmpWasProjected = new BooleanYoVariable("CmpWasProjected", registry);
+
+   // temporary variables to avoid garbage generation
+   private final BoundingBox2d tempBoundingBox = new BoundingBox2d();
+   private final FrameLine2d icpToCMPLine = new FrameLine2d();
+   private final FramePoint2d intersection1 = new FramePoint2d();
+   private final FramePoint2d intersection2 = new FramePoint2d();
+   private final FramePoint2d vertex = new FramePoint2d();
+   private final FrameVector2d icpToCMPVector = new FrameVector2d();
+   private final FrameVector2d icpToCandidateVector = new FrameVector2d();
+   private final FrameLine2d finalICPToICPLine = new FrameLine2d();
+   private final FrameVector2d finalICPToICPVector = new FrameVector2d();
+   private final FramePoint2d centroid = new FramePoint2d();
+
+   // for debugging and to check what method was used
+   public enum ProjectionMethod {
+      NONE,
+      SMALL_AREA_CENTROID,
+      RAY_THROUGH_AREA,
+      TOWARDS_FINAL,
+      TOWARDS_FINAL_MIN_ANGLE,
+      ORTHOGONAL_PROJECTION
+   }
+   private final EnumYoVariable<ProjectionMethod> activeProjection = new EnumYoVariable<>("ActiveCMPProjection", registry, ProjectionMethod.class);
+
+   public SmartCMPProjector(YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      cmpProjected = new BooleanYoVariable("cmpProjected", registry);
-      cmpEdgeProjectionInside = new DoubleYoVariable("cmpEdgeProjectionInside", registry);
-      minICPToCMPProjection = new DoubleYoVariable("minICPToCMPProjection", registry);
-
-      cmpEdgeProjectionInside.set(0.04); //0.06);
-      minICPToCMPProjection.set(0.06); //0.04);
-
-      if (yoGraphicsListRegistry == null)
-         VISUALIZE = false;
-
-      if (VISUALIZE)
-      {
-         double VizBallSize = 0.3;
-
-         icpViz = new YoGraphicPosition("icpViz", "", registry, VizBallSize, YoAppearance.Blue(), GraphicType.BALL_WITH_CROSS);
-         yoGraphicsListRegistry.registerYoGraphic("CMPProjection", icpViz);
-         yoGraphicsListRegistry.registerArtifact("CMPProjection", icpViz.createArtifact());
-
-         moveAwayFromEdgeViz = new YoGraphicPosition("moveAwayFromEdgeViz", "", registry, VizBallSize, YoAppearance.CadetBlue(),
-               GraphicType.BALL_WITH_CROSS);
-         yoGraphicsListRegistry.registerYoGraphic("CMPProjection", moveAwayFromEdgeViz);
-         yoGraphicsListRegistry.registerArtifact("CMPProjection", moveAwayFromEdgeViz.createArtifact());
-
-         projectedCMPViz = new YoGraphicPosition("projectedCMPViz", "", registry, VizBallSize, YoAppearance.Gold(), GraphicType.BALL_WITH_CROSS);
-         yoGraphicsListRegistry.registerYoGraphic("CMPProjection", projectedCMPViz);
-         yoGraphicsListRegistry.registerArtifact("CMPProjection", projectedCMPViz.createArtifact());
-
-         preProjectedCMPViz = new YoGraphicPosition("preProjectedCMPViz", "", registry, VizBallSize, YoAppearance.Red(), GraphicType.BALL);
-         yoGraphicsListRegistry.registerYoGraphic("CMPProjection", preProjectedCMPViz);
-         yoGraphicsListRegistry.registerArtifact("CMPProjection", preProjectedCMPViz.createArtifact());
-
-         edgeOneViz = new YoGraphicPosition("edgeOneViz", "", registry, VizBallSize, YoAppearance.Pink(), GraphicType.BALL);
-         yoGraphicsListRegistry.registerYoGraphic("CMPProjection", edgeOneViz);
-         yoGraphicsListRegistry.registerArtifact("CMPProjection", edgeOneViz.createArtifact());
-
-         edgeTwoViz = new YoGraphicPosition("edgeTwoViz", "", registry, VizBallSize, YoAppearance.Beige(), GraphicType.BALL);
-         yoGraphicsListRegistry.registerYoGraphic("CMPProjection", edgeTwoViz);
-         yoGraphicsListRegistry.registerArtifact("CMPProjection", edgeTwoViz.createArtifact());
-      }
-      else
-      {
-         icpViz = null;
-
-         moveAwayFromEdgeViz = null;
-         projectedCMPViz = null;
-         preProjectedCMPViz = null;
-         edgeOneViz = null;
-         edgeTwoViz = null;
-      }
+      activeProjection.set(ProjectionMethod.NONE);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
+
+      if (graphicsListRegistry != null)
+      {
+         YoArtifactPosition desiredCMPViz = new YoArtifactPosition("Desired CMP Position", yoDesiredCMP, GraphicType.SOLID_BALL, DarkRed().getAwtColor(),
+               0.008);
+         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), desiredCMPViz);
+
+         YoArtifactPosition projectedCMPViz = new YoArtifactPosition("Projected CMP Position", yoProjectedCMP, GraphicType.BALL_WITH_ROTATED_CROSS,
+               DarkRed().getAwtColor(), 0.01);
+         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), projectedCMPViz);
+
+         YoArtifactPolygon projectionAreaViz = new YoArtifactPolygon("CMP Projection Area", yoProjectionArea, Blue().getAwtColor(), false);
+         graphicsListRegistry.registerArtifact(getClass().getSimpleName(), projectionAreaViz);
+      }
    }
 
-   public void setCMPEdgeProjectionInside(double cmpEdgeProjectionInside)
+   public void projectCMP(FramePoint2d desiredCMP, FrameConvexPolygon2d projectionArea, FramePoint2d capturePoint, FramePoint2d finalCapturePoint)
    {
-      this.cmpEdgeProjectionInside.set(cmpEdgeProjectionInside);
-   }
+      // store arguments in local variables and change the frames to match the projection area
+      this.projectionArea.setIncludingFrameAndUpdate(projectionArea);
+      this.desiredCMP.setIncludingFrame(desiredCMP);
+      this.desiredCMP.changeFrameAndProjectToXYPlane(projectionArea.getReferenceFrame());
+      this.capturePoint.setIncludingFrame(capturePoint);
+      this.capturePoint.changeFrameAndProjectToXYPlane(projectionArea.getReferenceFrame());
+      if (finalCapturePoint != null)
+         this.finalCapturePoint.setIncludingFrame(finalCapturePoint);
+      else
+         this.finalCapturePoint.setToNaN();
+      this.finalCapturePoint.changeFrameAndProjectToXYPlane(projectionArea.getReferenceFrame());
 
-   public void setMinICPToCMPProjection(double minICPToCMPProjection)
-   {
-      this.minICPToCMPProjection.set(minICPToCMPProjection);
-   }
+      // do the projection
+      projectCMP();
+      cmpWasProjected.set(!activeProjection.valueEquals(ProjectionMethod.NONE));
 
-   private final FrameVector2d cmpToICPVector = new FrameVector2d();
-
-   
-   // orders a pair of points by nearest then farthest from reference point
-   public void order(FramePoint2d reference, FramePoint2d[] points)
-   {
-      if (points.length != 2) {
-         throw new RuntimeException("requires two points, got: " + points.length);
-      }
-
-      if (reference.distance(points[0]) < reference.distance(points[1]))
-         return;
-
-      FramePoint2d temp = points[0];
-      points[0] = points[1];
-      points[1] = temp;
-   }
-   
-   
-   // Merges the intersections formed by projections of to collinear but opposing rays from a single point.
-   // This assumes intersection with a convex polygon and removes duplicate points.
-   private FramePoint2d[] merge(FramePoint2d[] one, FramePoint2d[] two, double epsilon)
-   {
-      if (one.length == 0) {
-         return two;
-      }
-      
-      if (two.length == 0) {
-         return one;
-      }
-      
-      if (one.length == 2) {
-         return one;
-      }
-      
-      if (two.length == 2) {
-         return two;
-      }
-      
-      if (one[0].distance(two[0]) < epsilon) {
-         return one;
-      }
-      
-      return new FramePoint2d[]{one[0], two[0]};
-   }
-
-   /**
-    * Project the CMP to the support polygon by moving it along the line CMP-ICP.
-    * Only problem, sometimes the line CMP-ICP doesn't intersect with the support polygon and the CMP isn't projected.
-    * Risk of jumps on the CMP because of the latter.
-    */
-   @Override
-   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
-   {
+      // set the desired CMP to the projection
       ReferenceFrame returnFrame = desiredCMP.getReferenceFrame();
+      desiredCMP.setIncludingFrame(projectedCMP);
+      desiredCMP.changeFrame(returnFrame);
 
-      desiredCMP.changeFrame(supportPolygon.getReferenceFrame());
-      capturePoint.changeFrame(supportPolygon.getReferenceFrame());
-      cmpProjected.set(false);
-
-      if (VISUALIZE)
+      // visualize
+      this.projectionArea.changeFrameAndProjectToXYPlane(worldFrame);
+      this.desiredCMP.changeFrameAndProjectToXYPlane(worldFrame);
+      projectedCMP.changeFrameAndProjectToXYPlane(worldFrame);
+      if (cmpWasProjected.getBooleanValue())
       {
-         projectedCMPViz.setPositionToNaN();
-         edgeOneViz.setPositionToNaN();
-         edgeTwoViz.setPositionToNaN();
-
-         FramePoint2d desiredCMPInWorld = new FramePoint2d(desiredCMP);
-         desiredCMPInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-         preProjectedCMPViz.setPosition(desiredCMPInWorld.getX() + 0.001, desiredCMPInWorld.getY(), 0.001);
-
-         FramePoint2d capturePointInWorld = new FramePoint2d(capturePoint);
-         capturePointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-         icpViz.setPosition(capturePointInWorld.getX() - 0.001, capturePointInWorld.getY(), 0.001);
-      }
-
-      boolean isCapturePointInside = supportPolygon.isPointInside(capturePoint);
-      boolean isCMPInside = supportPolygon.isPointInside(desiredCMP);
-
-      // Don't just project the cmp onto the support polygon.
-      // Instead, find the first intersection from the cmp to the support polygon
-      // along the line segment from the cmp to the capture point. 
-
-      cmpToICPVector.setToZero(capturePoint.getReferenceFrame());
-      cmpToICPVector.sub(capturePoint, desiredCMP);
-      if (cmpToICPVector.lengthSquared() < 0.001 * 0.001)
-      {
-         // If CMP And ICP are really close, do nothing. Not much you can do anyway.
-         desiredCMP.changeFrame(returnFrame);
-         return;
-      }
-     
-      icpToCMPLine.setIncludingFrame(capturePoint, desiredCMP);
-      FramePoint2d[] icpToCMPIntersections = supportPolygon.intersectionWithRay(icpToCMPLine);
-      icpToCMPLine.negateDirection();
-      FramePoint2d[] icpAwayFromCMPIntersections = supportPolygon.intersectionWithRay(icpToCMPLine);
-      icpToCMPLine.negateDirection();
-      
-      if (icpToCMPIntersections == null)
-         icpToCMPIntersections = new FramePoint2d[0];
-      if (icpAwayFromCMPIntersections == null)
-         icpAwayFromCMPIntersections = new FramePoint2d[0];
-      
-      FramePoint2d[] intersections = merge(icpAwayFromCMPIntersections, icpToCMPIntersections, 1e-10);
-
-      if (intersections.length == 0)
-      {
-         // If no intersections, just give up. Point is outside and no idea how to project it.
-         desiredCMP.changeFrame(returnFrame);
-         return;
-      }
-
-      if (VISUALIZE)
-      {
-         if (intersections.length > 0)
-         {
-            FramePoint2d intersection0InWorld = new FramePoint2d(intersections[0]);
-            intersection0InWorld.changeFrame(ReferenceFrame.getWorldFrame());
-            edgeOneViz.setPosition(intersection0InWorld.getX(), intersection0InWorld.getY() + 0.001, 0.0005);
-         }
-         else
-         {
-            edgeOneViz.setPositionToNaN();
-         }
-
-         if (intersections.length > 1)
-         {
-            FramePoint2d intersection1InWorld = new FramePoint2d(intersections[1]);
-            intersection1InWorld.changeFrame(ReferenceFrame.getWorldFrame());
-            edgeTwoViz.setPosition(intersection1InWorld.getX(), intersection1InWorld.getY() - 0.001, 0.0005);
-         }
-         else
-         {
-            edgeTwoViz.setPositionToNaN();
-         }
-      }
-
-      if (intersections.length == 1)
-      {
-         // Not much you can do here. Just set the cmp to the edge and be done with it.
-         desiredCMP.set(intersections[0]);
-         desiredCMP.changeFrame(returnFrame);
-         return;
-      }
-      
-      if (icpAwayFromCMPIntersections.length == 2)
-      {
-         // special case where both are outside and on same side of polygon, just project CMP to nearest edge.
-         order(desiredCMP, icpAwayFromCMPIntersections);
-         desiredCMP.set(intersections[0]);
-         desiredCMP.changeFrame(returnFrame);
-         return;
-      }
-
-      if (isCapturePointInside)
-      {
-         moveAwayFromEdge.setIncludingFrame(icpToCMPIntersections[0]);
-         otherEdge.setIncludingFrame(icpAwayFromCMPIntersections[0]);
+         yoProjectionArea.setFrameConvexPolygon2d(this.projectionArea);
+         yoDesiredCMP.set(this.desiredCMP);
+         yoProjectedCMP.set(projectedCMP);
       }
       else
       {
-         order(capturePoint, intersections);
-         moveAwayFromEdge.setIncludingFrame(intersections[1]);
-         otherEdge.setIncludingFrame(intersections[0]);
+         yoProjectionArea.setFrameConvexPolygon2d(null);
+         yoDesiredCMP.setToNaN();
+         yoProjectedCMP.setToNaN();
       }
-
-      insideEdgeDirection.setToZero(otherEdge.getReferenceFrame());
-      insideEdgeDirection.sub(otherEdge, moveAwayFromEdge);
-
-      double distanceFromCMPToMoveAwayFromEdge = moveAwayFromEdge.distance(desiredCMP);
-      double distanceFromCMPToOtherEdge = otherEdge.distance(desiredCMP);
-
-      if (VISUALIZE)
-      {
-         FramePoint2d moveAwayFromEdgeInWorld = new FramePoint2d(moveAwayFromEdge);
-         moveAwayFromEdgeInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-         moveAwayFromEdgeViz.setPosition(moveAwayFromEdgeInWorld.getX() - 0.002, moveAwayFromEdgeInWorld.getY() + 0.002, 0.0);
-      }
-
-      if ((isCMPInside) && (distanceFromCMPToMoveAwayFromEdge > cmpEdgeProjectionInside.getDoubleValue()))
-      {
-         // Point is inside and far enough away from the edge. Don't project
-         desiredCMP.changeFrame(returnFrame);
-         return;
-      }
-
-      if (!isCMPInside && (distanceFromCMPToOtherEdge < distanceFromCMPToMoveAwayFromEdge))
-      {
-         // Point is outside but close to ICP, just project to ICP
-         desiredCMP.set(otherEdge);
-         desiredCMP.changeFrame(returnFrame);
-         return;
-      }
-
-      // Stay cmpEdgeProjectionDistance away from the edge if possible.
-      // By possible, we mean if you were to move inside by cmpEdgeProjectionDistance,
-      // Make sure you are still at least minCMPProjectionDistance from the ICP,
-      // unless that would put you over the edge. Then just use the edge and hope for the best.
-      cmpProjected.set(true);
-      double distanceFromICPToMoveAwayFromEdge = moveAwayFromEdge.distance(capturePoint);
-      double distanceToMove = distanceFromICPToMoveAwayFromEdge - minICPToCMPProjection.getDoubleValue();
-
-      if (isCMPInside)
-      {
-         double distanceToCMP = moveAwayFromEdge.distance(desiredCMP);
-         if (distanceToMove < distanceToCMP)
-            distanceToMove = distanceToCMP;
-      }
-
-      if (distanceToMove < 0.0)
-         distanceToMove = 0.0;
-      if (distanceToMove > cmpEdgeProjectionInside.getDoubleValue())
-         distanceToMove = cmpEdgeProjectionInside.getDoubleValue();
-
-      double edgeToEdgeDistance = moveAwayFromEdge.distance(otherEdge);
-      if (distanceToMove > edgeToEdgeDistance)
-         distanceToMove = edgeToEdgeDistance;
-      insideEdgeDirection.normalize();
-      insideEdgeDirection.scale(distanceToMove);
-
-      desiredCMP.setIncludingFrame(moveAwayFromEdge);
-      desiredCMP.add(insideEdgeDirection);
-
-      if (VISUALIZE)
-      {
-         FramePoint2d desiredCMPInWorld = new FramePoint2d(desiredCMP);
-         desiredCMPInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-         projectedCMPViz.setPosition(desiredCMPInWorld.getX(), desiredCMPInWorld.getY(), 0.0);
-      }
-
-      desiredCMP.changeFrame(returnFrame);
    }
 
+   private void projectCMP()
+   {
+      // if the desired CMP is inside the support do nothing
+      if (projectionArea.isPointInside(desiredCMP))
+      {
+         projectedCMP.setIncludingFrame(desiredCMP);
+         activeProjection.set(ProjectionMethod.NONE);
+         return;
+      }
 
+      // if the support area is small set the desired CMP to centroid
+      projectionArea.getBoundingBox(tempBoundingBox);
+      if (tempBoundingBox.getDiagonalLengthSquared() < 0.01 * 0.01)
+      {
+         projectionArea.getCentroid(projectedCMP);
+         activeProjection.set(ProjectionMethod.SMALL_AREA_CENTROID);
+         return;
+      }
+
+      // if the ICP is just on the edge move it out a little bit
+      if (projectionArea.distance(capturePoint) < 1.0e-6)
+      {
+         projectionArea.getCentroid(centroid);
+         centroid.sub(capturePoint);
+         centroid.scale(1.0e-6);
+         capturePoint.sub(centroid);
+      }
+
+      // if a ray (!) from ICP through the CMP intersects the support chose the intersection closest to the desired CMP
+      icpToCMPLine.setIncludingFrame(capturePoint, desiredCMP);
+      if (projectionArea.intersectionWithRay(icpToCMPLine, intersection1, intersection2) > 0)
+      {
+         FramePoint2d candidate = closestPoint(desiredCMP, intersection1, intersection2);
+         icpToCMPVector.setToZero(projectionArea.getReferenceFrame());
+         icpToCMPVector.sub(desiredCMP, capturePoint);
+         icpToCandidateVector.setToZero(projectionArea.getReferenceFrame());
+         icpToCandidateVector.sub(candidate, capturePoint);
+
+         // make sure the CMP does not get projected too far from its original position
+         double maxICPSpeedIncreaseFactor = 3.0;
+         double desiredDistance = icpToCMPVector.length();
+         double distanceAfterProjecting = icpToCandidateVector.length();
+         boolean projectionClose = distanceAfterProjecting < maxICPSpeedIncreaseFactor * desiredDistance;
+
+         // make sure the ICP is pushed in the right direction
+         double angle = icpToCMPVector.angle(icpToCandidateVector);
+         if (angle < 1.0e-7 && projectionClose)
+         {
+            projectedCMP.setIncludingFrame(candidate);
+            activeProjection.set(ProjectionMethod.RAY_THROUGH_AREA);
+            return;
+         }
+      }
+
+      // if we have a final desired ICP check if we can push the ICP towards that point as slow as possible
+      if (!finalCapturePoint.containsNaN())
+      {
+         finalICPToICPLine.setIncludingFrame(finalCapturePoint, capturePoint);
+         if (projectionArea.intersectionWithRay(finalICPToICPLine, intersection1, intersection2) > 0)
+         {
+            FramePoint2d candidate = closestPoint(capturePoint, intersection1, intersection2);
+            finalICPToICPVector.setToZero(projectionArea.getReferenceFrame());
+            finalICPToICPVector.sub(capturePoint, finalCapturePoint);
+            icpToCandidateVector.setToZero(projectionArea.getReferenceFrame());
+            icpToCandidateVector.sub(candidate, capturePoint);
+
+            // make sure the ICP is pushed in the right direction
+            double angle = finalICPToICPVector.angle(icpToCandidateVector);
+            if (angle < 1.0e-7)
+            {
+               projectedCMP.setIncludingFrame(candidate);
+               activeProjection.set(ProjectionMethod.TOWARDS_FINAL);
+               return;
+            }
+         }
+      }
+
+      // if we have a final desired ICP find the vertex on the projection area that achieves the movement toward
+      // the final ICP best.
+      if (!finalCapturePoint.containsNaN())
+      {
+         double angle = Double.POSITIVE_INFINITY;
+         for (int i = 0; i < projectionArea.getNumberOfVertices(); i++)
+         {
+            vertex.setIncludingFrame(projectionArea.getReferenceFrame(), projectionArea.getVertex(i));
+            finalICPToICPVector.setToZero(projectionArea.getReferenceFrame());
+            finalICPToICPVector.sub(capturePoint, finalCapturePoint);
+            icpToCandidateVector.setToZero(projectionArea.getReferenceFrame());
+            icpToCandidateVector.sub(vertex, capturePoint);
+
+            double newAngle = icpToCandidateVector.angle(finalICPToICPVector);
+            if (newAngle < angle)
+            {
+               angle = newAngle;
+               projectedCMP.setIncludingFrame(vertex);
+            }
+         }
+         // only do this if it actually helps (pushed the ICP in the right direction)
+         if (angle < Math.PI / 4.0)
+         {
+            activeProjection.set(ProjectionMethod.TOWARDS_FINAL_MIN_ANGLE);
+            return;
+         }
+      }
+
+      // as a last resort do an orthogonal projection of the desired CMP onto the projection area
+      projectedCMP.setIncludingFrame(desiredCMP);
+      projectionArea.orthogonalProjection(projectedCMP);
+      activeProjection.set(ProjectionMethod.ORTHOGONAL_PROJECTION);
+   }
+
+   private FramePoint2d closestPoint(FramePoint2d point, FramePoint2d candidate1, FramePoint2d candidate2)
+   {
+      if (candidate1.containsNaN() && candidate2.containsNaN())
+         return null;
+      if (candidate1.containsNaN())
+         return candidate2;
+      if (candidate2.containsNaN())
+         return candidate1;
+      if (point.distance(candidate1) <= point.distance(candidate2))
+         return candidate1;
+      return candidate2;
+   }
+
+   public ProjectionMethod getProjectionMethod()
+   {
+      return activeProjection.getEnumValue();
+   }
 
    @Override
    public boolean getWasCMPProjected()
    {
-      return cmpProjected.getBooleanValue();
+      return cmpWasProjected.getBooleanValue();
+   }
+
+   @Override
+   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint,
+         FramePoint2d desiredCMP)
+   {
+      projectCMP(desiredCMP, supportPolygon, capturePoint, finalDesiredCapturePoint);
    }
 
 }

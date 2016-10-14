@@ -3,20 +3,18 @@ package us.ihmc.atlas.generatedTestSuites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
-import us.ihmc.tools.testing.TestPlanSuite;
-import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
-@RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@RunWith(ContinuousIntegrationSuite.class)
+@ContinuousIntegrationSuiteCategory(IntegrationCategory.FAST)
 @SuiteClasses
 ({
-   us.ihmc.atlas.packets.wholebody.AtlasWholeBodyTrajectoryPacketTest.class,
-   us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest.class,
-   us.ihmc.atlas.roughTerrainWalking.AtlasFootstepSnapperTest.class,
-   us.ihmc.atlas.roughTerrainWalking.AtlasSwingTrajectoryTest.class,
-   us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasHighSwingTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class
 })
 
 public class AtlasJFastTestSuite

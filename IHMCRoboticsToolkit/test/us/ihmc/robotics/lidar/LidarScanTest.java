@@ -15,14 +15,14 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransformTest;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.tools.thread.RunnableThatThrows;
 
 public class LidarScanTest
 {
 	
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFlipNew()
    {
@@ -47,7 +47,7 @@ public class LidarScanTest
       assertLidarScanEquals(lidarScan, lidarScan.flipNew().flipNew(), 1e-7, 1e-7f);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertLidarScanRangesEqual()
    {
@@ -78,7 +78,7 @@ public class LidarScanTest
       assertLidarScanRangesEqual(lidarScan1, lidarScan4, 1e-7);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertLidarScanTransformsEqual()
    {
@@ -108,7 +108,7 @@ public class LidarScanTest
       });
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAssertLidarScanEquals()
    {
@@ -152,7 +152,7 @@ public class LidarScanTest
       assertLidarScanRangesEqual(lidarScan1, lidarScan2, rangeTolerance);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor()
    {
@@ -172,7 +172,7 @@ public class LidarScanTest
       assertEquals(lidarScan1.size(), 720, 1e-7f);
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor2()
    {
@@ -189,7 +189,7 @@ public class LidarScanTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetRanges()
    {
@@ -210,7 +210,7 @@ public class LidarScanTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testGetCopy()
    {
@@ -231,7 +231,7 @@ public class LidarScanTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testScanParameters()
    {
@@ -270,7 +270,7 @@ public class LidarScanTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testGetAllPoints()
    {
@@ -295,9 +295,9 @@ public class LidarScanTest
           
           for(int j = 0; j < list.size(); j++)
           {
-              assertEquals(list.get(j).x, lidarScan1.getAllPoints3f().get(j).x, 1e-3);
-              assertEquals(list.get(j).y, lidarScan1.getAllPoints3f().get(j).y, 1e-3);
-              assertEquals(list.get(j).z, lidarScan1.getAllPoints3f().get(j).z, 1e-3);
+              assertEquals(list.get(j).getX(), lidarScan1.getAllPoints3f().get(j).getX(), 1e-3);
+              assertEquals(list.get(j).getY(), lidarScan1.getAllPoints3f().get(j).getY(), 1e-3);
+              assertEquals(list.get(j).getZ(), lidarScan1.getAllPoints3f().get(j).getZ(), 1e-3);
           }
       }
    }

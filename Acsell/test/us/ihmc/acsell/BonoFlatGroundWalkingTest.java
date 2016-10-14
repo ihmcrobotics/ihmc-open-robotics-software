@@ -8,26 +8,21 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.steppr.parameters.BonoRobotModel;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = TestPlanTarget.Flaky)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FLAKY)
 public class BonoFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private BonoRobotModel robotModel;
 
-	@DeployableTestMethod(estimatedDuration = 128.2)
+	@ContinuousIntegrationTest(estimatedDuration = 128.2)
 	@Test(timeout = 640000)
    public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
-
-      String runName = "BONOFlatGroundWalkingTest";
       robotModel = new BonoRobotModel(false, false);
-
-      boolean doPelvisYawWarmup = false;
-      setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
+      super.testFlatGroundWalking(robotModel, false);
    }
 
    @Override

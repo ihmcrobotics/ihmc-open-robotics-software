@@ -22,12 +22,12 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.JointRole;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.LimbName;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -45,7 +45,7 @@ public class BonoJointMap implements DRCRobotJointMap
    public static final String headName = null;
 
    private final SpineJointName[] spineJoints = { SpineJointName.SPINE_ROLL, SpineJointName.SPINE_PITCH, SpineJointName.SPINE_YAW };
-   private final LegJointName[] legJoints = { LegJointName.HIP_ROLL, LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_ROLL, LegJointName.ANKLE_PITCH };
+   private final LegJointName[] legJoints = { LegJointName.HIP_ROLL, LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_ROLL, LegJointName.ANKLE_PITCH };
    private final NeckJointName[] neckJoints = {};
    private final ArmJointName[] armJoints = {};
 
@@ -77,7 +77,7 @@ public class BonoJointMap implements DRCRobotJointMap
          legJointNames.put(forcedSideJointNames[l_leg_mhx], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
          legJointNames.put(forcedSideJointNames[l_leg_uhz], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
          legJointNames.put(forcedSideJointNames[l_leg_lhy], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
-         legJointNames.put(forcedSideJointNames[l_leg_kny], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
+         legJointNames.put(forcedSideJointNames[l_leg_kny], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE_PITCH));
          legJointNames.put(forcedSideJointNames[l_leg_lax], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
          legJointNames.put(forcedSideJointNames[l_leg_uay], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
 
@@ -332,5 +332,25 @@ public class BonoJointMap implements DRCRobotJointMap
    public String[] getJointNamesBeforeFeet()
    {
       return jointNamesBeforeFeet;
+   }
+
+   @Override
+   public Enum<?>[] getRobotSegments()
+   {
+      return RobotSide.values;
+   }
+   
+   @Override
+   public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
+   {
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         String jointBeforeFootName = getJointBeforeFootName(robotSide);
+         if(jointBeforeFootName != null && jointBeforeFootName.equals(joineNameBeforeEndEffector))
+         {
+            return robotSide;
+         }
+      }
+      throw new IllegalArgumentException(joineNameBeforeEndEffector + " was not listed as an end effector in " + this.getClass().getSimpleName());
    }
 }

@@ -146,14 +146,14 @@ public class GrahamScanConvexHullCalculator2d
       if (p2.getClass() != p1.getClass())
          return false;
 
-      return (p1.x == p2.x) && (p1.y == p2.y);
+      return (p1.getX() == p2.getX()) && (p1.getY() == p2.getY());
    }
 
    // is a->b->c a counter-clockwise turn?
    // -1 if clockwise, +1 if counter-clockwise, 0 if collinear
    public static int ccw(Point2d a, Point2d b, Point2d c)
    {
-      double area2 = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+      double area2 = (b.getX() - a.getX()) * (c.getY() - a.getY()) - (b.getY() - a.getY()) * (c.getX() - a.getX());
       if (area2 < 0)
          return -1;
       else if (area2 > 0)
@@ -170,10 +170,10 @@ public class GrahamScanConvexHullCalculator2d
 
       public int compare(Point2d q1, Point2d q2)
       {
-         double dx1 = q1.x - point.x;
-         double dy1 = q1.y - point.y;
-         double dx2 = q2.x - point.x;
-         double dy2 = q2.y - point.y;
+         double dx1 = q1.getX() - point.getX();
+         double dy1 = q1.getY() - point.getY();
+         double dx2 = q2.getX() - point.getX();
+         double dy2 = q2.getY() - point.getY();
 
          if ((dy1 >= 0) && (dy2 < 0))
             return -1;    // q1 above; q2 below
@@ -204,13 +204,13 @@ public class GrahamScanConvexHullCalculator2d
    {
       public int compare(Point2d o1, Point2d o2)
       {
-         if (o1.y < o2.y)
+         if (o1.getY() < o2.getY())
             return -1;
-         if (o1.y > o2.y)
+         if (o1.getY() > o2.getY())
             return +1;
-         if (o1.x < o2.x)
+         if (o1.getX() < o2.getX())
             return -1;
-         if (o1.x > o2.x)
+         if (o1.getX() > o2.getX())
             return +1;
 
          return 0;

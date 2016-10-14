@@ -160,13 +160,13 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       this.addStaticLink(caseLink);
 
       // Add listener to the button
-      buttonSliderJoint.getQ().addVariableChangedListener(
+      buttonSliderJoint.getQYoVariable().addVariableChangedListener(
             new VariableChangedListener()
             {
                @Override
                public void variableChanged(YoVariable<?> v)
                {
-                  if (buttonIsSwitchable == true && buttonSliderJoint.getQ().getDoubleValue() > buttonLimit * buttonSwitchLimit)
+                  if (buttonIsSwitchable == true && buttonSliderJoint.getQYoVariable().getDoubleValue() > buttonLimit * buttonSwitchLimit)
                   {
                      // Button is switched
                      if(buttonStatus.getBooleanValue() == true)
@@ -182,7 +182,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
                      }
                   }
                   
-                  else if (buttonIsSwitchable == false && buttonSliderJoint.getQ().getDoubleValue() < 0.0005)
+                  else if (buttonIsSwitchable == false && buttonSliderJoint.getQYoVariable().getDoubleValue() < 0.0005)
                   {
                      // Button is released, can be switched again
                      buttonIsSwitchable = true;
@@ -201,7 +201,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    public void updateAllGroundContactPointVelocities() {
       RigidBodyTransform sliderJointTransform = new RigidBodyTransform();
       RigidBodyTransform newButtonPose = new RigidBodyTransform();
-      buttonPushVector.scale(buttonSliderJoint.getQ().getDoubleValue());
+      buttonPushVector.scale(buttonSliderJoint.getQYoVariable().getDoubleValue());
       sliderJointTransform.setTranslationAndIdentityRotation(buttonPushVector);
       buttonPushVector.normalize();
       newButtonPose.multiply(originalButtonTransform, sliderJointTransform);

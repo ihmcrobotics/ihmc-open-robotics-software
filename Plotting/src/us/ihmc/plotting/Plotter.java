@@ -5,11 +5,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,388 +19,784 @@ import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.border.Border;
-import javax.swing.event.MouseInputAdapter;
 import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
+import javax.vecmath.Vector3d;
 
-import us.ihmc.plotting.shapes.LineArtifact;
-import us.ihmc.plotting.shapes.PointArtifact;
-import us.ihmc.plotting.shapes.PolygonArtifact;
-import us.ihmc.plotting.shapes.ShapeArtifact;
+import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.plotting.artifact.ArtifactsChangedListener;
+import us.ihmc.plotting.artifact.LineArtifact;
+import us.ihmc.plotting.artifact.PointListArtifact;
+import us.ihmc.plotting.frames.MetersReferenceFrame;
+import us.ihmc.plotting.frames.PixelsReferenceFrame;
+import us.ihmc.plotting.frames.PlotterFrameSpace;
+import us.ihmc.plotting.frames.PlotterSpaceConverter;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Line2d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.FormattingTools;
+import us.ihmc.tools.io.printing.PrintTools;
 
-public class Plotter extends JPanel
+/**
+ * TODO Deprecate archaic methods
+ * TODO Factor out artifacts.
+ * TODO Fix color field in Artifact
+ * TODO Fix zoom in for vector
+ */
+@SuppressWarnings("serial")
+public class Plotter
 {
-   private static final long serialVersionUID = 3113130298799362369L;
-
-   private final ArrayList<ArtifactsChangedListener> artifactsChangedListeners = new ArrayList<ArtifactsChangedListener>();
-
-   // show selections
-   private boolean SHOW_SELECTION = false;
-
-   private boolean drawHistory = false;
-
-   private long updateDelayInMillis = 0;
-   private long lastUpdate = 0;
-
+   private static final boolean SHOW_LABELS_BY_DEFAULT = true;
+   private static final boolean SHOW_SELECTION_BY_DEFAULT = false;
+   private static final boolean SHOW_HISTORY_BY_DEFAULT = false;
+   private static final boolean ENABLE_XY_ZOOM_BY_DEFAULT = false;
+   private static final boolean ENABLE_ROTATION_BY_DEFAULT = true;
+   
+   private boolean showLabels = SHOW_LABELS_BY_DEFAULT;
+   private boolean showSelection = SHOW_SELECTION_BY_DEFAULT;
+   private boolean showHistory = SHOW_HISTORY_BY_DEFAULT;
+   private boolean xyZoomEnabled = ENABLE_XY_ZOOM_BY_DEFAULT;
+   private boolean rotationEnabled = ENABLE_ROTATION_BY_DEFAULT;
+   
+   private final JPanel panel;
+   
+   private final PlotterMouseAdapter mouseAdapter;
+   private final PlotterComponentAdapter componentAdapter;
+   
+   private final Plotter2DAdapter plotter2dAdapter;
+   private final Graphics2DAdapter graphics2dAdapter;
+   
+   private final Vector2d metersToPixels = new Vector2d(50.0, 50.0);
+   private final Rectangle visibleRectangle = new Rectangle();
+   private final Dimension preferredSize = new Dimension(500, 500);
+   private final Vector2d gridSizePixels = new Vector2d();
    private BufferedImage backgroundImage = null;
-
-   private Dimension preferredSize = new Dimension(275, 275);
+   
+   private final PlotterSpaceConverter spaceConverter;
+   private final PixelsReferenceFrame pixelsFrame;
+   private final PixelsReferenceFrame screenFrame;
+   private final MetersReferenceFrame metersFrame;
+   
+   private double screenRotation = 0.0;
+   private final Vector3d tempTranslation = new Vector3d();
+   private final Line2d tempGridLine = new Line2d();
+   private final PlotterPoint2d screenPosition;
+   private final PlotterPoint2d upperLeftCorner;
+   private final PlotterPoint2d lowerRightCorner;
+   private final PlotterPoint2d focusPoint;
+   private final PlotterPoint2d origin;
+   private final PlotterPoint2d gridLinePencil;
+   private final PlotterPoint2d selected;
+   private final PlotterPoint2d selectionAreaStart;
+   private final PlotterPoint2d selectionAreaEnd;
+   private final PlotterPoint2d imageFirstCorner;
+   private final PlotterPoint2d imageSecondCorner;
+   private final PlotterPoint2d labelPosition;
+   
+   // Artifact stuff
+   private final ArrayList<ArtifactsChangedListener> artifactsChangedListeners = new ArrayList<ArtifactsChangedListener>();
    private final HashMap<String, Artifact> artifacts = new HashMap<String, Artifact>();
-
-   private int xCenter;
-   private int yCenter;
-   private double xOffset = 0.0;
-   private double yOffset = 0.0;
-   private double scale = 20.0;
-   private double scaleFactor;
-   private double _ullon, _ullat, _lrlon, _lrlat;
-   private double xSelected = 0.0;
-   private double ySelected = 0.0;
-
-   private int _orientation;
-
-   // rectangle area selection
-   private double _areaX1 = 0.0;
-   private double _areaY1 = 0.0;
-   private double _areaX2 = 0.0;
-   private double _areaY2 = 0.0;
-   private double _areaX1TEMP = 0.0;
-   private double _areaY1TEMP = 0.0;
-
-   // drag tracking
-   private int buttonPressed;
-   private int dragStartX;
-   private int dragStartY;
-   private double xOffsetStartOfDrag;
-   private double yOffsetStartOfDrag;
-
-   // double click listener
-   private DoubleClickListener _listener;
-
-   // polygon tracking
-   private boolean MAKING_POLYGON = false;
-   private PolygonArtifact polygonArtifact;
-
-   private boolean overrideAutomaticInterval = false;
-   private double manualOverideInterval = 1.0;
-
+   
    public Plotter()
    {
-      // Initialize class variables
-      this.setDoubleBuffered(true);
+      panel = new JPanel()
+      {
+         @Override
+         protected void paintComponent(Graphics graphics)
+         {
+            plotter2dAdapter.setGraphics2d((Graphics2D) graphics);
+            updateFrames();
+            super.paintComponent(graphics);
+            Plotter.this.paintComponent(plotter2dAdapter);
+         }
+         
+         @Override
+         public Dimension getPreferredSize()
+         {
+            return Plotter.this.preferredSize;
+         }
+         
+         @Override
+         public void setPreferredSize(Dimension preferredSize)
+         {
+            Plotter.this.preferredSize.setSize(preferredSize);
+         }
+      };
+      
+      spaceConverter = new PlotterSpaceConverter()
+      {
+         private Vector2d scaleVector = new Vector2d();
+         
+         @Override
+         public Vector2d getConversionToSpace(PlotterFrameSpace plotterFrameType)
+         {
+            if (plotterFrameType == PlotterFrameSpace.METERS)
+            {
+               scaleVector.set(1.0 / metersToPixels.getX(), 1.0 / metersToPixels.getY());
+            }
+            else
+            {
+               scaleVector.set(metersToPixels.getX(), metersToPixels.getY());
+            }
+            return scaleVector;
+         }
+      };
+      pixelsFrame = new PixelsReferenceFrame("pixelsFrame", ReferenceFrame.getWorldFrame(), spaceConverter)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+         }
+      };
+      screenFrame = new PixelsReferenceFrame("screenFrame", pixelsFrame, spaceConverter)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            screenPosition.changeFrame(pixelsFrame);
+            transformToParent.setIdentity();
+            tempTranslation.set(screenPosition.getX() + getPlotterWidthPixels() / 2.0, screenPosition.getY() - getPlotterHeightPixels() / 2.0, 0.0);
+            transformToParent.applyTranslation(tempTranslation);
+            transformToParent.applyRotationZ(screenRotation);
+            tempTranslation.set(-getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0, 0.0);
+            transformToParent.applyTranslation(tempTranslation);
+            transformToParent.applyRotationY(Math.PI);
+            transformToParent.applyRotationZ(Math.PI);
+         }
+      };
+      metersFrame = new MetersReferenceFrame("metersFrame", ReferenceFrame.getWorldFrame(), spaceConverter)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+         }
+      };
+      
+      screenPosition = new PlotterPoint2d(pixelsFrame);
+      upperLeftCorner = new PlotterPoint2d(screenFrame);
+      lowerRightCorner = new PlotterPoint2d(screenFrame);
+      origin = new PlotterPoint2d(metersFrame);
+      focusPoint = new PlotterPoint2d(screenFrame);
+      gridLinePencil = new PlotterPoint2d(screenFrame);
+      selected = new PlotterPoint2d(screenFrame);
+      selectionAreaStart = new PlotterPoint2d(screenFrame);
+      selectionAreaEnd = new PlotterPoint2d(screenFrame);
+      imageFirstCorner = new PlotterPoint2d(screenFrame);
+      imageSecondCorner = new PlotterPoint2d(screenFrame);
+      labelPosition = new PlotterPoint2d(screenFrame);
+      
+      screenPosition.set(-getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0);
+      focusPoint.setIncludingFrame(metersFrame, 0.0, 0.0);
+      
+      updateFrames();
+      
+      plotter2dAdapter = new Plotter2DAdapter(metersFrame, screenFrame, pixelsFrame);
+      graphics2dAdapter = new Graphics2DAdapter(plotter2dAdapter);
+      
+      panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
+      panel.setBackground(PlotterColors.BACKGROUND);
+      
+      mouseAdapter = new PlotterMouseAdapter();
+      componentAdapter = new PlotterComponentAdapter();
+      
+      panel.addMouseListener(mouseAdapter);
+      panel.addMouseMotionListener(mouseAdapter);
+      panel.addComponentListener(componentAdapter);
+   }
+   
+   private void updateFrames()
+   {
+      panel.computeVisibleRect(visibleRectangle);
+      
+      pixelsFrame.update();
+      screenFrame.update();
+      metersFrame.update();
+      
+      upperLeftCorner.setIncludingFrame(screenFrame, 0.0, 0.0);
+      lowerRightCorner.setIncludingFrame(screenFrame, getPlotterWidthPixels(), getPlotterHeightPixels());
+      origin.setIncludingFrame(metersFrame, 0.0, 0.0);
+   }
+   
+   public void setScale(double pixelsPerMeterX, double pixelsPerMeterY)
+   {
+      focusPoint.changeFrame(metersFrame);
+      metersToPixels.set(pixelsPerMeterX, pixelsPerMeterY);
+      
+      centerOnFocusPoint();
+   }
+   
+   private void centerOnFocusPoint()
+   {
+      focusPoint.changeFrame(pixelsFrame);
+      
+      screenPosition.changeFrame(pixelsFrame);
+      screenPosition.set(focusPoint);
+      screenPosition.add(-getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0);
 
-      // Set LayoutManager to null
-      this.setLayout(null);
+      updateFrames();
+   }
 
-      // simpane
-      Border raisedBevel = BorderFactory.createRaisedBevelBorder();
-      Border loweredBevel = BorderFactory.createLoweredBevelBorder();
-      Border compound = BorderFactory.createCompoundBorder(raisedBevel, loweredBevel);
-      setBorder(compound);
+   private boolean isInitialized()
+   {
+      return visibleRectangle.getWidth() > 0.0;
+   }
+   
+   private double getPlotterWidthPixels()
+   {
+      return isInitialized() ? visibleRectangle.getWidth() : preferredSize.getWidth();
+   }
+   
+   private double getPlotterHeightPixels()
+   {
+      return isInitialized() ? visibleRectangle.getHeight() : preferredSize.getHeight();
+   }
 
-      super.setBackground(new Color(180, 220, 240));
+   private void paintComponent(final Plotter2DAdapter graphics2d)
+   {
+      origin.changeFrame(screenFrame);
+      forAllArtifacts(86, new ArtifactIterator()
+      {
+         @Override
+         public void drawArtifact(Artifact artifact)
+         {
+            if (artifact.isVisible())
+            {
+               artifact.draw(graphics2dAdapter);
+            }
+         }
+      });
+      
+      if (backgroundImage != null)
+      {
+         imageFirstCorner.setToZero();
+         imageSecondCorner.set(backgroundImage.getWidth(), backgroundImage.getHeight());
+         graphics2d.drawImage(backgroundImage, upperLeftCorner, lowerRightCorner, imageFirstCorner, imageSecondCorner, panel);
+      }
+      else
+      {
+         // change grid line scale from 1m to 10cm ehn below 10m
+         gridSizePixels.set(calculateGridSizePixels(metersToPixels.getX()), calculateGridSizePixels(metersToPixels.getY()));
+         
+         upperLeftCorner.changeFrame(pixelsFrame);
+         lowerRightCorner.changeFrame(pixelsFrame);
+         
+         focusPoint.changeFrame(pixelsFrame);
+         double gridStart = (Math.round(focusPoint.getX() / gridSizePixels.getX()) - 20.0) * gridSizePixels.getX();
+         double gridEnd = (Math.round(focusPoint.getX() / gridSizePixels.getX()) + 20.0) * gridSizePixels.getX();
+         
+         for (double gridX = gridStart; gridX < gridEnd; gridX += gridSizePixels.getX())
+         {
+            gridLinePencil.setIncludingFrame(pixelsFrame, gridX, 0.0);
+            
+            int nthGridLineFromOrigin = (int) (Math.abs(gridX) / gridSizePixels.getX());
+            applyColorForGridline(graphics2d, nthGridLineFromOrigin);
+   
+            tempGridLine.set(gridLinePencil.getX(), gridLinePencil.getY(), 0.0, 1.0);
+            graphics2d.drawLine(pixelsFrame, tempGridLine);
+            
+            if (showLabels)
+            {
+               graphics2d.setColor(PlotterColors.LABEL_COLOR);
+               gridLinePencil.changeFrame(metersFrame);
+               String labelString = FormattingTools.getFormattedToSignificantFigures(gridLinePencil.getX(), 2);
+               gridLinePencil.changeFrame(pixelsFrame);
+               origin.changeFrame(pixelsFrame);
+               if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getY() > upperLeftCorner.getY() - 14)
+               {
+                  gridLinePencil.setY(upperLeftCorner.getY() - 14);
+               }
+               else if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getY() < lowerRightCorner.getY())
+               {
+                  gridLinePencil.setY(lowerRightCorner.getY() + 6);
+               }
+               else
+               {
+                  gridLinePencil.setY(origin.getY() + 1);
+               }
+               labelPosition.setIncludingFrame(gridLinePencil);
+               labelPosition.add(1.0, 0.0);
+               graphics2d.drawString(labelString, labelPosition);
+            }
+         }
+         
+         gridStart = (Math.round(focusPoint.getY() / gridSizePixels.getY()) - 20.0) * gridSizePixels.getY();
+         gridEnd = (Math.round(focusPoint.getY() / gridSizePixels.getY()) + 20.0) * gridSizePixels.getY();
+         
+         for (double gridY = gridStart; gridY < gridEnd; gridY += gridSizePixels.getY())
+         {
+            gridLinePencil.setIncludingFrame(pixelsFrame, 0.0, gridY);
+            
+            int nthGridLineFromOrigin = (int) (Math.abs(gridY) / gridSizePixels.getY());
+            applyColorForGridline(graphics2d, nthGridLineFromOrigin);
+   
+            tempGridLine.set(gridLinePencil.getX(), gridLinePencil.getY(), 1.0, 0.0);
+            graphics2d.drawLine(pixelsFrame, tempGridLine);
+            
+            if (showLabels)
+            {
+               graphics2d.setColor(PlotterColors.LABEL_COLOR);
+               gridLinePencil.changeFrame(metersFrame);
+               String labelString = FormattingTools.getFormattedToSignificantFigures(gridLinePencil.getY(), 2);
+               gridLinePencil.changeFrame(pixelsFrame);
+               origin.changeFrame(pixelsFrame);
+               if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getX() > lowerRightCorner.getX() - 30)
+               {
+                  gridLinePencil.setX(lowerRightCorner.getX() - 30);
+               }
+               else if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getX() < upperLeftCorner.getX())
+               {
+                  gridLinePencil.setX(upperLeftCorner.getX() + 6);
+               }
+               else
+               {
+                  gridLinePencil.setX(origin.getX() + 1);
+               }
+               labelPosition.setIncludingFrame(gridLinePencil);
+               labelPosition.add(0.0, 1.0);
+               graphics2d.drawString(labelString, labelPosition);
+            }
+         }
+      }
+      
+      // paint grid centerline
+      origin.changeFrame(pixelsFrame);
+      graphics2d.setColor(PlotterColors.GRID_AXIS);
+      tempGridLine.set(origin.getX(), origin.getY(), 1.0, 0.0);
+      graphics2d.drawLine(pixelsFrame, tempGridLine);
+      tempGridLine.set(origin.getX(), origin.getY(), 0.0, 1.0);
+      graphics2d.drawLine(pixelsFrame, tempGridLine);
+      
+      for (int artifactLevel = 0; artifactLevel < 5; artifactLevel++)
+      {
+         forAllArtifacts(artifactLevel, new ArtifactIterator()
+         {
+            @Override
+            public void drawArtifact(Artifact artifact)
+            {
+               if (showHistory && artifact.getDrawHistory() && artifact.isVisible())
+               {
+                  artifact.drawHistory(graphics2dAdapter);
+               }
+            }
+         });
+      }
+      
+      for (int artifactLevel = 0; artifactLevel < 5; artifactLevel++)
+      {
+         forAllArtifacts(artifactLevel, new ArtifactIterator()
+         {
+            @Override
+            public void drawArtifact(Artifact artifact)
+            {
+               if (artifact.isVisible())
+               {
+                  artifact.draw(graphics2dAdapter);
+               }
+            }
+         });
+      }
+      
+      // paint selected destination
+      if (showSelection)
+      {
+         selected.changeFrame(screenFrame);
+         graphics2d.setColor(PlotterColors.SELECTION);
+         double crossSize = 8.0;
+         graphics2d.drawLineSegment(screenFrame, selected.getX() - crossSize,
+                                                 selected.getY() - crossSize,
+                                                 selected.getX() + crossSize,
+                                                 selected.getY() + crossSize);
+         graphics2d.drawLineSegment(screenFrame, selected.getX() - crossSize,
+                                                 selected.getY() + crossSize,
+                                                 selected.getX() + crossSize,
+                                                 selected.getY() - crossSize);
+      }
 
-      PlotterMouseListener myListener = new PlotterMouseListener();
-      this.addMouseListener(myListener);
-      this.addMouseMotionListener(myListener);
+      // paint selected area
+      if (showSelection)
+      {
+         graphics2d.setColor(PlotterColors.SELECTION);
+         double Xmin, Xmax, Ymin, Ymax;
+         if (selectionAreaStart.getX() > selectionAreaEnd.getX())
+         {
+            Xmax = selectionAreaStart.getX();
+            Xmin = selectionAreaEnd.getX();
+         }
+         else
+         {
+            Xmax = selectionAreaEnd.getX();
+            Xmin = selectionAreaStart.getX();
+         }
+
+         if (selectionAreaStart.getY() > selectionAreaEnd.getY())
+         {
+            Ymax = selectionAreaStart.getY();
+            Ymin = selectionAreaEnd.getY();
+         }
+         else
+         {
+            Ymax = selectionAreaEnd.getY();
+            Ymin = selectionAreaStart.getY();
+         }
+
+         graphics2d.drawRectangle(screenFrame, Xmin, Ymin, Xmax - Xmin, Ymax - Ymin);
+      }
+   }
+
+   private double calculateGridSizePixels(double pixelsPerMeter)
+   {
+      double medianGridWidthInPixels = Toolkit.getDefaultToolkit().getScreenResolution();
+      double desiredMeters = medianGridWidthInPixels / pixelsPerMeter;
+      double decimalPlace = Math.log10(desiredMeters);
+      double orderOfMagnitude = Math.floor(decimalPlace);
+      double nextOrderOfMagnitude = Math.pow(10, orderOfMagnitude + 1);
+      double percentageToNextOrderOfMagnitude = desiredMeters / nextOrderOfMagnitude;
+      
+      double remainder = percentageToNextOrderOfMagnitude % 0.5;
+      double roundToNearestPoint5 = remainder >= 0.25 ? percentageToNextOrderOfMagnitude + (0.5 - remainder) : percentageToNextOrderOfMagnitude - remainder;
+      
+      double gridSizeMeters;
+      if (roundToNearestPoint5 > 0.0)
+      {
+         gridSizeMeters = nextOrderOfMagnitude * roundToNearestPoint5;
+      }
+      else
+      {
+         gridSizeMeters = Math.pow(10, orderOfMagnitude);
+      }
+      double gridSizePixels = gridSizeMeters * pixelsPerMeter;
+      
+      return gridSizePixels;
+   }
+
+   private void applyColorForGridline(final Plotter2DAdapter graphics2d, int nthGridLineFromOrigin)
+   {
+      if (nthGridLineFromOrigin % 10 == 0)
+      {
+         graphics2d.setColor(PlotterColors.GRID_EVERY_10);
+      }
+      else if (nthGridLineFromOrigin % 5 == 0)
+      {
+         graphics2d.setColor(PlotterColors.GRID_EVERY_5);
+      }
+      else
+      {
+         graphics2d.setColor(PlotterColors.GRID_EVERY_1);
+      }
+   }
+   
+   private void forAllArtifacts(int level, ArtifactIterator artifactIterator)
+   {
+      synchronized (artifacts)
+      {
+         for (Artifact artifact : artifacts.values())
+         {
+            if (artifact != null)
+            {
+               if (artifact.getLevel() == level)
+               {
+                  artifactIterator.drawArtifact(artifact);
+               }
+            }
+            else
+            {
+               PrintTools.error("Plotter: one of the artifacts you added was null");
+            }
+         }
+      }
+   }
+   
+   private interface ArtifactIterator
+   {
+      public void drawArtifact(Artifact artifact); 
+   }
+   
+   private class PlotterMouseAdapter extends MouseAdapter
+   {
+      private int buttonPressed;
+      private PlotterPoint2d middleMouseDragStart = new PlotterPoint2d(screenFrame);
+      private PlotterPoint2d middleMouseDragEnd = new PlotterPoint2d(screenFrame);
+      private PlotterPoint2d rightMouseDragStart = new PlotterPoint2d(screenFrame);
+      private PlotterPoint2d rightMouseDragEnd = new PlotterPoint2d(screenFrame);
+
+      @Override
+      public void mousePressed(MouseEvent mouseEvent)
+      {
+         buttonPressed = mouseEvent.getButton();
+
+         if (buttonPressed == MouseEvent.BUTTON1)
+         {
+            selected.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
+            selectionAreaStart.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
+         }
+         else if (buttonPressed == MouseEvent.BUTTON2)
+         {
+            middleMouseDragStart.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
+         }
+         else if (buttonPressed == MouseEvent.BUTTON3)
+         {
+            rightMouseDragStart.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
+            
+            if (mouseEvent.getClickCount() > 1)
+            {
+               focusPoint.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
+               centerOnFocusPoint();
+               panel.repaint();
+            }
+         }
+      }
+
+      @Override
+      public void mouseDragged(MouseEvent mouseEvent)
+      {
+         if (buttonPressed == MouseEvent.BUTTON1)
+         {
+            selectionAreaEnd.changeFrame(screenFrame);
+            selectionAreaEnd.set(mouseEvent.getX(), mouseEvent.getY());
+            
+            panel.repaint();
+         }
+         else if (buttonPressed == MouseEvent.BUTTON2)
+         {
+            middleMouseDragEnd.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
+            
+            double deltaDragY = middleMouseDragStart.getY() - middleMouseDragEnd.getY();
+            double deltaDragX = middleMouseDragStart.getX() - middleMouseDragEnd.getX();
+            
+            double scaledXChange;
+            if (xyZoomEnabled && mouseEvent.isControlDown())
+            {
+               scaledXChange = 1.0 + (deltaDragX * 0.005);
+            }
+            else
+            {
+               scaledXChange = 1.0 + (deltaDragY * 0.005);
+            }
+            double scaledYChange = 1.0 + (deltaDragY * 0.005);
+            
+            focusPoint.setIncludingFrame(screenFrame, getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0);
+            
+            setScale(metersToPixels.getX() * scaledXChange, metersToPixels.getY() * scaledYChange);
+            
+            middleMouseDragStart.set(middleMouseDragEnd);
+            
+            panel.repaint();
+         }
+         else if (buttonPressed == MouseEvent.BUTTON3)
+         {
+            rightMouseDragEnd.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
+            
+            focusPoint.changeFrame(screenFrame);
+            
+            rightMouseDragEnd.sub(rightMouseDragStart);
+
+            if (rotationEnabled && mouseEvent.isAltDown())
+            {
+               screenRotation += 0.01 * (double) rightMouseDragEnd.getX();
+            }
+            else
+            {
+               rightMouseDragEnd.negate();
+               focusPoint.add(rightMouseDragEnd);
+            }
+            
+            centerOnFocusPoint();
+            panel.repaint();
+            
+            rightMouseDragStart.setIncludingFrame(screenFrame, mouseEvent.getX(), mouseEvent.getY());
+         }
+      }
+   }
+   
+   private class PlotterComponentAdapter extends ComponentAdapter
+   {
+      @Override
+      public void componentResized(ComponentEvent componentEvent)
+      {
+         centerOnFocusPoint();
+         panel.repaint();
+      }
+   }
+   
+   public Dimension getPreferredSize()
+   {
+      return preferredSize;
+   }
+   
+   public void setPreferredSize(int width, int height)
+   {
+      preferredSize.setSize(width, height);
+   }
+
+   public void setFocusPointY(double focusPointY)
+   {
+      focusPoint.changeFrame(metersFrame);
+      focusPoint.setY(focusPointY);
+      
+      centerOnFocusPoint();
+   }
+   
+   public void setFocusPointX(double focusPointX)
+   {
+      focusPoint.changeFrame(metersFrame);
+      focusPoint.setX(focusPointX);
+      
+      centerOnFocusPoint();
+   }
+
+   public void setFocusOrientationYaw(double focusOrientationYaw)
+   {
+      screenRotation = focusOrientationYaw - Math.PI / 2.0;
+      
+      centerOnFocusPoint();
+   }
+   
+   public double getFocusPointX()
+   {
+      focusPoint.changeFrame(metersFrame);
+      return focusPoint.getX();
+   }
+   
+   public double getFocusPointY()
+   {
+      focusPoint.changeFrame(metersFrame);
+      return focusPoint.getY();
+   }
+   
+   /**
+    * Specify amount of meters that occupy view in X and Y.
+    */
+   public void setViewRange(double viewRangeInX, double viewRangeInY)
+   {
+      setScale(getPlotterWidthPixels() / viewRangeInX, getPlotterHeightPixels() / viewRangeInY);
+   }
+   
+   public void setViewRange(double minimumViewRange)
+   {
+      double smallestDimension;
+      smallestDimension = Math.min(getPlotterWidthPixels(), getPlotterHeightPixels());
+      double newPixelsPerMeter = smallestDimension / minimumViewRange;
+      setScale(newPixelsPerMeter, newPixelsPerMeter);
+   }
+   
+   public void setScale(double pixelsPerMeter)
+   {
+      setScale(pixelsPerMeter, pixelsPerMeter);
+   }
+
+   public void setShowLabels(boolean showLabels)
+   {
+      this.showLabels = showLabels;
+   }
+   
+   public void setXYZoomEnabled(boolean xyZoomEnabled)
+   {
+      this.xyZoomEnabled = xyZoomEnabled;
+   }
+   
+   public void setRotationEnabled(boolean rotationEnabled)
+   {
+      this.rotationEnabled = rotationEnabled;
+   }
+
+   public void showInNewWindow()
+   {
+      showInNewWindow("Plotter", false);
+   }
+   
+   public void showInNewWindow(String title, boolean showLegend)
+   {
+      JFrame frame = new JFrame(title);
+      if (showLegend)
+      {
+         frame.getContentPane().add(createAndAttachPlotterLegendPanel(), BorderLayout.CENTER);
+      }
+      else
+      {
+         frame.getContentPane().add(panel, BorderLayout.CENTER);
+      }
+      frame.pack();
+      frame.setVisible(true);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+   }
+   
+   public double getSelectedX()
+   {
+      selected.changeFrame(metersFrame);
+      return selected.getX();
+   }
+
+   public double getSelectedY()
+   {
+      selected.changeFrame(metersFrame);
+      return selected.getY();
+   }
+   
+   public void setBackgroundImage(BufferedImage backgroundImage)
+   {
+      this.backgroundImage = backgroundImage;
+      panel.repaint();
+   }
+
+   public double getViewRange()
+   {
+      if (getPlotterWidthPixels() <= getPlotterHeightPixels())
+      {
+         return metersToPixels.getX() * getPlotterWidthPixels();
+      }
+      else
+      {
+         return metersToPixels.getY() * getPlotterHeightPixels();
+      }
    }
 
    public void setDrawHistory(boolean drawHistory)
    {
-      this.drawHistory = drawHistory;
+      this.showHistory = drawHistory;
    }
 
-   public void paintComponent(Graphics gO)
+   public void update()
    {
-      long currentTime = System.currentTimeMillis();
-      if ((currentTime - lastUpdate) > updateDelayInMillis)
-      {
-         Graphics2D g = (Graphics2D) gO;
-
-         // get current size and determine scaling factor
-         Dimension d = this.getSize();
-         int height = (int) Math.round(d.getHeight());
-         int width = (int) Math.round(d.getWidth());
-         xCenter = width / 2;    // 0;//w/2;
-         yCenter = height / 2;    // h;//h/2;
-         scaleFactor = height / scale;
-
-         double headingOffset = 0.0;
-
-         // set current offset
-         xCenter = xCenter - (int) Math.round(xOffset * scaleFactor);
-         yCenter = yCenter + (int) Math.round(yOffset * scaleFactor);
-
-         // paint background
-         super.paintComponent(g);
-
-         // Paint all artifacts that want to be under grid (86)
-         synchronized (artifacts)
-         {
-            for (Artifact artifact : artifacts.values())
-            {
-               if (artifact != null)
-               {
-                  if (artifact.getLevel() == 86)
-                  {
-                     artifact.draw(g, xCenter, yCenter, headingOffset, scaleFactor);
-                  }
-               }
-               else
-               {
-                  System.out.println("Plotter: one of the artifacts you added was null");
-               }
-            }
-         }
-
-         // _scale == range
-         // if we start out at 100%, then the range will be equal to the extent of the map
-         // if we zoom in, the range will be less, and so we need to compute from the current
-         // center the zoomed in area.
-         if (backgroundImage != null)
-         {
-            Coordinate ul = new Coordinate(_ullon, _ullat, Coordinate.METER);
-            Coordinate lr = new Coordinate(_lrlon, _lrlat, Coordinate.METER);
-            Coordinate pul = convertFromMetersToPixels(ul);
-            Coordinate plr = convertFromMetersToPixels(lr);
-
-            int ulx = (int) pul.getX();
-            int uly = (int) pul.getY();
-            int lrx = (int) plr.getX();
-            int lry = (int) plr.getY();
-
-            g.drawImage(backgroundImage, ulx, uly, lrx, lry, 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight(), this);
-         }
-         else
-         {
-            // change grid line scale from 1m to 10cm ehn below 10m
-            double interval = 1.0;
-            if (getRange() < 10)
-            {
-               interval = 0.1;
-            }
-
-            if (overrideAutomaticInterval)
-            {
-               interval = manualOverideInterval;
-            }
-
-            // paint grid lines
-            Coordinate ulCoord = convertFromPixelsToMeters(new Coordinate(0, 0, Coordinate.PIXEL));
-            Coordinate lrCoord = convertFromPixelsToMeters(new Coordinate(width, height, Coordinate.PIXEL));
-
-            double minX = ulCoord.getX();
-            double maxX = lrCoord.getX();
-            double xDiff = maxX - minX;
-            int xCount = (int) Math.round(Math.ceil(xDiff / interval));
-            int xCountOffset = (int) Math.floor(minX / interval);
-            double minXforPlotting = xCountOffset * interval;
-
-            for (int i = 0; i < xCount; i++)
-            {
-               double distance = minXforPlotting + (i * interval);
-
-               if ((i + xCountOffset) % 10 == 0)
-                  g.setColor(new Color(180, 190, 210));
-               else if ((i + xCountOffset) % 5 == 0)
-                  g.setColor(new Color(180, 210, 230));
-               else
-                  g.setColor(new Color(230, 240, 250));
-
-               // get pixel from meter for positive
-               Coordinate coord = convertFromMetersToPixels(new Coordinate(distance, distance, Coordinate.METER));
-               int x = (int) Math.round(coord.getX());
-
-               // draw line
-               g.drawLine(x, 0, x, height);
-            }
-
-            double minY = lrCoord.getY();
-            double maxY = ulCoord.getY();
-            double yDiff = maxY - minY;
-            int yCount = (int) Math.round(Math.ceil(yDiff / interval));
-            int yCountOffset = (int) Math.floor(minY / interval);
-            double minYforPlotting = yCountOffset * interval;
-
-            for (int i = 0; i < yCount; i++)
-            {
-               double distance = minYforPlotting + (i * interval);
-
-               if ((i + yCountOffset) % 10 == 0)
-                  g.setColor(new Color(180, 190, 210));
-               else if ((i + yCountOffset) % 5 == 0)
-                  g.setColor(new Color(180, 210, 230));
-               else
-                  g.setColor(new Color(230, 240, 250));
-
-               // get pixel from meter for positive
-               Coordinate coord = convertFromMetersToPixels(new Coordinate(distance, distance, Coordinate.METER));
-               int y = (int) Math.round(coord.getY());
-
-               // draw line
-               g.drawLine(0, y, width, y);
-            }
-         }
-
-         // paint grid centerline
-         g.setColor(Color.gray);
-
-         // get pixel from meter for positive
-         Coordinate coord = convertFromMetersToPixels(new Coordinate(0, 0, Coordinate.METER));
-         int x0 = (int) Math.round(coord.getX());
-         int y0 = (int) Math.round(coord.getY());
-
-         // draw line
-         g.drawLine(x0, 0, x0, height);
-         g.drawLine(0, y0, width, y0);
-
-         // Paint all artifacts history by level
-         // (assumes 5 levels (0-4)
-         if (drawHistory)
-         {
-            synchronized (artifacts)
-            {
-               for (int i = 0; i < 5; i++)
-               {
-                  for (Artifact artifact : artifacts.values())
-                  {
-                     // get next element
-                     // System.out.println("drawing " + a.getID());
-                     if (artifact != null)
-                     {
-                        if (artifact.getDrawHistory() && (artifact.getLevel() == i))
-                        {
-                           artifact.drawHistory(g, xCenter, yCenter, scaleFactor);    // , _orientation);
-                        }
-                     }
-                     else
-                     {
-                        System.out.println(">>> a = " + artifact);
-                     }
-                  }
-               }
-            }
-         }
-
-         // Paint all artifacts by level
-         // (assumes 5 levels (0-4)
-         synchronized (artifacts)
-         {
-            for (int i = 0; i < 5; i++)
-            {
-               for (Artifact artifact : artifacts.values())
-               {
-                  // get next element
-                  // System.out.println("drawing " + a.getID());
-                  if (artifact != null)
-                  {
-                     if (artifact.getLevel() == i)
-                     {
-                        artifact.draw(g, xCenter, yCenter, headingOffset, scaleFactor);    // , _orientation);
-                     }
-                  }
-                  else
-                  {
-                     System.out.println(">>> a = " + artifact);
-                  }
-               }
-            }
-         }
-
-         // paint selected destination
-         if (SHOW_SELECTION)
-         {
-            g.setColor(Color.red);
-            int xSize = 8;
-            int xX = xCenter + ((int) Math.round(xSelected * scaleFactor));
-            int yX = yCenter - ((int) Math.round(ySelected * scaleFactor));
-            g.drawLine(xX - xSize, yX - xSize, xX + xSize, yX + xSize);
-            g.drawLine(xX - xSize, yX + xSize, xX + xSize, yX - xSize);
-         }
-
-         // paint selected area
-         if (SHOW_SELECTION)
-         {
-            g.setColor(Color.red);
-            int areaX1 = xCenter + ((int) Math.round(_areaX1 * scaleFactor));
-            int areaY1 = yCenter - ((int) Math.round(_areaY1 * scaleFactor));
-            int areaX2 = xCenter + ((int) Math.round(_areaX2 * scaleFactor));
-            int areaY2 = yCenter - ((int) Math.round(_areaY2 * scaleFactor));
-            int Xmin, Xmax, Ymin, Ymax;
-            if (areaX1 > areaX2)
-            {
-               Xmax = areaX1;
-               Xmin = areaX2;
-            }
-            else
-            {
-               Xmax = areaX2;
-               Xmin = areaX1;
-            }
-
-            if (areaY1 > areaY2)
-            {
-               Ymax = areaY1;
-               Ymin = areaY2;
-            }
-            else
-            {
-               Ymax = areaY2;
-               Ymin = areaY1;
-            }
-
-            // System.out.println("drawing cal: (" +
-            // areaX1 + "," + areaY1 + ") to (" +
-            // areaX2 + "," + areaY2 + ")");
-            g.drawRect(Xmin, Ymin, (Xmax - Xmin), (Ymax - Ymin));
-         }
-
-         /*
-          *  //check reference
-          *  if(_isRoboCentric){
-          *   e = _artifacts.elements();
-          *   while(e.hasMoreElements()){
-          *    //find robot
-          *    Artifact a = (Artifact)e.nextElement();
-          *    if(a.getType().equals("robot")){
-          *     _Xcenter = _Xcenter - ((int)Math.round(a.getX()*_scaleFactor));
-          *     _Ycenter = _Ycenter + ((int)Math.round(a.getY()*_scaleFactor));
-          *     break;
-          *    }
-          *   }
-          *  }
-          *
-          */
-
-         lastUpdate = currentTime;
-      }
+      panel.repaint();
    }
-
-   public void setBackgroundImage(BufferedImage bgi)
+   
+   public JPanel getJPanel()
    {
-      if (bgi == null)
-      {
-         System.out.println("Passed in NULL as a background image");
-      }
-      else
-      {
-         backgroundImage = bgi;
-         repaint();
-      }
+      return panel;
    }
-
-   public void setManualGidInterval(double intervalInMeters)
+   
+   public Graphics2DAdapter getGraphics2DAdapter()
    {
-      this.manualOverideInterval = intervalInMeters;
-      this.overrideAutomaticInterval = true;
+      return graphics2dAdapter;
    }
-
-   public void disableManualGridIntervalOverride()
+   
+   public Plotter2DAdapter getPlotter2DAdapter()
    {
-      this.overrideAutomaticInterval = false;
+      return plotter2dAdapter;
    }
 
+   public PlotterLegendPanel createPlotterLegendPanel()
+   {
+      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel(plotter2dAdapter);
+      addArtifactsChangedListener(plotterLegendPanel);
+      return plotterLegendPanel;
+   }
+
+   public JPanel createAndAttachPlotterLegendPanel()
+   {
+      JPanel flashyNewJayPanel = new JPanel();
+      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel(plotter2dAdapter);
+      plotterLegendPanel.setPreferredSize(new Dimension(500, 500));
+      addArtifactsChangedListener(plotterLegendPanel);
+      flashyNewJayPanel.setLayout(new BorderLayout());
+      flashyNewJayPanel.add(panel, "Center");
+      flashyNewJayPanel.add(plotterLegendPanel, "South");
+      return flashyNewJayPanel;
+   }
+   
+   // BEGIN ARTIFACT GARBAGE //
+   
    public void updateArtifacts(Vector<Artifact> artifacts)
    {
       this.artifacts.clear();
@@ -410,7 +807,7 @@ public class Plotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void updateArtifact(Artifact newArtifact)
@@ -421,7 +818,7 @@ public class Plotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void updateArtifactNoRePaint(Artifact newArtifact)
@@ -443,16 +840,14 @@ public class Plotter extends JPanel
       return lineArtifact;
    }
 
-   public PointArtifact createAndAddPointArtifact(String name, Point2d point, Color color)
+   public PointListArtifact createAndAddPointArtifact(String name, Point2d point, Color color)
    {
-      PointArtifact pointArtifact = new PointArtifact(name, point);
+      PointListArtifact pointArtifact = new PointListArtifact(name, point);
       pointArtifact.setColor(color);
       addArtifact(pointArtifact);
 
       return pointArtifact;
    }
-
-
 
    public void addArtifact(Artifact newArtifact)
    {
@@ -462,7 +857,7 @@ public class Plotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void addArtifactNoRepaint(Artifact newArtifact)
@@ -474,7 +869,6 @@ public class Plotter extends JPanel
 
       notifyArtifactsChangedListeners();
    }
-
 
    public ArrayList<Artifact> getArtifacts()
    {
@@ -489,7 +883,6 @@ public class Plotter extends JPanel
    {
       return artifacts.get(id);
    }
-
 
    public void replaceArtifact(String id, Artifact newArtifact)
    {
@@ -509,7 +902,7 @@ public class Plotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
 
    public void removeArtifact(String id)
@@ -520,9 +913,8 @@ public class Plotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
+      panel.repaint();
    }
-
 
    public void removeArtifactNoRepaint(String id)
    {
@@ -552,421 +944,7 @@ public class Plotter extends JPanel
       }
 
       notifyArtifactsChangedListeners();
-      repaint();
-   }
-
-   public double getSelectedX()
-   {
-      return xSelected;
-   }
-
-   public double getSelectedY()
-   {
-      return ySelected;
-   }
-
-   public double getAreaX1()
-   {
-      return _areaX1;
-   }
-
-   public double getAreaY1()
-   {
-      return _areaY1;
-   }
-
-   public double getAreaX2()
-   {
-      return _areaX2;
-   }
-
-   public double getAreaY2()
-   {
-      return _areaY2;
-   }
-
-   public ArrayList<Point2d> getPolygon()
-   {
-      if (polygonArtifact == null)
-         return null;
-
-      return polygonArtifact.getPoints();
-   }
-
-   public void clearPolygon()
-   {
-      this.removeArtifactsStartingWith("polygon");
-      polygonArtifact = null;
-      repaint();
-   }
-
-
-   @SuppressWarnings("unused")
-   private Point convertCoordinates(JPanel plot, Point2D.Double pt)
-   {
-      // get current size and determine scaling factor
-      Dimension d = this.getSize();
-      int h = (int) Math.round(d.getHeight());
-      int w = (int) Math.round(d.getWidth());
-
-      // _Xcenter = w/2;
-      // _Ycenter = h/2;
-      scaleFactor = h / scale;
-
-      // detemine plot size
-      Dimension plotD = plot.getSize();
-      int plotH = (int) Math.round(plotD.getHeight());
-      int plotW = (int) Math.round(plotD.getWidth());
-
-      // place plot so bottom is cenetered at location
-      int xnew = (int) Math.round((pt.x * scaleFactor) - (plotW / 2));
-      int ynew = (int) Math.round((h - (pt.y * scaleFactor)) - (plotH));
-
-      return new Point(xnew, ynew);
-
-      // return new Point(200,200);
-   }
-
-   private double unConvertXCoordinate(int coordinate)
-   {
-      double x = new Integer(coordinate - xCenter).doubleValue() / scaleFactor;
-
-      // System.out.println("x=" + x);
-      return x;
-   }
-
-   private double unConvertYCoordinate(int coordinate)
-   {
-      double y = new Integer((yCenter - coordinate)).doubleValue() / scaleFactor;
-
-      // System.out.println("y=" + y);
-      return y;
-   }
-
-   private Coordinate convertFromMetersToPixels(Coordinate coordinate)
-   {
-      double x = coordinate.getX();
-      double y = coordinate.getY();
-
-      x = new Double(xCenter + ((int) Math.round(x * scaleFactor))).doubleValue();
-
-      // System.out.println("x(pixels)=" + x);
-      y = new Double(yCenter - ((int) Math.round(y * scaleFactor))).doubleValue();
-
-      // System.out.println("y(pixels)=" + y);
-      return new Coordinate(x, y, Coordinate.PIXEL);
-   }
-
-   private Coordinate convertFromPixelsToMeters(Coordinate coordinate)
-   {
-      double x = coordinate.getX();
-      double y = coordinate.getY();
-
-      x = (x - new Integer(xCenter).doubleValue()) / scaleFactor;
-
-      // System.out.println("x=" + x);
-      y = ((new Integer(yCenter).doubleValue()) - y) / scaleFactor;
-
-      // System.out.println("y=" + y);
-      return new Coordinate(x, y, Coordinate.METER);
-   }
-
-   public void setRangeLimit(int range, double origMapScale, double ullon, double ullat, double lrlon, double lrlat)
-   {
-      scale = range;
-      _ullon = ullon;
-      _ullat = ullat;
-      _lrlon = lrlon;
-      _lrlat = lrlat;
-
-      repaint();
-   }
-
-   public void setRange(double range)
-   {
-      scale = range;
-      repaint();
-   }
-
-   public double getRange()
-   {
-      return scale;
-   }
-
-   public void setOrientation(int orientation)
-   {
-      _orientation = orientation;
-      repaint();
-   }
-
-   public void setXoffset(double x)
-   {
-      xOffset = x;
-   }
-
-   public void setYoffset(double y)
-   {
-      yOffset = y;
-   }
-
-   public double getXoffset()
-   {
-      return xOffset;
-   }
-
-   public double getYoffset()
-   {
-      return yOffset;
-   }
-
-   public Dimension getPreferredSize()
-   {
-      return preferredSize;
-   }
-
-   public void setPreferredSize(int h, int w)
-   {
-      preferredSize = new Dimension(h, w);    // (150, 150);
-   }
-
-   public void setDoubleClickListener(DoubleClickListener listener)
-   {
-      _listener = listener;
-   }
-
-
-   public void update(String objectID, ShapeArtifact shapeArtifact)
-   {
-      if (shapeArtifact == null)
-      {
-         removeArtifact(objectID);
-      }
-      else
-      {
-         if (shapeArtifact.getCoordinate() == null)
-         {
-            removeArtifact(shapeArtifact.getID());
-         }
-         else
-         {
-            ShapeArtifact targetArtifact = (ShapeArtifact) getArtifact(objectID);
-            if (targetArtifact == null)
-            {
-               addArtifact(shapeArtifact);
-            }
-            else
-            {
-               updateArtifact(shapeArtifact);
-            }
-         }
-      }
-
-      repaint();
-   }
-
-   public void update(String objectID, PolygonArtifact polygonArtifact)
-   {
-      if (polygonArtifact == null)
-      {
-         removeArtifact(objectID);
-      }
-      else
-      {
-         if (polygonArtifact.getPoints().size() == 0)
-         {
-            removeArtifact(polygonArtifact.getID());
-         }
-         else
-         {
-            ShapeArtifact targetArtifact = (ShapeArtifact) getArtifact(objectID);
-            if (targetArtifact == null)
-            {
-               addArtifact(polygonArtifact);
-            }
-            else
-            {
-               updateArtifact(polygonArtifact);
-            }
-         }
-      }
-
-      repaint();
-   }
-
-   public void setUpdateDelayInMillis(long timeInMillis)
-   {
-      updateDelayInMillis = timeInMillis;
-   }
-
-   public long getUpdateDelayInMillis()
-   {
-      return updateDelayInMillis;
-   }
-
-   // test driver //////////////////////////////////////////////////
-   public static void main(String[] args)
-   {
-      // plotter
-      Plotter p = new Plotter();
-
-//    BufferedImage image = null;
-//    try
-//    {
-//        image = ImageIO.read(new File(args[0]));
-//    }
-//    catch (IOException e)
-//    {
-//        JOptionPane.showMessageDialog(null, e.getMessage(), "",
-//                JOptionPane.ERROR_MESSAGE);
-//        System.exit(1);
-//    }
-//    p.setBackgroundImage(image);
-
-
-
-      JFrame f = new JFrame("Plotter Test");
-      f.addWindowListener(new WindowAdapter()
-      {
-         public void windowClosing(WindowEvent e)
-         {
-            System.exit(0);
-         }
-      });
-
-      f.getContentPane().add(p, BorderLayout.CENTER);
-      f.pack();
-      f.setVisible(true);
-   }
-
-   //////////////////////////////////////////////////////////////////////////
-   private class PlotterMouseListener extends MouseInputAdapter
-   {
-      public void mouseClicked(MouseEvent e)
-      {
-         if (buttonPressed == MouseEvent.BUTTON1)
-         {
-//          _Xselected = unConvertXCoordinate(e.getX());
-//          _Yselected = unConvertYCoordinate(e.getY());
-            removeArtifact("path");
-            removeArtifact("polygon");
-            polygonArtifact = null;
-            MAKING_POLYGON = false;
-         }
-         else if (buttonPressed == MouseEvent.BUTTON3)
-         {
-//          if (MAKING_POLYGON)
-//          {
-//              Point2d point = new Point2d(unConvertXCoordinate(e.getX()), unConvertYCoordinate(e.getY()));
-//              polygonArtifact.addPoint(point);
-//              updateArtifact(polygonArtifact);
-//          }
-//          else
-//          {
-//              MAKING_POLYGON = true;
-//              polygonArtifact = new PolygonArtifact("polygon");
-//              Point2d point = new Point2d(unConvertXCoordinate(e.getX()), unConvertYCoordinate(e.getY()));
-//              polygonArtifact.addPoint(point);
-//              polygonArtifact.setColor(Color.red);
-//              addArtifact(polygonArtifact);
-//          }
-         }
-      }
-
-      public void mousePressed(MouseEvent e)
-      {
-         buttonPressed = e.getButton();
-
-         if (buttonPressed == MouseEvent.BUTTON1)
-         {
-            xSelected = unConvertXCoordinate(e.getX());
-            ySelected = unConvertYCoordinate(e.getY());
-
-//          _areaX1TEMP = unConvertXCoordinate(e.getX());
-//          _areaY1TEMP = unConvertYCoordinate(e.getY());
-         }
-         else if (buttonPressed == MouseEvent.BUTTON3)
-         {
-            xSelected = unConvertXCoordinate(e.getX());
-            ySelected = unConvertYCoordinate(e.getY());
-
-//          dragStartX = e.getX();
-//          dragStartY = e.getY();
-//          xOffsetStartOfDrag = _Xoffset;
-//          yOffsetStartOfDrag = _Yoffset;
-         }
-         else if (buttonPressed == MouseEvent.BUTTON2)
-         {
-            dragStartY = e.getY();
-         }
-
-         // check for double-clicks
-         if (e.getClickCount() > 1)
-         {
-            if (buttonPressed == MouseEvent.BUTTON1)
-            {
-               if (_listener != null)
-               {
-                  _listener.doubleClicked();
-               }
-            }
-            else if (buttonPressed == MouseEvent.BUTTON3)
-            {
-               Coordinate offset = convertFromPixelsToMeters(new Coordinate(e.getX(), e.getY(), Coordinate.PIXEL));
-               setXoffset(offset.getX());
-               setYoffset(offset.getY());
-               repaint();
-            }
-         }
-      }
-
-      public void mouseDragged(MouseEvent e)
-      {
-         if (buttonPressed == MouseEvent.BUTTON1)
-         {
-            _areaX1 = _areaX1TEMP;
-            _areaY1 = _areaY1TEMP;
-            _areaX2 = unConvertXCoordinate(e.getX());
-            _areaY2 = unConvertYCoordinate(e.getY());
-         }
-         else if (buttonPressed == MouseEvent.BUTTON3)
-         {
-//          int idx = e.getX() - dragStartX;
-//          int idy = -(e.getY() - dragStartY);
-//          double dx = idx / _scaleFactor;
-//          double dy = idy / _scaleFactor;
-//          setXoffset(xOffsetStartOfDrag - dx);
-//          setYoffset(yOffsetStartOfDrag - dy);
-         }
-         else if (buttonPressed == MouseEvent.BUTTON2)
-         {
-            int yDifferenceFromStartOfDrag = -(e.getY() - dragStartY);
-            double scaledYChange = new Double(yDifferenceFromStartOfDrag * 0.5);
-            if (getRange() < 10)
-               scaledYChange = new Double(yDifferenceFromStartOfDrag * 0.01);
-            double newRange = getRange() + scaledYChange;
-            if (newRange < 0.1)
-            {
-               newRange = 0.1;
-            }
-
-            setRange(newRange);
-            dragStartY = e.getY();
-         }
-
-         repaint();
-      }
-
-      public void mouseReleased(MouseEvent e)
-      {
-      }
-   }
-
-   public void showInNewWindow()
-   {
-      JFrame frame = new JFrame("Plotter");
-      frame.getContentPane().add(this, BorderLayout.CENTER);
-      frame.pack();
-      frame.setVisible(true);
+      panel.repaint();
    }
 
    public void addArtifactsChangedListener(ArtifactsChangedListener artifactsChangedListener)
@@ -981,30 +959,6 @@ public class Plotter extends JPanel
          artifactsChangedListener.artifactsChanged(getArtifacts());
       }
    }
-
-   public PlotterLegendPanel createPlotterLegendPanel()
-   {
-      PlotterLegendPanel ret = new PlotterLegendPanel();
-
-      this.addArtifactsChangedListener(ret);
-
-      return ret;
-   }
-
-   public JPanel createAndAttachPlotterLegendPanel()
-   {
-      JPanel ret = new JPanel();
-
-      PlotterLegendPanel plotterLegendPanel = new PlotterLegendPanel();
-
-      this.addArtifactsChangedListener(plotterLegendPanel);
-
-
-      ret.setLayout(new BorderLayout());
-      ret.add(this, "Center");
-      ret.add(plotterLegendPanel, "South");
-
-      return ret;
-
-   }
+   
+   // END ARTIFACT GARBAGE //
 }

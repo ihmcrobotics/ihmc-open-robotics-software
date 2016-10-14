@@ -1,10 +1,12 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.stateMachines.FinishableState;
 import us.ihmc.robotics.stateMachines.GenericStateMachine;
 
-public class BehaviorStateMachine <E extends Enum<E>> extends GenericStateMachine<E, BehaviorStateWrapper<E>>
+public class BehaviorStateMachine<E extends Enum<E>> extends GenericStateMachine<E, BehaviorAction<E>>
 {
    public BehaviorStateMachine(String name, String switchTimeName, Class<E> enumType, DoubleYoVariable t, YoVariableRegistry registry)
    {
@@ -13,37 +15,38 @@ public class BehaviorStateMachine <E extends Enum<E>> extends GenericStateMachin
 
    public void initialize()
    {
-      BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
+      BehaviorAction<E> currentState = getCurrentState();
       currentState.doTransitionIntoAction();
+   }
+
+   public void addStateWithDoneTransition(BehaviorAction<E> state, E nextState)
+   {
+      state.addDoneWithStateTransition(nextState);
+      addState(state);
    }
 
    public void pause()
    {
-      BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
+      BehaviorAction<E> currentState = getCurrentState();
       currentState.pause();
    }
 
    public void resume()
    {
-      BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
+      BehaviorAction<E> currentState = getCurrentState();
       currentState.resume();
    }
 
    public void stop()
    {
-      BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
-      currentState.stop();
+      BehaviorAction<E> currentState = getCurrentState();
+      currentState.abort();
    }
 
    public void doPostBehaviorCleanup()
    {
-      BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
+      BehaviorAction<E> currentState = getCurrentState();
       currentState.doPostBehaviorCleanup();
    }
 
-   public void enableActions()
-   {
-      BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
-      currentState.enableActions();
-   }
 }

@@ -150,7 +150,7 @@ public class SDFEnvironment implements CommonAvatarEnvironmentInterface
         			   if (geo.getBox()!=null)
         			   {
         				   Vector3d sz = SDFConversionsHelper.stringToVector3d(geo.getBox().getSize());
-        				   RotatableBoxTerrainObject obj = new RotatableBoxTerrainObject(transformToModel,sz.x,sz.y,sz.z, mat);
+        				   RotatableBoxTerrainObject obj = new RotatableBoxTerrainObject(transformToModel,sz.getX(),sz.getY(),sz.getZ(), mat);
         				   combinedTerrainObject3D.addTerrainObject(obj);
         			   }
         			   if (geo.getCylinder()!=null)

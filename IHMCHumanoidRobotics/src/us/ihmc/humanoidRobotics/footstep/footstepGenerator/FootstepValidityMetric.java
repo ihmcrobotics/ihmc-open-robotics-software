@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 
 /**
  * Created by agrabertilton on 2/20/15.
@@ -13,7 +13,7 @@ public interface FootstepValidityMetric
     * @param prospectiveFootstep the prospective footstep to take.
     * @return
     */
-   public boolean footstepValid(FootstepData stanceFootstep, FootstepData prospectiveFootstep);
+   public boolean footstepValid(FootstepDataMessage stanceFootstep, FootstepDataMessage prospectiveFootstep);
 
    /**
     * More Comprehensive check that also checks things related to the initial position of the prospective foot.
@@ -23,5 +23,5 @@ public interface FootstepValidityMetric
     * @param prospectiveFootstep the prospective footstep to take.
     * @return
     */
-   public boolean footstepValid(FootstepData previousFootstep, FootstepData stanceFootstep, FootstepData prospectiveFootstep);
+   public boolean footstepValid(FootstepDataMessage previousFootstep, FootstepDataMessage stanceFootstep, FootstepDataMessage prospectiveFootstep);
 }

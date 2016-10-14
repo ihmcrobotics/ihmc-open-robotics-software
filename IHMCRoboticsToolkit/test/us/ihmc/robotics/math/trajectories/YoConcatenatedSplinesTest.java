@@ -14,8 +14,8 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class YoConcatenatedSplinesTest
 {
@@ -23,7 +23,7 @@ public class YoConcatenatedSplinesTest
    private final static double EPSILON = 1;
    private final static Random random = new Random(2468642L);
 
-	@DeployableTestMethod(estimatedDuration = 1.2)
+	@ContinuousIntegrationTest(estimatedDuration = 1.8)
 	@Test(timeout = 30000)
    public void testSimpleCubicQuinticCubic()
    {
@@ -56,7 +56,7 @@ public class YoConcatenatedSplinesTest
       }
    }
    
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testSimpleCubicQuinticCubicTroublesome()
    {
@@ -95,7 +95,7 @@ public class YoConcatenatedSplinesTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 2.3)
+	@ContinuousIntegrationTest(estimatedDuration = 3.3)
 	@Test(timeout = 30000)
    public void testQuinticsFromCubicQuinticCubic()
    {
@@ -134,7 +134,7 @@ public class YoConcatenatedSplinesTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 1.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.4)
 	@Test(timeout = 30000)
    public void testTimeFromArcLength()
    {

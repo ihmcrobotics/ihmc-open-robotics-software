@@ -5,71 +5,92 @@ import javax.vecmath.Matrix3d;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class RateBasedDesiredHeadingControlModule implements DesiredHeadingControlModule
-{  
+{
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable desiredHeading = new DoubleYoVariable("desiredHeading", registry);
    private final DoubleYoVariable desiredHeadingDot = new DoubleYoVariable("desiredHeadingDot", registry);
 
    private final DesiredHeadingFrame desiredHeadingFrame = new DesiredHeadingFrame();
+   private final DesiredHeadingFrame predictedHeadingFrame = new DesiredHeadingFrame();
 
    private final double controlDT;
-   
-   public RateBasedDesiredHeadingControlModule(double initialDesiredHeading, double controlDT,
-           YoVariableRegistry parentRegistry)
+
+   public RateBasedDesiredHeadingControlModule(double initialDesiredHeading, double controlDT, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.controlDT = controlDT;
-      this.desiredHeading.set(initialDesiredHeading);
-      
+      desiredHeading.set(initialDesiredHeading);
+
       updateDesiredHeadingFrame();
    }
 
+   @Override
    public void updateDesiredHeadingFrame()
    {
       updateDesiredHeading();
-      desiredHeadingFrame.update();
+      desiredHeadingFrame.setHeadingAngleAndUpdate(desiredHeading.getDoubleValue());
    }
 
+   @Override
    public double getFinalHeadingTargetAngle()
    {
       throw new RuntimeException("Don't use this. It should be removed from the interface");
    }
-   
+
+   @Override
    public FrameVector2d getFinalHeadingTarget()
    {
       throw new RuntimeException("Don't use this. It should be removed from the interface");
    }
 
+   @Override
    public ReferenceFrame getDesiredHeadingFrame()
    {
       return desiredHeadingFrame;
    }
 
+   @Override
+   public ReferenceFrame getPredictedHeadingFrame(double timeFromNow)
+   {
+      double predictedHeading = predictHeading(timeFromNow);
+      predictedHeadingFrame.setHeadingAngleAndUpdate(predictedHeading);
+      return predictedHeadingFrame;
+   }
+
+   private double predictHeading(double timeFromNow)
+   {
+      double deltaHeading = desiredHeadingDot.getDoubleValue() * timeFromNow;
+      return desiredHeading.getDoubleValue() + deltaHeading;
+   }
+
+   @Override
    public void setFinalHeadingTarget(FrameVector2d finalHeadingTarget)
    {
       finalHeadingTarget.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       setFinalHeadingTargetAngle(Math.atan2(finalHeadingTarget.getY(), finalHeadingTarget.getX()));
    }
 
+   @Override
    public double getDesiredHeadingAngle()
-   {      
+   {
       return desiredHeading.getDoubleValue();
    }
-   
-   public void getDesiredHeading(FrameVector2d desiredHeadingToPack)
+
+   @Override
+   public void getDesiredHeading(FrameVector2d desiredHeadingToPack, double timeFromNow)
    {
-      desiredHeadingToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeading.getDoubleValue()),
-                                    Math.sin(desiredHeading.getDoubleValue()));
+      double heading = predictHeading(timeFromNow);
+      desiredHeadingToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), Math.cos(heading), Math.sin(heading));
    }
 
+   @Override
    public void resetHeadingAngle(double newHeading)
    {
-      this.desiredHeading.set(newHeading);
+      desiredHeading.set(newHeading);
    }
 
    private void updateDesiredHeading()
@@ -79,7 +100,7 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
       desiredHeading.set(desiredHeading.getDoubleValue() + deltaHeading);
    }
 
-   private class DesiredHeadingFrame extends ReferenceFrame
+   public static class DesiredHeadingFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = 4657294310129415811L;
 
@@ -88,17 +109,25 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
          super("DesiredHeadingFrame", ReferenceFrame.getWorldFrame(), false, false, true);
       }
 
+      private final Matrix3d rotation = new Matrix3d();
+
+      @Override
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
       {
-         Matrix3d rotation = new Matrix3d();
-         rotation.rotZ(desiredHeading.getDoubleValue());
 
          transformToParent.setRotationAndZeroTranslation(rotation);
       }
+
+      public void setHeadingAngleAndUpdate(double headingAngle)
+      {
+         rotation.rotZ(headingAngle);
+         update();
+      }
    }
 
+   @Override
    public void setFinalHeadingTargetAngle(double finalHeadingTargetAngle)
    {
-      throw new RuntimeException("Don't use this. It should be removed from the interface");      
+      throw new RuntimeException("Don't use this. It should be removed from the interface");
    }
 }

@@ -13,13 +13,13 @@ import org.junit.Test;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class JointWrenchSensorTest
 {
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testStaticallyHangingMasses() throws UnreasonableAccelerationException
    {
@@ -67,7 +67,7 @@ public class JointWrenchSensorTest
       assertJointWrenchEquals(jointWrenchSensorTwo, expectedJointForce, expectedJointTorque);
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testJointTorquesMatchWhenSensorAtJoint() throws UnreasonableAccelerationException
    {
@@ -107,14 +107,14 @@ public class JointWrenchSensorTest
          robot.doDynamicsAndIntegrate(0.0001);
          
          jointWrenchSensorOne.getJointTorque(jointTorque);
-         assertEquals(pinJointOne.getTau().getDoubleValue(), -jointTorque.getY(), 1e-7);
+         assertEquals(pinJointOne.getTauYoVariable().getDoubleValue(), -jointTorque.getY(), 1e-7);
          
          jointWrenchSensorTwo.getJointTorque(jointTorque);
-         assertEquals(pinJointTwo.getTau().getDoubleValue(), -jointTorque.getX(), 1e-7);
+         assertEquals(pinJointTwo.getTauYoVariable().getDoubleValue(), -jointTorque.getX(), 1e-7);
       }
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testOffsetAtCenterOfMassWithCantileveredBeam() throws UnreasonableAccelerationException
    {
@@ -137,7 +137,7 @@ public class JointWrenchSensorTest
       
       robot.doDynamicsAndIntegrate(0.0001);
       
-      double jointAcceleration = pinJointOne.getQDD().getDoubleValue();
+      double jointAcceleration = pinJointOne.getQDDYoVariable().getDoubleValue();
       assertEquals(0.0, jointAcceleration, 1e-7);
       
       Vector3d expectedJointForce = new Vector3d(-massOne * robot.getGravityZ(), 0.0, 0.0);

@@ -7,14 +7,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.vecmath.Point3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.models.FullRobotModel;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -73,7 +68,7 @@ public class PosePlaybackSCSBridge
 
    private final PoseSequenceEditorGUI poseSequenceEditorGUI;
 
-   private final SDFHumanoidRobot sdfRobot;
+   private final HumanoidFloatingRootJointRobot sdfRobot;
    private final FullRobotModel fullRobotModel;
    private final SimulationConstructionSet scs;
    
@@ -81,7 +76,7 @@ public class PosePlaybackSCSBridge
 
    // private final BagOfBalls balls = new BagOfBalls(500, 0.01, YoAppearance.AliceBlue(), registry, yoGraphicsListRegistry);
 
-   public PosePlaybackSCSBridge(SDFHumanoidRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModel fullRobotModelForSlider, double controlDT) throws IOException
+   public PosePlaybackSCSBridge(HumanoidFloatingRootJointRobot sdfRobot, FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModel fullRobotModelForSlider, double controlDT) throws IOException
    {
       this.sdfRobot = sdfRobot;
       this.fullRobotModel = fullRobotModel;

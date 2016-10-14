@@ -3,13 +3,15 @@ package us.ihmc.wholeBodyController.concurrent;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
@@ -20,16 +22,18 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchronizerInterface
 {
-   private final SDFFullHumanoidRobotModel estimatorFullRobotModel;
+   private final FullHumanoidRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder estimatorForceSensorDataHolder;
+   private final CenterOfMassDataHolder estimatorCenterOfMassDataHolder;
    private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
    private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
    private final RobotMotionStatusHolder estimatorRobotMotionStatusHolder;
    private final ContactSensorHolder estimatorContactSensorHolder;
    private final DesiredJointDataHolder estimatorDesiredJointDataHolder;
 
-   private final SDFFullHumanoidRobotModel controllerFullRobotModel;
+   private final FullHumanoidRobotModel controllerFullRobotModel;
    private final ForceSensorDataHolder controllerForceSensorDataHolder;
+   private final CenterOfMassDataHolder controllerCenterOfMassDataHolder;
    private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
    private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
    private final RobotMotionStatusHolder controllerRobotMotionStatusHolder;
@@ -56,6 +60,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
       
       estimatorFullRobotModel = wholeBodyControlParameters.createFullRobotModel();
       estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
+      estimatorCenterOfMassDataHolder = new CenterOfMassDataHolder();
       estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
       estimatorContactSensorHolder = new ContactSensorHolder(Arrays.asList(estimatorFullRobotModel.getContactSensorDefinitions()));
       estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
@@ -70,6 +75,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
 
       controllerFullRobotModel = estimatorFullRobotModel;
       controllerForceSensorDataHolder = estimatorForceSensorDataHolder;
+      controllerCenterOfMassDataHolder = estimatorCenterOfMassDataHolder;
       controllerRawJointSensorDataHolderMap = estimatorRawJointSensorDataHolderMap;
       controllerCenterOfPressureDataHolder = estimatorCenterOfPressureDataHolder;
       controllerRobotMotionStatusHolder = estimatorRobotMotionStatusHolder;
@@ -101,7 +107,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    }
 
    @Override
-   public SDFFullHumanoidRobotModel getEstimatorFullRobotModel()
+   public FullHumanoidRobotModel getEstimatorFullRobotModel()
    {
       return estimatorFullRobotModel;
    }
@@ -113,7 +119,13 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    }
 
    @Override
-   public SDFFullHumanoidRobotModel getControllerFullRobotModel()
+   public CenterOfMassDataHolder getEstimatorCenterOfMassDataHolder()
+   {
+      return estimatorCenterOfMassDataHolder;
+   }
+
+   @Override
+   public FullHumanoidRobotModel getControllerFullRobotModel()
    {
       return controllerFullRobotModel;
    }
@@ -122,6 +134,12 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    public ForceSensorDataHolder getControllerForceSensorDataHolder()
    {
       return controllerForceSensorDataHolder;
+   }
+
+   @Override
+   public CenterOfMassDataHolderReadOnly getControllerCenterOfMassDataHolder()
+   {
+      return controllerCenterOfMassDataHolder;
    }
 
    @Override
@@ -207,5 +225,6 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    {
       return estimatorDesiredJointDataHolder;
    }
+
 
 }

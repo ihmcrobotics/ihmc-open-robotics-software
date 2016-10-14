@@ -1,17 +1,17 @@
 package us.ihmc.robotics.robotSide;
 
 import static org.junit.Assert.assertEquals;
-import static us.ihmc.tools.testing.TestPlanTarget.Fast;
+import static us.ihmc.tools.continuousIntegration.IntegrationCategory.FAST;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = Fast)
+@ContinuousIntegrationPlan(categories = FAST)
 public class QuadrantDependentListTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMultipleIterations()
    {
@@ -33,7 +33,7 @@ public class QuadrantDependentListTest
       }
    }
    
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIteratorOrdering()
    {

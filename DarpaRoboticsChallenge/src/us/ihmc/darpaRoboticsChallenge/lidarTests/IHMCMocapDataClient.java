@@ -34,7 +34,7 @@ public class IHMCMocapDataClient extends MocapDataClient
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            transformToParent.setEuler(Math.toRadians(-90), Math.toRadians(0), Math.toRadians(0));
+            transformToParent.setRotationEulerAndZeroTranslation(Math.toRadians(-90), Math.toRadians(0), Math.toRadians(0));
          }
       };
       mocapOriginFrame.update();
@@ -53,7 +53,7 @@ public class IHMCMocapDataClient extends MocapDataClient
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            transformToParent.setEuler(Math.toRadians(90), 0, 0);
+            transformToParent.setRotationEulerAndZeroTranslation(Math.toRadians(90), 0, 0);
          }
       };
       mocapRbZUpFrame.update();

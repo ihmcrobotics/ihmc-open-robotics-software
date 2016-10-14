@@ -6,19 +6,19 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.gui.CombinedVarPanel;
+import us.ihmc.simulationconstructionset.gui.YoVariableExplorerTabbedPane;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
-import us.ihmc.simulationconstructionset.gui.VarPanel;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets={TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class SimulationConstructionSetRootRegistryTest
 {
    private static final boolean SHOW_GUI = false;
 
-	@DeployableTestMethod(estimatedDuration = 1.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void testRootRegistryNothingFancy()
    {
@@ -43,13 +43,13 @@ public class SimulationConstructionSetRootRegistryTest
       if (SHOW_GUI)
       {
          StandardSimulationGUI standardSimulationGUI = scs.getStandardSimulationGUI();
-         CombinedVarPanel combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
+         YoVariableExplorerTabbedPane combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
 
          // This also fails when the Search Panel doesn't come up...
          sleep(2000);  //+++JEP: Not sure why need this sleep, but it fails if we don't...
 
          combinedVarPanel.setVisibleVarPanel("root.RobotsRootRegistry.RegistryOne");
-         VarPanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
+         YoVariablePanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
         
          assertTrue(visibleVarPanel != null);
          assertTrue(variableOne == visibleVarPanel.getYoVariable("variableOne"));
@@ -58,7 +58,7 @@ public class SimulationConstructionSetRootRegistryTest
       scs.closeAndDispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000) 
    public void testVarGroups()
    {
@@ -86,13 +86,13 @@ public class SimulationConstructionSetRootRegistryTest
       if (SHOW_GUI)
       {
          StandardSimulationGUI standardSimulationGUI = scs.getStandardSimulationGUI();
-         CombinedVarPanel combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
+         YoVariableExplorerTabbedPane combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
 
          sleep(2000);  //+++JEP: Not sure why need this sleep, but it fails if we don't...
          // This also fails when the Search Panel doesn't come up...
          
          standardSimulationGUI.selectVarGroup("VarGroupToTest");
-         VarPanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
+         YoVariablePanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
          assertTrue(visibleVarPanel.getName().equals("VarGroupToTest"));
          assertTrue(variableOneA == visibleVarPanel.getYoVariable("variableOneA"));
          assertTrue(variableTwoB == visibleVarPanel.getYoVariable("variableTwoB"));
@@ -105,7 +105,7 @@ public class SimulationConstructionSetRootRegistryTest
       scs.closeAndDispose();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testRootRegistryAddYoVariablesAfterConstruction()
    {
@@ -168,11 +168,11 @@ public class SimulationConstructionSetRootRegistryTest
   
          sleep(2000);  //+++JEP: Not sure why need this sleep, but it fails if we don't...
 
-         CombinedVarPanel combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
+         YoVariableExplorerTabbedPane combinedVarPanel = standardSimulationGUI.getCombinedVarPanel();
          combinedVarPanel.setVisibleVarPanel("root.TestAfterConstruction.RegistryBeforeConstructionOne");
 //         sleep(2000);
          
-         VarPanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
+         YoVariablePanel visibleVarPanel = combinedVarPanel.getVisibleVarPanel();
          System.out.println("visibleVarPanel = " + visibleVarPanel.getName());
          assertTrue(visibleVarPanel.getName().equals("RegistryBeforeConstructionOne"));
          assertTrue(variableBeforeConstructionOne == visibleVarPanel.getYoVariable("variableBeforeConstructionOne"));

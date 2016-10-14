@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
@@ -41,7 +42,7 @@ public class PeterPlanarWalkerRobot extends Robot
       super("Walker");
       this.setGravity(GRAVITY);
 
-      bodyJoint = new FloatingPlanarJoint("body", this, FloatingPlanarJoint.XZ);
+      bodyJoint = new FloatingPlanarJoint("body", this, Plane.XZ);
 
       Link bodyLink = getBodyLink();
 
@@ -98,10 +99,10 @@ public class PeterPlanarWalkerRobot extends Robot
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         kneeJoints.get(robotSide).getQ().set(maxLegExtension / 2.0);
+         kneeJoints.get(robotSide).getQYoVariable().set(maxLegExtension / 2.0);
 
          double sign = robotSide.negateIfLeftSide(1.0);
-         hipJoints.get(robotSide).getQ().set(initalHipAngle * sign);
+         hipJoints.get(robotSide).getQYoVariable().set(initalHipAngle * sign);
       }
 
       bodyJoint.getQd_t1().set(initalBodyVelocity);
@@ -173,37 +174,37 @@ public class PeterPlanarWalkerRobot extends Robot
 
    public double getKneePosition(RobotSide robotSide)
    {
-      return kneeJoints.get(robotSide).getQ().getDoubleValue();
+      return kneeJoints.get(robotSide).getQYoVariable().getDoubleValue();
    }
 
    public double getKneeVelocity(RobotSide robotSide)
    {
-      return kneeJoints.get(robotSide).getQD().getDoubleValue();
+      return kneeJoints.get(robotSide).getQDYoVariable().getDoubleValue();
    }
 
    public double getHipPosition(RobotSide robotSide)
    {
-      return hipJoints.get(robotSide).getQ().getDoubleValue();
+      return hipJoints.get(robotSide).getQYoVariable().getDoubleValue();
    }
 
    public double getHipVelocity(RobotSide robotSide)
    {
-      return hipJoints.get(robotSide).getQD().getDoubleValue();
+      return hipJoints.get(robotSide).getQDYoVariable().getDoubleValue();
    }
 
    public void setKneeTorque(RobotSide robotSide, double torque)
    {
-      kneeJoints.get(robotSide).getTau().set(torque);
+      kneeJoints.get(robotSide).getTauYoVariable().set(torque);
    }
 
    public void setHipTorque(RobotSide robotSide, double torque)
    {
-      hipJoints.get(robotSide).getTau().set(torque);
+      hipJoints.get(robotSide).getTauYoVariable().set(torque);
    }
-   
+
    public double getHipTorque(RobotSide robotSide)
    {
-      return hipJoints.get(robotSide).getTau().getDoubleValue();
+      return hipJoints.get(robotSide).getTauYoVariable().getDoubleValue();
    }
 
    public boolean isFootOnGround(RobotSide robotSide)

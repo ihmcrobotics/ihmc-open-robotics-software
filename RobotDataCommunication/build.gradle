@@ -1,15 +1,13 @@
 buildscript {
-   repositories {
-      jcenter()
-      mavenCentral()
-      maven {
-         url "https://plugins.gradle.org/m2/"
-      }
-   }
-   dependencies {
-      classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.15"
-      classpath "org.hidetake:gradle-ssh-plugin:1.2.0"
-   }
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+    classpath "org.hidetake:gradle-ssh-plugin:2.1.1"
+  }
 }
 
 apply plugin: "us.ihmc.gradle.ihmc-build"
@@ -32,15 +30,12 @@ apply plugin: 'application'
 repositories ihmc.ihmcDefaultArtifactProxies()
 
 repositories {
-   maven {
-      url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
-   }
-}
-
-repositories {
-   mavenLocal()
-   jcenter()
-   mavenCentral()
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven {
+        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+    }
 }
 
 def strings = ['ihmc', 'robotics']
@@ -52,23 +47,26 @@ dependencies {
 
    compile group: 'com.google.protobuf', name: 'protobuf-java', version: '2.6.1'
    compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
-   compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
-
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-   compile group: 'com.google.guava', name: 'guava', version: '17.0'
-   compile group: 'org.yaml', name: 'snakeyaml', version: '1.17'
+   compile group: 'com.google.guava', name: 'guava', version: '18.0'
    compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
+   compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
    compile group: 'us.ihmc', name: 'IHMCJavaDecklinkCapture', version: '0.1.7'
-
-   compile ihmc.getProjectDependency(":Graphics3DAdapter")
+   compile group: 'commons-io', name: 'commons-io', version: '2.4'
+   compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
+   compile group: 'org.tukaani', name: 'xz', version: '1.5'
+   
    compile ihmc.getProjectDependency(":Plotting")
    compile ihmc.getProjectDependency(":SDFLoader")
    compile ihmc.getProjectDependency(":SimulationConstructionSet")
    compile ihmc.getProjectDependency(":IHMCCommunication")
    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+   compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+    compile ihmc.getProjectDependency(":IHMCRobotDescription")
+    compile ihmc.getProjectDependency(":IHMCRobotModels")
 }
 
 mainClassName = hasProperty('mainClass') ? mainClass : "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher"

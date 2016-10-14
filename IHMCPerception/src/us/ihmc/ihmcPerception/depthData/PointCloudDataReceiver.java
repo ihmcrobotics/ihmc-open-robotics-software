@@ -10,8 +10,8 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -34,7 +34,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class PointCloudDataReceiver extends Thread implements NetStateListener, PointCloudDataReceiverInterface
 {
-   private final SDFFullHumanoidRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final DepthDataFilter depthDataFilter;
@@ -46,6 +46,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
    private final LinkedBlockingQueue<PointCloudData> dataQueue = new LinkedBlockingQueue<PointCloudData>();
    private final AtomicBoolean sendData = new AtomicBoolean(false);
+   private final AtomicBoolean sendLidarPose = new AtomicBoolean(false);
    private volatile boolean running = true;
 
    private volatile boolean clearQuadTree = false;
@@ -53,7 +54,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
    private final PacketCommunicator sensorSuitePacketCommunicator;
    private boolean DEBUG_WITH_MOCAP = false;
 
-   public PointCloudDataReceiver(SDFFullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
+   public PointCloudDataReceiver(FullHumanoidRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotJointMap jointMap, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
          PacketCommunicator sensorSuitePacketCommunicator)
    {
@@ -218,6 +219,9 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
                      }
                   }
                }
+
+               if (sendLidarPose.get())
+                  pointCloudWorldPacketGenerator.setLidarPose(scanFrameToWorld);
             }
             readWriteLock.writeLock().unlock();
          }
@@ -275,14 +279,17 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
 
       sensorSuitePacketCommunicator.attachListener(DepthDataStateCommand.class, new PacketConsumer<DepthDataStateCommand>()
       {
+         @Override
          public void receivedPacket(DepthDataStateCommand object)
          {
             setLidarState(object.getLidarState());
+            sendLidarPose.set(object.isLidarPoseRequested());
          }
       });
 
       sensorSuitePacketCommunicator.attachListener(DepthDataClearCommand.class, new PacketConsumer<DepthDataClearCommand>()
       {
+         @Override
          public void receivedPacket(DepthDataClearCommand object)
          {
             clearLidar(object);
@@ -291,6 +298,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
 
       sensorSuitePacketCommunicator.attachListener(DepthDataFilterParameters.class, new PacketConsumer<DepthDataFilterParameters>()
       {
+         @Override
          public void receivedPacket(DepthDataFilterParameters object)
          {
             setFilterParameters(object);
@@ -338,6 +346,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
       return points;
    }
 
+   @Override
    public void start()
    {
       super.start();

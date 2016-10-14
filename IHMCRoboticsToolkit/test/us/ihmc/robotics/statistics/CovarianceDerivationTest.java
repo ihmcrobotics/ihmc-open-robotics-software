@@ -3,7 +3,7 @@ package us.ihmc.robotics.statistics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import java.util.Random;
 
@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 public class CovarianceDerivationTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testLawOfLargeNumbers()
    {
@@ -31,8 +31,8 @@ public class CovarianceDerivationTest
       assertEquals(variance, statistics.getVariance(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 7.6)
-	@Test(timeout = 38016)
+	@ContinuousIntegrationTest(estimatedDuration = 8.4)
+	@Test(timeout = 42000)
    public void testRandomWalkDiscretization()
    {
       Random random = new Random(1252L);

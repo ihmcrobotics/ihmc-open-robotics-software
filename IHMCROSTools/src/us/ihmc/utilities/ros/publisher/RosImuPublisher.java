@@ -23,20 +23,20 @@ public class RosImuPublisher extends RosTopicPublisher<sensor_msgs.Imu>
       sensor_msgs.Imu message = getMessage();
 
       Vector3  localLinearAcceleration = newMessageFromType(Vector3._TYPE);
-      localLinearAcceleration.setX(linearAcceleration.x);
-      localLinearAcceleration.setY(linearAcceleration.y);
-      localLinearAcceleration.setZ(linearAcceleration.z);
+      localLinearAcceleration.setX(linearAcceleration.getX());
+      localLinearAcceleration.setY(linearAcceleration.getY());
+      localLinearAcceleration.setZ(linearAcceleration.getZ());
       
       Quaternion localOrientation = newMessageFromType(Quaternion._TYPE);
-      localOrientation.setW(orientation.w);
-      localOrientation.setX(orientation.x);
-      localOrientation.setY(orientation.y);
-      localOrientation.setZ(orientation.z);
+      localOrientation.setW(orientation.getW());
+      localOrientation.setX(orientation.getX());
+      localOrientation.setY(orientation.getY());
+      localOrientation.setZ(orientation.getZ());
       
       Vector3 localAngularVelocity = newMessageFromType(Vector3._TYPE);
-      localAngularVelocity.setX(angularVelocity.x);
-      localAngularVelocity.setY(angularVelocity.y);
-      localAngularVelocity.setZ(angularVelocity.z);
+      localAngularVelocity.setX(angularVelocity.getX());
+      localAngularVelocity.setY(angularVelocity.getY());
+      localAngularVelocity.setZ(angularVelocity.getZ());
       
       Header header = newMessageFromType(Header._TYPE);
       header.setFrameId(frameId);

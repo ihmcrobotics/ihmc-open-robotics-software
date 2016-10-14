@@ -1,26 +1,26 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 
-public class FootstepListTask extends BehaviorTask
+public class FootstepListTask<E extends Enum<E>> extends BehaviorAction<E>
 {
    private final FootstepListBehavior footstepListBehavior;
-   private final FootstepDataList footStepList;
+   private final FootstepDataListMessage footStepList;
    
-   public FootstepListTask(FootstepListBehavior footstepListBehavior,FootstepDataList footStepList ,DoubleYoVariable yoTime,double sleepTime)
+   public FootstepListTask(FootstepListBehavior footstepListBehavior,FootstepDataListMessage footStepList)
    {
-      super(footstepListBehavior, yoTime, sleepTime);
+      this(null,footstepListBehavior, footStepList);
+   }
+   public FootstepListTask(E stateEnum,FootstepListBehavior footstepListBehavior,FootstepDataListMessage footStepList)
+   {
+      super(stateEnum, footstepListBehavior);
       this.footstepListBehavior = footstepListBehavior;
       this.footStepList= footStepList;
    }
 
-   public FootstepListTask(FootstepListBehavior footstepListBehavior, FootstepDataList footStepList, DoubleYoVariable yoTime)
-   {
-      this(footstepListBehavior,footStepList, yoTime, 0.0);
-   }
-
+   
    @Override
    protected void setBehaviorInput()
    {

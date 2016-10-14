@@ -91,68 +91,68 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
 
    public void closestIntersectionTo(double x, double y, double z, Point3d intersection)
    {
-      intersection.x = x;
-      intersection.y = y;
-      intersection.z = heightAt(x, y, z);
+      intersection.setX(x);
+      intersection.setY(y);
+      intersection.setZ(heightAt(x, y, z));
    }
 
    public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
    {
       double threshhold = 0.015;
-      normal.x = 0.0;
-      normal.y = 0.0;
-      normal.z = 1.0;
+      normal.setX(0.0);
+      normal.setY(0.0);
+      normal.setZ(1.0);
 
       if (!boundingBox.isXYInside(x, y) || (z > boundingBox.getZMax() - threshhold))
          return;
 
       if (Math.abs(x - boundingBox.getXMin()) < threshhold)
       {
-         normal.x = -1.0;
-         normal.y = 0.0;
-         normal.z = 0.0;
+         normal.setX(-1.0);
+         normal.setY(0.0);
+         normal.setZ(0.0);
       }
 
       else if (Math.abs(x - boundingBox.getXMax()) < threshhold)
       {
-         normal.x = 1.0;
-         normal.y = 0.0;
-         normal.z = 0.0;
+         normal.setX(1.0);
+         normal.setY(0.0);
+         normal.setZ(0.0);
       }
 
       else if (Math.abs(y - boundingBox.getYMin()) < threshhold)
       {
-         normal.x = 0.0;
-         normal.y = -1.0;
-         normal.z = 0.0;
+         normal.setX(0.0);
+         normal.setY(-1.0);
+         normal.setZ(0.0);
       }
 
       else if (Math.abs(y - boundingBox.getYMax()) < threshhold)
       {
-         normal.x = 0.0;
-         normal.y = 1.0;
-         normal.z = 0.0;
+         normal.setX(0.0);
+         normal.setY(1.0);
+         normal.setZ(0.0);
       }
    }
 
    public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
    {
-      intersection.x = x;    // Go Straight Up for now...
-      intersection.y = y;
-      intersection.z = heightAt(x, y, z);
+      intersection.setX(x);    // Go Straight Up for now...
+      intersection.setY(y);
+      intersection.setZ(heightAt(x, y, z));
 
       surfaceNormalAt(x, y, z, normal);
    }
    
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
-      intersectionToPack.x = x;    // Go Straight Up for now...
-      intersectionToPack.y = y;
-      intersectionToPack.z = heightAt(x, y, z);
+      intersectionToPack.setX(x);    // Go Straight Up for now...
+      intersectionToPack.setY(y);
+      intersectionToPack.setZ(heightAt(x, y, z));
 
       surfaceNormalAt(x, y, z, normalToPack);
       
-      return (z < intersectionToPack.z);
+      return (z < intersectionToPack.getZ());
    }
 
    public double getXMin()

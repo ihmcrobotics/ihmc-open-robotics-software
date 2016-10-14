@@ -6,14 +6,14 @@ import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class SimulationConstructionSetProcessDataCallTest
 {   
    private static final boolean DEBUG = false;
    private YoVariableRegistry registry;
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=1000)
    public void testForwardCount()
    {
@@ -71,7 +71,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=1000)
    public void testBackwardCount()
    {
@@ -130,7 +130,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=1000)
    public void testForwardCopy()
    {
@@ -188,7 +188,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=1000)
    public void testBackwardCopy()
    {

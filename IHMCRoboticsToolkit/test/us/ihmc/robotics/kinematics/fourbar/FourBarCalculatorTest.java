@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class FourBarCalculatorTest
 {
@@ -14,8 +14,8 @@ public class FourBarCalculatorTest
    private FourbarLink outputLink, groundLink, inputLink, floatingLink;
    private FourbarProperties fourBarProperties;
       
-   @DeployableTestMethod
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSquare()
    {
       outputLink = new FourbarLink(1.0);

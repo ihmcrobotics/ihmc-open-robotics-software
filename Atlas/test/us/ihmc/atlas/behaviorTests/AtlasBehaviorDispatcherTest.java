@@ -4,16 +4,16 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.behaviorTests.BehaviorDispatcherTest;
+import us.ihmc.darpaRoboticsChallenge.behaviorTests.HumanoidBehaviorDispatcherTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = TestPlanTarget.Flaky)
-public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
+@ContinuousIntegrationPlan(categories = IntegrationCategory.SLOW)
+public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
 {
    private final AtlasRobotModel robotModel;
 
@@ -35,15 +35,15 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 50.0)
-   @Test(timeout = 250000)
+   @ContinuousIntegrationTest(estimatedDuration = 48.8)
+   @Test(timeout = 240000)
    public void testDispatchPelvisPoseBehavior() throws SimulationExceededMaximumTimeException
    {
       super.testDispatchPelvisPoseBehavior();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 315.0, targets = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 315.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 1600000)
    public void testDispatchWalkToLocationBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -51,16 +51,16 @@ public class AtlasBehaviorDispatcherTest extends BehaviorDispatcherTest
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 47.0)
-   @Test(timeout = 230000)
+   @ContinuousIntegrationTest(estimatedDuration = 43.2)
+   @Test(timeout = 220000)
    public void testDispatchWalkToLocationBehaviorAndStop() throws SimulationExceededMaximumTimeException
    {
       super.testDispatchWalkToLocationBehaviorAndStop();
    }
 
    @Override
-   @DeployableTestMethod(estimatedDuration = 314.6)
-   @Test(timeout = 1600000)
+   @ContinuousIntegrationTest(estimatedDuration = 68.3)
+   @Test(timeout = 340000)
    public void testDispatchWalkToLocationBehaviorPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       super.testDispatchWalkToLocationBehaviorPauseAndResume();

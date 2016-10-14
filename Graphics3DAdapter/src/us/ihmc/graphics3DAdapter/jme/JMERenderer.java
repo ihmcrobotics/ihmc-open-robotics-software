@@ -55,14 +55,12 @@ import com.jme3.system.awt.AwtPanelsContext;
 import com.jme3.system.lwjgl.LwjglContext;
 import com.jme3.texture.plugins.AWTLoader;
 import com.jme3.util.SkyFactory;
+import com.jme3.util.SkyFactory.EnvMapType;
 
 import jme3dae.ColladaLoader;
 import jme3dae.collada14.ColladaDocumentV14;
 import jme3dae.materials.FXBumpMaterialGenerator;
-import us.ihmc.graphics3DAdapter.GPULidarListener;
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
-import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.graphics3DAdapter.*;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
@@ -91,6 +89,8 @@ import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
 import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.tools.time.Timer;
 
 public class JMERenderer extends SimpleApplication implements Graphics3DAdapter, PBOAwtPanelListener
@@ -159,6 +159,9 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    private ArrayList<PBOAwtPanel> pboAwtPanels;
 
    private DirectionalLight primaryLight;
+   private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
+
+   private ArrayList<Updatable> updatables = new ArrayList<Updatable>();    // things we want to move automatically
 
    public JMERenderer(RenderType renderType)
    {
@@ -220,7 +223,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {  
       synchronized (graphicsConch)
       {
-         JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, assetLocator, this);
+         JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, assetLocator, this, closeableAndDisposableRegistry);
    
          if (rootJoint == null)
          {
@@ -245,10 +248,12 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       }
    }
 
+   @Override
    public void addRootNode(final Graphics3DNode rootNode)
    {
       enqueue(new Callable<JMEGraphics3DNode>()
       {
+         @Override
          public JMEGraphics3DNode call() throws Exception
          {
             synchronized (graphicsConch)
@@ -268,6 +273,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       viewportAdapters.add(viewportAdapter);
    }
 
+   @Override
    public ViewportAdapter createNewViewport(GraphicsDevice graphicsDevice, boolean isMainViewport, boolean isOffScreen)
    {
       if (isMainViewport)
@@ -287,14 +293,18 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return newViewport;
    }
 
+   @Override
    public void closeViewport(ViewportAdapter viewport)
    {
       ((JMEViewportAdapter) viewport).closeViewportAdapter();
       while (viewportAdapters.remove(viewport))
-      ;
+      {
+      }
+
       notifyRepaint();
    }
 
+   @Override
    public Object getGraphicsConch()
    {
       return graphicsConch;
@@ -405,10 +415,12 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       }
    }
 
+   @Override
    public void removeRootNode(final Graphics3DNode rootNode)
    {
       enqueue(new Callable<JMEGraphics3DNode>()
       {
+         @Override
          public JMEGraphics3DNode call() throws Exception
          {
             synchronized (graphicsConch)
@@ -480,11 +492,20 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       zUpNode.setShadowMode(ShadowMode.CastAndReceive);
    }
 
+   public void addDirectionalLight(ColorRGBA color, Vector3f direction)
+   {
+      DirectionalLight light = new DirectionalLight();
+      light.setColor(color);
+      light.setDirection(direction.normalizeLocal());
+      rootNode.addLight(light);
+   }
+
+   @Override
    public void setupSky()
    {
       try
       {
-         Spatial sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", false);
+         Spatial sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", EnvMapType.CubeMap);
          sky.setLocalScale(1000);
          rootNode.attachChild(sky);
          notifyRepaint();
@@ -545,6 +566,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          {
             jmeGraphicsNode.update();
          }
+         updateCameras();
       }
 
       if (count > 1000&&!tickUpdated)
@@ -552,8 +574,9 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          tickUpdated = true;
       }
 
-      updateCameras();
       count++;
+
+      updateGraphics(tpf);
    }
 
    /**
@@ -578,7 +601,10 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
     * render anything unless necessary.
     */
    @Override
-   public void update() {
+   public void update() 
+   {
+      if (alreadyClosing) return;
+
       if (prof!=null) prof.appStep(AppStep.BeginFrame);
 
       applicationUpdate(); // makes sure to execute AppTasks
@@ -651,7 +677,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       // user code here..
    }
 
-   private void updateCameras()
+   private synchronized void updateCameras()
    {
       if (alreadyClosing) return;
 
@@ -661,10 +687,12 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       }
    }
 
+   @Override
    public void setGroundVisible(final boolean isVisible)
    {
       enqueue(new Callable<Boolean>()
       {
+         @Override
          public Boolean call() throws Exception
          {
             if (isVisible != isTerrainVisible)
@@ -687,10 +715,12 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       notifyRepaint();
    }
 
+   @Override
    public void setHeightMap(final HeightMap heightMap)
    {
       enqueue(new Callable<JMEHeightMapTerrain>()
       {
+         @Override
          public JMEHeightMapTerrain call() throws Exception
          {
             if (terrain != null)
@@ -718,6 +748,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return jmeGraphicsNodes;
    }
 
+   @Override
    public void addSelectedListener(SelectedListener selectedListener)
    {
       this.selectedListenerHolder.addSelectedListener(selectedListener);
@@ -775,66 +806,123 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    public void addRepaintListeners(final Component panel)
    {
-      panel.addMouseListener(new MouseAdapter() {
+      if (alreadyClosing) return;
+      if (panel == null) return;
+      
+      panel.addMouseListener(new MouseAdapter() 
+      {
          @Override
-         public void mousePressed(MouseEvent e) {
+         public void mousePressed(MouseEvent e) 
+         {
             notifyRepaint();
          }
       });
 
-      panel.addMouseMotionListener(new MouseAdapter() {
+      panel.addMouseMotionListener(new MouseAdapter() 
+      {
          @Override
-         public void mouseDragged(MouseEvent e) {
+         public void mouseDragged(MouseEvent e) 
+         {
             notifyRepaint();
          }
       });
 
-      panel.addKeyListener(new KeyAdapter() {
+      panel.addKeyListener(new KeyAdapter() 
+      {
          @Override
-         public void keyPressed(KeyEvent e) {
+         public void keyPressed(KeyEvent e) 
+         {
             notifyRepaint();
          }
       });
 
-      panel.addComponentListener(new ComponentAdapter() {
+      panel.addComponentListener(new ComponentAdapter() 
+      {
          @Override
-         public void componentResized(ComponentEvent e) {
+         public void componentResized(ComponentEvent e) 
+         {
             notifyRepaint(3);
          }
 
          @Override
-         public void componentMoved(ComponentEvent e) {
+         public void componentMoved(ComponentEvent e) 
+         {
             notifyRepaint();
          }
       });
 
-      final RepaintManager oldManager = RepaintManager.currentManager(panel);
-      RepaintManager.setCurrentManager(new RepaintManager() {
-         @Override
-         public void addDirtyRegion(Applet applet, int x, int y, int w, int h) {
-            oldManager.addDirtyRegion(applet, x, y, w, h);
-         }
 
-         @Override
-         public void addDirtyRegion(Window window, int x, int y, int w, int h) {
-            oldManager.addDirtyRegion(window, x, y, w, h);
-         }
-
-         @Override
-         public synchronized void addInvalidComponent(JComponent invalidComponent) {
-            oldManager.addInvalidComponent(invalidComponent);
-         }
-
-         @Override
-         public void addDirtyRegion(JComponent c, int x, int y, int w, int h) {
-            oldManager.addDirtyRegion(c, x, y, w, h);
-            if (c == panel)
-               notifyRepaint();
-         }
-      });
-
+      RepaintManager.setCurrentManager(new NewRepaintManager(this, panel, closeableAndDisposableRegistry));
    }
    
+   private static class NewRepaintManager extends RepaintManager implements CloseableAndDisposable
+   {
+      private RepaintManager oldManager;
+      private Component panel;
+      private JMERenderer jmeRender;
+      
+      public NewRepaintManager(JMERenderer jmeRender, Component panel, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+      {
+         oldManager = RepaintManager.currentManager(panel);
+         this.panel = panel;
+         
+         if (closeableAndDisposableRegistry != null)
+         {
+            closeableAndDisposableRegistry.registerCloseableAndDisposable(this);
+         }
+      }
+      
+      @Override
+      public void addDirtyRegion(Applet applet, int x, int y, int w, int h) 
+      {
+         if (oldManager == null) return;
+         oldManager.addDirtyRegion(applet, x, y, w, h);
+      }
+
+      @Override
+      public void addDirtyRegion(Window window, int x, int y, int w, int h) 
+      {
+         if (oldManager == null) return;
+         oldManager.addDirtyRegion(window, x, y, w, h);
+      }
+
+      @Override
+      public synchronized void addInvalidComponent(JComponent invalidComponent) 
+      {
+         if (oldManager == null) return;
+         oldManager.addInvalidComponent(invalidComponent);
+      }
+
+      @Override
+      public void addDirtyRegion(JComponent c, int x, int y, int w, int h) 
+      {
+         if (oldManager == null) return;
+         oldManager.addDirtyRegion(c, x, y, w, h);
+         
+         if (jmeRender == null) return;
+         if (c == panel)
+            jmeRender.notifyRepaint();
+      }
+
+      @Override
+      public void closeAndDispose()
+      {
+         // Have to do this messy stuff since Swing has all these static calls, like RepaintManager.setCurrentManager() and the SwingThread never dies...
+         if (oldManager != null)
+         {
+            // TODO: Something is messed up with reseting the repaintManager. Someone should look into
+            // what is going on here and clean this up.
+            // My sense right now is that every time we make a new JMERenderer, it recursively makes 
+            // a new repaint manager...
+//            RepaintManager.setCurrentManager(oldManager);
+//            oldManager = null;
+            panel = null;
+            jmeRender = null;
+         }
+      }
+   }
+
+
    @Override
    public void isCreated(PBOAwtPanel pboAwtPanel)
    {
@@ -1051,6 +1139,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return list;
    }
 
+   @Override
    public void setBackgroundColor(final Color3f color)
    {
 //      enqueue(new Callable<Object>()
@@ -1068,6 +1157,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 //      });
    }
 
+   @Override
    public void setBackgroundImage(URL fileURL, Graphics3DBackgroundScaleMode backgroundScaleMode)
    {
       System.err.println(getClass().getSimpleName() + ": setBackgroundImage not implemented.");
@@ -1075,6 +1165,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       // TODO
    }
 
+   @Override
    public void setGroundAppearance(AppearanceDefinition app)
    {
       System.err.println(getClass().getSimpleName() + ": setGroundAppearance not implemented.");
@@ -1082,6 +1173,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       // TODO
    }
 
+   @Override
    public void addKeyListener(KeyListener keyListener)
    {
       keyListenerHolder.addKeyListener(keyListener);
@@ -1097,6 +1189,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return keyListenerHolder;
    }
 
+   @Override
    public void addMouseListener(MouseListener mouseListener)
    {
       mouseListenerHolder.addMouseListener(mouseListener);
@@ -1107,6 +1200,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return mouseListenerHolder;
    }
    
+   @Override
    public void addMouse3DListener(Mouse3DListener mouse3DListener)
    {
       mouse3DListenerHolder.addMouse3DListener(mouse3DListener);
@@ -1127,15 +1221,18 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return primaryLight;
    }
 
+   @Override
    public InputManager getInputManager()
    {
       return inputManager;
    }
 
+   @Override
    public void freezeFrame(final Graphics3DNode rootJoint)
    {
       enqueue(new Callable<Object>()
       {
+         @Override
          public Object call() throws Exception
          {
             JMEGraphics3DNode node = jmeGraphicsNodes.get(rootJoint);
@@ -1150,6 +1247,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    private boolean alreadyClosing = false;
    
+   @Override
    public void closeAndDispose()
    {
       if (alreadyClosing) return;
@@ -1157,6 +1255,19 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       notifyRepaint();
       
       stop();
+      
+      // Things in jme SimpleApplication:
+      rootNode = null;
+      guiNode = null;
+      fpsText = null;
+      guiFont = null;
+      flyCam = null;
+      
+      if (closeableAndDisposableRegistry != null)
+      {
+         closeableAndDisposableRegistry.closeAndDispose();
+         closeableAndDisposableRegistry = null;
+      }
       
       if (viewportAdapters != null)
       {
@@ -1229,6 +1340,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       primaryLight = null;
    }
 
+   @Override
    public JMEContextManager getContextManager()
    {
       return contextManager;
@@ -1298,5 +1410,39 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    public void pause() 
    {
       this.lazyRendering = true;
+   }
+
+   protected synchronized void updateGraphics(float tpf)
+   {
+      for (Updatable updatable : updatables)
+      {
+         updatable.simpleUpdate(tpf);
+      }
+   }
+
+   public synchronized void registerUpdatable(final Updatable updatable)
+   {
+      enqueue(new Callable<Object>()
+      {
+         public Object call() throws Exception
+         {
+            updatables.add(updatable);
+
+            return null;
+         }
+      });
+   }
+
+   public synchronized void removeUpdatable(final Updatable updatable)
+   {
+      enqueue(new Callable<Object>()
+      {
+         public Object call() throws Exception
+         {
+            updatables.remove(updatable);
+
+            return null;
+         }
+      });
    }
 }

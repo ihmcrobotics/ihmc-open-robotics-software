@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry;
 import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -19,7 +19,7 @@ public class InertiaToolsTest
    private static final int ITERATIONS = 1000;
    private static final double DELTA = 1e-3;
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetInertiaEllipsoidRadii()
    {
@@ -33,17 +33,17 @@ public class InertiaToolsTest
          double zRadius = maxRandomValue * random.nextDouble();
 
          Matrix3d rotationalInertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
-         Vector3d principalMomentsOfInertia = new Vector3d(rotationalInertia.m00, rotationalInertia.m11, rotationalInertia.m22);
+         Vector3d principalMomentsOfInertia = new Vector3d(rotationalInertia.getM00(), rotationalInertia.getM11(), rotationalInertia.getM22());
 
          Vector3d ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
 
-         assertEquals(xRadius, ellipsoidRadii.x, DELTA);
-         assertEquals(yRadius, ellipsoidRadii.y, DELTA);
-         assertEquals(zRadius, ellipsoidRadii.z, DELTA);
+         assertEquals(xRadius, ellipsoidRadii.getX(), DELTA);
+         assertEquals(yRadius, ellipsoidRadii.getY(), DELTA);
+         assertEquals(zRadius, ellipsoidRadii.getZ(), DELTA);
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRotations()
    {
@@ -70,9 +70,9 @@ public class InertiaToolsTest
          InertiaTools.computePrincipalMomentsOfInertia(rotatedInertia, principalAxesAfterRotation, principalMomentsOfInertiaAfterRotation);
 
          ArrayList<Double> principleMomentsBeforeRotation = new ArrayList<Double>();
-         principleMomentsBeforeRotation.add(rotationalInertia.m00);
-         principleMomentsBeforeRotation.add(rotationalInertia.m11);
-         principleMomentsBeforeRotation.add(rotationalInertia.m22);
+         principleMomentsBeforeRotation.add(rotationalInertia.getM00());
+         principleMomentsBeforeRotation.add(rotationalInertia.getM11());
+         principleMomentsBeforeRotation.add(rotationalInertia.getM22());
          
          ArrayList<Double> principleMomentsAfterRotation = new ArrayList<Double>();
          principleMomentsAfterRotation.add(principalMomentsOfInertiaAfterRotation.getX());
@@ -87,9 +87,9 @@ public class InertiaToolsTest
          assertEquals(principleMomentsBeforeRotation.get(2), principleMomentsAfterRotation.get(2), epsilon);
 
          Matrix3d inertiaAboutPrincipalAxes = new Matrix3d();
-         inertiaAboutPrincipalAxes.m00 = principalMomentsOfInertiaAfterRotation.getX();
-         inertiaAboutPrincipalAxes.m11 = principalMomentsOfInertiaAfterRotation.getY();
-         inertiaAboutPrincipalAxes.m22 = principalMomentsOfInertiaAfterRotation.getZ();
+         inertiaAboutPrincipalAxes.setM00(principalMomentsOfInertiaAfterRotation.getX());
+         inertiaAboutPrincipalAxes.setM11(principalMomentsOfInertiaAfterRotation.getY());
+         inertiaAboutPrincipalAxes.setM22(principalMomentsOfInertiaAfterRotation.getZ());
          
          Matrix3d rotatedInertiaAgain = InertiaTools.rotate(principalAxesAfterRotation, inertiaAboutPrincipalAxes);
          assertTrue(rotatedInertiaAgain.epsilonEquals(rotatedInertia, epsilon));

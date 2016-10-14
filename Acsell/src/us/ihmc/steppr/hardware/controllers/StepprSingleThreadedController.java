@@ -5,8 +5,8 @@ import java.util.EnumMap;
 
 import javax.vecmath.Quat4d;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.visualizer.RobotVisualizer;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.acsell.hardware.AcsellSetup;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
@@ -19,7 +19,7 @@ import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -62,7 +62,7 @@ public class StepprSingleThreadedController extends RealtimeThread
 
    private final UDPAcsellOutputWriter outputWriter;
 
-   private final SixDoFJoint rootJoint;
+   private final FloatingInverseDynamicsJoint rootJoint;
    private final Quat4d rotation = new Quat4d();
    private final EnumMap<StepprJoint, OneDoFJoint> jointMap = new EnumMap<>(StepprJoint.class);
    private final RawJointSensorDataHolderMap rawSensors;
@@ -86,7 +86,7 @@ public class StepprSingleThreadedController extends RealtimeThread
       this.outputWriter = new UDPAcsellOutputWriter(command);
 
       
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       rootJoint = fullRobotModel.getRootJoint();
 
       for (StepprJoint joint : StepprJoint.values)

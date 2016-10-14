@@ -5,8 +5,8 @@ import org.junit.Test;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -21,7 +21,7 @@ public class CenterOfMassAccelerationCalculatorTest
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOneRigidBody()
    {
@@ -60,7 +60,7 @@ public class CenterOfMassAccelerationCalculatorTest
       JUnitTools.assertTuple3dEquals(expected, comAcceleration.getVectorCopy(), 1e-5);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTwoSliderJointsZeroAcceleration()
    {
@@ -102,7 +102,7 @@ public class CenterOfMassAccelerationCalculatorTest
       JUnitTools.assertTuple3dEquals(new Vector3d(), comAcceleration.getVectorCopy(), 1e-5);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPendulumCentripetalAcceleration()
    {
@@ -141,7 +141,7 @@ public class CenterOfMassAccelerationCalculatorTest
 
    // Just tests whether it will crash or not for now
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTree()
    {
@@ -176,9 +176,9 @@ public class CenterOfMassAccelerationCalculatorTest
    private Matrix3d getRandomDiagonalMatrix(Random random)
    {
       Matrix3d ret = new Matrix3d();
-      ret.m00 = random.nextDouble();
-      ret.m11 = random.nextDouble();
-      ret.m22 = random.nextDouble();
+      ret.setM00(random.nextDouble());
+      ret.setM11(random.nextDouble());
+      ret.setM22(random.nextDouble());
 
       return ret;
    }

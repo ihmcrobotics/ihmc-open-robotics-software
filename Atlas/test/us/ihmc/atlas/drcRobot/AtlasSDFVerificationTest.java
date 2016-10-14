@@ -20,7 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -36,8 +36,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -84,14 +84,14 @@ public class AtlasSDFVerificationTest
     * @throws IOException
     * @throws ControllerFailureException
     */
-	@DeployableTestMethod(estimatedDuration = 10.4, targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 10.4, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout = 41302)
    public void testSimpleLegSwing() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException, ControllerFailureException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCRobotModel selectedModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, DRCRobotModel.RobotTarget.SCS, false);
-      SDFRobot sdfRobot = selectedModel.createSdfRobot(true);
+      FloatingRootJointRobot sdfRobot = selectedModel.createHumanoidFloatingRootJointRobot(true);
 
       pinRobotInAir(sdfRobot);
 
@@ -111,14 +111,14 @@ public class AtlasSDFVerificationTest
          BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS), scs, 1);
       }
 
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 
 //    fail();
    }
 
-   private void pinRobotInAir(SDFRobot sdfRobot)
+   private void pinRobotInAir(FloatingRootJointRobot sdfRobot)
    {
-      sdfRobot.setPositionInWorld(new Vector3d(sdfRobot.getPositionInWorld().x, sdfRobot.getPositionInWorld().y, sdfRobot.getPositionInWorld().z + 0.5));
+      sdfRobot.setPositionInWorld(new Vector3d(sdfRobot.getPositionInWorld().getX(), sdfRobot.getPositionInWorld().getY(), sdfRobot.getPositionInWorld().getZ() + 0.5));
       ExternalForcePoint fp = new ExternalForcePoint("gravityCompensation", sdfRobot.getRobotsYoVariableRegistry());
       fp.setForce(0, 0, -sdfRobot.getGravityZ() * sdfRobot.computeCenterOfMass(new Point3d()) / 2);
 

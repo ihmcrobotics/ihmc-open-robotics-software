@@ -7,8 +7,8 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -35,11 +35,11 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    private final RobotSide[] footContactSides;
    private final RobotSide[] handContactSides;
 
-   public MultiContactTestEnvironment(DRCRobotInitialSetup<SDFHumanoidRobot> robotInitialSetup, DRCRobotModel robotModel,
+   public MultiContactTestEnvironment(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCRobotModel robotModel,
                                       RobotSide[] footContactSides, RobotSide[] handContactSides, SideDependentList<RigidBodyTransform> invisibleContactablePlaneHandContactPointTransforms)
    {
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      SDFHumanoidRobot robotForEnvironmentSetup = robotModel.createSdfRobot(DRCConfigParameters.USE_COLLISIONS_MESHS_FOR_VISUALIZATION);
+      HumanoidFloatingRootJointRobot robotForEnvironmentSetup = robotModel.createHumanoidFloatingRootJointRobot(DRCConfigParameters.USE_COLLISIONS_MESHS_FOR_VISUALIZATION);
       robotInitialSetup.initializeRobot(robotForEnvironmentSetup, jointMap);
       robotForEnvironmentSetup.update();
       FullHumanoidRobotModel fullRobotModelForEnvironmentSetup = robotModel.createFullRobotModel();
@@ -80,13 +80,13 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
    private TerrainObject3D createConvexPolygonTerrainObject(RigidBodyTransform transformToWorld)
    {
       Matrix3d rotationToWorld = new Matrix3d();
-      transformToWorld.get(rotationToWorld);
+      transformToWorld.getRotation(rotationToWorld);
 
       Vector3d normal = new Vector3d();
       rotationToWorld.getColumn(2, normal);
 
       Vector3d centroid = new Vector3d();
-      transformToWorld.get(centroid);
+      transformToWorld.getTranslation(centroid);
 
       int nPoints = 5;
       double radius = 0.23;

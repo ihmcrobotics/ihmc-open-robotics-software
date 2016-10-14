@@ -3,23 +3,21 @@ package us.ihmc.simulationconstructionset.generatedTestSuites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
-import us.ihmc.tools.testing.TestPlanSuite;
-import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
-@RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@RunWith(ContinuousIntegrationSuite.class)
+@ContinuousIntegrationSuiteCategory(IntegrationCategory.FAST)
 @SuiteClasses
 ({
    us.ihmc.simulationconstructionset.bambooTools.BambooToolsTest.class,
    us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistryTest.class,
    us.ihmc.simulationconstructionset.DataBufferEntryTest.class,
    us.ihmc.simulationconstructionset.DataBufferTest.class,
-   us.ihmc.simulationconstructionset.dataExporter.DataExporterGraphCreatorTest.class,
    us.ihmc.simulationconstructionset.DataFileWriterTest.class,
    us.ihmc.simulationconstructionset.DataProcessingFunctionTest.class,
-   us.ihmc.simulationconstructionset.gui.actions.ActionsTest.class,
    us.ihmc.simulationconstructionset.gui.config.VarGroupTest.class,
    us.ihmc.simulationconstructionset.JointWrenchSensorTest.class,
    us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListenerTest.class,
@@ -27,8 +25,9 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.simulationconstructionset.LinkTest.class,
    us.ihmc.simulationconstructionset.mathfunctions.MatrixTest.class,
    us.ihmc.simulationconstructionset.optimization.SimpleSimulationTest.class,
-   us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetectorTest.class,
+   us.ihmc.simulationconstructionset.physics.collision.CollisionResolutionTest.class,
    us.ihmc.simulationconstructionset.physics.collision.gdx.GdxUtilTest.class,
+   us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetectorTest.class,
    us.ihmc.simulationconstructionset.RobotTest.class,
    us.ihmc.simulationconstructionset.RobotToolsTest.class,
    us.ihmc.simulationconstructionset.screwTheory.CentroidalMomentumRateADotVTermSCSTest.class,
@@ -52,11 +51,19 @@ import us.ihmc.tools.testing.TestPlanTarget;
    us.ihmc.simulationconstructionset.util.globalParameters.MultiplicativeDoubleGlobalParameterTest.class,
    us.ihmc.simulationconstructionset.util.globalParameters.OrBooleanGlobalParameterTest.class,
    us.ihmc.simulationconstructionset.util.ground.AlternatingSlopesGroundProfileTest.class,
+   us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfileTest.class,
    us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObjectTest.class,
    us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObjectTest.class,
+   us.ihmc.simulationconstructionset.util.ground.DoubleStepGroundProfileTest.class,
+   us.ihmc.simulationconstructionset.util.ground.FlatGroundProfileTest.class,
    us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObjectTest.class,
    us.ihmc.simulationconstructionset.util.ground.RotatableRampTerrainObjectTest.class,
    us.ihmc.simulationconstructionset.util.ground.ShipCorridorGroundProfileTest.class,
+   us.ihmc.simulationconstructionset.util.ground.SingleStepGroundProfileTest.class,
+   us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfileTest.class,
+   us.ihmc.simulationconstructionset.util.ground.StairGroundProfileTest.class,
+   us.ihmc.simulationconstructionset.util.ground.VaryingStairGroundProfileTest.class,
+   us.ihmc.simulationconstructionset.util.ground.WavyGroundProfileTest.class,
    us.ihmc.simulationconstructionset.util.IndexOrderCheckerTest.class,
    us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoardTest.class,
    us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardUtilsTest.class,

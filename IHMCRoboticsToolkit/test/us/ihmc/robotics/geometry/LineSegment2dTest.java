@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point2d;
 import java.util.Random;
@@ -68,7 +68,7 @@ public class LineSegment2dTest
       testSegment2 = null;
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDistancePoint2dLineSegment2d()
    {
@@ -94,7 +94,7 @@ public class LineSegment2dTest
       assertEquals(0.0, line1.distance(point9), delta);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLineSegment2dDoubleDoubleDoubleDouble()
    {
@@ -111,10 +111,10 @@ public class LineSegment2dTest
          if ((x1 != x2) || (y1 != y2))
          {
             LineSegment2d test = new LineSegment2d(x1, y1, x2, y2);
-            assertEquals(test.getFirstEndPointCopy().x, x1, 0.001);
-            assertEquals(test.getFirstEndPointCopy().y, y1, 0.001);
-            assertEquals(test.getSecondEndPointCopy().x, x2, 0.001);
-            assertEquals(test.getSecondEndPointCopy().y, y2, 0.001);
+            assertEquals(test.getFirstEndpointCopy().getX(), x1, 0.001);
+            assertEquals(test.getFirstEndpointCopy().getY(), y1, 0.001);
+            assertEquals(test.getSecondEndpointCopy().getX(), x2, 0.001);
+            assertEquals(test.getSecondEndpointCopy().getY(), y2, 0.001);
          }
       }
 
@@ -134,7 +134,7 @@ public class LineSegment2dTest
       assertTrue(fail);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLineSegment2dPoint2dArray()
    {
@@ -154,8 +154,8 @@ public class LineSegment2dTest
             points[0] = new Point2d(x1, y1);
             points[1] = new Point2d(x2, y2);
             LineSegment2d test = new LineSegment2d(points);
-            assertEquals(test.getFirstEndPointCopy(), points[0]);
-            assertEquals(test.getSecondEndPointCopy(), points[1]);
+            assertEquals(test.getFirstEndpointCopy(), points[0]);
+            assertEquals(test.getSecondEndpointCopy(), points[1]);
          }
       }
 
@@ -178,7 +178,7 @@ public class LineSegment2dTest
       assertTrue(fail);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLineSegment2dPoint2dPoint2d()
    {
@@ -198,8 +198,8 @@ public class LineSegment2dTest
             points[0] = new Point2d(x1, y1);
             points[1] = new Point2d(x2, y2);
             LineSegment2d test = new LineSegment2d(points[0], points[1]);
-            assertEquals(test.getFirstEndPointCopy(), points[0]);
-            assertEquals(test.getSecondEndPointCopy(), points[1]);
+            assertEquals(test.getFirstEndpointCopy(), points[0]);
+            assertEquals(test.getSecondEndpointCopy(), points[1]);
          }
       }
 
@@ -222,7 +222,7 @@ public class LineSegment2dTest
       assertTrue(fail);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLineSegment2dLineSegment2d()
    {
@@ -241,69 +241,69 @@ public class LineSegment2dTest
             points[1] = new Point2d(x2, y2);
             LineSegment2d test = new LineSegment2d(points[0], points[1]);
             LineSegment2d test2 = new LineSegment2d(test);
-            assertEquals(test.getFirstEndPointCopy(), test2.getFirstEndPointCopy());
-            assertEquals(test.getSecondEndPointCopy(), test2.getSecondEndPointCopy());
+            assertEquals(test.getFirstEndpointCopy(), test2.getFirstEndpointCopy());
+            assertEquals(test.getSecondEndpointCopy(), test2.getSecondEndpointCopy());
          }
       }
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetEndpointsCopy()
    {
       Point2d[] pointsCopy = testSegment1.getEndpointsCopy();
-      assertEquals(pointsCopy[0], testSegment1.getFirstEndPointCopy());
-      assertEquals(pointsCopy[1], testSegment1.getSecondEndPointCopy());
+      assertEquals(pointsCopy[0], testSegment1.getFirstEndpointCopy());
+      assertEquals(pointsCopy[1], testSegment1.getSecondEndpointCopy());
       assertEquals(pointsCopy[0], segment1Point1);
       assertEquals(pointsCopy[1], segment1Point2);
 
       // make sure that chaning the copy does not change the origional
-      pointsCopy[0].set(pointsCopy[0].x - 10.0, pointsCopy[0].y - 10.0);
-      pointsCopy[1].set(pointsCopy[1].x - 10.0, pointsCopy[1].y - 10.0);
+      pointsCopy[0].set(pointsCopy[0].getX() - 10.0, pointsCopy[0].getY() - 10.0);
+      pointsCopy[1].set(pointsCopy[1].getX() - 10.0, pointsCopy[1].getY() - 10.0);
 
-      assertFalse(pointsCopy[0].equals(testSegment1.getFirstEndPointCopy()));
-      assertFalse(pointsCopy[1].equals(testSegment1.getSecondEndPointCopy()));
+      assertFalse(pointsCopy[0].equals(testSegment1.getFirstEndpointCopy()));
+      assertFalse(pointsCopy[1].equals(testSegment1.getSecondEndpointCopy()));
       assertFalse(pointsCopy[0].equals(segment1Point1));
       assertFalse(pointsCopy[1].equals(segment1Point2));
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetEndpointsPoint2dPoint2d()
    {
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetEndpoints()
    {
       Point2d[] pointsCopy = testSegment1.getEndpoints();
-      assertEquals(pointsCopy[0], testSegment1.getFirstEndPointCopy());
-      assertEquals(pointsCopy[1], testSegment1.getSecondEndPointCopy());
+      assertEquals(pointsCopy[0], testSegment1.getFirstEndpointCopy());
+      assertEquals(pointsCopy[1], testSegment1.getSecondEndpointCopy());
       assertEquals(pointsCopy[0], segment1Point1);
       assertEquals(pointsCopy[1], segment1Point2);
 
       // make sure that chaning the copy does not change the origional
-      pointsCopy[0].set(pointsCopy[0].x - 10.0, pointsCopy[0].y - 10.0);
-      pointsCopy[1].set(pointsCopy[1].x - 10.0, pointsCopy[1].y - 10.0);
+      pointsCopy[0].set(pointsCopy[0].getX() - 10.0, pointsCopy[0].getY() - 10.0);
+      pointsCopy[1].set(pointsCopy[1].getX() - 10.0, pointsCopy[1].getY() - 10.0);
 
-      assertEquals(pointsCopy[0], testSegment1.getFirstEndPointCopy());
-      assertEquals(pointsCopy[1], testSegment1.getSecondEndPointCopy());
+      assertEquals(pointsCopy[0], testSegment1.getFirstEndpointCopy());
+      assertEquals(pointsCopy[1], testSegment1.getSecondEndpointCopy());
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetFirstEndPointCopy()
    {
-      Point2d pointCopy = testSegment1.getFirstEndPointCopy();
+      Point2d pointCopy = testSegment1.getFirstEndpointCopy();
       assertEquals(pointCopy, segment1Point1);
 
 
       // make sure that chaning the copy does not change the origional
-      pointCopy.set(pointCopy.x - 10.0, pointCopy.y - 10.0);
+      pointCopy.set(pointCopy.getX() - 10.0, pointCopy.getY() - 10.0);
 
 
       assertFalse(pointCopy.equals(segment1Point1));
@@ -311,35 +311,35 @@ public class LineSegment2dTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetSecondEndPointCopy()
    {
-      Point2d pointCopy = testSegment1.getSecondEndPointCopy();
+      Point2d pointCopy = testSegment1.getSecondEndpointCopy();
       assertEquals(pointCopy, segment1Point2);
 
 
       // make sure that chaning the copy does not change the origional
-      pointCopy.set(pointCopy.x - 10.0, pointCopy.y - 10.0);
+      pointCopy.set(pointCopy.getX() - 10.0, pointCopy.getY() - 10.0);
 
 
       assertFalse(pointCopy.equals(segment1Point2));
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPoint2dPoint2d()
    {
       Point2d[] pointsCopy = testSegment1.getEndpointsCopy();
 
-      pointsCopy[0].set(pointsCopy[0].x - 10.0, pointsCopy[0].y - 10.0);
-      pointsCopy[1].set(pointsCopy[1].x - 10.0, pointsCopy[1].y - 10.0);
+      pointsCopy[0].set(pointsCopy[0].getX() - 10.0, pointsCopy[0].getY() - 10.0);
+      pointsCopy[1].set(pointsCopy[1].getX() - 10.0, pointsCopy[1].getY() - 10.0);
 
       testSegment1.set(pointsCopy[0], pointsCopy[1]);
 
-      assertEquals(pointsCopy[0], testSegment1.getFirstEndPointCopy());
-      assertEquals(pointsCopy[1], testSegment1.getSecondEndPointCopy());
+      assertEquals(pointsCopy[0], testSegment1.getFirstEndpointCopy());
+      assertEquals(pointsCopy[1], testSegment1.getSecondEndpointCopy());
 
       boolean throwEx = false;
       try
@@ -355,24 +355,24 @@ public class LineSegment2dTest
       assertTrue(throwEx);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetDoubleDoubleDoubleDouble()
    {
       Point2d[] pointsCopy = testSegment1.getEndpointsCopy();
 
-      pointsCopy[0].set(pointsCopy[0].x - 10.0, pointsCopy[0].y - 10.0);
-      pointsCopy[1].set(pointsCopy[1].x - 10.0, pointsCopy[1].y - 10.0);
+      pointsCopy[0].set(pointsCopy[0].getX() - 10.0, pointsCopy[0].getY() - 10.0);
+      pointsCopy[1].set(pointsCopy[1].getX() - 10.0, pointsCopy[1].getY() - 10.0);
 
-      testSegment1.set(pointsCopy[0].x, pointsCopy[0].y, pointsCopy[1].x, pointsCopy[1].y);
+      testSegment1.set(pointsCopy[0].getX(), pointsCopy[0].getY(), pointsCopy[1].getX(), pointsCopy[1].getY());
 
-      assertEquals(pointsCopy[0], testSegment1.getFirstEndPointCopy());
-      assertEquals(pointsCopy[1], testSegment1.getSecondEndPointCopy());
+      assertEquals(pointsCopy[0], testSegment1.getFirstEndpointCopy());
+      assertEquals(pointsCopy[1], testSegment1.getSecondEndpointCopy());
       boolean throwEx = false;
       try
       {
          pointsCopy[0] = pointsCopy[1];
-         testSegment1.set(pointsCopy[0].x, pointsCopy[0].y, pointsCopy[1].x, pointsCopy[1].y);
+         testSegment1.set(pointsCopy[0].getX(), pointsCopy[0].getY(), pointsCopy[1].getX(), pointsCopy[1].getY());
       }
       catch (Exception e)
       {
@@ -382,7 +382,7 @@ public class LineSegment2dTest
       assertTrue(throwEx);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetPoint2dArray()
    {
@@ -390,13 +390,13 @@ public class LineSegment2dTest
 
 
 
-      pointsCopy[0].set(pointsCopy[0].x - 10.0, pointsCopy[0].y - 10.0);
-      pointsCopy[1].set(pointsCopy[1].x - 10.0, pointsCopy[1].y - 10.0);
+      pointsCopy[0].set(pointsCopy[0].getX() - 10.0, pointsCopy[0].getY() - 10.0);
+      pointsCopy[1].set(pointsCopy[1].getX() - 10.0, pointsCopy[1].getY() - 10.0);
 
       testSegment1.set(pointsCopy);
 
-      assertEquals(pointsCopy[0], testSegment1.getFirstEndPointCopy());
-      assertEquals(pointsCopy[1], testSegment1.getSecondEndPointCopy());
+      assertEquals(pointsCopy[0], testSegment1.getFirstEndpointCopy());
+      assertEquals(pointsCopy[1], testSegment1.getSecondEndpointCopy());
       boolean throwEx = false;
       try
       {
@@ -411,35 +411,35 @@ public class LineSegment2dTest
       assertTrue(throwEx);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSetLineSegment2d()
    {
       testSegment1.set(testSegment2);
 
-      assertEquals(testSegment2.getFirstEndPointCopy(), testSegment1.getFirstEndPointCopy());
-      assertEquals(testSegment2.getSecondEndPointCopy(), testSegment1.getSecondEndPointCopy());
+      assertEquals(testSegment2.getFirstEndpointCopy(), testSegment1.getFirstEndpointCopy());
+      assertEquals(testSegment2.getSecondEndpointCopy(), testSegment1.getSecondEndpointCopy());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testFlipDirection()
    {
       testSegment1.flipDirection();
-      assertEquals(segment1Point2, testSegment1.getFirstEndPointCopy());
-      assertEquals(segment1Point1, testSegment1.getSecondEndPointCopy());
+      assertEquals(segment1Point2, testSegment1.getFirstEndpointCopy());
+      assertEquals(segment1Point1, testSegment1.getSecondEndpointCopy());
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testMidpoint()
    {
       Point2d midPoint = testSegment1.midpoint();
-      assertEquals(midPoint.distance(testSegment1.getFirstEndPointCopy()), midPoint.distance(testSegment1.getSecondEndPointCopy()), 0.001);
+      assertEquals(midPoint.distance(testSegment1.getFirstEndpointCopy()), midPoint.distance(testSegment1.getSecondEndpointCopy()), 0.001);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLength()
    {
@@ -461,7 +461,7 @@ public class LineSegment2dTest
 //    fail("Not yet implemented");
 // }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testPercentageAlongLineSegment()
    {
@@ -485,7 +485,7 @@ public class LineSegment2dTest
 //    fail("Not yet implemented");
 // }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionWithLineSegment2d()
    {
@@ -518,7 +518,7 @@ public class LineSegment2dTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionWithLine2d()
    {
@@ -557,7 +557,7 @@ public class LineSegment2dTest
 // }
 //
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDistancePoint2d()
    {
@@ -642,7 +642,7 @@ public class LineSegment2dTest
 //    fail("Not yet implemented");
 // }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testShiftToLeftAndRightCopy()
    {
@@ -653,8 +653,8 @@ public class LineSegment2dTest
       LineSegment2d lineSegment = new LineSegment2d(0.0, 0.0, 0.0, 1.0);
       LineSegment2d shiftedLineSegment = lineSegment.shiftToRightCopy(distanceToShift);
 
-      Point2d firstShiftedEndpoint = shiftedLineSegment.getFirstEndPointCopy();
-      Point2d secondShiftedEndpoint = shiftedLineSegment.getSecondEndPointCopy();
+      Point2d firstShiftedEndpoint = shiftedLineSegment.getFirstEndpointCopy();
+      Point2d secondShiftedEndpoint = shiftedLineSegment.getSecondEndpointCopy();
 
       assertEquals(distanceToShift, firstShiftedEndpoint.getX(), epsilon);
       assertEquals(0.0, firstShiftedEndpoint.getY(), epsilon);
@@ -663,8 +663,8 @@ public class LineSegment2dTest
 
       shiftedLineSegment = lineSegment.shiftToLeftCopy(distanceToShift);
 
-      firstShiftedEndpoint = shiftedLineSegment.getFirstEndPointCopy();
-      secondShiftedEndpoint = shiftedLineSegment.getSecondEndPointCopy();
+      firstShiftedEndpoint = shiftedLineSegment.getFirstEndpointCopy();
+      secondShiftedEndpoint = shiftedLineSegment.getSecondEndpointCopy();
 
       assertEquals(-distanceToShift, firstShiftedEndpoint.getX(), epsilon);
       assertEquals(0.0, firstShiftedEndpoint.getY(), epsilon);
@@ -675,8 +675,8 @@ public class LineSegment2dTest
       lineSegment = new LineSegment2d(0.0, 0.0, 1.0, 0.0);
       shiftedLineSegment = lineSegment.shiftToRightCopy(distanceToShift);
 
-      firstShiftedEndpoint = shiftedLineSegment.getFirstEndPointCopy();
-      secondShiftedEndpoint = shiftedLineSegment.getSecondEndPointCopy();
+      firstShiftedEndpoint = shiftedLineSegment.getFirstEndpointCopy();
+      secondShiftedEndpoint = shiftedLineSegment.getSecondEndpointCopy();
 
       assertEquals(0.0, firstShiftedEndpoint.getX(), epsilon);
       assertEquals(-distanceToShift, firstShiftedEndpoint.getY(), epsilon);
@@ -685,8 +685,8 @@ public class LineSegment2dTest
 
       shiftedLineSegment = lineSegment.shiftToLeftCopy(distanceToShift);
 
-      firstShiftedEndpoint = shiftedLineSegment.getFirstEndPointCopy();
-      secondShiftedEndpoint = shiftedLineSegment.getSecondEndPointCopy();
+      firstShiftedEndpoint = shiftedLineSegment.getFirstEndpointCopy();
+      secondShiftedEndpoint = shiftedLineSegment.getSecondEndpointCopy();
 
       assertEquals(0.0, firstShiftedEndpoint.getX(), epsilon);
       assertEquals(distanceToShift, firstShiftedEndpoint.getY(), epsilon);
@@ -698,8 +698,8 @@ public class LineSegment2dTest
       shiftedLineSegment = lineSegment.shiftToRightCopy(distanceToShift);
       double distanceAtFortyFiveDegrees = distanceToShift * Math.sqrt(2.0) / 2.0;
 
-      firstShiftedEndpoint = shiftedLineSegment.getFirstEndPointCopy();
-      secondShiftedEndpoint = shiftedLineSegment.getSecondEndPointCopy();
+      firstShiftedEndpoint = shiftedLineSegment.getFirstEndpointCopy();
+      secondShiftedEndpoint = shiftedLineSegment.getSecondEndpointCopy();
 
       assertEquals(distanceAtFortyFiveDegrees, firstShiftedEndpoint.getX(), epsilon);
       assertEquals(-distanceAtFortyFiveDegrees, firstShiftedEndpoint.getY(), epsilon);
@@ -708,8 +708,8 @@ public class LineSegment2dTest
 
       shiftedLineSegment = lineSegment.shiftToLeftCopy(distanceToShift);
 
-      firstShiftedEndpoint = shiftedLineSegment.getFirstEndPointCopy();
-      secondShiftedEndpoint = shiftedLineSegment.getSecondEndPointCopy();
+      firstShiftedEndpoint = shiftedLineSegment.getFirstEndpointCopy();
+      secondShiftedEndpoint = shiftedLineSegment.getSecondEndpointCopy();
 
       assertEquals(-distanceAtFortyFiveDegrees, firstShiftedEndpoint.getX(), epsilon);
       assertEquals(distanceAtFortyFiveDegrees, firstShiftedEndpoint.getY(), epsilon);
@@ -717,7 +717,7 @@ public class LineSegment2dTest
       assertEquals(1.0 + distanceAtFortyFiveDegrees, secondShiftedEndpoint.getY(), epsilon);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testShiftToLeftAndRight()
    {
@@ -729,8 +729,8 @@ public class LineSegment2dTest
       LineSegment2d shiftedLineSegment = new LineSegment2d(lineSegment);
       shiftedLineSegment.shiftToRight(distanceToShift);
 
-      Point2d firstShiftedEndpoint = shiftedLineSegment.getFirstEndPointCopy();
-      Point2d secondShiftedEndpoint = shiftedLineSegment.getSecondEndPointCopy();
+      Point2d firstShiftedEndpoint = shiftedLineSegment.getFirstEndpointCopy();
+      Point2d secondShiftedEndpoint = shiftedLineSegment.getSecondEndpointCopy();
 
       assertEquals(distanceToShift, firstShiftedEndpoint.getX(), epsilon);
       assertEquals(0.0, firstShiftedEndpoint.getY(), epsilon);
@@ -740,8 +740,8 @@ public class LineSegment2dTest
       shiftedLineSegment.set(lineSegment);
       shiftedLineSegment.shiftToLeft(distanceToShift);
 
-      firstShiftedEndpoint = shiftedLineSegment.getFirstEndPointCopy();
-      secondShiftedEndpoint = shiftedLineSegment.getSecondEndPointCopy();
+      firstShiftedEndpoint = shiftedLineSegment.getFirstEndpointCopy();
+      secondShiftedEndpoint = shiftedLineSegment.getSecondEndpointCopy();
 
       assertEquals(-distanceToShift, firstShiftedEndpoint.getX(), epsilon);
       assertEquals(0.0, firstShiftedEndpoint.getY(), epsilon);
@@ -753,8 +753,8 @@ public class LineSegment2dTest
       shiftedLineSegment.set(lineSegment);
       shiftedLineSegment.shiftToRight(distanceToShift);
 
-      firstShiftedEndpoint = shiftedLineSegment.getFirstEndPointCopy();
-      secondShiftedEndpoint = shiftedLineSegment.getSecondEndPointCopy();
+      firstShiftedEndpoint = shiftedLineSegment.getFirstEndpointCopy();
+      secondShiftedEndpoint = shiftedLineSegment.getSecondEndpointCopy();
 
       assertEquals(0.0, firstShiftedEndpoint.getX(), epsilon);
       assertEquals(-distanceToShift, firstShiftedEndpoint.getY(), epsilon);
@@ -764,8 +764,8 @@ public class LineSegment2dTest
       shiftedLineSegment.set(lineSegment);
       shiftedLineSegment.shiftToLeft(distanceToShift);
 
-      firstShiftedEndpoint = shiftedLineSegment.getFirstEndPointCopy();
-      secondShiftedEndpoint = shiftedLineSegment.getSecondEndPointCopy();
+      firstShiftedEndpoint = shiftedLineSegment.getFirstEndpointCopy();
+      secondShiftedEndpoint = shiftedLineSegment.getSecondEndpointCopy();
 
       assertEquals(0.0, firstShiftedEndpoint.getX(), epsilon);
       assertEquals(distanceToShift, firstShiftedEndpoint.getY(), epsilon);
@@ -779,8 +779,8 @@ public class LineSegment2dTest
 
       double distanceAtFortyFiveDegrees = distanceToShift * Math.sqrt(2.0) / 2.0;
 
-      firstShiftedEndpoint = shiftedLineSegment.getFirstEndPointCopy();
-      secondShiftedEndpoint = shiftedLineSegment.getSecondEndPointCopy();
+      firstShiftedEndpoint = shiftedLineSegment.getFirstEndpointCopy();
+      secondShiftedEndpoint = shiftedLineSegment.getSecondEndpointCopy();
 
       assertEquals(distanceAtFortyFiveDegrees, firstShiftedEndpoint.getX(), epsilon);
       assertEquals(-distanceAtFortyFiveDegrees, firstShiftedEndpoint.getY(), epsilon);
@@ -790,8 +790,8 @@ public class LineSegment2dTest
       shiftedLineSegment.set(lineSegment);
       shiftedLineSegment.shiftToLeft(distanceToShift);
 
-      firstShiftedEndpoint = shiftedLineSegment.getFirstEndPointCopy();
-      secondShiftedEndpoint = shiftedLineSegment.getSecondEndPointCopy();
+      firstShiftedEndpoint = shiftedLineSegment.getFirstEndpointCopy();
+      secondShiftedEndpoint = shiftedLineSegment.getSecondEndpointCopy();
 
       assertEquals(-distanceAtFortyFiveDegrees, firstShiftedEndpoint.getX(), epsilon);
       assertEquals(distanceAtFortyFiveDegrees, firstShiftedEndpoint.getY(), epsilon);
@@ -799,7 +799,7 @@ public class LineSegment2dTest
       assertEquals(1.0 + distanceAtFortyFiveDegrees, secondShiftedEndpoint.getY(), epsilon);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIsPointOnLeftRightSide()
    {
@@ -826,7 +826,7 @@ public class LineSegment2dTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testOrthogonalProjectionCopyPoint2dLineSegment2d()
    {
@@ -874,7 +874,7 @@ public class LineSegment2dTest
 
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionLine2dLineSegment2d()
    {
@@ -904,7 +904,7 @@ public class LineSegment2dTest
       assertEquals(null, line1.intersectionWith(line9));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testIntersectionLineSegment2dLineSegment2d()
    {

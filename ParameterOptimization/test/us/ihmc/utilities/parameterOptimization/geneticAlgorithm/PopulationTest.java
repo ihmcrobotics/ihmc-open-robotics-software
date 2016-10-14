@@ -9,12 +9,12 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class PopulationTest
 {
 
-	@DeployableTestMethod(estimatedDuration = 0.8)
+	@ContinuousIntegrationTest(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
    public void testPopulation()
    {

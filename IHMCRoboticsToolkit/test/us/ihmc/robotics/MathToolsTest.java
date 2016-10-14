@@ -23,8 +23,8 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class MathToolsTest
 {
@@ -41,7 +41,16 @@ public class MathToolsTest
    {
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testAngleFromZeroToTwoPi()
+   {
+      assertEquals("not equal", 0.0, MathTools.angleFromZeroToTwoPi(0.0, 0.0), 1e-7);
+      assertEquals("not equal", Math.PI / 4.0, MathTools.angleFromZeroToTwoPi(1.0, 1.0), 1e-7);
+      assertEquals("not equal", 7.0 * Math.PI / 4.0, MathTools.angleFromZeroToTwoPi(1.0, -1.0), 1e-7);
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConstructor()
            throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
@@ -54,7 +63,7 @@ public class MathToolsTest
       constructor.newInstance();
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testClipToMinMaxWrongBounds()
    {
@@ -63,7 +72,7 @@ public class MathToolsTest
       MathTools.clipToMinMax(5.0, min, max);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testClipToMinMax_2()
    {
@@ -88,7 +97,7 @@ public class MathToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsNumber()
    {
@@ -103,7 +112,7 @@ public class MathToolsTest
       assertTrue(MathTools.containsNaN(new Vector3d(Double.NaN, Double.NaN, Double.NaN)));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testClipToMinMaxNaN()
    {
@@ -112,7 +121,7 @@ public class MathToolsTest
 
 
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCheckIfInRange()
    {
@@ -122,14 +131,14 @@ public class MathToolsTest
       assertFalse(MathTools.isInsideBoundsInclusive(7, 0, 6));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIfInRange_2()
    {
       MathTools.checkIfInRange(-5, -1, 1);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testClipToMinMax()
    {
@@ -155,7 +164,7 @@ public class MathToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void squareTest()
    {
@@ -166,7 +175,7 @@ public class MathToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void cubeTest()
    {
@@ -177,7 +186,7 @@ public class MathToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.04)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void powWithIntegerTest()
    {
@@ -196,7 +205,7 @@ public class MathToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void signTest()
    {
@@ -211,7 +220,7 @@ public class MathToolsTest
       assertEquals(1.0, MathTools.sign(0.0), 1e-12);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void sumDoublesTest()
    {
@@ -234,7 +243,7 @@ public class MathToolsTest
       assertEquals(MathTools.sumDoubles(negValsList), -37.5, 1e-12);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void sumIntegerTest()
    {
@@ -257,7 +266,7 @@ public class MathToolsTest
       assertEquals(MathTools.sumIntegers(negValsList), -25);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void dotPlusTest()
    {
@@ -274,7 +283,7 @@ public class MathToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsInsideBounds()
    {
@@ -299,7 +308,7 @@ public class MathToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testIsInsideBoundsWrongBounds()
    {
@@ -308,7 +317,7 @@ public class MathToolsTest
       MathTools.isInsideBoundsExclusive(5.0, min, max);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsInsideBoundsInclusive()
    {
@@ -336,7 +345,7 @@ public class MathToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testIsInsideBoundsWrongBoundsInclusive()
    {
@@ -345,7 +354,7 @@ public class MathToolsTest
       MathTools.isInsideBoundsInclusive(5.0, min, max);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMin()
    {
@@ -366,7 +375,7 @@ public class MathToolsTest
       assertTrue(Double.isNaN(MathTools.min(numbers)));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMax()
    {
@@ -387,7 +396,7 @@ public class MathToolsTest
       assertTrue(Double.isNaN(MathTools.max(numbers)));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMeanArray()
    {
@@ -410,7 +419,7 @@ public class MathToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMeanArrayList()
    {
@@ -434,14 +443,14 @@ public class MathToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIfInRangeFalse()
    {
       MathTools.checkIfInRange(5.0, -3.0, 2.0);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCheckIfInRangeTrue()
    {
@@ -449,7 +458,7 @@ public class MathToolsTest
       MathTools.checkIfInRange(5.0, 5.0, 5.0);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDiff()
    {
@@ -468,7 +477,7 @@ public class MathToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testEpsilonEquals()
    {
@@ -497,7 +506,7 @@ public class MathToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPercentEquals()
    {
@@ -530,7 +539,7 @@ public class MathToolsTest
       assertEquals(expectedReturn, actualReturn);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDiffFrameVector()
    {
@@ -553,7 +562,7 @@ public class MathToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testDiffFrameVectorDifferentFrames()
    {
@@ -566,7 +575,7 @@ public class MathToolsTest
       MathTools.diff(vectors);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCheckIsEqual()
    {
@@ -577,21 +586,21 @@ public class MathToolsTest
       MathTools.checkIfEqual(-2.0, -2.001, 0.1);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIsEqualNaN()
    {
       MathTools.checkIfEqual(Double.NaN, Double.NaN, 1e-12);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIsEqualInt()
    {
       MathTools.checkIfEqual(2, 4);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsGreaterThan()
    {
@@ -599,7 +608,7 @@ public class MathToolsTest
       assertFalse(MathTools.isGreaterThan(2.00011000, 2.00010000, 4));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsGreaterThanOrEqualTo()
    {
@@ -609,7 +618,7 @@ public class MathToolsTest
       assertFalse(MathTools.isGreaterThanOrEqualTo(2.00019000, 2.00020000, 5));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsLessThan()
    {
@@ -619,7 +628,7 @@ public class MathToolsTest
       assertTrue(MathTools.isLessThan(2.00019000, 2.00020000, 5));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsLessThanOrEqualTo()
    {
@@ -629,14 +638,14 @@ public class MathToolsTest
       assertTrue(MathTools.isLessThanOrEqualTo(2.00019000, 2.00020000, 5));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIsEqualDouble()
    {
       MathTools.checkIfEqual(2.0, 2.001, 0.0001);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGcd()
    {
@@ -652,7 +661,7 @@ public class MathToolsTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLcm()
    {
@@ -672,15 +681,15 @@ public class MathToolsTest
 
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testLcm_2()
    {
       Random rand = new Random();
-      long c = MathTools.lcm(rand.nextLong());
+      MathTools.lcm(rand.nextLong());
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testArePointsInOrderColinear()
    {
@@ -695,7 +704,7 @@ public class MathToolsTest
       /** @todo fill in the test code */
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testArePointsInOrderColinear2()
    {
@@ -744,7 +753,7 @@ public class MathToolsTest
       }
    }
 
-// @DeployableTestMethod
+// @DeployableTestMethod(estimatedDuration = 0.1)
 // @Test(timeout = 300000)
 // public void testDiff1()
 // {
@@ -757,7 +766,7 @@ public class MathToolsTest
 //              && actualReturn[1] == expectedReturn[1]);
 // }
 
-// @DeployableTestMethod
+// @DeployableTestMethod(estimatedDuration = 0.1)
 // @Test(timeout = 300000)
 // public void testDiffWithAlphaFilter()
 // {
@@ -770,7 +779,7 @@ public class MathToolsTest
 //
 // }
 
-// @DeployableTestMethod
+// @DeployableTestMethod(estimatedDuration = 0.1)
 // @Test(timeout = 300000)
 // public void testGetQuaternionFromTransform3D()
 // {
@@ -780,7 +789,7 @@ public class MathToolsTest
 //
 // }
 
-// @DeployableTestMethod
+// @DeployableTestMethod(estimatedDuration = 0.1)
 // @Test(timeout = 300000)
 // public void testLoadTransform() throws IOException
 // {
@@ -791,7 +800,7 @@ public class MathToolsTest
 //
 // }
 
-// @DeployableTestMethod
+// @DeployableTestMethod(estimatedDuration = 0.1)
 // @Test(timeout = 300000)
 // public void testSaveTransform()
 // {
@@ -801,7 +810,7 @@ public class MathToolsTest
 //
 // }
 
-// @DeployableTestMethod
+// @DeployableTestMethod(estimatedDuration = 0.1)
 // @Test(timeout = 300000)
 // public void testSplitArrayIntoEqualishParts()
 // {
@@ -832,7 +841,7 @@ public class MathToolsTest
 //      assertEquals(0.1, proj.getZ(), 10e-10);
 //   }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRoundToGivenPrecision()
    {
@@ -854,7 +863,7 @@ public class MathToolsTest
       JUnitTools.assertTuple3dEquals(new Vector3d(0.123, 100.123, 1000.123), roundedVector, 1e-14);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsFinite()
    {
@@ -871,5 +880,31 @@ public class MathToolsTest
 
    }
 
-
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testApplyDeadband()
+   {
+      assertEquals(MathTools.applyDeadband(1.0, 0.0), 1.0, 1e-12);
+      assertEquals(MathTools.applyDeadband(1.0, 5.0), 0.0, 1e-12);
+      assertEquals(MathTools.applyDeadband(5.0, 5.0), 0.0, 1e-12);
+      assertEquals(MathTools.applyDeadband(-5.0, 5.0), 0.0, 1e-12);
+      assertEquals(MathTools.applyDeadband(10.0, 5.0), 5.0, 1e-12);
+      assertEquals(MathTools.applyDeadband(-10.0, 5.0), -5.0, 1e-12);
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testOrderOfMagnitude()
+   {
+      assertEquals(-2, MathTools.orderOfMagnitude(-0.01));
+      assertEquals(-2, MathTools.orderOfMagnitude(0.01));
+      assertEquals(-1, MathTools.orderOfMagnitude(0.1));
+      assertEquals(-1, MathTools.orderOfMagnitude(0.9));
+      assertEquals(0, MathTools.orderOfMagnitude(1.0));
+      assertEquals(1, MathTools.orderOfMagnitude(10.0));
+      assertEquals(2, MathTools.orderOfMagnitude(100.0));
+      assertEquals(3, MathTools.orderOfMagnitude(1000.01));
+      assertEquals(3, MathTools.orderOfMagnitude(1000.0));
+      assertEquals(4, MathTools.orderOfMagnitude(10000.0));
+   }
 }

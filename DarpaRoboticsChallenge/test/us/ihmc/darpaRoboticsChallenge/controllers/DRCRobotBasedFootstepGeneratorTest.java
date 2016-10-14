@@ -14,7 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -36,7 +36,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTestInterface
@@ -49,7 +49,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    private List<Footstep> footSteps = new ArrayList<Footstep>();
    private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
-   private SideDependentList<ContactablePlaneBody> contactableFeet;
+   private SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private SideDependentList<RigidBody> feet;
    private SideDependentList<ReferenceFrame> soleFrames;
    private WalkingControllerParameters walkingParamaters;
@@ -66,7 +66,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.7)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
    public void testStraightLinePath()
    {
@@ -74,7 +74,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       testPathToDestination(destination);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
    public void testAngledPaths()
    {
@@ -92,7 +92,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    private void testPathToDestination(Point3d destination)
    {
       setupRobotParameters();
-      generateFootsteps(new FramePose2d(WORLD_FRAME), new FramePoint2d(WORLD_FRAME, destination.x, destination.y), SIDESTEP ? Math.PI / 2 : 0.0);
+      generateFootsteps(new FramePose2d(WORLD_FRAME), new FramePoint2d(WORLD_FRAME, destination.getX(), destination.getY()), SIDESTEP ? Math.PI / 2 : 0.0);
       FootstepValidityMetric footstepValidityMetric = new SemiCircularStepValidityMetric(fullRobotModel.getFoot(RobotSide.LEFT), 0.00, 1.2, 1.5);
       assertAllStepsLevelAndAtStartSoleHeight();
       assertAllStepsValid(footstepValidityMetric);

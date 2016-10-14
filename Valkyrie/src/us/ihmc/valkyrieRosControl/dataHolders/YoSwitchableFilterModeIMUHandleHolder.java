@@ -5,7 +5,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.rosControl.valkyrie.IMUHandle;
+import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.valkyrie.imu.MicroStrainData;
 
 /**

@@ -9,10 +9,10 @@ import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatT
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
-@DeployableTestClass(targets = {TestPlanTarget.Slow, TestPlanTarget.VideoA})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
@@ -37,8 +37,9 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Override
    protected DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
-      return (DoubleYoVariable) scs.getVariable("MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController",
-                                                "pelvisOrientationErrorMagnitude");
+      
+      return (DoubleYoVariable) scs.getVariable("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAxisAngleOrientationController",
+                                                "pelvisRotationErrorInBodyZ");
    }
 
    @Override

@@ -16,12 +16,8 @@ import us.ihmc.simulationconstructionset.SpatialVector;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
 
-/**
- * @author Peter Abeles
- */
 public class FloatJointPhysics extends JointPhysics<FloatingJoint>
 {
-
    private double[] k_qdd_x = new double[4], k_qdd_y = new double[4], k_qdd_z = new double[4];
    private double[] k_qdd_wx = new double[4], k_qdd_wy = new double[4], k_qdd_wz = new double[4];
    private double[] k_qd_x = new double[4], k_qd_y = new double[4], k_qd_z = new double[4];
@@ -57,7 +53,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
    public void featherstonePassOne(Vector3d w_h, Vector3d v_h, Matrix3d Rh_0)
    {
       owner.update();
-      owner.jointTransform3D.get(Ri_0);
+      owner.jointTransform3D.getRotation(Ri_0);
 
       // this.jointDependentSetAndGetRotation(Ri_0);
       Ri_0.transpose();
@@ -213,12 +209,12 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
 
       // R0_i.transform(a_hat_world_top);  //+++JEP w and wd should be in joint coords, not world coords.  Only x,y,z in world coords.
       R0_i.transform(a_hat_world_bot);
-      owner.qdd_x.set(a_hat_world_bot.x);
-      owner.qdd_y.set(a_hat_world_bot.y);
-      owner.qdd_z.set(a_hat_world_bot.z);
-      owner.qdd_wx.set(a_hat_world_top.x);
-      owner.qdd_wy.set(a_hat_world_top.y);
-      owner.qdd_wz.set(a_hat_world_top.z);
+      owner.qdd_x.set(a_hat_world_bot.getX());
+      owner.qdd_y.set(a_hat_world_bot.getY());
+      owner.qdd_z.set(a_hat_world_bot.getZ());
+      owner.qdd_wx.set(a_hat_world_top.getX());
+      owner.qdd_wy.set(a_hat_world_top.getY());
+      owner.qdd_wz.set(a_hat_world_top.getZ());
       jointDependentRecordK(passNumber);
 
       /*
@@ -428,16 +424,16 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
       delta_v_me.bottom.set(-a_hat_matrix.get(3, 0), -a_hat_matrix.get(4, 0), -a_hat_matrix.get(5, 0));
 
       // These are defined in body coords. Don't rotate.
-      owner.qd_wx.set(owner.qd_wx.getDoubleValue() + delta_v_me.top.x);
-      owner.qd_wy.set(owner.qd_wy.getDoubleValue() + delta_v_me.top.y);
-      owner.qd_wz.set(owner.qd_wz.getDoubleValue() + delta_v_me.top.z);
+      owner.qd_wx.set(owner.qd_wx.getDoubleValue() + delta_v_me.top.getX());
+      owner.qd_wy.set(owner.qd_wy.getDoubleValue() + delta_v_me.top.getY());
+      owner.qd_wz.set(owner.qd_wz.getDoubleValue() + delta_v_me.top.getZ());
 
       // Rotate into world coords.
       delta_qd_xyz.set(delta_v_me.bottom);
       R0_i.transform(delta_qd_xyz);
-      owner.qd_x.set(owner.qd_x.getDoubleValue() + delta_qd_xyz.x);
-      owner.qd_y.set(owner.qd_y.getDoubleValue() + delta_qd_xyz.y);
-      owner.qd_z.set(owner.qd_z.getDoubleValue() + delta_qd_xyz.z);
+      owner.qd_x.set(owner.qd_x.getDoubleValue() + delta_qd_xyz.getX());
+      owner.qd_y.set(owner.qd_y.getDoubleValue() + delta_qd_xyz.getY());
+      owner.qd_z.set(owner.qd_z.getDoubleValue() + delta_qd_xyz.getZ());
    }
 
    protected boolean jointDependentVerifyReasonableAccelerations()

@@ -9,12 +9,12 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class BacklashProcessingYoVariableTest
 {
-   @DeployableTestMethod(estimatedDuration = 1.0)
-   @Test(timeout = 10000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testAgainstRevisedBacklash()
    {
       YoVariableRegistry registry = new YoVariableRegistry("dummy");

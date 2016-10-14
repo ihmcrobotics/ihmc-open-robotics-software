@@ -4,13 +4,14 @@ import java.util.ArrayList;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.robotics.Plane;
+import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 /**
  * <p>VisualizeAlphaToAlphaFunction </p>
@@ -69,7 +70,7 @@ public class AlphaToAlphaFunctionVisualizer
       {
          super("Ball");
 
-         planarJoint = new FloatingPlanarJoint("planar", this, FloatingPlanarJoint.XY);
+         planarJoint = new FloatingPlanarJoint("planar", this, Plane.XY);
          Link ball = new Link("ball");
          Graphics3DObject linkGraphics = new Graphics3DObject();
          ball.setMass(1.0);

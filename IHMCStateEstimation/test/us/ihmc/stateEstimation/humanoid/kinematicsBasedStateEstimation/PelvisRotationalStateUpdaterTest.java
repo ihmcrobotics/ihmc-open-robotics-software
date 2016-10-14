@@ -17,11 +17,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -29,8 +25,8 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 public class PelvisRotationalStateUpdaterTest
 {
@@ -44,7 +40,7 @@ public class PelvisRotationalStateUpdaterTest
 
    private final List<IMUSensorReadOnly> imuSensors = new ArrayList<>();
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructorWithOneIMU()
    {
@@ -63,7 +59,7 @@ public class PelvisRotationalStateUpdaterTest
       
       try
       {
-         new PelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, registry);
+         new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, 1.0e-3, registry);
       }
       catch (Exception e)
       {
@@ -72,7 +68,7 @@ public class PelvisRotationalStateUpdaterTest
       }
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testConstructorWithZeroIMUSensor()
    {
@@ -87,10 +83,10 @@ public class PelvisRotationalStateUpdaterTest
       StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
       buildSensorConfigurations(stateEstimatorSensorDefinitions, registry);
       
-      PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
+      PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater;
       try
       {
-         pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, registry);
+         pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, 1.0e-3, registry);
       }
       catch (Exception e)
       {
@@ -101,7 +97,7 @@ public class PelvisRotationalStateUpdaterTest
          fail("RuntimeException expected, no orientation sensor attached to the sensor map.");
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testInitializeAndReadWithOneIMU()
    {
@@ -118,14 +114,14 @@ public class PelvisRotationalStateUpdaterTest
       
       SensorProcessing jointAndIMUSensorDataSource = buildSensorConfigurations(stateEstimatorSensorDefinitions, registry);
 
-      PelvisRotationalStateUpdater pelvisRotationalStateUpdater = new PelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, registry);
+      PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater = new IMUBasedPelvisRotationalStateUpdater(inverseDynamicsStructure, imuSensors, 1.0e-3, registry);
 
       
       Quat4d rotationExpected = new Quat4d();
       Twist twistExpected = new Twist();
       Quat4d rotationEstimated = new Quat4d();
       Twist twistEstimated = new Twist();
-      SixDoFJoint rootJoint = inverseDynamicsStructure.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = inverseDynamicsStructure.getRootJoint();
 
       setRandomRobotConfigurationAndUpdateSensors(joints, inverseDynamicsStructure, stateEstimatorSensorDefinitions, jointAndIMUSensorDataSource);
       
@@ -186,7 +182,7 @@ public class PelvisRotationalStateUpdaterTest
          
          RigidBodyTransform transformFromMeasFrameToWorld = imuSensor.getMeasurementFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
          Matrix3d rotationFromMeasFrameToWorld = new Matrix3d();
-         transformFromMeasFrameToWorld.get(rotationFromMeasFrameToWorld);
+         transformFromMeasFrameToWorld.getRotation(rotationFromMeasFrameToWorld);
          jointAndIMUSensorDataSource.setOrientationSensorValue(imuDefinition, rotationFromMeasFrameToWorld);
       }
 

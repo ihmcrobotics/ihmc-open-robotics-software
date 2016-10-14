@@ -68,8 +68,8 @@ public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
       YoAppearanceTexture texture = new YoAppearanceTexture("Textures/gridGroundProfile.png");
       combinedTerrainObject.addBox(-10.0, -10.0, 10.0, 10.0, -0.05, 0.0, texture);
-      combinedTerrainObject.addBox(tableCenter.x-tableLength , tableCenter.y-tableLength, tableCenter.x+tableLength, tableCenter.y+tableLength , tableCenter.z);
-      combinedTerrainObject.addBox(wallPosition.x - 1.0, wallPosition.y - 0.05, wallPosition.x + 1.0, wallPosition.y + 0.05, 2.0);
+      combinedTerrainObject.addBox(tableCenter.getX()-tableLength , tableCenter.getY()-tableLength, tableCenter.getX()+tableLength, tableCenter.getY()+tableLength , tableCenter.getZ());
+      combinedTerrainObject.addBox(wallPosition.getX() - 1.0, wallPosition.getY() - 0.05, wallPosition.getX() + 1.0, wallPosition.getY() + 0.05, 2.0);
       
       return combinedTerrainObject;
    }

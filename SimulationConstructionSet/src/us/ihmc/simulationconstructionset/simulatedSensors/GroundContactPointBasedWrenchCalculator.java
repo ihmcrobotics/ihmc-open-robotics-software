@@ -71,13 +71,13 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
          contactVectorOriginFrame.set(contactPointOriginFrame);
          tau.cross(contactVectorOriginFrame, force);
          
-         wrenchMatrix.set(0, 0, wrenchMatrix.get(0, 0) + tau.x);
-         wrenchMatrix.set(1, 0, wrenchMatrix.get(1, 0) + tau.y);
-         wrenchMatrix.set(2, 0, wrenchMatrix.get(2, 0) + tau.z);
+         wrenchMatrix.set(0, 0, wrenchMatrix.get(0, 0) + tau.getX());
+         wrenchMatrix.set(1, 0, wrenchMatrix.get(1, 0) + tau.getY());
+         wrenchMatrix.set(2, 0, wrenchMatrix.get(2, 0) + tau.getZ());
          
-         wrenchMatrix.set(3, 0, wrenchMatrix.get(3, 0) + force.x);
-         wrenchMatrix.set(4, 0, wrenchMatrix.get(4, 0) + force.y);
-         wrenchMatrix.set(5, 0, wrenchMatrix.get(5, 0) + force.z);
+         wrenchMatrix.set(3, 0, wrenchMatrix.get(3, 0) + force.getX());
+         wrenchMatrix.set(4, 0, wrenchMatrix.get(4, 0) + force.getY());
+         wrenchMatrix.set(5, 0, wrenchMatrix.get(5, 0) + force.getZ());
       }
       
       if(doWrenchCorruption)

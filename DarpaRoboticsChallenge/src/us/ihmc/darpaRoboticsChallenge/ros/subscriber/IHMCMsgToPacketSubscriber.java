@@ -4,8 +4,11 @@ import org.ros.internal.message.Message;
 
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.darpaRoboticsChallenge.ros.DRCROSMessageConverter;
+import us.ihmc.darpaRoboticsChallenge.ros.IHMCROSTranslationRuntimeTools;
+import us.ihmc.utilities.ros.msgToPacket.converter.RosEnumConversionException;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
+
+import java.lang.reflect.InvocationTargetException;
 
 public class IHMCMsgToPacketSubscriber<T extends Message> extends AbstractRosTopicSubscriber<T>
 {
@@ -24,13 +27,14 @@ public class IHMCMsgToPacketSubscriber<T extends Message> extends AbstractRosTop
    {
       try
       {
-         Packet<?> packet = DRCROSMessageConverter.convertToPacket(message);
+         Packet<?> packet = IHMCROSTranslationRuntimeTools.convertToIHMCMessage(message);
          packet.setDestination(packetDestination);
          controllerCommunicator.send(packet);
       }
-      catch (IllegalArgumentException | SecurityException e)
+      catch (ClassNotFoundException | InvocationTargetException | RosEnumConversionException | IllegalAccessException | InstantiationException | NoSuchFieldException e)
       {
-         System.out.println(this.getMessageType().getClass().getSimpleName() + " failed to covert message to packet! see exception below.");
+         System.err.println("Could not convert ROS Message to IHMC Message. Will not publish.");
+         System.err.println("Original ROS message: " + message);
          e.printStackTrace();
       }
    }

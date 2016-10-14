@@ -19,8 +19,8 @@ import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class ConvexOptimizationAdapterTest
 {
@@ -28,7 +28,7 @@ public abstract class ConvexOptimizationAdapterTest
    public abstract double getTestErrorEpsilon();
    
    @SuppressWarnings("unchecked")
-   @DeployableTestMethod(targets = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 300000)
    public void qpsFileTest() throws IOException
    {
@@ -62,7 +62,7 @@ public abstract class ConvexOptimizationAdapterTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testASimpleRedundantEqualityCase()
    {
@@ -78,7 +78,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(2.0, solution[0], getTestErrorEpsilon());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testASimpleRedundantEqualityCase2d()
    {
@@ -95,7 +95,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0, solution[1], getTestErrorEpsilon());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
   public void JOptimizerWebpageLPExample() throws Exception
   {
@@ -144,7 +144,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(0, sol2[1], 1e-5);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testASimpleInequalityCase() throws Exception
    {
@@ -159,7 +159,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(2.0, solution[0], 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testASimpleMaximizationInequalityCase()
    {
@@ -175,7 +175,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
    
    // Need to implement addQuadraticInequalities
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testLinearCostQuadraticInequalityOptimizationProblem()
    {
@@ -199,7 +199,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(Math.sqrt(2.0), solution[1], 1e-5);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLinearCostFullyLinearConstrainedEqualityOptimizationProblem()
    {
@@ -221,7 +221,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0, solution[1], getTestErrorEpsilon());
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testZeroCostLinearEqualityOptimizationProblem() throws Exception
    {
@@ -243,7 +243,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
    
    //Not implemented yet!
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testLinearCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -273,7 +273,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
 
    //Not implemented yet!
-	@DeployableTestMethod(targets = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {

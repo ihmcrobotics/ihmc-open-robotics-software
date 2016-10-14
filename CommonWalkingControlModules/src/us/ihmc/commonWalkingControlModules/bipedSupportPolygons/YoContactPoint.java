@@ -17,7 +17,8 @@ public class YoContactPoint implements ContactPointInterface
    private final String namePrefix;
    private final PlaneContactState parentContactState;
 
-   public YoContactPoint(String namePrefix, int index, FramePoint2d contactPointPosition2d, PlaneContactState parentContactState, YoVariableRegistry parentRegistry)
+   public YoContactPoint(String namePrefix, int index, FramePoint2d contactPointPosition2d, PlaneContactState parentContactState,
+         YoVariableRegistry parentRegistry)
    {
       this(namePrefix, index, contactPointPosition2d.getReferenceFrame(), parentContactState, parentRegistry);
       setPosition(contactPointPosition2d);
@@ -69,7 +70,7 @@ public class YoContactPoint implements ContactPointInterface
    public void getPosition2d(Point2d position2d)
    {
       // TODO Auto-generated method stub
-      
+
    }
 
    @Override

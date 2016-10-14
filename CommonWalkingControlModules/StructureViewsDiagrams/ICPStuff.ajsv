@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2016-Mar-03 14:20" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.2.v20150605-1440">
+        <class className="us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ICPAndMomentumBasedController" project="CommonWalkingControlModules" xLocation="626" yLocation="223"/>
+    </diagram>
+</ajsv>

@@ -3,71 +3,66 @@ package us.ihmc.commonWalkingControlModules.generatedTestSuites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
-import us.ihmc.tools.testing.TestPlanSuite;
-import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
-@RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Fast)
+@RunWith(ContinuousIntegrationSuite.class)
+@ContinuousIntegrationSuiteCategory(IntegrationCategory.FAST)
 @SuiteClasses
 ({
-   us.ihmc.commonWalkingControlModules.calibration.virtualChain.VirtualChainBuilderTest.class,
-   us.ihmc.commonWalkingControlModules.calibration.virtualChain.VirtualChainConstructorFromARobotTest.class,
-   us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolverTest.class,
-   us.ihmc.commonWalkingControlModules.controlModules.GeometricVirtualToePointCalculatorLogisticParametersTest.class,
-   us.ihmc.commonWalkingControlModules.controlModules.GeometricVirtualToePointCalculatorTest.class,
-   us.ihmc.commonWalkingControlModules.controlModules.nativeOptimization.ConstrainedQPSolverTest.class,
-   us.ihmc.commonWalkingControlModules.controlModules.TeeterTotterLegStrengthCalculatorTest.class,
-   us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootPosePacketTransformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootstepDataTansformerTest.class,
-   us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.HandPosePacketTransformerTest.class,
-   us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.PelvisPosePacketTransformerTest.class,
+   us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.FootTrajectoryMessageTransformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects.TorusPosePacketTransformerTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorToolsTest.class,
    us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepTest.class,
-   us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathCoordinatorTest.class,
-   us.ihmc.commonWalkingControlModules.desiredFootStep.RangeOfStep2dTest.class,
-   us.ihmc.commonWalkingControlModules.desiredFootStep.RangeOfStep3dTest.class,
    us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptTest.class,
-   us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.FastCutForceControlHelperTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.DoubleSupportICPEquationsTest.class,
-   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.NewInstantaneousCapturePointPlannerTest.class,
-   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.NewInstantaneousCapturePointPlannerWithSmootherTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationControllerTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationSolverTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.CMPRecursionMultipliersTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.CurrentStateProjectionMultiplierTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.EntryCMPProjectionMultiplierTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.ExitCMPProjectionMultiplierTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.FinalICPRecursionMultiplierTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.InitialICPProjectionMultiplierTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionDerivativeMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicProjectionMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicSplineCoefficientMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicTimeDerivativeMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.interpolation.CubicTimeMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.PreviousExitCMPProjectionMultiplierTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.RemainingStanceCMPProjectionMultipliersTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.StanceCMPProjectionMultipliersTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.swing.SwingEntryCMPProjectionMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.swing.SwingExitCMPProjectionMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.swing.SwingInitialICPProjectionMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.swing.SwingStateEndRecursionMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferEntryCMPProjectionMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferExitCMPProjectionMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferInitialICPProjectionMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferPreviousExitCMPProjectionMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.projectionAndRecursionMultipliers.stateMatrices.transfer.TransferStateEndRecursionMatrixTest.class,
+   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.MomentumRecoveryControlModuleTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPPlanarProjectorTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.SmartCMPProjectorTest.class,
    us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointToolsTest.class,
-   us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.NewDoubleSupportICPComputerTest.class,
-   us.ihmc.commonWalkingControlModules.kinematics.DampedLeastSquaresJacobianSolverTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.CentroidalMomentumBenchmarkTest.class,
-   us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumOptimizerOldTest.class,
-   us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumSolverTest.class,
-   us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModuleTest.class,
+   us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.PointFeedbackControllerTest.class,
+   us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculatorTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.SingularValueExplorationAndExamplesTest.class,
    us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.TypicalMotionConstraintsTest.class,
-   us.ihmc.commonWalkingControlModules.terrain.VaryingStairGroundProfileTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.CirclePoseTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmootherTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.Constrained5thOrderPolyForSwingTrajectoryTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.EndPointConstrainedCubicTrajectoryTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.SmoothenedConstantCoPICPTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.SplineBasedCoMHeightTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.StraightUpThenParabolicCartesianTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.SwingHeightTrajectoryCalculatorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.TakeoffLandingCartesianTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.ThreePointDoubleSplines1DTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.ThreePointDoubleSplines2DTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.VelocityConstrainedPoseTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.ZeroToOneParabolicVelocityTrajectoryGeneratorTest.class,
-   us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculatorTest.class,
-   us.ihmc.commonWalkingControlModules.wrenchDistribution.GroundReactionWrenchDistributorTest.class,
-   us.ihmc.commonWalkingControlModules.wrenchDistribution.PlaneContactWrenchMatrixCalculatorTest.class
+   us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTest.class
 })
 
 public class CommonWalkingControlModulesAFastTestSuite

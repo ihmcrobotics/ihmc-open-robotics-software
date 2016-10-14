@@ -1,13 +1,7 @@
 package us.ihmc.simulationconstructionset.dataExporter;
 
-import org.junit.Test;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.tools.testing.TestPlanAnnotations;
+import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Vector3d;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -15,22 +9,32 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertTrue;
+import javax.vecmath.Vector3d;
 
+import org.junit.Test;
 
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
 public class DataExporterGraphCreatorTest
 {
 
-    @TestPlanAnnotations.DeployableTestMethod(estimatedDuration = 1.0)
+    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 1.0)
     @Test(timeout = 30000)
     public void testDataExporterGraphCreator() throws IOException
     {
         SimulationConstructionSet sim = createSimulation();
-        DataExporterGraphCreator graphCreator = new DataExporterGraphCreator(sim.getRobots()[0], sim.getDataBuffer());
+        TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(sim.getRobots()[0], sim.getDataBuffer());
 
         File path = new File(System.getProperty("java.io.tmpdir"));
         Path tmpPath = Files.createTempDirectory(Paths.get(path.getAbsolutePath()), "test");
-        graphCreator.createGraphs(tmpPath.toFile(), "", true, true);
+        graphCreator.createJointTorqueSpeedGraphs(tmpPath.toFile(), "", true, true);
 
         int fileCount = tmpPath.toFile().listFiles(new FilenameFilter()
             {

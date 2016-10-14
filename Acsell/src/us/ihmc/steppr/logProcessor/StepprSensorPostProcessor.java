@@ -14,9 +14,8 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorFunction;
@@ -42,9 +41,11 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -192,7 +193,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
       double gravitationalAcceleration = -9.80;
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
       CommonHumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(estimatorFullRobotModel);
-      SideDependentList<ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel, referenceFrames);
+      SideDependentList<? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(estimatorFullRobotModel, referenceFrames);
       YoGraphicsListRegistry yoGraphicsListRegistry = null; // no viz for now
       
       Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new HashMap<>();
@@ -217,12 +218,16 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
             logDataProcessorHelper.getDesiredCoP(feetMap.get(foot), centerOfPressureToPack);
          }
       };
+      
+      CenterOfMassDataHolder centerOfMassDataHolderToUpdate = new CenterOfMassDataHolder();
+
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            postProcessedSensors, null, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitchMap, centerOfPressureDataHolder, new RobotMotionStatusHolder(), bipedFeetMap, yoGraphicsListRegistry);
+            postProcessedSensors, null, centerOfMassDataHolderToUpdate,
+            imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitchMap, centerOfPressureDataHolder, new RobotMotionStatusHolder(), bipedFeetMap, yoGraphicsListRegistry);
       return stateEstimator;
    }
 
-   private Map<RigidBody, FootSwitchInterface> createStateEstimatorFootSwitches(final LogDataProcessorHelper logDataProcessorHelper, final SideDependentList<ContactablePlaneBody> bipedFeet)
+   private Map<RigidBody, FootSwitchInterface> createStateEstimatorFootSwitches(final LogDataProcessorHelper logDataProcessorHelper, final SideDependentList<? extends ContactablePlaneBody> bipedFeet)
    {
       Map<RigidBody, FootSwitchInterface> footSwitches = new HashMap<>();
       
@@ -272,7 +277,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
             public void computeAndPackFootWrench(Wrench footWrenchToPack)
             {
             }
-            
+
             @Override
             public void computeAndPackCoP(FramePoint2d copToPack)
             {
@@ -281,11 +286,21 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
             }
 
             @Override
+            public void updateCoP()
+            {
+            }
+
+            @Override
             @Deprecated
             public void setFootContactState(boolean hasFootHitGround)
             {
                // TODO Auto-generated method stub
                
+            }
+
+            @Override
+            public void trustFootSwitch(boolean trustFootSwitch)
+            {
             }
          };
          
@@ -343,7 +358,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
       postProcessedSensors.startComputation(rawSensorMap.getTimestamp(), rawSensorMap.getVisionSensorTimestamp(), -1);
       stateEstimator.doControl();
 
-      SixDoFJoint rootJoint = estimatorFullRobotModel.getRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = estimatorFullRobotModel.getRootJoint();
 
       rootJoint.getTranslation(translation);
       estimatedRootJointPosition.set(translation);

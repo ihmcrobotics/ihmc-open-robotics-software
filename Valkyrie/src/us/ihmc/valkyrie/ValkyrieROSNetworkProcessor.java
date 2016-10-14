@@ -55,7 +55,7 @@ public class ValkyrieROSNetworkProcessor
       RosMainNode rosMainNode = new RosMainNode(rosUri, nameSpace + nodeName);
       rosMainNode.execute();
 
-      new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPICommunicator, robotModel, nameSpace, tfPrefix);
+      new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPICommunicator, robotModel, nameSpace, tfPrefix, "ihmc_valkyrie_ros");
    }
 
    public static void main(String[] args) throws JSAPException, IOException

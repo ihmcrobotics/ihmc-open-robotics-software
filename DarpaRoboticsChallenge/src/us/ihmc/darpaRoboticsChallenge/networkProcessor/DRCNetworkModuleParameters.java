@@ -27,6 +27,10 @@ public class DRCNetworkModuleParameters
    private boolean runAutomaticDiagnostic = false;
    private boolean useMultisenseManualTestModule;
    private boolean useDrillDetectionModule;
+   private boolean useKinematicsToolbox = true;
+   private boolean useKinematicsToolboxVisualizer = false;
+   private boolean useTextToSpeechModule = false;
+   private boolean useRobotEnvironmentAwarenessModule = false;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
    
@@ -55,6 +59,16 @@ public class DRCNetworkModuleParameters
       return useBehaviorVisualizer;
    }
 
+   public boolean isKinematicsToolboxEnabled()
+   {
+      return useKinematicsToolbox;
+   }
+
+   public boolean isKinematicsToolboxVisualizerEnabled()
+   {
+      return useKinematicsToolboxVisualizer;
+   }
+
    public boolean isHandModuleEnabled()
    {
       return useHandModule;
@@ -74,7 +88,12 @@ public class DRCNetworkModuleParameters
    {
       return useMultisenseManualTestModule;
    }
-   
+
+   public boolean isRobotEnvironmentAwerenessModuleEnabled()
+   {
+      return useRobotEnvironmentAwarenessModule;
+   }
+
    public void enableMultisenseManualTestModule(boolean b)
    {
       useMultisenseManualTestModule = b;
@@ -109,6 +128,16 @@ public class DRCNetworkModuleParameters
       this.useBehaviorVisualizer = useBehaviorVisualizer;
    }
 
+   public void enableKinematicsToolbox(boolean useKinematicsToolbox)
+   {
+      this.useKinematicsToolbox = useKinematicsToolbox;
+   }
+
+   public void enableKinematicsToolboxVisualizer(boolean useKinematicsToolboxVisualizer)
+   {
+      this.useKinematicsToolboxVisualizer = useKinematicsToolboxVisualizer;
+   }
+
    public void enableHandModule(boolean b)
    {
       useHandModule = b;
@@ -119,6 +148,11 @@ public class DRCNetworkModuleParameters
       usePerceptionModule = b;
       if (b)
          useController = true;
+   }
+
+   public void enableRobotEnvironmentAwerenessModule(boolean enable)
+   {
+      this.useRobotEnvironmentAwarenessModule = enable;
    }
 
    public void enableRosModule(boolean b)
@@ -222,6 +256,16 @@ public class DRCNetworkModuleParameters
    public void setDrillDetectionModuleEnabled(boolean b)
    {
       useDrillDetectionModule = b;
+   }
+
+   public void enableTextToSpeechModule(boolean useTextToSpeechModule)
+   {
+      this.useTextToSpeechModule = useTextToSpeechModule;
+   }
+
+   public boolean isTextToSpeechModuleEnabled()
+   {
+      return useTextToSpeechModule;
    }
 
    public void setRosUri(URI rosURI)

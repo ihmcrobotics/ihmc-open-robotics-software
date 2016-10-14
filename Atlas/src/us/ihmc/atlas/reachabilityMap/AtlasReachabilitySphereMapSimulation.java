@@ -1,8 +1,8 @@
 package us.ihmc.atlas.reachabilityMap;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.SdfLoader.partNames.LimbName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -23,8 +23,8 @@ public class AtlasReachabilitySphereMapSimulation
    public AtlasReachabilitySphereMapSimulation()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false);
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      FloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       final JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(sdfRobot, fullRobotModel);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(true, 16000);
@@ -34,7 +34,6 @@ public class AtlasReachabilitySphereMapSimulation
       ReachabilitySphereMapCalculator reachabilitySphereMapCalculator = new ReachabilitySphereMapCalculator(armJoints, scs);
 //      reachabilitySphereMapCalculator.setControlFrameFixedInEndEffector(fullRobotModel.getHandControlFrame(RobotSide.LEFT));
       FramePose palmCenter = new FramePose(fullRobotModel.getHandControlFrame(RobotSide.LEFT));
-      palmCenter.setX(robotModel.getArmControllerParameters().getWristHandCenterOffset() - 0.02);
       palmCenter.changeFrame(fullRobotModel.getEndEffector(RobotSide.LEFT, LimbName.ARM).getBodyFixedFrame());
       RigidBodyTransform transformFromPalmCenterToHandBodyFixedFrame = new RigidBodyTransform();
       palmCenter.getPose(transformFromPalmCenterToHandBodyFixedFrame);

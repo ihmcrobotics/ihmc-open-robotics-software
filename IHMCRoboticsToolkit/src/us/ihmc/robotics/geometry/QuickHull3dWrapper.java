@@ -77,7 +77,7 @@ public class QuickHull3dWrapper
 
    private com.github.quickhull3d.Point3d createPoint3d(Point3d point3d)
    {
-      return new com.github.quickhull3d.Point3d(point3d.x, point3d.y, point3d.z);
+      return new com.github.quickhull3d.Point3d(point3d.getX(), point3d.getY(), point3d.getZ());
    }
 
    private Point3d createPoint3d(com.github.quickhull3d.Point3d point3d)

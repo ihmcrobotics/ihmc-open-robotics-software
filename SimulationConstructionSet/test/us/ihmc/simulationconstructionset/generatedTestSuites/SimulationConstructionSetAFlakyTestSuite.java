@@ -3,13 +3,13 @@ package us.ihmc.simulationconstructionset.generatedTestSuites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite.SuiteClasses;
 
-import us.ihmc.tools.testing.TestPlanSuite;
-import us.ihmc.tools.testing.TestPlanSuite.TestSuiteTarget;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
-@RunWith(TestPlanSuite.class)
-@TestSuiteTarget(TestPlanTarget.Flaky)
+@RunWith(ContinuousIntegrationSuite.class)
+@ContinuousIntegrationSuiteCategory(IntegrationCategory.FLAKY)
 @SuiteClasses
 ({
    us.ihmc.simulationconstructionset.whiteBoard.TCPYoWhiteBoardTest.class

@@ -27,20 +27,20 @@ public class AngleTools
 
    public static float getAngle(Quat4f q)
    {
-      return 2.0f * (float) Math.acos(q.w);
+      return 2.0f * (float) Math.acos(q.getW());
    }
 
    public static double angleMinusPiToPi(Vector2d startVector, Vector2d endVector)
    {
       double absoluteAngle = Math.acos(startVector.dot(endVector) / startVector.length() / endVector.length());
 
-      Vector3d start3d = new Vector3d(startVector.x, startVector.y, 0.0);
-      Vector3d end3d = new Vector3d(endVector.x, endVector.y, 0.0);
+      Vector3d start3d = new Vector3d(startVector.getX(), startVector.getY(), 0.0);
+      Vector3d end3d = new Vector3d(endVector.getX(), endVector.getY(), 0.0);
 
       Vector3d crossProduct = new Vector3d();
       crossProduct.cross(start3d, end3d);
 
-      if (crossProduct.z >= 0.0)
+      if (crossProduct.getZ() >= 0.0)
       {
          return absoluteAngle;
       }
@@ -149,7 +149,7 @@ public class AngleTools
    {
       double difference = angleA - angleB;
       difference = difference % TwoPI;
-      difference = AngleTools.shiftAngleToStartOfRange(difference, -2.0 * PI);
+      difference = AngleTools.shiftAngleToStartOfRange(difference, -TwoPI);
 
       return difference;
    }
@@ -164,17 +164,31 @@ public class AngleTools
     */
    public static double shiftAngleToStartOfRange(double angleToShift, double startOfAngleRange)
    {
+      return shiftAngleToStartOfRange(angleToShift, startOfAngleRange, TwoPI);
+   }
+
+   /**
+    * This will shift an angle to be in the range [<i>startOfAngleRange</i>,
+    *  (<i>startOfAngleRange + endOfAngleRange</i>)
+    *
+    * @param angleToShift the angle to shift
+    * @param startOfAngleRange start of the range.
+    * @param endOfAngleRange end of the range.
+    * @return the shifted angle
+    */
+   public static double shiftAngleToStartOfRange(double angleToShift, double startOfAngleRange, double endOfAngleRange)
+   {
       double ret = angleToShift;
       startOfAngleRange = startOfAngleRange - EPSILON;
 
       if (angleToShift < startOfAngleRange)
       {
-         ret = angleToShift + Math.ceil((startOfAngleRange - angleToShift) / (2.0 * Math.PI)) * Math.PI * 2.0;
+         ret = angleToShift + Math.ceil((startOfAngleRange - angleToShift) / endOfAngleRange) * endOfAngleRange;
       }
 
-      if (angleToShift >= (startOfAngleRange + Math.PI * 2.0))
+      if (angleToShift >= (startOfAngleRange + endOfAngleRange))
       {
-         ret = angleToShift - Math.floor((angleToShift - startOfAngleRange) / (2.0 * Math.PI)) * Math.PI * 2.0;
+         ret = angleToShift - Math.floor((angleToShift - startOfAngleRange) / endOfAngleRange) * endOfAngleRange;
       }
 
       return ret;

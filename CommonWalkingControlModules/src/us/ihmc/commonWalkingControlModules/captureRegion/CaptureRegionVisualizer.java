@@ -30,7 +30,7 @@ public class CaptureRegionVisualizer
       yoCaptureRegionPolygon = new YoFrameConvexPolygon2d(caption, "", worldFrame, 30, registry);
 
       YoArtifactPolygon dynamicGraphicYoPolygonArtifact = new YoArtifactPolygon(caption, yoCaptureRegionPolygon, color, false);
-      yoGraphicsListRegistry.registerArtifact(caption, dynamicGraphicYoPolygonArtifact);
+      yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), dynamicGraphicYoPolygonArtifact);
 
       parentRegistry.addChild(registry);
    }

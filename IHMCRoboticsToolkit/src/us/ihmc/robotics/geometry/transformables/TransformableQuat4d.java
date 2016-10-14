@@ -16,6 +16,7 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public TransformableQuat4d(Quat4d tuple)
    {
       super(tuple);
+      normalizeAndLimitToPiMinusPi();
    }
 
    public TransformableQuat4d()
@@ -27,22 +28,26 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public TransformableQuat4d(double[] quaternion)
    {
       super(quaternion);
+      normalizeAndLimitToPiMinusPi();
    }
 
    @Override
    public void applyTransform(RigidBodyTransform transform3D)
    {
-      transform3D.get(tempQuaternionForTransform);
+      transform3D.getRotation(tempQuaternionForTransform);
       this.mul(tempQuaternionForTransform, this);
       normalizeAndLimitToPiMinusPi();
    }
-   
+
    /**
     * Normalize the quaternion and also limits the described angle magnitude in [-Pi, Pi].
     * The latter prevents some controllers to poop their pants.
     */
    public void normalizeAndLimitToPiMinusPi()
    {
+      // Quat4d.normalize() turns it into zero if it contains NaN. This needs to be fixed. Should stay NaN...
+      if (this.containsNaN()) return;
+
       if (normSquared() < 1.0e-7)
          setToZero();
       else
@@ -55,7 +60,7 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
 
    public double normSquared()
    {
-      return this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
+      return this.getX() * this.getX() + this.getY() * this.getY() + this.getZ() * this.getZ() + this.getW() * this.getW();
    }
 
    @Override
@@ -110,6 +115,15 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public boolean epsilonEquals(TransformableQuat4d other, double epsilon)
    {
       //TODO: Not sure if this is the best for epsilonEquals. Also, not sure how to handle the negative equal cases...
+      if (Double.isNaN(getW()) && !Double.isNaN(other.getW())) return false;
+      if (Double.isNaN(getX()) && !Double.isNaN(other.getX())) return false;
+      if (Double.isNaN(getY()) && !Double.isNaN(other.getY())) return false;
+      if (Double.isNaN(getZ()) && !Double.isNaN(other.getZ())) return false;
+      
+      if (!Double.isNaN(getW()) && Double.isNaN(other.getW())) return false;
+      if (!Double.isNaN(getX()) && Double.isNaN(other.getX())) return false;
+      if (!Double.isNaN(getY()) && Double.isNaN(other.getY())) return false;
+      if (!Double.isNaN(getZ()) && Double.isNaN(other.getZ())) return false;
       
       if (Math.abs(getW() - other.getW()) > epsilon) return false;
       if (Math.abs(getX() - other.getX()) > epsilon) return false;

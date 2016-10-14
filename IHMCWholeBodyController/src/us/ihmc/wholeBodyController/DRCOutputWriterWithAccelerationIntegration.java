@@ -3,10 +3,10 @@ package us.ihmc.wholeBodyController;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -236,7 +236,7 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    private final LinkedHashMap<OneDoFJoint, BooleanYoVariable> doAccelerationIntegrationMap = new LinkedHashMap<>();
 
    @Override
-   public void setFullRobotModel(SDFFullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       drcOutputWriter.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
 

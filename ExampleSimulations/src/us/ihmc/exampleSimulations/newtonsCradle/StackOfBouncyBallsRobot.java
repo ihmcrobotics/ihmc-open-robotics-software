@@ -27,17 +27,17 @@ public class StackOfBouncyBallsRobot extends Robot
 
       double gravity = -9.81;
       this.setGravity(gravity);
-      
-      final YoFrameVector yoLinearMomentum = new YoFrameVector("linearMomentum", null, this.getRobotsYoVariableRegistry()); 
+
+      final YoFrameVector yoLinearMomentum = new YoFrameVector("linearMomentum", null, this.getRobotsYoVariableRegistry());
       final DoubleYoVariable potentialEnergy = new DoubleYoVariable("potentialEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable kineticEnergy = new DoubleYoVariable("kineticEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", this.getRobotsYoVariableRegistry());
-      
+
       int numberOfBalls = 4;
       double radiusScaleFactor = 0.6;
       double massScaleFactor = 0.2;
 
-      collisionDetector = new GdxCollisionDetector(this.getRobotsYoVariableRegistry(), 10000);
+      collisionDetector = new GdxCollisionDetector(1000.0);
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(0.02);
 
@@ -80,7 +80,7 @@ public class StackOfBouncyBallsRobot extends Robot
          this.addRootJoint(floatingJoint);
 
          floatingJoint.setPosition(0.0, 0.0, ballCenterHeight);
-         
+
 //         if (i==0)
 //         {
 //            floatingJoint.setVelocity(0.0, 0.0, 1.0);

@@ -1,5 +1,6 @@
 package us.ihmc.robotics.robotSide;
 
+import java.util.EnumSet;
 import java.util.Random;
 
 /**
@@ -18,6 +19,7 @@ public enum RobotSide
 {
    LEFT, RIGHT;
 
+   public static final EnumSet<RobotSide> set = EnumSet.allOf(RobotSide.class);
    public static final RobotSide[] values = values();
 
    public static RobotSide generateRandomRobotSide(Random random)
@@ -184,7 +186,7 @@ public enum RobotSide
       System.out.println(side.toString());
    }
 
-   public String getDocumentation(RobotSide var)
+   public static String getDocumentation(RobotSide var)
    {
       switch (var)
       {
@@ -196,10 +198,5 @@ public enum RobotSide
       default:
          return "no documentation available";
       }
-   }
-
-   public RobotSide[] getDocumentedValues()
-   {
-      return values;
    }
 }

@@ -6,13 +6,13 @@ import org.junit.Test;
 
 import net.wimpi.modbus.procimg.Register;
 import net.wimpi.modbus.procimg.SimpleRegister;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.FingerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotiq.RobotiqGraspMode;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class RobotiqWriteRequestFactoryTest
 {
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOpenMessage()
    {
@@ -28,7 +28,7 @@ public class RobotiqWriteRequestFactoryTest
       
       RobotiqWriteRequestFactory writeRequestFactory = new RobotiqWriteRequestFactory();
       writeRequestFactory.createActivationRequest();
-      Register[] factoryRequest = writeRequestFactory.createWholeHandPositionRequest(RobotiqGraspMode.BASIC_MODE, FingerState.OPEN);
+      Register[] factoryRequest = writeRequestFactory.createWholeHandPositionRequest(RobotiqGraspMode.BASIC_MODE, HandConfiguration.OPEN);
       
       assertEquals(request.length, factoryRequest.length);
       

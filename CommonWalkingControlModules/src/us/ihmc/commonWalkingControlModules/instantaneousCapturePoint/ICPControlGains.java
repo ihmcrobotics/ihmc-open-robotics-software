@@ -1,110 +1,100 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+
 public class ICPControlGains
 {
-   private double kpParallelToMotion;
-   private double kpOrthogonalToMotion;
-   private double ki;
-   private double kiBleedOff = 1.0;
+   private final String suffix;
+   private final YoVariableRegistry registry;
 
-   private boolean useRawCMP = false;
-   private boolean useHackToReduceFeedForward = true;
+   private final DoubleYoVariable kpParallelToMotion;
+   private final DoubleYoVariable kpOrthogonalToMotion;
+   private final DoubleYoVariable ki;
+   private final DoubleYoVariable kiBleedOff;
+   private DoubleYoVariable feedbackPartMaxRate;
 
-   private double cmpFilterBreakFrequencyInHertz = Double.POSITIVE_INFINITY;
-   private double cmpRateLimit = Double.POSITIVE_INFINITY;
-   private double cmpAccelerationLimit = Double.POSITIVE_INFINITY;
-
-   public ICPControlGains()
+   public ICPControlGains(String suffix, YoVariableRegistry registry)
    {
-   }
+      this.suffix = suffix;
+      this.registry = registry;
 
-   public double getKpParallelToMotion()
-   {
-      return kpParallelToMotion;
+      kpParallelToMotion = new DoubleYoVariable("captureKpParallel" + suffix, registry);
+      kpOrthogonalToMotion = new DoubleYoVariable("captureKpOrthogonal" + suffix, registry);
+      ki = new DoubleYoVariable("captureKi" + suffix, registry);
+      kiBleedOff = new DoubleYoVariable("captureKiBleedOff" + suffix, registry);
+      kiBleedOff.set(1.0);
    }
 
    public void setKpParallelToMotion(double kpParallelToMotion)
    {
-      this.kpParallelToMotion = kpParallelToMotion;
-   }
-
-   public double getKpOrthogonalToMotion()
-   {
-      return kpOrthogonalToMotion;
+      this.kpParallelToMotion.set(kpParallelToMotion);
    }
 
    public void setKpOrthogonalToMotion(double kpOrthogonalToMotion)
    {
-      this.kpOrthogonalToMotion = kpOrthogonalToMotion;
-   }
-
-   public double getKi()
-   {
-      return ki;
+      this.kpOrthogonalToMotion.set(kpOrthogonalToMotion);
    }
 
    public void setKi(double ki)
    {
-      this.ki = ki;
-   }
-
-   public double getKiBleedOff()
-   {
-      return kiBleedOff;
+      this.ki.set(ki);
    }
 
    public void setKiBleedOff(double kiBleedOff)
    {
-      this.kiBleedOff = kiBleedOff;
+      this.kiBleedOff.set(kiBleedOff);
    }
 
-   public boolean useRawCMP()
+   public void setFeedbackPartMaxRate(double maxRate)
    {
-      return useRawCMP;
+      if (feedbackPartMaxRate == null)
+         feedbackPartMaxRate = new DoubleYoVariable("feedbackPartMaxRate" + suffix, registry);
+      feedbackPartMaxRate.set(maxRate);
    }
 
-   public void setUseRawCMP(boolean useRawCMP)
+   public DoubleYoVariable getYoKpParallelToMotion()
    {
-      this.useRawCMP = useRawCMP;
+      return kpParallelToMotion;
    }
 
-   public double getCMPFilterBreakFrequencyInHertz()
+   public DoubleYoVariable getYoKpOrthogonalToMotion()
    {
-      return cmpFilterBreakFrequencyInHertz;
+      return kpOrthogonalToMotion;
    }
 
-   public void setCMPFilterBreakFrequencyInHertz(double cmpFilterBreakFrequencyInHertz)
+   public DoubleYoVariable getYoKi()
    {
-      this.cmpFilterBreakFrequencyInHertz = cmpFilterBreakFrequencyInHertz;
+      return ki;
    }
 
-   public double getCMPRateLimit()
+   public DoubleYoVariable getYoKiBleedOff()
    {
-      return cmpRateLimit;
+      return kiBleedOff;
    }
 
-   public void setCMPRateLimit(double cmpRateLimit)
+   public DoubleYoVariable getFeedbackPartMaxRate()
    {
-      this.cmpRateLimit = cmpRateLimit;
+      return feedbackPartMaxRate;
    }
 
-   public double getCMPAccelerationLimit()
+   public double getKpParallelToMotion()
    {
-      return cmpAccelerationLimit;
+      return kpParallelToMotion.getDoubleValue();
    }
 
-   public void setCMPAccelerationLimit(double cmpAccelerationLimit)
+   public double getKpOrthogonalToMotion()
    {
-      this.cmpAccelerationLimit = cmpAccelerationLimit;
+      return kpOrthogonalToMotion.getDoubleValue();
    }
 
-   public boolean useHackToReduceFeedForward()
+   public double getKi()
    {
-      return useHackToReduceFeedForward;
+      return ki.getDoubleValue();
    }
 
-   public void setUseHackToReduceFeedForward(boolean useHackToReduceFeedForward)
+   public double getKiBleedOff()
    {
-      this.useHackToReduceFeedForward = useHackToReduceFeedForward;
+      return kiBleedOff.getDoubleValue();
    }
 }

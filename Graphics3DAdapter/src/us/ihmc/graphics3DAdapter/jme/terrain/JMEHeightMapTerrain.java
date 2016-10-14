@@ -118,10 +118,7 @@ public class JMEHeightMapTerrain
       Vector2f scale = new Vector2f(localScale.x, localScale.z);
       matTerrain.setFloat("gridSize", gridSize);
       matTerrain.setVector2("Scale", scale);
-      
-      
-
-      
+           
       return matTerrain;
    }
    

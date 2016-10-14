@@ -35,7 +35,7 @@ import javax.swing.plaf.basic.BasicArrowButton;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import us.ihmc.communication.ComparableDataObject;
+import us.ihmc.robotics.EpsilonComparable;
 import us.ihmc.robotics.time.TimeTools;
 
 public class ScriptEditorInterface
@@ -841,9 +841,9 @@ public class ScriptEditorInterface
          {
             Object tableDataObject1 = tableData.get(i).getScriptObject();
             Object tableDataObject2 = tableData2.get(i).getScriptObject();
-            if (tableDataObject1 instanceof ComparableDataObject)
+            if (tableDataObject1 instanceof EpsilonComparable)
             {
-               equals = ((ComparableDataObject<Object>) tableDataObject1).epsilonEquals(tableDataObject2, epsilon);
+               equals = ((EpsilonComparable<Object>) tableDataObject1).epsilonEquals(tableDataObject2, epsilon);
 
                if (!equals)
                {

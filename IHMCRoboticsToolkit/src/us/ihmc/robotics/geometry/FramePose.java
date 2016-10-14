@@ -12,7 +12,6 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FramePose extends AbstractFrameObject<FramePose, Pose>
@@ -131,9 +130,9 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void setPose(RigidBodyTransform transform)
    {
-      transform.get(tempVector);
+      transform.getTranslation(tempVector);
       pose.setPosition(tempVector);
-      transform.get(tempMatrix);
+      transform.getRotation(tempMatrix);
       pose.setOrientation(tempMatrix);
    }
 
@@ -158,9 +157,9 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public void setPoseIncludingFrame(ReferenceFrame referenceFrame, RigidBodyTransform transform)
    {
-      transform.get(tempVector);
+      transform.getTranslation(tempVector);
       pose.setPosition(tempVector);
-      transform.get(tempMatrix);
+      transform.getRotation(tempMatrix);
       pose.setOrientation(tempMatrix);
       
       this.referenceFrame = referenceFrame;

@@ -2,14 +2,18 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.util.Random;
 
-import us.ihmc.communication.packetAnnotations.ClassDocumentation;
-import us.ihmc.communication.packets.IHMCRosApiPacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@ClassDocumentation("Request taring of the wrist force/torque sensors.")
-public class AtlasWristSensorCalibrationRequestPacket extends IHMCRosApiPacket<AtlasWristSensorCalibrationRequestPacket>
+@RosMessagePacket(documentation = "Request taring of the wrist force/torque sensors.",
+      rosPackage = "ihmc_atlas_ros",
+      topic = "/control/request_wrist_sensor_calibration")
+public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristSensorCalibrationRequestPacket>
 {
+   @RosExportedField(documentation = "The robot side (left or right) for the wrist sensor you would like to request calibration for.")
    public RobotSide robotSide;
 
    public AtlasWristSensorCalibrationRequestPacket()
@@ -45,6 +49,5 @@ public class AtlasWristSensorCalibrationRequestPacket extends IHMCRosApiPacket<A
    public AtlasWristSensorCalibrationRequestPacket(Random random)
    {
       this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT);
-
    }
 }

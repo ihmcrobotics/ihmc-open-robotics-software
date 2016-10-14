@@ -2,6 +2,8 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +15,6 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.LocalObjectCommunicator;
@@ -45,6 +46,11 @@ abstract public class ROSAPISimulator
    protected abstract List<Map.Entry<String, RosTopicPublisher<? extends Message>>> createCustomPublishers(String namespace, PacketCommunicator communicator);
 
    public ROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix, boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
+   {
+         this(robotModel, startingLocation, nameSpace, tfPrefix, runAutomaticDiagnosticRoutine, disableViz, Collections.<Class>emptySet());
+   }
+
+   public ROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix, boolean runAutomaticDiagnosticRoutine, boolean disableViz, Collection<Class> additionalPacketTypes) throws IOException
    {
       this.robotModel = robotModel;
 
@@ -79,7 +85,6 @@ abstract public class ROSAPISimulator
          simulationStarter.setGuiInitialSetup(guiSetup);
       }
 
-      simulationStarter.registerHighLevelController(new JointPositionControllerFactory(false));
       simulationStarter.setStartingLocation(startingLocation);
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.startSimulation(networkProcessorParameters, true);
@@ -92,7 +97,7 @@ abstract public class ROSAPISimulator
       
       LocalObjectCommunicator sensorCommunicator = simulationStarter.getSimulatedSensorsPacketCommunicator();
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
-      new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix,
+      new ThePeoplesGloriousNetworkProcessor(rosUri, rosAPI_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix, additionalPacketTypes,
             createCustomSubscribers(nameSpace, rosAPI_communicator), createCustomPublishers(nameSpace, rosAPI_communicator));
    }
 

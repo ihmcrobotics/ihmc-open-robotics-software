@@ -120,7 +120,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
       }
    }
 
-   protected UnpackedPointCloud unpackPointsAndIntensities(PointCloud2 pointCloud)
+   public static UnpackedPointCloud unpackPointsAndIntensities(PointCloud2 pointCloud)
    {
 
       UnpackedPointCloud packet = new UnpackedPointCloud();
@@ -162,6 +162,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
          float x = byteBuffer.getFloat();
          float y = byteBuffer.getFloat();
          float z = byteBuffer.getFloat();
+
          packet.points[i] = new Point3d(x, y, z);
 
          switch (packet.pointType)
@@ -196,7 +197,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
       return packet;
    }
 
-   private int byteToUnsignedInt(byte b)
+   private static int byteToUnsignedInt(byte b)
    {
       return ((int) b) & 0xff;
    }

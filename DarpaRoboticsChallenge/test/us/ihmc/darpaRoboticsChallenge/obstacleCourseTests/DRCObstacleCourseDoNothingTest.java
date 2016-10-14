@@ -22,7 +22,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestInterface
@@ -63,8 +63,8 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("DRCObstacleCourseDoNothingTest after class.");
    }
 
-	@DeployableTestMethod(estimatedDuration = 13.4)
-   @Test(timeout = 67000)
+	@ContinuousIntegrationTest(estimatedDuration = 11.1)
+   @Test(timeout = 55000)
    public void testDoNothing1() throws SimulationExceededMaximumTimeException
    {
       doATest();
@@ -77,7 +77,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
    
    private void doATestWithDRCStuff() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
 
@@ -87,31 +87,28 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DRCDemo01NavigationEnvironment();
       String name = "DRCDoNothingTest";
-      String scriptFileName = "";
       
 
       DRCRobotModel robotModel = getRobotModel();
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel);
-//      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCDoNothingTest", "", selectedLocation, checkNothingChanged, showGUI, createVideo,
-//            getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverSmallPlatform(simulationConstructionSet);
 
       ThreadTools.sleep(100);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
       drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
-      BambooTools.reportTestFinishedMessage();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
    
    private void doATestWithJustAnSCS() throws SimulationExceededMaximumTimeException
    {
-//      BambooTools.reportTestStartedMessage();
+//      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       SimulationConstructionSetParameters simulationConstructionSetParameters = new SimulationConstructionSetParameters();
       simulationConstructionSetParameters.setCreateGUI(true);
@@ -125,7 +122,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       ThreadTools.sleep(4000);
       scs.closeAndDispose();
 
-//      BambooTools.reportTestFinishedMessage();
+//      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
 

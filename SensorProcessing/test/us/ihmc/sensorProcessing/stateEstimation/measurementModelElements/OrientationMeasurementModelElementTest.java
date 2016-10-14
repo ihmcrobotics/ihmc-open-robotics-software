@@ -13,7 +13,6 @@ import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -22,6 +21,7 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.sensorProcessing.stateEstimation.measurementModelElements.OrientationMeasurementModelElement;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 
 public class OrientationMeasurementModelElementTest
@@ -30,7 +30,7 @@ public class OrientationMeasurementModelElementTest
    private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
    private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void test()
    {
@@ -73,7 +73,7 @@ public class OrientationMeasurementModelElementTest
 
       RigidBodyTransform transformFromMeasurementToWorld = measurementFrame.getTransformToDesiredFrame(elevator.getBodyFixedFrame());
       Matrix3d rotationFromMeasurementToWorld = new Matrix3d();
-      transformFromMeasurementToWorld.get(rotationFromMeasurementToWorld);
+      transformFromMeasurementToWorld.getRotation(rotationFromMeasurementToWorld);
       orientationMeasurementInputPort.setData(rotationFromMeasurementToWorld);
 
       DenseMatrix64F zeroResidual = modelElement.computeResidual();

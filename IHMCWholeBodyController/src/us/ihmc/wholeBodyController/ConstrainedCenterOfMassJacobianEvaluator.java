@@ -14,7 +14,7 @@ import org.ejml.ops.NormOps;
 
 import com.google.common.primitives.Doubles;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;

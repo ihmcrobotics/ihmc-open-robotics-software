@@ -11,7 +11,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.TimestampProvider;
@@ -107,9 +107,9 @@ public class CommandPlayer implements TimestampListener
            consumeObject = false;
          }
 
-         else if (object instanceof FootstepDataList)
+         else if (object instanceof FootstepDataListMessage)
          {
-            FootstepDataList footstepDataList = (FootstepDataList) object;
+            FootstepDataListMessage footstepDataList = (FootstepDataListMessage) object;
          }
 
 

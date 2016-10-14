@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.plotting.Artifact;
+import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -106,11 +106,11 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    public void setTransformToWorld(RigidBodyTransform transformToWorld)
    {
-      transformToWorld.get(translationToWorld);
+      transformToWorld.getTranslation(translationToWorld);
 
-      x.set(translationToWorld.x);
-      y.set(translationToWorld.y);
-      z.set(translationToWorld.z);
+      x.set(translationToWorld.getX());
+      y.set(translationToWorld.getY());
+      z.set(translationToWorld.getZ());
 
       orientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), transformToWorld);
       setOrientation(orientation);
@@ -123,16 +123,16 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    public void getPosition(Vector3d position)
    {
-      position.x = x.getDoubleValue();
-      position.y = y.getDoubleValue();
-      position.z = z.getDoubleValue();
+      position.setX(x.getDoubleValue());
+      position.setY(y.getDoubleValue());
+      position.setZ(z.getDoubleValue());
    }
 
    public void getYawPitchRoll(Vector3d yawPitchRoll)
    {
-      yawPitchRoll.x = yaw.getDoubleValue();
-      yawPitchRoll.y = pitch.getDoubleValue();
-      yawPitchRoll.z = roll.getDoubleValue();
+      yawPitchRoll.setX(yaw.getDoubleValue());
+      yawPitchRoll.setY(pitch.getDoubleValue());
+      yawPitchRoll.setZ(roll.getDoubleValue());
    }
 
    public void setPosition(double x, double y, double z)
@@ -206,7 +206,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       transform3D.setIdentity();
       translationVector.set(x.getDoubleValue(), y.getDoubleValue(), z.getDoubleValue());
       transform3D.setScale(scale);
-      transform3D.setEuler(roll.getDoubleValue(), pitch.getDoubleValue(), yaw.getDoubleValue());
+      transform3D.setRotationEulerAndZeroTranslation(roll.getDoubleValue(), pitch.getDoubleValue(), yaw.getDoubleValue());
       transform3D.setTranslation(translationVector);
    }
 

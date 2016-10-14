@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.frames;
 
 import java.util.EnumMap;
 
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,4 +38,8 @@ public interface CommonHumanoidReferenceFrames extends ReferenceFrames
    public abstract ReferenceFrame getPelvisZUpFrame();
 
    public abstract ReferenceFrame getSoleFrame(RobotSide robotSide);
+
+   public abstract ReferenceFrame getSoleZUpFrame(RobotSide robotSide);
+
+   public abstract SideDependentList<ReferenceFrame> getSoleZUpFrames();
 }

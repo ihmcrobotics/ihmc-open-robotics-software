@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2016-Sep-14 09:16" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20160414-2044">
+        <filterScript>
+
+// no filter script yet defined for this class diagram
+// use CTRL+SPACE for completion suggestions
+hide all methods
+hide all fields
+
+</filterScript>
+        <class className="us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPStandaloneSolver" modelMemberId="us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPStandaloneSolver" project="ConvexOptimizationAdapter" xLocation="927" yLocation="521"/>
+        <class className="us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface" modelMemberId="us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface" project="ConvexOptimizationAdapter" xLocation="1363" yLocation="414"/>
+        <class className="us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver" modelMemberId="us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver" project="ConvexOptimizationAdapter" xLocation="1354" yLocation="250"/>
+        <class className="us.ihmc.convexOptimization.quadraticProgram.CompositeActiveSetQPSolver" modelMemberId="us.ihmc.convexOptimization.quadraticProgram.CompositeActiveSetQPSolver" project="ConvexOptimizationAdapter" xLocation="175" yLocation="162"/>
+        <class className="us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver" modelMemberId="us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver" project="ConvexOptimizationAdapter" xLocation="524" yLocation="164"/>
+        <class className="us.ihmc.convexOptimization.quadraticProgram.OJAlgoConstrainedQPSolver" modelMemberId="us.ihmc.convexOptimization.quadraticProgram.OJAlgoConstrainedQPSolver" project="ConvexOptimizationAdapter" xLocation="866" yLocation="167"/>
+        <class className="us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolver" modelMemberId="us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolver" project="ConvexOptimizationAdapter" xLocation="956" yLocation="329"/>
+        <class className="us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolverTest" modelMemberId="us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolverTest" project="ConvexOptimizationAdapter" xLocation="439" yLocation="1"/>
+        <class className="us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver" modelMemberId="us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver" project="ConvexOptimizationAdapter" xLocation="576" yLocation="481"/>
+        <class className="us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver" modelMemberId="us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver" project="ConvexOptimizationAdapter" xLocation="-75" yLocation="181"/>
+    </diagram>
+</ajsv>

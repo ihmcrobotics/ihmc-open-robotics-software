@@ -1,22 +1,22 @@
 package us.ihmc.atlas;
 
-import static us.ihmc.SdfLoader.partNames.ArmJointName.ELBOW_PITCH;
-import static us.ihmc.SdfLoader.partNames.ArmJointName.ELBOW_ROLL;
-import static us.ihmc.SdfLoader.partNames.ArmJointName.FIRST_WRIST_PITCH;
-import static us.ihmc.SdfLoader.partNames.ArmJointName.SECOND_WRIST_PITCH;
-import static us.ihmc.SdfLoader.partNames.ArmJointName.SHOULDER_ROLL;
-import static us.ihmc.SdfLoader.partNames.ArmJointName.SHOULDER_YAW;
-import static us.ihmc.SdfLoader.partNames.ArmJointName.WRIST_ROLL;
-import static us.ihmc.SdfLoader.partNames.LegJointName.ANKLE_PITCH;
-import static us.ihmc.SdfLoader.partNames.LegJointName.ANKLE_ROLL;
-import static us.ihmc.SdfLoader.partNames.LegJointName.HIP_PITCH;
-import static us.ihmc.SdfLoader.partNames.LegJointName.HIP_ROLL;
-import static us.ihmc.SdfLoader.partNames.LegJointName.HIP_YAW;
-import static us.ihmc.SdfLoader.partNames.LegJointName.KNEE;
-import static us.ihmc.SdfLoader.partNames.NeckJointName.LOWER_NECK_PITCH;
-import static us.ihmc.SdfLoader.partNames.SpineJointName.SPINE_PITCH;
-import static us.ihmc.SdfLoader.partNames.SpineJointName.SPINE_ROLL;
-import static us.ihmc.SdfLoader.partNames.SpineJointName.SPINE_YAW;
+import static us.ihmc.robotics.partNames.ArmJointName.ELBOW_PITCH;
+import static us.ihmc.robotics.partNames.ArmJointName.ELBOW_ROLL;
+import static us.ihmc.robotics.partNames.ArmJointName.FIRST_WRIST_PITCH;
+import static us.ihmc.robotics.partNames.ArmJointName.SECOND_WRIST_PITCH;
+import static us.ihmc.robotics.partNames.ArmJointName.SHOULDER_ROLL;
+import static us.ihmc.robotics.partNames.ArmJointName.SHOULDER_YAW;
+import static us.ihmc.robotics.partNames.ArmJointName.WRIST_ROLL;
+import static us.ihmc.robotics.partNames.LegJointName.ANKLE_PITCH;
+import static us.ihmc.robotics.partNames.LegJointName.ANKLE_ROLL;
+import static us.ihmc.robotics.partNames.LegJointName.HIP_PITCH;
+import static us.ihmc.robotics.partNames.LegJointName.HIP_ROLL;
+import static us.ihmc.robotics.partNames.LegJointName.HIP_YAW;
+import static us.ihmc.robotics.partNames.LegJointName.KNEE_PITCH;
+import static us.ihmc.robotics.partNames.NeckJointName.PROXIMAL_NECK_PITCH;
+import static us.ihmc.robotics.partNames.SpineJointName.SPINE_PITCH;
+import static us.ihmc.robotics.partNames.SpineJointName.SPINE_ROLL;
+import static us.ihmc.robotics.partNames.SpineJointName.SPINE_YAW;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bky;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
@@ -47,12 +47,12 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.JointRole;
-import us.ihmc.SdfLoader.partNames.LegJointName;
-import us.ihmc.SdfLoader.partNames.LimbName;
-import us.ihmc.SdfLoader.partNames.NeckJointName;
-import us.ihmc.SdfLoader.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
@@ -82,10 +82,10 @@ public class AtlasJointMap implements DRCRobotJointMap
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
 
-   private final LegJointName[] legJoints = { HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL };
+   private final LegJointName[] legJoints = { HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE_PITCH, ANKLE_PITCH, ANKLE_ROLL };
    private final ArmJointName[] armJoints = { SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, FIRST_WRIST_PITCH, WRIST_ROLL, SECOND_WRIST_PITCH };
    private final SpineJointName[] spineJoints = { SPINE_PITCH, SPINE_ROLL, SPINE_YAW };
-   private final NeckJointName[] neckJoints = { LOWER_NECK_PITCH };
+   private final NeckJointName[] neckJoints = { PROXIMAL_NECK_PITCH };
 
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
    private final LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>>();
@@ -118,7 +118,7 @@ public class AtlasJointMap implements DRCRobotJointMap
          legJointNames.put(forcedSideJointNames[l_leg_hpz], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_YAW));
          legJointNames.put(forcedSideJointNames[l_leg_hpx], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_ROLL));
          legJointNames.put(forcedSideJointNames[l_leg_hpy], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_PITCH));
-         legJointNames.put(forcedSideJointNames[l_leg_kny], new ImmutablePair<RobotSide, LegJointName>(robotSide, KNEE));
+         legJointNames.put(forcedSideJointNames[l_leg_kny], new ImmutablePair<RobotSide, LegJointName>(robotSide, KNEE_PITCH));
          legJointNames.put(forcedSideJointNames[l_leg_aky], new ImmutablePair<RobotSide, LegJointName>(robotSide, ANKLE_PITCH));
          legJointNames.put(forcedSideJointNames[l_leg_akx], new ImmutablePair<RobotSide, LegJointName>(robotSide, ANKLE_ROLL));
 
@@ -139,7 +139,7 @@ public class AtlasJointMap implements DRCRobotJointMap
       spineJointNames.put(jointNames[back_bkz], SPINE_YAW);
       spineJointNames.put(jointNames[back_bky], SPINE_PITCH);
       spineJointNames.put(jointNames[back_bkx], SPINE_ROLL);
-      neckJointNames.put(jointNames[neck_ry], LOWER_NECK_PITCH);
+      neckJointNames.put(jointNames[neck_ry], PROXIMAL_NECK_PITCH);
 
       for (String legJointString : legJointNames.keySet())
       {
@@ -400,6 +400,32 @@ public class AtlasJointMap implements DRCRobotJointMap
    public String[] getJointNamesBeforeFeet()
    {
       return jointNamesBeforeFeet;
+   }
+
+   @Override
+   public Enum<?>[] getRobotSegments()
+   {
+      return RobotSide.values;
+   }
+
+   @Override
+   public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
+   {
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         String jointBeforeFootName = getJointBeforeFootName(robotSide);
+         if(jointBeforeFootName != null && jointBeforeFootName.equals(joineNameBeforeEndEffector))
+         {
+            return robotSide;
+         }
+         
+         String endOfArm = armJointStrings.get(robotSide).get(SECOND_WRIST_PITCH);
+         if(endOfArm != null && endOfArm.equals(joineNameBeforeEndEffector))
+         {
+            return robotSide;
+         }
+      }
+      throw new IllegalArgumentException(joineNameBeforeEndEffector + " was not listed as an end effector in " + this.getClass().getSimpleName());
    }
 }
 

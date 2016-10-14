@@ -7,14 +7,14 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ROSMessageFolderExistsTest
 {
-   @DeployableTestMethod(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testROSMessageFolderExists()
    {
-      assertTrue(Files.exists(Paths.get(ROSMessageGenerator.messageFolder)));
+//      assertTrue(Files.exists(Paths.get(ROSMessageFileCreator.messageRootFolder)));
    }
 }

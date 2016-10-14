@@ -8,7 +8,7 @@ import javax.vecmath.Vector3d;
 
 import com.esotericsoftware.minlog.Log;
 
-import us.ihmc.rosControl.valkyrie.IMUHandle;
+import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.valkyrie.imu.MicroStrainData;
 import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainFilterType;
 import us.ihmc.valkyrie.imu.MicrostrainUDPPacketListener;

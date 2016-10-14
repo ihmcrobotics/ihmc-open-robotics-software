@@ -11,6 +11,7 @@ import org.ejml.alg.dense.decomposition.svd.SvdImplicitQrDecompose_D64;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
+import org.ejml.ops.SingularOps;
 
 /**
  * Compute the singular value decomposition of a data matrix to find the three principal axes (called: principal axis, secondary axis, and third axis) and the associated variance.
@@ -27,8 +28,9 @@ public class PrincipalComponentAnalysis3D
    private static final boolean DEBUG = false;
 
    private final DenseMatrix64F pointCloud = new DenseMatrix64F(1, 3);
-   private final DenseMatrix64F V = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F U = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F W = new DenseMatrix64F(3, 3);
+   private final DenseMatrix64F V = new DenseMatrix64F(3, 3);
 
    private int numberOfPoints;
 
@@ -64,16 +66,16 @@ public class PrincipalComponentAnalysis3D
       mean.set(0.0, 0.0, 0.0);
       for (int row = 0; row < numberOfPoints; row++)
       {
-         mean.x += pointCloud.get(row).x * scale;
-         mean.y += pointCloud.get(row).y * scale;
-         mean.z += pointCloud.get(row).z * scale;
+         mean.setX(mean.getX() + pointCloud.get(row).getX() * scale);
+         mean.setY(mean.getY() + pointCloud.get(row).getY() * scale);
+         mean.setZ(mean.getZ() + pointCloud.get(row).getZ() * scale);
       }
 
       for (int row = 0; row < numberOfPoints; row++)
       {
-         this.pointCloud.set(row, 0, pointCloud.get(row).x - mean.x);
-         this.pointCloud.set(row, 1, pointCloud.get(row).y - mean.y);
-         this.pointCloud.set(row, 2, pointCloud.get(row).z - mean.z);
+         this.pointCloud.set(row, 0, pointCloud.get(row).getX() - mean.getX());
+         this.pointCloud.set(row, 1, pointCloud.get(row).getY() - mean.getY());
+         this.pointCloud.set(row, 2, pointCloud.get(row).getZ() - mean.getZ());
       }
 
       if (DEBUG)
@@ -104,16 +106,16 @@ public class PrincipalComponentAnalysis3D
       mean.set(0.0, 0.0, 0.0);
       for (int row = 0; row < numberOfPoints; row++)
       {
-         mean.x += tempMatrix.get(row, 0) * scale;
-         mean.y += tempMatrix.get(row, 1) * scale;
-         mean.z += tempMatrix.get(row, 2) * scale;
+         mean.setX(mean.getX() + tempMatrix.get(row, 0) * scale);
+         mean.setY(mean.getY() + tempMatrix.get(row, 1) * scale);
+         mean.setZ(mean.getZ() + tempMatrix.get(row, 2) * scale);
       }
 
       for (int row = 0; row < numberOfPoints; row++)
       {
-         this.pointCloud.set(row, 0, tempMatrix.get(row, 0) - mean.x);
-         this.pointCloud.set(row, 1, tempMatrix.get(row, 1) - mean.y);
-         this.pointCloud.set(row, 2, tempMatrix.get(row, 2) - mean.z);
+         this.pointCloud.set(row, 0, tempMatrix.get(row, 0) - mean.getX());
+         this.pointCloud.set(row, 1, tempMatrix.get(row, 1) - mean.getY());
+         this.pointCloud.set(row, 2, tempMatrix.get(row, 2) - mean.getZ());
       }
 
       if (DEBUG)
@@ -126,9 +128,21 @@ public class PrincipalComponentAnalysis3D
     */
    public void compute()
    {
+      if (pointCloud.getNumRows() < 3)
+      {
+         principalAxis.set(Double.NaN, Double.NaN, Double.NaN);
+         secondaryAxis.set(Double.NaN, Double.NaN, Double.NaN);
+         thirdAxis.set(Double.NaN, Double.NaN, Double.NaN);
+         principalValues.set(0.0, 0.0, 0.0);
+         return;
+      }
+
       svd.decompose(pointCloud);
 
+      U.zero(); // do not need U
+      svd.getW(W);
       svd.getV(V, false);
+      SingularOps.descendingOrder(U, false, W, V, false);
 
       if (DEBUG)
          System.out.println("V: \n" + V);
@@ -137,14 +151,12 @@ public class PrincipalComponentAnalysis3D
       secondaryAxis.set(V.get(0, 1), V.get(1, 1), V.get(2, 1));
       thirdAxis.cross(principalAxis, secondaryAxis);
 
-      svd.getW(W);
-
       if (DEBUG)
          System.out.println("W: \n" + W);
 
-      principalValues.x = W.get(0, 0);
-      principalValues.y = W.get(1, 1);
-      principalValues.z = W.get(2, 2);
+      principalValues.setX(W.get(0, 0));
+      principalValues.setY(W.get(1, 1));
+      principalValues.setZ(W.get(2, 2));
    }
 
    /**
@@ -173,9 +185,9 @@ public class PrincipalComponentAnalysis3D
     */
    public void getVariance(Vector3d principalVarianceToPack)
    {
-      principalVarianceToPack.x = principalValues.x * principalValues.x;
-      principalVarianceToPack.y = principalValues.y * principalValues.y;
-      principalVarianceToPack.z = principalValues.z * principalValues.z;
+      principalVarianceToPack.setX(principalValues.getX() * principalValues.getX());
+      principalVarianceToPack.setY(principalValues.getY() * principalValues.getY());
+      principalVarianceToPack.setZ(principalValues.getZ() * principalValues.getZ());
       principalVarianceToPack.scale(1.0 / numberOfPoints);
    }
 
@@ -185,9 +197,9 @@ public class PrincipalComponentAnalysis3D
     */
    public void getStandardDeviation(Vector3d principalStandardDeviationToPack)
    {
-      principalStandardDeviationToPack.x = Math.abs(principalValues.x);
-      principalStandardDeviationToPack.y = Math.abs(principalValues.y);
-      principalStandardDeviationToPack.z = Math.abs(principalValues.z);
+      principalStandardDeviationToPack.setX(Math.abs(principalValues.getX()));
+      principalStandardDeviationToPack.setY(Math.abs(principalValues.getY()));
+      principalStandardDeviationToPack.setZ(Math.abs(principalValues.getZ()));
       principalStandardDeviationToPack.scale(1.0 / Math.sqrt(numberOfPoints));
    }
 
@@ -206,7 +218,7 @@ public class PrincipalComponentAnalysis3D
 
    public void getPrincipalVector(Vector3d principalVectorToPack)
    {
-      principalVectorToPack.set(principalVectorToPack);
+      principalVectorToPack.set(principalAxis);
    }
 
    /**
@@ -218,10 +230,10 @@ public class PrincipalComponentAnalysis3D
    public void getScaledPrincipalVectors(Vector3d principalVectorToPack, Vector3d secondaryVectorToPack, Vector3d thirdVectorToPack)
    {
       principalVectorToPack.set(principalAxis);
-      principalVectorToPack.scale(principalValues.x);
+      principalVectorToPack.scale(principalValues.getX());
       secondaryVectorToPack.set(secondaryAxis);
-      secondaryVectorToPack.scale(principalValues.y);
+      secondaryVectorToPack.scale(principalValues.getY());
       thirdVectorToPack.set(thirdAxis);
-      thirdVectorToPack.scale(principalValues.z);
+      thirdVectorToPack.scale(principalValues.getZ());
    }
 }

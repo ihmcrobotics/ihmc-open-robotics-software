@@ -105,12 +105,12 @@ public abstract class ContactablePinJointRobot extends Robot implements Contacta
 
    public double getVelocity()
    {
-      return getPinJoint().getQD().getDoubleValue();
+      return getPinJoint().getQDYoVariable().getDoubleValue();
    }
 
    public double getPosition()
    {
-      return getPinJoint().getQ().getDoubleValue();
+      return getPinJoint().getQYoVariable().getDoubleValue();
    }
 
 }

@@ -10,5 +10,4 @@ public interface PointCloudDataReceiverInterface
 {
    void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points, PointCloudSource... sources);
 
-   ReferenceFrame getLidarFrame(String sensorNameInSdf);
 }

@@ -14,12 +14,12 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHelper;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class YoMultipleFramesHelperTest
 {
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testCommonUsageOfYoMultipleFramesHelper()
    {
@@ -53,7 +53,7 @@ public class YoMultipleFramesHelperTest
       assertTrue(frameB == referenceFrames.get(2));
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRepeatFrames()
    {
@@ -68,7 +68,7 @@ public class YoMultipleFramesHelperTest
       assertEquals("Should ignore repeat frames!", 1, helper.getNumberOfReferenceFramesRegistered());
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testExceptions()
    {

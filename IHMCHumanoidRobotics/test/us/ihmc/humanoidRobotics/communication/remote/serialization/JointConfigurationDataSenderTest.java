@@ -22,11 +22,11 @@ import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@DeployableTestClass(targets = TestPlanTarget.Flaky)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FLAKY)
 public class JointConfigurationDataSenderTest
 {
    private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
@@ -37,8 +37,8 @@ public class JointConfigurationDataSenderTest
    private static final NetworkPorts TCP_PORT = NetworkPorts.createRandomTestPort(random);
    private static final String HOST = "localhost";
 
-	@DeployableTestMethod(estimatedDuration = 30.0)
-	@Test(timeout = 30000)
+	@ContinuousIntegrationTest(estimatedDuration = 8.4)
+	@Test(timeout = 42000)
    public void test() throws InterruptedException, IOException
    {
       Random random = new Random(1274L);

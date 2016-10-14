@@ -2,7 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -22,7 +22,7 @@ public class CapsuleTest
       assertTrue(result.epsilonEquals(exp, epsilon));
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void test()
    {
@@ -42,9 +42,9 @@ public class CapsuleTest
       tr_base.multiply(tr_other);
       transforms.add(new RigidBodyTransform(tr_base));
 
-      tr_other.rotY(1.2);
+      tr_other.setRotationPitchAndZeroTranslation(1.2);
       tr_base.multiply(tr_other);
-      tr_other.rotZ(-0.6);
+      tr_other.setRotationYawAndZeroTranslation(-0.6);
       tr_other.setTranslation(new Vector3d(0, -2, 3));
       tr_base.multiply(tr_other);
       transforms.add(new RigidBodyTransform(tr_base));
@@ -97,7 +97,7 @@ public class CapsuleTest
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOther()
    {
@@ -105,18 +105,18 @@ public class CapsuleTest
       for (int i = 0; i < 1000; i++)
       {
          Point3d point1 = new Point3d(-rand.nextDouble() * 10, -rand.nextDouble() * 10, -rand.nextDouble() * 10);
-         Point3d point2 = new Point3d(point1.x + 10, point1.y + 10, point1.z + 10);
+         Point3d point2 = new Point3d(point1.getX() + 10, point1.getY() + 10, point1.getZ() + 10);
 
          Capsule c1 = new Capsule(point1, point2, 0.0);
          Capsule other = new Capsule(c1);
 
-         assertEquals(c1.p1.x, other.p1.x, 1e-7);
-         assertEquals(c1.p1.y, other.p1.y, 1e-7);
-         assertEquals(c1.p1.z, other.p1.z, 1e-7);
+         assertEquals(c1.p1.getX(), other.p1.getX(), 1e-7);
+         assertEquals(c1.p1.getY(), other.p1.getY(), 1e-7);
+         assertEquals(c1.p1.getZ(), other.p1.getZ(), 1e-7);
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOther_2()
    {
@@ -124,16 +124,16 @@ public class CapsuleTest
       for (int i = 0; i < 1000; i++)
       {
          Point3d point1 = new Point3d(-rand.nextDouble() * 10, -rand.nextDouble() * 10, -rand.nextDouble() * 10);
-         Point3d point2 = new Point3d(point1.x + 10, point1.y + 10, point1.z + 10);
+         Point3d point2 = new Point3d(point1.getX() + 10, point1.getY() + 10, point1.getZ() + 10);
          
          Capsule c1 = new Capsule(point1, point2, 0.0);
          Capsule other = new Capsule(c1);
 
          other.set(c1);
 
-         assertEquals(c1.p1.x, other.p1.x, 1e-7);
-         assertEquals(c1.p1.y, other.p1.y, 1e-7);
-         assertEquals(c1.p1.z, other.p1.z, 1e-7);
+         assertEquals(c1.p1.getX(), other.p1.getX(), 1e-7);
+         assertEquals(c1.p1.getY(), other.p1.getY(), 1e-7);
+         assertEquals(c1.p1.getZ(), other.p1.getZ(), 1e-7);
       }
 
    }

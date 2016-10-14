@@ -1,14 +1,18 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Test;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import static org.junit.Assert.assertTrue;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static org.junit.Assert.assertTrue;
+import javax.vecmath.Point2d;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ConvexPolygonToolsTest
 {
@@ -16,7 +20,7 @@ public class ConvexPolygonToolsTest
    private static final boolean WAIT_FOR_BUTTON_PUSH = false;
    private static final double epsilon = 1e-7;
 
-	@DeployableTestMethod(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testCombineDisjointPolygons()
    {
@@ -86,11 +90,11 @@ public class ConvexPolygonToolsTest
       FrameLineSegment2d connectingEdge1 = frameConvexPolygon2dAndConnectingEdges.getConnectingEdge1();
       FrameLineSegment2d connectingEdge2 = frameConvexPolygon2dAndConnectingEdges.getConnectingEdge2();
 
-      assertTrue(polygon1.isPointInside(connectingEdge1.getFirstEndPointCopy()));
-      assertTrue(polygon2.isPointInside(connectingEdge1.getSecondEndPointCopy()));
+      assertTrue(polygon1.isPointInside(connectingEdge1.getFirstEndpointCopy()));
+      assertTrue(polygon2.isPointInside(connectingEdge1.getSecondEndpointCopy()));
 
-      assertTrue(polygon1.isPointInside(connectingEdge2.getSecondEndPointCopy()));
-      assertTrue(polygon2.isPointInside(connectingEdge2.getFirstEndPointCopy()));
+      assertTrue(polygon1.isPointInside(connectingEdge2.getSecondEndpointCopy()));
+      assertTrue(polygon2.isPointInside(connectingEdge2.getFirstEndpointCopy()));
 
       ArrayList<FramePoint2d> pointsThatShouldNotBeInOriginals = new ArrayList<FramePoint2d>();
 
@@ -102,7 +106,7 @@ public class ConvexPolygonToolsTest
 //      pointsThatShouldNotBeInOriginals.add(FramePoint2d.morph(connectingEdge2.getFirstEndPointCopy(), connectingEdge2.getSecondEndPointCopy(), epsilon));
 //      pointsThatShouldNotBeInOriginals.add(FramePoint2d.morph(connectingEdge2.getFirstEndPointCopy(), connectingEdge2.getSecondEndPointCopy(), 1.0 - epsilon));
 //      pointsThatShouldNotBeInOriginals.add(FramePoint2d.morph(connectingEdge2.getFirstEndPointCopy(), connectingEdge2.getSecondEndPointCopy(), 1.0 + epsilon));
-      
+
       FramePoint2d point1 = new FramePoint2d();
       FramePoint2d point2 = new FramePoint2d();
       FramePoint2d point3 = new FramePoint2d();
@@ -111,16 +115,16 @@ public class ConvexPolygonToolsTest
       FramePoint2d point6 = new FramePoint2d();
       FramePoint2d point7 = new FramePoint2d();
       FramePoint2d point8 = new FramePoint2d();
-      
-      point1.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), -epsilon);
-      point2.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), epsilon);
-      point3.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), 1.0 - epsilon);
-      point4.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), 1.0 + epsilon);
-      point5.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), -epsilon);
-      point6.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), epsilon);
-      point7.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), 1.0 - epsilon);
-      point8.interpolate(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), 1.0 + epsilon);
-      
+
+      point1.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), -epsilon);
+      point2.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), epsilon);
+      point3.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), 1.0 - epsilon);
+      point4.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), 1.0 + epsilon);
+      point5.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), -epsilon);
+      point6.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), epsilon);
+      point7.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), 1.0 - epsilon);
+      point8.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), 1.0 + epsilon);
+
       pointsThatShouldNotBeInOriginals.add(point1);
       pointsThatShouldNotBeInOriginals.add(point2);
       pointsThatShouldNotBeInOriginals.add(point3);
@@ -181,7 +185,7 @@ public class ConvexPolygonToolsTest
       ConvexPolygon2dTestHelpers.verifyPointsAreNotInside(polygon1, pointsThatShouldNotBeInOriginals, 0.0);
       ConvexPolygon2dTestHelpers.verifyPointsAreNotInside(polygon2, pointsThatShouldNotBeInOriginals, 0.0);
    }
-   
+
    private void waitForButtonOrPause(FrameGeometryTestFrame testFrame)
    {
       if (WAIT_FOR_BUTTON_PUSH)
@@ -189,7 +193,7 @@ public class ConvexPolygonToolsTest
       else
          pauseOneSecond();
    }
-   
+
    private void pauseOneSecond()
    {
       try
@@ -199,6 +203,69 @@ public class ConvexPolygonToolsTest
       catch (InterruptedException ex)
       {
       }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test (timeout = 30000)
+   public void testLimitVerticesConservative()
+   {
+      Random random = new Random(123821L);
+      int tests = 100;
+
+//      int increase = 0;
+//      int decrease = 0;
+
+      for (int test = 0; test < tests; test++)
+      {
+         FrameConvexPolygon2d polygon = new FrameConvexPolygon2d();
+         int n = random.nextInt(30)+1;
+         for (int i = 0; i < n; i++)
+         {
+            double x = random.nextDouble();
+            double y = random.nextDouble();
+            polygon.addVertex(new Point2d(x, y));
+         }
+         polygon.update();
+
+         int desiredNumberOfVertices = random.nextInt(10);
+         FrameConvexPolygon2d originalPolygon = new FrameConvexPolygon2d(polygon);
+
+//         if (desiredNumberOfVertices > polygon.getNumberOfVertices()) increase++;
+//         if (desiredNumberOfVertices < polygon.getNumberOfVertices()) decrease++;
+
+         ConvexPolygonTools.limitVerticesConservative(polygon, desiredNumberOfVertices);
+
+         if (PLOT_RESULTS)
+         {
+            FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-0.1, 1.1, -0.1, 1.1);
+            FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
+            plotter.setDrawPointsLarge();
+
+            plotter.addPolygon(originalPolygon, Color.BLUE);
+            plotter.addPolygon(polygon, Color.RED);
+
+            for (int i = 0; i < originalPolygon.getNumberOfVertices(); i++)
+            {
+               plotter.addFramePoint2d(new FramePoint2d(ReferenceFrame.getWorldFrame(), originalPolygon.getVertex(i)), Color.BLUE);
+            }
+            for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+            {
+               plotter.addFramePoint2d(new FramePoint2d(ReferenceFrame.getWorldFrame(), polygon.getVertex(i)), Color.RED);
+            }
+
+            System.out.println("Expecting " + desiredNumberOfVertices + " Vertices.");
+            waitForButtonOrPause(testFrame);
+            testFrame.dispose();
+         }
+
+         // check if the number of vertices is correct
+         Assert.assertEquals(desiredNumberOfVertices, polygon.getNumberOfVertices());
+         // check if the new polygon is contained in the old one
+         Assert.assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygon.getConvexPolygon2d(), 10E-10, originalPolygon.getConvexPolygon2d()));
+      }
+
+//      System.out.println("Tested " + increase + " point increases");
+//      System.out.println("Tested " + decrease + " point decreases");
    }
 
 }

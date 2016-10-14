@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -67,7 +67,7 @@ public class PushRecoveryControlModule
    private final FramePoint projectedCapturePoint = new FramePoint();
    private final FramePoint2d projectedCapturePoint2d = new FramePoint2d();
 
-   public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, MomentumBasedController momentumBasedController,
+   public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       this.bipedSupportPolygon = bipedSupportPolygons;
@@ -77,7 +77,7 @@ public class PushRecoveryControlModule
       soleFrames = referenceFrames.getSoleFrames();
 
       enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
-      enablePushRecovery.set(ENABLE);
+      enablePushRecovery.set(ENABLE); // todo add some smartness on whether ot not to enable this if using the icp optimization
 
       yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, yoGraphicsListRegistry);
@@ -93,6 +93,7 @@ public class PushRecoveryControlModule
       icpErrorThreshold.set(0.05);
       closestFootToICP = new EnumYoVariable<>("ClosestFootToICP", registry, RobotSide.class, true);
       swingSideForDoubleSupportRecovery = new EnumYoVariable<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
+      swingSideForDoubleSupportRecovery.set(null);
 
       isRobotBackToSafeState = new GlitchFilteredBooleanYoVariable("isRobotBackToSafeState", registry, 100);
       isCaptureRegionEmpty = new BooleanYoVariable("isCaptureRegionEmpty", registry);
@@ -111,19 +112,26 @@ public class PushRecoveryControlModule
       reset();
    }
 
+   public void updateCaptureRegion(double swingTimeRemaining, double omega0, RobotSide swingSide, FramePoint2d capturePoint2d)
+   {
+      footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(swingSide.getOppositeSide()));
+      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
+   }
+
+   public FrameConvexPolygon2d getCaptureRegion()
+   {
+      return captureRegionCalculator.getCaptureRegion();
+   }
+
    /**
     * Return null if the robot is not falling.
-    * If the robot is falling, it returns the suggested swingSide to recover. 
-    * @param timeInState
+    * If the robot is falling, it returns the suggested swingSide to recover.
     */
-   public RobotSide isRobotFallingFromDoubleSupport(double timeInState)
+   public RobotSide isRobotFallingFromDoubleSupport()
    {
-      if (!isICPOutside.getBooleanValue())
-         return null;
-      
       return swingSideForDoubleSupportRecovery.getEnumValue();
    }
-   
+
    public void initializeParametersForDoubleSupportPushRecovery()
    {
       recoveringFromDoubleSupportFall.set(true);
@@ -131,6 +139,9 @@ public class PushRecoveryControlModule
 
    public void updateForDoubleSupport(FramePoint2d desiredCapturePoint2d, FramePoint2d capturePoint2d, double omega0)
    {
+      if (!isEnabled())
+         return;
+
       this.omega0 = omega0;
       this.capturePoint2d.setIncludingFrame(capturePoint2d);
       this.desiredCapturePoint2d.setIncludingFrame(desiredCapturePoint2d);
@@ -138,6 +149,7 @@ public class PushRecoveryControlModule
 
       // Initialize variables
       closestFootToICP.set(null);
+      swingSideForDoubleSupportRecovery.set(null);
 
       for (RobotSide robotSide : RobotSide.values)
          distanceICPToFeet.get(robotSide).set(Double.NaN);
@@ -175,6 +187,9 @@ public class PushRecoveryControlModule
 
    public void updateForSingleSupport(FramePoint2d desiredCapturePoint2d, FramePoint2d capturePoint2d, double omega0)
    {
+      if (!isEnabled())
+         return;
+
       this.omega0 = omega0;
       this.capturePoint2d.setIncludingFrame(capturePoint2d);
       this.desiredCapturePoint2d.setIncludingFrame(desiredCapturePoint2d);
@@ -237,8 +252,15 @@ public class PushRecoveryControlModule
       FramePoint2d footCentroid = footPolygon.getCentroid();
       FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
       isCaptureRegionEmpty.set(captureRegion.isEmpty());
-      boolean hasFootstepBeenAdjusted = footstepAdjustor.adjustFootstep(nextFootstep, footCentroid, captureRegion);
-      footstepWasProjectedInCaptureRegion.set(hasFootstepBeenAdjusted);
+      if (!recovering.getBooleanValue())
+      {
+         boolean hasFootstepBeenAdjusted = footstepAdjustor.adjustFootstep(nextFootstep, footCentroid, captureRegion);
+         footstepWasProjectedInCaptureRegion.set(hasFootstepBeenAdjusted);
+      }
+      else
+      {
+         footstepWasProjectedInCaptureRegion.set(false);
+      }
 
       if (footstepWasProjectedInCaptureRegion.getBooleanValue())
       {
@@ -253,7 +275,7 @@ public class PushRecoveryControlModule
    {
       if (!enablePushRecovery.getBooleanValue())
          return null;
-      
+
       Footstep footstepForPushRecovery = createFootstepAtCurrentLocation(swingSide);
       checkAndUpdateFootstep(swingTimeRemaining, footstepForPushRecovery);
       return footstepForPushRecovery;
@@ -300,7 +322,7 @@ public class PushRecoveryControlModule
 
    public boolean isRecovering()
    {
-      return recovering.getBooleanValue();
+      return isEnabled() && recovering.getBooleanValue();
    }
 
    public boolean isRobotBackToSafeState()

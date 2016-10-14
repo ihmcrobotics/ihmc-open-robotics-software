@@ -14,10 +14,9 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.SdfLoader.partNames.ArmJointName;
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -27,13 +26,12 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
-public class ValkyrieStateEstimatorParameters implements StateEstimatorParameters
+public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 {
    private final boolean runningOnRealRobot;
 
    private final double estimatorDT;
 
-   private final double kinematicsPelvisLinearVelocityFilterFreqInHertz;
    private final double kinematicsPelvisPositionFilterFreqInHertz;
 
    private final double lowerBodyJointVelocityBacklashSlopTime;
@@ -81,26 +79,25 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       armJointPositionFilterFrequencyHz = Double.POSITIVE_INFINITY;
       jointOutputEncoderVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
       lowerBodyJointPositionFilterFrequencyHz = Double.POSITIVE_INFINITY;
-      lowerBodyJointVelocityFilterFrequencyHz = Double.POSITIVE_INFINITY;
+      lowerBodyJointVelocityFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
 
       // Somehow it's less shaky when these are low especially when pitching the chest forward.
       // I still don't quite get it. Sylvain
-      orientationFilterFrequencyHz        = runningOnRealRobot ? 12.0 : Double.POSITIVE_INFINITY;
-      angularVelocityFilterFrequencyHz    = runningOnRealRobot ? 12.0 : Double.POSITIVE_INFINITY;
-      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 12.0 : Double.POSITIVE_INFINITY;
+      orientationFilterFrequencyHz        = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      angularVelocityFilterFrequencyHz    = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
+      linearAccelerationFilterFrequencyHz = runningOnRealRobot ? 25.0 : Double.POSITIVE_INFINITY;
 
       lowerBodyJointVelocityBacklashSlopTime = 0.03;
       armJointVelocityBacklashSlopTime = 0.03;
 
       doElasticityCompensation = runningOnRealRobot;
       jointElasticityFilterFrequencyHz = 20.0;
-      maximumDeflection = 0.25;
-      defaultJointStiffness = 10000;
+      maximumDeflection = 0.10;
+      defaultJointStiffness = 10000.0;
       for (RobotSide robotSide : RobotSide.values)
          jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 8000.0);
 
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
-      kinematicsPelvisLinearVelocityFilterFreqInHertz = 50.0;
    }
 
    @Override
@@ -197,15 +194,39 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    }
 
    @Override
-   public double getKinematicsPelvisLinearVelocityFilterFreqInHertz()
-   {
-      return kinematicsPelvisLinearVelocityFilterFreqInHertz;
-   }
-
-   @Override
    public double getCoPFilterFreqInHertz()
    {
       return 4.0;
+   }
+
+   @Override
+   public boolean enableIMUBiasCompensation()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean enableIMUYawDriftCompensation()
+   {
+      return true;
+   }
+
+   @Override
+   public double getIMUBiasFilterFreqInHertz()
+   {
+      return 6.0e-3;
+   }
+
+   @Override
+   public double getIMUYawDriftFilterFreqInHertz()
+   {
+      return 1.0e-3;
+   }
+
+   @Override
+   public double getIMUBiasVelocityThreshold()
+   {
+      return 0.015;
    }
 
    @Override
@@ -215,21 +236,9 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    }
 
    @Override
-   public boolean estimateAccelerationBias()
-   {
-      return false;
-   }
-
-   @Override
    public boolean cancelGravityFromAccelerationMeasurement()
    {
       return true;
-   }
-
-   @Override
-   public double getAccelerationBiasFilterFreqInHertz()
-   {
-      return 5.3052e-4;
    }
 
    @Override
@@ -241,11 +250,15 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    @Override
    public double getPelvisLinearVelocityFusingFrequency()
    {
-      return 0.4261; // alpha = 0.992 with dt = 0.003
+//      return 0.4261; // alpha = 0.992 with dt = 0.003
+      // For some reason, trusting more the accelerometer causes the state estimator to understimate the
+      // pelvis linear velocity when doing reasonably quick transfer during walking.
+      // This contributes in the capture point overshooting to the outside of the feet.
+      return 2.0146195328088035; // alpha = 0.975 with dt = 0.002
    }
 
    @Override
-   public double getPelvisVelocityBacklashSlopTime()
+   public double getIMUJointVelocityEstimationBacklashSlopTime()
    {
       return lowerBodyJointVelocityBacklashSlopTime;
    }
@@ -263,49 +276,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    }
 
    @Override
-   public boolean estimateIMUDrift()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean compensateIMUDrift()
-   {
-      return true;
-   }
-
-   @Override
-   public double getIMUDriftFilterFreqInHertz()
-   {
-      return 0.5332;
-   }
-
-   @Override
-   public double getFootVelocityUsedForImuDriftFilterFreqInHertz()
-   {
-      return 0.5332;
-   }
-
-   @Override
-   public double getFootVelocityThresholdToEnableIMUDriftCompensation()
-   {
-      return 0.03;
-   }
-
-   @Override
    public boolean trustCoPAsNonSlippingContactPoint()
-   {
-      return true;
-   }
-
-   @Override
-   public boolean useControllerDesiredCenterOfPressure()
-   {
-      return false;
-   }
-
-   @Override
-   public boolean useTwistForPelvisLinearStateEstimation()
    {
       return true;
    }
@@ -314,12 +285,6 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public double getPelvisLinearVelocityAlphaNewTwist()
    {
       return 0.15;
-   }
-
-   @Override
-   public boolean createFusedIMUSensor()
-   {
-      return false;
    }
 
    @Override
@@ -391,5 +356,23 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public SideDependentList<String> getFootForceSensorNames()
    {
       return footForceSensorNames;
+   }
+
+   @Override
+   public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+   {
+      return false;
+   }
+   
+   @Override
+   public double getCenterOfMassVelocityFusingFrequency()
+   {
+      return 0.4261;
+   }
+
+   @Override
+   public boolean useGroundReactionForcesToComputeCenterOfMassVelocity()
+   {
+      return false;
    }
 }

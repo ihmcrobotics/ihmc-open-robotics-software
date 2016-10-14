@@ -3,7 +3,7 @@ package us.ihmc.robotics.geometry;
 import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -15,7 +15,7 @@ public class PointToLineUnProjectorTest
 {
    private static final double eps = 1e-7;
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testsimpleCase()
    {
@@ -31,7 +31,7 @@ public class PointToLineUnProjectorTest
       runTest(x0, y0, z0, x1, y1, z1, x2, y2, z2);
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testGeneralCase()
    {
@@ -47,11 +47,11 @@ public class PointToLineUnProjectorTest
          temp.set(point2);
          temp.scale(s);
          point3.add(temp);
-         runTest(point1.x, point1.y, point1.z, point2.x, point2.y, point2.z, point3.x, point3.y, point3.z);
+         runTest(point1.getX(), point1.getY(), point1.getZ(), point2.getX(), point2.getY(), point2.getZ(), point3.getX(), point3.getY(), point3.getZ());
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testDegenerateCase()
    {
@@ -67,11 +67,11 @@ public class PointToLineUnProjectorTest
          temp.set(point2);
          temp.scale(s);
          point3.add(temp);
-         runTest(point1.x, point1.y, point1.z, point2.x, point2.y, point2.z, point3.x, point3.y, point3.z);
+         runTest(point1.getX(), point1.getY(), point1.getZ(), point2.getX(), point2.getY(), point2.getZ(), point3.getX(), point3.getY(), point3.getZ());
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testYCase()
    {
@@ -88,12 +88,12 @@ public class PointToLineUnProjectorTest
          temp.set(point2);
          temp.scale(s);
          point3.add(temp);
-         runTest(point1.x, point1.y, point1.z, point2.x, point2.y, point2.z, point3.x, point3.y, point3.z);
+         runTest(point1.getX(), point1.getY(), point1.getZ(), point2.getX(), point2.getY(), point2.getZ(), point3.getX(), point3.getY(), point3.getZ());
       }
    }
 
-   @DeployableTestMethod(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testXCase()
    {
       Random gen = new Random(124L);
@@ -109,7 +109,7 @@ public class PointToLineUnProjectorTest
          temp.set(point2);
          temp.scale(s);
          point3.add(temp);
-         runTest(point1.x, point1.y, point1.z, point2.x, point2.y, point2.z, point3.x, point3.y, point3.z);
+         runTest(point1.getX(), point1.getY(), point1.getZ(), point2.getX(), point2.getY(), point2.getZ(), point3.getX(), point3.getY(), point3.getZ());
       }
    }
 

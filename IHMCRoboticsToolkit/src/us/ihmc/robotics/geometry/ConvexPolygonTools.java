@@ -1,11 +1,12 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector2d;
-import java.util.ArrayList;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ConvexPolygonTools
 {
@@ -60,7 +61,7 @@ public class ConvexPolygonTools
       {
          verticesIndices[0][0] = 0;
          verticesIndices[0][1] = 0;
-         success = polygon2.getLineOfSightVerticesIndices(polygon1.getVertex(0), verticesIndices[1]);
+         success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon1.getVertex(0), verticesIndices[1], polygon2);
          return success;
       }
 
@@ -68,7 +69,7 @@ public class ConvexPolygonTools
       {
          verticesIndices[1][0] = 0;
          verticesIndices[1][1] = 0;
-         success = polygon1.getLineOfSightVerticesIndices(polygon2.getVertex(0), verticesIndices[0]);
+         success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon2.getVertex(0), verticesIndices[0], polygon1);
          return success;
       }
 
@@ -80,7 +81,7 @@ public class ConvexPolygonTools
       int L1, R1, L2, R2;
 
       // Then find its two line of sight points on polygon 2:
-      success = polygon2.getLineOfSightVerticesIndices(vertex, lineOfSight1);
+      success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(vertex, lineOfSight1, polygon2);
       if (!success)
          return false;
 
@@ -88,10 +89,10 @@ public class ConvexPolygonTools
       R2 = lineOfSight1[1];
 
       // Then find the line of sight vertices on polygon 1:
-      success = polygon1.getLineOfSightVerticesIndices(polygon2.getVertex(R2), lineOfSight1);
+      success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon2.getVertex(R2), lineOfSight1, polygon1);
       if (!success)
          return false;
-      success = polygon1.getLineOfSightVerticesIndices(polygon2.getVertex(L2), lineOfSight2);
+      success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon2.getVertex(L2), lineOfSight2, polygon1);
       if (!success)
          return false;
 
@@ -102,10 +103,10 @@ public class ConvexPolygonTools
       boolean done = false;
       while (!done)
       {
-         success = polygon2.getLineOfSightVerticesIndices(polygon1.getVertex(L1), lineOfSight1);
+         success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon1.getVertex(L1), lineOfSight1, polygon2);
          if (!success)
             return false;
-         success = polygon2.getLineOfSightVerticesIndices(polygon1.getVertex(R1), lineOfSight2);
+         success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon1.getVertex(R1), lineOfSight2, polygon2);
          if (!success)
             return false;
 
@@ -118,10 +119,10 @@ public class ConvexPolygonTools
          L2 = lineOfSight2[0];
          R2 = lineOfSight1[1];
 
-         success = polygon1.getLineOfSightVerticesIndices(polygon2.getVertex(L2), lineOfSight1);
+         success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon2.getVertex(L2), lineOfSight1, polygon1);
          if (!success)
             return false;
-         success = polygon1.getLineOfSightVerticesIndices(polygon2.getVertex(R2), lineOfSight2);
+         success = ConvexPolygon2dCalculator.getLineOfSightVertexIndices(polygon2.getVertex(R2), lineOfSight2, polygon1);
          if (!success)
             return false;
 
@@ -416,12 +417,12 @@ public class ConvexPolygonTools
       if (bridgeCount == 0)
       {
          // check to see if a polygons is contained in another.
-         if (polygonP.isPointInside(polygonQ.getVertex(0)))
+         if (ConvexPolygon2dCalculator.isPointInside(polygonQ.getVertex(0), polygonP))
          {
             intersectingPolygonToPack.setAndUpdate(polygonQ);
          }
 
-         if (polygonQ.isPointInside(polygonP.getVertex(0)))
+         if (ConvexPolygon2dCalculator.isPointInside(polygonP.getVertex(0), polygonQ))
          {
             intersectingPolygonToPack.setAndUpdate(polygonP);
          }
@@ -718,7 +719,7 @@ public class ConvexPolygonTools
       ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
 
       ConvexPolygon2d polygonToReturn = new ConvexPolygon2d();
-      
+
       boolean foundPolygon = convexPolygonConstructorFromInteriorOfRays.constructFromInteriorOfRays(rays, polygonToReturn);
       if (foundPolygon) return polygonToReturn;
       return null;
@@ -795,7 +796,7 @@ public class ConvexPolygonTools
       cuttingLine.checkReferenceFrameMatch(polygonToCut);
       return cutPolygonWithLine(cuttingLine.getLine2d(), polygonToCut.getConvexPolygon2d(), sideOfLineToCut);
    }
-   
+
    public static int cutPolygonWithLine(Line2d cuttingLine, ConvexPolygon2d polygonToCut, RobotSide sideOfLineToCut)
    {
       Point2d[] intersectionPoints = polygonToCut.intersectionWith(cuttingLine);
@@ -825,5 +826,139 @@ public class ConvexPolygonTools
          polygonToCut.update();
          return numberOfVerticesRemoved;
       }
+   }
+
+   /**
+    * This function changes the polygon given, such that it has the desired number of vertices. It is conservative in
+    * the sense, that the modified polygon will be contained in the original polygon completely.
+    *
+    * @param polygon: modified to have the desired number of vertices
+    * @param desiredVertices: number of vertices that the polygon should have
+    */
+   public static void limitVerticesConservative(ConvexPolygon2d polygon, int desiredVertices)
+   {
+      polygon.checkNonEmpty();
+
+      if (desiredVertices == 0)
+      {
+         polygon.clear();
+         polygon.update();
+         return;
+      }
+
+      int vertices = polygon.getNumberOfVertices();
+      while (vertices > desiredVertices)
+      {
+         int removeVertex = -1;
+         double shortestEdgeLength = Double.POSITIVE_INFINITY;
+         Point2d lastVertex = polygon.getVertex(0);
+         for (int i = 1; i < vertices+1; i++)
+         {
+            Point2d nextVertex = null;
+            if (i == vertices)
+            {
+               nextVertex = polygon.getVertex(0);
+            }
+            else
+            {
+               nextVertex = polygon.getVertex(i);
+            }
+            double edgeLength = lastVertex.distance(nextVertex);
+            if (edgeLength < shortestEdgeLength)
+            {
+               shortestEdgeLength = edgeLength;
+               removeVertex = i;
+            }
+            lastVertex = nextVertex;
+         }
+
+         int idx1 = -1;
+         int idx2 = -1;
+         if (removeVertex == vertices)
+         {
+            idx1 = vertices-1;
+            idx2 = 0;
+         }
+         else
+         {
+            idx1 = removeVertex;
+            idx2 = removeVertex-1;
+         }
+
+         Point2d vertexA = polygon.getVertex(idx1);
+         Point2d vertexB = polygon.getVertex(idx2);
+         double xNew = (vertexA.getX() + vertexB.getX()) / 2.0;
+         double yNew = (vertexA.getY() + vertexB.getY()) / 2.0;
+
+         polygon.removeVertex(idx1);
+         polygon.removeVertex(idx2);
+         polygon.addVertex(xNew, yNew);
+         polygon.update();
+
+         vertices = polygon.getNumberOfVertices();
+      }
+
+      while (vertices < desiredVertices)
+      {
+         int index = -1;
+         double longestEdgeLength = Double.NEGATIVE_INFINITY;
+         Point2d lastVertex = polygon.getVertex(0);
+         for (int i = 1; i < vertices+1; i++)
+         {
+            Point2d nextVertex = null;
+            if (i == vertices)
+            {
+               nextVertex = polygon.getVertex(0);
+            }
+            else
+            {
+               nextVertex = polygon.getVertex(i);
+            }
+
+            double edgeLength = lastVertex.distance(nextVertex);
+            if (edgeLength > longestEdgeLength)
+            {
+               longestEdgeLength = edgeLength;
+               index = i;
+            }
+            lastVertex = nextVertex;
+         }
+
+         int idx1 = -1;
+         int idx2 = -1;
+         if (index == vertices)
+         {
+            idx1 = vertices-1;
+            idx2 = 0;
+         }
+         else
+         {
+            idx1 = index;
+            idx2 = index-1;
+         }
+
+         Point2d vertexA = polygon.getVertex(idx1);
+         Point2d vertexB = polygon.getVertex(idx2);
+         double xNew = (vertexA.getX() + vertexB.getX()) / 2.0;
+         double yNew = (vertexA.getY() + vertexB.getY()) / 2.0;
+
+         polygon.scale(1.0 - 10E-10);
+         polygon.addVertex(xNew, yNew);
+         polygon.update();
+
+         vertices = polygon.getNumberOfVertices();
+      }
+   }
+
+   /**
+    * This function changes the polygon given, such that it has the desired number of vertices. It is conservative in
+    * the sense, that the modified polygon will be contained in the original polygon completely.
+    *
+    * @param polygon: modified to have the desired number of vertices
+    * @param desiredVertices: number of vertices that the polygon should have
+    */
+   public static void limitVerticesConservative(FrameConvexPolygon2d polygon, int desiredVertices)
+   {
+      limitVerticesConservative(polygon.getConvexPolygon2d(), desiredVertices);
    }
 }

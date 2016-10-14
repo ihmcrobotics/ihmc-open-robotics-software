@@ -3,14 +3,14 @@ package us.ihmc.atlas.posePlayback;
 import java.io.Reader;
 import java.io.StringReader;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequence;
-import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPose;
+import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseSequence;
+import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PoseCheckerCallback;
 import us.ihmc.darpaRoboticsChallenge.posePlayback.PoseInterpolatorPlaybacker;
 
@@ -20,8 +20,8 @@ public class AtlasPoseInterpolatorPlaybacker
    
    public AtlasPoseInterpolatorPlaybacker()
    {
-      SDFFullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      SDFHumanoidRobot sdfRobot = robotModel.createSdfRobot(false);
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       
       StringBuffer stringBuffer = new StringBuffer();
       stringBuffer

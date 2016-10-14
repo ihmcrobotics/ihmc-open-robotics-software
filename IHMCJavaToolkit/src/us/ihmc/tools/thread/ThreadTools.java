@@ -164,6 +164,12 @@ public class ThreadTools
 
       return null;
    }
+   
+   public static void startAThread(Runnable runnable, String threadName)
+   {
+      Thread newThread = new Thread(runnable, threadName);
+      newThread.start();
+   }
 
    public static void startAsDaemon(Runnable daemonThreadRunnable, String threadName)
    {
@@ -202,6 +208,7 @@ public class ThreadTools
       {
          private final AtomicInteger threadNumber = new AtomicInteger(1);
 
+         @Override
          public Thread newThread(Runnable r)
          {
             Thread t = new Thread(r, name + "-thread-" + threadNumber.getAndIncrement());

@@ -4,18 +4,20 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.SDFFullHumanoidRobotModel;
-import us.ihmc.SdfLoader.SDFHumanoidRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -32,16 +34,18 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.ForceSensorHysteresisCreator;
+import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.robotics.time.GlobalTimer;
-import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -51,12 +55,13 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class DRCSimulationTestHelper
 {
    private final SimulationConstructionSet scs;
-   private final SDFHumanoidRobot sdfRobot;
+   private final HumanoidFloatingRootJointRobot sdfRobot;
    private final DRCSimulationFactory drcSimulationFactory;
    protected final PacketCommunicator controllerCommunicator;
    private final CommonAvatarEnvironmentInterface testEnvironment;
@@ -68,37 +73,47 @@ public class DRCSimulationTestHelper
    private final WalkingControllerParameters walkingControlParameters;
 
    private final FullHumanoidRobotModel fullRobotModel;
-   private final HumanoidReferenceFrames referenceFrames;
    private final ScriptedFootstepGenerator scriptedFootstepGenerator;
    private final ScriptedHandstepGenerator scriptedHandstepGenerator;
 
    private final DRCNetworkModuleParameters networkProcessorParameters;
    private DRCSimulationStarter simulationStarter;
+   private Exception caughtException;
 
-   public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation,
+   public DRCSimulationTestHelper(String name, DRCObstacleCourseStartingLocation selectedLocation,
          SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
    {
-      this(new DRCDemo01NavigationEnvironment(), name, scriptFileName, selectedLocation, simulationconstructionsetparameters, robotModel);
+      this(new DRCDemo01NavigationEnvironment(), name, selectedLocation, simulationconstructionsetparameters, robotModel);
    }
 
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name,
          DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
    {
-      this(commonAvatarEnvironmentInterface, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel, null, null, null);
+      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, null, null, null, false, false, false);
    }
 
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name,
          DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-         DRCNetworkModuleParameters drcNetworkModuleParameters)
+         boolean addFootstepMessageGenerator, boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep)
    {
-      this(commonAvatarEnvironmentInterface, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null);
+      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, null, null, null, addFootstepMessageGenerator,
+            useHeadingAndVelocityScript, cheatWithGroundHeightAtForFootstep);
    }
-   
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
-         DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-         DRCNetworkModuleParameters drcNetworkModuleParameters, HighLevelBehaviorFactory highLevelBehaviorFactoryToAdd, DRCRobotInitialSetup<SDFHumanoidRobot> initialSetup)
+
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
+         SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, DRCNetworkModuleParameters drcNetworkModuleParameters)
    {
-      this.controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null, false,
+            false, false);
+   }
+
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
+         SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, DRCNetworkModuleParameters drcNetworkModuleParameters,
+         HighLevelBehaviorFactory highLevelBehaviorFactoryToAdd, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+         boolean addFootstepMessageGenerator, boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep)
+   {
+      this.controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
+            new IHMCCommunicationKryoNetClassList());
       this.testEnvironment = commonAvatarEnvironmentInterface;
 
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
@@ -115,7 +130,7 @@ public class DRCSimulationTestHelper
       }
 
       fullRobotModel = robotModel.createFullRobotModel();
-      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
       scriptedHandstepGenerator = new ScriptedHandstepGenerator(fullRobotModel);
 
@@ -128,10 +143,12 @@ public class DRCSimulationTestHelper
          simulationStarter.registerHighLevelController(highLevelBehaviorFactoryToAdd);
       if (initialSetup != null)
          simulationStarter.setRobotInitialSetup(initialSetup);
-      simulationStarter.setScriptFile(scriptFileName);
       simulationStarter.setStartingLocation(selectedLocation);
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);
+
+      if (addFootstepMessageGenerator)
+         simulationStarter.addFootstepMessageGenerator(useHeadingAndVelocityScript, cheatWithGroundHeightAtForFootstep);
 
       if (drcNetworkModuleParameters == null)
       {
@@ -150,9 +167,9 @@ public class DRCSimulationTestHelper
       drcSimulationFactory = simulationStarter.getDRCSimulationFactory();
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
       simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
-      
 
-      
+
+
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
          nothingChangedVerifier = new NothingChangedVerifier(name, scs);
@@ -163,35 +180,72 @@ public class DRCSimulationTestHelper
       }
    }
 
+   public YoVariable<?> getYoVariable(String name)
+   {
+      return scs.getVariable(name);
+   }
+
+   public YoVariable<?> getYoVariable(String nameSpace, String name)
+   {
+      return scs.getVariable(nameSpace, name);
+   }
+
+   public void loadScriptFile(String scriptFilename, ReferenceFrame referenceFrame)
+   {
+      ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator = simulationStarter.getScriptBasedControllerCommandGenerator();
+      scriptBasedControllerCommandGenerator.loadScriptFile(scriptFilename, referenceFrame);
+   }
+
+   public void loadScriptFile(InputStream scriptInputStream, ReferenceFrame referenceFrame)
+   {
+      ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator = simulationStarter.getScriptBasedControllerCommandGenerator();
+      scriptBasedControllerCommandGenerator.loadScriptFile(scriptInputStream, referenceFrame);
+   }
+
+   public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()
+   {
+      return simulationStarter.getQueuedControllerCommands();
+   }
+
    public BlockingSimulationRunner getBlockingSimulationRunner()
    {
       return blockingSimulationRunner;
    }
-   
+
    public SimulationConstructionSet getSimulationConstructionSet()
    {
       return scs;
    }
-   
+
    public DRCSimulationFactory getDRCSimulationFactory()
    {
       return drcSimulationFactory;
    }
-   
+
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
       MomentumBasedControllerFactory controllerFactory = drcSimulationFactory.getControllerFactory();
       controllerFactory.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
-   public SDFFullHumanoidRobotModel getControllerFullRobotModel()
+   public FullHumanoidRobotModel getControllerFullRobotModel()
    {
       return drcSimulationFactory.getControllerFullRobotModel();
    }
 
-   public SDFFullHumanoidRobotModel getSDFFullRobotModel()
+   public FullHumanoidRobotModel getSDFFullRobotModel()
    {
-      return (SDFFullHumanoidRobotModel) fullRobotModel;
+      return (FullHumanoidRobotModel) fullRobotModel;
+   }
+
+   /**
+    * For unit testing only
+    *
+    * @param controller
+    */
+   public void addRobotControllerOnControllerThread(RobotController controller)
+   {
+      drcSimulationFactory.addRobotControllerOnControllerThread(controller);
    }
 
    public CommonAvatarEnvironmentInterface getTestEnviroment()
@@ -225,7 +279,7 @@ public class DRCSimulationTestHelper
       }
    }
 
-   public SDFHumanoidRobot getRobot()
+   public HumanoidFloatingRootJointRobot getRobot()
    {
       return sdfRobot;
    }
@@ -271,7 +325,8 @@ public class DRCSimulationTestHelper
       }
       catch (Exception e)
       {
-         System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
+         this.caughtException = e;
+         PrintTools.error(this, e.getMessage());
          return false;
       }
    }
@@ -315,9 +370,13 @@ public class DRCSimulationTestHelper
 
    public void assertRobotsRootJointIsInBoundingBox(BoundingBox3d boundingBox)
    {
-      FloatingJoint rootJoint = getRobot().getRootJoint();
+      assertRobotsRootJointIsInBoundingBox(boundingBox, getRobot());
+   }
+
+   public static void assertRobotsRootJointIsInBoundingBox(BoundingBox3d boundingBox, HumanoidFloatingRootJointRobot robot)
+   {
       Point3d position = new Point3d();
-      rootJoint.getPosition(position);
+      robot.getRootJoint().getPosition(position);
       boolean inside = boundingBox.isInside(position);
       if (!inside)
       {
@@ -349,6 +408,11 @@ public class DRCSimulationTestHelper
       return exceptions;
    }
 
+   public Exception getCaughtException()
+   {
+      return caughtException;
+   }
+
    public void send(Packet<?> packet)
    {
       controllerCommunicator.send(packet);
@@ -363,37 +427,37 @@ public class DRCSimulationTestHelper
    {
       return controllerCommunicator;
    }
-   
+
    public ArrayList<RobotController> getFootForceSensorHysteresisCreators()
    {
       SideDependentList<ArrayList<WrenchCalculatorInterface>> footForceSensors = new SideDependentList<ArrayList<WrenchCalculatorInterface>>();
       packFootForceSensors(footForceSensors);
-      
+
       ArrayList<RobotController> footForceSensorSignalCorruptors = new ArrayList<RobotController>();
-      
+
       for(RobotSide robotSide : RobotSide.values)
-      {  
+      {
          for(int i = 0; i<footForceSensors.get(robotSide).size(); i++)
          {
-            ForceSensorHysteresisCreator forceSensorSignalCorruptor = new ForceSensorHysteresisCreator(sdfRobot.computeCenterOfMass(new Point3d()), 
+            ForceSensorHysteresisCreator forceSensorSignalCorruptor = new ForceSensorHysteresisCreator(sdfRobot.computeCenterOfMass(new Point3d()),
                   footForceSensors.get(robotSide).get(i).getName(), footForceSensors.get(robotSide).get(i));
-            
+
             footForceSensorSignalCorruptors.add(forceSensorSignalCorruptor);
          }
       }
-      
+
       return footForceSensorSignalCorruptors;
    }
-   
+
    public void packFootForceSensors(SideDependentList<ArrayList<WrenchCalculatorInterface>> footForceSensors)
-   {  
+   {
       ArrayList<WrenchCalculatorInterface> forceSensors = new ArrayList<WrenchCalculatorInterface>();
       sdfRobot.getForceSensors(forceSensors);
-      
+
       SideDependentList<String> jointNamesBeforeFeet = sdfRobot.getJointNamesBeforeFeet();
-      
+
       for(RobotSide robotSide : RobotSide.values)
-      {  
+      {
          footForceSensors.put(robotSide,new ArrayList<WrenchCalculatorInterface>());
          for(int i = 0; i<forceSensors.size(); i++)
          {
@@ -404,4 +468,6 @@ public class DRCSimulationTestHelper
          }
       }
    }
+
+
 }

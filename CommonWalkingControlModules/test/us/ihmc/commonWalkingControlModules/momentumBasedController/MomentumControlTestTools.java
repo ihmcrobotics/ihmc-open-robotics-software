@@ -1,5 +1,10 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import static junit.framework.Assert.assertTrue;
+
+import java.util.Collection;
+import java.util.Map;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -14,19 +19,14 @@ import us.ihmc.robotics.screwTheory.SpatialForceVectorTest;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 
-import java.util.Collection;
-import java.util.Map;
-
-import static junit.framework.Assert.assertTrue;
-
 /**
  * @author twan
  *         Date: 5/7/13
  */
 public class MomentumControlTestTools
 {
-   public static void assertWrenchesSumUpToMomentumDot(Collection<Wrench> externalWrenches, SpatialForceVector desiredCentroidalMomentumRate,
-                                                       double gravityZ, double mass, ReferenceFrame centerOfMassFrame, double epsilon)
+   public static void assertWrenchesSumUpToMomentumDot(Collection<Wrench> externalWrenches, SpatialForceVector desiredCentroidalMomentumRate, double gravityZ,
+         double mass, ReferenceFrame centerOfMassFrame, double epsilon)
    {
       SpatialForceVector totalWrench = new SpatialForceVector(centerOfMassFrame);
       Wrench tempWrench = new Wrench();
@@ -45,7 +45,7 @@ public class MomentumControlTestTools
    }
 
    public static void assertWrenchesInFrictionCones(Map<RigidBody, Wrench> externalWrenches,
-                                                    Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, double coefficientOfFriction)
+         Map<ContactablePlaneBody, ? extends PlaneContactState> contactStates, double coefficientOfFriction)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
 

@@ -15,7 +15,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 
 public class WandererSensorInformation implements DRCRobotSensorInformation
 {
-   
+
    public static final String lidarSensorName = null;
    public static final String leftCameraName = null;
    public static final String rightCameraName = null;
@@ -23,17 +23,17 @@ public class WandererSensorInformation implements DRCRobotSensorInformation
    public static final String[] imuSensorsToUse = {imuSensor};
    private final String[] forceSensorNames;
    private final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>();
-   
+
    public WandererSensorInformation()
    {
       for (RobotSide robotSide : RobotSide.values())
       {
          String robotSideLowerCaseFirstLetter = robotSide.getSideNameFirstLetter().toLowerCase();
          feetForceSensorNames.put(robotSide, robotSideLowerCaseFirstLetter + "_leg_lax");
-      }     
+      }
       forceSensorNames= new String[]{feetForceSensorNames.get(RobotSide.LEFT), feetForceSensorNames.get(RobotSide.RIGHT)};
    }
-   
+
    @Override
    public String[] getForceSensorNames()
    {
@@ -125,7 +125,7 @@ public class WandererSensorInformation implements DRCRobotSensorInformation
    {
       return false;
    }
-   
+
    @Override
    public ReferenceFrame getHeadIMUFrameWhenLevel(){
 	   return null;

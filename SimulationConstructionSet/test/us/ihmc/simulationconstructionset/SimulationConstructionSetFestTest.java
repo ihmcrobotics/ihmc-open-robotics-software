@@ -17,12 +17,12 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestClass;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
-@DeployableTestClass(targets = {TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
 public class SimulationConstructionSetFestTest
 {
    private boolean isGradleBuild()
@@ -36,7 +36,7 @@ public class SimulationConstructionSetFestTest
       return false;
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testSimulationConstructionSetUsingGUITestFixture() throws AWTException
    {
@@ -245,7 +245,7 @@ public class SimulationConstructionSetFestTest
       testFixture = null;
    }
 
-	@DeployableTestMethod
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=45000)
    public void testSimulationConstructionSetNewGraphWindowUsingGUITestFixture() throws AWTException
    {

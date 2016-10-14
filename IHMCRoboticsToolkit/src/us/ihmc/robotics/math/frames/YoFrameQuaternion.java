@@ -28,6 +28,7 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
 
    private final DoubleYoVariable qx, qy, qz, qs;
    private final FrameOrientation frameOrientation = new FrameOrientation();
+   /** Never use this reference frame directly, use {@link #getReferenceFrame()} instead so the multiple frames version of this {@link YoFrameQuaternion} will work properly. */
    private final ReferenceFrame referenceFrame;
 
    public YoFrameQuaternion(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
@@ -60,6 +61,12 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       this.qs = qs;
       this.referenceFrame = referenceFrame;
    }
+   
+   public final FrameOrientation getFrameOrientation()
+   {
+      putYoValuesIntoFrameOrientation();
+      return frameOrientation;
+   }
 
    public void set(Quat4d quaternion)
    {
@@ -91,10 +98,30 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       getYoValuesFromFrameOrientation();
    }
 
+   public void set(double qx, double qy, double qz, double qs)
+   {
+      this.qx.set(qx);
+      this.qy.set(qy);
+      this.qz.set(qz);
+      this.qs.set(qs);
+   }
+
    public void set(FrameOrientation frameOrientation)
+   {
+      set(frameOrientation, true);
+   }
+
+   public void set(FrameOrientation frameOrientation, boolean notifyListeners)
    {
       checkReferenceFrameMatch(frameOrientation);
       this.frameOrientation.setIncludingFrame(frameOrientation);
+      getYoValuesFromFrameOrientation(notifyListeners);
+   }
+
+   public void setAndMatchFrame(FrameOrientation frameOrientation)
+   {
+      this.frameOrientation.setIncludingFrame(frameOrientation);
+      this.frameOrientation.changeFrame(getReferenceFrame());
       getYoValuesFromFrameOrientation();
    }
 
@@ -147,6 +174,18 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       frameOrientationToPack.setIncludingFrame(frameOrientation);
    }
 
+   public Quat4d getQuaternionCopy()
+   {
+      putYoValuesIntoFrameOrientation();
+      return frameOrientation.getQuaternionCopy();
+   }
+
+   public FrameOrientation getFrameOrientationCopy()
+   {
+      putYoValuesIntoFrameOrientation();
+      return new FrameOrientation(frameOrientation);
+   }
+
    public DoubleYoVariable getYoQx()
    {
       return qx;
@@ -165,6 +204,26 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
    public DoubleYoVariable getYoQs()
    {
       return qs;
+   }
+
+   public double getQx()
+   {
+      return qx.getDoubleValue();
+   }
+
+   public double getQy()
+   {
+      return qy.getDoubleValue();
+   }
+
+   public double getQz()
+   {
+      return qz.getDoubleValue();
+   }
+
+   public double getQs()
+   {
+      return qs.getDoubleValue();
    }
 
    public void interpolate(YoFrameQuaternion yoFrameQuaternion1, YoFrameQuaternion yoFrameQuaternion2, double alpha)
@@ -216,6 +275,13 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       getYoValuesFromFrameOrientation();
    }
 
+   public void conjugate()
+   {
+      putYoValuesIntoFrameOrientation();
+      frameOrientation.conjugate();
+      getYoValuesFromFrameOrientation();
+   }
+
    /**
     * Compute the dot product between this quaternion and the orhter quaternion: this . other = qx * other.qx + qy * other.qy + qz * other.qz + qs * other.qs.
     * @param other
@@ -249,18 +315,27 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
 
    private void getYoValuesFromFrameOrientation()
    {
-      qx.set(frameOrientation.getQx());
-      qy.set(frameOrientation.getQy());
-      qz.set(frameOrientation.getQz());
-      qs.set(frameOrientation.getQs());
+      getYoValuesFromFrameOrientation(true);
+   }
+
+   private void getYoValuesFromFrameOrientation(boolean notifyListeners)
+   {
+      qx.set(frameOrientation.getQx(), notifyListeners);
+      qy.set(frameOrientation.getQy(), notifyListeners);
+      qz.set(frameOrientation.getQz(), notifyListeners);
+      qs.set(frameOrientation.getQs(), notifyListeners);
    }
 
    public void setToNaN()
    {
-      qx.set(Double.NaN);
-      qy.set(Double.NaN);
-      qz.set(Double.NaN);
-      qs.set(Double.NaN);
+      frameOrientation.setToNaN();
+      getYoValuesFromFrameOrientation();
+   }
+
+   public void setToZero()
+   {
+      frameOrientation.setToZero(getReferenceFrame());
+      getYoValuesFromFrameOrientation();
    }
 
    public boolean containsNaN()
@@ -302,5 +377,11 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
    public String getNameSuffix()
    {
       return nameSuffix;
+   }
+
+   public boolean epsilonEquals(YoFrameQuaternion other, double epsilon)
+   {
+      putYoValuesIntoFrameOrientation();
+      return frameOrientation.epsilonEquals(other.frameOrientation, epsilon);
    }
 }

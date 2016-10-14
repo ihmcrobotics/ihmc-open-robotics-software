@@ -1,17 +1,43 @@
 package us.ihmc.robotics;
 
-import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FrameVector;
-
-import javax.vecmath.Tuple3d;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import javax.vecmath.Quat4d;
+import javax.vecmath.Tuple3d;
+
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
 public class MathTools
 {
    private MathTools()
    {
+   }
+   
+   /**
+    * Pass in a vector. Get its angle in polar coordinates.
+    * 
+    * @param vx
+    * @param vy
+    * @return angle of vector from 0 to 2PI
+    */
+   public static double angleFromZeroToTwoPi(double vx, double vy)
+   {
+      double angleFromNegtivePiToPi = Math.atan2(vy, vx);
+      
+      if (angleFromNegtivePiToPi < 0.0)
+      {
+         return 2.0 * Math.PI + angleFromNegtivePiToPi;
+      }
+      else
+      {
+         return angleFromNegtivePiToPi;
+      }
    }
 
    /**
@@ -132,6 +158,34 @@ public class MathTools
    }
 
    /**
+    * True if value |(v1-v2)| <= |epsilon|
+    * True if v1 and v2 are Float.NaN
+    * True if v1 and v2 are Positive Infinity
+    * True if v1 and v2 are Negative Infinity
+    * false if not
+    *
+    * @param v1 float
+    * @param v2 float
+    * @param epsilon float
+    * @return boolean
+    */
+   public static boolean epsilonEquals(float v1, float v2, float epsilon)
+   {
+      if(Float.isNaN(v1) && Float.isNaN(v2))
+      {
+         return true;
+      }
+      
+      //catches infinites
+      if(v1 == v2)
+      {
+         return true;
+      }
+      
+      return Math.abs(v1 - v2) <= Math.abs(epsilon);
+   }
+
+   /**
     * True if v2 is within given percent of v1
     * False otherwise
     *
@@ -199,6 +253,7 @@ public class MathTools
       return (Math.min(max, Math.max(val, min)));
    }
 
+
    /**
     * Checks to see if val is Inside Bounds of max and min
     *
@@ -216,6 +271,16 @@ public class MathTools
       }
 
       return ((val > min) && (val < max));
+   }
+
+   public static boolean isInsideBoundsInclusive(double val, double max)
+   {
+      return isInsideBoundsInclusive(val, -max, max);
+   }
+
+   public static boolean isInsideBoundsExclusive(double val, double max)
+   {
+      return isInsideBoundsExclusive(val, -max, max);
    }
 
    public static boolean isInsideBoundsInclusive(double val, double min, double max)
@@ -419,6 +484,36 @@ public class MathTools
       }
    }
 
+   public static void checkIfPositive(double argument)
+   {
+      if (argument < 0.0)
+         throw new RuntimeException("Argument " + argument + " not positive.");
+   }
+
+   public static void checkIfGreaterOrEqual(double argument, double desired)
+   {
+      if (argument < desired)
+         throw new RuntimeException("Argument " + argument + " less than: " + desired);
+   }
+
+   public static void checkIfNegative(double argument)
+   {
+      if (argument > 0.0)
+         throw new RuntimeException("Argument " + argument + " not negative.");
+   }
+
+   public static void checkIfLessOrEqual(double argument, double desired)
+   {
+      if (argument > desired)
+         throw new RuntimeException("Argument " + argument + " greater than: " + desired);
+   }
+
+   public static void checkIfLessOrEqual(int argument, int desired)
+   {
+      if (argument > desired)
+         throw new RuntimeException("Argument " + argument + " greater than: " + desired);
+   }
+
    public static double square(double x)
    {
       return x * x;
@@ -557,7 +652,41 @@ public class MathTools
    {
       return (Double.isNaN(tuple.getX()) || Double.isNaN(tuple.getY()) || Double.isNaN(tuple.getZ()));
    }
-   
+
+   public static boolean containsNaN(Quat4d quat4d)
+   {
+      return (Double.isNaN(quat4d.getW()) || Double.isNaN(quat4d.getX()) || Double.isNaN(quat4d.getY()) || Double.isNaN(quat4d.getZ()));
+   }
+
+   public static boolean containsNaN(DenseMatrix64F denseMatrix64F)
+   {
+      int numberOfRows = denseMatrix64F.getNumRows();
+      int numberOfColumns = denseMatrix64F.getNumCols();
+      
+      for (int row = 0; row < numberOfRows; row++)
+      {
+         for (int column = 0; column < numberOfColumns; column++)
+         {
+            if (Double.isNaN(denseMatrix64F.get(row, column))) return true;
+         }
+      }
+
+      return false;
+   }
+
+   public static boolean containsNaN(SpatialMotionVector spatialMotionVector)
+   {
+      if (Double.isNaN(spatialMotionVector.getLinearPartX())) return true;
+      if (Double.isNaN(spatialMotionVector.getLinearPartY())) return true;
+      if (Double.isNaN(spatialMotionVector.getLinearPartZ())) return true;
+      
+      if (Double.isNaN(spatialMotionVector.getAngularPartX())) return true;
+      if (Double.isNaN(spatialMotionVector.getAngularPartY())) return true;
+      if (Double.isNaN(spatialMotionVector.getAngularPartZ())) return true;
+
+      return false;
+   }
+
    public static long gcd(long a, long b)
    {
       while(b > 0)
@@ -601,5 +730,37 @@ public class MathTools
       tuple3d.setY(roundToGivenPrecision(tuple3d.getY(), precision));
       tuple3d.setZ(roundToGivenPrecision(tuple3d.getZ(), precision));
       
+   }
+   
+   public static int orderOfMagnitude(double number)
+   {
+      return (int) Math.floor(Math.log10(Math.abs(number)));
+   }
+
+   /**
+    * Returns value - |deadband| if value is greater than |deadband|
+    * Returns value + |deadband| if value is less than -|deadband|
+    * Returns 0 if value is in the range [-deadband, deadband]
+    *
+    * @param value double
+    * @param deadband double
+    * @return double
+    */
+   public static double applyDeadband(double value, double deadband)
+   {
+      deadband = Math.abs(deadband);
+
+      if (value > deadband)
+      {
+         return value - deadband;
+      }
+      else if (value < -deadband)
+      {
+         return value + deadband;
+      }
+      else
+      {
+         return 0.0;
+      }
    }
 }

@@ -1,5 +1,7 @@
 package us.ihmc.tools.inputDevices.joystick;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import us.ihmc.tools.io.printing.PrintTools;
 
 public enum JoystickModel
@@ -9,6 +11,7 @@ public enum JoystickModel
    MAD_CATZ_FLY5_STICK("Mad Catz F.L.Y.5 Stick"),
    SAITEK_X52("Saitek X52 Flight Control System"),
    THRUSTMASTER_16000M("T.16000M"),
+   XBOX_ONE("Xbox One For Windows", "Xbox One Wired Controller", "Microsoft X-Box One pad"),
    UNKNOWN("Unknown"),
    
    ;
@@ -22,6 +25,26 @@ public enum JoystickModel
       this.jinputName = jinputName;
    }
 
+   private JoystickModel(String jinputWindowsName, String jinputMacName, String jinputLinuxName)
+   {
+      if(SystemUtils.IS_OS_WINDOWS)
+      {
+         this.jinputName = jinputWindowsName;
+      }
+      else if (SystemUtils.IS_OS_MAC)
+      {
+         this.jinputName = jinputMacName;
+      }
+      else if (SystemUtils.IS_OS_LINUX)
+      {
+         this.jinputName = jinputLinuxName;
+      }
+      else
+      {
+         this.jinputName = null;
+      }
+   }
+
    public String getJinputName()
    {
       return jinputName;
@@ -31,7 +54,7 @@ public enum JoystickModel
    {
       for (JoystickModel joystickModel : values)
       {
-         if (name.contains(joystickModel.getJinputName()))
+         if (name.toLowerCase().contains(joystickModel.getJinputName().toLowerCase()))
             return joystickModel;
       }
       

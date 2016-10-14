@@ -7,22 +7,21 @@ public enum PacketDestination
    NETWORK_PROCESSOR,
    UI,
    BEHAVIOR_MODULE,
-   SCS_SENSORS,
    LEFT_HAND,
    RIGHT_HAND,
    SENSOR_MANAGER,
-   PERCEPTION_MODULE,
    ROS_MODULE,
    MOCAP_MODULE,
-   SCRIPTED_FOOTSTEP_DATA_LIST,
    TRAFFIC_SHAPER,
    MULTISENSE_TEST_MODULE,
    ROS_API,
    AUXILIARY_ROBOT_DATA_PUBLISHER, 
    ZERO_POSE_PRODUCER,
-   SPEECH_TO_TEXT,
+   TEXT_TO_SPEECH,
    DRILL_DETECTOR,
-   AUDIO_MODULE;
+   AUDIO_MODULE,
+   KINEMATICS_TOOLBOX_MODULE,
+   REA_MODULE; // Destination for the robot environment awareness module. Not yet available in the open source repo.
 
    public static final PacketDestination[] values = values();
    

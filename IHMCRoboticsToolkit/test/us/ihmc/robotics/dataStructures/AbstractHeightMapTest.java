@@ -14,14 +14,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javax.vecmath.GMatrix;
 import javax.vecmath.Point3d;
 
+import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.geometry.InsufficientDataException;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class AbstractHeightMapTest
 {
@@ -40,7 +40,7 @@ public abstract class AbstractHeightMapTest
       super();
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSinglePoint()
    {
@@ -71,13 +71,14 @@ public abstract class AbstractHeightMapTest
       assertSinglePointGridHandlesPoint(x, y, xIndex, yIndex, z);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGettingAreas()
    {
       double gridResolution = 1;
       HeightMapWithPoints map = getHeightMap(-2,-2,2,2,gridResolution);
-      GMatrix matrix = new GMatrix(7, 7, new double[] { 
+      DenseMatrix64F matrix = new DenseMatrix64F(7, 7);
+      matrix.setData(new double[] { 
             0, 0, 0, 0, 3, 0, 0, 
             0, 0, 8, 8, 0, 0, 0, 
             0, 0, 0, 0, 0, 1, 0, 
@@ -110,8 +111,6 @@ public abstract class AbstractHeightMapTest
       assertEquals(0, points.get(0).getZ(), eps);
       assertEquals(0, points.get(1).getZ(), eps);
       assertEquals(0, points.get(2).getZ(), eps);
-   
-   
    }
    
    
@@ -122,7 +121,7 @@ public abstract class AbstractHeightMapTest
    /* To use test unhandled points include this.
     * 
 
-	@DeployableTestMethod
+	@DeployableTestMethod(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testUnhandledPoints()
    {
@@ -185,7 +184,7 @@ public abstract class AbstractHeightMapTest
    }
    public abstract HeightMapWithPoints getHeightMap(double minX, double minY, double maxX, double maxY, double resolution);
 
-	@DeployableTestMethod(estimatedDuration = 2.0)
+	@ContinuousIntegrationTest(estimatedDuration = 2.0)
 	@Test(timeout = 30000)
    public void rowModificationSynchronizationTest()
    {
@@ -283,13 +282,14 @@ public abstract class AbstractHeightMapTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testKernelMasking() throws InsufficientDataException
    {
       double b = 10000;    // borderOfExpectedFootPlacement
        double gridResolution = 0.01;
-      GMatrix matrix = new GMatrix(11, 11, new double[]
+      DenseMatrix64F matrix = new DenseMatrix64F(11, 11);
+      matrix.setData(new double[]
       {
          b, b, b, b, b, b, b, b, b, b, b, 
          b, b, b, 0, 0, 0, 0, 0, b, b, b, 
@@ -309,7 +309,7 @@ public abstract class AbstractHeightMapTest
    
          public boolean isIncluded(Point3d test)
          {
-            return test.z<20;
+            return test.getZ()<20;
          }
          
       });

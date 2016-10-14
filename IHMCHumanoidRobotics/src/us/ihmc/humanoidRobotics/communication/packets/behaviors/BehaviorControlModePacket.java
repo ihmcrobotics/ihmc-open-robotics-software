@@ -9,7 +9,7 @@ public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
 {
    public static enum BehaviorControlModeEnum
    {
-      ENABLE_ACTIONS, STOP, PAUSE, RESUME;
+      STOP, PAUSE, RESUME;
 
       public static final BehaviorControlModeEnum[] values = values();
    }

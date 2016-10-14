@@ -13,8 +13,8 @@ import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
       // slope betwen points must be positive
       for (int i = 0; i < segmentPoints.length - 1; i++)
       {
-         double xDifference = segmentPoints[i + 1].x - segmentPoints[i].x;
-         double yDifference = segmentPoints[i + 1].y - segmentPoints[i].y;
+         double xDifference = segmentPoints[i + 1].getX() - segmentPoints[i].getX();
+         double yDifference = segmentPoints[i + 1].getY() - segmentPoints[i].getY();
          if ((xDifference <= 0.0) || (yDifference < 0.0))
          {
             throw new RuntimeException("Slope of line must be greater than zero");
@@ -31,12 +31,12 @@ import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
 
       for (int i = 0; i < segmentPoints.length - 1; i++)
       {
-         if (alpha < segmentPoints[i + 1].x)
+         if (alpha < segmentPoints[i + 1].getX())
          {
-            double x0 = segmentPoints[i].x;
-            double y0 = segmentPoints[i].y;
-            double x1 = segmentPoints[i + 1].x;
-            double y1 = segmentPoints[i + 1].y;
+            double x0 = segmentPoints[i].getX();
+            double y0 = segmentPoints[i].getY();
+            double x1 = segmentPoints[i + 1].getX();
+            double y1 = segmentPoints[i + 1].getY();
 
             double alphaPrime = y0 + (alpha - x0) / (x1 - x0) * (y1 - y0);
 
@@ -44,7 +44,7 @@ import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
          }
       }
 
-      return segmentPoints[segmentPoints.length - 1].y;
+      return segmentPoints[segmentPoints.length - 1].getY();
    }
 
    public static void main(String[] args)
@@ -70,7 +70,7 @@ import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
    {
       Point2d lastPoint = this.segmentPoints[segmentPoints.length];
 
-      return lastPoint.x;
+      return lastPoint.getX();
    }
 
    @Override public double getDerivativeAtAlpha(double alpha)

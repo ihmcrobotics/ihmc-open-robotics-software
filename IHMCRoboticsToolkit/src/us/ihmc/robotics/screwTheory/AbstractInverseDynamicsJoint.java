@@ -1,6 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoint
@@ -11,39 +12,49 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
    protected final ReferenceFrame beforeJointFrame;
    protected GeometricJacobian motionSubspace;
 
+   private final long nameBasedHashCode;
+
    public AbstractInverseDynamicsJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
    {
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(name, predecessor);
+
       this.name = name;
       this.predecessor = predecessor;
       this.beforeJointFrame = beforeJointFrame;
       predecessor.addChildJoint(this);
    }
 
+   @Override
    public final ReferenceFrame getFrameBeforeJoint()
    {
       return beforeJointFrame;
    }
 
+   @Override
    public final GeometricJacobian getMotionSubspace()
    {
       return motionSubspace;
    }
 
+   @Override
    public final RigidBody getPredecessor()
    {
       return predecessor;
    }
 
+   @Override
    public final RigidBody getSuccessor()
    {
       return successor;
    }
 
+   @Override
    public final String getName()
    {
       return name;
    }
 
+   @Override
    public final void updateFramesRecursively()
    {
       getFrameAfterJoint().update();
@@ -54,6 +65,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       }
    }
 
+   @Override
    public void getSuccessorTwist(Twist twistToPack)
    {
       getJointTwist(twistToPack);
@@ -66,6 +78,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       twistToPack.changeFrame(successorFrame);
    }
 
+   @Override
    public void getPredecessorTwist(Twist twistToPack)
    {
       getJointTwist(twistToPack);
@@ -79,6 +92,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       twistToPack.changeFrame(predecessorFrame);
    }
 
+   @Override
    public void getSuccessorAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       getJointAcceleration(accelerationToPack);
@@ -91,6 +105,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       accelerationToPack.changeFrameNoRelativeMotion(successorFrame);
    }
 
+   @Override
    public void getDesiredSuccessorAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       getDesiredJointAcceleration(accelerationToPack);
@@ -103,6 +118,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
       accelerationToPack.changeFrameNoRelativeMotion(successorFrame);
    }
 
+   @Override
    public void getDesiredPredecessorAcceleration(SpatialAccelerationVector accelerationToPack)
    {
       getDesiredJointAcceleration(accelerationToPack);
@@ -117,11 +133,13 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
    }
 
    
+   @Override
    public RigidBodyTransform getOffsetTransform3D()
    {
       return getFrameBeforeJoint().getTransformToParent();
    }
    
+   @Override
    public RigidBodyTransform getJointTransform3D()
    {
       return getFrameAfterJoint().getTransformToParent();
@@ -141,5 +159,11 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
    public String toString()
    {
       return getClass().getSimpleName() + " " + getName();
+   }
+
+   @Override
+   public long nameBasedHashCode()
+   {
+      return nameBasedHashCode;
    }
 }

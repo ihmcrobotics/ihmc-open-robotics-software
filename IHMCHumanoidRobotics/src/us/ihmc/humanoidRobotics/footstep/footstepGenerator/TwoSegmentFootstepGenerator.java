@@ -141,7 +141,7 @@ public class TwoSegmentFootstepGenerator implements FootstepGenerator
    }
 
    @Override
-   public void setHeightMap(HeightMapWithPoints heightMap, SideDependentList<ContactablePlaneBody> contactableFeet)
+   public void setHeightMap(HeightMapWithPoints heightMap, SideDependentList<? extends ContactablePlaneBody> contactableFeet)
    {
       footstepGenerator.setHeightMap(heightMap, contactableFeet);
       footstepGenerator2.setHeightMap(heightMap, contactableFeet);

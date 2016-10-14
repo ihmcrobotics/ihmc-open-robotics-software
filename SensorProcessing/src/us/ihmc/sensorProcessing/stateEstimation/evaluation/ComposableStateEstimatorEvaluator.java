@@ -163,7 +163,7 @@ public class ComposableStateEstimatorEvaluator
             return false;
          }
 
-         public boolean estimateAccelerationBias()
+         public boolean enableIMUBiasCompensation()
          {
             return false;
          }
@@ -174,7 +174,7 @@ public class ComposableStateEstimatorEvaluator
             return true;
          }
 
-         public double getAccelerationBiasFilterFreqInHertz()
+         public double getIMUBiasFilterFreqInHertz()
          {
             return 0;
          }
@@ -199,29 +199,21 @@ public class ComposableStateEstimatorEvaluator
             return 0;
          }
 
-         public boolean estimateIMUDrift()
+         public boolean enableIMUYawDriftCompensation()
          {
             return false;
          }
 
-         public boolean compensateIMUDrift()
-         {
-            return false;
-         }
-
-         public double getIMUDriftFilterFreqInHertz()
+         public double getIMUYawDriftFilterFreqInHertz()
          {
             return 0;
          }
 
-         public double getFootVelocityUsedForImuDriftFilterFreqInHertz()
-         {
-            return 0;
-         }
 
-         public double getFootVelocityThresholdToEnableIMUDriftCompensation()
+         @Override
+         public double getIMUBiasVelocityThreshold()
          {
-            return 0;
+            return 0.015;
          }
 
          public boolean trustCoPAsNonSlippingContactPoint()
@@ -230,24 +222,9 @@ public class ComposableStateEstimatorEvaluator
          }
 
          @Override
-         public boolean useControllerDesiredCenterOfPressure()
-         {
-            return false;
-         }
-
-         public boolean useTwistForPelvisLinearStateEstimation()
-         {
-            return true;
-         }
-
          public double getPelvisLinearVelocityAlphaNewTwist()
          {
             return 1.0;
-         }
-
-         public boolean createFusedIMUSensor()
-         {
-            return false;
          }
 
          public double getContactThresholdForce()
@@ -269,34 +246,6 @@ public class ComposableStateEstimatorEvaluator
          }
 
          @Override
-         public double getPelvisVelocityBacklashSlopTime()
-         {
-            // TODO Auto-generated method stub
-            return 0;
-         }
-
-         @Override
-         public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
-         {
-            // TODO For Valkyrie. Probably have to make more generic.
-            return null;
-         }
-
-         @Override
-         public boolean useIMUsForSpineJointVelocityEstimation()
-         {
-            // TODO Auto-generated method stub
-            return false;
-         }
-
-         @Override
-         public double getAlphaIMUsForSpineJointVelocityEstimation()
-         {
-            // TODO Auto-generated method stub
-            return 0;
-         }
-
-         @Override
          public double getContactThresholdHeight()
          {
             // TODO Auto-generated method stub
@@ -307,20 +256,6 @@ public class ComposableStateEstimatorEvaluator
          public FootSwitchType getFootSwitchType()
          {
             return null;
-         }
-
-         @Override
-         public SideDependentList<String> getWristForceSensorNames()
-         {
-            // TODO Auto-generated method stub
-            return null;
-         }
-
-         @Override
-         public boolean requestWristForceSensorCalibrationAtStart()
-         {
-            // TODO Auto-generated method stub
-            return false;
          }
 
          @Override
@@ -335,6 +270,25 @@ public class ComposableStateEstimatorEvaluator
          {
             // TODO Auto-generated method stub
             return null;
+         }
+
+         @Override
+         public boolean getPelvisLinearStateUpdaterTrustImuWhenNoFeetAreInContact()
+         {
+            // TODO Auto-generated method stub
+            return false;
+         }
+
+         @Override
+         public double getCenterOfMassVelocityFusingFrequency()
+         {
+            return 0.4261;
+         }
+
+         @Override
+         public boolean useGroundReactionForcesToComputeCenterOfMassVelocity()
+         {
+            return false;
          }
       };
 

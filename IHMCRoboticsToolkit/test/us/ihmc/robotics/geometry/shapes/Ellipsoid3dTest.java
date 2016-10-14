@@ -3,8 +3,8 @@ package us.ihmc.robotics.geometry.shapes;
 import org.junit.Test;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.DeployableTestMethod;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -19,7 +19,7 @@ public class Ellipsoid3dTest
    private static final double epsilon = 1e-4;    // This epsilon is meant small changes in coordinates. Use Ellipsoid3d's DEFAULT_EPSILON for error handling.
    private static final int iterations = 100;
 
-	@DeployableTestMethod(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
    public void testCommonShape3dFunctionality()
    {
@@ -40,7 +40,7 @@ public class Ellipsoid3dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleWithNoTransform()
    {
@@ -81,7 +81,7 @@ public class Ellipsoid3dTest
       assertEquals(1.0, sumSquared, 1e-7);
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleWithTranslationalTransform()
    {
@@ -114,7 +114,7 @@ public class Ellipsoid3dTest
       assertFalse(ellipsoid.isInsideOrOnSurface(new Point3d(xTranslation, yTranslation, zTranslation-zRadius - epsilon)));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testExampleUsage()
    {
@@ -123,7 +123,7 @@ public class Ellipsoid3dTest
       double zRadius = 3.0;
       
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotX(Math.PI / 2.0);
+      transform.setRotationRollAndZeroTranslation(Math.PI / 2.0);
       transform.setTranslation(new Vector3d(0.0, 5.0, 0.0));
 
       Ellipsoid3d ellipsoid = new Ellipsoid3d(xRadius, yRadius, zRadius, transform);
@@ -134,7 +134,7 @@ public class Ellipsoid3dTest
       assertFalse(ellipsoid.isInsideOrOnSurface(new Point3d(0.2, 8.2, 0.2), 0.001));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSet()
    {
@@ -168,7 +168,7 @@ public class Ellipsoid3dTest
       assertEquals(!invertResult, ellipsoid.isInsideOrOnSurface(new Point3d(translations[0], translations[1], translations[2] - (radii[2] + offsets[2]))));
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testTranslation()
    {
@@ -204,7 +204,7 @@ public class Ellipsoid3dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testSimpleRotations()
    {
@@ -225,11 +225,11 @@ public class Ellipsoid3dTest
                RigidBodyTransform transform = new RigidBodyTransform();
 
                if (i == 0)
-                  transform.rotX(angle);
+                  transform.setRotationRollAndZeroTranslation(angle);
                if (i == 1)
-                  transform.rotY(angle);
+                  transform.setRotationPitchAndZeroTranslation(angle);
                if (i == 2)
-                  transform.rotZ(angle);
+                  transform.setRotationYawAndZeroTranslation(angle);
 
                Ellipsoid3d ellipsoid = new Ellipsoid3d(xRadius, yRadius, zRadius);
                ellipsoid.setTransform(transform);
@@ -309,7 +309,7 @@ public class Ellipsoid3dTest
       }
    }
 
-	@DeployableTestMethod(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testMethodsForRandomEllipsoids()
    {
@@ -349,10 +349,10 @@ public class Ellipsoid3dTest
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       RigidBodyTransform tempTransform = new RigidBodyTransform();
-      transform.rotX(2 * Math.PI * random.nextDouble());
-      tempTransform.rotY(2 * Math.PI * random.nextDouble());
+      transform.setRotationRollAndZeroTranslation(2 * Math.PI * random.nextDouble());
+      tempTransform.setRotationPitchAndZeroTranslation(2 * Math.PI * random.nextDouble());
       transform.multiply(tempTransform);
-      tempTransform.rotZ(2 * Math.PI * random.nextDouble());
+      tempTransform.setRotationYawAndZeroTranslation(2 * Math.PI * random.nextDouble());
       transform.multiply(tempTransform);
 
       double[] matrix = new double[16];

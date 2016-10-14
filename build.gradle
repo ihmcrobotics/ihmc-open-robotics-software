@@ -1,5 +1,5 @@
 buildscript {
-   repositories {
+    repositories {
       jcenter()
    }
 
@@ -14,7 +14,7 @@ import org.ajoberstar.grgit.*
 
 project.ext.repo = Grgit.open(projectDir)
 
-version = '0.7.10'
+version = '0.8.0'
 
 project.ext.fullVersion = version
 project.ext.vcsUrl = "https://github.com/ihmcrobotics/ihmc-open-robotics-software"
@@ -46,17 +46,12 @@ if (buildType.equals("RELEASE")) {
 }
 
 repositories {
-   mavenLocal()
-
-   jcenter()
-
-   mavenCentral()
-}
-
-repositories {
-   maven {
-      url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty"
-   }
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven {
+        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+    }
 }
 
 task performRelease(type: GradleBuild) {
@@ -100,7 +95,7 @@ subprojects { subproject ->
 
    apply plugin: 'maven-publish'
    apply plugin: 'java'
-
+   
    subproject.ext {
       getOpenRoboticsSoftwareProject = {
          if (subproject.getParent().name.equals(rootProject.name)) {

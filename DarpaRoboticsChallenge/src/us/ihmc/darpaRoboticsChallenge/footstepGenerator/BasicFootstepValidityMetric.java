@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.footstepGenerator;
 
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepValidityMetric;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -24,7 +24,7 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
    }
 
    @Override
-   public boolean footstepValid(FootstepData stanceFootstep, FootstepData prospectiveFootstep)
+   public boolean footstepValid(FootstepDataMessage stanceFootstep, FootstepDataMessage prospectiveFootstep)
    {
       if (stanceFootstep.getRobotSide() == prospectiveFootstep.getRobotSide()) return false;
       double stanceYaw = RotationTools.computeYaw(stanceFootstep.getOrientation());
@@ -41,10 +41,10 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
 
       Vector3d stepVector = new Vector3d(prospectiveFootstep.getLocation());
       stepVector.sub(stanceFootstep.getLocation());
-      double stepLengthInStanceFrame = Math.cos(stanceYaw) * stepVector.x + Math.sin(stanceYaw) * stepVector.y;
-      double stepWidthInStanceFrame = Math.cos(stanceYaw) * stepVector.y - Math.sin(stanceYaw) * stepVector.x;
+      double stepLengthInStanceFrame = Math.cos(stanceYaw) * stepVector.getX() + Math.sin(stanceYaw) * stepVector.getY();
+      double stepWidthInStanceFrame = Math.cos(stanceYaw) * stepVector.getY() - Math.sin(stanceYaw) * stepVector.getX();
       stepWidthInStanceFrame *= sign;
-      double zDiff = stepVector.z;
+      double zDiff = stepVector.getZ();
       if (zDiff > steppingParameters.getMaxStepUp() + EPSILON || -1*zDiff + EPSILON > steppingParameters.getMaxStepDown()){
          return false;
       }
@@ -93,7 +93,7 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
    }
 
    @Override
-   public boolean footstepValid(FootstepData previousFootstep, FootstepData stanceFootstep, FootstepData prospectiveFootstep)
+   public boolean footstepValid(FootstepDataMessage previousFootstep, FootstepDataMessage stanceFootstep, FootstepDataMessage prospectiveFootstep)
    {
       if (previousFootstep.getRobotSide() != prospectiveFootstep.getRobotSide()) return false;
       if (!footstepValid(stanceFootstep, prospectiveFootstep)){
@@ -105,10 +105,10 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
 
       Vector3d stepVector = new Vector3d(prospectiveFootstep.getLocation());
       stepVector.sub(stanceFootstep.getLocation());
-      double stepLengthInStanceFrame = Math.cos(stanceYaw) * stepVector.x + Math.sin(stanceYaw) * stepVector.y;
-      double stepWidthInStanceFrame = Math.cos(stanceYaw) * stepVector.y - Math.sin(stanceYaw) * stepVector.x;
+      double stepLengthInStanceFrame = Math.cos(stanceYaw) * stepVector.getX() + Math.sin(stanceYaw) * stepVector.getY();
+      double stepWidthInStanceFrame = Math.cos(stanceYaw) * stepVector.getY() - Math.sin(stanceYaw) * stepVector.getX();
       stepWidthInStanceFrame *= sign;
-      double zDiff = stepVector.z;
+      double zDiff = stepVector.getZ();
       double swingHeightInRelationToStanceFoot = previousFootstep.getLocation().getZ() + prospectiveFootstep.getSwingHeight() - stanceFootstep.getLocation().getZ();
 
       boolean stricterBoundaries = false;
@@ -140,7 +140,7 @@ public class BasicFootstepValidityMetric implements FootstepValidityMetric
       return true;
    }
 
-   private boolean checkArea(FootstepData footstep, double percentageToCheckAgainst, SteppingParameters parameters){
+   private boolean checkArea(FootstepDataMessage footstep, double percentageToCheckAgainst, SteppingParameters parameters){
       if (footstep.predictedContactPoints == null) return true;
 
       ConvexPolygon2d convexPolygon2d = new ConvexPolygon2d(footstep.getPredictedContactPoints());

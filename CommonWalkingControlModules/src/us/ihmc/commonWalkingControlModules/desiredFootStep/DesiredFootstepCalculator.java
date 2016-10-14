@@ -1,15 +1,16 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 
 public interface DesiredFootstepCalculator
 {
-   public abstract Footstep updateAndGetDesiredFootstep(RobotSide supportLegSide);
+   public abstract FootstepDataMessage updateAndGetDesiredFootstep(RobotSide supportLegSide);
 
    public abstract void initializeDesiredFootstep(RobotSide supportLegSide);
-   
-   public abstract Footstep predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, Footstep desiredFootstep);
+
+   public abstract FootstepDataMessage predictFootstepAfterDesiredFootstep(RobotSide supportLegSide, FootstepDataMessage desiredFootstep, double timeFromNow);
 
    public abstract void initialize();
 

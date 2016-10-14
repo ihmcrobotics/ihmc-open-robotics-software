@@ -12,18 +12,15 @@ import us.ihmc.SdfLoader.SDFDescriptionMutator;
 public class DRCRobotSDFLoader
 {
      
-   public static JaxbSDFLoader loadDRCRobot(String[] resourceDirectories, InputStream sdfFile, boolean headless, SDFDescriptionMutator descriptionMutator)
+   public static JaxbSDFLoader loadDRCRobot(String[] resourceDirectories, InputStream sdfFile, SDFDescriptionMutator descriptionMutator)
    {
       ArrayList<String> resources = new ArrayList<String>();
 
-      if (!headless)
+      for(String resource : resourceDirectories)
       {
-        for(String resource : resourceDirectories)
-        {
-           resources.add(resource);
-        }
+         resources.add(resource);
       }
-       
+
       if(sdfFile==null)
       {
         System.err.println("failed to load sdf file");

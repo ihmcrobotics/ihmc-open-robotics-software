@@ -279,4 +279,9 @@ public class StringStretcher2d
       
       return null;
    }
+
+   public void reset()
+   {
+      minMaxPoints.clear();
+   }
 }
