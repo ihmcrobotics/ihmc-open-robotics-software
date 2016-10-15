@@ -92,6 +92,12 @@ public class MeshDataGeneratorVisualizer extends Application
       cube.setTranslateY(-1.0);
       rootNode.getChildren().add(cube);
 
+      MeshView flatRectangle = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.FlatRectangle(-0.1, 0.1, 0.25, 0.01, 0.2)));
+      flatRectangle.setMaterial(defaultMaterial);
+      flatRectangle.setTranslateX(0.5);
+      flatRectangle.setTranslateY(-1.0);
+      rootNode.getChildren().add(flatRectangle);
+
       primaryStage.setMaximized(true);
       primaryStage.setScene(scene);
       primaryStage.show();

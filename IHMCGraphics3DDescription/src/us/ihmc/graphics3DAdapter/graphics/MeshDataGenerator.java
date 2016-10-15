@@ -939,8 +939,9 @@ public class MeshDataGenerator
 
    public static MeshDataHolder FlatRectangle(float xMin, float yMin, float xMax, float yMax, float z)
    {
-      Point3f points[] = new Point3f[4];
-      TexCoord2f textPoints[] = new TexCoord2f[4];
+      Point3f[] points = new Point3f[4];
+      Vector3f[] normals = new Vector3f[4];
+      TexCoord2f[] textPoints = new TexCoord2f[4];
 
       points[0] = new Point3f(xMin, yMin, z);
       points[1] = new Point3f(xMax, yMin, z);
@@ -952,15 +953,24 @@ public class MeshDataGenerator
       textPoints[2] = new TexCoord2f(1.0f, 1.0f);
       textPoints[3] = new TexCoord2f(0.0f, 1.0f);
 
-      int[] polygonIndices = new int[4];
-      for (int i = 0; i < polygonIndices.length; i++)
-      {
-         polygonIndices[i] = i;
-      }
+      normals[0] = new Vector3f(0.0f, 0.0f, 1.0f);
+      normals[1] = new Vector3f(0.0f, 0.0f, 1.0f);
+      normals[2] = new Vector3f(0.0f, 0.0f, 1.0f);
+      normals[3] = new Vector3f(0.0f, 0.0f, 1.0f);
 
-      int[] polygonStripCounts = {4};
+      int[] triangleIndices = new int[3 * 2];
+      int index = 0;
+      triangleIndices[index++] = 0;
+      triangleIndices[index++] = 3;
+      triangleIndices[index++] = 1;
 
-      return new MeshDataHolder(points, textPoints, polygonIndices, polygonStripCounts);
+      triangleIndices[index++] = 3;
+      triangleIndices[index++] = 2;
+      triangleIndices[index++] = 1;
+
+      int[] polygonStripCounts = {3, 3};
+
+      return new MeshDataHolder(points, textPoints, triangleIndices, polygonStripCounts, normals);
    }
 
    public static MeshDataHolder Rectangle(double x0, double y0, double z0, double x1, double y1, double z1, double x2, double y2, double z2, double x3,
