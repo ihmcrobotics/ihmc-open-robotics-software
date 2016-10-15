@@ -1144,122 +1144,99 @@ public class MeshDataGenerator
 
       TexCoord2f textPoints[] = new TexCoord2f[10];
 
+      // Box front face
       points[0] = new Point3f(-lx / 2.0f, -ly / 2.0f, 0.0f);
-      points[1] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
-      points[2] = new Point3f(lx / 2.0f, ly / 2.0f, 0.0f);
+      textPoints[0] = new TexCoord2f(0.5f, 0.5f);
+      points[1] = new Point3f(-lx / 2.0f, -ly / 2.0f, lz);
+      textPoints[1] = new TexCoord2f(0.5f, 0.5f);
+      points[2] = new Point3f(-lx / 2.0f, ly / 2.0f, lz);
+      textPoints[2] = new TexCoord2f(0.5f, 0.75f);
       points[3] = new Point3f(-lx / 2.0f, ly / 2.0f, 0.0f);
-      points[4] = new Point3f(-lx / 2.0f, -ly / 2.0f, lz);
+      textPoints[3] = new TexCoord2f(0.5f, 0.75f);
+
+      // Box back face
+      points[4] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
+      textPoints[4] = new TexCoord2f(0.75f, 0.5f);
       points[5] = new Point3f(lx / 2.0f, -ly / 2.0f, lz);
+      textPoints[5] = new TexCoord2f(0.75f, 0.5f);
       points[6] = new Point3f(lx / 2.0f, ly / 2.0f, lz);
-      points[7] = new Point3f(-lx / 2.0f, ly / 2.0f, lz);
+      textPoints[6] = new TexCoord2f(0.75f, 0.75f);
+      points[7] = new Point3f(lx / 2.0f, ly / 2.0f, 0.0f);
+      textPoints[7] = new TexCoord2f(0.75f, 0.75f);
+
+      // Box left face
+      points[8] = new Point3f(-lx / 2.0f, ly / 2.0f, 0.0f);
+      textPoints[8] = new TexCoord2f(0.5f, 0.75f);
+      points[9] = new Point3f(-lx / 2.0f, ly / 2.0f, lz);
+      textPoints[9] = new TexCoord2f(0.5f, 0.75f);
+      points[10] = new Point3f(lx / 2.0f, ly / 2.0f, lz);
+      textPoints[10] = new TexCoord2f(0.75f, 0.75f);
+      points[11] = new Point3f(lx / 2.0f, ly / 2.0f, 0.0f);
+      textPoints[11] = new TexCoord2f(0.75f, 0.75f);
+
+      // Box right face
+      points[12] = new Point3f(-lx / 2.0f, -ly / 2.0f, 0.0f);
+      textPoints[12] = new TexCoord2f(0.5f, 0.5f);
+      points[13] = new Point3f(-lx / 2.0f, -ly / 2.0f, lz);
+      textPoints[13] = new TexCoord2f(0.5f, 0.5f);
+      points[14] = new Point3f(lx / 2.0f, -ly / 2.0f, lz);
+      textPoints[14] = new TexCoord2f(0.75f, 0.5f);
+      points[15] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
+      textPoints[15] = new TexCoord2f(0.75f, 0.5f);
 
       points[8] = new Point3f(0.0f, 0.0f, lz + lh);
-      points[9] = new Point3f(0.0f, 0.0f, -lh);
-
-      textPoints[0] = new TexCoord2f(0.5f, 0.5f);
-      textPoints[1] = new TexCoord2f(0.75f, 0.5f);
-      textPoints[2] = new TexCoord2f(0.75f, 0.75f);
-      textPoints[3] = new TexCoord2f(0.5f, 0.75f);
-      textPoints[4] = new TexCoord2f(0.5f, 0.5f);
-      textPoints[5] = new TexCoord2f(0.75f, 0.5f);
-      textPoints[6] = new TexCoord2f(0.75f, 0.75f);
-      textPoints[7] = new TexCoord2f(0.5f, 0.75f);
-
       textPoints[8] = new TexCoord2f(0.675f, 0.675f);
+      points[9] = new Point3f(0.0f, 0.0f, -lh);
       textPoints[9] = new TexCoord2f(0.675f, 0.675f);
 
-      int[] polygonIndices = new int[4 * 4 + 8 * 3];
+
+
+      int numberOfTriangles = 2 * 4 + 2 * 4;
+      int[] polygonIndices = new int[3 * numberOfTriangles];
       int index = 0;
 
-      for (int i = 0; i <= 3; i++)
-      {
-         polygonIndices[index] = i;
-         polygonIndices[index + 1] = (i + 1) % 4;
-         polygonIndices[index + 2] = 4 + (i + 1) % 4;
-         polygonIndices[index + 3] = 4 + i;
+      // Box front face
+      polygonIndices[index++] = 0;
+      polygonIndices[index++] = 1;
+      polygonIndices[index++] = 2;
 
-         index = index + 4;
-      }
+      polygonIndices[index++] = 0;
+      polygonIndices[index++] = 2;
+      polygonIndices[index++] = 3;
 
-      for (int i = 0; i <= 3; i++)
-      {
-         polygonIndices[index] = (i + 1) % 4;
-         polygonIndices[index + 1] = i;
-         polygonIndices[index + 2] = 9;
+      // Box back face
+      polygonIndices[index++] = 4;
+      polygonIndices[index++] = 6;
+      polygonIndices[index++] = 5;
+      
+      polygonIndices[index++] = 4;
+      polygonIndices[index++] = 7;
+      polygonIndices[index++] = 6;
 
-         index = index + 3;
-      }
+      // Box left face
+      polygonIndices[index++] = 8;
+      polygonIndices[index++] = 9;
+      polygonIndices[index++] = 10;
+      
+      polygonIndices[index++] = 8;
+      polygonIndices[index++] = 10;
+      polygonIndices[index++] = 11;
 
-      for (int i = 0; i <= 3; i++)
-      {
-         polygonIndices[index] = 4 + i;
-         polygonIndices[index + 1] = 4 + (i + 1) % 4;
-         polygonIndices[index + 2] = 8;
+      // TODO stopped there
+      // Box right face
+      polygonIndices[index++] = 8;
+      polygonIndices[index++] = 9;
+      polygonIndices[index++] = 10;
+      
+      polygonIndices[index++] = 8;
+      polygonIndices[index++] = 10;
+      polygonIndices[index++] = 11;
 
-         index = index + 3;
-      }
-
-      int[] pStripCounts = new int[12];
-
-      for (int i = 0; i < 4; i++)
-      {
-         pStripCounts[i] = 4;
-      }
-
-      for (int i = 4; i < 12; i++)
-      {
-         pStripCounts[i] = 3;
-      }
+      int[] pStripCounts = new int[numberOfTriangles];
+      Arrays.fill(pStripCounts, 3);
 
       return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts);
    }
-
-   //TODO: Figure out what a Gridded Polytope is and figure out how to draw them.
-   //   public static MeshDataHolder griddedPolytope(Point3f[][] griddedPoints, double x_tiles, double y_tiles)
-   //   {
-   //      int firstSize = griddedPoints.length;
-   //      int secondSize = griddedPoints[0].length;
-   //
-   //      int totalN = firstSize * 2 * secondSize;
-   //
-   //      Point3f[] coords = new Point3f[totalN];
-   //
-   //      
-   //      int[] stripCounts = new int[firstSize];
-   //      TexCoord2f[] textPoints = new TexCoord2f[totalN];
-   //
-   //      int index = 0;
-   //      for (int i = 0; i < firstSize - 1; i++)
-   //      {
-   //         for (int j = 0; j < secondSize; j++)
-   //         {
-   //            coords[index] = new Point3f(griddedPoints[i + 1][j]);
-   //            textPoints[index] = new TexCoord2f((float) (x_tiles * ((float) i + 1) / (firstSize)),
-   //                                               (float) (y_tiles * (j) / (secondSize)));
-   //            
-   //            index++;
-   //
-   //            coords[index] = new Point3f(griddedPoints[i][j]);
-   //            textPoints[index] = new TexCoord2f((float) (x_tiles * (i) / (firstSize)), (float) (y_tiles * (j) / (secondSize)));
-   //            index++;
-   //         }
-   //      }
-   //      
-   //      for (int k = 0; k < secondSize; k++)
-   //      {
-   ////       stripCounts[k] = 2*(xPointsPerSide+1);
-   //         stripCounts[k] = 2 * firstSize;
-   //      }
-   //
-   //      int[] polygonIndices = new int[coords.length];
-   //      for(int l = 0; l < firstSize; l++)
-   //      {
-   //         // TODO: Fill polygonIndices.
-   //      }
-   //      
-   //      return new MeshDataHolder(coords, textPoints, polygonIndices, stripCounts);
-   //   }
-   //   
 
    private static TexCoord2f[] generateInterpolatedTexturePoints(int numPoints)
    {
