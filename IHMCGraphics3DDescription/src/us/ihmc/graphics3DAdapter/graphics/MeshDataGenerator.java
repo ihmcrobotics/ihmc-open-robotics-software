@@ -10,6 +10,7 @@ import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
 import javax.vecmath.Vector3f;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 public class MeshDataGenerator
@@ -720,66 +721,154 @@ public class MeshDataGenerator
 
    public static MeshDataHolder ArcTorus(float startAngle, float endAngle, float majorRadius, float minorRadius, int N)
    {
-      Point3f points[] = new Point3f[N * N];
-      TexCoord2f[] textPoints = new TexCoord2f[N * N];
-      double angle1, angle2;
-      double cenX, cenY;
-      double pX, pY, pZ;
+      float torusSpanAngle = endAngle - startAngle;
+      boolean isClosed = MathTools.epsilonEquals(torusSpanAngle, 2.0 * Math.PI, 1.0e-3);
+
+      // Make things a bit clearer.
+      int majorN = N;
+      // Make things a bit clearer.
+      int minorN = N;
+
+      float stepAngle = (endAngle - startAngle) / (isClosed ? majorN : majorN - 1);
+
+      int numberOfVertices = isClosed ? majorN * minorN : majorN * minorN + 2 * (N + 1);
+      Point3f points[] = new Point3f[numberOfVertices];
+      Vector3f[] normals = new Vector3f[numberOfVertices];
+      TexCoord2f[] textPoints = new TexCoord2f[numberOfVertices];
+
+      float centerX, centerY;
+      float pX, pY, pZ;
       float texY, texX;
 
-      for (int i = 0; i < N; i++)
+      // Core part of the torus
+      for (int majorIndex = 0; majorIndex < majorN; majorIndex++)
       {
-         angle1 = startAngle + i * (endAngle - startAngle) / (N - 1);
-         cenX = majorRadius * Math.cos(angle1);
-         cenY = majorRadius * Math.sin(angle1);
+         float majorAngle = startAngle + majorIndex * stepAngle;
+         float cosMajorAngle = (float) Math.cos(majorAngle);
+         float sinMajorAngle = (float) Math.sin(majorAngle);
+         centerX = majorRadius * cosMajorAngle;
+         centerY = majorRadius * sinMajorAngle;
 
-         texY = (float) i / (float) N;
+         texY = (float) majorIndex / (float) majorN;
 
-         for (int j = 0; j < N; j++)
+         for (int minorIndex = 0; minorIndex < minorN; minorIndex++)
          {
-            angle2 = j * 2.0 * Math.PI / N;
-            pX = cenX + minorRadius * Math.cos(angle1) * Math.cos(angle2);
-            pY = cenY + minorRadius * Math.sin(angle1) * Math.cos(angle2);
-            pZ = minorRadius * Math.sin(angle2);
-            points[i * N + j] = new Point3f((float) pX, (float) pY, (float) pZ);
-
-            texX = (float) j / (float) N;
-            textPoints[i * N + j] = new TexCoord2f(texX, texY);
+            int currentIndex = majorIndex * minorN + minorIndex;
+            float minorAngle = minorIndex * 2.0f * (float) Math.PI / minorN;
+            float cosMinorAngle = (float) Math.cos(minorAngle);
+            float sinMinorAngle = (float) Math.sin(minorAngle);
+            pX = centerX + minorRadius * cosMajorAngle * cosMinorAngle;
+            pY = centerY + minorRadius * sinMajorAngle * cosMinorAngle;
+            pZ = minorRadius * sinMinorAngle;
+            points[currentIndex] = new Point3f(pX, pY, pZ);
+            normals[currentIndex] = new Vector3f(cosMajorAngle * cosMinorAngle, sinMajorAngle * cosMinorAngle, sinMinorAngle);
+            texX = (float) minorIndex / (float) minorN;
+            textPoints[currentIndex] = new TexCoord2f(texX, texY);
          }
       }
 
-      int[] polygonIndices = new int[4 * (N - 1) * N];
+      int lastMajorIndex = isClosed ? majorN : majorN - 1;
+      int numberOfTriangles = 2 * lastMajorIndex * minorN;
+      if (!isClosed)
+         numberOfTriangles += 2 * minorN;
+      int[] triangleIndices = new int[3 * numberOfTriangles];
 
       int index = 0;
 
-      // Bottom
-      for (int i = 0; i < N - 1; i++)
+      // Torus core
+      for (int majorIndex = 0; majorIndex < lastMajorIndex; majorIndex++)
       {
-         for (int j = 0; j < N - 1; j++)
+         for (int minorIndex = 0; minorIndex < minorN; minorIndex++)
          {
-            polygonIndices[index + 3] = (i * N) + j;
-            polygonIndices[index + 2] = (i * N) + j + 1;
-            polygonIndices[index + 1] = (i + 1) * N + j + 1;
-            polygonIndices[index] = (i + 1) * N + j;
+            int nextMajorIndex = (majorIndex + 1) % majorN;
+            int nextMinorIndex = (minorIndex + 1) % minorN;
 
-            index = index + 4;
+            triangleIndices[index++] = nextMajorIndex * minorN + minorIndex;
+            triangleIndices[index++] = nextMajorIndex * minorN + nextMinorIndex;
+            triangleIndices[index++] = majorIndex * minorN + nextMinorIndex;
+
+            triangleIndices[index++] = nextMajorIndex * minorN + minorIndex;
+            triangleIndices[index++] = majorIndex * minorN + nextMinorIndex;
+            triangleIndices[index++] = majorIndex * minorN + minorIndex;
+         }
+      }
+
+      // Close both ends when the torus is open
+      if (!isClosed)
+      {
+         // First end
+         float cosStartAngle = (float) Math.cos(startAngle);
+         float sinStartAngle = (float) Math.sin(startAngle);
+         centerX = majorRadius * cosStartAngle;
+         centerY = majorRadius * sinStartAngle;
+
+         for (int minorIndex = 0; minorIndex < minorN; minorIndex++)
+         {
+            int currentIndex = majorN * minorN + minorIndex;
+            float minorAngle = minorIndex * 2.0f * (float) Math.PI / minorN;
+            float cosMinorAngle = (float) Math.cos(minorAngle);
+            float sinMinorAngle = (float) Math.sin(minorAngle);
+            pX = centerX + minorRadius * cosStartAngle * cosMinorAngle;
+            pY = centerY + minorRadius * sinStartAngle * cosMinorAngle;
+            pZ = minorRadius * sinMinorAngle;
+            points[currentIndex] = new Point3f(pX, pY, pZ);
+            normals[currentIndex] = new Vector3f(sinStartAngle, -cosStartAngle, 0.0f);
+            texX = (float) minorIndex / (float) minorN;
+            textPoints[currentIndex] = new TexCoord2f(texX, 0.0f);
          }
 
-         polygonIndices[index + 3] = (i * N) + N - 1;
-         polygonIndices[index + 2] = (i * N);
-         polygonIndices[index + 1] = (i + 1) * N;
-         polygonIndices[index] = (i + 1) * N + N - 1;
-         index = index + 4;
+         // First end center
+         int firstEndCenterIndex = numberOfVertices - 2;
+         points[firstEndCenterIndex] = new Point3f(centerX, centerY, 0.0f);
+         normals[firstEndCenterIndex] = new Vector3f(sinStartAngle, -cosStartAngle, 0.0f);
+         textPoints[firstEndCenterIndex] = new TexCoord2f(0.0f, 0.0f);
+
+         // Second end
+         float cosEndAngle = (float) Math.cos(endAngle);
+         float sinEndAngle = (float) Math.sin(endAngle);
+         centerX = majorRadius * cosEndAngle;
+         centerY = majorRadius * sinEndAngle;
+
+         for (int minorIndex = 0; minorIndex < minorN; minorIndex++)
+         {
+            int currentIndex = (majorN + 1) * minorN + minorIndex;
+            float minorAngle = minorIndex * 2.0f * (float) Math.PI / minorN;
+            float cosMinorAngle = (float) Math.cos(minorAngle);
+            float sinMinorAngle = (float) Math.sin(minorAngle);
+            pX = centerX + minorRadius * cosEndAngle * cosMinorAngle;
+            pY = centerY + minorRadius * sinEndAngle * cosMinorAngle;
+            pZ = minorRadius * sinMinorAngle;
+            points[currentIndex] = new Point3f(pX, pY, pZ);
+            normals[currentIndex] = new Vector3f(-sinEndAngle, cosEndAngle, 0.0f);
+            texX = (float) minorIndex / (float) minorN;
+            textPoints[currentIndex] = new TexCoord2f(texX, 1.0f);
+         }
+
+         // Second end center
+         int secondEndCenterIndex = numberOfVertices - 1;
+         points[secondEndCenterIndex] = new Point3f(centerX, centerY, 0.0f);
+         normals[secondEndCenterIndex] = new Vector3f(-sinEndAngle, cosEndAngle, 0.0f);
+         textPoints[secondEndCenterIndex] = new TexCoord2f(0.0f, 1.0f);
+
+         // Setting up indices
+         for (int minorIndex = 0; minorIndex < minorN; minorIndex++)
+         {
+            int nextMinorIndex = (minorIndex + 1) % minorN;
+
+            triangleIndices[index++] = firstEndCenterIndex;
+            triangleIndices[index++] = majorN * minorN + minorIndex;
+            triangleIndices[index++] = majorN * minorN + nextMinorIndex;
+
+            triangleIndices[index++] = secondEndCenterIndex;
+            triangleIndices[index++] = (majorN + 1) * minorN + nextMinorIndex;
+            triangleIndices[index++] = (majorN + 1) * minorN + minorIndex;
+         }
       }
 
-      int[] pStripCounts = new int[(N - 1) * N];
+      int[] pStripCounts = new int[numberOfTriangles];
+      Arrays.fill(pStripCounts, 3);
 
-      for (int i = 0; i < (N - 1) * N; i++)
-      {
-         pStripCounts[i] = 4;
-      }
-
-      return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts);
+      return new MeshDataHolder(points, textPoints, triangleIndices, pStripCounts, normals);
    }
 
    public static MeshDataHolder Cube(double lx, double ly, double lz, boolean centered)
@@ -985,41 +1074,6 @@ public class MeshDataGenerator
       int[] polygonStripCounts = {3, 3};
 
       return new MeshDataHolder(points, textPoints, triangleIndices, polygonStripCounts, normals);
-   }
-
-   public static MeshDataHolder Rectangle(double x0, double y0, double z0, double x1, double y1, double z1, double x2, double y2, double z2, double x3,
-         double y3, double z3)
-   {
-      return Rectangle((float) x0, (float) y0, (float) z0, (float) x1, (float) y1, (float) z1, (float) x2, (float) y2, (float) z2, (float) x3, (float) y3,
-            (float) z3);
-   }
-
-   public static MeshDataHolder Rectangle(float x0, float y0, float z0, float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3,
-         float z3)
-   {
-      Point3f points[] = new Point3f[4];
-
-      TexCoord2f textPoints[] = new TexCoord2f[4];
-
-      points[0] = new Point3f(x0, y0, z0);
-      points[1] = new Point3f(x1, y1, z1);
-      points[2] = new Point3f(x2, y2, z2);
-      points[3] = new Point3f(x3, y3, z3);
-
-      textPoints[0] = new TexCoord2f(0.0f, 0.0f);
-      textPoints[1] = new TexCoord2f(1.0f, 0.0f);
-      textPoints[2] = new TexCoord2f(1.0f, 1.0f);
-      textPoints[3] = new TexCoord2f(0.0f, 1.0f);
-
-      int[] polygonIndices = new int[4];
-      for (int i = 0; i < polygonIndices.length; i++)
-      {
-         polygonIndices[i] = i;
-      }
-
-      int[] polygonStripCounts = {4};
-
-      return new MeshDataHolder(points, textPoints, polygonIndices, polygonStripCounts);
    }
 
    public static MeshDataHolder Wedge(double lx, double ly, double lz)
