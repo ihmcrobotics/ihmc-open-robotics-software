@@ -80,6 +80,18 @@ public class MeshDataGeneratorVisualizer extends Application
       hemiEllipsoid.setTranslateY(0.5);
       rootNode.getChildren().add(hemiEllipsoid);
 
+      MeshView polygon = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Polygon(polygonVertices)));
+      polygon.setMaterial(defaultMaterial);
+      polygon.setTranslateX(-0.5);
+      polygon.setTranslateY(3.5);
+      rootNode.getChildren().add(polygon);
+
+      MeshView cube = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Cube(0.3, 0.1, 0.5, false)));
+      cube.setMaterial(defaultMaterial);
+      cube.setTranslateX(-0.5);
+      cube.setTranslateY(-1.0);
+      rootNode.getChildren().add(cube);
+
       primaryStage.setMaximized(true);
       primaryStage.setScene(scene);
       primaryStage.show();
@@ -102,8 +114,9 @@ public class MeshDataGeneratorVisualizer extends Application
       }
 
       Point2d[] vertices = new Point2d[numberOfPoints];
+      int reverseIndex = numberOfPoints;
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-         vertices[i] = polygon.getVertex(i);
+         vertices[i] = polygon.getVertex(--reverseIndex);
       return vertices;
    }
 
