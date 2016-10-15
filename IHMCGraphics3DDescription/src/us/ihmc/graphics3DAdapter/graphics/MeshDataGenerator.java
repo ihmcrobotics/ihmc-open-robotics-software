@@ -567,9 +567,9 @@ public class MeshDataGenerator
 
    public static MeshDataHolder Cone(float height, float radius, int N)
    {
-      Point3f[] vertices = new Point3f[2 * N + 2];
-      Vector3f[] normals = new Vector3f[2 * N + 2];
-      TexCoord2f[] textureCoordinates = new TexCoord2f[2 * N + 2];
+      Point3f[] vertices = new Point3f[3 * N + 1];
+      Vector3f[] normals = new Vector3f[3 * N + 1];
+      TexCoord2f[] textureCoordinates = new TexCoord2f[3 * N + 1];
 
       // This is equal to half of the opening angle of the cone at its top. Used to compute the normals.
       float slopeAngle = (float) Math.atan2(radius, height);
@@ -593,16 +593,13 @@ public class MeshDataGenerator
          vertices[i + N] = new Point3f(vertexX, vertexY, 0.0f);
          normals[i + N] = new Vector3f(cosSlopeAngle * cosAngle, cosSlopeAngle * sinAngle, sinSlopeAngle);
          textureCoordinates[i + N] = new TexCoord2f(0.5f * cosAngle + 0.5f, 0.5f * sinAngle + 0.5f);
+         vertices[i + 2 * N] = new Point3f(0.0f, 0.0f, height);
+         normals[i + 2 * N] = new Vector3f(cosSlopeAngle * cosAngle, cosSlopeAngle * sinAngle, sinSlopeAngle);
+         textureCoordinates[i + 2 * N] = new TexCoord2f(0.5f, 0.5f);
       }
 
-      // The top peak
-      int peakIndex = 2 * N;
-      vertices[peakIndex] = new Point3f(0.0f, 0.0f, height);
-      normals[peakIndex] = new Vector3f(0.0f, 0.0f, 1.0f);
-      textureCoordinates[peakIndex] = new TexCoord2f(0.5f, 0.5f);
-
       // The center of the bottom
-      int bottomCenterIndex = 2 * N + 1;
+      int bottomCenterIndex = 3 * N;
       vertices[bottomCenterIndex] = new Point3f(0.0f, 0.0f, 0.0f);
       normals[bottomCenterIndex] = new Vector3f(0.0f, 0.0f, -1.0f);
       textureCoordinates[bottomCenterIndex] = new TexCoord2f(0.5f, 0.5f);
@@ -622,7 +619,7 @@ public class MeshDataGenerator
          // The side faces
          triangleIndices[index++] = i + N;
          triangleIndices[index++] = (i + 1) % N + N;
-         triangleIndices[index++] = peakIndex;
+         triangleIndices[index++] = i + 2 * N;
       }
 
       int[] pStripCounts = new int[numberOfTriangles];
@@ -893,7 +890,7 @@ public class MeshDataGenerator
       triangleIndices[index++] = 8;
       triangleIndices[index++] = 11;
       triangleIndices[index++] = 10;
-      
+
       triangleIndices[index++] = 8;
       triangleIndices[index++] = 9;
       triangleIndices[index++] = 11;
@@ -902,7 +899,7 @@ public class MeshDataGenerator
       triangleIndices[index++] = 15;
       triangleIndices[index++] = 14;
       triangleIndices[index++] = 13;
-      
+
       triangleIndices[index++] = 14;
       triangleIndices[index++] = 12;
       triangleIndices[index++] = 13;
@@ -911,7 +908,7 @@ public class MeshDataGenerator
       triangleIndices[index++] = 16;
       triangleIndices[index++] = 19;
       triangleIndices[index++] = 17;
-      
+
       triangleIndices[index++] = 16;
       triangleIndices[index++] = 18;
       triangleIndices[index++] = 19;
@@ -920,11 +917,10 @@ public class MeshDataGenerator
       triangleIndices[index++] = 20;
       triangleIndices[index++] = 23;
       triangleIndices[index++] = 22;
-      
+
       triangleIndices[index++] = 20;
       triangleIndices[index++] = 21;
       triangleIndices[index++] = 23;
-      
 
       int[] polygonStripCounts = new int[numberOfTriangles];
       Arrays.fill(polygonStripCounts, 3);
@@ -1084,7 +1080,6 @@ public class MeshDataGenerator
       normals[17] = new Vector3f(0.0f, 1.0f, 0.0f);
       textPoints[17] = new TexCoord2f(textPoints[5]);
 
-
       int numberOfTriangles = 2 * 3 + 2;
       int[] triangleIndices = new int[3 * numberOfTriangles];
 
@@ -1121,7 +1116,7 @@ public class MeshDataGenerator
       triangleIndices[index++] = 12;
       triangleIndices[index++] = 13;
       triangleIndices[index++] = 14;
-      
+
       // Left face
       triangleIndices[index++] = 15;
       triangleIndices[index++] = 16;
@@ -1140,56 +1135,158 @@ public class MeshDataGenerator
 
    public static MeshDataHolder PyramidCube(float lx, float ly, float lz, float lh)
    {
-      Point3f points[] = new Point3f[10];
-
-      TexCoord2f textPoints[] = new TexCoord2f[10];
+      Point3f points[] = new Point3f[40];
+      Vector3f[] normals = new Vector3f[40];
+      TexCoord2f textPoints[] = new TexCoord2f[40];
 
       // Box front face
       points[0] = new Point3f(-lx / 2.0f, -ly / 2.0f, 0.0f);
+      normals[0] = new Vector3f(-1.0f, 0.0f, 0.0f);
       textPoints[0] = new TexCoord2f(0.5f, 0.5f);
       points[1] = new Point3f(-lx / 2.0f, -ly / 2.0f, lz);
+      normals[1] = new Vector3f(-1.0f, 0.0f, 0.0f);
       textPoints[1] = new TexCoord2f(0.5f, 0.5f);
       points[2] = new Point3f(-lx / 2.0f, ly / 2.0f, lz);
+      normals[2] = new Vector3f(-1.0f, 0.0f, 0.0f);
       textPoints[2] = new TexCoord2f(0.5f, 0.75f);
       points[3] = new Point3f(-lx / 2.0f, ly / 2.0f, 0.0f);
+      normals[3] = new Vector3f(-1.0f, 0.0f, 0.0f);
       textPoints[3] = new TexCoord2f(0.5f, 0.75f);
 
       // Box back face
       points[4] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
+      normals[4] = new Vector3f(1.0f, 0.0f, 0.0f);
       textPoints[4] = new TexCoord2f(0.75f, 0.5f);
       points[5] = new Point3f(lx / 2.0f, -ly / 2.0f, lz);
+      normals[5] = new Vector3f(1.0f, 0.0f, 0.0f);
       textPoints[5] = new TexCoord2f(0.75f, 0.5f);
       points[6] = new Point3f(lx / 2.0f, ly / 2.0f, lz);
+      normals[6] = new Vector3f(1.0f, 0.0f, 0.0f);
       textPoints[6] = new TexCoord2f(0.75f, 0.75f);
       points[7] = new Point3f(lx / 2.0f, ly / 2.0f, 0.0f);
+      normals[7] = new Vector3f(1.0f, 0.0f, 0.0f);
       textPoints[7] = new TexCoord2f(0.75f, 0.75f);
 
       // Box left face
       points[8] = new Point3f(-lx / 2.0f, ly / 2.0f, 0.0f);
+      normals[8] = new Vector3f(0.0f, 1.0f, 0.0f);
       textPoints[8] = new TexCoord2f(0.5f, 0.75f);
       points[9] = new Point3f(-lx / 2.0f, ly / 2.0f, lz);
+      normals[9] = new Vector3f(0.0f, 1.0f, 0.0f);
       textPoints[9] = new TexCoord2f(0.5f, 0.75f);
       points[10] = new Point3f(lx / 2.0f, ly / 2.0f, lz);
+      normals[10] = new Vector3f(0.0f, 1.0f, 0.0f);
       textPoints[10] = new TexCoord2f(0.75f, 0.75f);
       points[11] = new Point3f(lx / 2.0f, ly / 2.0f, 0.0f);
+      normals[11] = new Vector3f(0.0f, 1.0f, 0.0f);
       textPoints[11] = new TexCoord2f(0.75f, 0.75f);
 
       // Box right face
       points[12] = new Point3f(-lx / 2.0f, -ly / 2.0f, 0.0f);
+      normals[12] = new Vector3f(0.0f, -1.0f, 0.0f);
       textPoints[12] = new TexCoord2f(0.5f, 0.5f);
       points[13] = new Point3f(-lx / 2.0f, -ly / 2.0f, lz);
+      normals[13] = new Vector3f(0.0f, -1.0f, 0.0f);
       textPoints[13] = new TexCoord2f(0.5f, 0.5f);
       points[14] = new Point3f(lx / 2.0f, -ly / 2.0f, lz);
+      normals[14] = new Vector3f(0.0f, -1.0f, 0.0f);
       textPoints[14] = new TexCoord2f(0.75f, 0.5f);
       points[15] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
+      normals[15] = new Vector3f(0.0f, -1.0f, 0.0f);
       textPoints[15] = new TexCoord2f(0.75f, 0.5f);
 
-      points[8] = new Point3f(0.0f, 0.0f, lz + lh);
-      textPoints[8] = new TexCoord2f(0.675f, 0.675f);
-      points[9] = new Point3f(0.0f, 0.0f, -lh);
-      textPoints[9] = new TexCoord2f(0.675f, 0.675f);
+      float frontBackAngle = (float) Math.atan2(lx / 2.0, lh);
+      float leftRightAngle = (float) Math.atan2(ly / 2.0, lh);
 
+      // Top pyramid
+      // Front face
+      points[16] = new Point3f(0.0f, 0.0f, lz + lh);
+      normals[16] = new Vector3f(-(float) Math.cos(frontBackAngle), 0.0f, (float) Math.sin(frontBackAngle));
+      textPoints[16] = new TexCoord2f(0.675f, 0.675f);
+      points[17] = new Point3f(-lx / 2.0f, -ly / 2.0f, lz);
+      normals[17] = new Vector3f(-(float) Math.cos(frontBackAngle), 0.0f, (float) Math.sin(frontBackAngle));
+      textPoints[17] = new TexCoord2f(0.5f, 0.5f);
+      points[18] = new Point3f(-lx / 2.0f, ly / 2.0f, lz);
+      normals[18] = new Vector3f(-(float) Math.cos(frontBackAngle), 0.0f, (float) Math.sin(frontBackAngle));
+      textPoints[18] = new TexCoord2f(0.5f, 0.75f);
 
+      // Back face
+      points[19] = new Point3f(0.0f, 0.0f, lz + lh);
+      normals[19] = new Vector3f((float) Math.cos(frontBackAngle), 0.0f, (float) Math.sin(frontBackAngle));
+      textPoints[19] = new TexCoord2f(0.675f, 0.675f);
+      points[20] = new Point3f(lx / 2.0f, -ly / 2.0f, lz);
+      normals[20] = new Vector3f((float) Math.cos(frontBackAngle), 0.0f, (float) Math.sin(frontBackAngle));
+      textPoints[20] = new TexCoord2f(0.75f, 0.5f);
+      points[21] = new Point3f(lx / 2.0f, ly / 2.0f, lz);
+      normals[21] = new Vector3f((float) Math.cos(frontBackAngle), 0.0f, (float) Math.sin(frontBackAngle));
+      textPoints[21] = new TexCoord2f(0.75f, 0.75f);
+
+      // Left face                                                                                       
+      points[22] = new Point3f(0.0f, 0.0f, lz + lh);
+      normals[22] = new Vector3f(0.0f, (float) Math.cos(leftRightAngle), (float) Math.sin(leftRightAngle));
+      textPoints[22] = new TexCoord2f(0.675f, 0.675f);
+      points[23] = new Point3f(-lx / 2.0f, ly / 2.0f, lz);
+      normals[23] = new Vector3f(0.0f, (float) Math.cos(leftRightAngle), (float) Math.sin(leftRightAngle));
+      textPoints[23] = new TexCoord2f(0.5f, 0.75f);
+      points[24] = new Point3f(lx / 2.0f, ly / 2.0f, lz);
+      normals[24] = new Vector3f(0.0f, (float) Math.cos(leftRightAngle), (float) Math.sin(leftRightAngle));
+      textPoints[24] = new TexCoord2f(0.75f, 0.75f);
+
+      // Right face                                                                                      
+      points[25] = new Point3f(0.0f, 0.0f, lz + lh);
+      normals[25] = new Vector3f(0.0f, -(float) Math.cos(leftRightAngle), (float) Math.sin(leftRightAngle));
+      textPoints[25] = new TexCoord2f(0.675f, 0.675f);
+      points[26] = new Point3f(-lx / 2.0f, -ly / 2.0f, lz);
+      normals[26] = new Vector3f(0.0f, -(float) Math.cos(leftRightAngle), (float) Math.sin(leftRightAngle));
+      textPoints[26] = new TexCoord2f(0.5f, 0.5f);
+      points[27] = new Point3f(lx / 2.0f, -ly / 2.0f, lz);
+      normals[27] = new Vector3f(0.0f, -(float) Math.cos(leftRightAngle), (float) Math.sin(leftRightAngle));
+      textPoints[27] = new TexCoord2f(0.75f, 0.5f);
+
+      // Bottom pyramid
+      // Front face
+      points[28] = new Point3f(0.0f, 0.0f, -lh);
+      normals[28] = new Vector3f(-(float) Math.cos(frontBackAngle), 0.0f, -(float) Math.sin(frontBackAngle));
+      textPoints[28] = new TexCoord2f(0.675f, 0.675f);
+      points[29] = new Point3f(-lx / 2.0f, -ly / 2.0f, 0.0f);
+      normals[29] = new Vector3f(-(float) Math.cos(frontBackAngle), 0.0f, -(float) Math.sin(frontBackAngle));
+      textPoints[29] = new TexCoord2f(0.5f, 0.5f);
+      points[30] = new Point3f(-lx / 2.0f, ly / 2.0f, 0.0f);
+      normals[30] = new Vector3f(-(float) Math.cos(frontBackAngle), 0.0f, -(float) Math.sin(frontBackAngle));
+      textPoints[30] = new TexCoord2f(0.5f, 0.75f);
+
+      // Back face
+      points[31] = new Point3f(0.0f, 0.0f, -lh);
+      normals[31] = new Vector3f((float) Math.cos(frontBackAngle), 0.0f, -(float) Math.sin(frontBackAngle));
+      textPoints[31] = new TexCoord2f(0.675f, 0.675f);
+      points[32] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
+      normals[32] = new Vector3f((float) Math.cos(frontBackAngle), 0.0f, -(float) Math.sin(frontBackAngle));
+      textPoints[32] = new TexCoord2f(0.75f, 0.5f);
+      points[33] = new Point3f(lx / 2.0f, ly / 2.0f, 0.0f);
+      normals[33] = new Vector3f((float) Math.cos(frontBackAngle), 0.0f, -(float) Math.sin(frontBackAngle));
+      textPoints[33] = new TexCoord2f(0.75f, 0.75f);
+
+      // Left face                                                                                       
+      points[34] = new Point3f(0.0f, 0.0f, -lh);
+      normals[34] = new Vector3f(0.0f, (float) Math.cos(leftRightAngle), -(float) Math.sin(leftRightAngle));
+      textPoints[34] = new TexCoord2f(0.675f, 0.675f);
+      points[35] = new Point3f(-lx / 2.0f, ly / 2.0f, 0.0f);
+      normals[35] = new Vector3f(0.0f, (float) Math.cos(leftRightAngle), -(float) Math.sin(leftRightAngle));
+      textPoints[35] = new TexCoord2f(0.5f, 0.75f);
+      points[36] = new Point3f(lx / 2.0f, ly / 2.0f, 0.0f);
+      normals[36] = new Vector3f(0.0f, (float) Math.cos(leftRightAngle), -(float) Math.sin(leftRightAngle));
+      textPoints[36] = new TexCoord2f(0.75f, 0.75f);
+
+      // Right face                                                                                       
+      points[37] = new Point3f(0.0f, 0.0f, -lh);
+      normals[37] = new Vector3f(0.0f, -(float) Math.cos(leftRightAngle), -(float) Math.sin(leftRightAngle));
+      textPoints[37] = new TexCoord2f(0.675f, 0.675f);
+      points[38] = new Point3f(-lx / 2.0f, -ly / 2.0f, 0.0f);
+      normals[38] = new Vector3f(0.0f, -(float) Math.cos(leftRightAngle), -(float) Math.sin(leftRightAngle));
+      textPoints[38] = new TexCoord2f(0.5f, 0.5f);
+      points[39] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
+      normals[39] = new Vector3f(0.0f, -(float) Math.cos(leftRightAngle), -(float) Math.sin(leftRightAngle));
+      textPoints[39] = new TexCoord2f(0.75f, 0.5f);
 
       int numberOfTriangles = 2 * 4 + 2 * 4;
       int[] polygonIndices = new int[3 * numberOfTriangles];
@@ -1208,7 +1305,7 @@ public class MeshDataGenerator
       polygonIndices[index++] = 4;
       polygonIndices[index++] = 6;
       polygonIndices[index++] = 5;
-      
+
       polygonIndices[index++] = 4;
       polygonIndices[index++] = 7;
       polygonIndices[index++] = 6;
@@ -1217,25 +1314,64 @@ public class MeshDataGenerator
       polygonIndices[index++] = 8;
       polygonIndices[index++] = 9;
       polygonIndices[index++] = 10;
-      
+
       polygonIndices[index++] = 8;
       polygonIndices[index++] = 10;
       polygonIndices[index++] = 11;
 
-      // TODO stopped there
       // Box right face
-      polygonIndices[index++] = 8;
-      polygonIndices[index++] = 9;
-      polygonIndices[index++] = 10;
-      
-      polygonIndices[index++] = 8;
-      polygonIndices[index++] = 10;
-      polygonIndices[index++] = 11;
+      polygonIndices[index++] = 12;
+      polygonIndices[index++] = 14;
+      polygonIndices[index++] = 13;
+
+      polygonIndices[index++] = 12;
+      polygonIndices[index++] = 15;
+      polygonIndices[index++] = 14;
+
+      // Top pyramid front face
+      polygonIndices[index++] = 16;
+      polygonIndices[index++] = 18;
+      polygonIndices[index++] = 17;
+
+      // Top pyramid back face
+      polygonIndices[index++] = 19;
+      polygonIndices[index++] = 20;
+      polygonIndices[index++] = 21;
+
+      // Top pyramid left face
+      polygonIndices[index++] = 22;
+      polygonIndices[index++] = 24;
+      polygonIndices[index++] = 23;
+
+      // Top pyramid right face
+      polygonIndices[index++] = 25;
+      polygonIndices[index++] = 26;
+      polygonIndices[index++] = 27;
+
+      // Bottom pyramid front face
+      polygonIndices[index++] = 28;
+      polygonIndices[index++] = 29;
+      polygonIndices[index++] = 30;
+
+      // Bottom pyramid back face
+      polygonIndices[index++] = 31;
+      polygonIndices[index++] = 33;
+      polygonIndices[index++] = 32;
+
+      // Bottom pyramid left face
+      polygonIndices[index++] = 36;
+      polygonIndices[index++] = 34;
+      polygonIndices[index++] = 35;
+
+      // Bottom pyramid right face
+      polygonIndices[index++] = 37;
+      polygonIndices[index++] = 39;
+      polygonIndices[index++] = 38;
 
       int[] pStripCounts = new int[numberOfTriangles];
       Arrays.fill(pStripCounts, 3);
 
-      return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts);
+      return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts, normals);
    }
 
    private static TexCoord2f[] generateInterpolatedTexturePoints(int numPoints)
