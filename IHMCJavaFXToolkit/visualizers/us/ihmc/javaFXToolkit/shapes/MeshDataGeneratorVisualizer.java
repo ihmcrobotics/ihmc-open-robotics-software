@@ -35,7 +35,7 @@ public class MeshDataGeneratorVisualizer extends Application
 
       Material defaultMaterial = new PhongMaterial(Color.CYAN);
 
-      MeshView torus = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.ArcTorus(0.0, 2.0 * Math.PI, 0.3, 0.1, 64)));
+      MeshView torus = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.ArcTorus(0.0, 1.0 * Math.PI, 0.3, 0.1, 64)));
       torus.setMaterial(defaultMaterial);
       torus.setTranslateY(1.5);
       rootNode.getChildren().add(torus);
@@ -81,6 +81,7 @@ public class MeshDataGeneratorVisualizer extends Application
       rootNode.getChildren().add(hemiEllipsoid);
 
       MeshView polygon = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Polygon(polygonVertices)));
+//      polygon.setDrawMode(DrawMode.LINE);
       polygon.setMaterial(defaultMaterial);
       polygon.setTranslateX(-0.5);
       polygon.setTranslateY(3.5);

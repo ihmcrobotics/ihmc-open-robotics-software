@@ -2,7 +2,11 @@ package us.ihmc.graphics3DAdapter.graphics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -122,10 +126,7 @@ public class MeshDataGenerator
          triangleIndices[index++] = (latitudeN - 2) * longitudeN + nextLongitudeIndex;
       }
 
-      int[] pStripCounts = new int[numberOfTriangles];
-      Arrays.fill(pStripCounts, 3);
-
-      return new MeshDataHolder(points, textPoints, triangleIndices, pStripCounts, normals);
+      return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
    /**
@@ -214,15 +215,23 @@ public class MeshDataGenerator
    public static MeshDataHolder Polygon(Point3f[] polygonPoints)
    {
       // Assume convexity and ccw.
-      int[] polygonIndices = new int[polygonPoints.length];
-      int[] polygonStripCounts = new int[] {polygonPoints.length};
+      TexCoord2f[] textPoints = generateInterpolatedTexturePoints(polygonPoints.length);
+      
+      int numberOfTriangles = polygonPoints.length - 2;
 
-      for (int i = 0; i < polygonPoints.length; i++)
+      // Do a naive way of splitting a polygon into triangles. Assumes convexity and ccw ordering.
+      int[] triangleIndices = new int[3 * numberOfTriangles];
+      int index = 0;
+      for (int j = 2; j < polygonPoints.length; j++)
       {
-         polygonIndices[i] = i;
+         triangleIndices[index++] = 0;
+         triangleIndices[index++] = j - 1;
+         triangleIndices[index++] = j;
       }
 
-      return new MeshDataHolder(polygonPoints, generateInterpolatedTexturePoints(polygonPoints.length), polygonIndices, polygonStripCounts);
+      Vector3f[] normals = findNormalsPerVertex(triangleIndices, polygonPoints);
+
+      return new MeshDataHolder(polygonPoints, textPoints, triangleIndices, normals);
    }
 
    /**
@@ -353,10 +362,7 @@ public class MeshDataGenerator
          triangleIndices[index++] = i + 3 * N;
       }
 
-      int[] polygonStripCounts = new int[numberOfTriangles];
-      Arrays.fill(polygonStripCounts, 3);
-
-      return new MeshDataHolder(vertices, texturePoints, triangleIndices, polygonStripCounts, normals);
+      return new MeshDataHolder(vertices, texturePoints, triangleIndices, normals);
    }
 
    public static MeshDataHolder HemiEllipsoid(double xRadius, double yRadius, double zRadius, int latitudeN, int longitudeN)
@@ -470,7 +476,7 @@ public class MeshDataGenerator
       int[] pStripCounts = new int[numberOfTriangles];
       Arrays.fill(pStripCounts, 3);
 
-      return new MeshDataHolder(points, textPoints, triangleIndices, pStripCounts, normals);
+      return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
    public static MeshDataHolder Cylinder(double radius, double height, int N)
@@ -555,10 +561,7 @@ public class MeshDataGenerator
          triangleIndices[index++] = i + 3 * N;
       }
 
-      int[] pStripCounts = new int[numberOfTriangles];
-      Arrays.fill(pStripCounts, 3);
-
-      return new MeshDataHolder(points, textPoints, triangleIndices, pStripCounts, normals);
+      return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
    public static MeshDataHolder Cone(double height, double radius, int N)
@@ -623,10 +626,7 @@ public class MeshDataGenerator
          triangleIndices[index++] = i + 2 * N;
       }
 
-      int[] pStripCounts = new int[numberOfTriangles];
-      Arrays.fill(pStripCounts, 3);
-
-      return new MeshDataHolder(vertices, textureCoordinates, triangleIndices, pStripCounts, normals);
+      return new MeshDataHolder(vertices, textureCoordinates, triangleIndices, normals);
    }
 
    public static MeshDataHolder GenTruncatedCone(double height, double xBaseRadius, double yBaseRadius, double xTopRadius, double yTopRadius, int N)
@@ -708,10 +708,7 @@ public class MeshDataGenerator
          triangleIndices[index++] = i + 3 * N;
       }
 
-      int[] pStripCounts = new int[numberOfTriangles];
-      Arrays.fill(pStripCounts, 3);
-
-      return new MeshDataHolder(points, textPoints, triangleIndices, pStripCounts, normals);
+      return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
    public static MeshDataHolder ArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, int N)
@@ -865,10 +862,7 @@ public class MeshDataGenerator
          }
       }
 
-      int[] pStripCounts = new int[numberOfTriangles];
-      Arrays.fill(pStripCounts, 3);
-
-      return new MeshDataHolder(points, textPoints, triangleIndices, pStripCounts, normals);
+      return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
    public static MeshDataHolder Cube(double lx, double ly, double lz, boolean centered)
@@ -1029,10 +1023,7 @@ public class MeshDataGenerator
       triangleIndices[index++] = 21;
       triangleIndices[index++] = 23;
 
-      int[] polygonStripCounts = new int[numberOfTriangles];
-      Arrays.fill(polygonStripCounts, 3);
-
-      return new MeshDataHolder(points, textPoints, triangleIndices, polygonStripCounts, normals);
+      return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
    public static MeshDataHolder FlatRectangle(double xMin, double yMin, double xMax, double yMax, double z)
@@ -1071,9 +1062,7 @@ public class MeshDataGenerator
       triangleIndices[index++] = 2;
       triangleIndices[index++] = 1;
 
-      int[] polygonStripCounts = {3, 3};
-
-      return new MeshDataHolder(points, textPoints, triangleIndices, polygonStripCounts, normals);
+      return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
    public static MeshDataHolder Wedge(double lx, double ly, double lz)
@@ -1194,10 +1183,7 @@ public class MeshDataGenerator
       triangleIndices[index++] = 16;
       triangleIndices[index++] = 17;
 
-      int[] pStripCounts = new int[numberOfTriangles];
-      Arrays.fill(pStripCounts, 3);
-
-      return new MeshDataHolder(points, textPoints, triangleIndices, pStripCounts, normals);
+      return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
    public static MeshDataHolder PyramidCube(double lx, double ly, double lz, double lh)
@@ -1440,10 +1426,7 @@ public class MeshDataGenerator
       polygonIndices[index++] = 39;
       polygonIndices[index++] = 38;
 
-      int[] pStripCounts = new int[numberOfTriangles];
-      Arrays.fill(pStripCounts, 3);
-
-      return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts, normals);
+      return new MeshDataHolder(points, textPoints, polygonIndices, normals);
    }
 
    private static TexCoord2f[] generateInterpolatedTexturePoints(int numPoints)
@@ -1483,4 +1466,77 @@ public class MeshDataGenerator
       }
       return points3f;
    }
+
+   private static Vector3f[] findNormalsPerVertex(int[] indices, Point3f[] vertices)
+   {
+      Map<Integer, Set<Integer>> participatingFacesPerVertex = new LinkedHashMap<Integer, Set<Integer>>();
+
+      for (int i = 0; i < indices.length; i++)
+      {
+         Set<Integer> vertexFacesSet = participatingFacesPerVertex.get(indices[i]);
+
+         if (vertexFacesSet == null)
+         {
+            vertexFacesSet = new LinkedHashSet<Integer>();
+            participatingFacesPerVertex.put(indices[i], vertexFacesSet);
+         }
+
+         // Abuse integer division assuming each face is a triangle => 3 indices per face;
+         vertexFacesSet.add(i / 3);
+      }
+
+      Vector3f[] normalsPerFace = findNormalsPerFace(indices, vertices);
+
+      int pos = 0;
+      Vector3f[] normalsPerVertex = new Vector3f[vertices.length];
+
+      for (int vertexIndex = 0; vertexIndex < vertices.length; vertexIndex++)
+      {
+         Set<Integer> participatingFaceIndices = participatingFacesPerVertex.get(vertexIndex);
+         if (participatingFaceIndices == null)
+            continue;
+
+         Vector3f vertexNormal = new Vector3f();
+
+         for (int face : participatingFaceIndices)
+            vertexNormal.add(normalsPerFace[face]);
+
+         float faces = (float) participatingFaceIndices.size();
+         vertexNormal.scale(1.0f / faces);
+         normalsPerVertex[pos++] = vertexNormal;
+      }
+
+      return normalsPerVertex;
+   }
+
+   private static Vector3f[] findNormalsPerFace(int[] indices, Point3f[] vertices)
+   {
+      Vector3f[] normalsPerFace = new Vector3f[indices.length / 3]; // Abuse integer division.
+
+      Vector3f firstVector = new Vector3f();
+      Vector3f secondVector = new Vector3f();
+      Point3f[] faceVertices = new Point3f[3];
+
+      for (int face = 0; face < normalsPerFace.length; face++)
+      {
+         normalsPerFace[face] = new Vector3f();
+
+         for (int i = 0; i < faceVertices.length; i++)
+         {
+            faceVertices[i] = vertices[indices[face * 3 + i]];
+         }
+
+         firstVector.set(faceVertices[2]);
+         firstVector.sub(faceVertices[0]);
+
+         secondVector.set(faceVertices[2]);
+         secondVector.sub(faceVertices[1]);
+
+         normalsPerFace[face].cross(firstVector, secondVector);
+         normalsPerFace[face].normalize();
+      }
+
+      return normalsPerFace;
+   }
+
 }
