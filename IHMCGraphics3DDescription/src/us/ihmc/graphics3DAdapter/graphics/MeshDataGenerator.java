@@ -127,11 +127,24 @@ public class MeshDataGenerator
       return new MeshDataHolder(points, textPoints, triangleIndices, pStripCounts, normals);
    }
 
+   /**
+    * Create a triangle mesh for the given polygon.
+    * <b> It is assumed that the polygon is convex and clockwise ordered. </b> 
+    * @param polygonPoints the vertices of the polygon.
+    * @return the created triangle mesh.
+    */
    public static MeshDataHolder Polygon(ArrayList<Point3d> polygonPoints)
    {
       return Polygon(polygonPoints, polygonPoints.size());
    }
 
+   /**
+    * Create a triangle mesh for the given polygon.
+    * <b> It is assumed that the polygon is convex and clockwise ordered. </b> 
+    * @param polygonPoints the vertices of the polygon.
+    * @param numberOfVertices will read only the vertices from 0 to numberOfVertices - 1.
+    * @return the created triangle mesh.
+    */
    public static MeshDataHolder Polygon(ArrayList<Point3d> polygonPoints, int numberOfVertices)
    {
       Point3f[] points = new Point3f[numberOfVertices];
@@ -143,18 +156,60 @@ public class MeshDataGenerator
       return Polygon(points);
    }
 
+   /**
+    * Create a triangle mesh for the given polygon.
+    * <b> It is assumed that the polygon is convex and clockwise ordered. </b> 
+    * @param polygonPoints the vertices of the polygon.
+    * @return the created triangle mesh.
+    */
+   public static MeshDataHolder Polygon(Point2d[] polygonPoints)
+   {
+      Point3f[] points = new Point3f[polygonPoints.length];
+      for (int i = 0; i < polygonPoints.length; i++)
+      {
+         Point2d vertex = polygonPoints[i];
+         points[i] = new Point3f((float) vertex.getX(), (float) vertex.getY(), 0.0f);
+      }
+      return Polygon(points);
+   }
+
+   /**
+    * Create a triangle mesh for the given polygon.
+    * @param convexPolygon the polygon to create a mesh from.
+    * @return the created triangle mesh.
+    */
    public static MeshDataHolder Polygon(ConvexPolygon2d convexPolygon)
    {
       Point3f[] points = new Point3f[convexPolygon.getNumberOfVertices()];
+      int reverseIndex = convexPolygon.getNumberOfVertices();
       for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
       {
-         Point2d vertex = convexPolygon.getVertex(i);
+         Point2d vertex = convexPolygon.getVertex(--reverseIndex);
          points[i] = new Point3f((float) vertex.getX(), (float) vertex.getY(), 0.0f);
       }
 
       return Polygon(points);
    }
 
+   /**
+    * Create a triangle mesh for the given polygon.
+    * <b> It is assumed that the polygon is convex and clockwise ordered. </b> 
+    * @param polygonPoints the vertices of the polygon.
+    * @return the created triangle mesh.
+    */
+   public static MeshDataHolder Polygon(Point3d[] polygonPoints)
+   {
+      Point3f[] points = makePoint3fArrayFromPoint3dArray(polygonPoints);
+
+      return Polygon(points);
+   }
+
+   /**
+    * Create a triangle mesh for the given polygon.
+    * <b> It is assumed that the polygon is convex and counter-clockwise ordered. </b> 
+    * @param polygonPoints the vertices of the polygon.
+    * @return the created triangle mesh.
+    */
    public static MeshDataHolder Polygon(Point3f[] polygonPoints)
    {
       // Assume convexity and ccw.
@@ -169,24 +224,29 @@ public class MeshDataGenerator
       return new MeshDataHolder(polygonPoints, generateInterpolatedTexturePoints(polygonPoints.length), polygonIndices, polygonStripCounts);
    }
 
-   public static MeshDataHolder Polygon(Point3d[] polygonPoints)
-   {
-      Point3f[] points = makePoint3fArrayFromPoint3dArray(polygonPoints);
-
-      return Polygon(points);
-   }
-
+   /**
+    * Create a triangle mesh for the given polygon 2d and extrude it along the z-axis.
+    * @param convexPolygon2d the polygon to create a mesh from.
+    * @return the created triangle mesh.
+    */
    public static MeshDataHolder ExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double extrusionHeight)
    {
       Point2d[] points = new Point2d[convexPolygon2d.getNumberOfVertices()];
+      int reverseIndex = convexPolygon2d.getNumberOfVertices();
       for (int i = 0; i < convexPolygon2d.getNumberOfVertices(); i++)
       {
-         points[i] = new Point2d(convexPolygon2d.getVertex(i));
+         points[i] = new Point2d(convexPolygon2d.getVertex(--reverseIndex));
       }
 
       return ExtrudedPolygon(points, extrusionHeight);
    }
 
+   /**
+    * Create a triangle mesh for the given polygon 2d and extrude it along the z-axis.
+    * <b> It is assumed that the polygon is convex and clockwise ordered. </b>
+    * @param polygonPoints the vertices of the polygon.
+    * @return the created triangle mesh.
+    */
    public static MeshDataHolder ExtrudedPolygon(List<Point2d> polygonPoints, double extrusionHeight)
    {
       Point2d[] points = new Point2d[polygonPoints.size()];
@@ -199,7 +259,14 @@ public class MeshDataGenerator
       return ExtrudedPolygon(points, extrusionHeight);
    }
 
-   //TODO: Figure out how to texture an extruded polygon!
+   /**
+    * Create a triangle mesh for the given polygon 2d and extrude it along the z-axis.
+    * <b> It is assumed that the polygon is convex and clockwise ordered. </b>
+    * <p> 
+    * TODO: Figure out how to texture an extruded polygon!
+    * @param polygonPoints the vertices of the polygon.
+    * @return the created triangle mesh.
+    */
    public static MeshDataHolder ExtrudedPolygon(Point2d[] clockwiseOrderedConvexPolygonPoints, double extrusionHeight)
    {
       int N = clockwiseOrderedConvexPolygonPoints.length;
@@ -213,13 +280,10 @@ public class MeshDataGenerator
          average.add(polygonPoint);
       average.scale(1.0 / N);
 
-      int reverseIndex = N;
-
       for (int i = 0; i < N; i++)
       {
-         reverseIndex--;
-         float vertexX = (float) (clockwiseOrderedConvexPolygonPoints[reverseIndex].getX());
-         float vertexY = (float) (clockwiseOrderedConvexPolygonPoints[reverseIndex].getY());
+         float vertexX = (float) (clockwiseOrderedConvexPolygonPoints[i].getX());
+         float vertexY = (float) (clockwiseOrderedConvexPolygonPoints[i].getY());
          float normalX = vertexX - (float) average.getX();
          float normalY = vertexY - (float) average.getY();
          float normalLength = (float) Math.sqrt(normalX * normalX + normalY * normalY);
@@ -710,73 +774,162 @@ public class MeshDataGenerator
 
    public static MeshDataHolder Cube(float lx, float ly, float lz, boolean centered)
    {
-      Point3f points[] = new Point3f[8];
-
-      TexCoord2f textPoints[] = new TexCoord2f[8];
+      Point3f points[] = new Point3f[24];
+      Vector3f[] normals = new Vector3f[24];
+      TexCoord2f textPoints[] = new TexCoord2f[24];
 
       float za = centered ? -lz / 2f : 0;
       float zb = centered ? lz / 2f : lz;
 
+      // Bottom vertices for bottom face
       points[0] = new Point3f(-lx / 2.0f, -ly / 2.0f, za);
-      points[1] = new Point3f(lx / 2.0f, -ly / 2.0f, za);
-      points[2] = new Point3f(lx / 2.0f, ly / 2.0f, za);
-      points[3] = new Point3f(-lx / 2.0f, ly / 2.0f, za);
-      points[4] = new Point3f(-lx / 2.0f, -ly / 2.0f, zb);
-      points[5] = new Point3f(lx / 2.0f, -ly / 2.0f, zb);
-      points[6] = new Point3f(lx / 2.0f, ly / 2.0f, zb);
-      points[7] = new Point3f(-lx / 2.0f, ly / 2.0f, zb);
-
+      normals[0] = new Vector3f(0.0f, 0.0f, -1.0f);
       textPoints[0] = new TexCoord2f(0.0f, 0.0f);
+      points[1] = new Point3f(lx / 2.0f, -ly / 2.0f, za);
+      normals[1] = new Vector3f(0.0f, 0.0f, -1.0f);
       textPoints[1] = new TexCoord2f(1.0f, 0.0f);
+      points[2] = new Point3f(lx / 2.0f, ly / 2.0f, za);
+      normals[2] = new Vector3f(0.0f, 0.0f, -1.0f);
       textPoints[2] = new TexCoord2f(1.0f, 1.0f);
+      points[3] = new Point3f(-lx / 2.0f, ly / 2.0f, za);
+      normals[3] = new Vector3f(0.0f, 0.0f, -1.0f);
       textPoints[3] = new TexCoord2f(0.0f, 1.0f);
+
+      // Top vertices for top face
+      points[4] = new Point3f(-lx / 2.0f, -ly / 2.0f, zb);
+      normals[4] = new Vector3f(0.0f, 0.0f, 1.0f);
       textPoints[4] = new TexCoord2f(0.0f, 0.0f);
+      points[5] = new Point3f(lx / 2.0f, -ly / 2.0f, zb);
+      normals[5] = new Vector3f(0.0f, 0.0f, 1.0f);
       textPoints[5] = new TexCoord2f(1.0f, 0.0f);
+      points[6] = new Point3f(lx / 2.0f, ly / 2.0f, zb);
+      normals[6] = new Vector3f(0.0f, 0.0f, 1.0f);
       textPoints[6] = new TexCoord2f(1.0f, 1.0f);
+      points[7] = new Point3f(-lx / 2.0f, ly / 2.0f, zb);
+      normals[7] = new Vector3f(0.0f, 0.0f, 1.0f);
       textPoints[7] = new TexCoord2f(0.0f, 1.0f);
 
-      int[] polygonIndices = new int[6 * 4];
+      // Left face vertices
+      points[8] = points[2];
+      normals[8] = new Vector3f(0.0f, 1.0f, 0.0f);
+      textPoints[8] = textPoints[2];
+      points[9] = points[3];
+      normals[9] = new Vector3f(0.0f, 1.0f, 0.0f);
+      textPoints[9] = textPoints[3];
+      points[10] = points[6];
+      normals[10] = new Vector3f(0.0f, 1.0f, 0.0f);
+      textPoints[10] = textPoints[6];
+      points[11] = points[7];
+      normals[11] = new Vector3f(0.0f, 1.0f, 0.0f);
+      textPoints[11] = textPoints[7];
+
+      // Right face vertices
+      points[12] = points[0];
+      normals[12] = new Vector3f(0.0f, -1.0f, 0.0f);
+      textPoints[12] = textPoints[0];
+      points[13] = points[1];
+      normals[13] = new Vector3f(0.0f, -1.0f, 0.0f);
+      textPoints[13] = textPoints[1];
+      points[14] = points[4];
+      normals[14] = new Vector3f(0.0f, -1.0f, 0.0f);
+      textPoints[14] = textPoints[4];
+      points[15] = points[5];
+      normals[15] = new Vector3f(0.0f, -1.0f, 0.0f);
+      textPoints[15] = textPoints[5];
+
+      // Front face vertices
+      points[16] = points[0];
+      normals[16] = new Vector3f(-1.0f, 0.0f, 0.0f);
+      textPoints[16] = textPoints[0];
+      points[17] = points[3];
+      normals[17] = new Vector3f(-1.0f, 0.0f, 0.0f);
+      textPoints[17] = textPoints[3];
+      points[18] = points[4];
+      normals[18] = new Vector3f(-1.0f, 0.0f, 0.0f);
+      textPoints[18] = textPoints[4];
+      points[19] = points[7];
+      normals[19] = new Vector3f(-1.0f, 0.0f, 0.0f);
+      textPoints[19] = textPoints[7];
+
+      // Back face vertices
+      points[20] = points[1];
+      normals[20] = new Vector3f(1.0f, 0.0f, 0.0f);
+      textPoints[20] = textPoints[1];
+      points[21] = points[2];
+      normals[21] = new Vector3f(1.0f, 0.0f, 0.0f);
+      textPoints[21] = textPoints[2];
+      points[22] = points[5];
+      normals[22] = new Vector3f(1.0f, 0.0f, 0.0f);
+      textPoints[22] = textPoints[5];
+      points[23] = points[6];
+      normals[23] = new Vector3f(1.0f, 0.0f, 0.0f);
+      textPoints[23] = textPoints[6];
+
+      int numberOfTriangles = 2 * 6;
+
+      int[] triangleIndices = new int[3 * numberOfTriangles];
 
       int index = 0;
 
-      for (int i = 0; i < 3; i++)
-      {
-         polygonIndices[index] = i;
-         polygonIndices[index + 1] = i + 1;
-         polygonIndices[index + 2] = 4 + i + 1;
-         polygonIndices[index + 3] = 4 + i;
+      // Bottom face (face vertices 0, 1, 2, 3)
+      triangleIndices[index++] = 2;
+      triangleIndices[index++] = 1;
+      triangleIndices[index++] = 0;
 
-         index = index + 4;
-      }
+      triangleIndices[index++] = 3;
+      triangleIndices[index++] = 2;
+      triangleIndices[index++] = 0;
 
-      polygonIndices[index] = 3;
-      polygonIndices[index + 1] = 0;
-      polygonIndices[index + 2] = 4;
-      polygonIndices[index + 3] = 7;
+      // Top face (face vertices 4, 5, 6, 7)
+      triangleIndices[index++] = 4;
+      triangleIndices[index++] = 5;
+      triangleIndices[index++] = 6;
 
-      index = index + 4;
+      triangleIndices[index++] = 4;
+      triangleIndices[index++] = 6;
+      triangleIndices[index++] = 7;
 
-      polygonIndices[index] = 3;
-      polygonIndices[index + 1] = 2;
-      polygonIndices[index + 2] = 1;
-      polygonIndices[index + 3] = 0;
+      // Left face (face vertices 8, 9, 10, 11)
+      triangleIndices[index++] = 8;
+      triangleIndices[index++] = 11;
+      triangleIndices[index++] = 10;
+      
+      triangleIndices[index++] = 8;
+      triangleIndices[index++] = 9;
+      triangleIndices[index++] = 11;
 
-      index = index + 4;
+      // Right face (face vertices 12, 13, 14, 15)
+      triangleIndices[index++] = 15;
+      triangleIndices[index++] = 14;
+      triangleIndices[index++] = 13;
+      
+      triangleIndices[index++] = 14;
+      triangleIndices[index++] = 12;
+      triangleIndices[index++] = 13;
 
-      polygonIndices[index] = 4;
-      polygonIndices[index + 1] = 5;
-      polygonIndices[index + 2] = 6;
-      polygonIndices[index + 3] = 7;
+      // Front face (face vertices 16, 17, 18, 19)
+      triangleIndices[index++] = 16;
+      triangleIndices[index++] = 19;
+      triangleIndices[index++] = 17;
+      
+      triangleIndices[index++] = 16;
+      triangleIndices[index++] = 18;
+      triangleIndices[index++] = 19;
 
-      index = index + 4;
+      // Back face (face vertices 20, 21, 22, 23)
+      triangleIndices[index++] = 20;
+      triangleIndices[index++] = 23;
+      triangleIndices[index++] = 22;
+      
+      triangleIndices[index++] = 20;
+      triangleIndices[index++] = 21;
+      triangleIndices[index++] = 23;
+      
 
-      int[] polygonStripCounts = new int[6];
-      for (int i = 0; i < polygonStripCounts.length; i++)
-      {
-         polygonStripCounts[i] = 4;
-      }
+      int[] polygonStripCounts = new int[numberOfTriangles];
+      Arrays.fill(polygonStripCounts, 3);
 
-      return new MeshDataHolder(points, textPoints, polygonIndices, polygonStripCounts);
+      return new MeshDataHolder(points, textPoints, triangleIndices, polygonStripCounts, normals);
    }
 
    public static MeshDataHolder FlatRectangle(double xMin, double yMin, double xMax, double yMax, double z)
