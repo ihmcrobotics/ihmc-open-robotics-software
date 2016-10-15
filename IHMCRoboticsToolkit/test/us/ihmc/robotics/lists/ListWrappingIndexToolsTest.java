@@ -1,7 +1,7 @@
-package us.ihmc.tools.lists;
+package us.ihmc.robotics.lists;
 
 import static org.junit.Assert.*;
-import static us.ihmc.tools.lists.ListWrappingIndexTools.*;
+import static us.ihmc.robotics.lists.ListWrappingIndexTools.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -11,6 +11,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.robotics.lists.ListWrappingIndexTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.MutationTestingTools;
 
