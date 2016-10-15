@@ -1015,76 +1015,122 @@ public class MeshDataGenerator
 
    public static MeshDataHolder Wedge(float lx, float ly, float lz)
    {
-      Point3f points[] = new Point3f[6];
+      Point3f[] points = new Point3f[18];
+      Vector3f[] normals = new Vector3f[18];
+      TexCoord2f[] textPoints = new TexCoord2f[18];
 
-      TexCoord2f textPoints[] = new TexCoord2f[6];
-
+      // Bottom face vertices
       points[0] = new Point3f(-lx / 2.0f, -ly / 2.0f, 0.0f);
-      points[1] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
-      points[2] = new Point3f(lx / 2.0f, ly / 2.0f, 0.0f);
-      points[3] = new Point3f(-lx / 2.0f, ly / 2.0f, 0.0f);
-
-      points[4] = new Point3f(lx / 2.0f, -ly / 2.0f, lz);
-      points[5] = new Point3f(lx / 2.0f, ly / 2.0f, lz);
-
+      normals[0] = new Vector3f(0.0f, 0.0f, -1.0f);
       textPoints[0] = new TexCoord2f(0.0f, 0.0f);
+      points[1] = new Point3f(lx / 2.0f, -ly / 2.0f, 0.0f);
+      normals[1] = new Vector3f(0.0f, 0.0f, -1.0f);
       textPoints[1] = new TexCoord2f(1.0f, 0.0f);
+      points[2] = new Point3f(lx / 2.0f, ly / 2.0f, 0.0f);
+      normals[2] = new Vector3f(0.0f, 0.0f, -1.0f);
       textPoints[2] = new TexCoord2f(1.0f, 1.0f);
+      points[3] = new Point3f(-lx / 2.0f, ly / 2.0f, 0.0f);
+      normals[3] = new Vector3f(0.0f, 0.0f, -1.0f);
       textPoints[3] = new TexCoord2f(0.0f, 1.0f);
 
+      // Back face vertices
+      points[4] = new Point3f(lx / 2.0f, -ly / 2.0f, lz);
+      normals[4] = new Vector3f(1.0f, 0.0f, 0.0f);
       textPoints[4] = new TexCoord2f(0.0f, 1.0f);
+      points[5] = new Point3f(lx / 2.0f, ly / 2.0f, lz);
+      normals[5] = new Vector3f(1.0f, 0.0f, 0.0f);
       textPoints[5] = new TexCoord2f(1.0f, 1.0f);
+      points[6] = new Point3f(points[2]);
+      normals[6] = new Vector3f(1.0f, 0.0f, 0.0f);
+      textPoints[6] = new TexCoord2f(textPoints[2]);
+      points[7] = new Point3f(points[1]);
+      normals[7] = new Vector3f(1.0f, 0.0f, 0.0f);
+      textPoints[7] = new TexCoord2f(textPoints[1]);
 
-      int[] polygonIndices = new int[3 * 4 + 2 * 3];
+      // Top face vertices
+      float wedgeAngle = (float) Math.atan2(lz, lx);
+      points[8] = new Point3f(points[0]);
+      normals[8] = new Vector3f(-(float) Math.sin(wedgeAngle), (float) Math.cos(wedgeAngle), 0.0f);
+      textPoints[8] = new TexCoord2f(textPoints[0]);
+      points[9] = new Point3f(points[4]);
+      normals[9] = new Vector3f(-(float) Math.sin(wedgeAngle), (float) Math.cos(wedgeAngle), 0.0f);
+      textPoints[9] = new TexCoord2f(textPoints[4]);
+      points[10] = new Point3f(points[5]);
+      normals[10] = new Vector3f(-(float) Math.sin(wedgeAngle), (float) Math.cos(wedgeAngle), 0.0f);
+      textPoints[10] = new TexCoord2f(textPoints[5]);
+      points[11] = new Point3f(points[3]);
+      normals[11] = new Vector3f(-(float) Math.sin(wedgeAngle), (float) Math.cos(wedgeAngle), 0.0f);
+      textPoints[11] = new TexCoord2f(textPoints[3]);
+
+      // Right face vertices
+      points[12] = new Point3f(points[0]);
+      normals[12] = new Vector3f(0.0f, -1.0f, 0.0f);
+      textPoints[12] = new TexCoord2f(textPoints[0]);
+      points[13] = new Point3f(points[1]);
+      normals[13] = new Vector3f(0.0f, -1.0f, 0.0f);
+      textPoints[13] = new TexCoord2f(textPoints[1]);
+      points[14] = new Point3f(points[4]);
+      normals[14] = new Vector3f(0.0f, -1.0f, 0.0f);
+      textPoints[14] = new TexCoord2f(textPoints[4]);
+
+      // Left face vertices
+      points[15] = new Point3f(points[2]);
+      normals[15] = new Vector3f(0.0f, 1.0f, 0.0f);
+      textPoints[15] = new TexCoord2f(textPoints[2]);
+      points[16] = new Point3f(points[3]);
+      normals[16] = new Vector3f(0.0f, 1.0f, 0.0f);
+      textPoints[16] = new TexCoord2f(textPoints[3]);
+      points[17] = new Point3f(points[5]);
+      normals[17] = new Vector3f(0.0f, 1.0f, 0.0f);
+      textPoints[17] = new TexCoord2f(textPoints[5]);
+
+
+      int numberOfTriangles = 2 * 3 + 2;
+      int[] triangleIndices = new int[3 * numberOfTriangles];
 
       int index = 0;
 
-      polygonIndices[index] = 3;
-      polygonIndices[index + 1] = 2;
-      polygonIndices[index + 2] = 1;
-      polygonIndices[index + 3] = 0;
+      // Bottom face
+      triangleIndices[index++] = 0;
+      triangleIndices[index++] = 2;
+      triangleIndices[index++] = 1;
 
-      index = index + 4;
+      triangleIndices[index++] = 0;
+      triangleIndices[index++] = 3;
+      triangleIndices[index++] = 2;
 
-      polygonIndices[index] = 2;
-      polygonIndices[index + 1] = 5;
-      polygonIndices[index + 2] = 4;
-      polygonIndices[index + 3] = 1;
+      // Back face
+      triangleIndices[index++] = 7;
+      triangleIndices[index++] = 5;
+      triangleIndices[index++] = 4;
 
-      index = index + 4;
+      triangleIndices[index++] = 5;
+      triangleIndices[index++] = 7;
+      triangleIndices[index++] = 6;
 
-      polygonIndices[index] = 4;
-      polygonIndices[index + 1] = 5;
-      polygonIndices[index + 2] = 3;
-      polygonIndices[index + 3] = 0;
+      // Top face
+      triangleIndices[index++] = 8;
+      triangleIndices[index++] = 9;
+      triangleIndices[index++] = 10;
 
-      index = index + 4;
+      triangleIndices[index++] = 8;
+      triangleIndices[index++] = 10;
+      triangleIndices[index++] = 11;
 
-      polygonIndices[index] = 1;
-      polygonIndices[index + 1] = 4;
-      polygonIndices[index + 2] = 0;
+      // Right face
+      triangleIndices[index++] = 12;
+      triangleIndices[index++] = 13;
+      triangleIndices[index++] = 14;
+      
+      // Left face
+      triangleIndices[index++] = 15;
+      triangleIndices[index++] = 16;
+      triangleIndices[index++] = 17;
 
-      index = index + 3;
+      int[] pStripCounts = new int[numberOfTriangles];
+      Arrays.fill(pStripCounts, 3);
 
-      polygonIndices[index] = 3;
-      polygonIndices[index + 1] = 5;
-      polygonIndices[index + 2] = 2;
-
-      index = index + 3;
-
-      int[] pStripCounts = new int[5];
-
-      for (int i = 0; i < 3; i++)
-      {
-         pStripCounts[i] = 4;
-      }
-
-      for (int i = 3; i < 5; i++)
-      {
-         pStripCounts[i] = 3;
-      }
-
-      return new MeshDataHolder(points, textPoints, polygonIndices, pStripCounts);
+      return new MeshDataHolder(points, textPoints, triangleIndices, pStripCounts, normals);
    }
 
    public static MeshDataHolder PyramidCube(double lx, double ly, double lz, double lh)

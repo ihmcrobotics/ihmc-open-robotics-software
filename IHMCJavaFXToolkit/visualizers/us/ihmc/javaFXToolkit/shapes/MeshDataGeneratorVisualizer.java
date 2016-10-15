@@ -98,6 +98,12 @@ public class MeshDataGeneratorVisualizer extends Application
       flatRectangle.setTranslateY(-1.0);
       rootNode.getChildren().add(flatRectangle);
 
+      MeshView wedge = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Wedge(0.4, 0.2, 0.5)));
+      wedge.setMaterial(defaultMaterial);
+      wedge.setTranslateX(0.5);
+      wedge.setTranslateY(1.0);
+      rootNode.getChildren().add(wedge);
+
       primaryStage.setMaximized(true);
       primaryStage.setScene(scene);
       primaryStage.show();
