@@ -43,7 +43,6 @@ public class Graphics3DObject
 
    private ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions;
    private ArrayList<SelectedListener> selectedListeners;
-   private MeshDataHolderSharpener sharpener = null;
 
    private boolean changeable = false;
 
@@ -116,17 +115,6 @@ public class Graphics3DObject
       this.graphics3DInstructions.addAll(graphics3DObject.getGraphics3DInstructions());
    }
 
-   private MeshDataHolder sharpenMeshData(MeshDataHolder meshDataToSharpen)
-   {
-      if (sharpener == null) 
-      {
-         sharpener = new MeshDataHolderSharpener();
-      }
-      
-//      return meshDataToSharpen;
-      return sharpener.sharpenMeshData(meshDataToSharpen);
-   }
-   
    public void combine(Graphics3DObject Graphics3DObject, Vector3d offset)
    {
       this.identity();
@@ -504,8 +492,7 @@ public class Graphics3DObject
    public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp)
    {
       MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, false);
-      boolean sharpenMeshData = true;
-      return addMeshData(meshData, sharpenMeshData, cubeApp);
+      return addMeshData(meshData, cubeApp);
    }
    
    public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, boolean centered, AppearanceDefinition cubeApp)
@@ -557,8 +544,7 @@ public class Graphics3DObject
    public Graphics3DAddMeshDataInstruction addWedge(double lx, double ly, double lz, AppearanceDefinition wedgeApp)
    {
       MeshDataHolder meshData = MeshDataGenerator.Wedge(lx, ly, lz);
-      boolean sharpenMeshData = true;
-      return addMeshData(meshData, sharpenMeshData, wedgeApp);
+      return addMeshData(meshData, wedgeApp);
    }
 
    /**
@@ -645,16 +631,6 @@ public class Graphics3DObject
 
    public Graphics3DAddMeshDataInstruction addMeshData(MeshDataHolder meshData, AppearanceDefinition meshAppearance)
    {
-      return addMeshData(meshData, false, meshAppearance);
-   }
-   
-   public Graphics3DAddMeshDataInstruction addMeshData(MeshDataHolder meshData, boolean sharpenMeshData, AppearanceDefinition meshAppearance)
-   {
-      if (sharpenMeshData)
-      {
-         meshData = sharpenMeshData(meshData);
-      }
-      
       Graphics3DAddMeshDataInstruction instruction = new Graphics3DAddMeshDataInstruction(meshData, meshAppearance);
       graphics3DInstructions.add(instruction);
 
@@ -992,8 +968,7 @@ public class Graphics3DObject
    public Graphics3DAddMeshDataInstruction addPyramidCube(double lx, double ly, double lz, double lh, AppearanceDefinition cubeApp)
    {
       MeshDataHolder meshData = MeshDataGenerator.PyramidCube(lx, ly, lz, lh);
-      boolean sharpenMeshData = true;
-      return addMeshData(meshData, sharpenMeshData, cubeApp);
+      return addMeshData(meshData, cubeApp);
    }
 
    public Graphics3DAddMeshDataInstruction addPolygon(ArrayList<Point3d> polygonPoints)
@@ -1082,7 +1057,7 @@ public class Graphics3DObject
    public Graphics3DAddMeshDataInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height, AppearanceDefinition appearance)
    {
       MeshDataHolder meshData = MeshDataGenerator.ExtrudedPolygon(convexPolygon2d, height);
-      return addMeshData(meshData, true, appearance);
+      return addMeshData(meshData, appearance);
    }
 
    public Graphics3DAddMeshDataInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height)
@@ -1093,7 +1068,7 @@ public class Graphics3DObject
    public Graphics3DAddMeshDataInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height, AppearanceDefinition appearance)
    {
       MeshDataHolder meshData = MeshDataGenerator.ExtrudedPolygon(polygonPoints, height);
-      return addMeshData(meshData, true, appearance);
+      return addMeshData(meshData, appearance);
    }
 
    /**
