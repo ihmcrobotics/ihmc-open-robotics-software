@@ -288,9 +288,9 @@ public class MeshDataGenerator
    {
       int N = clockwiseOrderedConvexPolygonPoints.length;
 
-      Point3f vertices[] = new Point3f[4 * N + 2];
-      Vector3f normals[] = new Vector3f[4 * N + 2];
-      TexCoord2f[] texturePoints = new TexCoord2f[4 * N + 2];
+      Point3f vertices[] = new Point3f[4 * N];
+      Vector3f normals[] = new Vector3f[4 * N];
+      TexCoord2f[] texturePoints = new TexCoord2f[4 * N];
 
       Point2d average = new Point2d();
       for (Point2d polygonPoint : clockwiseOrderedConvexPolygonPoints)
@@ -329,36 +329,27 @@ public class MeshDataGenerator
          texturePoints[i + 3 * N] = new TexCoord2f();
       }
 
-      // Bottom center
-      int bottomCenterIndex = 4 * N;
-      vertices[bottomCenterIndex] = new Point3f((float) average.getX(), (float) average.getY(), 0.0f);
-      normals[bottomCenterIndex] = new Vector3f(0.0f, 0.0f, -1.0f);
-      texturePoints[bottomCenterIndex] = new TexCoord2f();
-
-      // Top center
-      int topCenterIndex = 4 * N + 1;
-      vertices[topCenterIndex] = new Point3f((float) average.getX(), (float) average.getY(), (float) extrusionHeight);
-      normals[topCenterIndex] = new Vector3f(0.0f, 0.0f, 1.0f);
-      texturePoints[topCenterIndex] = new TexCoord2f();
-
-      int numberOfTriangles = 4 * N;
+      int numberOfTriangles = 4 * N - 2;
       int[] triangleIndices = new int[3 * numberOfTriangles];
 
       int index = 0;
 
-      for (int i = 0; i < N; i++)
+      for (int i = 1; i < N; i++)
       {
          // Bottom face
          triangleIndices[index++] = (i + 1) % N;
          triangleIndices[index++] = i;
-         triangleIndices[index++] = bottomCenterIndex;
+         triangleIndices[index++] = 0;
 
          // Top face
-         triangleIndices[index++] = topCenterIndex;
+         triangleIndices[index++] = N;
          triangleIndices[index++] = i + N;
          triangleIndices[index++] = (i + 1) % N + N;
+      }
 
-         // Side face
+      // Side faces
+      for (int i = 0; i < N; i++)
+      {
          // Lower triangle
          triangleIndices[index++] = i + 2 * N;
          triangleIndices[index++] = (i + 1) % N + 2 * N;
