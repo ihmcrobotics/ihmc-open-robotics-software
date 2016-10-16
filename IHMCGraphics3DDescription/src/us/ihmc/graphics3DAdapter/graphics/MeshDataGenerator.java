@@ -1,5 +1,6 @@
 package us.ihmc.graphics3DAdapter.graphics;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -59,8 +60,8 @@ public class MeshDataGenerator
          for (int latitudeIndex = 1; latitudeIndex < latitudeN; latitudeIndex++)
          {
             float latitudeAngle = (float) (-HalfPi + Math.PI * ((float) latitudeIndex / (float) latitudeN));
-            float cosLatitude  = (float) Math.cos(latitudeAngle);
-            float sinLatitude  = (float) Math.sin(latitudeAngle);
+            float cosLatitude = (float) Math.cos(latitudeAngle);
+            float sinLatitude = (float) Math.sin(latitudeAngle);
 
             int currentIndex = (latitudeIndex - 1) * longitudeN + longitudeIndex;
             float normalX = cosLongitude * cosLatitude;
@@ -171,7 +172,7 @@ public class MeshDataGenerator
     * @param polygonPoints the vertices of the polygon.
     * @return the created triangle mesh.
     */
-   public static MeshDataHolder Polygon(Point2d[] polygonPoints)
+   public static MeshDataHolder Polygon(Point2d... polygonPoints)
    {
       Point3f[] points = new Point3f[polygonPoints.length];
       for (int i = 0; i < polygonPoints.length; i++)
@@ -206,7 +207,7 @@ public class MeshDataGenerator
     * @param polygonPoints the vertices of the polygon.
     * @return the created triangle mesh.
     */
-   public static MeshDataHolder Polygon(Point3d[] polygonPoints)
+   public static MeshDataHolder Polygon(Point3d... polygonPoints)
    {
       Point3f[] points = makePoint3fArrayFromPoint3dArray(polygonPoints);
 
@@ -219,11 +220,11 @@ public class MeshDataGenerator
     * @param polygonPoints the vertices of the polygon.
     * @return the created triangle mesh.
     */
-   public static MeshDataHolder Polygon(Point3f[] polygonPoints)
+   public static MeshDataHolder Polygon(Point3f... polygonPoints)
    {
       // Assume convexity and ccw.
       TexCoord2f[] textPoints = generateInterpolatedTexturePoints(polygonPoints.length);
-      
+
       int numberOfTriangles = polygonPoints.length - 2;
 
       // Do a naive way of splitting a polygon into triangles. Assumes convexity and ccw ordering.
@@ -385,8 +386,8 @@ public class MeshDataGenerator
 
             float cosLongitude = (float) Math.cos(longitudeAngle);
             float sinLongitude = (float) Math.sin(longitudeAngle);
-            float cosLatitude  = (float) Math.cos(latitudeAngle);
-            float sinLatitude  = (float) Math.sin(latitudeAngle);
+            float cosLatitude = (float) Math.cos(latitudeAngle);
+            float sinLatitude = (float) Math.sin(latitudeAngle);
 
             int currentIndex = latitudeIndex * longitudeN + longitudeIndex;
             float normalX = cosLongitude * cosLatitude;
@@ -1477,7 +1478,7 @@ public class MeshDataGenerator
       float sPitch = (float) Math.sin(pitch);
 
       float rxx = cYaw * cPitch;
-      float rxy = - sYaw;
+      float rxy = -sYaw;
       float rxz = cYaw * sPitch;
       float ryx = sYaw * cPitch;
       float ryy = cYaw;
@@ -1485,7 +1486,7 @@ public class MeshDataGenerator
       float rzx = -sPitch;
       float rzz = cPitch;
 
-      for (int i = 0; i < vertices.length; i ++)
+      for (int i = 0; i < vertices.length; i++)
       {
          Point3f vertex = vertices[i];
          float vx = vertex.getX();
@@ -1535,8 +1536,8 @@ public class MeshDataGenerator
 
             float cosLongitude = (float) Math.cos(longitudeAngle);
             float sinLongitude = (float) Math.sin(longitudeAngle);
-            float cosLatitude  = (float) Math.cos(latitudeAngle);
-            float sinLatitude  = (float) Math.sin(latitudeAngle);
+            float cosLatitude = (float) Math.cos(latitudeAngle);
+            float sinLatitude = (float) Math.sin(latitudeAngle);
 
             int currentIndex = latitudeIndex * longitudeN + longitudeIndex;
             float normalX = cosLongitude * cosLatitude;
@@ -1556,16 +1557,16 @@ public class MeshDataGenerator
 
          // Bottom hemi-ellipsoid
          longitudeAngle = (float) (TwoPi * ((float) longitudeIndex / (float) longitudeN));
-         
+
          for (int latitudeIndex = 0; latitudeIndex < latitudeN / 2; latitudeIndex++)
          {
             float latitudeAngle = -(float) (HalfPi * ((float) 2 * latitudeIndex / (float) latitudeN));
-            
+
             float cosLongitude = (float) Math.cos(longitudeAngle);
             float sinLongitude = (float) Math.sin(longitudeAngle);
-            float cosLatitude  = (float) Math.cos(latitudeAngle);
-            float sinLatitude  = (float) Math.sin(latitudeAngle);
-            
+            float cosLatitude = (float) Math.cos(latitudeAngle);
+            float sinLatitude = (float) Math.sin(latitudeAngle);
+
             int currentIndex = (latitudeN / 2 + latitudeIndex) * longitudeN + longitudeIndex;
             float normalX = cosLongitude * cosLatitude;
             float normalY = sinLongitude * cosLatitude;
@@ -1574,9 +1575,9 @@ public class MeshDataGenerator
             float vertexY = yRadius * normalY;
             float vertexZ = zRadius * normalZ - halfHeight;
             points[currentIndex] = new Point3f(vertexX, vertexY, vertexZ);
-            
+
             normals[currentIndex] = new Vector3f(normalX, normalY, normalZ);
-            
+
             float textureX = (float) (longitudeAngle / TwoPi);
             float textureY = (float) (0.5 * sinLatitude + 0.5);
             textPoints[currentIndex] = new TexCoord2f(textureX, textureY);
@@ -1588,7 +1589,7 @@ public class MeshDataGenerator
       points[northPoleIndex] = new Point3f(0.0f, 0.0f, zRadius + halfHeight);
       normals[northPoleIndex] = new Vector3f(0.0f, 0.0f, 1.0f);
       textPoints[northPoleIndex] = new TexCoord2f(1.0f, 1.0f);
-      
+
       // South pole
       int southPoleIndex = (latitudeN) * longitudeN + 1;
       points[southPoleIndex] = new Point3f(0.0f, 0.0f, -zRadius - halfHeight);
@@ -1627,7 +1628,7 @@ public class MeshDataGenerator
          triangleIndices[index++] = (latitudeN / 2 - 1) * longitudeN + longitudeIndex;
          triangleIndices[index++] = (latitudeN / 2 - 1) * longitudeN + nextLongitudeIndex;
       }
-      
+
       // Bottom hemi-ellipsoid Mid-latitude faces
       for (int latitudeIndex = latitudeN / 2; latitudeIndex < latitudeN - 1; latitudeIndex++)
       {
@@ -1635,7 +1636,7 @@ public class MeshDataGenerator
          {
             int nextLongitudeIndex = (longitudeIndex + 1) % longitudeN;
             int nextLatitudeIndex = (latitudeIndex + 1);
-            
+
             // Lower triangles
             triangleIndices[index++] = latitudeIndex * longitudeN + longitudeIndex;
             triangleIndices[index++] = nextLatitudeIndex * longitudeN + longitudeIndex;
@@ -1646,7 +1647,7 @@ public class MeshDataGenerator
             triangleIndices[index++] = nextLatitudeIndex * longitudeN + nextLongitudeIndex;
          }
       }
-      
+
       // South pole faces
       for (int longitudeIndex = 0; longitudeIndex < longitudeN; longitudeIndex++)
       {
@@ -1667,12 +1668,12 @@ public class MeshDataGenerator
          triangleIndices[index++] = lowerLatitudeIndex * longitudeN +     longitudeIndex;
          triangleIndices[index++] = lowerLatitudeIndex * longitudeN + nextLongitudeIndex;
          triangleIndices[index++] = upperLatitudeIndex * longitudeN + nextLongitudeIndex;
-         
+
          // Upper triangle
          triangleIndices[index++] = lowerLatitudeIndex * longitudeN +     longitudeIndex;
          triangleIndices[index++] = upperLatitudeIndex * longitudeN + nextLongitudeIndex;
          triangleIndices[index++] = upperLatitudeIndex * longitudeN +     longitudeIndex;
-      }      
+      }
 
       int[] pStripCounts = new int[numberOfTriangles];
       Arrays.fill(pStripCounts, 3);
@@ -1788,5 +1789,82 @@ public class MeshDataGenerator
       }
 
       return normalsPerFace;
+   }
+
+   public static MeshDataHolder createFromVerticesAndStripCounts(Point3d[] vertices, int[] polygonStripCounts)
+   {
+      Point3f[] verticesWithFloats = new Point3f[vertices.length];
+
+      for (int i = 0; i < vertices.length; i++)
+      {
+         verticesWithFloats[i] = new Point3f(vertices[i]);
+      }
+
+      return createFromVerticesAndStripCounts(verticesWithFloats, polygonStripCounts);
+   }
+
+   public static MeshDataHolder createFromVerticesAndStripCounts(Point3f[] vertices, int[] polygonStripCounts)
+   {
+      int[] polygonIndices = new int[vertices.length];
+
+      for (int i = 0; i < vertices.length; i++)
+      {
+         polygonIndices[i] = i;
+      }
+
+      TexCoord2f[] textPoints = new TexCoord2f[vertices.length];
+      for (int i = 0; i < vertices.length; i++)
+      {
+         textPoints[i] = new TexCoord2f();
+      }
+
+      List<Integer> triangleIndices = new ArrayList<Integer>();
+
+      int polygonIndicesStart = 0;
+      for (int pointsForThisPolygon : polygonStripCounts)
+      {
+         int[] polygon = new int[pointsForThisPolygon];
+
+         for (int i = 0; i < pointsForThisPolygon; i++)
+         {
+            polygon[i] = polygonIndices[polygonIndicesStart + i];
+         }
+
+         int[] splitIntoTriangles = splitPolygonIntoTriangles(polygon);
+
+         for (int i : splitIntoTriangles)
+         {
+            triangleIndices.add(i);
+         }
+
+         polygonIndicesStart += pointsForThisPolygon;
+      }
+
+      int[] indices = new int[triangleIndices.size()];
+      for (int i = 0; i < indices.length; i++)
+      {
+         indices[i] = triangleIndices.get(i);
+      }
+
+      Vector3f[] normals = findNormalsPerVertex(indices, vertices);
+      return new MeshDataHolder(vertices, textPoints, indices, normals);
+   }
+
+   private static int[] splitPolygonIntoTriangles(int[] polygonIndices)
+   {
+      if (polygonIndices.length <= 3)
+         return polygonIndices;
+
+      // Do a naive way of splitting a polygon into triangles. Assumes convexity and ccw ordering.
+      int[] ret = new int[3 * (polygonIndices.length - 2)];
+      int i = 0;
+      for (int j = 2; j < polygonIndices.length; j++)
+      {
+         ret[i++] = polygonIndices[0];
+         ret[i++] = polygonIndices[j - 1];
+         ret[i++] = polygonIndices[j];
+      }
+
+      return ret;
    }
 }
