@@ -2,6 +2,9 @@ package us.ihmc.javaFXToolkit.shapes;
 
 import java.util.List;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Matrix3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
@@ -16,7 +19,7 @@ import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 
 public class MeshBuilder
 {
-   private static final int DEFAULT_RES = 32;
+   static final int DEFAULT_RES = 32;
 
    private MeshDataHolder meshDataHolder;
 
@@ -48,6 +51,11 @@ public class MeshBuilder
       addMesh(translate(meshDataHolder, offset));
    }
    
+   public void addMesh(MeshDataHolder meshDataHolder, Tuple3d offset, AxisAngle4d orientation)
+   {
+      addMesh(rotate(meshDataHolder, orientation), offset);
+   }
+   
    public void addMesh(MeshDataHolder meshDataHolder, Tuple3f offset)
    {
       addMesh(translate(meshDataHolder, offset));
@@ -75,32 +83,42 @@ public class MeshBuilder
 
    public void addBox(float lx, float ly, float lz, Tuple3f offset)
    {
-      addMesh(translate(MeshDataGenerator.Cube(lx, ly, lz, true), offset));
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true), offset);
    }
 
    public void addBox(double lx, double ly, double lz, Tuple3d offset)
    {
-      addMesh(translate(MeshDataGenerator.Cube(lx, ly, lz, true), offset));
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true), offset);
    }
 
    public void addCylinder(double height, double radius, Tuple3d offset)
    {
-      addMesh(translate(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset));
+      addMesh(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset);
+   }
+
+   public void addCylinder(double height, double radius, Tuple3d offset, AxisAngle4d orientation)
+   {
+      addMesh(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset, orientation);
    }
 
    public void addCylinder(float height, float radius, Tuple3f offset)
    {
-      addMesh(translate(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset));
+      addMesh(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset);
    }
 
    public void addCone(double height, double radius, Tuple3d offset)
    {
-      addMesh(translate(MeshDataGenerator.Cone(radius, height, DEFAULT_RES), offset));
+      addMesh(MeshDataGenerator.Cone(radius, height, DEFAULT_RES), offset);
+   }
+
+   public void addCone(double height, double radius, Tuple3d offset, AxisAngle4d orientation)
+   {
+      addMesh(MeshDataGenerator.Cone(height, radius, DEFAULT_RES), offset, orientation);
    }
 
    public void addCone(float height, float radius, Tuple3f offset)
    {
-      addMesh(translate(MeshDataGenerator.Cone(radius, height, DEFAULT_RES), offset));
+      addMesh(MeshDataGenerator.Cone(radius, height, DEFAULT_RES), offset);
    }
 
    public void addLine(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth)
@@ -158,17 +176,17 @@ public class MeshBuilder
       }
    }
 
-   private static MeshDataHolder translate(MeshDataHolder input, Tuple3d offset)
+   public static MeshDataHolder translate(MeshDataHolder input, Tuple3d offset)
    {
       return translate(input, (float) offset.getX(), (float) offset.getY(), (float) offset.getZ());
    }
    
-   private static MeshDataHolder translate(MeshDataHolder input, Tuple3f offset)
+   public static MeshDataHolder translate(MeshDataHolder input, Tuple3f offset)
    {
       return translate(input, offset.getX(), offset.getY(), offset.getZ());
    }
 
-   private static MeshDataHolder translate(MeshDataHolder input, float offsetX, float offsetY, float offsetZ)
+   public static MeshDataHolder translate(MeshDataHolder input, float offsetX, float offsetY, float offsetZ)
    {
       Point3f[] inputVertices = input.getVertices();
       TexCoord2f[] texturePoints = input.getTexturePoints();
@@ -182,6 +200,38 @@ public class MeshBuilder
          outputVertices[i].add(inputVertices[i]);
       }
       return new MeshDataHolder(outputVertices, texturePoints, triangleIndices, normals);
+   }
+
+   public static MeshDataHolder rotate(MeshDataHolder input, AxisAngle4d axisAngle)
+   {
+      Matrix3f matrix = new Matrix3f();
+      matrix.set(axisAngle);
+      return rotate(input, matrix);
+   }
+
+   public static MeshDataHolder rotate(MeshDataHolder input, Matrix3d matrix)
+   {
+      return rotate(input, new Matrix3f(matrix));
+   }
+
+   public static MeshDataHolder rotate(MeshDataHolder input, Matrix3f matrix)
+   {
+      TexCoord2f[] texturePoints = input.getTexturePoints();
+      int[] triangleIndices = input.getTriangleIndices();
+      Point3f[] inputVertices = input.getVertices();
+      Vector3f[] inputNormals = input.getVertexNormals();
+
+      Point3f[] outputVertices = new Point3f[inputVertices.length];
+      Vector3f[] outputNormals = new Vector3f[inputNormals.length];
+
+      for (int i = 0; i < inputVertices.length; i++)
+      {
+         outputVertices[i] = new Point3f();
+         outputNormals[i] = new Vector3f();
+         matrix.transform(inputVertices[i], outputVertices[i]);
+         matrix.transform(inputNormals[i], outputNormals[i]);
+      }
+      return new MeshDataHolder(outputVertices, texturePoints, triangleIndices, outputNormals);
    }
 
    public Mesh generateMesh()

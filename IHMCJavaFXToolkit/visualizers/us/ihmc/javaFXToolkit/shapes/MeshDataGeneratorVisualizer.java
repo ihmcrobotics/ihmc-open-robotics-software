@@ -32,6 +32,9 @@ public class MeshDataGeneratorVisualizer extends Application
       Scene scene = new Scene(rootNode, 600, 400, true);
       scene.setFill(Color.GRAY);
       setupCamera(rootNode, scene);
+      
+      JavaFXCoordinateSystem coordinateSystem = new JavaFXCoordinateSystem(0.4);
+      rootNode.getChildren().add(coordinateSystem);
 
       Material defaultMaterial = new PhongMaterial(Color.CYAN);
 
@@ -47,7 +50,7 @@ public class MeshDataGeneratorVisualizer extends Application
       
       MeshView cone = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Cone(0.3, 0.1, 64)));
       cone.setMaterial(defaultMaterial);
-      cone.setTranslateY(0.0);
+      cone.setTranslateY(-0.3);
       rootNode.getChildren().add(cone);
       
       MeshView sphere = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Ellipsoid(0.3, 0.1, 0.4, 64, 64)));

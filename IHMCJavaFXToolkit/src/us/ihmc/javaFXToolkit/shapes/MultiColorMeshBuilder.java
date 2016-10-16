@@ -1,7 +1,10 @@
 package us.ihmc.javaFXToolkit.shapes;
 
+import static us.ihmc.javaFXToolkit.shapes.MeshBuilder.DEFAULT_RES;
+
 import java.util.List;
 
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
@@ -51,6 +54,11 @@ public class MultiColorMeshBuilder
       meshBuilder.addMesh(setColor(meshDataHolder, color), offset);
    }
 
+   public void addMesh(MeshDataHolder meshDataHolder, Tuple3d offset, AxisAngle4d orientation, Color color)
+   {
+      meshBuilder.addMesh(setColor(meshDataHolder, color), offset, orientation);
+   }
+
    public void addMesh(MeshDataHolder meshDataHolder, Tuple3f offset, Color color)
    {
       meshBuilder.addMesh(setColor(meshDataHolder, color), offset);
@@ -94,6 +102,26 @@ public class MultiColorMeshBuilder
    public void addCube(double size, double xOffset, double yOffset, double zOffset, Color color)
    {
       addBox(size, size, size, new Point3d(xOffset, yOffset, zOffset), color);
+   }
+
+   public void addCylinder(double height, double radius, Tuple3d offset, Color color)
+   {
+      addMesh(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset, color);
+   }
+
+   public void addCylinder(double height, double radius, Tuple3d offset, AxisAngle4d orientation, Color color)
+   {
+      addMesh(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset, orientation, color);
+   }
+
+   public void addCone(double height, double radius, Tuple3d offset, Color color)
+   {
+      addMesh(MeshDataGenerator.Cone(height, radius, DEFAULT_RES), offset, color);
+   }
+
+   public void addCone(double height, double radius, Tuple3d offset, AxisAngle4d orientation, Color color)
+   {
+      addMesh(MeshDataGenerator.Cone(height, radius, DEFAULT_RES), offset, orientation, color);
    }
 
    public void addLine(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth, Color color)

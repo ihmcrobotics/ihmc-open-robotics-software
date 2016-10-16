@@ -1488,10 +1488,6 @@ public class MeshDataGenerator
          float vx = vertex.getX();
          float vy = vertex.getY();
          float vz = vertex.getZ();
-         System.out.println("-----------------------------------------------");
-         System.out.println(vx + ", " + (x0 + rxx * vx + rxy * vy + rxz * vz));
-         System.out.println(vy + ", " + (y0 + ryx * vx + ryy * vy + ryz * vz));
-         System.out.println(vz + ", " + (z0 + rzx * vx            + rzz * vz));
          vertex.setX(x0 + rxx * vx + rxy * vy + rxz * vz);
          vertex.setY(y0 + ryx * vx + ryy * vy + ryz * vz);
          vertex.setZ(z0 + rzx * vx            + rzz * vz);
