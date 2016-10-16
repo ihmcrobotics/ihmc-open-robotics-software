@@ -1,5 +1,16 @@
 package us.ihmc.robotbuilder.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3f;
+import javax.vecmath.TexCoord2f;
+import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
+
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
@@ -7,23 +18,22 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
-import javafx.scene.transform.*;
+import javafx.scene.transform.Affine;
+import javafx.scene.transform.MatrixType;
+import javafx.scene.transform.Scale;
+import javafx.scene.transform.Transform;
+import javafx.scene.transform.Translate;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DInstructionExecutor;
 import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.instructions.*;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtrusionInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddHeightMapInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTranslateInstruction;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.TexCoord2f;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Converts a {@link us.ihmc.graphics3DAdapter.graphics.Graphics3DObject} to a {@link MeshView}
@@ -109,30 +119,11 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
     {
         Point3f[] vertices = meshData.getVertices();
         TexCoord2f[] textureCoords = meshData.getTexturePoints();
-        int[] polygonIndices = meshData.getPolygonIndices();
-        int[] pointsPerPolygonCount = meshData.getPolygonStripCounts();
+        int[] triangleIndices = meshData.getTriangleIndices();
+        Vector3f[] normals = meshData.getVertexNormals();
 
-        ArrayList<Integer> triangleIndices = new ArrayList<>();
-
-        int polygonIndicesStart = 0;
-        for (int pointsForThisPolygon : pointsPerPolygonCount)
-        {
-            int[] polygon = new int[pointsForThisPolygon];
-            System.arraycopy(polygonIndices, polygonIndicesStart, polygon, 0, pointsForThisPolygon);
-
-            int[] splitIntoTriangles = splitPolygonIntoTriangles(polygon);
-
-            for (int i : splitIntoTriangles)
-            {
-                triangleIndices.add(i);
-            }
-
-            polygonIndicesStart += pointsForThisPolygon;
-        }
-
-        int[] indices = triangleIndices.stream().flatMapToInt(x -> IntStream.of(x, x)).toArray();
-
-        TriangleMesh mesh = new TriangleMesh(VertexFormat.POINT_TEXCOORD);
+        TriangleMesh mesh = new TriangleMesh(VertexFormat.POINT_NORMAL_TEXCOORD);
+        int[] indices = Arrays.stream(triangleIndices).flatMap(x -> IntStream.of(x, x, x)).toArray();
         mesh.getFaces().addAll(indices);
 
         float[] vertexBuffer = Arrays.stream(vertices).flatMap(v -> Stream.of(v.x, v.y, v.z)).collect(FloatArrayCollector.create());
@@ -141,24 +132,9 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
         float[] texCoordBuffer = Arrays.stream(textureCoords).flatMap(v -> Stream.of(v.x, v.y)).collect(FloatArrayCollector.create());
         mesh.getTexCoords().addAll(texCoordBuffer);
 
+        float[] normalBuffer = Arrays.stream(normals).flatMap(n -> Stream.of(n.x, n.y, n.z)).collect(FloatArrayCollector.create());
+        mesh.getPoints().addAll(normalBuffer);
+
         return mesh;
-    }
-
-    private static int[] splitPolygonIntoTriangles(int[] polygonIndices)
-    {
-        if(polygonIndices.length <= 3)
-            return polygonIndices;
-
-        // Do a naive way of splitting a polygon into triangles. Assumes convexity and ccw ordering.
-        int[] ret = new int[3 * (polygonIndices.length - 2)];
-        int i = 0;
-        for(int j = 2; j < polygonIndices.length; j++)
-        {
-            ret[i++] = polygonIndices[0];
-            ret[i++] = polygonIndices[j-1];
-            ret[i++] = polygonIndices[j];
-        }
-
-        return ret;
     }
 }

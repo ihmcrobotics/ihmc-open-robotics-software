@@ -133,8 +133,7 @@ public class LinkExamplesSimulation
       MeshDataHolder meshData = MeshDataGenerator.Wedge(WEDGE_X, WEDGE_Y, WEDGE_Z);
       AppearanceDefinition meshAppearance = YoAppearance.Gold();
       
-      boolean sharpenMeshData = true;
-      linkGraphics.addMeshData(meshData, sharpenMeshData , meshAppearance);
+      linkGraphics.addMeshData(meshData, meshAppearance);
       
       // Gridded Polytope
 //      linkGraphics.translate(OFFSET, 0.0, 0.0);
