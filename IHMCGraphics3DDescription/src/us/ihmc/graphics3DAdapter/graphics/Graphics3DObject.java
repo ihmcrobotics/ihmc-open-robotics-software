@@ -39,6 +39,8 @@ import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class Graphics3DObject
 {
+   private static final AppearanceDefinition DEFAULT_APPEARANCE = YoAppearance.Black();
+
    private static final int RESOLUTION = 25;
 
    private ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions;
@@ -414,7 +416,7 @@ public class Graphics3DObject
 
    public Graphics3DAddMeshDataInstruction add(Shape3d shape)
    {
-      return add(shape, YoAppearance.Black());
+      return add(shape, DEFAULT_APPEARANCE);
    }
 
    public Graphics3DAddMeshDataInstruction add(Shape3d shape, AppearanceDefinition app)
@@ -468,7 +470,7 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz)
    {
-      return addCube(lx, ly, lz, YoAppearance.Black());
+      return addCube(lx, ly, lz, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -520,7 +522,7 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addWedge(double lx, double ly, double lz)
    {
-      return addWedge(lx, ly, lz, YoAppearance.Black());
+      return addWedge(lx, ly, lz, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -562,7 +564,7 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addSphere(double radius)
    {
-      return addSphere(radius, YoAppearance.Black());
+      return addSphere(radius, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -586,48 +588,16 @@ public class Graphics3DObject
       return addMeshData(meshData, sphereApp);
    }
    
-   public Graphics3DAddMeshDataInstruction addCapsule(double objectRadius, double objectHeight)
+   public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height)
    {
-      return addCapsule(objectRadius, objectHeight, YoAppearance.Black());
+      return addCapsule(radius, height, DEFAULT_APPEARANCE);
    }
    
    public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height, AppearanceDefinition capsuleAppearance)
    {
-      translate(0.0, 0.0, -height/2.0 + radius);
-      rotate(Math.PI, Axis.X);
-      addHemiEllipsoid(radius, radius, radius, capsuleAppearance);
-      rotate(-Math.PI, Axis.X);
-
-      addCylinder(height - 2.0 * radius, radius, capsuleAppearance);
-
-      translate(0.0, 0.0, height - 2.0 * radius);
-      addHemiEllipsoid(radius, radius, radius, capsuleAppearance);
-
-      translate(0.0, 0.0, -(height/2.0 - radius));
-
-      //TODO: Make a Mesh for Capsules.
-      //      MeshDataHolder meshData = MeshDataGenerator.Capsule(radius, height, RESOLUTION, RESOLUTION);
-
-      return null; //addMeshData(meshData, capsuleAppearance);
+      MeshDataHolder meshData = MeshDataGenerator.Capsule(height, radius, radius, radius, RESOLUTION, RESOLUTION);
+      return addMeshData(meshData, capsuleAppearance);
    }
-
-//   public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height, AppearanceDefinition capsuleAppearance)
-//   {
-//      This seems to be what is needed for Bullet stuff. But still has problems:
-//      translate(0.0, 0.0, radius);
-//      addHemiEllipsoid(radius, radius, radius, capsuleAppearance);
-//      
-//      translate(0.0, 0.0, -height + radius);
-//      addCylinder(height - radius, radius, capsuleAppearance);
-//
-//      rotate(Math.PI, Axis.X);
-//      addHemiEllipsoid(radius, radius, radius, capsuleAppearance);
-//      rotate(-Math.PI, Axis.X);
-//      TODO: Make a Mesh for Capsules.
-//      MeshDataHolder meshData = MeshDataGenerator.Capsule(radius, height, RESOLUTION, RESOLUTION);
-//
-//      return null; //addMeshData(meshData, capsuleAppearance);
-//   }
 
    public Graphics3DAddMeshDataInstruction addMeshData(MeshDataHolder meshData, AppearanceDefinition meshAppearance)
    {
@@ -654,7 +624,7 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addEllipsoid(double xRadius, double yRadius, double zRadius)
    {
-      return addEllipsoid(xRadius, yRadius, zRadius, YoAppearance.Black());
+      return addEllipsoid(xRadius, yRadius, zRadius, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -696,7 +666,7 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addCylinder(double height, double radius)
    {
-      return addCylinder(height, radius, YoAppearance.Black());
+      return addCylinder(height, radius, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -737,7 +707,7 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addCone(double height, double radius)
    {
-      return addCone(height, radius, YoAppearance.Black());
+      return addCone(height, radius, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -783,7 +753,7 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addGenTruncatedCone(double height, double bx, double by, double tx, double ty)
    {
-      return addGenTruncatedCone(height, bx, by, tx, ty, YoAppearance.Black());
+      return addGenTruncatedCone(height, bx, by, tx, ty, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -834,7 +804,7 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addHemiEllipsoid(double xRad, double yRad, double zRad)
    {
-      return addHemiEllipsoid(xRad, yRad, zRad, YoAppearance.Black());
+      return addHemiEllipsoid(xRad, yRad, zRad, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -886,7 +856,7 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius)
    {
-      return addArcTorus(startAngle, endAngle, majorRadius, minorRadius, YoAppearance.Black());
+      return addArcTorus(startAngle, endAngle, majorRadius, minorRadius, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -942,7 +912,7 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addPyramidCube(double lx, double ly, double lz, double lh)
    {
-      return addPyramidCube(lx, ly, lz, lh, YoAppearance.Black());
+      return addPyramidCube(lx, ly, lz, lh, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -973,7 +943,7 @@ public class Graphics3DObject
 
    public Graphics3DAddMeshDataInstruction addPolygon(ArrayList<Point3d> polygonPoints)
    {
-      return addPolygon(polygonPoints, YoAppearance.Black());
+      return addPolygon(polygonPoints, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -1011,7 +981,7 @@ public class Graphics3DObject
    {
       MeshDataHolder meshData = MeshDataGenerator.Polygon(convexPolygon2d);
 
-      return addMeshData(meshData, YoAppearance.Black());
+      return addMeshData(meshData, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -1024,7 +994,7 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addPolygon(Point3d[] polygonPoint)
    {
-      return addPolygon(polygonPoint, YoAppearance.Black());
+      return addPolygon(polygonPoint, DEFAULT_APPEARANCE);
    }
 
    /**
@@ -1051,7 +1021,7 @@ public class Graphics3DObject
 
    public Graphics3DAddMeshDataInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height)
    {
-      return addExtrudedPolygon(convexPolygon2d, height, YoAppearance.Black());
+      return addExtrudedPolygon(convexPolygon2d, height, DEFAULT_APPEARANCE);
    }
 
    public Graphics3DAddMeshDataInstruction addExtrudedPolygon(ConvexPolygon2d convexPolygon2d, double height, AppearanceDefinition appearance)
@@ -1062,7 +1032,7 @@ public class Graphics3DObject
 
    public Graphics3DAddMeshDataInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height)
    {
-      return addExtrudedPolygon(polygonPoints, height, YoAppearance.Black());
+      return addExtrudedPolygon(polygonPoints, height, DEFAULT_APPEARANCE);
    }
 
    public Graphics3DAddMeshDataInstruction addExtrudedPolygon(List<Point2d> polygonPoints, double height, AppearanceDefinition appearance)
@@ -1150,5 +1120,4 @@ public class Graphics3DObject
    {
       this.changeable = changeable;
    }
-
 }
