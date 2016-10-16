@@ -21,7 +21,12 @@ public class JavaFXMeshDataInterpreter
 {
    public static TriangleMesh interpretMeshData(MeshDataHolder meshData)
    {
-      if (meshData == null)
+      return interpretMeshData(meshData, true);
+   }
+
+   public static TriangleMesh interpretMeshData(MeshDataHolder meshData, boolean filterDuplicates)
+   {
+      if (meshData == null || meshData.getTriangleIndices().length == 0)
          return null;
 
       Point3f[] vertices = meshData.getVertices();
@@ -30,18 +35,30 @@ public class JavaFXMeshDataInterpreter
       Vector3f[] normals = meshData.getVertexNormals();
       TIntArrayList facesIndices = new TIntArrayList();
 
-      Pair<int[], Point3f[]> filterDuplicateVertices = filterDuplicates(triangleIndices, vertices);
-      Pair<int[], Vector3f[]> filterDuplicateNormals = filterDuplicates(triangleIndices, normals);
-      Pair<int[], TexCoord2f[]> filterDuplicateTex = filterDuplicates(triangleIndices, texturePoints);
-      vertices = filterDuplicateVertices.getRight();
-      normals = filterDuplicateNormals.getRight();
-      texturePoints = filterDuplicateTex.getRight();
-
-      for (int pos = 0; pos < triangleIndices.length; pos++)
+      if (filterDuplicates)
       {
-         facesIndices.add(filterDuplicateVertices.getLeft()[pos]); // vertex index
-         facesIndices.add(filterDuplicateNormals.getLeft()[pos]); // normal index
-         facesIndices.add(filterDuplicateTex.getLeft()[pos]); // texture index
+         Pair<int[], Point3f[]> filterDuplicateVertices = filterDuplicates(triangleIndices, vertices);
+         Pair<int[], Vector3f[]> filterDuplicateNormals = filterDuplicates(triangleIndices, normals);
+         Pair<int[], TexCoord2f[]> filterDuplicateTex = filterDuplicates(triangleIndices, texturePoints);
+         vertices = filterDuplicateVertices.getRight();
+         normals = filterDuplicateNormals.getRight();
+         texturePoints = filterDuplicateTex.getRight();
+         
+         for (int pos = 0; pos < triangleIndices.length; pos++)
+         {
+            facesIndices.add(filterDuplicateVertices.getLeft()[pos]); // vertex index
+            facesIndices.add(filterDuplicateNormals.getLeft()[pos]); // normal index
+            facesIndices.add(filterDuplicateTex.getLeft()[pos]); // texture index
+         }
+      }
+      else
+      {
+         for (int pos = 0; pos < triangleIndices.length; pos++)
+         {
+            facesIndices.add(triangleIndices[pos]); // vertex index
+            facesIndices.add(triangleIndices[pos]); // normal index
+            facesIndices.add(triangleIndices[pos]); // texture index
+         }
       }
 
       int[] indices = facesIndices.toArray();
