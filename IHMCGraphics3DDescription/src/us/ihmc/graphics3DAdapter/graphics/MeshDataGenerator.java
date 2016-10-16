@@ -1,6 +1,5 @@
 package us.ihmc.graphics3DAdapter.graphics;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -16,6 +15,7 @@ import javax.vecmath.Vector3f;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.LineSegment3d;
 
 public class MeshDataGenerator
 {
@@ -135,7 +135,7 @@ public class MeshDataGenerator
     * @param polygonPoints the vertices of the polygon.
     * @return the created triangle mesh.
     */
-   public static MeshDataHolder Polygon(ArrayList<Point3d> polygonPoints)
+   public static MeshDataHolder Polygon(List<Point3d> polygonPoints)
    {
       return Polygon(polygonPoints, polygonPoints.size());
    }
@@ -147,7 +147,7 @@ public class MeshDataGenerator
     * @param numberOfVertices will read only the vertices from 0 to numberOfVertices - 1.
     * @return the created triangle mesh.
     */
-   public static MeshDataHolder Polygon(ArrayList<Point3d> polygonPoints, int numberOfVertices)
+   public static MeshDataHolder Polygon(List<Point3d> polygonPoints, int numberOfVertices)
    {
       Point3f[] points = new Point3f[numberOfVertices];
       for (int i = 0; i < numberOfVertices; i++)
@@ -908,60 +908,60 @@ public class MeshDataGenerator
       textPoints[7] = new TexCoord2f(0.0f, 1.0f);
 
       // Left face vertices
-      points[8] = points[2];
+      points[8] = new Point3f(points[2]);
       normals[8] = new Vector3f(0.0f, 1.0f, 0.0f);
-      textPoints[8] = textPoints[2];
-      points[9] = points[3];
+      textPoints[8] = new TexCoord2f(textPoints[2]);
+      points[9] = new Point3f(points[3]);
       normals[9] = new Vector3f(0.0f, 1.0f, 0.0f);
-      textPoints[9] = textPoints[3];
-      points[10] = points[6];
+      textPoints[9] = new TexCoord2f(textPoints[3]);
+      points[10] = new Point3f(points[6]);
       normals[10] = new Vector3f(0.0f, 1.0f, 0.0f);
-      textPoints[10] = textPoints[6];
-      points[11] = points[7];
+      textPoints[10] = new TexCoord2f(textPoints[6]);
+      points[11] = new Point3f(points[7]);
       normals[11] = new Vector3f(0.0f, 1.0f, 0.0f);
-      textPoints[11] = textPoints[7];
+      textPoints[11] = new TexCoord2f(textPoints[7]);
 
       // Right face vertices
-      points[12] = points[0];
+      points[12] = new Point3f(points[0]);
       normals[12] = new Vector3f(0.0f, -1.0f, 0.0f);
-      textPoints[12] = textPoints[0];
-      points[13] = points[1];
+      textPoints[12] = new TexCoord2f(textPoints[0]);
+      points[13] = new Point3f(points[1]);
       normals[13] = new Vector3f(0.0f, -1.0f, 0.0f);
-      textPoints[13] = textPoints[1];
-      points[14] = points[4];
+      textPoints[13] = new TexCoord2f(textPoints[1]);
+      points[14] = new Point3f(points[4]);
       normals[14] = new Vector3f(0.0f, -1.0f, 0.0f);
-      textPoints[14] = textPoints[4];
-      points[15] = points[5];
+      textPoints[14] = new TexCoord2f(textPoints[4]);
+      points[15] = new Point3f(points[5]);
       normals[15] = new Vector3f(0.0f, -1.0f, 0.0f);
-      textPoints[15] = textPoints[5];
+      textPoints[15] = new TexCoord2f(textPoints[5]);
 
       // Front face vertices
-      points[16] = points[0];
+      points[16] = new Point3f(points[0]);
       normals[16] = new Vector3f(-1.0f, 0.0f, 0.0f);
-      textPoints[16] = textPoints[0];
-      points[17] = points[3];
+      textPoints[16] = new TexCoord2f(textPoints[0]);
+      points[17] = new Point3f(points[3]);
       normals[17] = new Vector3f(-1.0f, 0.0f, 0.0f);
-      textPoints[17] = textPoints[3];
-      points[18] = points[4];
+      textPoints[17] = new TexCoord2f(textPoints[3]);
+      points[18] = new Point3f(points[4]);
       normals[18] = new Vector3f(-1.0f, 0.0f, 0.0f);
-      textPoints[18] = textPoints[4];
-      points[19] = points[7];
+      textPoints[18] = new TexCoord2f(textPoints[4]);
+      points[19] = new Point3f(points[7]);
       normals[19] = new Vector3f(-1.0f, 0.0f, 0.0f);
-      textPoints[19] = textPoints[7];
+      textPoints[19] = new TexCoord2f(textPoints[7]);
 
       // Back face vertices
-      points[20] = points[1];
+      points[20] = new Point3f(points[1]);
       normals[20] = new Vector3f(1.0f, 0.0f, 0.0f);
-      textPoints[20] = textPoints[1];
-      points[21] = points[2];
+      textPoints[20] = new TexCoord2f(textPoints[1]);
+      points[21] = new Point3f(points[2]);
       normals[21] = new Vector3f(1.0f, 0.0f, 0.0f);
-      textPoints[21] = textPoints[2];
-      points[22] = points[5];
+      textPoints[21] = new TexCoord2f(textPoints[2]);
+      points[22] = new Point3f(points[5]);
       normals[22] = new Vector3f(1.0f, 0.0f, 0.0f);
-      textPoints[22] = textPoints[5];
-      points[23] = points[6];
+      textPoints[22] = new TexCoord2f(textPoints[5]);
+      points[23] = new Point3f(points[6]);
       normals[23] = new Vector3f(1.0f, 0.0f, 0.0f);
-      textPoints[23] = textPoints[6];
+      textPoints[23] = new TexCoord2f(textPoints[6]);
 
       int numberOfTriangles = 2 * 6;
 
@@ -1429,6 +1429,87 @@ public class MeshDataGenerator
       return new MeshDataHolder(points, textPoints, polygonIndices, normals);
    }
 
+   public static MeshDataHolder Line(LineSegment3d lineSegment3d, double width)
+   {
+      return Line(lineSegment3d.getPointA(), lineSegment3d.getPointB(), width);
+   }
+
+   public static MeshDataHolder Line(Point3d point0, Point3d point1, double width)
+   {
+      return Line(point0.getX(), point0.getY(), point0.getZ(), point1.getX(), point1.getY(), point1.getZ(), width);
+   }
+
+   public static MeshDataHolder Line(double x0, double y0, double z0, double x1, double y1, double z1, double width)
+   {
+      return Line((float) x0, (float) y0, (float) z0, (float) x1, (float) y1, (float) z1, (float) width);
+   }
+
+   public static MeshDataHolder Line(float x0, float y0, float z0, float x1, float y1, float z1, float width)
+   {
+      Vector3f lineDirection = new Vector3f(x1 - x0, y1 - y0, z1 - z0);
+      float lineLength = lineDirection.length();
+      lineDirection.scale(1.0f / lineLength);
+      MeshDataHolder line = Cube(width, width, lineLength, false);
+      Point3f[] vertices = line.getVertices();
+      Vector3f[] normals = line.getVertexNormals();
+
+      float yaw;
+      float pitch;
+      if (Math.abs(lineDirection.getZ()) < 1.0 - 1.0e-3)
+      {
+         yaw = (float) Math.atan2(lineDirection.getY(), lineDirection.getX());
+         double xyLength = Math.sqrt(lineDirection.getX() * lineDirection.getX() + lineDirection.getY() * lineDirection.getY());
+         pitch = (float) Math.atan2(xyLength, lineDirection.getZ());
+      }
+      else
+      {
+         yaw = 0.0f;
+         pitch = lineDirection.getZ() >= 0.0 ? 0.0f : (float) Math.PI;
+      }
+
+      float cYaw = (float) Math.cos(yaw);
+      float sYaw = (float) Math.sin(yaw);
+
+      float cPitch = (float) Math.cos(pitch);
+      float sPitch = (float) Math.sin(pitch);
+
+      float rxx = cYaw * cPitch;
+      float rxy = - sYaw;
+      float rxz = cYaw * sPitch;
+      float ryx = sYaw * cPitch;
+      float ryy = cYaw;
+      float ryz = sYaw * sPitch;
+      float rzx = -sPitch;
+      float rzz = cPitch;
+
+      for (int i = 0; i < vertices.length; i ++)
+      {
+         Point3f vertex = vertices[i];
+         float vx = vertex.getX();
+         float vy = vertex.getY();
+         float vz = vertex.getZ();
+         System.out.println("-----------------------------------------------");
+         System.out.println(vx + ", " + (x0 + rxx * vx + rxy * vy + rxz * vz));
+         System.out.println(vy + ", " + (y0 + ryx * vx + ryy * vy + ryz * vz));
+         System.out.println(vz + ", " + (z0 + rzx * vx            + rzz * vz));
+         vertex.setX(x0 + rxx * vx + rxy * vy + rxz * vz);
+         vertex.setY(y0 + ryx * vx + ryy * vy + ryz * vz);
+         vertex.setZ(z0 + rzx * vx            + rzz * vz);
+      }
+
+      for (int i = 0; i < normals.length; i++)
+      {
+         Vector3f normal = normals[i];
+         float vx = normal.getX();
+         float vy = normal.getY();
+         float vz = normal.getZ();
+         normal.setX(rxx * vx + rxy * vy + rxz * vz);
+         normal.setY(ryx * vx + ryy * vy + ryz * vz);
+         normal.setZ(rzx * vx            + rzz * vz);
+      }
+      return line;
+   }
+
    private static TexCoord2f[] generateInterpolatedTexturePoints(int numPoints)
    {
       TexCoord2f[] textPoints = new TexCoord2f[numPoints];
@@ -1467,7 +1548,7 @@ public class MeshDataGenerator
       return points3f;
    }
 
-   private static Vector3f[] findNormalsPerVertex(int[] indices, Point3f[] vertices)
+   public static Vector3f[] findNormalsPerVertex(int[] indices, Point3f[] vertices)
    {
       Map<Integer, Set<Integer>> participatingFacesPerVertex = new LinkedHashMap<Integer, Set<Integer>>();
 
@@ -1538,5 +1619,4 @@ public class MeshDataGenerator
 
       return normalsPerFace;
    }
-
 }

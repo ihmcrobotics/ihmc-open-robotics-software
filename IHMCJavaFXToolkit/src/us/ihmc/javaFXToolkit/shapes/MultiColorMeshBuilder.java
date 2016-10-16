@@ -4,17 +4,17 @@ import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
+import javax.vecmath.TexCoord2f;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple3f;
+import javax.vecmath.Vector3f;
 
-import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
-import us.ihmc.javaFXToolkit.shapes.meshGenerators.BoxMeshGenerator;
-import us.ihmc.javaFXToolkit.shapes.meshGenerators.LineMeshGenerator;
+import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
+import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
 
 public class MultiColorMeshBuilder
 {
@@ -41,76 +41,39 @@ public class MultiColorMeshBuilder
       meshBuilder.clear();
    }
 
-   public void addMesh(float[] points, int[] faces, int[] faceSmoothingGroups, Color color)
+   public void addMesh(MeshDataHolder meshDataHolder, Color color)
    {
-      int[] localFaces = new int[faces.length];
-      System.arraycopy(faces, 0, localFaces, 0, faces.length);
-      for (int i = 1; i < localFaces.length; i += 2)
-         localFaces[i] = 0;
-      float[] texCoords = colorPalette.getTextureLocation(color);
-      meshBuilder.addMesh(points, texCoords, localFaces, faceSmoothingGroups);
+      meshBuilder.addMesh(setColor(meshDataHolder, color));
    }
 
-   public void addMesh(float[] points, int[] faces, int[] faceSmoothingGroups, Tuple3f pointsOffset, Color color)
+   public void addMesh(MeshDataHolder meshDataHolder, Tuple3d offset, Color color)
    {
-      int[] localFaces = new int[faces.length];
-      System.arraycopy(faces, 0, localFaces, 0, faces.length);
-      for (int i = 1; i < localFaces.length; i += 2)
-         localFaces[i] = 0;
-      float[] texCoords = colorPalette.getTextureLocation(color);
-      meshBuilder.addMesh(points, texCoords, localFaces, faceSmoothingGroups, pointsOffset);
+      meshBuilder.addMesh(setColor(meshDataHolder, color), offset);
    }
 
-   public void addMesh(float[] points, int[] faces, int[] faceSmoothingGroups, float pointsOffsetX, float pointsOffsetY, float pointsOffsetZ, Color color)
+   public void addMesh(MeshDataHolder meshDataHolder, Tuple3f offset, Color color)
    {
-      int[] localFaces = new int[faces.length];
-      System.arraycopy(faces, 0, localFaces, 0, faces.length);
-      for (int i = 1; i < localFaces.length; i += 2)
-         localFaces[i] = 0;
-      float[] texCoords = colorPalette.getTextureLocation(color);
-      meshBuilder.addMesh(points, texCoords, localFaces, faceSmoothingGroups, pointsOffsetX, pointsOffsetY, pointsOffsetZ);
-   }
-
-   public void addMesh(TFloatArrayList points, TIntArrayList faces, TIntArrayList faceSmoothingGroups, Color color)
-   {
-      for (int i = 1; i < faces.size(); i += 2)
-         faces.set(i, 0);
-      float[] texCoords = colorPalette.getTextureLocation(color);
-      meshBuilder.addMesh(points.toArray(), texCoords, faces.toArray(), faceSmoothingGroups.toArray());
-   }
-
-   public void addMesh(TFloatArrayList points, TIntArrayList faces, TIntArrayList faceSmoothingGroups, Tuple3f pointsOffset, Color color)
-   {
-      for (int i = 1; i < faces.size(); i += 2)
-         faces.set(i, 0);
-      float[] texCoords = colorPalette.getTextureLocation(color);
-      meshBuilder.addMesh(points.toArray(), texCoords, faces.toArray(), faceSmoothingGroups.toArray(), pointsOffset);
+      meshBuilder.addMesh(setColor(meshDataHolder, color), offset);
    }
 
    public void addPolyon(List<Point3d> polygon, Color color)
    {
-      meshBuilder.addPolygon(polygon, colorPalette.getTextureLocation(color));
+      addMesh(MeshDataGenerator.Polygon(polygon), color);
    }
 
    public void addBox(float lx, float ly, float lz, Color color)
    {
-      float[] points = BoxMeshGenerator.generatePoints(lx, ly, lz);
-      int[] faces = BoxMeshGenerator.faces;
-      int[] faceSmoothingGroups = BoxMeshGenerator.faceSmoothingGroups;
-      addMesh(points, faces, faceSmoothingGroups, color);
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true), color);
    }
 
-   public void addBox(float lx, float ly, float lz, Tuple3f pointsOffset, Color color)
+   public void addBox(float lx, float ly, float lz, Tuple3f offset, Color color)
    {
-      float[] points = BoxMeshGenerator.generatePoints(lx, ly, lz);
-      int[] faces = BoxMeshGenerator.faces;
-      int[] faceSmoothingGroups = BoxMeshGenerator.faceSmoothingGroups;
-      addMesh(points, faces, faceSmoothingGroups, pointsOffset, color);
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true), offset, color);
    }
 
-   public void addBox(double lx, double ly, double lz, Tuple3d pointsOffset, Color color)
+   public void addBox(double lx, double ly, double lz, Tuple3d offset, Color color)
    {
-      addBox((float) lx, (float) ly, (float) lz, new Point3f(pointsOffset), color);
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true), offset, color);
    }
 
    public void addCube(float size, Color color)
@@ -135,29 +98,17 @@ public class MultiColorMeshBuilder
 
    public void addLine(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth, Color color)
    {
-      float lx = xf - x0;
-      float ly = yf - y0;
-      float lz = zf - z0;
-      float[] linePoints = LineMeshGenerator.generatePoints(lx, ly, lz, lineWidth);
-      int[] lineFaces = LineMeshGenerator.faces;
-      int[] lineFaceSmoothingGroups = LineMeshGenerator.faceSmoothingGroups;
-      addMesh(linePoints, lineFaces, lineFaceSmoothingGroups, x0, y0, z0, color);
+      addMesh(MeshDataGenerator.Line(x0, y0, z0, xf, yf, zf, lineWidth), color);
    }
 
    public void addLine(double x0, double y0, double z0, double xf, double yf, double zf, double lineWidth, Color color)
    {
-      addLine((float) x0, (float) y0, (float) z0, (float) xf, (float) yf, (float) zf, (float) lineWidth, color);
+      addMesh(MeshDataGenerator.Line(x0, y0, z0, xf, yf, zf, lineWidth), color);
    }
 
    public void addLine(Point3d start, Point3d end, double lineWidth, Color color)
    {
-      double x0 = start.getX();
-      double y0 = start.getY();
-      double z0 = start.getZ();
-      double xf = end.getX();
-      double yf = end.getY();
-      double zf = end.getZ();
-      addLine(x0, y0, z0, xf, yf, zf, lineWidth, color);
+      addMesh(MeshDataGenerator.Line(start, end, lineWidth), color);
    }
 
    public void addMultiLine(Point3d[] points, double lineWidth, Color color, boolean close)
@@ -167,7 +118,7 @@ public class MultiColorMeshBuilder
 
       for (int i = 1; i < points.length; i++)
       {
-         Point3d start = points[i-1];
+         Point3d start = points[i - 1];
          Point3d end = points[i];
          addLine(start, end, lineWidth, color);
       }
@@ -187,7 +138,7 @@ public class MultiColorMeshBuilder
 
       for (int i = 1; i < points.size(); i++)
       {
-         Point3d start = points.get(i-1);
+         Point3d start = points.get(i - 1);
          Point3d end = points.get(i);
          addLine(start, end, lineWidth, color);
       }
@@ -198,6 +149,19 @@ public class MultiColorMeshBuilder
          Point3d end = points.get(0);
          addLine(start, end, lineWidth, color);
       }
+   }
+
+   private MeshDataHolder setColor(MeshDataHolder input, Color color)
+   {
+      Point3f[] vertices = input.getVertices();
+      int[] triangleIndices = input.getTriangleIndices();
+      Vector3f[] vertexNormals = input.getVertexNormals();
+      TexCoord2f[] inputTexturePoints = input.getTexturePoints();
+      TexCoord2f[] outputTexturePoints = new TexCoord2f[inputTexturePoints.length];
+      float[] textureLocation = colorPalette.getTextureLocation(color);
+      for (int i = 0; i < inputTexturePoints.length; i++)
+         outputTexturePoints[i] = new TexCoord2f(textureLocation);
+      return new MeshDataHolder(vertices, outputTexturePoints, triangleIndices, vertexNormals);
    }
 
    public Mesh generateMesh()
