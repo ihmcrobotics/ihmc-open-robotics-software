@@ -11,13 +11,14 @@ import javax.vecmath.Tuple3f;
 import javafx.scene.shape.Mesh;
 import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
 import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
+import us.ihmc.graphics3DAdapter.graphics.ModifiableMeshDataHolder;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 
 public class MeshBuilder
 {
    static final int DEFAULT_RES = 32;
 
-   private MeshDataHolder meshDataHolder;
+   private final ModifiableMeshDataHolder meshDataHolder = new ModifiableMeshDataHolder();
 
    public MeshBuilder()
    {
@@ -26,20 +27,17 @@ public class MeshBuilder
 
    public void clear()
    {
-      meshDataHolder = null;
+      meshDataHolder.clear();
    }
 
    public void addMesh(MeshBuilder other)
    {
-      addMesh(other.meshDataHolder);
+      meshDataHolder.add(other.meshDataHolder, true);
    }
 
    public void addMesh(MeshDataHolder meshDataHolder)
    {
-      if (this.meshDataHolder == null)
-         this.meshDataHolder = meshDataHolder;
-      else
-         this.meshDataHolder = MeshDataHolder.combine(this.meshDataHolder, meshDataHolder, true);
+      this.meshDataHolder.add(meshDataHolder, true);
    }
 
    public void addMesh(MeshDataHolder meshDataHolder, Tuple3d offset)
@@ -190,6 +188,6 @@ public class MeshBuilder
 
    public Mesh generateMesh()
    {
-      return JavaFXMeshDataInterpreter.interpretMeshData(meshDataHolder);
+      return JavaFXMeshDataInterpreter.interpretMeshData(meshDataHolder.createMeshDataHolder());
    }
 }
