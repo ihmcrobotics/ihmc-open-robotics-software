@@ -2,8 +2,13 @@ package us.ihmc.graphics3DAdapter.graphics;
 
 import java.lang.reflect.Array;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Matrix3f;
 import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
+import javax.vecmath.Tuple3d;
+import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3f;
 
 public class MeshDataHolder
@@ -39,6 +44,64 @@ public class MeshDataHolder
    public Vector3f[] getVertexNormals()
    {
       return vertexNormals;
+   }
+
+   public static MeshDataHolder rotate(MeshDataHolder input, Matrix3f matrix)
+   {
+      TexCoord2f[] texturePoints = input.getTexturePoints();
+      int[] triangleIndices = input.getTriangleIndices();
+      Point3f[] inputVertices = input.getVertices();
+      Vector3f[] inputNormals = input.getVertexNormals();
+   
+      Point3f[] outputVertices = new Point3f[inputVertices.length];
+      Vector3f[] outputNormals = new Vector3f[inputNormals.length];
+   
+      for (int i = 0; i < inputVertices.length; i++)
+      {
+         outputVertices[i] = new Point3f();
+         outputNormals[i] = new Vector3f();
+         matrix.transform(inputVertices[i], outputVertices[i]);
+         matrix.transform(inputNormals[i], outputNormals[i]);
+      }
+      return new MeshDataHolder(outputVertices, texturePoints, triangleIndices, outputNormals);
+   }
+
+   public static MeshDataHolder rotate(MeshDataHolder input, Matrix3d matrix)
+   {
+      return rotate(input, new Matrix3f(matrix));
+   }
+
+   public static MeshDataHolder rotate(MeshDataHolder input, AxisAngle4d axisAngle)
+   {
+      Matrix3f matrix = new Matrix3f();
+      matrix.set(axisAngle);
+      return rotate(input, matrix);
+   }
+
+   public static MeshDataHolder translate(MeshDataHolder input, float offsetX, float offsetY, float offsetZ)
+   {
+      Point3f[] inputVertices = input.getVertices();
+      TexCoord2f[] texturePoints = input.getTexturePoints();
+      int[] triangleIndices = input.getTriangleIndices();
+      Vector3f[] normals = input.getVertexNormals();
+   
+      Point3f[] outputVertices = new Point3f[inputVertices.length];
+      for (int i = 0; i < inputVertices.length; i++)
+      {
+         outputVertices[i] = new Point3f(offsetX, offsetY, offsetZ);
+         outputVertices[i].add(inputVertices[i]);
+      }
+      return new MeshDataHolder(outputVertices, texturePoints, triangleIndices, normals);
+   }
+
+   public static MeshDataHolder translate(MeshDataHolder input, Tuple3f offset)
+   {
+      return translate(input, offset.getX(), offset.getY(), offset.getZ());
+   }
+
+   public static MeshDataHolder translate(MeshDataHolder input, Tuple3d offset)
+   {
+      return translate(input, (float) offset.getX(), (float) offset.getY(), (float) offset.getZ());
    }
 
    public static MeshDataHolder combine(MeshDataHolder meshData1, MeshDataHolder meshData2, boolean updateMeshData2TrianglesIndices)
