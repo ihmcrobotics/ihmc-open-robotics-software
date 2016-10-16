@@ -87,7 +87,7 @@ public class MeshDataGeneratorVisualizer extends Application
       polygon.setTranslateY(3.5);
       rootNode.getChildren().add(polygon);
 
-      MeshView cube = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Cube(0.3, 0.1, 0.5, false)));
+      MeshView cube = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Cube(0.01, 0.01, 1.0, false)));
       cube.setMaterial(defaultMaterial);
       cube.setTranslateX(-0.5);
       cube.setTranslateY(-1.0);
@@ -104,6 +104,12 @@ public class MeshDataGeneratorVisualizer extends Application
       wedge.setTranslateX(0.5);
       wedge.setTranslateY(1.0);
       rootNode.getChildren().add(wedge);
+
+      MeshView line = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Line(0.0, 0.0, 0.2, 0.0, 0.5, 0.0, 0.01)));
+      line.setMaterial(defaultMaterial);
+      line.setTranslateX(-0.5);
+      line.setTranslateY(1.0);
+      rootNode.getChildren().add(line);
 
       primaryStage.setMaximized(true);
       primaryStage.setScene(scene);
