@@ -113,6 +113,12 @@ public class MeshDataGeneratorVisualizer extends Application
       line.setTranslateX(-0.5);
       line.setTranslateY(1.0);
       rootNode.getChildren().add(line);
+      
+      MeshView capsule = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Capsule(0.3, 0.1, 0.05, 0.15, 16, 16)));
+      capsule.setMaterial(defaultMaterial);
+      capsule.setTranslateX(0.0);
+      capsule.setTranslateY(0.0);
+      rootNode.getChildren().add(capsule);
 
       primaryStage.setMaximized(true);
       primaryStage.setScene(scene);
