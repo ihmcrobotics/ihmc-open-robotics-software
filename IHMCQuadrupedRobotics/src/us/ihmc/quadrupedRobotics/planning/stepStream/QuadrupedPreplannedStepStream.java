@@ -25,7 +25,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
       this.preplannedStepProvider = preplannedStepProvider;
       this.referenceFrames = referenceFrames;
       this.timestamp = timestamp;
-      this.stepSequence = new PreallocatedList<>(QuadrupedTimedStep.class, MAXIMUM_STEP_QUEUE_SIZE);
+      this.stepSequence = new PreallocatedList<>(MAXIMUM_STEP_QUEUE_SIZE, QuadrupedTimedStep.class);
       this.bodyOrientation = new FrameOrientation();
    }
 

@@ -16,7 +16,7 @@ public class TimeIntervalToolsTest
 
       int size = 10;
       ArrayList<TimedValue> arrayValues = new ArrayList<>(size);
-      PreallocatedList<TimedValue> preallocatedValues = new PreallocatedList<>(TimedValue.class, size);
+      PreallocatedList<TimedValue> preallocatedValues = new PreallocatedList<>(size, TimedValue.class);
 
       for (int i = 0; i < size; i++)
       {
@@ -68,7 +68,7 @@ public class TimeIntervalToolsTest
 
       int size = 10;
       ArrayList<TimedValue> arrayValues = new ArrayList<>(size);
-      PreallocatedList<TimedValue> preallocatedValues = new PreallocatedList<>(TimedValue.class, size);
+      PreallocatedList<TimedValue> preallocatedValues = new PreallocatedList<>(size, TimedValue.class);
 
       for (int i = 0; i < size; i++)
       {

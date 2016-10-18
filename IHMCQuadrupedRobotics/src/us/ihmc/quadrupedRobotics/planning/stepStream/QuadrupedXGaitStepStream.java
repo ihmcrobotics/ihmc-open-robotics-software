@@ -69,7 +69,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       this.controlDT = controlDT;
       this.timestamp = timestamp;
       this.bodyOrientation = new FrameOrientation();
-      this.stepSequence = new PreallocatedList<>(QuadrupedTimedStep.class, NUMBER_OF_PREVIEW_STEPS + 2);
+      this.stepSequence = new PreallocatedList<>(NUMBER_OF_PREVIEW_STEPS + 2, QuadrupedTimedStep.class);
 
       if (parentRegistry != null)
       {

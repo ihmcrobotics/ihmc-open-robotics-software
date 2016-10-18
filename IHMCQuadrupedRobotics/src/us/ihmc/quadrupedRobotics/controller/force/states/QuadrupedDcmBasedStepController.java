@@ -174,7 +174,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       }
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
-      stepSequence = new PreallocatedList<>(QuadrupedTimedStep.class, MAXIMUM_STEP_QUEUE_SIZE);
+      stepSequence = new PreallocatedList<>(MAXIMUM_STEP_QUEUE_SIZE, QuadrupedTimedStep.class);
       bodyOrientationReference = new FrameOrientation();
       bodyOrientationReferenceFrame = new OrientationFrame(bodyOrientationReference);
 

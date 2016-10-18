@@ -92,7 +92,7 @@ public class QuadrupedTimedStepController
       {
          this.solePositionControllerSetpoints.set(robotQuadrant, new QuadrupedSolePositionController.Setpoints(robotQuadrant));
       }
-      stepSequence = new PreallocatedList<>(QuadrupedTimedStep.class, 100);
+      stepSequence = new PreallocatedList<>(100, QuadrupedTimedStep.class);
       contactState = new QuadrantDependentList<>();
       solePositionEstimate = new QuadrantDependentList<>();
       soleForceCommand = new QuadrantDependentList<>();

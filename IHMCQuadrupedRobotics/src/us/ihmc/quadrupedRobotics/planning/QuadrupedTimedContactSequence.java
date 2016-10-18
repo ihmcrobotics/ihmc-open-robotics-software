@@ -52,7 +52,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
 
    public QuadrupedTimedContactSequence(int pastContactPhaseCapacity, int futureContactPhaseCapacity)
    {
-      super(QuadrupedTimedContactPhase.class, pastContactPhaseCapacity + futureContactPhaseCapacity + 1);
+      super(pastContactPhaseCapacity + futureContactPhaseCapacity + 1, QuadrupedTimedContactPhase.class);
       this.pastContactPhaseCapacity = pastContactPhaseCapacity;
 
       if (capacity() < 1)
