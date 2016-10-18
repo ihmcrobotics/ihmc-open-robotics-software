@@ -13,7 +13,7 @@ public class PreallocatedListTest
    @Test(timeout = 30000)
    public void testCapacity()
    {
-      PreallocatedList<MutableDouble> doubleList = new PreallocatedList<>(MutableDouble.class, 10);
+      PreallocatedList<MutableDouble> doubleList = new PreallocatedList<>(10, MutableDouble.class);
       for (int i = 0; i < 10; i++)
       {
          assertTrue(doubleList.add());
@@ -29,7 +29,7 @@ public class PreallocatedListTest
    {
       double epsilon = 0.001;
 
-      PreallocatedList<MutableDouble> doubleList = new PreallocatedList<>(MutableDouble.class, 10);
+      PreallocatedList<MutableDouble> doubleList = new PreallocatedList<>(10, MutableDouble.class);
       for (int i = 0; i < 10; i++)
       {
          doubleList.add();

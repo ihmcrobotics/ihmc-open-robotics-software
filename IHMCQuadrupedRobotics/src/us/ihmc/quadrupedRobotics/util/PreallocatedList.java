@@ -5,11 +5,35 @@ import java.util.*;
 
 public class PreallocatedList<E> implements List<E>
 {
+   public interface DefaultElementFactory<E>
+   {
+      E createDefaultElement();
+   }
+
    private int size;
    private int position;
    private final List<E> elements;
 
-   public PreallocatedList(Class<E> element, int capacity)
+   public PreallocatedList(int capacity, final Class<E> element)
+   {
+      this(capacity, new DefaultElementFactory<E>()
+      {
+         @Override
+         public E createDefaultElement()
+         {
+            try
+            {
+               return element.newInstance();
+            }
+            catch (InstantiationException | IllegalAccessException e)
+            {
+               throw new RuntimeException(e);
+            }
+         }
+      });
+   }
+
+   public PreallocatedList(int capacity, final DefaultElementFactory<E> defaultElementFactory)
    {
       if (capacity < 0)
       {
@@ -21,14 +45,7 @@ public class PreallocatedList<E> implements List<E>
       elements = new ArrayList<>();
       for (int i = 0; i < capacity; i++)
       {
-         try
-         {
-            elements.add(element.newInstance());
-         }
-         catch (InstantiationException | IllegalAccessException e)
-         {
-            e.printStackTrace();
-         }
+         elements.add(defaultElementFactory.createDefaultElement());
       }
    }
 
