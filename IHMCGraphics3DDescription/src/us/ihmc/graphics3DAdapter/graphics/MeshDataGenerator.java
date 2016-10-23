@@ -287,6 +287,9 @@ public class MeshDataGenerator
     */
    public static MeshDataHolder ExtrudedPolygon(Point2d[] clockwiseOrderedConvexPolygonPoints, double extrusionHeight)
    {
+      if (clockwiseOrderedConvexPolygonPoints == null || clockwiseOrderedConvexPolygonPoints.length == 0)
+         return null;
+
       int N = clockwiseOrderedConvexPolygonPoints.length;
 
       Point3f vertices[] = new Point3f[4 * N];
