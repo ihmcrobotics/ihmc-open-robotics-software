@@ -97,7 +97,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             runtimeEnvironment.getControlDT(), runtimeEnvironment.getRobotTimestamp(), registry);
       preplannedStepStream = new QuadrupedPreplannedStepStream(preplannedStepProvider, controllerToolbox.getReferenceFrames(),
             runtimeEnvironment.getRobotTimestamp());
-      stepStreamMultiplexer = new QuadrupedStepStreamMultiplexer<>();
+      stepStreamMultiplexer = new QuadrupedStepStreamMultiplexer<>(QuadrupedForceControllerState.class, registry);
       stepStreamMultiplexer.addStepStream(QuadrupedForceControllerState.XGAIT, xGaitStepStream);
       stepStreamMultiplexer.addStepStream(QuadrupedForceControllerState.STEP, preplannedStepStream);
       stepStreamMultiplexer.selectStepStream(QuadrupedForceControllerState.XGAIT);
