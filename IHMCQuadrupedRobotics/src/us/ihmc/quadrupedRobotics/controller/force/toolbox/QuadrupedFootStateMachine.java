@@ -232,7 +232,7 @@ public class QuadrupedFootStateMachine
          double currentTime = timestamp.getDoubleValue();
          double touchDownTime = stepCommand.getTimeInterval().getEndTime();
 
-         // Current goal position.
+         // Compute current goal position.
          stepCommand.getGoalPosition(goalPosition);
          goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
          goalPosition.add(0.0, 0.0, stepGoalOffsetZParameter.get());
@@ -256,7 +256,7 @@ public class QuadrupedFootStateMachine
             touchdownTrigger.update(pressureEstimate > touchdownPressureLimitParameter.get());
          }
 
-         // compute sole force
+         // Compute sole force.
          if (touchdownTrigger.getBooleanValue())
          {
             double pressureLimit = touchdownPressureLimitParameter.get();
@@ -269,7 +269,7 @@ public class QuadrupedFootStateMachine
             soleForceCommand.changeFrame(ReferenceFrame.getWorldFrame());
          }
 
-         // trigger support phase
+         // Trigger support phase.
          if (currentTime >= touchDownTime)
          {
             if (stepTransitionCallback != null)

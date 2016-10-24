@@ -11,9 +11,7 @@ import net.java.games.input.Event;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator.Estimates;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
@@ -189,9 +187,6 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
       List<QuadrupedTimedStep> steps = Collections.singletonList(step);
       QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps);
       packetCommunicator.send(timedStepPacket);
-
-      QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
-      packetCommunicator.send(eventPacket);
    }
 
    private void sendXGaitFootsteps(QuadrupedXGaitSettings xGaitSettings, Vector3d planarVelocity, int numberOfSteps)
@@ -221,8 +216,5 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
 
       QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps);
       packetCommunicator.send(timedStepPacket);
-
-      QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
-      packetCommunicator.send(eventPacket);
    }
 }

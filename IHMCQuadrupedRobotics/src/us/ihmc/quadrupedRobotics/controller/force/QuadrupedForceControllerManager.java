@@ -186,8 +186,17 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       }
       if (preplannedStepProvider.isStepPlanAvailable())
       {
-         lastEvent.set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
-         stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
+         if (stateMachine.getState() == QuadrupedForceControllerState.STAND)
+         {
+            // trigger step event if preplanned steps are available in stand state
+            lastEvent.set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
+            stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
+         }
+         else
+         {
+            // clear step plan in any state other than stand
+            preplannedStepProvider.getAndClearStepPlan();
+         }
       }
 
       // update controller state machine
