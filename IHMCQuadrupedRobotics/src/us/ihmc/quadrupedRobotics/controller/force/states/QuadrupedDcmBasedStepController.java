@@ -22,11 +22,14 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+
+import java.lang.ref.Reference;
 
 public class QuadrupedDcmBasedStepController implements QuadrupedController, QuadrupedStepTransitionCallback
 {
@@ -97,7 +100,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    // step planner
    private static int MAXIMUM_STEP_QUEUE_SIZE = 100;
    private final GroundPlaneEstimator groundPlaneEstimator;
-   private final QuadrantDependentList<FramePoint> groundPlanePositions;
+   private final QuadrantDependentList<YoFramePoint> groundPlanePositions;
    private final QuadrupedTimedContactSequence timedContactSequence;
    private final QuadrupedPiecewiseConstantCopTrajectory piecewiseConstanceCopTrajectory;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
@@ -158,7 +161,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       groundPlanePositions = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         groundPlanePositions.set(robotQuadrant, new FramePoint());
+         groundPlanePositions.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseName() + "GroundPlanePosition", worldFrame, registry));
       }
       timedContactSequence = new QuadrupedTimedContactSequence(4, 2 * STEP_SEQUENCE_CAPACITY);
       piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedContactSequence.capacity());
@@ -217,6 +220,14 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    {
       // trigger step events
       triggerStepEvents();
+
+      // update ground plane estimate
+      groundPlaneEstimator.clearContactPoints();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant).getFrameTuple().getPoint());
+      }
+      groundPlaneEstimator.compute();
 
       // update desired horizontal com forces
       computeDcmSetpoints();
@@ -385,10 +396,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    public void onLiftOff(RobotQuadrant thisStepQuadrant)
    {
       // update ground plane estimate
-      groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
-      groundPlanePositions.get(thisStepQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-      groundPlaneEstimator.compute(groundPlanePositions);
-
+      groundPlanePositions.get(thisStepQuadrant).setAndMatchFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
       onLiftOffTriggered.set(true);
    }
 
@@ -437,12 +445,13 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       taskSpaceController.reset();
 
       // initialize ground plane
+      groundPlaneEstimator.clearContactPoints();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         groundPlanePositions.get(robotQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
-         groundPlanePositions.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
+         groundPlanePositions.get(robotQuadrant).setAndMatchFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
+         groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant).getFrameTuple().getPoint());
       }
-      groundPlaneEstimator.compute(groundPlanePositions);
+      groundPlaneEstimator.compute();
 
       // initialize timed contact sequence
       timedContactSequence.initialize();
