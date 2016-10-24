@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.state.FiniteStateMachineState;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineStateChangedListener;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -49,6 +50,7 @@ public class QuadrupedFootStateMachine
    private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
    private final FrameVector soleForceCommand;
    private final QuadrupedTimedStep stepCommand;
+   private final BooleanYoVariable stepCommandIsValid;
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
 
    // foot state machine
@@ -74,6 +76,7 @@ public class QuadrupedFootStateMachine
       this.solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints(robotQuadrant);
       this.soleForceCommand = new FrameVector();
       this.stepCommand = new QuadrupedTimedStep();
+      this.stepCommandIsValid = new BooleanYoVariable("stepCommandIsValid", registry);
       this.taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
 
       // state machine
@@ -102,6 +105,7 @@ public class QuadrupedFootStateMachine
 
    public void reset()
    {
+      stepCommandIsValid.set(false);
       footStateMachine.reset();
    }
 
@@ -110,6 +114,7 @@ public class QuadrupedFootStateMachine
       if (footStateMachine.getState() == FootState.SUPPORT)
       {
          this.stepCommand.set(stepCommand);
+         this.stepCommandIsValid.set(true);
       }
    }
 
@@ -155,7 +160,7 @@ public class QuadrupedFootStateMachine
       @Override
       public FootEvent process()
       {
-         if (stepCommand != null)
+         if (stepCommandIsValid.getBooleanValue())
          {
             double currentTime = timestamp.getDoubleValue();
             double liftOffTime = stepCommand.getTimeInterval().getStartTime();
@@ -281,6 +286,7 @@ public class QuadrupedFootStateMachine
       public void onExit()
       {
          soleForceCommand.setToZero();
+         stepCommandIsValid.set(false);
       }
    }
 }
