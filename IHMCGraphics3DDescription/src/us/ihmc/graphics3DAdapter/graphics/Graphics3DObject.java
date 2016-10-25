@@ -42,6 +42,7 @@ public class Graphics3DObject
    private static final AppearanceDefinition DEFAULT_APPEARANCE = YoAppearance.Black();
 
    private static final int RESOLUTION = 25;
+   private static final int CAPSULE_RESOLUTION = 24;
 
    private ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions;
    private ArrayList<SelectedListener> selectedListeners;
@@ -86,7 +87,7 @@ public class Graphics3DObject
          }
       }
    }
-   
+
    /**
     * Default no-arg constructor.  This creates a new empty Graphics3DObject component.
     */
@@ -496,7 +497,7 @@ public class Graphics3DObject
       MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, false);
       return addMeshData(meshData, cubeApp);
    }
-   
+
    public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, boolean centered, AppearanceDefinition cubeApp)
    {
       MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, centered);
@@ -587,15 +588,15 @@ public class Graphics3DObject
 
       return addMeshData(meshData, sphereApp);
    }
-   
+
    public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height)
    {
       return addCapsule(radius, height, DEFAULT_APPEARANCE);
    }
-   
+
    public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height, AppearanceDefinition capsuleAppearance)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Capsule(height, radius, radius, radius, RESOLUTION, RESOLUTION);
+      MeshDataHolder meshData = MeshDataGenerator.Capsule(height, radius, radius, radius, CAPSULE_RESOLUTION, CAPSULE_RESOLUTION);
       return addMeshData(meshData, capsuleAppearance);
    }
 
@@ -1107,7 +1108,7 @@ public class Graphics3DObject
       {
          selectedListeners = new ArrayList<SelectedListener>();
       }
-      
+
       selectedListeners.add(selectedListener);
    }
 
