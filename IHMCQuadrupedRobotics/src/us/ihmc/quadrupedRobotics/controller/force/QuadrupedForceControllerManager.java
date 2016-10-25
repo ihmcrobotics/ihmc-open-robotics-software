@@ -22,8 +22,6 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
 import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
-import us.ihmc.quadrupedRobotics.params.BooleanParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.params.ParameterPacketListener;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPreplannedStepStream;
@@ -195,7 +193,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
          else
          {
             // clear step plan in any state other than stand
-            preplannedStepProvider.getAndClearStepPlan();
+            preplannedStepProvider.getAndClearSteps();
          }
       }
 

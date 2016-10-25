@@ -33,18 +33,18 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    public void onEntry()
    {
       double currentTime = timestamp.getDoubleValue();
-      ArrayList<QuadrupedTimedStep> steps = preplannedStepProvider.getAndClearStepPlan();
+      boolean isExpressedInAbsoluteTime = preplannedStepProvider.isStepPlanExpressedInAbsoluteTime();
+      ArrayList<QuadrupedTimedStep> steps = preplannedStepProvider.getAndClearSteps();
       stepSequence.clear();
       for (int i = 0; i < steps.size(); i++)
       {
-         double timeShift = steps.get(i).isAbsolute() ? 0.0 : currentTime;
+         double timeShift = isExpressedInAbsoluteTime ? 0.0 : currentTime;
          double touchdownTime = steps.get(i).getTimeInterval().getEndTime();
          if (touchdownTime + timeShift >= currentTime)
          {
             stepSequence.add();
             stepSequence.get(stepSequence.size() - 1).set(steps.get(i));
             stepSequence.get(stepSequence.size() - 1).getTimeInterval().shiftInterval(timeShift);
-            stepSequence.get(stepSequence.size() - 1).setAbsolute(true);
          }
       }
       TimeIntervalTools.sortByEndTime(stepSequence);

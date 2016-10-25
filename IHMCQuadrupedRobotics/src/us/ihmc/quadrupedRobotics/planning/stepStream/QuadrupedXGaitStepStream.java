@@ -130,7 +130,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
          QuadrupedTimedStep xGaitPreviewStep = xGaitPreviewSteps.get(i);
          if (xGaitPreviewStep.getTimeInterval().getStartTime() <= currentTime)
          {
-            xGaitCurrentSteps.get(xGaitPreviewStep.getRobotEnd()).set(xGaitPreviewStep);
+            xGaitCurrentSteps.get(xGaitPreviewStep.getRobotQuadrant().getEnd()).set(xGaitPreviewStep);
          }
       }
 
