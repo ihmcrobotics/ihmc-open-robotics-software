@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.reachabilityMap;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.ReachabilityMapListener;
 import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.ReachabilitySphereMapCalculator;
@@ -19,7 +19,7 @@ public class ValkyrieReachabilitySphereMapSimulation
    {
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      FloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      FloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       final JointAnglesWriter jointAnglesWriter = new JointAnglesWriter(sdfRobot, fullRobotModel);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(true, 16000);

@@ -1,13 +1,12 @@
 package us.ihmc.wholeBodyController;
  
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
@@ -27,7 +26,7 @@ public interface WholeBodyControllerParameters extends FullHumanoidRobotModelFac
 	
 	public double getControllerDT();
 
-	public HumanoidFloatingRootJointRobot createSdfRobot(boolean createCollisionMeshes);
+	public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes);
 	
 	
 	public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel);

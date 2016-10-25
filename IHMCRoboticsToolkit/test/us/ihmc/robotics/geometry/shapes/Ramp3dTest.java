@@ -15,8 +15,8 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class Ramp3dTest
 {
@@ -25,7 +25,7 @@ public class Ramp3dTest
 	/**
 	 * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
 	 */
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout = 502)
    public void testCommonShape3dFunctionality()
    {
@@ -206,7 +206,7 @@ public class Ramp3dTest
 	/**
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 502)
    public void testIsInsideOrOnSurfaceRandomOrientations()
    {
@@ -287,7 +287,7 @@ public class Ramp3dTest
    /**
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 502)
 	public void testTrickyOneThatProjectsOntoTheEdge()
 	{
@@ -331,7 +331,7 @@ public class Ramp3dTest
    /**
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 502)
    public void testDistance()
    {
@@ -374,7 +374,7 @@ public class Ramp3dTest
    /**
     * Ramp3d needs a little more work and the tests improve. It's hard to do really good surface normal tests at the corners.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 502)
    public void testGetClosestPointAndNormalAt()
    {

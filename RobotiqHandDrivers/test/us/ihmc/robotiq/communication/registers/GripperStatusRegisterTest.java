@@ -5,10 +5,10 @@ import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gGTO;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gIMC;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gMOD;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gSTA;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
-@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GripperStatusRegisterTest extends RobotiqInputRegisterTest
 {
    @Override

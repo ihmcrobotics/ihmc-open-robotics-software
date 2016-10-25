@@ -11,8 +11,8 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class BambooToolsTest
 {
@@ -29,7 +29,7 @@ public class BambooToolsTest
       assertEquals("BambooToolsTest.testGetClassAndMethodName", classAndMethodName);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = { TestPlanTarget.UI })
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = { IntegrationCategory.UI })
 	@Test(timeout=300000)
    public void testLogMessagesToFile() throws IOException
    {

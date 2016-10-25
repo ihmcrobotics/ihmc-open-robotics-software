@@ -15,9 +15,13 @@ public class JFreePlot extends XYSeries
    private PlotTypes type = PlotTypes.Solid;
 
    private Color color = Color.BLACK;
-   String name;
-   double[] xPlot;
-   double[] yPlot;
+   private String name;
+
+   private final BasicStroke solid = new BasicStroke(2.0f);
+   private final BasicStroke doted = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, new float[] {1.0f, 6.0f}, 0.0f);
+   private final BasicStroke dashed = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, new float[] {6.0f, 6.0f}, 0.0f);
+
+   private boolean isScatterPlot = false;
 
    protected JFreePlot(String name)
    {
@@ -32,8 +36,6 @@ public class JFreePlot extends XYSeries
    public JFreePlot(double[] xPlot, double[] yPlot)
    {
       this("plot", xPlot, yPlot);
-
-
    }
 
    public JFreePlot(DataBufferEntry xPlot, DataBufferEntry yPlot, boolean autoSort, boolean allowDuplicateXValues)
@@ -54,7 +56,6 @@ public class JFreePlot extends XYSeries
    public JFreePlot(String name, double[] xPlot, double[] yPlot)
    {
       this(name, xPlot, yPlot, true, false);
-
    }
 
    public JFreePlot(String name, DataBufferEntry xPlot, DataBufferEntry yPlot, boolean autoSort, boolean allowDuplicateXValues)
@@ -65,12 +66,7 @@ public class JFreePlot extends XYSeries
    public JFreePlot(String name, double[] xPlot, double[] yPlot, boolean autoSort, boolean allowDuplicateXValues)
    {
       super(name, autoSort, allowDuplicateXValues);
-      this.xPlot = xPlot;
-      this.yPlot = yPlot;
-
-
       createXYSeries(xPlot, yPlot);
-
    }
 
    protected void createXYSeries(double[] xData, double[] yData)
@@ -89,7 +85,6 @@ public class JFreePlot extends XYSeries
             double xValue = xData[i];
             double yValue = yData[i];
 
-
             add(xValue, yValue);
          }
       }
@@ -97,8 +92,6 @@ public class JFreePlot extends XYSeries
       {
          System.err.println("Duplicate x value found, Trimming Graph at this location");
       }
-
-
    }
 
    public void setType(PlotTypes type)
@@ -130,6 +123,16 @@ public class JFreePlot extends XYSeries
       return returnType;
    }
 
+   public boolean isScatterPlot()
+   {
+      return isScatterPlot;
+   }
+
+   public void setIsScatterPlot(boolean isScatterPlot)
+   {
+      this.isScatterPlot = isScatterPlot;
+   }
+
    public Color getColor()
    {
       return color;
@@ -144,11 +147,4 @@ public class JFreePlot extends XYSeries
    {
       return name;
    }
-
-   BasicStroke solid = new BasicStroke(2.0f);
-   BasicStroke doted = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, new float[] {1.0f, 6.0f}, 0.0f);
-   BasicStroke dashed = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, new float[] {6.0f, 6.0f}, 0.0f);
-
-
-
 }

@@ -8,11 +8,11 @@ import us.ihmc.darpaRoboticsChallenge.behaviorTests.HumanoidBehaviorDispatcherTe
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@ContinuousIntegrationPlan(targets = TestPlanTarget.Slow)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.SLOW)
 public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
 {
    private final AtlasRobotModel robotModel;
@@ -43,7 +43,7 @@ public class AtlasBehaviorDispatcherTest extends HumanoidBehaviorDispatcherTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 315.0, targetsOverride = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 315.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 1600000)
    public void testDispatchWalkToLocationBehavior() throws SimulationExceededMaximumTimeException
    {

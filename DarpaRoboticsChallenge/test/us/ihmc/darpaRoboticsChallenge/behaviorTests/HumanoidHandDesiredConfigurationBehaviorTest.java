@@ -9,7 +9,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
@@ -25,8 +25,8 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements MultiRobotTestInterface
@@ -201,7 +201,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       double ret = 0.0;
 
       ArrayList<OneDegreeOfFreedomJoint> fingerJoints = new ArrayList<OneDegreeOfFreedomJoint>();
-      SDFHumanoidJointNameMap jointNameMap = (SDFHumanoidJointNameMap) drcBehaviorTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames();
+      HumanoidJointNameMap jointNameMap = (HumanoidJointNameMap) drcBehaviorTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames();
       Joint wristJoint = drcBehaviorTestHelper.getRobot().getJoint(jointNameMap.getJointBeforeHandName(robotSide));
       wristJoint.recursiveGetOneDegreeOfFreedomJoints(fingerJoints);
       fingerJoints.remove(0);
@@ -222,7 +222,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
    private HandDesiredConfigurationBehavior testHandDesiredConfigurationBehavior(HandDesiredConfigurationMessage handDesiredConfigurationMessage, double trajectoryTime)
          throws SimulationExceededMaximumTimeException
    {
-      final HandDesiredConfigurationBehavior behavior = new HandDesiredConfigurationBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+      final HandDesiredConfigurationBehavior behavior = new HandDesiredConfigurationBehavior("test",drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
             drcBehaviorTestHelper.getYoTime());
 
       behavior.initialize();

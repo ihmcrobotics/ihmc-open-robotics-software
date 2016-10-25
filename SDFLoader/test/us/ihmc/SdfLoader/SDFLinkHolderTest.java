@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFInertia;
 import us.ihmc.SdfLoader.xmlDescription.SDFLink;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 
 public class SDFLinkHolderTest

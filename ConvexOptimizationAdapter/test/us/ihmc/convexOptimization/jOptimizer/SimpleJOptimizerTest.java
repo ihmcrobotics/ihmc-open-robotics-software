@@ -17,11 +17,11 @@ import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 import com.joptimizer.optimizers.OptimizationResponse;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-@ContinuousIntegrationPlan(targets = {TestPlanTarget.Exclude}) // Revisit JOptimzer some day and see if they ever got their act in gear...
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE}) // Revisit JOptimzer some day and see if they ever got their act in gear...
 public class SimpleJOptimizerTest
 {
    private static final boolean VERBOSE = true;
@@ -31,7 +31,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-	@ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout = 300000)
    public void testReallyReallySimpleOptimizationProblem() throws Exception
    {
@@ -58,7 +58,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 300000)
    public void testASimpleRedundantEqualityCase() throws Exception
    {
@@ -83,7 +83,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 300000)
    public void testAnotherReallySimpleOptimizationProblem() throws Exception
    {
@@ -151,7 +151,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 300000)
    public void testLinearCostFullyLinearConstrainedEqualityOptimizationProblem() throws Exception
    {
@@ -221,7 +221,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 300000)
    public void testQuadraticCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -304,7 +304,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 300000)
    public void testASecondOrderLorenzConeProblemUsingSquaring() throws Exception
    {
@@ -380,7 +380,7 @@ public class SimpleJOptimizerTest
     * 
     * @throws Exception
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 300000)
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {

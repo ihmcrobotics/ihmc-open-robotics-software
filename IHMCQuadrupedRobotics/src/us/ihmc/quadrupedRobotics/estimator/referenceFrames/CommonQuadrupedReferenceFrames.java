@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.estimator.referenceFrames;
 
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.quadrupedRobotics.geometry.QuadrupedGeometryTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;

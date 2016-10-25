@@ -34,7 +34,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven {
-        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
 }
 
@@ -66,6 +66,7 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
     compile ihmc.getProjectDependency(":IHMCRobotDescription")
+    compile ihmc.getProjectDependency(":IHMCRobotModels")
 }
 
 mainClassName = hasProperty('mainClass') ? mainClass : "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher"

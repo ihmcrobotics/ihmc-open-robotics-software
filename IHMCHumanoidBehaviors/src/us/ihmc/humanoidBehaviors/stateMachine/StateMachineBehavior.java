@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -9,18 +10,10 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
 
    protected BehaviorStateMachine<E> statemachine;
 
-   public StateMachineBehavior(String name, String switchTimeName, Class<E> enumType, DoubleYoVariable yoTime,
-         BehaviorCommunicationBridge outgoingCommunicationBridge)
+   public StateMachineBehavior(String name, Class<E> enumType, DoubleYoVariable yoTime, BehaviorCommunicationBridge outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
-      statemachine = new BehaviorStateMachine<E>(name, switchTimeName, enumType, yoTime, registry);
-   }
-
-   protected BehaviorStateWrapper<E> createState(E stateEnum,DoubleYoVariable yoTime, AbstractBehavior... behavior)
-   {
-      BehaviorStateWrapper<E> newState = new BehaviorStateWrapper<E>(stateEnum, yoTime, behavior);
-      getStateMachine().addState(newState);
-      return newState;
+      statemachine = new BehaviorStateMachine<E>(name, name + "SwitchTime", enumType, yoTime, registry);
    }
 
    public BehaviorStateMachine<E> getStateMachine()
@@ -48,23 +41,25 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
       statemachine.stop();
    }
 
-   public void doPostBehaviorCleanup()
-   {
-      statemachine.doPostBehaviorCleanup();
-   }
-
-  
-   @Override
+   @Override 
    public void doControl()
    {
       statemachine.doAction();
       statemachine.checkTransitionConditions();
    }
 
+  
+
    @Override
-   public boolean hasInputBeenSet()
+   public boolean isDone()
    {
-      return true;
+      //if your current state has finished and there is no transition out of that state... the entire state machine is finished
+      if (statemachine.getCurrentState().isDone() && statemachine.getCurrentState().getStateTransitions().size() == 0)
+      {
+         return true;
+      }
+      return false;
+
    }
 
 }

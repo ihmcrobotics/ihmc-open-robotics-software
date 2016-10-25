@@ -11,9 +11,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.graphics3DAdapter.jme.JMERenderer;
 import us.ihmc.graphics3DAdapter.jme.util.JMELidarSpriteGenerator;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 import javax.vecmath.Point3f;
@@ -21,7 +21,7 @@ import javax.vecmath.Point3f;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@ContinuousIntegrationPlan(targets = { TestPlanTarget.UI })
+@ContinuousIntegrationPlan(categories = { IntegrationCategory.UI })
 /**
  * Tests for point cloud collision stuff in JMELidarSpriteGenerator 
  *

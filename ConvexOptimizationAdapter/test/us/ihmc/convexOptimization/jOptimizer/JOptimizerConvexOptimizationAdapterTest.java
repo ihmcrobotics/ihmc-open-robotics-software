@@ -2,12 +2,12 @@ package us.ihmc.convexOptimization.jOptimizer;
 
 import us.ihmc.convexOptimization.ConvexOptimizationAdapter;
 import us.ihmc.convexOptimization.ConvexOptimizationAdapterTest;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
 
 //TODO: Get this working some day!!
-@ContinuousIntegrationPlan(targets = {TestPlanTarget.Exclude})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE})
 public class JOptimizerConvexOptimizationAdapterTest extends ConvexOptimizationAdapterTest
 {
    public ConvexOptimizationAdapter createConvexOptimizationAdapter()

@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeTools;

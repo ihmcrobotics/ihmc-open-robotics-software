@@ -1,13 +1,15 @@
 package us.ihmc.quadrupedRobotics.util;
 
 import org.junit.Test;
-import us.ihmc.tools.testing.TestPlanAnnotations;
+
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TimeIntervalTest
 {
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAccessors()
    {
@@ -34,7 +36,7 @@ public class TimeIntervalTest
       assertTrue(timeInterval.epsilonEquals(other, epsilon));
    }
 
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testShiftInterval()
    {

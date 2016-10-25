@@ -2,8 +2,11 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import static us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance.Purple;
 
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
@@ -12,7 +15,11 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -20,12 +27,10 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
-
-import javax.vecmath.Vector3d;
 
 public abstract class LinearMomentumRateOfChangeControlModule
 {
@@ -64,8 +69,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FramePoint2d perfectCMP = new FramePoint2d();
    protected final FramePoint2d desiredCMP = new FramePoint2d();
 
-   protected final BipedSupportPolygons bipedSupportPolygons;
-
    protected final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
 
    protected final CMPProjector cmpProjector;
@@ -84,12 +87,11 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected RobotSide supportSide = null;
    protected RobotSide transferToSide = null;
 
-   public LinearMomentumRateOfChangeControlModule(String namePrefix, CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         double gravityZ, double totalMass, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
+   public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ, 
+         double totalMass, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      this.bipedSupportPolygons = bipedSupportPolygons;
       this.totalMass = totalMass;
       this.gravityZ = gravityZ;
 

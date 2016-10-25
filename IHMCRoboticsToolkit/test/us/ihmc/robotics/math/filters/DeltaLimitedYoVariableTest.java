@@ -7,7 +7,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.robotics.random.RandomTools;
 
-import static us.ihmc.tools.testing.TestPlanAnnotations.*;
+import static us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.*;
 
 import java.util.Random;
 

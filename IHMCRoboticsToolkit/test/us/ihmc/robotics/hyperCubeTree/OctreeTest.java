@@ -2,7 +2,7 @@ package us.ihmc.robotics.hyperCubeTree;
 
 import org.junit.Test;
 import us.ihmc.robotics.geometry.LineSegment3d;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point3d;
 import java.util.List;

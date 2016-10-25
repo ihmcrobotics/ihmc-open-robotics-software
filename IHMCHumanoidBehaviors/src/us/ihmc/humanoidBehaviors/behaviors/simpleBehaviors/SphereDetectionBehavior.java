@@ -250,11 +250,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       ballFound.set(false);
    }
 
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      return true;
-   }
+  
 
    @Override
    public void initialize()

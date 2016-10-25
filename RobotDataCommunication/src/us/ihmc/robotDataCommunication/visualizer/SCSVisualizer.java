@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
@@ -149,6 +150,11 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       return scs.getDataBuffer();
    }
 
+   public void addButtonToSimulationConstructionSetGUI(AbstractButton button)
+   {
+      scs.addButton(button);
+   }
+
    @Override
    public void exitActionPerformed()
    {
@@ -184,6 +190,11 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    public void setShowOverheadView(boolean showOverheadView)
    {
       this.showOverheadView = showOverheadView;
+   }
+
+   public SimulationConstructionSet getSimulationConstructionSet()
+   {
+      return scs;
    }
 
    @Override
@@ -333,4 +344,5 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    {
       return recording;
    }
+
 }

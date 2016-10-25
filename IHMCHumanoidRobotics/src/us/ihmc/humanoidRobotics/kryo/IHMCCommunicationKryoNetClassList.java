@@ -105,6 +105,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPack
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationStatusPacket;
@@ -443,6 +444,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(Point3d[].class);
 
       registerPacketClass(PointCloudWorldPacket.class);
+      registerPacketClass(LidarPosePacket.class);
 
       registerPacketClass(ControllerCrashNotificationPacket.class);
       registerPacketField(ControllerCrashNotificationPacket.CrashLocation.class);

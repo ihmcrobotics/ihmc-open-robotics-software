@@ -15,14 +15,14 @@ import javax.vecmath.Point3d;
 import org.junit.Test;
 
 import sensor_msgs.PointCloud2;
-import us.ihmc.tools.testing.TestPlanTarget;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.utilities.ros.publisher.RosPointCloudPublisher;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.types.PointType;
 
-@ContinuousIntegrationPlan(targets=TestPlanTarget.Flaky)
+@ContinuousIntegrationPlan(categories=IntegrationCategory.FLAKY)
 public class RosPointCloudPublisherSubscriberTest extends IHMCRosTestWithRosCore
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.2)

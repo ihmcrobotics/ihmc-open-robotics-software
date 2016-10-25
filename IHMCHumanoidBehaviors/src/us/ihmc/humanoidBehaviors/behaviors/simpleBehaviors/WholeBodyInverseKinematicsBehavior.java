@@ -6,7 +6,7 @@ import javax.vecmath.Quat4d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxStateMessage;
 import us.ihmc.communication.packets.KinematicsToolboxStateMessage.KinematicsToolboxState;
@@ -274,14 +274,5 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       sendPacketToNetworkProcessor(message);
    }
 
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (!yoDesiredHandPositions.get(robotSide).containsNaN() || !yoDesiredHandOrientations.get(robotSide).containsNaN())
-            return true;
-      }
-      return false;
-   }
+
 }

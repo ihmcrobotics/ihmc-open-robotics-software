@@ -188,7 +188,6 @@ public class GoHomeBehavior extends AbstractBehavior
    }
 
 
-   @Override
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();

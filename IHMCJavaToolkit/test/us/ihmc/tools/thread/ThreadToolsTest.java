@@ -15,8 +15,8 @@ import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ThreadToolsTest
 {
@@ -50,7 +50,7 @@ public class ThreadToolsTest
    /**
     * Tests capturing the output of an echo.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 30000)
    public void testRunCommandLineEchoOutput()
    {
@@ -70,7 +70,7 @@ public class ThreadToolsTest
       Assert.assertTrue("Output not correct: " + commandLineOutput.toString(), commandLineOutput.toString().matches("Hi\\s*"));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 3.1, targetsOverride = TestPlanTarget.Flaky)
+   @ContinuousIntegrationTest(estimatedDuration = 3.1, categoriesOverride = IntegrationCategory.FLAKY)
    @Test(timeout = 30000)
    public void testTimeLimitScheduler()
    {
@@ -136,7 +136,7 @@ public class ThreadToolsTest
       assertEquals(iterations, counter.get());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, targetsOverride = TestPlanTarget.Flaky)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.FLAKY)
    @Test(timeout = 30000)
    public void testExecuteWithTimeout()
    {

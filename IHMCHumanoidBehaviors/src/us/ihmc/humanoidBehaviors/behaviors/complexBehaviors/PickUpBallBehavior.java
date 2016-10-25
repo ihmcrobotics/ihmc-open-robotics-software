@@ -7,11 +7,11 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.BehaviorState;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
+import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSideOLD;
+import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementOLD.PickUpBallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ClearLidarBehavior;
@@ -20,15 +20,15 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.SetLidarParametersBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
@@ -57,7 +57,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 {
    private static final boolean FILTER_KNOWN_COLORS_TO_SPEED_UP = false;
 
-   private final PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement;
+   private final PickUpBallBehaviorCoactiveElementBehaviorSideOLD coactiveElement;
 
    private final ArrayList<AbstractBehavior> behaviors = new ArrayList<AbstractBehavior>();
    private final EnableLidarBehavior enableBehaviorOnlyLidarBehavior;
@@ -135,11 +135,11 @@ public class PickUpBallBehavior extends AbstractBehavior
       armTrajectoryBehavior = new ArmTrajectoryBehavior("handTrajectory", outgoingCommunicationBridge, yoTime);
       behaviors.add(armTrajectoryBehavior);
 
-      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior(outgoingCommunicationBridge, yoTime);
+      handDesiredConfigurationBehavior = new HandDesiredConfigurationBehavior("left", outgoingCommunicationBridge, yoTime);
       behaviors.add(handDesiredConfigurationBehavior);
 
-      coactiveElement = new PickUpBallBehaviorCoactiveElementBehaviorSide();
-      coactiveElement.setPickUpBallBehavior(this);
+      coactiveElement = new PickUpBallBehaviorCoactiveElementBehaviorSideOLD();
+      //      coactiveElement.setPickUpBallBehavior(this);
       registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
       registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
 
@@ -170,31 +170,29 @@ public class PickUpBallBehavior extends AbstractBehavior
    private void setupPipelineForKick()
    {
 
-      HandDesiredConfigurationTask closeHand = new HandDesiredConfigurationTask(RobotSide.LEFT, HandConfiguration.CLOSE, handDesiredConfigurationBehavior,
-            yoTime);
-      HandDesiredConfigurationTask openHand = new HandDesiredConfigurationTask(RobotSide.LEFT, HandConfiguration.OPEN, handDesiredConfigurationBehavior,
-            yoTime);
+      HandDesiredConfigurationTask closeHand = new HandDesiredConfigurationTask(RobotSide.LEFT, HandConfiguration.CLOSE, handDesiredConfigurationBehavior);
+      HandDesiredConfigurationTask openHand = new HandDesiredConfigurationTask(RobotSide.LEFT, HandConfiguration.OPEN, handDesiredConfigurationBehavior);
 
       //ENABLE LIDAR
-      BehaviorTask enableLidarTask = new BehaviorTask(enableBehaviorOnlyLidarBehavior, yoTime)
+      BehaviorAction enableLidarTask = new BehaviorAction(enableBehaviorOnlyLidarBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
             enableBehaviorOnlyLidarBehavior.setLidarState(LidarState.ENABLE_BEHAVIOR_ONLY);
-            coactiveElement.currentState.set(BehaviorState.ENABLING_LIDAR);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.ENABLING_LIDAR);
          }
       };
 
       //REDUCE LIDAR RANGE *******************************************
 
-      BehaviorTask setLidarMediumRangeTask = new BehaviorTask(setLidarParametersBehavior, yoTime)
+      BehaviorAction setLidarMediumRangeTask = new BehaviorAction(setLidarParametersBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
 
-            coactiveElement.currentState.set(BehaviorState.SETTING_LIDAR_PARAMS);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.SETTING_LIDAR_PARAMS);
             DepthDataFilterParameters param = new DepthDataFilterParameters();
             param.nearScanRadius = 1.4f;
             setLidarParametersBehavior.setInput(param);
@@ -202,25 +200,25 @@ public class PickUpBallBehavior extends AbstractBehavior
       };
 
       //CLEAR LIDAR POINTS FOR CLEAN SCAN *******************************************
-      BehaviorTask clearLidarTask = new BehaviorTask(clearLidarBehavior, yoTime)
+      BehaviorAction clearLidarTask = new BehaviorAction(clearLidarBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(BehaviorState.CLEARING_LIDAR);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.CLEARING_LIDAR);
          }
       };
 
       //SEARCH FOR BALL *******************************************
 
-      BehaviorTask findBallTask = new BehaviorTask(initialSphereDetectionBehavior, yoTime)
+      BehaviorAction findBallTask = new BehaviorAction(initialSphereDetectionBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("LOOKING FOR BALL");
             sendPacketToNetworkProcessor(p1);
-            coactiveElement.currentState.set(BehaviorState.SEARCHING_FOR_BALL);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
             coactiveElement.ballX.set(0);
@@ -234,12 +232,12 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       // Confirm from the user that this is the correct ball *******************************************
 
-      BehaviorTask validateBallTask = new BehaviorTask(waitForUserValidationBehavior, yoTime)
+      BehaviorAction validateBallTask = new BehaviorAction(waitForUserValidationBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(BehaviorState.WAITING_FOR_USER_CONFIRMATION);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.WAITING_FOR_USER_CONFIRMATION);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(true);
             coactiveElement.validAcknowledged.set(false);
@@ -254,7 +252,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       // WALK TO THE BALL *******************************************
 
-      BehaviorTask walkToBallTask = new BehaviorTask(walkToLocationBehavior, yoTime)
+      BehaviorAction walkToBallTask = new BehaviorAction(walkToLocationBehavior)
       {
 
          @Override
@@ -262,7 +260,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To The Ball");
             sendPacketToNetworkProcessor(p1);
-            coactiveElement.currentState.set(BehaviorState.WALKING_TO_BALL);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
             coactiveElement.foundBall.set(true);
@@ -287,12 +285,12 @@ public class PickUpBallBehavior extends AbstractBehavior
       headTrajectoryBehavior.initialize();
       headTrajectoryBehavior.setInput(message);
 
-      BehaviorTask lookDown = new BehaviorTask(headTrajectoryBehavior, yoTime)
+      BehaviorAction lookDown = new BehaviorAction(headTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(BehaviorState.BENDING_OVER);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.BENDING_OVER);
          }
       };
 
@@ -310,28 +308,28 @@ public class PickUpBallBehavior extends AbstractBehavior
       headTrajectoryUpBehavior.initialize();
       headTrajectoryUpBehavior.setInput(messageHeadUp);
 
-      BehaviorTask lookUp = new BehaviorTask(headTrajectoryUpBehavior, yoTime)
+      BehaviorAction lookUp = new BehaviorAction(headTrajectoryUpBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(BehaviorState.STOPPED);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
          }
       };
 
       // BEND OVER *******************************************
       FrameOrientation desiredChestOrientation = new FrameOrientation(referenceFrames.getPelvisZUpFrame(), Math.toRadians(30), Math.toRadians(20), 0);
       desiredChestOrientation.changeFrame(worldFrame);
-      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, yoTime, chestTrajectoryBehavior, 4);
+      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, chestTrajectoryBehavior, 4);
 
       //REDUCE LIDAR RANGE *******************************************
 
-      BehaviorTask setLidarShortRangeTask = new BehaviorTask(setLidarParametersBehavior, yoTime)
+      BehaviorAction setLidarShortRangeTask = new BehaviorAction(setLidarParametersBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(BehaviorState.SETTING_LIDAR_PARAMS);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.SETTING_LIDAR_PARAMS);
             DepthDataFilterParameters param = new DepthDataFilterParameters();
             param.nearScanRadius = 0.6f;
             setLidarParametersBehavior.setInput(param);
@@ -339,24 +337,24 @@ public class PickUpBallBehavior extends AbstractBehavior
       };
 
       //CLEAR LIDAR POINTS FOR CLEAN SCAN *******************************************
-      BehaviorTask clearLidarTask2 = new BehaviorTask(clearLidarBehavior, yoTime)
+      BehaviorAction clearLidarTask2 = new BehaviorAction(clearLidarBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(BehaviorState.CLEARING_LIDAR);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.CLEARING_LIDAR);
          }
       };
 
       //SEARCH FOR BALL AGAIN FOR FINAL LOCATION *******************************************
-      BehaviorTask finalFindBallTask = new BehaviorTask(initialSphereDetectionBehavior, yoTime)
+      BehaviorAction finalFindBallTask = new BehaviorAction(initialSphereDetectionBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Looking for the ball");
             sendPacketToNetworkProcessor(p1);
-            coactiveElement.currentState.set(BehaviorState.SEARCHING_FOR_BALL);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
             coactiveElement.ballX.set(0);
@@ -367,12 +365,12 @@ public class PickUpBallBehavior extends AbstractBehavior
       };
 
       // re-validat ball with user *******************************************
-      BehaviorTask validateBallTask2 = new BehaviorTask(waitForUserValidationBehavior, yoTime)
+      BehaviorAction validateBallTask2 = new BehaviorAction(waitForUserValidationBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            coactiveElement.currentState.set(BehaviorState.WAITING_FOR_USER_CONFIRMATION);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.WAITING_FOR_USER_CONFIRMATION);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(true);
             coactiveElement.validAcknowledged.set(false);
@@ -386,14 +384,18 @@ public class PickUpBallBehavior extends AbstractBehavior
       };
 
       // GO TO INITIAL POICKUP LOCATION *******************************************
-      BehaviorTask goToPickUpBallInitialLocationTask = new BehaviorTask(wholeBodyBehavior, yoTime)
+      BehaviorAction goToPickUpBallInitialLocationTask = new BehaviorAction(wholeBodyBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
+            System.out.println("Picking up Ball "+initialSphereDetectionBehavior.getBallLocation().getX()+" "+
+                  initialSphereDetectionBehavior.getBallLocation().getY()+" "+
+                  initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
+
             TextToSpeechPacket p1 = new TextToSpeechPacket("I think i found the ball");
             sendPacketToNetworkProcessor(p1);
-            coactiveElement.currentState.set(BehaviorState.REACHING_FOR_BALL);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.REACHING_FOR_BALL);
             FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
                   initialSphereDetectionBehavior.getBallLocation().getY(),
                   initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
@@ -411,7 +413,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       };
 
       //REACH FOR THE BALL *******************************************
-      BehaviorTask pickUpBallTask = new BehaviorTask(wholeBodyBehavior, yoTime)
+      BehaviorAction pickUpBallTask = new BehaviorAction(wholeBodyBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -450,33 +452,33 @@ public class PickUpBallBehavior extends AbstractBehavior
       //RESET BODY POSITIONS *******************************************
       GoHomeMessage goHomeChestMessage = new GoHomeMessage(BodyPart.CHEST, 2);
       chestGoHomeBehavior.setInput(goHomeChestMessage);
-      GoHomeTask goHomeChestTask = new GoHomeTask(goHomeChestMessage, chestGoHomeBehavior, yoTime);
+      GoHomeTask goHomeChestTask = new GoHomeTask(goHomeChestMessage, chestGoHomeBehavior);
 
       GoHomeMessage goHomepelvisMessage = new GoHomeMessage(BodyPart.PELVIS, 2);
       pelvisGoHomeBehavior.setInput(goHomepelvisMessage);
-      GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, pelvisGoHomeBehavior, yoTime);
+      GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, pelvisGoHomeBehavior);
 
       GoHomeMessage goHomeLeftArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2);
       armGoHomeLeftBehavior.setInput(goHomeLeftArmMessage);
-      GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior, yoTime);
+      GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior);
 
       GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
       armGoHomeRightBehavior.setInput(goHomeRightArmMessage);
-      GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior, yoTime);
+      GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior);
 
       double[] rightHandWiderHomeJointAngles = new double[] {-0.785398, 0.5143374964757462, 2.2503094898479272, -2.132492022530739, -0.22447272781774874,
             -0.4780687104960028, -0.24919417978503655};
 
       ArmTrajectoryMessage widerHome = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandWiderHomeJointAngles);
 
-      ArmTrajectoryTask rightArmHomeTask = new ArmTrajectoryTask(widerHome, armTrajectoryBehavior, yoTime);
+      ArmTrajectoryTask rightArmHomeTask = new ArmTrajectoryTask(widerHome, armTrajectoryBehavior);
 
       double[] rightHandBucketLocation1 = new double[] {0.5489321822438367, 0.2899665391571677, 2.096340823983413, -1.2225333451166707, 0.1256161514011733,
             -1.3433026185064938, -1.1994258903111514};
 
       ArmTrajectoryMessage rightHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandBucketLocation1);
 
-      ArmTrajectoryTask rightHandBucketLocation1Task = new ArmTrajectoryTask(rightHandBucketLocation1Message, armTrajectoryBehavior, yoTime)
+      ArmTrajectoryTask rightHandBucketLocation1Task = new ArmTrajectoryTask(rightHandBucketLocation1Message, armTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -484,7 +486,7 @@ public class PickUpBallBehavior extends AbstractBehavior
             super.setBehaviorInput();
             TextToSpeechPacket p1 = new TextToSpeechPacket("Putting The Ball In The Bucket");
             sendPacketToNetworkProcessor(p1);
-            coactiveElement.currentState.set(BehaviorState.PUTTING_BALL_IN_BASKET);
+            coactiveElement.currentState.set(PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET);
          }
       };
 
@@ -493,35 +495,33 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       ArmTrajectoryMessage leftHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBucketLocation1);
 
-      ArmTrajectoryTask leftHandBucketLocation1Task = new ArmTrajectoryTask(leftHandBucketLocation1Message, armTrajectoryBehavior, yoTime);
+      ArmTrajectoryTask leftHandBucketLocation1Task = new ArmTrajectoryTask(leftHandBucketLocation1Message, armTrajectoryBehavior);
 
       double[] rightHandBucketLocation2 = new double[] {0.4765048070153984, 0.305694742754363, 2.173812006625049, -1.4970540590789951, 0.10321456673940527,
             -1.2120648871681976, -1.1591439074587626};
 
       ArmTrajectoryMessage rightHandBucketLocation2Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandBucketLocation2);
 
-      ArmTrajectoryTask rightHandBucketLocation2Task = new ArmTrajectoryTask(rightHandBucketLocation2Message, armTrajectoryBehavior, yoTime);
+      ArmTrajectoryTask rightHandBucketLocation2Task = new ArmTrajectoryTask(rightHandBucketLocation2Message, armTrajectoryBehavior);
 
       double[] leftHandBucketLocation2 = new double[] {-0.6312858675745908, -0.6560594198655715, 2.026449179186367, 2.0325182474649997, -1.4129369066719957,
             -0.33189990885720594, -1.1435699210219243};
 
       ArmTrajectoryMessage leftHandBucketLocation2Message = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBucketLocation2);
 
-      ArmTrajectoryTask leftHandBucketLocation2Task = new ArmTrajectoryTask(leftHandBucketLocation2Message, armTrajectoryBehavior, yoTime);
+      ArmTrajectoryTask leftHandBucketLocation2Task = new ArmTrajectoryTask(leftHandBucketLocation2Message, armTrajectoryBehavior);
 
       double[] leftHandAfterGrabLocation = new double[] {-0.799566492522621, -0.8850712601496326, 1.1978163314288173, 0.9978871050058826, -0.22593401111949774,
             -0.2153318563363089, -1.2957848304397805};
 
       ArmTrajectoryMessage leftHandAfterGrabMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandAfterGrabLocation);
 
-      ArmTrajectoryTask leftHandAfterGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior, yoTime);
+      ArmTrajectoryTask leftHandBeforeGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior);
 
-      double[] leftHandBeforeGrabLocation = new double[] {-0.4157909673929138, -0.33973574728338696, 1.687124827585988, 1.8776226987048135,
-            -0.39801575126789734, -1.4444576032955683, -1.9387386907009923};
+      
+      ArmTrajectoryTask leftHandAfterGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior);
 
-      ArmTrajectoryMessage leftHandBeforeGrabMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBeforeGrabLocation);
 
-      ArmTrajectoryTask leftHandBeforeGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior, yoTime);
 
       // TASK SETUP
       pipeLine.submitTaskForPallelPipesStage(handDesiredConfigurationBehavior, closeHand);
@@ -538,7 +538,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       //LOOK AROUND
 
-      pipeLine.submitSingleTaskStage(validateBallTask);
+//      pipeLine.submitSingleTaskStage(validateBallTask);
       pipeLine.submitSingleTaskStage(rightArmHomeTask);
       //RECENTER BODY      
       pipeLine.submitSingleTaskStage(walkToBallTask);
@@ -553,7 +553,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       pipeLine.submitSingleTaskStage(clearLidarTask2);
       pipeLine.submitSingleTaskStage(finalFindBallTask);
-      pipeLine.submitSingleTaskStage(validateBallTask2);
+//      pipeLine.submitSingleTaskStage(validateBallTask2);
 
       pipeLine.submitSingleTaskStage(leftHandBeforeGrab);
 
@@ -649,7 +649,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
       sendPacketToNetworkProcessor(p1);
 
-      coactiveElement.currentState.set(BehaviorState.STOPPED);
+      coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
 
       coactiveElement.searchingForBall.set(false);
       coactiveElement.waitingForValidation.set(false);
@@ -711,11 +711,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       }
    }
 
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      return true;
-   }
+  
 
    //   public void setHSVRange(HSVRange hsvRange)
    //   {

@@ -61,7 +61,6 @@ public class ObjectWeightBehavior extends AbstractBehavior
       packetAvailable.set(false);
    }
 
-   @Override
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();

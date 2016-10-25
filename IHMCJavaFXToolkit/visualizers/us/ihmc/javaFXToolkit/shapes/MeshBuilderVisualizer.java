@@ -15,13 +15,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
+import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
+import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.robotics.random.RandomTools;
 
 public class MeshBuilderVisualizer extends Application
 {
-   private enum MeshToDisplay {BOX, LINE}
-   private static final MeshToDisplay MESH_TO_DISPLAY = MeshToDisplay.LINE;
+   private enum MeshToDisplay {BOX, LINE, CYLINDER, CONE}
+   private static final MeshToDisplay MESH_TO_DISPLAY = MeshToDisplay.CONE;
 
    public MeshBuilderVisualizer()
    {
@@ -38,8 +40,8 @@ public class MeshBuilderVisualizer extends Application
       scene.setFill(Color.GRAY);
       setupCamera(rootNode, scene);
 
-      JavaFXCoordinateSystem worldCoordinateSystem = new JavaFXCoordinateSystem(0.3);
-      rootNode.getChildren().add(worldCoordinateSystem);
+//      JavaFXCoordinateSystem worldCoordinateSystem = new JavaFXCoordinateSystem(0.3);
+//      rootNode.getChildren().add(worldCoordinateSystem);
 
       MeshBuilder meshBuilder = new MeshBuilder();
       switch (MESH_TO_DISPLAY)
@@ -49,10 +51,21 @@ public class MeshBuilderVisualizer extends Application
          break;
       case LINE:
          addLines(meshBuilder);
+         break;
+      case CYLINDER:
+         addCylinders(meshBuilder);
+         break;
+      case CONE:
+         addCones(meshBuilder);
+         break;
       default:
          break;
       }
 
+//      MeshView meshView = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Cone(0.3, 0.1, 64)));
+//      MeshView meshView = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.GenTruncatedCone(0.3, 0.1, 0.1, 0.1, 0.1, 64)));
+//      MeshView meshView = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.GenTruncatedCone(0.3, 0.1, 0.1, 0.1, 0.1, 64)));
+//      MeshView meshView = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Cylinder(0.1, 0.3, 64)));
       MeshView meshView = new MeshView(meshBuilder.generateMesh());
       PhongMaterial material = new PhongMaterial();
       material.setDiffuseColor(Color.CYAN);
@@ -71,7 +84,7 @@ public class MeshBuilderVisualizer extends Application
       {
          for (float y = -2.0f; y <= 2.0f; y += 0.055f)
          {
-            meshBuilder.addBoxMesh(0.05f, 0.05f, 0.05f, new Vector3f(x, y, RandomTools.generateRandomFloatInRange(new Random(), -2.0f, 2.0f)));
+            meshBuilder.addBox(0.05f, 0.05f, 0.05f, new Vector3f(x, y, RandomTools.generateRandomFloatInRange(new Random(), -2.0f, 2.0f)));
             count++;
          }
       }
@@ -83,7 +96,27 @@ public class MeshBuilderVisualizer extends Application
       Point3d start = new Point3d(0.3, 0.0, -0.);
       Point3d end = new Point3d(0.0, 0.3, 0.0);
       double lineWidth = 0.01;
-      meshBuilder.addLineMesh(start, end, lineWidth);
+      meshBuilder.addLine(start, end, lineWidth);
+   }
+
+   private void addCylinders(MeshBuilder meshBuilder)
+   {
+      Point3d cylinderPosition = new Point3d(1.0, 0.0, 0.0);
+      double height = 0.3;
+      double radius = 0.1;
+      meshBuilder.addCylinder(height, radius, cylinderPosition);
+//      meshBuilder.addMesh(MeshDataGenerator.ArcTorus(0.0, 2.0 * Math.PI, 0.3, 0.01, 128));
+      meshBuilder.addMesh(MeshDataGenerator.Cylinder(radius, height, 64));
+   }
+
+   private void addCones(MeshBuilder meshBuilder)
+   {
+      Point3d conePosition = new Point3d(0.4, 0.0, 0.0);
+      double height = 0.3;
+      double radius = 0.1;
+      meshBuilder.addCone(height, radius, conePosition);
+//      meshBuilder.addMesh(MeshDataGenerator.ArcTorus(0.0, 2.0 * Math.PI, 0.3, 0.01, 128));
+      meshBuilder.addMesh(MeshDataGenerator.Cone(height, radius, 64));
    }
 
    private void setupCamera(Group root, Scene scene)

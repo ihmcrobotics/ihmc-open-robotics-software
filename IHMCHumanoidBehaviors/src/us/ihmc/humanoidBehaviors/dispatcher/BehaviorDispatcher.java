@@ -9,10 +9,10 @@ import java.util.concurrent.TimeUnit;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleForwardingBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
-import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
 import us.ihmc.robotDataCommunication.YoVariableServer;
@@ -106,16 +106,16 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    public void addBehavior(E E, AbstractBehavior behaviorToAdd)
    {
-      BehaviorStateWrapper<E> behaviorStateToAdd = new BehaviorStateWrapper<E>(E, yoTime, behaviorToAdd);
+      BehaviorAction<E> behaviorStateToAdd = new BehaviorAction<E>(E, behaviorToAdd);
 
       this.stateMachine.addState(behaviorStateToAdd);
       this.registry.addChild(behaviorToAdd.getYoVariableRegistry());
 
-      ArrayList<BehaviorStateWrapper<E>> allOtherBehaviorStates = new ArrayList<BehaviorStateWrapper<E>>();
+      ArrayList<BehaviorAction<E>> allOtherBehaviorStates = new ArrayList<BehaviorAction<E>>();
 
       for (E otherBehaviorType : behaviorEnum.getEnumConstants())
       {
-         BehaviorStateWrapper<E> otherBehaviorState = stateMachine.getState(otherBehaviorType);
+         BehaviorAction<E> otherBehaviorState = stateMachine.getState(otherBehaviorType);
 
          if (otherBehaviorState == null)
          {
@@ -247,10 +247,10 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private class SwitchGlobalListenersAction implements StateTransitionAction
    {
-      private final BehaviorStateWrapper<E> fromBehaviorState;
-      private final BehaviorStateWrapper<E> toBehaviorState;
+      private final BehaviorAction<E> fromBehaviorState;
+      private final BehaviorAction<E> toBehaviorState;
 
-      public SwitchGlobalListenersAction(BehaviorStateWrapper<E> fromBehaviorState, BehaviorStateWrapper<E> toBehaviorState)
+      public SwitchGlobalListenersAction(BehaviorAction<E> fromBehaviorState, BehaviorAction<E> toBehaviorState)
       {
          this.fromBehaviorState = fromBehaviorState;
          this.toBehaviorState = toBehaviorState;

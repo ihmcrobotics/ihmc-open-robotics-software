@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.testTools;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.HandstepHelper;
 import us.ihmc.robotics.robotSide.RobotSide;

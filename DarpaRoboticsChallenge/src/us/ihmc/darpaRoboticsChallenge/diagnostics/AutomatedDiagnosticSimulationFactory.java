@@ -7,8 +7,8 @@ import java.util.Map;
 
 import com.github.quickhull3d.Point3d;
 
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
@@ -95,7 +95,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
    public AutomatedDiagnosticConfiguration createDiagnosticController(boolean startWithRobotAlive)
    {
-      simulatedRobot = robotModel.createSdfRobot(false);
+      simulatedRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       DiagnosticLoggerConfiguration.setupLogging(simulatedRobot.getYoTime(), getClass(), robotModel.getSimpleRobotName());
 
       if (robotInitialSetup == null)

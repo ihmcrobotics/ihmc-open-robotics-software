@@ -1,19 +1,18 @@
 package us.ihmc.robotDataCommunication;
 
-import us.ihmc.SdfLoader.SDFHumanoidJointNameMap;
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
-public class VisualizerRobot extends HumanoidFloatingRootJointRobot
+public class VisualizerRobot extends FloatingRootJointRobot
 {
    private final YoVariableRegistry reducedRegistry;
 
 
-   public VisualizerRobot(RobotDescription robotDescription, SDFHumanoidJointNameMap sdfJointNameMap)
+   public VisualizerRobot(RobotDescription robotDescription)
    {
-      super(robotDescription, sdfJointNameMap);
+      super(robotDescription);
       this.reducedRegistry = new YoVariableRegistry(robotDescription.getName());
 
       reducedRegistry.registerVariable(getRootJoint().getQx());

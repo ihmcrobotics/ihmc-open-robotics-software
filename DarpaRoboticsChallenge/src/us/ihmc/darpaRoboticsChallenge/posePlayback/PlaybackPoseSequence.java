@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.posePlayback;
 
 import java.util.ArrayList;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 
 public class PlaybackPoseSequence
 {

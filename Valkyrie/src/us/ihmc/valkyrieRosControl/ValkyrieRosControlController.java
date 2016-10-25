@@ -1,10 +1,5 @@
 package us.ihmc.valkyrieRosControl;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import us.ihmc.affinity.Affinity;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -30,14 +25,11 @@ import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
-import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
-import us.ihmc.rosControl.wholeRobot.IMUHandle;
-import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
-import us.ihmc.rosControl.wholeRobot.JointStateHandle;
+import us.ihmc.rosControl.wholeRobot.*;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
@@ -46,44 +38,45 @@ import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.wholeBodyController.concurrent.SynchronousMultiThreadedRobotController;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
+import us.ihmc.wholeBodyController.concurrent.MultiThreadedRobotControlElementCoordinator;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorControllerFactory;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
-{   
-//   private static final String[] torqueControlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
-//         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
-//         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "lowerNeckPitch",
-//         "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
-//         "rightWristPitch" };
+{
+   //   private static final String[] torqueControlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
+   //         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
+   //         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "lowerNeckPitch",
+   //         "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
+   //         "rightWristPitch" };
 
-   private static final String[] allValkyrieJoints = {
-         "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
-         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
-         "torsoYaw", "torsoPitch", "torsoRoll",
-         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch",
-         "lowerNeckPitch", "neckYaw", "upperNeckPitch",
-         "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll", "rightWristPitch"
-   };
+   private static final String[] allValkyrieJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
+         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
+         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "leftForearmYaw", "leftWristRoll", "leftWristPitch", "lowerNeckPitch",
+         "neckYaw", "upperNeckPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch", "rightForearmYaw", "rightWristRoll",
+         "rightWristPitch" };
 
-	private static final String[] torqueControlledJoints = {
-	      "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
-	      "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll",
-	      "torsoYaw", "torsoPitch", "torsoRoll",
-	      "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch",
-	      "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"
-	      };
+   private static final String[] torqueControlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
+         "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
+         "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw",
+         "rightElbowPitch" };
 
-   private static final String[] positionControlledJoints = {
-         "lowerNeckPitch", "neckYaw", "upperNeckPitch",
+   private static final String[] positionControlledJoints = { "lowerNeckPitch", "neckYaw", "upperNeckPitch",
          //"rightForearmYaw", "rightWristRoll", "rightWristPitch"
-         };
+   };
 
    public static final boolean USE_YOVARIABLE_DESIREDS = true;
    public static final boolean USE_USB_MICROSTRAIN_IMUS = false;
    public static final boolean USE_SWITCHABLE_FILTER_HOLDER_FOR_NON_USB_IMUS = false;
    public static final String[] readIMUs = USE_USB_MICROSTRAIN_IMUS ? new String[0] : new String[ValkyrieSensorInformation.imuSensorsToUse.length];
+
    static
    {
       if (!USE_USB_MICROSTRAIN_IMUS)
@@ -95,8 +88,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
    }
 
-   public static final String[] readForceTorqueSensors = {"leftFootSixAxis", "rightFootSixAxis"};
-   public static final String[] forceTorqueSensorModelNames = {"leftAnkleRoll", "rightAnkleRoll"};
+   public static final String[] readForceTorqueSensors = { "leftFootSixAxis", "rightFootSixAxis" };
+   public static final String[] forceTorqueSensorModelNames = { "leftAnkleRoll", "rightAnkleRoll" };
 
    public static final double gravity = 9.80665;
 
@@ -105,13 +98,14 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    public static final boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
    private static final boolean DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET = true;
 
-   private MultiThreadedRealTimeRobotController robotController;
+   private MultiThreadedRobotControlElementCoordinator robotController;
 
    private final SettableTimestampProvider timestampProvider = new SettableTimestampProvider();
 
    private boolean firstTick = true;
 
    private final ValkyrieAffinity valkyrieAffinity = new ValkyrieAffinity();
+   private boolean isGazebo;
 
    public ValkyrieRosControlController()
    {
@@ -156,13 +150,11 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    @Override
    protected void init()
    {
-      long maxMemory = Runtime.getRuntime().maxMemory();
-
-      System.out.println("Partying hard with max memory of: " + maxMemory);
-
       /*
        * Create joints
        */
+
+      processEnvironmentVariables();
 
       HashSet<String> torqueControlledJointsSet = new HashSet<>(Arrays.asList(torqueControlledJoints));
       HashSet<String> positionControlledJointsSet = new HashSet<>(Arrays.asList(positionControlledJoints));
@@ -171,24 +163,24 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       HashMap<String, PositionJointHandle> positionJointHandles = new HashMap<>();
       HashMap<String, JointStateHandle> jointStateHandles = new HashMap<>();
 
-      for(String joint : allValkyrieJoints)
+      for (String joint : allValkyrieJoints)
       {
-         if(torqueControlledJointsSet.contains(joint) && positionControlledJointsSet.contains(joint))
+         if (torqueControlledJointsSet.contains(joint) && positionControlledJointsSet.contains(joint))
          {
             throw new RuntimeException("Joint cannot be both position controlled and torque controlled via ROS Control! Joint name: " + joint);
          }
 
-         if(torqueControlledJointsSet.contains(joint))
+         if (torqueControlledJointsSet.contains(joint))
          {
             effortJointHandles.put(joint, createEffortJointHandle(joint));
          }
 
-         if(positionControlledJointsSet.contains(joint))
+         if (positionControlledJointsSet.contains(joint))
          {
             positionJointHandles.put(joint, createPositionJointHandle(joint));
          }
 
-         if(!(torqueControlledJointsSet.contains(joint) || positionControlledJointsSet.contains(joint)))
+         if (!(torqueControlledJointsSet.contains(joint) || positionControlledJointsSet.contains(joint)))
          {
             jointStateHandles.put(joint, createJointStateHandle(joint));
          }
@@ -222,14 +214,23 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
        * Create registries
        */
 
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, true);
+      ValkyrieRobotModel robotModel;
+      if(isGazebo)
+      {
+         robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.GAZEBO, true);
+      }
+      else
+      {
+         robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, true);
+      }
+
       ValkyrieSensorInformation sensorInformation = robotModel.getSensorInformation();
 
       /*
        * Create network servers/clients
        */
-      PacketCommunicator controllerPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT,
-            new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator controllerPacketCommunicator = PacketCommunicator
+            .createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       PeriodicRealtimeThreadScheduler yoVariableServerScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.LOGGER_PRIORITY);
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       LogSettings logSettings = robotModel.getLogSettings(ValkyrieConfigurationRoot.USE_CAMERAS_FOR_LOGGING);
@@ -301,17 +302,49 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       yoVariableServer.start();
 
-      robotController = new MultiThreadedRealTimeRobotController(estimatorThread);
-      if (valkyrieAffinity.setAffinity())
+      if (isGazebo)
       {
-         robotController.addController(controllerThread, ValkyriePriorityParameters.CONTROLLER_PRIORITY, valkyrieAffinity.getControlThreadProcessor());
+         PrintTools.info(ValkyrieRosControlController.class, "Running with blocking synchronous execution between estimator and controller");
+         SynchronousMultiThreadedRobotController coordinator = new SynchronousMultiThreadedRobotController(estimatorThread, timestampProvider);
+         coordinator.addController(controllerThread, (int) (robotModel.getControllerDT() / robotModel.getEstimatorDT()));
+
+         robotController = coordinator;
       }
       else
       {
-         robotController.addController(controllerThread, ValkyriePriorityParameters.CONTROLLER_PRIORITY, null);
+         PrintTools.info(ValkyrieRosControlController.class, "Running with multi-threaded RT threads for estimator and controller");
+         MultiThreadedRealTimeRobotController coordinator = new MultiThreadedRealTimeRobotController(estimatorThread);
+         if (valkyrieAffinity.setAffinity())
+         {
+            coordinator.addController(controllerThread, ValkyriePriorityParameters.CONTROLLER_PRIORITY, valkyrieAffinity.getControlThreadProcessor());
+         }
+         else
+         {
+            coordinator.addController(controllerThread, ValkyriePriorityParameters.CONTROLLER_PRIORITY, null);
+         }
+
+         robotController = coordinator;
       }
 
       robotController.start();
+   }
+
+   private void processEnvironmentVariables()
+   {
+      String isGazeboEnvironmentVariable = System.getenv("IS_GAZEBO");
+      isGazebo = false;
+      if (isGazeboEnvironmentVariable != null)
+      {
+         switch (isGazeboEnvironmentVariable)
+         {
+         case "true":
+            isGazebo = true;
+            break;
+         default:
+            isGazebo = false;
+            break;
+         }
+      }
    }
 
    @Override

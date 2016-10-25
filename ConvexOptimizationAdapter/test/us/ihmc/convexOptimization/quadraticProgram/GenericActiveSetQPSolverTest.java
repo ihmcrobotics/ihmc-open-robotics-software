@@ -30,8 +30,8 @@ import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 public class GenericActiveSetQPSolverTest
 {
    /** 

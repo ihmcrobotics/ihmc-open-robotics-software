@@ -1,6 +1,6 @@
 package us.ihmc.wholeBodyController.concurrent;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJointDesiredAccelerationChecksum;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJointDesiredAccelerationCopier;

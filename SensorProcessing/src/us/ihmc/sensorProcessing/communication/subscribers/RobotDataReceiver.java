@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;

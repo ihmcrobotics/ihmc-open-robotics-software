@@ -7,20 +7,17 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 
 public abstract class PickUpBallBehaviorCoactiveElement extends BehaviorCoactiveElement
 {
-   public enum BehaviorState
+   public enum PickUpBallBehaviorState
    {
       STOPPED,
-      ENABLING_LIDAR,
-      SETTING_LIDAR_PARAMS,
-      CLEARING_LIDAR,
-      SEARCHING_FOR_BALL,
-      WAITING_FOR_USER_CONFIRMATION,
+      SETUP_ROBOT,
+      SEARCHING_FOR_BALL_FAR,
       WALKING_TO_BALL,
-      BENDING_OVER,
-      REACHING_FOR_BALL,
-      CLOSING_HAND,
+      SEARCHING_FOR_BALL_NEAR,
       PICKING_UP_BALL,
-      PUTTING_BALL_IN_BASKET
+      PUTTING_BALL_IN_BASKET,
+      RESET_ROBOT,
+      WAITING_FOR_USER_CONFIRMATION
    }
 
    //UI SIDE YOVARS
@@ -36,8 +33,8 @@ public abstract class PickUpBallBehaviorCoactiveElement extends BehaviorCoactive
    public final BooleanYoVariable validClicked = new BooleanYoVariable("validClicked", userInterfaceWritableRegistry);
 
    //BEHAVIOR SIDE YOVARS
-   public final EnumYoVariable<BehaviorState> currentState = new EnumYoVariable<BehaviorState>("currentPickUpState", machineWritableRegistry,
-         BehaviorState.class);
+   public final EnumYoVariable<PickUpBallBehaviorState> currentState = new EnumYoVariable<PickUpBallBehaviorState>("currentPickUpState", machineWritableRegistry,
+         PickUpBallBehaviorState.class);
    public final IntegerYoVariable machineSideCount = new IntegerYoVariable("machineSideCount", machineWritableRegistry);
    public final IntegerYoVariable abortCount = new IntegerYoVariable("abortCount", machineWritableRegistry);
    public final BooleanYoVariable abortAcknowledged = new BooleanYoVariable("abortAcknowledged", machineWritableRegistry);

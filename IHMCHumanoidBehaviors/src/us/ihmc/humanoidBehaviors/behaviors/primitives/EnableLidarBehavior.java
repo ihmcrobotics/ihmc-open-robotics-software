@@ -21,19 +21,14 @@ public class EnableLidarBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      if (hasInputBeenSet())
-      {
+      
          enableLidarPacket = new DepthDataStateCommand(lidarState);
 
          if (!packetHasBeenSent.getBooleanValue() && (enableLidarPacket != null))
          {
             sendPacketToNetworkProcessor();
          }
-      }
-      else
-      {
-         setLidarState(LidarState.ENABLE);
-      }
+      
    }
 
    public void setLidarState(LidarState lidarState)
@@ -74,12 +69,5 @@ public class EnableLidarBehavior extends AbstractBehavior
       return packetHasBeenSent.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      if (lidarState != null)
-         return true;
-      else
-         return false;
-   }
+  
 }

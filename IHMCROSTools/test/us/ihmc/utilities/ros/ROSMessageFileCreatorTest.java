@@ -2,7 +2,7 @@ package us.ihmc.utilities.ros;
 
 import org.junit.Test;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.tools.testing.TestPlanAnnotations;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 
 import java.util.Set;
@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
  */
 public class ROSMessageFileCreatorTest
 {
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAllExportedPacketsWithTopicsAreFormattedCorrectly()
    {
