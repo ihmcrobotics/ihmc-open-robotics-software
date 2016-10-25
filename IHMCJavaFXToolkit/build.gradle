@@ -26,7 +26,7 @@ repositories ihmc.ihmcDefaultArtifactProxies()
 
 repositories {
     maven {
-        url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
 }
 
