@@ -8,7 +8,7 @@ import javax.swing.JButton;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.darpaRoboticsChallenge.diagnostics.HumanoidDiagnosticsWhenHangingSimulation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -296,9 +296,9 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       }
       
       @Override
-      public HumanoidFloatingRootJointRobot createSdfRobot(boolean createCollisionMeshes)
+      public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
       {
-         HumanoidFloatingRootJointRobot robot = super.createSdfRobot(createCollisionMeshes);
+         HumanoidFloatingRootJointRobot robot = super.createHumanoidFloatingRootJointRobot(createCollisionMeshes);
          
          Joint joint = robot.getJoint("torsoRoll");
          

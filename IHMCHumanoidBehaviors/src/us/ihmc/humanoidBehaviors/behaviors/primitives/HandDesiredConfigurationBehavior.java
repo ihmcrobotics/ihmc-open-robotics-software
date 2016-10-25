@@ -23,9 +23,9 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
 
    private final boolean DEBUG = true;
 
-   public HandDesiredConfigurationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridgeInterface, DoubleYoVariable yoTime)
+   public HandDesiredConfigurationBehavior(String name, OutgoingCommunicationBridgeInterface outgoingCommunicationBridgeInterface, DoubleYoVariable yoTime)
    {
-      super(outgoingCommunicationBridgeInterface);
+      super(name,outgoingCommunicationBridgeInterface);
       this.yoTime = yoTime;
 
       hasInputBeenSet = new BooleanYoVariable(getName() + "hasInputBeenSet", registry);
@@ -160,7 +160,6 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
       trajectoryTimeElapsed.set(false);
    }
 
-   @Override
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();

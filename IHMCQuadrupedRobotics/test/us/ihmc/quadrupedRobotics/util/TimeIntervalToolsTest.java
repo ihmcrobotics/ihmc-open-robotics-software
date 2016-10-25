@@ -1,14 +1,16 @@
 package us.ihmc.quadrupedRobotics.util;
 
 import org.junit.Test;
-import us.ihmc.tools.testing.TestPlanAnnotations;
+
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+
 import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 
 public class TimeIntervalToolsTest
 {
 
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSortMethods()
    {
@@ -60,7 +62,7 @@ public class TimeIntervalToolsTest
       }
    }
 
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRemoveMethods()
    {

@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import javax.swing.JButton;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataCommunication.logger.LogVisualizer;

@@ -1,18 +1,29 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class SleepTask extends BehaviorTask
+public class SleepTask<E extends Enum<E>> extends BehaviorAction<E>
 {
 
-   public SleepTask(SleepBehavior sleepBehavior, DoubleYoVariable yoTime)
+   private final SleepBehavior sleepBehavior;
+   private final double sleepTime;
+   
+   public SleepTask(SleepBehavior sleepBehavior, double sleepTime)
    {
-      super(sleepBehavior, yoTime);
+     this(null, sleepBehavior, sleepTime);
+   }
+   
+   public SleepTask(E stateEnum,SleepBehavior sleepBehavior, double sleepTime)
+   {
+      super(stateEnum,sleepBehavior);
+      this.sleepBehavior = sleepBehavior;
+      this.sleepTime = sleepTime;
    }
 
    @Override
    protected void setBehaviorInput()
    {
+      sleepBehavior.setSleepTime(sleepTime);
    }
 }

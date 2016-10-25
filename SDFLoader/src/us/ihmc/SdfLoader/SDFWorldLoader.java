@@ -1,5 +1,13 @@
 package us.ihmc.SdfLoader;
 
+import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
+import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DAdapter.jme.JMEGeneratedHeightMap;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,18 +17,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
-
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
-import us.ihmc.graphics3DAdapter.HeightMap;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.jme.JMEGeneratedHeightMap;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 
 public class SDFWorldLoader
 {
@@ -62,16 +58,6 @@ public class SDFWorldLoader
       HeightMap groundProfile = new JMEGeneratedHeightMap(nodes, resolution);
 
       return groundProfile;
-   }
-
-   public ImmutablePair<HumanoidFloatingRootJointRobot, FullHumanoidRobotModel> createRobotAndRemoveFromWorld(SDFHumanoidJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
-   {
-      removeVisualFromWorld(sdfJointNameMap.getModelName());
-
-      ImmutablePair<HumanoidFloatingRootJointRobot, FullHumanoidRobotModel> ret = new ImmutablePair<HumanoidFloatingRootJointRobot, FullHumanoidRobotModel>(jaxbSDFLoader.createRobot(sdfJointNameMap, useCollisionMeshes),
-            jaxbSDFLoader.createFullRobotModel(sdfJointNameMap));
-
-      return ret;
    }
 
    private void removeVisualFromWorld(String modelName)

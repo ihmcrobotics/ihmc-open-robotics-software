@@ -193,7 +193,6 @@ public class HandTrajectoryBehavior extends AbstractBehavior
 
    
 
-   @Override
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();

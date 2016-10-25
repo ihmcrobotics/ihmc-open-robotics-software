@@ -3,7 +3,7 @@ package us.ihmc.robotiq.simulatedHand;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;

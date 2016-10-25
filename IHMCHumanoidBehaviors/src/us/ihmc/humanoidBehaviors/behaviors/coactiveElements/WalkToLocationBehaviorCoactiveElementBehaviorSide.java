@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.coactiveElements;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 

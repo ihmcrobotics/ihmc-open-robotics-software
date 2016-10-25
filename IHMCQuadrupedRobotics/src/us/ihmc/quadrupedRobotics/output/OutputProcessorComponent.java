@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.output;
 
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 
 public interface OutputProcessorComponent
 {

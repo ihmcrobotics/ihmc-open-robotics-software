@@ -17,7 +17,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.dataExporter.DataExporter;
+import us.ihmc.simulationconstructionset.dataExporter.TorqueSpeedDataExporter;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class DRCGuiInitialSetup implements GuiInitialSetup
@@ -110,7 +110,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       if (SHOW_EXPORT_TORQUE_AND_SPEED)
       {
          JButton exportTorqueAndSpeedButton = new JButton("Export Torque And Speed");
-         DataExporter dataExporter = new DataExporter(scs, robot);
+         TorqueSpeedDataExporter dataExporter = new TorqueSpeedDataExporter(scs, robot);
          exportTorqueAndSpeedButton.addActionListener(dataExporter);
          scs.addButton(exportTorqueAndSpeedButton);
       }

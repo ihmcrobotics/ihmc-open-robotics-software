@@ -1,6 +1,6 @@
 package us.ihmc.llaQuadruped;
 
-import us.ihmc.SdfLoader.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public enum LLAQuadrupedOrderedJointMap

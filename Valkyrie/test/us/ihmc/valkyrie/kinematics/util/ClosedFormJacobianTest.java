@@ -7,13 +7,13 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobian;
 import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
 
-@ContinuousIntegrationPlan(targets = {TestPlanTarget.Fast})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ClosedFormJacobianTest
 {
    private static final boolean DEBUG = false;
@@ -52,7 +52,7 @@ public class ClosedFormJacobianTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.InDevelopment)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 30000)
    public void testJacobianMatchesMATLABWaist()
    {
@@ -94,7 +94,7 @@ public class ClosedFormJacobianTest
    // The following test is just for achieving proper renishaw jacobian matrix signs/element indices. It should never be used in Bamboo.
    @Ignore
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.InDevelopment)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 9000)
    public void testEfficientKindaMatchesInefficientJacobianAnkle()
    {
@@ -117,7 +117,7 @@ public class ClosedFormJacobianTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.InDevelopment)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 30000)
    public void testEfficientMatchesInefficientJacobianWaist()
    {

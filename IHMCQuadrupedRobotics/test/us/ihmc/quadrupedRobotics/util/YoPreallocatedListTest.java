@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.util;
 import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.testing.TestPlanAnnotations;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 
 import java.util.ArrayList;
 
@@ -13,7 +13,7 @@ public class YoPreallocatedListTest
 {
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCapacity()
    {
@@ -36,7 +36,7 @@ public class YoPreallocatedListTest
       assertEquals(doubleList.capacity(), 10);
    }
 
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDefaultElementFactory()
    {
@@ -107,7 +107,7 @@ public class YoPreallocatedListTest
       assertEquals(doubleList.get(9).getDoubleValue(), 9.0, epsilon);
    }
 
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPreallocatedListConstructor()
    {

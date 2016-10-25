@@ -5,9 +5,9 @@ import org.reflections.Reflections;
 import org.ros.internal.message.Message;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.tools.testing.TestPlanAnnotations;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
 import java.lang.reflect.*;
 import java.util.HashSet;
@@ -19,10 +19,10 @@ import static org.junit.Assert.*;
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-@ContinuousIntegrationPlan(targets = TestPlanTarget.Fast)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class IHMCROSTranslationRuntimeToolsTest
 {
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 24.4)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 24.4)
    @Test(timeout = 120000)
    public void testBidirectionalConversionWithRandomConstructors()
    {

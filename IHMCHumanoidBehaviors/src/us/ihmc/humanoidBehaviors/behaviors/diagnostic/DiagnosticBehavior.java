@@ -11,8 +11,8 @@ import javax.vecmath.Vector3d;
 import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.partNames.LimbName;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
@@ -24,13 +24,13 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.TurnInPlaceBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootstepListTask;
@@ -81,12 +81,12 @@ import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJointReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJointReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -1656,7 +1656,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       targetPoseInWorld.changeFrame(worldFrame);
 
       WalkToLocationTask walkToLocationTask = new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, angleRelativeToPath,
-            footstepLength.getDoubleValue() * percentOfMaxFootstepLength, swingTime.getDoubleValue(), transferTime.getDoubleValue(), yoTime);
+            footstepLength.getDoubleValue() * percentOfMaxFootstepLength, swingTime.getDoubleValue(), transferTime.getDoubleValue());
       if (parallelize)
       {
          pipeLine.submitTaskForPallelPipesStage(walkToLocationBehavior, walkToLocationTask);
@@ -1695,7 +1695,7 @@ public class DiagnosticBehavior extends AbstractBehavior
             footstepDataList.add(footstepData);
          }
       }
-      pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList, yoTime));
+      pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList));
    }
 
    private void sequenceSquareUp()
@@ -1722,7 +1722,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footLocation, footOrientation);
 
          footstepDataList.add(footstepData);
-         pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList, yoTime));
+         pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList));
       }
 
    }
@@ -1825,7 +1825,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          }
 
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),
-               new ArmTrajectoryTask(flyingMessage, armTrajectoryBehaviors.get(flyingSide), yoTime));
+               new ArmTrajectoryTask(flyingMessage, armTrajectoryBehaviors.get(flyingSide)));
          
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
          
@@ -1946,7 +1946,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void submitChestHomeCommand(boolean parallelize)
    {
       GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.CHEST, trajectoryTime.getDoubleValue());
-      GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, chestGoHomeBehavior, yoTime);
+      GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, chestGoHomeBehavior);
       if (parallelize)
       {
          pipeLine.submitTaskForPallelPipesStage(chestGoHomeBehavior, goHomeTask);
@@ -1965,7 +1965,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, yaw, pitch, roll);
       desiredChestOrientation.changeFrame(worldFrame);
-      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, yoTime, chestTrajectoryBehavior,
+      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, chestTrajectoryBehavior,
             trajectoryTime.getDoubleValue());
       if (parallelize)
       {
@@ -1987,7 +1987,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       FramePoint desiredPelvisPosition = new FramePoint(frameAfterRootJoint);
       desiredPelvisPosition.setZ(offsetHeight);
       desiredPelvisPosition.changeFrame(worldFrame);
-      PelvisHeightTrajectoryTask comHeightTask = new PelvisHeightTrajectoryTask(desiredPelvisPosition.getZ(), yoTime, pelvisHeightTrajectoryBehavior, trajectoryTime.getDoubleValue());
+      PelvisHeightTrajectoryTask comHeightTask = new PelvisHeightTrajectoryTask(desiredPelvisPosition.getZ(), pelvisHeightTrajectoryBehavior, trajectoryTime.getDoubleValue());
       if (parallelize)
       {
          pipeLine.submitTaskForPallelPipesStage(pelvisHeightTrajectoryBehavior, comHeightTask);
@@ -2005,7 +2005,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private void submitPelvisHomeCommand(boolean parallelize)
    {
       GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.PELVIS, trajectoryTime.getDoubleValue());
-      GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, pelvisGoHomeBehavior, yoTime);
+      GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, pelvisGoHomeBehavior);
 
       if (parallelize)
       {
@@ -2032,7 +2032,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       desiredPelvisOrientation.changeFrame(worldFrame);
       Quat4d desiredQuaternion = new Quat4d(desiredPelvisOrientation.getQuaternion());
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, desiredQuaternion);
-      PelvisOrientationTrajectoryTask task = new PelvisOrientationTrajectoryTask(message, yoTime, pelvisOrientationTrajectoryBehavior);
+      PelvisOrientationTrajectoryTask task = new PelvisOrientationTrajectoryTask(message, pelvisOrientationTrajectoryBehavior);
 
       if (parallelize)
       {
@@ -2064,7 +2064,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       Quat4d orientation = new Quat4d();
       desiredPelvisPose.getPose(position, orientation);
       PelvisTrajectoryMessage message = new PelvisTrajectoryMessage(trajectoryTime.getDoubleValue(), position, orientation);
-      PelvisTrajectoryTask task = new PelvisTrajectoryTask(message, yoTime, pelvisTrajectoryBehavior);
+      PelvisTrajectoryTask task = new PelvisTrajectoryTask(message, pelvisTrajectoryBehavior);
       if (parallelize)
       {
          pipeLine.submitTaskForPallelPipesStage(pelvisTrajectoryBehavior, task);
@@ -2086,9 +2086,9 @@ public class DiagnosticBehavior extends AbstractBehavior
          GoHomeMessage goHomeMessage = new GoHomeMessage(BodyPart.ARM, robotSide, trajectoryTime.getDoubleValue());
          GoHomeBehavior armGoHomeBehavior = armGoHomeBehaviors.get(robotSide);
          if (parallelize)
-            pipeLine.submitTaskForPallelPipesStage(armGoHomeBehavior, new GoHomeTask(goHomeMessage, armGoHomeBehavior, yoTime));
+            pipeLine.submitTaskForPallelPipesStage(armGoHomeBehavior, new GoHomeTask(goHomeMessage, armGoHomeBehavior));
          else
-            pipeLine.submitSingleTaskStage(new GoHomeTask(goHomeMessage, armGoHomeBehavior, yoTime));
+            pipeLine.submitSingleTaskStage(new GoHomeTask(goHomeMessage, armGoHomeBehavior));
       }
    }
 
@@ -2135,7 +2135,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          }
          ArmTrajectoryBehavior armTrajectoryBehavior = armTrajectoryBehaviors.get(robotSide);
          ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, trajectoryTime.getDoubleValue(), desiredJointAngles);
-         pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior, new ArmTrajectoryTask(message, armTrajectoryBehavior, yoTime));
+         pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior, new ArmTrajectoryTask(message, armTrajectoryBehavior));
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehavior,createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
 
       }
@@ -2304,7 +2304,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       FramePose footPose = new FramePose(desiredFootstepPose);
 
-      FootstepTask footstepTask = new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose, yoTime);
+      FootstepTask footstepTask = new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose);
       if (parallelize)
          pipeLine.submitTaskForPallelPipesStage(footstepListBehavior, footstepTask);
       else
@@ -2324,7 +2324,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       Point3d desiredFootPosition = new Point3d();
       Quat4d desiredFootOrientation = new Quat4d();
       desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
-      FootTrajectoryTask footPoseTask = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior,
+      FootTrajectoryTask footPoseTask = new FootTrajectoryTask(robotSide, desiredFootPosition, desiredFootOrientation, footPoseBehavior,
             trajectoryTime.getDoubleValue());
 
       if (parallelize)
@@ -2585,10 +2585,10 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       if (parallelize)
          pipeLine.submitTaskForPallelPipesStage(turnInPlaceBehavior,
-               new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior, transferTime.getDoubleValue(), swingTime.getDoubleValue(), yoTime));
+               new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior, transferTime.getDoubleValue(), swingTime.getDoubleValue()));
       else
          pipeLine
-               .submitSingleTaskStage(new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior, transferTime.getDoubleValue(), swingTime.getDoubleValue(), yoTime));
+               .submitSingleTaskStage(new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior, transferTime.getDoubleValue(), swingTime.getDoubleValue()));
    }
 
    private void sequenceFootLift()
@@ -2812,10 +2812,10 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
    }
 
-   private BehaviorTask createSleepTask(double sleepTime)
+   private BehaviorAction createSleepTask(double sleepTime)
    {
-      SleepBehavior sleepBehavior = new SleepBehavior(outgoingCommunicationBridge, yoTime, sleepTime);
-      SleepTask sleepTask = new SleepTask(sleepBehavior, yoTime);
+      SleepBehavior sleepBehavior = new SleepBehavior(outgoingCommunicationBridge, yoTime);
+      SleepTask sleepTask = new SleepTask(sleepBehavior,sleepTime);
       return sleepTask;
    }
    
@@ -2830,9 +2830,5 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
    }
 
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      return false;
-   }
+   
 }

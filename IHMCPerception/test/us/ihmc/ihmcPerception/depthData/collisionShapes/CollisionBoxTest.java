@@ -14,7 +14,7 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.shape.Box;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class CollisionBoxTest
 {

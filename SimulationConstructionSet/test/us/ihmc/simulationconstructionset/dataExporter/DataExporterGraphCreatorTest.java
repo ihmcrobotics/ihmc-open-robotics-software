@@ -17,24 +17,24 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.tools.testing.TestPlanAnnotations;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
-@ContinuousIntegrationPlan(targets = {TestPlanTarget.UI})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
 public class DataExporterGraphCreatorTest
 {
 
-    @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 1.0)
+    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 1.0)
     @Test(timeout = 30000)
     public void testDataExporterGraphCreator() throws IOException
     {
         SimulationConstructionSet sim = createSimulation();
-        DataExporterGraphCreator graphCreator = new DataExporterGraphCreator(sim.getRobots()[0], sim.getDataBuffer());
+        TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(sim.getRobots()[0], sim.getDataBuffer());
 
         File path = new File(System.getProperty("java.io.tmpdir"));
         Path tmpPath = Files.createTempDirectory(Paths.get(path.getAbsolutePath()), "test");
-        graphCreator.createGraphs(tmpPath.toFile(), "", true, true);
+        graphCreator.createJointTorqueSpeedGraphs(tmpPath.toFile(), "", true, true);
 
         int fileCount = tmpPath.toFile().listFiles(new FilenameFilter()
             {

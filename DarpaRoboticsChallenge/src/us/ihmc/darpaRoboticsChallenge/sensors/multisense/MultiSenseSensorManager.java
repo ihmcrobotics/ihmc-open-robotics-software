@@ -2,8 +2,8 @@ package us.ihmc.darpaRoboticsChallenge.sensors.multisense;
 
 import java.net.URI;
 
-import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
-import us.ihmc.SdfLoader.models.FullRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;

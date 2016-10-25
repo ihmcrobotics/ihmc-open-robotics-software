@@ -10,7 +10,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class SimpleInefficientEqualityConstrainedQPSolverTest
 {

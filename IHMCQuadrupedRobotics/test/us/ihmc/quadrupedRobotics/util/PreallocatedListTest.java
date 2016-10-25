@@ -2,10 +2,9 @@ package us.ihmc.quadrupedRobotics.util;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.Test;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.tools.testing.TestPlanAnnotations;
-
 import java.util.ArrayList;
+
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -13,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 
 public class PreallocatedListTest
 {
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCapacity()
    {
@@ -27,7 +26,7 @@ public class PreallocatedListTest
       assertEquals(doubleList.capacity(), 10);
    }
 
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testDefaultElementFactory()
    {
@@ -97,7 +96,7 @@ public class PreallocatedListTest
       assertEquals(doubleList.get(9).doubleValue(), 9.0, epsilon);
    }
 
-   @TestPlanAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPreallocatedListConstructor()
    {

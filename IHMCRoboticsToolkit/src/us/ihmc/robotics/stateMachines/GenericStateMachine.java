@@ -49,10 +49,12 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
       this(stateYoVariableName, switchTimeName, enumType, null, timeProvider, registry);
    }
 
-   public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, E initialState, DoubleProvider timeProvider, YoVariableRegistry registry)
+   public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, E initialState, DoubleProvider timeProvider,
+         YoVariableRegistry registry)
    {
       stateYoVariable = new EnumYoVariable<E>(stateYoVariableName, "State machine variable to keep track of the state.", registry, enumType, false);
-      previousStateYoVariable = new EnumYoVariable<E>(stateYoVariableName + "PreviousState", "State machine variable to keep track of the previous state.", registry, enumType, true);
+      previousStateYoVariable = new EnumYoVariable<E>(stateYoVariableName + "PreviousState", "State machine variable to keep track of the previous state.",
+            registry, enumType, true);
 
       enumsToStates = new EnumMap<>(enumType);
 
@@ -146,7 +148,8 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
    public void doAction()
    {
       T currentState = getCurrentState();
-      currentState.doAction();
+      if (currentState != null)
+         currentState.doAction();
    }
 
    public T getCurrentState()

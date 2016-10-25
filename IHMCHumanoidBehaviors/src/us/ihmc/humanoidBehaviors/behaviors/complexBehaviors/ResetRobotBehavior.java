@@ -17,13 +17,27 @@ public class ResetRobotBehavior extends AbstractBehavior
    private final GoHomeBehavior armGoHomeLeftBehavior;
    private final GoHomeBehavior armGoHomeRightBehavior;
 
+   boolean leftArm = true;
+   boolean rightArm = true;
+   boolean chest = true; 
+   boolean pelvis = true;
+   
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
    private final DoubleYoVariable yoTime;
 
    public ResetRobotBehavior(BehaviorCommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
+      this(true,true,true,true,outgoingCommunicationBridge,yoTime);
+   }
+   public ResetRobotBehavior(boolean leftArm, boolean rightArm, boolean chest, boolean pelvis, BehaviorCommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   {
       super(outgoingCommunicationBridge);
+      this.leftArm = leftArm;
+      this.rightArm = rightArm;
+      this.chest = chest;
+      this.pelvis = pelvis;
+      
       this.yoTime = yoTime;
 
       chestGoHomeBehavior = new GoHomeBehavior("chest", outgoingCommunicationBridge, yoTime);
@@ -51,27 +65,29 @@ public class ResetRobotBehavior extends AbstractBehavior
       //RESET BODY POSITIONS *******************************************
       GoHomeMessage goHomeChestMessage = new GoHomeMessage(BodyPart.CHEST, 2);
       chestGoHomeBehavior.setInput(goHomeChestMessage);
-      GoHomeTask goHomeChestTask = new GoHomeTask(goHomeChestMessage, chestGoHomeBehavior, yoTime);
+      GoHomeTask goHomeChestTask = new GoHomeTask(goHomeChestMessage, chestGoHomeBehavior);
 
       GoHomeMessage goHomepelvisMessage = new GoHomeMessage(BodyPart.PELVIS, 2);
       pelvisGoHomeBehavior.setInput(goHomepelvisMessage);
-      GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, pelvisGoHomeBehavior, yoTime);
+      GoHomeTask goHomePelvisTask = new GoHomeTask(goHomepelvisMessage, pelvisGoHomeBehavior);
 
       GoHomeMessage goHomeLeftArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2);
       armGoHomeLeftBehavior.setInput(goHomeLeftArmMessage);
-      GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior, yoTime);
+      GoHomeTask goHomeLeftArmTask = new GoHomeTask(goHomeLeftArmMessage, armGoHomeLeftBehavior);
 
       GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
       armGoHomeRightBehavior.setInput(goHomeRightArmMessage);
-      GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior, yoTime);
+      GoHomeTask goHomeRightArmTask = new GoHomeTask(goHomeRightArmMessage, armGoHomeRightBehavior);
 
       pipeLine.requestNewStage();
 
+      if(rightArm)
       pipeLine.submitSingleTaskStage(goHomeRightArmTask);
-      //
+      if(leftArm)
       pipeLine.submitSingleTaskStage(goHomeLeftArmTask);
-      //      
+      if(chest)
       pipeLine.submitSingleTaskStage(goHomeChestTask);
+      if(pelvis)
       pipeLine.submitSingleTaskStage(goHomePelvisTask);
    }
 
@@ -89,9 +105,5 @@ public class ResetRobotBehavior extends AbstractBehavior
       return pipeLine.isDone();
    }
 
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      return true;
-   }
+   
 }

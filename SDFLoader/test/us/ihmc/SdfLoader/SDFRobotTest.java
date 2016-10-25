@@ -17,15 +17,11 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.GroundContactPointGroup;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.RobotFromDescription;
+import us.ihmc.simulationconstructionset.*;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class SDFRobotTest
 {
@@ -42,14 +38,14 @@ public class SDFRobotTest
       String modelName = "atlas";
       GeneralizedSDFRobotModel generalizedSDFRobotModel = loader.getGeneralizedSDFRobotModel(modelName);
 
-      SDFHumanoidJointNameMap sdfJointNameMap = null;
+      HumanoidJointNameMap sdfJointNameMap = null;
       boolean useCollisionMeshes = true;
       boolean enableTorqueVelocityLimits = true;
       boolean enableJointDamping = true;
 
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
       RobotDescription description = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
-      HumanoidFloatingRootJointRobot sdfHumanoidRobot = new HumanoidFloatingRootJointRobot(description, sdfJointNameMap);
+      FloatingRootJointRobot sdfHumanoidRobot = new FloatingRootJointRobot(description);
 
       inputStream = getClass().getClassLoader().getResourceAsStream("sdfRobotTest.sdf");
       RobotDescriptionFromSDFLoader robotDescriptionFromSDFLoader = new RobotDescriptionFromSDFLoader();

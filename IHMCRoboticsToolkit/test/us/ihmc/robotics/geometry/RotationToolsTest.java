@@ -18,8 +18,8 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.TestPlanTarget;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class RotationToolsTest
 {
@@ -1160,7 +1160,7 @@ public class RotationToolsTest
    /**
     * Test that has for only purpose to highlight a bug in Java3d.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 10000)
    public void testJava3dAxisAngleSetMatrixBug()
    {
@@ -1178,7 +1178,7 @@ public class RotationToolsTest
    /**
     * Test that has for only purpose to highlight a bug in Java3d
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 10000)
    public void testJava3dQuat4dSetMatrixBug()
    {
@@ -1196,7 +1196,7 @@ public class RotationToolsTest
    /**
     * Test that has for only purpose to highlight a bug in Java3d
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 10000)
    public void testJava3dQuat4dSetMatrixBug2()
    {
@@ -1214,7 +1214,7 @@ public class RotationToolsTest
    /**
     * Test that has for only purpose to highlight a bug in Java3d
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, targetsOverride = TestPlanTarget.Exclude)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 10000)
    public void testJava3dAxisAngleSetMatrixBug2()
    {

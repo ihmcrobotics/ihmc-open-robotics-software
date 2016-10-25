@@ -82,6 +82,13 @@ public abstract class AbstractBehavior implements RobotController
       childBehaviors.add(childBehavior);
    }
    
+   protected void addChildBehaviors(ArrayList<AbstractBehavior> newChildBehaviors)
+   {
+      for(AbstractBehavior behavior: newChildBehaviors)
+      {
+         childBehaviors.add(behavior);
+      }
+   }
    public void sendPacketToController(Packet<?> obj)
    {
       outgoingCommunicationBridge.sendPacketToController(obj);
@@ -258,6 +265,4 @@ public abstract class AbstractBehavior implements RobotController
    {
       return controllerObjectConsumer;
    }
-   
-   public abstract boolean hasInputBeenSet();
 }

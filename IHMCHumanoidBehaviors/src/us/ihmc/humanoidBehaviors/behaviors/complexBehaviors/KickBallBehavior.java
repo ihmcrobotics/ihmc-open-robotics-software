@@ -4,17 +4,17 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.KickBallBehaviorCoactiveElementBehaviorSide;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
-import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
@@ -115,7 +115,7 @@ public class KickBallBehavior extends AbstractBehavior
    @Override
    public CoactiveElement getCoactiveElement()
    {
-      return coactiveElement;
+      return null;//coactiveElement;
    }
 
    boolean locationSet = false;
@@ -129,7 +129,7 @@ public class KickBallBehavior extends AbstractBehavior
    private void setupPipelineForKick()
    {
 
-      BehaviorTask findBallTask = new BehaviorTask(sphereDetectionBehavior, yoTime)
+      BehaviorAction findBallTask = new BehaviorAction(sphereDetectionBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -145,7 +145,7 @@ public class KickBallBehavior extends AbstractBehavior
 
       pipeLine.submitSingleTaskStage(findBallTask);
 
-      BehaviorTask validateBallTask = new BehaviorTask(waitForUserValidationBehavior, yoTime)
+      BehaviorAction validateBallTask = new BehaviorAction(waitForUserValidationBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -164,7 +164,7 @@ public class KickBallBehavior extends AbstractBehavior
 
       pipeLine.submitSingleTaskStage(validateBallTask);
 
-      BehaviorTask walkToBallTask = new BehaviorTask(walkToLocationBehavior, yoTime)
+      BehaviorAction walkToBallTask = new BehaviorAction(walkToLocationBehavior)
       {
 
          @Override
@@ -184,7 +184,7 @@ public class KickBallBehavior extends AbstractBehavior
 
       pipeLine.submitSingleTaskStage(walkToBallTask);
 
-      BehaviorTask kickBallTask = new BehaviorTask(kickBehavior, yoTime)
+      BehaviorAction kickBallTask = new BehaviorAction(kickBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -293,11 +293,7 @@ public class KickBallBehavior extends AbstractBehavior
       }
    }
 
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      return true;
-   }
+  
 
 
    public boolean isUseBlobFiltering()

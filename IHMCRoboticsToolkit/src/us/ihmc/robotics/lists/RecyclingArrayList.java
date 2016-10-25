@@ -290,18 +290,33 @@ public class RecyclingArrayList<T> implements List<T>
       }
    }
 
+   private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
    protected void ensureCapacity(int minCapacity)
    {
       if (minCapacity <= elementData.length)
          return;
 
       int previousArraySize = elementData.length;
-      elementData = Arrays.copyOf(elementData, minCapacity);
+      int newArraySize = previousArraySize + (previousArraySize >> 1);
+      if (newArraySize - minCapacity < 0)
+         newArraySize = minCapacity;
+      if (newArraySize - MAX_ARRAY_SIZE > 0)
+         newArraySize = checkWithMaxCapacity(minCapacity);
 
-      for (int i = previousArraySize; i < minCapacity; i++)
+      elementData = Arrays.copyOf(elementData, newArraySize);
+
+      for (int i = previousArraySize; i < newArraySize; i++)
       {
          elementData[i] = builder.newInstance();
       }
+   }
+
+   private static int checkWithMaxCapacity(int minCapacity)
+   {
+      if (minCapacity < 0) // overflow
+         throw new OutOfMemoryError();
+      return (minCapacity > MAX_ARRAY_SIZE) ? Integer.MAX_VALUE : MAX_ARRAY_SIZE;
    }
 
    private void fillElementDataIfNeeded()
@@ -390,6 +405,25 @@ public class RecyclingArrayList<T> implements List<T>
    }
 
    @Override
+   public Object[] toArray()
+   {
+      return Arrays.copyOf(elementData, size);
+   }
+
+   @SuppressWarnings("unchecked")
+   @Override
+   public <X> X[] toArray(X[] a)
+   {
+      if (a.length < size)
+         // Make a new array of a's runtime type, but my contents:
+         return (X[]) Arrays.copyOf(elementData, size, a.getClass());
+      System.arraycopy(elementData, 0, a, 0, size);
+      if (a.length > size)
+         a[size] = null;
+      return a;
+   }
+
+   @Override
    public String toString()
    {
       if (isEmpty())
@@ -407,20 +441,6 @@ public class RecyclingArrayList<T> implements List<T>
    /** Unsupported operation. */
    @Override
    public Iterator<T> iterator()
-   {
-      throw new UnsupportedOperationException();
-   }
-
-   /** Unsupported operation. */
-   @Override
-   public Object[] toArray()
-   {
-      throw new UnsupportedOperationException();
-   }
-
-   /** Unsupported operation. */
-   @Override
-   public <X> X[] toArray(X[] a)
    {
       throw new UnsupportedOperationException();
    }

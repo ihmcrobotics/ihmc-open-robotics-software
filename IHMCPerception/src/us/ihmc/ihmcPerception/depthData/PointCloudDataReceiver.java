@@ -10,8 +10,8 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -46,6 +46,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
    private final LinkedBlockingQueue<PointCloudData> dataQueue = new LinkedBlockingQueue<PointCloudData>();
    private final AtomicBoolean sendData = new AtomicBoolean(false);
+   private final AtomicBoolean sendLidarPose = new AtomicBoolean(false);
    private volatile boolean running = true;
 
    private volatile boolean clearQuadTree = false;
@@ -218,6 +219,9 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
                      }
                   }
                }
+
+               if (sendLidarPose.get())
+                  pointCloudWorldPacketGenerator.setLidarPose(scanFrameToWorld);
             }
             readWriteLock.writeLock().unlock();
          }
@@ -279,6 +283,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener, 
          public void receivedPacket(DepthDataStateCommand object)
          {
             setLidarState(object.getLidarState());
+            sendLidarPose.set(object.isLidarPoseRequested());
          }
       });
 

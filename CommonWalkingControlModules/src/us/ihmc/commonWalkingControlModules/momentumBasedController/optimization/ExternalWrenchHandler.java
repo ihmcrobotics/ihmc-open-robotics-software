@@ -132,7 +132,8 @@ public class ExternalWrenchHandler
       {
          RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
          Wrench externalWrench = externalWrenches.get(rigidBody);
-         externalWrench.add(groundReactionWrenches.get(rigidBody));
+         if(groundReactionWrenches.containsKey(rigidBody))
+            externalWrench.add(groundReactionWrenches.get(rigidBody));
          if (!rigidBodiesWithExternalWrench.contains(rigidBody))
             rigidBodiesWithExternalWrench.add(rigidBody);
       }

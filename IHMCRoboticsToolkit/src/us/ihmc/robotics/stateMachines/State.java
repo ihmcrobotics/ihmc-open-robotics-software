@@ -91,6 +91,8 @@ public abstract class State<E extends Enum<E>>
 
    public final E getStateEnum()
    {
+      if(stateEnum == null)
+         throw new RuntimeException("A state has not had its state enume set stateEnum is null for this state.");
       return stateEnum;
    }
 

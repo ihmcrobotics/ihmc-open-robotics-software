@@ -2310,6 +2310,21 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     */
    private int ticksSimulated = 0; // 1;
 
+   private boolean synchronizeGraphicsAndCamerasWhileSimulating = false;
+
+   /**
+    * Temporary method for telling a sim to synchronize its graphics and cameras while simulating.
+    * Only set to true if you are creating a game like simulation where the user is driving a vehicle from
+    * a camera mount while simulating. This method should go away once we internally make camera updates
+    * synched with GraphicsRobot, or part of GraphicsRobot...
+    * 
+    * @param synchronizeGraphicsAndCamerasWhileSimulating
+    */
+   public void setSynchronizeGraphicsAndCamerasWhileSimulating(boolean synchronizeGraphicsAndCamerasWhileSimulating)
+   {
+      this.synchronizeGraphicsAndCamerasWhileSimulating = synchronizeGraphicsAndCamerasWhileSimulating;
+   }
+   
    /**
     * Internal function which controls simulation.  This function is synchronized.
     *
@@ -2333,7 +2348,19 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          // for(int i=0;i<RECORD_FREQ;i++)
          for (int i = 0; i < ticksThisCycle; i++)
          {
-            mySimulation.simulate();
+            if (synchronizeGraphicsAndCamerasWhileSimulating)
+            {
+               synchronized (myGUI.getGraphicsConch())
+               {
+                  mySimulation.simulate();
+                  myGUI.updateSimulationGraphics();
+               }
+            }
+
+            else
+            {
+               mySimulation.simulate();
+            }
          }
 
          // Update the tick counts.
@@ -2381,7 +2408,10 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
                }
             }
 
-            myGUI.updateSimulationGraphics();
+            synchronized (simulationSynchronizer) // Synched so we don't update during a graphics redraw...
+            {
+               myGUI.updateSimulationGraphics();
+            }
          }
       }
    }

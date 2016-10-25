@@ -10,8 +10,8 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.corruptors.NoiseType;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 public class NoisyYoRotationMatrixTest
 {

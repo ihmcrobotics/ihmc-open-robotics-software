@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.EnumMap;
 
 import net.java.games.input.Component;
-import us.ihmc.SdfLoader.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.acsell.treadmill.TreadmillJoystickEventListener;
 import us.ihmc.acsell.treadmill.TreadmillSerialManager;
 import us.ihmc.robotDataCommunication.YoVariableClient;

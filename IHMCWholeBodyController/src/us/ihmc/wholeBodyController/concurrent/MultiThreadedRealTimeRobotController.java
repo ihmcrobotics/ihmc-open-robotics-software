@@ -10,7 +10,7 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
-public class MultiThreadedRealTimeRobotController
+public class MultiThreadedRealTimeRobotController implements MultiThreadedRobotControlElementCoordinator
 {
    private final MultiThreadedRobotControlElement sensorReader;
    private final ArrayList<ImmutableTriple<MultiThreadedRobotControlElement, PriorityParameters, Processor>> robotControllers = new ArrayList<>();

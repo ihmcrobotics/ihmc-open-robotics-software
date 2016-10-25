@@ -6,11 +6,11 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.SdfLoader.models.FullHumanoidRobotModel;
-import us.ihmc.SdfLoader.HumanoidFloatingRootJointRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.tools.testing.TestPlanAnnotations.ContinuousIntegrationTest;
 
 
 //TODO: update this test class to access poses via resource directory and undelete old pose files from svn
@@ -25,7 +25,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
       DRCRobotModel robotModel = getRobotModel();
 
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       double delay = 0.3;
       double trajectoryTime = 1.0;
@@ -48,7 +48,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
    {
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       
       int numberOfPoses = 5;
       double delay = 0.3;
@@ -88,7 +88,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
    {
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
       PlaybackPoseSequenceReader.appendFromFile(sequence, getClass().getClassLoader().getResourceAsStream("testSequence2.poseSequence"));
@@ -109,7 +109,7 @@ public abstract class PlaybackPoseInterpolatorDRCTest implements MultiRobotTestI
    {
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createSdfRobot(false);
+      HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       
       PlaybackPoseSequence sequence = new PlaybackPoseSequence(fullRobotModel);
       PlaybackPoseSequenceReader.appendFromFile(sequence, getClass().getClassLoader().getResourceAsStream("tenPoses.poseSequence"));
