@@ -6,6 +6,7 @@ import us.ihmc.quadrupedRobotics.params.IntegerParameter;
 import us.ihmc.quadrupedRobotics.params.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachine;
 import us.ihmc.quadrupedRobotics.state.FiniteStateMachineBuilder;
@@ -49,7 +50,7 @@ public class QuadrupedFootStateMachine
    private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedSolePositionController.Setpoints solePositionControllerSetpoints;
    private final FrameVector soleForceCommand;
-   private final QuadrupedTimedStep stepCommand;
+   private final YoQuadrupedTimedStep stepCommand;
    private final BooleanYoVariable stepCommandIsValid;
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
 
@@ -70,17 +71,17 @@ public class QuadrupedFootStateMachine
          DoubleYoVariable timestamp, YoVariableRegistry parentRegistry)
    {
       // control variables
+      String prefix = robotQuadrant.getCamelCaseName();
       this.registry = new YoVariableRegistry(robotQuadrant.getPascalCaseName() + getClass().getSimpleName());
       this.timestamp = timestamp;
       this.solePositionController = solePositionController;
       this.solePositionControllerSetpoints = new QuadrupedSolePositionController.Setpoints(robotQuadrant);
       this.soleForceCommand = new FrameVector();
-      this.stepCommand = new QuadrupedTimedStep();
-      this.stepCommandIsValid = new BooleanYoVariable("stepCommandIsValid", registry);
+      this.stepCommand = new YoQuadrupedTimedStep(prefix + "StepCommand", registry);
+      this.stepCommandIsValid = new BooleanYoVariable(prefix + "StepCommandIsValid", registry);
       this.taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
 
       // state machine
-      String prefix = robotQuadrant.getCamelCaseName();
       FiniteStateMachineBuilder<FootState, FootEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(FootState.class, FootEvent.class,
             prefix + "FootState", registry);
       stateMachineBuilder.addState(FootState.SUPPORT, new SupportState(robotQuadrant));
