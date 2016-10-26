@@ -30,7 +30,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven {
-        url "http://artifactory.ihmc.us/artifactory/thirdparty"
+        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
 }
 
