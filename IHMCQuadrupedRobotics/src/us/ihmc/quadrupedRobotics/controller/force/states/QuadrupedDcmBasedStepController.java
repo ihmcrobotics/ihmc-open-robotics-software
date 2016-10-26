@@ -109,7 +109,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final YoFrameVector instantaneousStepAdjustment;
    private final YoFrameVector accumulatedStepAdjustment;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
-   private final QuadrantDependentList<FramePoint> stepGoalPosition;
+   private final FramePoint stepGoalPosition;
    private final PreallocatedList<QuadrupedTimedStep> stepSequence;
    private final FrameOrientation bodyOrientationReference;
    private final OrientationFrame bodyOrientationReferenceFrame;
@@ -170,11 +170,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       dcmPositionWaypoint = new FramePoint();
       instantaneousStepAdjustment = new YoFrameVector("instantaneousStepAdjustment", worldFrame, registry);
       accumulatedStepAdjustment = new YoFrameVector("accumulatedStepAdjustment", worldFrame, registry);
-      stepGoalPosition = new QuadrantDependentList<>();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         stepGoalPosition.set(robotQuadrant, new FramePoint());
-      }
+      stepGoalPosition = new FramePoint();
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
       stepSequence = new PreallocatedList<>(MAXIMUM_STEP_QUEUE_SIZE, QuadrupedTimedStep.class);
@@ -353,7 +349,10 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
          {
             stepSequence.add();
             stepSequence.get(stepSequence.size() - 1).set(stepStream.getSteps().get(i));
-            stepSequence.get(stepSequence.size() - 1).getGoalPosition().add(accumulatedStepAdjustment.getFrameTuple().getVector());
+            stepSequence.get(stepSequence.size() - 1).getGoalPosition(stepGoalPosition);
+            stepGoalPosition.changeFrame(worldFrame);
+            stepGoalPosition.add(accumulatedStepAdjustment.getFrameTuple());
+            stepSequence.get(stepSequence.size() - 1).setGoalPosition(stepGoalPosition);
          }
       }
    }
@@ -371,7 +370,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
          instantaneousStepAdjustment.scale(dcmPositionStepAdjustmentGainParameter.get());
          instantaneousStepAdjustment.setZ(0);
 
-         // adjust nominal step goal positions and update step controller queue
+         // adjust nominal step goal positions in foot state machine
          for (int i = 0; i < stepSequence.size(); i++)
          {
             RobotQuadrant robotQuadrant = stepSequence.get(i).getRobotQuadrant();
@@ -380,13 +379,12 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
             double endTime = stepSequence.get(i).getTimeInterval().getEndTime();
             if (startTime < currentTime && currentTime < endTime)
             {
-               FramePoint goalPosition = stepGoalPosition.get(robotQuadrant);
-               goalPosition.changeFrame(worldFrame);
-               goalPosition.set(stepSequence.get(i).getGoalPosition());
-               goalPosition.add(instantaneousStepAdjustment.getFrameTuple().getVector());
-               crossoverProjection.project(robotQuadrant, goalPosition, taskSpaceEstimates.getSolePosition());
-               groundPlaneEstimator.projectZ(goalPosition.getPoint());
-               footStateMachine.get(robotQuadrant).adjustStep(goalPosition);
+               stepSequence.get(i).getGoalPosition(stepGoalPosition);
+               stepGoalPosition.changeFrame(worldFrame);
+               stepGoalPosition.add(instantaneousStepAdjustment.getFrameTuple());
+               crossoverProjection.project(stepGoalPosition, taskSpaceEstimates.getSolePosition(), robotQuadrant);
+               groundPlaneEstimator.projectZ(stepGoalPosition.getPoint());
+               footStateMachine.get(robotQuadrant).adjustStep(stepGoalPosition);
             }
          }
       }

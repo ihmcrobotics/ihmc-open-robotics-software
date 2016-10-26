@@ -101,6 +101,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final FramePoint supportCentroid;
    private final FrameVector stepAdjustmentVector;
+   private final FramePoint stepGoalPosition;
 
    // inputs
    private final DoubleYoVariable haltTime = new DoubleYoVariable("haltTime", registry);
@@ -166,6 +167,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
          xGaitCurrentSteps.set(robotEnd, new QuadrupedTimedStep());
       }
       stepAdjustmentVector = new FrameVector();
+      stepGoalPosition = new FramePoint();
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
       supportCentroid = new FramePoint();
@@ -303,12 +305,15 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       for (int i = 0; i < timedStepController.getStepSequence().size(); i++)
       {
          QuadrupedTimedStep step = timedStepController.getStepSequence().get(i);
-         step.getGoalPosition().add(stepAdjustmentVector.getVector());
+         step.getGoalPosition(stepGoalPosition);
+         stepGoalPosition.changeFrame(worldFrame);
+         stepGoalPosition.add(stepAdjustmentVector);
          if (step.getTimeInterval().getStartTime() <= currentTime)
          {
-            crossoverProjection.project(step, taskSpaceEstimates.getSolePosition());
+            crossoverProjection.project(stepGoalPosition, taskSpaceEstimates.getSolePosition(), step.getRobotQuadrant());
          }
-         groundPlaneEstimator.projectZ(step.getGoalPosition());
+         groundPlaneEstimator.projectZ(stepGoalPosition);
+         step.setGoalPosition(stepGoalPosition);
       }
    }
 

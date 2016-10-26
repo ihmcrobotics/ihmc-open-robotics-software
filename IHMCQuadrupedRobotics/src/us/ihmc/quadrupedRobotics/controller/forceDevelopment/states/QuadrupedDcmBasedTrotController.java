@@ -413,6 +413,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       private final FramePoint dcmPositionAtEoS;
       private final FramePoint footholdPosition;
       private final QuadrupedTimedStep timedStep;
+      private final Point3d timedStepGoalPosition;
       private final QuadrantDependentList<Point3d> timedStepGoalPositionAtSoS;
 
       public DoubleSupportState(RobotQuadrant hindSupportQuadrant, RobotQuadrant frontSupportQuadrant)
@@ -428,6 +429,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          dcmPositionAtEoS = new FramePoint();
          footholdPosition = new FramePoint();
          timedStep = new QuadrupedTimedStep();
+         timedStepGoalPosition = new Point3d();
          timedStepGoalPositionAtSoS = new QuadrantDependentList<>();
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
@@ -476,7 +478,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
             timedStep.getTimeInterval().setEndTime(initialTime + doubleSupportDurationParameter.get());
             timedStep.setGoalPosition(footholdPosition);
             timedStepController.addStep(timedStep);
-            timedStepGoalPositionAtSoS.get(swingQuadrants[i]).set(timedStep.getGoalPosition());
+            timedStep.getGoalPosition(timedStepGoalPositionAtSoS.get(swingQuadrants[i]));
 
             // initialize ground plane points
             groundPlanePositions.get(swingQuadrants[i]).setIncludingFrame(taskSpaceEstimates.getSolePosition(swingQuadrants[i]));
@@ -501,8 +503,9 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          for (int i = 0; i < 2; i++)
          {
             QuadrupedTimedStep step = timedStepController.getCurrentStep(swingQuadrants[i]);
-            step.getGoalPosition().set(dcmPositionEstimate.getX() - dcmPositionSetpoint.getX(), dcmPositionEstimate.getY() - dcmPositionSetpoint.getY(), 0.0);
-            step.getGoalPosition().add(timedStepGoalPositionAtSoS.get(swingQuadrants[i]));
+            timedStepGoalPosition.set(dcmPositionEstimate.getX() - dcmPositionSetpoint.getX(), dcmPositionEstimate.getY() - dcmPositionSetpoint.getY(), 0.0);
+            timedStepGoalPosition.add(timedStepGoalPositionAtSoS.get(swingQuadrants[i]));
+            step.setGoalPosition(timedStepGoalPosition);
          }
 
          // trigger touch down event
