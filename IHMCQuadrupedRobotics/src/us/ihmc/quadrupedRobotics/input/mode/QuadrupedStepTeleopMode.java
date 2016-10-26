@@ -102,6 +102,9 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    @Override
    public void onInputEvent(Map<XBoxOneMapping, Double> channels, Estimates estimates, Event event)
    {
+      if (event.getValue() < 0.5)
+         return;
+
       // Each button steps a different foot. The step length is determined by the left stick forward/back.
       RobotQuadrant quadrantToStep;
       switch (XBoxOneMapping.getMapping(event))

@@ -190,11 +190,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             lastEvent.set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
             stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
          }
-         else
-         {
-            // clear step plan in any state other than stand
-            preplannedStepProvider.getAndClearSteps();
-         }
       }
 
       // update controller state machine
