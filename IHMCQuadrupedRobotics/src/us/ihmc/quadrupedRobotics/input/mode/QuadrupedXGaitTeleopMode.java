@@ -131,10 +131,12 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
    @Override
    public void onInputEvent(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimator.Estimates estimates, Event event)
    {
+      if (event.getValue() < 0.5)
+         return;
+
       switch (XBoxOneMapping.getMapping(event))
       {
       case A:
-         if (channels.get(XBoxOneMapping.A) > 0.5)
          {
             QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
             packetCommunicator.send(eventPacket);
@@ -142,7 +144,6 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case X:
-         if (channels.get(XBoxOneMapping.X) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(180);
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -153,7 +154,6 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case Y:
-         if (channels.get(XBoxOneMapping.Y) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(90);
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -164,7 +164,6 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case B:
-         if (channels.get(XBoxOneMapping.B) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(0);
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -175,7 +174,6 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case LEFT_BUMPER:
-         if (channels.get(XBoxOneMapping.LEFT_BUMPER) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 359));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -183,7 +181,6 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case RIGHT_BUMPER:
-         if (channels.get(XBoxOneMapping.RIGHT_BUMPER) > 0.5)
          {
             xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 359));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
@@ -191,7 +188,6 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
          }
          break;
       case DPAD:
-         if (channels.get(XBoxOneMapping.DPAD) == 0.5)
          {
             xGaitSettings.setStanceWidth(xGaitSettings.getStanceWidth() + deltaStanceWidthParameter.get());
          }
