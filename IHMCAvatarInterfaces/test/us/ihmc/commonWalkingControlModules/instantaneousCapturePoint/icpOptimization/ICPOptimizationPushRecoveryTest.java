@@ -40,6 +40,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
    private static String script = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScript.xml";
    private static String yawScript = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScript.xml";
+   private static String slowStepScript = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScriptSlow.xml";
 
    private static double simulationTime = 10.0;
 
@@ -124,6 +125,30 @@ public abstract class ICPOptimizationPushRecoveryTest
 
    @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
+   public void testPushICPOptimizationOutwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(slowStepScript);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * swingTime;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      double percentWeight = 0.25;
+      double magnitude = percentWeight * totalMass * 9.81;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
+      assertTrue(success);
+      assertTrue(noExceptions);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
+   @Test(timeout = 120000)
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(script);
@@ -135,7 +160,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3d forceDirection = new Vector3d(2.0, -1.0, 0.0);
-      double percentWeight = 0.40;
+      double percentWeight = 0.20;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -145,6 +170,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       assertTrue(success);
       assertTrue(noExceptions);
    }
+
 
    @ContinuousIntegrationTest(estimatedDuration =  20.0)
    @Test(timeout = 120000)
@@ -400,6 +426,30 @@ public abstract class ICPOptimizationPushRecoveryTest
       // push parameters:
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
       double percentWeight = 0.29;
+      double magnitude = percentWeight * totalMass * 9.81;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      boolean noExceptions = caughtException == null;
+
+      assertTrue(success);
+      assertTrue(noExceptions);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration =  20.0)
+   @Test(timeout = 120000)
+   public void testPushICPOptimizationForwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(slowStepScript);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * swingTime;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      double percentWeight = 0.15;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
