@@ -1,5 +1,7 @@
 package us.ihmc.exampleSimulations.newtonsCradle;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -33,7 +35,7 @@ public class SpinningCoinRobot
 
    private final double margin = 0.0002;
 
-   private final Robot[] robots = new Robot[2];
+   private final ArrayList<Robot> robots = new ArrayList<>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoFrameVector linearMomentum = new YoFrameVector("linearMomentum", ReferenceFrame.getWorldFrame(), registry);
@@ -74,7 +76,7 @@ public class SpinningCoinRobot
       //      floatingJoint.setVelocity(new Vector3d(1.0, 0.0, 0.0));
       floatingJoint.setAngularVelocityInBody(new Vector3d(0.0, spinningAngularVelocity, 0.0));
 
-      robots[0] = coinRobot;
+      robots.add(coinRobot);
 
       coinRobot.addFunctionToIntegrate(new FunctionToIntegrate()
       {
@@ -113,36 +115,6 @@ public class SpinningCoinRobot
       });
 
       coinRobot.addYoVariableRegistry(registry);
-      createGround(collisionShapeFactory);
-   }
-
-   private void createGround(CollisionShapeFactory collisionShapeFactory)
-   {
-      Robot groundRobot = new Robot("GroundRobot");
-      NullJoint baseJoint = new NullJoint("base", new Vector3d(), groundRobot);
-
-      //    FloatingJoint baseJoint = new FloatingJoint("base", new Vector3d(), this);
-      Link baseLink = new Link("base");
-      baseLink.setMassAndRadiiOfGyration(1000000000.0, 100.0, 100.0, 100.0);
-      Graphics3DObject baseLinkGraphics = new Graphics3DObject();
-      baseLinkGraphics.addCoordinateSystem(1.0);
-      baseLinkGraphics.translate(0.0, 0.0, -0.01 - 0.01 / 2.0);
-      baseLinkGraphics.addCube(5.0, 5.0, 0.01, YoAppearance.Yellow());
-      baseLink.setLinkGraphics(baseLinkGraphics);
-      baseLink.enableCollisions(100.0, groundRobot.getRobotsYoVariableRegistry());
-
-      PolytopeShapeDescription<?> groundBox = (PolytopeShapeDescription<?>) (collisionShapeFactory.createBox(5.0, 5.0, 0.01));
-      groundBox.setSmoothingRadius(0.0);//0.01);
-
-      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
-      CollisionShape shape = collisionShapeFactory.addShape(baseLink, shapeToLinkTransform, groundBox, false, 0xFFFFFFFF, 0xFFFFFFFF);
-      shape.setIsGround(true);
-
-      baseJoint.setLink(baseLink);
-      groundRobot.addRootJoint(baseJoint);
-
-      robots[1] = groundRobot;
    }
 
    private Link createCylinderCoin(CollisionShapeFactory collisionShapeFactory, Robot robot)
@@ -184,7 +156,7 @@ public class SpinningCoinRobot
       return collisionDetector;
    }
 
-   public Robot[] getRobots()
+   public ArrayList<Robot> getRobots()
    {
       return robots;
    }
