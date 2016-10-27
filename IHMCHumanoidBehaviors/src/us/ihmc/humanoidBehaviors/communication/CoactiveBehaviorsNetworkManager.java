@@ -49,13 +49,25 @@ public class CoactiveBehaviorsNetworkManager
       });
    }
 
-   public void sendToUI(String key, double data)
+   public void sendToUI(String key, double value)
+   {
+      SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, value);
+      outgoingCommunicationBridgeInterface.sendPacketToUI(newPacket);
+   }
+
+   public void sendToUI(String key, Object data)
    {
       SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, data);
       outgoingCommunicationBridgeInterface.sendPacketToUI(newPacket);
    }
 
-   public void sendToBehavior(String key, double data)
+   public void sendToBehavior(String key, double value)
+   {
+      SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, value);
+      outgoingCommunicationBridgeInterface.sendPacketToBehavior(newPacket);
+   }
+
+   public void sendToBehavior(String key, Object data)
    {
       SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, data);
       outgoingCommunicationBridgeInterface.sendPacketToBehavior(newPacket);
@@ -70,7 +82,7 @@ public class CoactiveBehaviorsNetworkManager
    {
       for (int i = 0; i < listerners.size(); i++)
       {
-         listerners.get(i).coactiveDataRecieved(packet.key, packet.data);
+         listerners.get(i).coactiveDataRecieved(packet);
       }
    }
 

@@ -1,5 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.pickUpBallSpecificBehaviors;
 
+import javax.vecmath.Vector3f;
+
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.PickUpBallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
@@ -15,6 +17,7 @@ import us.ihmc.humanoidBehaviors.communication.CoactiveBehaviorsNetworkManager;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
@@ -108,6 +111,9 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          @Override
          protected void setBehaviorInput()
          {
+            Vector3f tmp = new Vector3f(0, 1, 2); 
+
+            coactiveBehaviorsNetworkManager.sendToUI("3dLocation", searchFarForSphereBehavior.getBallLocation());
             TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To The Ball");
             sendPacketToNetworkProcessor(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
@@ -217,9 +223,9 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    }
 
    @Override
-   public void coactiveDataRecieved(String key, double value)
+   public void coactiveDataRecieved(SimpleCoactiveBehaviorDataPacket data)
    {
-      System.out.println("BEHAVIOR RECIEVED " + key + " " + value);
+      System.out.println("BEHAVIOR RECIEVED " + data.key + " " + data.value);
    }
 
 }
