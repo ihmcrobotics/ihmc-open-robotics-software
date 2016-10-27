@@ -1,6 +1,4 @@
-package us.ihmc.ihmcPerception.faceDetection;
-
-import us.ihmc.communication.packets.Packet;
+package us.ihmc.communication.packets;
 
 import javax.vecmath.Point3d;
 
