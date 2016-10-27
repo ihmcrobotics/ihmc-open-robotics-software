@@ -168,7 +168,12 @@ public class ICPOptimizationControllerTest
          return 0;
       }
 
-      @Override public double getFootstepWeight()
+      @Override public double getForwardFootstepWeight()
+      {
+         return 5.0;
+      }
+
+      @Override public double getLateralFootstepWeight()
       {
          return 5.0;
       }
@@ -274,12 +279,22 @@ public class ICPOptimizationControllerTest
          return 1.0;
       }
 
-      @Override public double getMaxCMPForwardExit()
+      @Override public double getDoubleSupportMaxCMPForwardExit()
       {
          return 0.05;
       }
 
-      @Override public double getMaxCMPLateralExit()
+      @Override public double getDoubleSupportMaxCMPLateralExit()
+      {
+         return 0.03;
+      }
+
+      @Override public double getSingleSupportMaxCMPForwardExit()
+      {
+         return 0.05;
+      }
+
+      @Override public double getSingleSupportMaxCMPLateralExit()
       {
          return 0.03;
       }
