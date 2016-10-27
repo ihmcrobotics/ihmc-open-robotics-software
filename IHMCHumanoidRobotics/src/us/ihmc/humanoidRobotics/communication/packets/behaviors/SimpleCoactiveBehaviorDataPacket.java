@@ -5,7 +5,8 @@ import us.ihmc.communication.packets.Packet;
 public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehaviorDataPacket>
 {
    public String key;
-   public double data;
+   public double value;
+   public Object dataObject;
    
 
    public SimpleCoactiveBehaviorDataPacket()
@@ -13,17 +14,24 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
       
    }
    
-   public SimpleCoactiveBehaviorDataPacket(String key, double data)
+   public SimpleCoactiveBehaviorDataPacket(String key, double value)
    {
       this.key = key;
-      this.data = data;
+      this.value = value;
 
    }
 
+   public SimpleCoactiveBehaviorDataPacket(String key, Object dataObject)
+   {
+      this.key = key;
+      this.dataObject = dataObject;
+
+   }
+   
    @Override
    public boolean epsilonEquals(SimpleCoactiveBehaviorDataPacket other, double epsilon)
    {
-      return key.equals(other.key)&& data == other.data;
+      return key.equals(other.key)&& value == other.value;
    }
    
 }
