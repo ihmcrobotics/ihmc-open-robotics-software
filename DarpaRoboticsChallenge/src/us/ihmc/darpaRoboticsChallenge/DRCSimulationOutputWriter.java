@@ -1,4 +1,4 @@
-package us.ihmc.wholeBodyController;
+package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.robotModels.PerfectSimulatedOutputWriter;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -14,8 +13,10 @@ import us.ihmc.robotics.math.filters.DelayedDoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
+import us.ihmc.wholeBodyController.DRCOutputWriter;
 
 public class DRCSimulationOutputWriter extends PerfectSimulatedOutputWriter implements DRCOutputWriter
 {

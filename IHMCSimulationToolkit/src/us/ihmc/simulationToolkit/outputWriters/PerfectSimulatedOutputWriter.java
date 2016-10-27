@@ -1,9 +1,11 @@
-package us.ihmc.robotModels;
+package us.ihmc.simulationToolkit.outputWriters;
 
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;

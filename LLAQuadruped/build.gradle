@@ -55,6 +55,8 @@ dependencies {
    compile ihmc.getProjectDependency(":SensorProcessing")
    compile ihmc.getProjectDependency(":IHMCRobotDescription")
    compile ihmc.getProjectDependency(":IHMCRobotModels")
+    compile ihmc.getProjectDependency(":IHMCSimulationToolkit")
+   
 
    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
    testCompile ihmc.getProjectTestDependency(":IHMCQuadrupedRobotics")
