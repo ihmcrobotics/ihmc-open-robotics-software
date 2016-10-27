@@ -7,7 +7,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationPushRecoveryTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class AtlasICPOptimizationPushRecoveryTest extends ICPOptimizationPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
