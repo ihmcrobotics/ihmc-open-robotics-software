@@ -16,7 +16,7 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajecto
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.quadrupedRobotics.util.PreallocatedList;
+import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -28,8 +28,6 @@ import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-
-import java.lang.ref.Reference;
 
 public class QuadrupedDcmBasedStepController implements QuadrupedController, QuadrupedStepTransitionCallback
 {
@@ -109,10 +107,10 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final YoFrameVector instantaneousStepAdjustment;
    private final YoFrameVector accumulatedStepAdjustment;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
-   private final FramePoint stepGoalPosition;
-   private final PreallocatedList<QuadrupedTimedStep> stepSequence;
    private final FrameOrientation bodyOrientationReference;
    private final OrientationFrame bodyOrientationReferenceFrame;
+   private final FramePoint stepGoalPosition;
+   private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
 
    // inputs
    private final DoubleYoVariable haltTime = new DoubleYoVariable("haltTime", registry);
@@ -170,12 +168,20 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       dcmPositionWaypoint = new FramePoint();
       instantaneousStepAdjustment = new YoFrameVector("instantaneousStepAdjustment", worldFrame, registry);
       accumulatedStepAdjustment = new YoFrameVector("accumulatedStepAdjustment", worldFrame, registry);
-      stepGoalPosition = new FramePoint();
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
-      stepSequence = new PreallocatedList<>(MAXIMUM_STEP_QUEUE_SIZE, QuadrupedTimedStep.class);
       bodyOrientationReference = new FrameOrientation();
       bodyOrientationReferenceFrame = new OrientationFrame(bodyOrientationReference);
+      stepGoalPosition = new FramePoint();
+      stepSequence = new YoPreallocatedList<>("stepSequence", registry, MAXIMUM_STEP_QUEUE_SIZE,
+            new YoPreallocatedList.DefaultElementFactory<YoQuadrupedTimedStep>()
+            {
+               @Override
+               public YoQuadrupedTimedStep createDefaultElement(String prefix, YoVariableRegistry registry)
+               {
+                  return new YoQuadrupedTimedStep(prefix, registry);
+               }
+            });
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }

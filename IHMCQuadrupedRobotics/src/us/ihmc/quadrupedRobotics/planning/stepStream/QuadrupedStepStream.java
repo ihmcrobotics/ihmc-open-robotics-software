@@ -25,7 +25,7 @@ public interface QuadrupedStepStream
     * Get the queue of ongoing and upcoming steps.
     * @return timed step queue
     */
-   PreallocatedList<QuadrupedTimedStep> getSteps();
+   PreallocatedList<? extends QuadrupedTimedStep> getSteps();
 
    /**
     * Get the nominal body orientation at the current time step.

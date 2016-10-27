@@ -74,7 +74,7 @@ public class QuadrupedStepStreamMultiplexer<E extends Enum<E>> implements Quadru
    }
 
    @Override
-   public PreallocatedList<QuadrupedTimedStep> getSteps()
+   public PreallocatedList<? extends QuadrupedTimedStep> getSteps()
    {
       QuadrupedStepStream stepStream = stepStreams.get(selectedStepStream.getEnumValue());
       if (stepStream != null)

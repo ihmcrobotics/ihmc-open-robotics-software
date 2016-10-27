@@ -87,7 +87,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
     * @param currentContactState current sole contact state (input)
     * @param currentTime current time (input)
     */
-   public void update(List<QuadrupedTimedStep> stepSequence, QuadrantDependentList<FramePoint> currentSolePosition,
+   public void update(List<? extends QuadrupedTimedStep> stepSequence, QuadrantDependentList<FramePoint> currentSolePosition,
          QuadrantDependentList<ContactState> currentContactState, double currentTime)
    {
       // initialize contact state and sole positions
