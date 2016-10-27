@@ -2,31 +2,50 @@ package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
+import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.math.frames.YoFrameOrientation;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import java.util.ArrayList;
 
 public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
 {
    private static int MAXIMUM_STEP_QUEUE_SIZE = 100;
-
+   private final YoVariableRegistry registry;
    private final QuadrupedPreplannedStepInputProvider preplannedStepProvider;
    private final QuadrupedReferenceFrames referenceFrames;
    private final DoubleYoVariable timestamp;
-   private final PreallocatedList<QuadrupedTimedStep> stepSequence;
-   private final FrameOrientation bodyOrientation;
+   private final YoFrameOrientation bodyOrientation;
+   private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
 
-   public QuadrupedPreplannedStepStream(QuadrupedPreplannedStepInputProvider preplannedStepProvider, QuadrupedReferenceFrames referenceFrames, DoubleYoVariable timestamp)
+   public QuadrupedPreplannedStepStream(QuadrupedPreplannedStepInputProvider preplannedStepProvider, QuadrupedReferenceFrames referenceFrames, DoubleYoVariable timestamp, YoVariableRegistry parentRegistry)
    {
+      this.registry = new YoVariableRegistry(getClass().getSimpleName());
       this.preplannedStepProvider = preplannedStepProvider;
       this.referenceFrames = referenceFrames;
       this.timestamp = timestamp;
-      this.stepSequence = new PreallocatedList<>(MAXIMUM_STEP_QUEUE_SIZE, QuadrupedTimedStep.class);
-      this.bodyOrientation = new FrameOrientation();
+      this.bodyOrientation = new YoFrameOrientation("bodyOrientation", ReferenceFrame.getWorldFrame(), registry);
+      this.stepSequence = new YoPreallocatedList<>("stepSequence", registry, MAXIMUM_STEP_QUEUE_SIZE,
+            new YoPreallocatedList.DefaultElementFactory<YoQuadrupedTimedStep>()
+            {
+               @Override
+               public YoQuadrupedTimedStep createDefaultElement(String prefix, YoVariableRegistry registry)
+               {
+                  return new YoQuadrupedTimedStep(prefix, registry);
+               }
+            });
+
+      if (parentRegistry != null)
+      {
+         parentRegistry.addChild(registry);
+      }
    }
 
    @Override
@@ -49,7 +68,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
       }
       TimeIntervalTools.sortByEndTime(stepSequence);
 
-      bodyOrientation.setToZero(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
+      bodyOrientation.setFromReferenceFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
    }
 
    @Override
@@ -59,7 +78,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
       double currentTime = timestamp.getDoubleValue();
       TimeIntervalTools.removeEndTimesLessThan(currentTime, stepSequence);
 
-      bodyOrientation.setToZero(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
+      bodyOrientation.setFromReferenceFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
    }
 
    @Override
@@ -71,11 +90,11 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    @Override
    public void getBodyOrientation(FrameOrientation bodyOrientation)
    {
-      bodyOrientation.setIncludingFrame(this.bodyOrientation);
+      bodyOrientation.setIncludingFrame(this.bodyOrientation.getFrameOrientation());
    }
 
    @Override
-   public PreallocatedList<QuadrupedTimedStep> getSteps()
+   public PreallocatedList<? extends QuadrupedTimedStep> getSteps()
    {
       return stepSequence;
    }

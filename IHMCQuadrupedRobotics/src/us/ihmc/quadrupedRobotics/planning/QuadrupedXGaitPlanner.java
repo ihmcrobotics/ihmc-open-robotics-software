@@ -38,7 +38,7 @@ public class QuadrupedXGaitPlanner
       pastSteps.put(RobotEnd.HIND, new QuadrupedTimedStep());
    }
 
-   public void computeInitialPlan(List<QuadrupedTimedStep> plannedSteps, Vector3d planarVelocity, RobotQuadrant initialStepQuadrant,
+   public void computeInitialPlan(List<? extends QuadrupedTimedStep> plannedSteps, Vector3d planarVelocity, RobotQuadrant initialStepQuadrant,
          FramePoint supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettings xGaitSettings)
    {
       // initialize nominal support rectangle
@@ -104,8 +104,8 @@ public class QuadrupedXGaitPlanner
       }
    }
 
-   public void computeOnlinePlan(List<QuadrupedTimedStep> plannedSteps, EndDependentList<QuadrupedTimedStep> latestSteps, Vector3d planarVelocity,
-         double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
+   public void computeOnlinePlan(List<? extends QuadrupedTimedStep> plannedSteps, EndDependentList<? extends QuadrupedTimedStep> latestSteps,
+         Vector3d planarVelocity, double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
    {
       // initialize latest step
       QuadrupedTimedStep latestStep;
