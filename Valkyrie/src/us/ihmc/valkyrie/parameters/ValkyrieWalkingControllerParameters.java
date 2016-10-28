@@ -114,7 +114,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean doToeOffIfPossible()
    {
-      return !(target == DRCRobotModel.RobotTarget.REAL_ROBOT);
+      return true;
    }
 
    @Override
@@ -126,7 +126,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
-      return true;
+      return target != RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -183,7 +183,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
    {
-      return false;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -195,13 +195,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
-      return Double.POSITIVE_INFINITY;
+      return 0.05;
    }
 
    @Override
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
-      return getDefaultSwingTime();
+      return 0.70;
    }
 
    @Override
@@ -751,13 +751,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getDefaultTransferTime()
    {
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 2.0 : 0.25;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.00 : 0.25;
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.5 : 0.60;
+      return target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 1.20 : 0.60;
    }
 
    /** @inheritDoc */
@@ -944,6 +944,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       // This seems to be specific to Val's, probably because of its particular kinematics.
       // Shouldn't affect the rest of the body as long as the head is controlled w.r.t. to the chest.
       momentumOptimizationSettings.setHeadWeights(5.0, 500.0, 50.0);
+      momentumOptimizationSettings.setAngularMomentumWeight(0.0, 0.1);
       return momentumOptimizationSettings;
    }
 
