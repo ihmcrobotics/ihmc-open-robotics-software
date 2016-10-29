@@ -238,7 +238,7 @@ public class RobotDescriptionTest
       Graphics3DObject linkGraphicsCheck = robotDescription.getGraphicsObject("childJointThree");
       assertTrue(linkGraphicsCheck == childGraphicsThree);
 
-      Graphics3DObject collisionMeshCheck = robotDescription.getCollisionObject("childJointThree");
+      CollisionMeshDescription collisionMeshCheck = robotDescription.getCollisionObject("childJointThree");
       assertTrue(collisionMeshCheck == childMeshThree);
 
    }
