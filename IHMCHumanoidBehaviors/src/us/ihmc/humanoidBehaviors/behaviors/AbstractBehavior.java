@@ -98,6 +98,10 @@ public abstract class AbstractBehavior implements RobotController
    {
       outgoingCommunicationBridge.sendPacketToNetworkProcessor(obj);
    }
+   public void sendPacketToUI(Packet<?> obj)
+   {
+      outgoingCommunicationBridge.sendPacketToUI(obj);
+   }
    
    public void consumeObjectFromController(Object object)
    {
