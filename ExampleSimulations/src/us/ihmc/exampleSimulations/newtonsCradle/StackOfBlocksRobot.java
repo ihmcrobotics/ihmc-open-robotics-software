@@ -12,7 +12,6 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.NullJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
@@ -40,7 +39,7 @@ public class StackOfBlocksRobot
 
    private void createFallingObjects(int numberOfObjects, CollisionShapeFactory collisionShapeFactory, Random random)
    {
-      double objectHeight = 0.2;
+      double objectHeight = 0.1;
 
       for (int i = 0; i < numberOfObjects; i++)
       {
@@ -55,11 +54,11 @@ public class StackOfBlocksRobot
 
          double x = 0.0;
          double y = 0.0;
-         double z = (objectHeight * 1.1) * (i + 1.0);
+         double z = (objectHeight * 1.05) * (i + 1.0);
 
          double yaw = 0.0;
-         double pitch = RandomTools.generateRandomDouble(random, -Math.PI/30.0, Math.PI/30.0);
-         double roll = RandomTools.generateRandomDouble(random, -Math.PI/30.0, Math.PI/30.0);
+         double pitch = RandomTools.generateRandomDouble(random, -Math.PI/90.0, Math.PI/90.0);
+         double roll = RandomTools.generateRandomDouble(random, -Math.PI/90.0, Math.PI/90.0);
 
          floatingJoint.setPosition(x, y, z);
          floatingJoint.setYawPitchRoll(yaw, pitch, roll);

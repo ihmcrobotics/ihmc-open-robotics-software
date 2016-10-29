@@ -590,7 +590,7 @@ public class Graphics3DObject
 
    public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height, AppearanceDefinition capsuleAppearance)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Capsule(height, radius, radius, radius, CAPSULE_RESOLUTION, CAPSULE_RESOLUTION);
+      MeshDataHolder meshData = MeshDataGenerator.Capsule(height-2.0*radius, radius, radius, radius, CAPSULE_RESOLUTION, CAPSULE_RESOLUTION);
       return addMeshData(meshData, capsuleAppearance);
    }
 
