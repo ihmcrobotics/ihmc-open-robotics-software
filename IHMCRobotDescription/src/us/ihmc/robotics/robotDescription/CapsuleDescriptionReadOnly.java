@@ -8,7 +8,6 @@ public class CapsuleDescriptionReadOnly implements ConvexShapeDescription
 {
    private final double radius;
    private final LineSegment3d capToCapLineSegment = new LineSegment3d();
-   private final RigidBodyTransform transformToCenter;
 
    public CapsuleDescriptionReadOnly(double radius, double height, RigidBodyTransform transformToCenter)
    {
@@ -19,7 +18,7 @@ public class CapsuleDescriptionReadOnly implements ConvexShapeDescription
    {
       this.radius = radius;
       this.capToCapLineSegment.set(capToCapLineSegment);
-      this.transformToCenter = new RigidBodyTransform(transformToCenter);
+      capToCapLineSegment.applyTransform(transformToCenter);
    }
 
    public CapsuleDescriptionReadOnly(double radius, double height, Axis longAxis, RigidBodyTransform transformToCenter)
@@ -47,7 +46,7 @@ public class CapsuleDescriptionReadOnly implements ConvexShapeDescription
       }
       }
 
-      this.transformToCenter = new RigidBodyTransform(transformToCenter);
+      capToCapLineSegment.applyTransform(transformToCenter);
    }
 
    public double getRadius()
@@ -58,11 +57,6 @@ public class CapsuleDescriptionReadOnly implements ConvexShapeDescription
    public void getCapToCapLineSegment(LineSegment3d lineSegmentToPack)
    {
       lineSegmentToPack.set(capToCapLineSegment);
-   }
-
-   public void getRigidBodyTransformToCenter(RigidBodyTransform transformToPack)
-   {
-      transformToPack.set(transformToCenter);
    }
 
 }

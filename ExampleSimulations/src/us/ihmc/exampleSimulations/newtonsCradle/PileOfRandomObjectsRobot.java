@@ -10,7 +10,9 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
@@ -170,11 +172,15 @@ public class PileOfRandomObjectsRobot
       linkGraphics.addCube(objectLength, objectWidth, objectHeight, randomColor);
       link.setLinkGraphics(linkGraphics);
 
-      CollisionShapeDescription<?> shapeDesc = collisionShapeFactory.createBox(objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
+      CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
+      collisionMesh.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
+      link.setCollisionMesh(collisionMesh);
 
-      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
-      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
+//      CollisionShapeDescription<?> shapeDesc = collisionShapeFactory.createBox(objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
+//
+//      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
+//      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
+//      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
       link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
       return link;
    }
@@ -193,11 +199,16 @@ public class PileOfRandomObjectsRobot
       linkGraphics.addSphere(objectRadius, randomColor);
       link.setLinkGraphics(linkGraphics);
 
-      CollisionShapeDescription<?> shapeDesc = collisionShapeFactory.createSphere(objectRadius);
+      CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
+      collisionMesh.addSphere(objectRadius);
+      link.setCollisionMesh(collisionMesh);
 
-      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
-      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
+//      CollisionShapeDescription<?> shapeDesc = collisionShapeFactory.createSphere(objectRadius);
+//
+//      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
+//      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
+//      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
+
       link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
       return link;
    }
@@ -217,11 +228,15 @@ public class PileOfRandomObjectsRobot
       linkGraphics.addCapsule(objectRadius, objectHeight, randomColor);
       link.setLinkGraphics(linkGraphics);
 
-      CollisionShapeDescription<?> shapeDesc = collisionShapeFactory.createCapsule(objectRadius, objectHeight);
+      CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
+      collisionMesh.addCapsule(objectRadius, objectHeight);
+      link.setCollisionMesh(collisionMesh);
 
-      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
-      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
+//      CollisionShapeDescription<?> shapeDesc = collisionShapeFactory.createCapsule(objectRadius, objectHeight);
+//
+//      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
+//      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
+//      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
       link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
       return link;
    }
@@ -243,11 +258,15 @@ public class PileOfRandomObjectsRobot
       linkGraphics.addCylinder(objectHeight, objectRadius, randomColor);
       link.setLinkGraphics(linkGraphics);
 
-      CollisionShapeDescription<?> shapeDesc = collisionShapeFactory.createCylinder(objectRadius, objectHeight);
+      CollisionMeshDescription collisionMesh = new CollisionMeshDescription();
+      collisionMesh.addCylinderReferencedAtCenter(objectRadius, objectHeight);
+      link.setCollisionMesh(collisionMesh);
 
-      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
-      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
+//      CollisionShapeDescription<?> shapeDesc = collisionShapeFactory.createCylinder(objectRadius, objectHeight);
+//
+//      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
+//      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
+//      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
       link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
       return link;
    }

@@ -13,6 +13,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.InertiaTools;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.robotdefinition.LinkDefinitionFixedFrame;
 
@@ -43,6 +44,7 @@ public class Link implements java.io.Serializable
    public Vector3d comOffset = new Vector3d();
 
    private Graphics3DObject linkGraphics;
+   private CollisionMeshDescription collisionMeshDescription;
    private CollisionShape collision;
 
    // external force applied to center of mass
@@ -361,6 +363,11 @@ public class Link implements java.io.Serializable
       this.linkGraphics = linkGraphics;
    }
 
+   public void setCollisionMesh(CollisionMeshDescription collisonMeshDescription)
+   {
+      this.collisionMeshDescription = collisonMeshDescription;
+   }
+
    /**
     * Retrieves the LinkGraphics object representing this link.
     *
@@ -369,6 +376,11 @@ public class Link implements java.io.Serializable
    public Graphics3DObject getLinkGraphics()
    {
       return linkGraphics;
+   }
+
+   public CollisionMeshDescription getCollisionMeshDescription()
+   {
+      return collisionMeshDescription;
    }
 
 // ///////////// Collision Stuff Here /////////////
@@ -572,5 +584,6 @@ public class Link implements java.io.Serializable
          System.err.println("Warning: Inertia may be too small for Link " + getName() + " for stable simulation. principalMomentsOfInertia = " + principalMomentsOfInertia);
       }
    }
+
 
 }
