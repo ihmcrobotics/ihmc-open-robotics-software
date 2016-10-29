@@ -73,7 +73,7 @@ public class PileOfRandomObjectsRobot
          floatingJoint.setLink(link);
          robot.addRootJoint(floatingJoint);
 
-         double xyExtents = 0.25;
+         double xyExtents = 1.5; //0.25;
          double x = RandomTools.generateRandomDouble(random, -xyExtents, xyExtents);
          double y = RandomTools.generateRandomDouble(random, -xyExtents, xyExtents);
          double z = RandomTools.generateRandomDouble(random, 0.2, 6.0);
