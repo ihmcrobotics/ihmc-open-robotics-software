@@ -46,7 +46,14 @@ public abstract class ICPOptimizationParameters
     * This weight penalizes using a large amount of CMP control.
     * Setting this weight high will make the robot behave similar to using point feet control / minimal ankle torques and angular momentum.
     */
-   public abstract double getFeedbackWeight();
+   public abstract double getFeedbackForwardWeight();
+
+   /**
+    * The weight for tracking the nominal desired CMP.
+    * This weight penalizes using a large amount of CMP control.
+    * Setting this weight high will make the robot behave similar to using point feet control / minimal ankle torques and angular momentum.
+    */
+   public abstract double getFeedbackLateralWeight();
 
    /**
     * Penalization on changes feedback CMP between control ticks.

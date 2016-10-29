@@ -14,6 +14,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -92,11 +93,14 @@ public class ICPOptimizationController
    private final DoubleYoVariable lateralFootstepWeight = new DoubleYoVariable(yoNamePrefix + "LateralFootstepWeight", registry);
    private final YoFramePoint2d yoFootstepWeights = new YoFramePoint2d(yoNamePrefix + "EquivalentFootstepWeights", worldFrame, registry);
 
+   private final DoubleYoVariable feedbackForwardWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackForwardWeight", registry);
+   private final DoubleYoVariable feedbackLateralWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackLateralWeight", registry);
+   private final YoFramePoint2d yoFeedbackWeights = new YoFramePoint2d(yoNamePrefix + "EquivalentFeedbackWeights", worldFrame, registry);
+   private final YoFramePoint2d scaledFeedbackWeight = new YoFramePoint2d(yoNamePrefix + "ScaledFeedbackWeight", worldFrame, registry);
+
    private final DoubleYoVariable footstepRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "FootstepRegularizationWeight", registry);
-   private final DoubleYoVariable feedbackWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackWeight", registry);
    private final DoubleYoVariable feedbackRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackRegularizationWeight", registry);
    private final DoubleYoVariable scaledFootstepRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "ScaledFootstepRegularizationWeight", registry);
-   private final YoFramePoint2d scaledFeedbackWeight = new YoFramePoint2d(yoNamePrefix + "ScaledFeedbackWeight", worldFrame, registry);
    private final DoubleYoVariable dynamicRelaxationWeight = new DoubleYoVariable(yoNamePrefix + "DynamicRelaxationWeight", registry);
 
    private final DoubleYoVariable feedbackOrthogonalGain = new DoubleYoVariable(yoNamePrefix + "FeedbackOrthogonalGain", registry);
@@ -173,7 +177,8 @@ public class ICPOptimizationController
       forwardFootstepWeight.set(icpOptimizationParameters.getForwardFootstepWeight());
       lateralFootstepWeight.set(icpOptimizationParameters.getLateralFootstepWeight());
       footstepRegularizationWeight.set(icpOptimizationParameters.getFootstepRegularizationWeight());
-      feedbackWeight.set(icpOptimizationParameters.getFeedbackWeight());
+      feedbackForwardWeight.set(icpOptimizationParameters.getFeedbackForwardWeight());
+      feedbackLateralWeight.set(icpOptimizationParameters.getFeedbackLateralWeight());
       feedbackRegularizationWeight.set(icpOptimizationParameters.getFeedbackRegularizationWeight());
       feedbackOrthogonalGain.set(icpOptimizationParameters.getFeedbackOrthogonalGain());
       feedbackParallelGain.set(icpOptimizationParameters.getFeedbackParallelGain());
@@ -560,7 +565,7 @@ public class ICPOptimizationController
    private final Matrix3d weightsMatrix = new Matrix3d();
    private final Matrix3d weightsMatrixTransformed = new Matrix3d();
 
-   private void getTransformedFootstepWeights(FrameVector2d footstepWeightsToPack)
+   private void getTransformedWeights(FrameVector2d weightsToPack, double forwardWeight, double lateralWeight)
    {
       RigidBodyTransform transform = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame().getTransformToWorldFrame();
 
@@ -570,20 +575,17 @@ public class ICPOptimizationController
       transformTranspose.setRotation(rotationTranspose);
 
       weightsMatrix.setZero();
-      weightsMatrix.setElement(0, 0, 1.0 + forwardFootstepWeight.getDoubleValue());
-      weightsMatrix.setElement(1, 1, 1.0 + lateralFootstepWeight.getDoubleValue());
+      weightsMatrix.setElement(0, 0, forwardWeight);
+      weightsMatrix.setElement(1, 1, lateralWeight);
 
       weightsMatrixTransformed.set(rotation);
       weightsMatrixTransformed.mul(weightsMatrix);
       weightsMatrixTransformed.mul(rotationTranspose);
 
-      footstepWeightsToPack.setToZero(worldFrame);
-      footstepWeightsToPack.setX(weightsMatrixTransformed.getElement(0, 0));
-      footstepWeightsToPack.setY(weightsMatrixTransformed.getElement(1, 1));
-
-      yoFootstepWeights.set(footstepWeightsToPack);
+      weightsToPack.setToZero(worldFrame);
+      weightsToPack.setX(weightsMatrixTransformed.getElement(0, 0));
+      weightsToPack.setY(weightsMatrixTransformed.getElement(1, 1));
    }
-
 
    private final FramePose footstepPose = new FramePose();
    private int checkForEndingOfAdjustment(double omega0)
@@ -644,7 +646,8 @@ public class ICPOptimizationController
    private final FrameVector2d footstepWeights = new FrameVector2d();
    private void submitFootstepConditionsToSolver(int footstepIndex)
    {
-      getTransformedFootstepWeights(footstepWeights);
+      getTransformedWeights(footstepWeights, forwardFootstepWeight.getDoubleValue(), lateralFootstepWeight.getDoubleValue());
+      yoFootstepWeights.set(footstepWeights);
 
       if (localScaleUpcomingStepWeights)
          footstepWeights.scale(1.0 / (footstepIndex + 1));
@@ -714,18 +717,19 @@ public class ICPOptimizationController
       }
    }
 
+   private final FrameVector2d feedbackWeights = new FrameVector2d();
    private void scaleFeedbackWeightWithGain()
    {
+      getTransformedWeights(feedbackWeights, feedbackForwardWeight.getDoubleValue(), feedbackLateralWeight.getDoubleValue());
+      yoFeedbackWeights.set(feedbackWeights);
+
+      scaledFeedbackWeight.set(feedbackWeights);
       if (scaleFeedbackWeightWithGain.getBooleanValue())
       {
          getTransformedFeedbackGains(feedbackGains);
 
          double alpha = Math.sqrt(Math.pow(feedbackGains.getX(), 2) + Math.pow(feedbackGains.getY(), 2));
-         scaledFeedbackWeight.set(feedbackWeight.getDoubleValue() / alpha, feedbackWeight.getDoubleValue() / alpha);
-      }
-      else
-      {
-         scaledFeedbackWeight.set(feedbackWeight.getDoubleValue(), feedbackWeight.getDoubleValue());
+         scaledFeedbackWeight.scale(1.0 / alpha);
       }
    }
 
