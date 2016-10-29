@@ -131,7 +131,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    }
 
    /**
-    * Hack for realtime controllers to run all states a lot of times. This hopefully kicks in the JIT compiler and avoids expensive interpeted code paths
+    * Hack for realtime controllers to run all states a lot of times. This hopefully kicks in the JIT compiler and avoids expensive interpreted code paths
     */
    public void warmup(int iterations)
    {
@@ -159,6 +159,11 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       robotTimestamp.set(robotTimeBeforeWarmUp);
    }
 
+   public FiniteStateMachineState<ControllerEvent> getState(QuadrupedForceControllerState state)
+   {
+      return stateMachine.getState(state);
+   }
+   
    @Override
    public void initialize()
    {

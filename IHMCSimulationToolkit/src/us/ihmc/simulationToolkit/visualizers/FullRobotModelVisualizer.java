@@ -1,6 +1,8 @@
-package us.ihmc.robotModels;
+package us.ihmc.simulationToolkit.visualizers;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
