@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.physics;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
 
 /**
@@ -18,7 +19,7 @@ public interface CollisionShapeFactory
     *
     * @param margin Collision margin
     */
-   public void setMargin(double margin);
+   public abstract void setMargin(double margin);
 
    /**
     * Creates a box shape.  The box will be centered around the origin (0,0,0) with vertexes spaced at the specified distances from the origin.
@@ -49,7 +50,9 @@ public interface CollisionShapeFactory
     * @param collisionMask Bit field specifying which groups it can collide against.  Set to 0xFFFFFFFF to collide against all groups
     * @return The resulting collision shape.  Already attached to the provided link.
     */
-   public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription<?> description, boolean isGround, int collisionGroup, int collisionMask);
+   public abstract CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription<?> description, boolean isGround, int collisionGroup, int collisionMask);
 
-   public CollisionShape addShape(CollisionShapeDescription<?> description);
+   public abstract CollisionShape addShape(CollisionShapeDescription<?> description);
+
+   public abstract void addCollisionMeshDescription(Link link, CollisionMeshDescription collisionMeshDescription);
  }

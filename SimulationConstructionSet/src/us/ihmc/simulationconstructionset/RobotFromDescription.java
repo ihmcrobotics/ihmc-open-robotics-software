@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.FloatingPlanarJointDescription;
@@ -361,25 +362,25 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
          SpringPinJointDescription pinJointDescription = (SpringPinJointDescription) jointDescription;
          Vector3d offset = new Vector3d();
          pinJointDescription.getOffsetFromParentJoint(offset);
-         
+
          Vector3d jointAxis = new Vector3d();
          pinJointDescription.getJointAxis(jointAxis);
          joint = new SpringPinJoint(jointDescription.getName(), offset, this, jointAxis);
-         
+
          SpringPinJoint pinJoint = (SpringPinJoint) joint;
-         
+
          if (pinJointDescription.containsLimitStops())
          {
             double[] limitStopParameters = pinJointDescription.getLimitStopParameters();
-            
+
             double qMin = limitStopParameters[0];
             double qMax = limitStopParameters[1];
             double kLimit = limitStopParameters[2];
             double bLimit = limitStopParameters[3];
-            
+
             pinJoint.setLimitStops(qMin, qMax, kLimit, bLimit);
          }
-         
+
          pinJoint.setDamping(pinJointDescription.getDamping());
          pinJoint.setVelocityLimits(pinJointDescription.getVelocityLimit(), pinJointDescription.getVelocityDamping());
          pinJoint.setStiction(pinJointDescription.getStiction());
@@ -435,7 +436,9 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       LinkGraphicsDescription linkGraphics = linkDescription.getLinkGraphics();
       link.setLinkGraphics(linkGraphics);
 
-      return link;
+      CollisionMeshDescription collisonMeshDescription = linkDescription.getCollisionMesh();
+      link.setCollisionMesh(collisonMeshDescription);
 
+      return link;
    }
 }

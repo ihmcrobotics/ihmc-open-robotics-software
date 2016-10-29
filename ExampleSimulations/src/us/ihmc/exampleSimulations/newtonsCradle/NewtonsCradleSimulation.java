@@ -2,6 +2,9 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 
 import java.util.ArrayList;
 
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -162,6 +165,8 @@ public class NewtonsCradleSimulation
       Robot groundRobot = new GroundAsABoxRobot(collisionDetector, true);
       robots.add(groundRobot);
 
+      createCollisionShapesFromLinks(robots, collisionDetector.getShapeFactory());
+
       boolean showGUI = true;
 
       Robot[] robotArray = new Robot[robots.size()];
@@ -211,5 +216,39 @@ public class NewtonsCradleSimulation
       createPileOfRandomObjectsSimulation();
 //            createSpinningCoinSimulation();
 //      createStackOfBlocksSimulation();
+   }
+
+
+   private static void createCollisionShapesFromLinks(ArrayList<Robot> robots, CollisionShapeFactory collisionShapeFactory)
+   {
+      for (Robot robot : robots)
+      {
+         createCollisionShapesFromLinks(robot, collisionShapeFactory);
+      }
+   }
+
+   private static void createCollisionShapesFromLinks(Robot robot, CollisionShapeFactory collisionShapeFactory)
+   {
+      ArrayList<Joint> rootJoints = robot.getRootJoints();
+      for (Joint rootJoint : rootJoints)
+      {
+         createCollisionShapesFromLinksRecursively(rootJoint, collisionShapeFactory);
+      }
+   }
+
+   private static void createCollisionShapesFromLinksRecursively(Joint joint, CollisionShapeFactory collisionShapeFactory)
+   {
+      Link link = joint.getLink();
+      CollisionMeshDescription collisionMeshDescription = link.getCollisionMeshDescription();
+      if (collisionMeshDescription != null)
+      {
+         collisionShapeFactory.addCollisionMeshDescription(link, collisionMeshDescription);
+      }
+
+      ArrayList<Joint> childrenJoints = joint.getChildrenJoints();
+      for (Joint childJoint : childrenJoints)
+      {
+         createCollisionShapesFromLinksRecursively(childJoint, collisionShapeFactory);
+      }
    }
 }

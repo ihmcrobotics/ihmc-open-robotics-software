@@ -10,54 +10,106 @@ import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 public class CollisionMeshDescription
 {
    private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
-   private final ArrayList<ConvexShapeDescription> collisionObjects = new ArrayList<>();
+   private final ArrayList<ConvexShapeDescription> convexShapeDescriptions = new ArrayList<>();
+   private boolean isGround = false;
+   private int collisionGroup = 0xFFFFFFFF;
+   private int collisionMask = 0xFFFFFFFF;
 
    public void addConvexShape(ConvexShapeDescription convexShapeDescription)
    {
-      collisionObjects.add(convexShapeDescription);
+      convexShapeDescriptions.add(convexShapeDescription);
    }
 
    public void addSphere(double radius)
    {
       SphereDescriptionReadOnly sphere = new SphereDescriptionReadOnly(radius, transformGenerator.getRigidBodyTransformCopy());
-      collisionObjects.add(sphere);
-   }
-
-   public void addCubeReferencedAtBottomCenter(double lengthX, double widthY, double heightZ)
-   {
-      transformGenerator.translate(0.0, 0.0, heightZ / 2.0);
-      CubeDescriptionReadOnly cube = new CubeDescriptionReadOnly(lengthX, widthY, heightZ, transformGenerator.getRigidBodyTransformCopy());
-      transformGenerator.translate(0.0, 0.0, -heightZ / 2.0);
-      collisionObjects.add(cube);
-   }
-
-   public void addCubeReferencedAtCenter(double lengthX, double widthY, double heightZ)
-   {
-      CubeDescriptionReadOnly cube = new CubeDescriptionReadOnly(lengthX, widthY, heightZ, transformGenerator.getRigidBodyTransformCopy());
-      collisionObjects.add(cube);
-   }
-
-   public void addCapsule(double radius, double height)
-   {
-      CapsuleDescriptionReadOnly capsule = new CapsuleDescriptionReadOnly(radius, height, transformGenerator.getRigidBodyTransformCopy());
-      collisionObjects.add(capsule);
+      convexShapeDescriptions.add(sphere);
    }
 
    public void addCapsule(double radius, LineSegment3d capToCapLineSegment)
    {
       CapsuleDescriptionReadOnly capsule = new CapsuleDescriptionReadOnly(radius, capToCapLineSegment, transformGenerator.getRigidBodyTransformCopy());
-      collisionObjects.add(capsule);
+      convexShapeDescriptions.add(capsule);
    }
 
    public void addCapsule(double radius, double height, Axis longAxis)
    {
       CapsuleDescriptionReadOnly capsule = new CapsuleDescriptionReadOnly(radius, height, longAxis, transformGenerator.getRigidBodyTransformCopy());
-      collisionObjects.add(capsule);
+      convexShapeDescriptions.add(capsule);
+   }
+
+   public void addCapsule(double radius, double height)
+   {
+      CapsuleDescriptionReadOnly capsule = new CapsuleDescriptionReadOnly(radius, height, transformGenerator.getRigidBodyTransformCopy());
+      convexShapeDescriptions.add(capsule);
+   }
+
+   public void addCubeReferencedAtBottomMiddle(double lengthX, double widthY, double heightZ)
+   {
+      transformGenerator.translate(0.0, 0.0, heightZ / 2.0);
+      CubeDescriptionReadOnly cube = new CubeDescriptionReadOnly(lengthX, widthY, heightZ, transformGenerator.getRigidBodyTransformCopy());
+      transformGenerator.translate(0.0, 0.0, -heightZ / 2.0);
+      convexShapeDescriptions.add(cube);
+   }
+
+   public void addCubeReferencedAtCenter(double lengthX, double widthY, double heightZ)
+   {
+      CubeDescriptionReadOnly cube = new CubeDescriptionReadOnly(lengthX, widthY, heightZ, transformGenerator.getRigidBodyTransformCopy());
+      convexShapeDescriptions.add(cube);
+   }
+
+   public void addCylinderReferencedAtCenter(double radius, double height)
+   {
+      CylinderDescriptionReadOnly cylinder = new CylinderDescriptionReadOnly(radius, height, transformGenerator.getRigidBodyTransformCopy());
+      convexShapeDescriptions.add(cylinder);
+   }
+
+   public void addCylinderReferencedAtBottomMiddle(double radius, double height)
+   {
+      transformGenerator.translate(0.0, 0.0, height / 2.0);
+      CylinderDescriptionReadOnly cylinder = new CylinderDescriptionReadOnly(radius, height, transformGenerator.getRigidBodyTransformCopy());
+      convexShapeDescriptions.add(cylinder);
+      transformGenerator.translate(0.0, 0.0, -height / 2.0);
    }
 
    public void addConvexPolytope(ConvexPolytope polytope)
    {
       ConvexPolytopeDescriptionReadOnly polytopeReadOnly = new ConvexPolytopeDescriptionReadOnly(polytope, transformGenerator.getRigidBodyTransformCopy());
-      collisionObjects.add(polytopeReadOnly);
+      convexShapeDescriptions.add(polytopeReadOnly);
+   }
+
+   public void getConvexShapeDescriptions(ArrayList<ConvexShapeDescription> convexShapeDescriptionsToPack)
+   {
+      convexShapeDescriptionsToPack.addAll(convexShapeDescriptions);
+   }
+
+   public boolean getIsGround()
+   {
+     return isGround;
+   }
+
+   public int getCollisionGroup()
+   {
+      return collisionGroup;
+   }
+
+   public int getCollisionMask()
+   {
+      return collisionMask;
+   }
+
+   public void setIsGround(boolean isGround)
+   {
+      this.isGround = isGround;
+   }
+
+   public void setCollisionGroup(int collisionGroup)
+   {
+      this.collisionGroup = collisionGroup;
+   }
+
+   public void setCollisionMask(int collisionMask)
+   {
+      this.collisionMask = collisionMask;
    }
 }

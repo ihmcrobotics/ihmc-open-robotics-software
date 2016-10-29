@@ -24,6 +24,7 @@ import com.badlogic.gdx.physics.bullet.collision.btPersistentManifold;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
@@ -233,6 +234,14 @@ public class GdxCollisionDetector implements ScsCollisionDetector
 
          return shape;
       }
+
+      @Override
+      public void addCollisionMeshDescription(Link link, CollisionMeshDescription collisionMeshDescription)
+      {
+         // TODO Auto-generated method stub
+      }
+
+
    }
 
    /**
