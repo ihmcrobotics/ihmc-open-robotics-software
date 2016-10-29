@@ -70,6 +70,7 @@ import us.ihmc.tools.continuousIntegration.IntegrationCategory;
    us.ihmc.robotics.geometry.PointToLineUnProjectorTest.class,
    us.ihmc.robotics.geometry.QuaternionRotationRelationshipTest.class,
    us.ihmc.robotics.geometry.RigidBodyTransformTest.class,
+   us.ihmc.robotics.geometry.RigidBodyTransformGeneratorTest.class,
    us.ihmc.robotics.geometry.RotationalInertiaCalculatorTest.class,
    us.ihmc.robotics.geometry.RotationToolsTest.class,
    us.ihmc.robotics.geometry.shapes.BestFitPlaneCalculatorTest.class,
