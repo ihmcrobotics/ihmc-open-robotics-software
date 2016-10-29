@@ -119,7 +119,7 @@ public class NewtonsCradleSimulation
 
    public static void createStackOfBlocksSimulation()
    {
-      int numberOfBlocks = 2;
+      int numberOfBlocks = 10;
       StackOfBlocksRobot stackOfBlocksRobot = new StackOfBlocksRobot(numberOfBlocks);
       ArrayList<Robot> robots = stackOfBlocksRobot.getRobots();
 
@@ -141,11 +141,12 @@ public class NewtonsCradleSimulation
       scs.setGroundVisible(false);
       scs.startOnAThread();
 
+      scs.setSimulateDuration(2.0);
       CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
 
-      //    DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(100.0, 100.0, scs, 1000);
-      DefaultCollisionVisualizer visualize = null;
-      //      handler.addListener(visualize);
+      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(100.0, 100.0, scs, 1000);
+//      DefaultCollisionVisualizer visualize = null;
+      handler.addListener(visualize);
 
       collisionDetector.initialize();
 
@@ -158,7 +159,7 @@ public class NewtonsCradleSimulation
       ArrayList<Robot> robots = pileOfRandomObjectsRobot.getRobots();
 
       ScsCollisionDetector collisionDetector = pileOfRandomObjectsRobot.getCollisionDetector();
-      Robot groundRobot = new GroundAsABoxRobot(collisionDetector);
+      Robot groundRobot = new GroundAsABoxRobot(collisionDetector, true);
       robots.add(groundRobot);
 
       boolean showGUI = true;
@@ -167,7 +168,7 @@ public class NewtonsCradleSimulation
       robots.toArray(robotArray);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      parameters.setDataBufferSize(16000);
+      parameters.setDataBufferSize(4000);
       parameters.setCreateGUI(showGUI);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
@@ -178,9 +179,9 @@ public class NewtonsCradleSimulation
 
       CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
 
-      //    DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(100.0, 100.0, scs, 1000);
+//          DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(100.0, 100.0, scs, 1000);
       DefaultCollisionVisualizer visualize = null;
-      //      handler.addListener(visualize);
+//            handler.addListener(visualize);
 
       collisionDetector.initialize();
 
@@ -207,8 +208,8 @@ public class NewtonsCradleSimulation
 //            createNewtonsCradleSimulation();
 //            createStackOfBouncyBallsSimulation();
 //            createRowOfDominosSimulation();
-//      createPileOfRandomObjectsSimulation();
+      createPileOfRandomObjectsSimulation();
 //            createSpinningCoinSimulation();
-      createStackOfBlocksSimulation();
+//      createStackOfBlocksSimulation();
    }
 }

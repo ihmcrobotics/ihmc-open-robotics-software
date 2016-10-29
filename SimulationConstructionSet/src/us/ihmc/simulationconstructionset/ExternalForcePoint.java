@@ -90,6 +90,18 @@ public class ExternalForcePoint extends KinematicPoint
    }
 
 
+
+   public boolean resolveMicroCollision(double penetrationSquared, ExternalForcePoint externalForcePointTwo, Vector3d negative_normal, double epsilon, double mu, Vector3d p_world)
+   {
+      //TODO: Duplicate code all over the place here. Clean this up once it works well. Test cases too!
+      epsilon = epsilon + 1000000.0 * penetrationSquared;
+      if (epsilon > 20.0)
+         epsilon = 20.0;
+
+      return resolveCollision(externalForcePointTwo, negative_normal, epsilon, mu, p_world);
+   }
+
+
    private final Vector3d otherObjectVelocity = new Vector3d();
    public boolean resolveCollision(ExternalForcePoint externalForcePoint, Vector3d collisionNormalInWorld, double epsilon, double mu, Vector3d impulseInWorldToPack)
    {
@@ -290,4 +302,5 @@ public class ExternalForcePoint extends KinematicPoint
       rot.setM21(yAxis.getZ());
       rot.setM22(zAxis.getZ());
    }
+
 }
