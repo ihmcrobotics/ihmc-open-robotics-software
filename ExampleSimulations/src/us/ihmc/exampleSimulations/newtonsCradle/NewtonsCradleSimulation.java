@@ -13,6 +13,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -45,7 +46,7 @@ public class NewtonsCradleSimulation
       ArrayList<Robot> robots = spinningCoinRobot.getRobots();
 
       ScsCollisionDetector collisionDetector = spinningCoinRobot.getCollisionDetector();
-      Robot groundRobot = new GroundAsABoxRobot(collisionDetector);
+      Robot groundRobot = new GroundAsABoxRobot();
       robots.add(groundRobot);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(100000);
@@ -127,7 +128,7 @@ public class NewtonsCradleSimulation
       ArrayList<Robot> robots = stackOfBlocksRobot.getRobots();
 
       ScsCollisionDetector collisionDetector = stackOfBlocksRobot.getCollisionDetector();
-      Robot groundRobot = new GroundAsABoxRobot(collisionDetector);
+      Robot groundRobot = new GroundAsABoxRobot();
       robots.add(groundRobot);
 
       boolean showGUI = true;
@@ -161,11 +162,10 @@ public class NewtonsCradleSimulation
       PileOfRandomObjectsRobot pileOfRandomObjectsRobot = new PileOfRandomObjectsRobot();
       ArrayList<Robot> robots = pileOfRandomObjectsRobot.getRobots();
 
-      ScsCollisionDetector collisionDetector = pileOfRandomObjectsRobot.getCollisionDetector();
-      Robot groundRobot = new GroundAsABoxRobot(collisionDetector, true);
+      Robot groundRobot = new GroundAsABoxRobot(true);
       robots.add(groundRobot);
 
-      createCollisionShapesFromLinks(robots, collisionDetector.getShapeFactory());
+      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
 
       boolean showGUI = true;
 
@@ -189,7 +189,6 @@ public class NewtonsCradleSimulation
 //            handler.addListener(visualize);
 
       collisionDetector.initialize();
-
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
 
       //      scs.simulate();
@@ -219,12 +218,23 @@ public class NewtonsCradleSimulation
    }
 
 
-   private static void createCollisionShapesFromLinks(ArrayList<Robot> robots, CollisionShapeFactory collisionShapeFactory)
+   private static ScsCollisionDetector createCollisionShapesFromLinks(ArrayList<Robot> robots)
    {
+      ScsCollisionDetector collisionDetector;
+
+      //      collisionDetector = new GdxCollisionDetector(100.0);
+      collisionDetector = new SimpleCollisionDetector();
+      ((SimpleCollisionDetector) collisionDetector).setUseSimpleSpeedupMethod();
+
+      CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
+      collisionShapeFactory.setMargin(0.002);
+
       for (Robot robot : robots)
       {
          createCollisionShapesFromLinks(robot, collisionShapeFactory);
       }
+
+      return collisionDetector;
    }
 
    private static void createCollisionShapesFromLinks(Robot robot, CollisionShapeFactory collisionShapeFactory)

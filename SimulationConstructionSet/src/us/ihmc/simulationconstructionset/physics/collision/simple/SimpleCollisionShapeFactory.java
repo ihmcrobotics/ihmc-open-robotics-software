@@ -71,7 +71,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription description, boolean isGround, int collisionGroup, int collisionMask)
    {
       SimpleCollisionShapeWithLink collisionShape = new SimpleCollisionShapeWithLink(link, description, shapeToLink);
-
+      collisionShape.setIsGround(isGround);
       detector.addShape(collisionShape);
 
       return collisionShape;
