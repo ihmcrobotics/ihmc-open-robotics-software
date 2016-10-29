@@ -23,7 +23,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getForwardFootstepWeight()
    {
-      return runningOnRealRobot ? 20.0 : 15.0;
+      return runningOnRealRobot ? 20.0 : 10.0;
    }
 
    /** {@inheritDoc} */
@@ -42,7 +42,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getFeedbackWeight()
+   public double getFeedbackForwardWeight()
+   {
+      return 1.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getFeedbackLateralWeight()
    {
       return 0.5;
    }
@@ -177,7 +184,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getDoubleSupportMaxCMPForwardExit()
    {
-      return -0.01;
+      return 0.01;
    }
 
    /** {@inheritDoc} */
@@ -191,7 +198,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getSingleSupportMaxCMPForwardExit()
    {
-      return -0.01;
+      return -0.03;
    }
 
    /** {@inheritDoc} */
