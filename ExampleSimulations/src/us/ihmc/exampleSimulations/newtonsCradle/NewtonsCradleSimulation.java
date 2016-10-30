@@ -2,18 +2,11 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
-import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -25,19 +18,15 @@ public class NewtonsCradleSimulation
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       scs.setDT(0.0001, 100);
+
+      //      CollisionHandler collisionHandler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
+      //      CollisionHandler collisionHandler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.99, 0.15);
+
+      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(4.0, 4.0, scs, 100);
+
+      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
       scs.startOnAThread();
-
-      //      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
-      //      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
-      CollisionHandler handler = new DefaultCollisionHandler(0.99, 0.15);
-
-      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(4.0, 4.0, scs, 100);
-
-      handler.addListener(visualize);
-      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robot);
-      collisionDetector.initialize();
-
-      scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
    }
 
    public static void createSpinningCoinSimulation()
@@ -56,18 +45,14 @@ public class NewtonsCradleSimulation
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
       scs.setDT(0.0001, 1);
       scs.setGroundVisible(false);
-      scs.startOnAThread();
 
       double epsilon = 0.3;
       double mu = 0.7;
-      CollisionHandler handler = new DefaultCollisionHandler(epsilon, mu);
-      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(10.0, 10.0, scs, 100);
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(epsilon, mu);
+      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(10.0, 10.0, scs, 100);
 
-      handler.addListener(visualize);
-      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
-      collisionDetector.initialize();
-
-      scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
+      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      scs.startOnAThread();
 
       scs.setSimulateDuration(60.0);
       scs.simulate();
@@ -87,21 +72,20 @@ public class NewtonsCradleSimulation
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray);
       scs.setDT(0.0001, 100);
+      scs.setGroundVisible(false);
+
+      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(0.1, 0.1, scs, 100);
+
+      double coefficientOfRestitution = 0.9;
+      double coefficientOfFriction = 0.0;
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+      //      CollisionHandler collisionHandler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
+      //      CollisionHandler collisionHandler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
+      //      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.98, 0.1, robot);
+      //      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.3, 0.7, robot);
+
+      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
       scs.startOnAThread();
-
-      //      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
-      //      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
-      //      CollisionHandler handler = new DefaultCollisionHandler(0.98, 0.1, robot);
-      CollisionHandler handler = new DefaultCollisionHandler(0.9, 0.0);
-      //      CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7, robot);
-
-      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, scs, 100);
-
-      handler.addListener(visualize);
-      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
-      collisionDetector.initialize();
-
-      scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
    }
 
    public static void createRowOfDominosSimulation()
@@ -119,21 +103,19 @@ public class NewtonsCradleSimulation
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray);
       scs.setDT(0.0001, 100);
       scs.setGroundVisible(false);
-      scs.startOnAThread();
 
+      //      DefaultCollisionVisualize collisionVisualizer = new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
+      DefaultCollisionVisualizer collisionVisualizer = null;
+
+      double coefficientOfRestitution = 0.3;
+      double coefficientOfFriction = 0.7;
       //      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
       //      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
       //      CollisionHandler handler = new DefaultCollisionHandler(0.98, 0.1, robot);
-      CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
 
-      //      DefaultCollisionVisualize visualize = new DefaultCollisionVisualize(100.0, 100.0, scs, 100);
-      //
-      //      handler.addListener(visualize);
-      DefaultCollisionVisualizer visualize = null;
-      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
-      collisionDetector.initialize();
-
-      scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
+      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      scs.startOnAThread();
    }
 
    public static void createStackOfBlocksSimulation()
@@ -157,19 +139,16 @@ public class NewtonsCradleSimulation
       scs.setDT(0.00025, 1);
       scs.setFastSimulate(false);
       scs.setGroundVisible(false);
-      scs.startOnAThread();
-
       scs.setSimulateDuration(2.0);
-      CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
 
-      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(100.0, 100.0, scs, 1000);
-//      DefaultCollisionVisualizer visualize = null;
-      handler.addListener(visualize);
+      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(100.0, 100.0, scs, 1000);
+//      DefaultCollisionVisualizer collisionVisualizer = null;
 
-      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
-      collisionDetector.initialize();
-
-      scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
+      double coefficientOfRestitution = 0.3;
+      double coefficientOfFriction = 0.7;
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      scs.startOnAThread();
    }
 
    public static void createPileOfRandomObjectsSimulation()
@@ -179,8 +158,6 @@ public class NewtonsCradleSimulation
 
       Robot groundRobot = new GroundAsABoxRobot(true);
       robots.add(groundRobot);
-
-      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
 
       boolean showGUI = true;
 
@@ -192,19 +169,19 @@ public class NewtonsCradleSimulation
       parameters.setCreateGUI(showGUI);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
+
+//    DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(100.0, 100.0, scs, 1000);
+      DefaultCollisionVisualizer collisionVisualizer = null;
+
+      double coefficientOfRestitution = 0.3;
+      double coefficientOfFriction = 0.7;
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+
       scs.setDT(0.00025, 10);
       scs.setFastSimulate(true);
       scs.setGroundVisible(false);
       scs.startOnAThread();
-
-      CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7);
-
-//          DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(100.0, 100.0, scs, 1000);
-      DefaultCollisionVisualizer visualize = null;
-//            handler.addListener(visualize);
-
-      collisionDetector.initialize();
-      scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
 
       //      scs.simulate();
 
@@ -228,67 +205,8 @@ public class NewtonsCradleSimulation
 //    createSpinningCoinSimulation();
 //            createStackOfBouncyBallsSimulation();
 //            createRowOfDominosSimulation();
-      createPileOfRandomObjectsSimulation();
 //      createStackOfBlocksSimulation();
+      createPileOfRandomObjectsSimulation();
    }
 
-   private static ScsCollisionDetector createCollisionShapesFromLinks(Robot robot)
-   {
-      ScsCollisionDetector collisionDetector;
-
-      //      collisionDetector = new GdxCollisionDetector(100.0);
-      collisionDetector = new SimpleCollisionDetector();
-      ((SimpleCollisionDetector) collisionDetector).setUseSimpleSpeedupMethod();
-
-      CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
-      collisionShapeFactory.setMargin(0.002);
-
-         createCollisionShapesFromLinks(robot, collisionShapeFactory);
-
-      return collisionDetector;
-   }
-
-   private static ScsCollisionDetector createCollisionShapesFromLinks(ArrayList<Robot> robots)
-   {
-      ScsCollisionDetector collisionDetector;
-
-      //      collisionDetector = new GdxCollisionDetector(100.0);
-      collisionDetector = new SimpleCollisionDetector();
-      ((SimpleCollisionDetector) collisionDetector).setUseSimpleSpeedupMethod();
-
-      CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
-      collisionShapeFactory.setMargin(0.002);
-
-      for (Robot robot : robots)
-      {
-         createCollisionShapesFromLinks(robot, collisionShapeFactory);
-      }
-
-      return collisionDetector;
-   }
-
-   private static void createCollisionShapesFromLinks(Robot robot, CollisionShapeFactory collisionShapeFactory)
-   {
-      ArrayList<Joint> rootJoints = robot.getRootJoints();
-      for (Joint rootJoint : rootJoints)
-      {
-         createCollisionShapesFromLinksRecursively(rootJoint, collisionShapeFactory);
-      }
-   }
-
-   private static void createCollisionShapesFromLinksRecursively(Joint joint, CollisionShapeFactory collisionShapeFactory)
-   {
-      Link link = joint.getLink();
-      CollisionMeshDescription collisionMeshDescription = link.getCollisionMeshDescription();
-      if (collisionMeshDescription != null)
-      {
-         collisionShapeFactory.addCollisionMeshDescription(link, collisionMeshDescription);
-      }
-
-      ArrayList<Joint> childrenJoints = joint.getChildrenJoints();
-      for (Joint childJoint : childrenJoints)
-      {
-         createCollisionShapesFromLinksRecursively(childJoint, collisionShapeFactory);
-      }
-   }
 }

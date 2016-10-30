@@ -37,7 +37,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    }
 
    @Override
-   public CollisionShapeDescription createBox(double halfLengthX, double halfWidthY, double halfHeightZ)
+   public CollisionShapeDescription<?> createBox(double halfLengthX, double halfWidthY, double halfHeightZ)
    {
       ConvexPolytope polytope = ConvexPolytopeConstructor.constructBoxWithCenterAtZero(halfLengthX, halfWidthY, halfHeightZ);
       return new PolytopeShapeDescription(polytope);
@@ -45,30 +45,30 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    }
 
    @Override
-   public CollisionShapeDescription createCylinder(double radius, double height)
+   public CollisionShapeDescription<?> createCylinder(double radius, double height)
    {
       return new CylinderShapeDescription(radius, height);
    }
 
    @Override
-   public CollisionShapeDescription createSphere(double radius)
+   public CollisionShapeDescription<?> createSphere(double radius)
    {
       return new SphereShapeDescription(radius, new Point3d());
    }
 
    @Override
-   public CollisionShapeDescription createCapsule(double radius, double height)
+   public CollisionShapeDescription<?> createCapsule(double radius, double height)
    {
       return new CapsuleShapeDescription(radius, height);
    }
 
-   public CollisionShapeDescription createCapsule(double radius, LineSegment3d capToCapLineSegment)
+   public CollisionShapeDescription<?> createCapsule(double radius, LineSegment3d capToCapLineSegment)
    {
       return new CapsuleShapeDescription(radius, capToCapLineSegment);
    }
 
    @Override
-   public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription description, boolean isGround, int collisionGroup, int collisionMask)
+   public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription<?> description, boolean isGround, int collisionGroup, int collisionMask)
    {
       SimpleCollisionShapeWithLink collisionShape = new SimpleCollisionShapeWithLink(link, description, shapeToLink);
       collisionShape.setIsGround(isGround);
@@ -78,7 +78,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    }
 
    @Override
-   public CollisionShape addShape(CollisionShapeDescription description)
+   public CollisionShape addShape(CollisionShapeDescription<?> description)
    {
       Link link = null;
       RigidBodyTransform shapeToLink = new RigidBodyTransform();
