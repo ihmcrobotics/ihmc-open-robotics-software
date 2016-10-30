@@ -26,19 +26,19 @@ public class GroundAsABoxRobot extends Robot
 
       //    FloatingJoint baseJoint = new FloatingJoint("base", new Vector3d(), this);
       baseLink = new Link("base");
-      baseLink.setMassAndRadiiOfGyration(1000000000.0, 100.0, 100.0, 100.0);
+      baseLink.setMassAndRadiiOfGyration(100000000000.0, 100.0, 100.0, 100.0);
 
       double floorLength = 4.0;
       double floorWidth = 4.0;
       double floorThickness = 0.05;
 
       Graphics3DObject baseLinkGraphics = new Graphics3DObject();
-      baseLinkGraphics.translate(0.0, 0.0, -floorThickness / 2.0);
+      baseLinkGraphics.translate(0.0, 0.0, -floorThickness);
       baseLinkGraphics.addCube(floorLength, floorWidth, floorThickness, YoAppearance.Green());
 
       CollisionMeshDescription collisonMeshDescription = new CollisionMeshDescription();
-      collisonMeshDescription.translate(0.0, 0.0, 0.0);
-      collisonMeshDescription.addCubeReferencedAtCenter(floorLength, floorWidth, floorThickness);
+      collisonMeshDescription.translate(0.0, 0.0, -floorThickness);
+      collisonMeshDescription.addCubeReferencedAtBottomMiddle(floorLength, floorWidth, floorThickness);
       collisonMeshDescription.setIsGround(true);
 
 //      CollisionShapeDescription<?> groundShapeDescription = collisionShapeFactory.createBox(floorLength / 2.0, floorWidth / 2.0, floorThickness / 2.0);
@@ -75,16 +75,12 @@ public class GroundAsABoxRobot extends Robot
          addWall(floorLength, floorWidth, floorThickness, baseLinkGraphics, collisonMeshDescription, offsetX, offsetY, xRotation, yRotation);
       }
 
-
-
       //    baseJoint.setVelocity(0.0, 0.0, 1.0);
-
 
       baseLink.setLinkGraphics(baseLinkGraphics);
       baseLink.setCollisionMesh(collisonMeshDescription);
 
       baseLink.enableCollisions(100.0, this.getRobotsYoVariableRegistry());
-
 
       baseJoint.setLink(baseLink);
       this.addRootJoint(baseJoint);
@@ -96,7 +92,7 @@ public class GroundAsABoxRobot extends Robot
          double offsetX, double offsetY, double xRotation, double yRotation)
    {
       baseLinkGraphics.identity();
-      baseLinkGraphics.translate(new Vector3d(offsetX, offsetY, -floorThickness / 2.0));
+      baseLinkGraphics.translate(new Vector3d(offsetX, offsetY, -floorThickness));
       Matrix3d rotationMatrixX = new Matrix3d();
       rotationMatrixX.rotX(xRotation);
       baseLinkGraphics.rotate(rotationMatrixX);
@@ -106,9 +102,9 @@ public class GroundAsABoxRobot extends Robot
       baseLinkGraphics.addCube(floorLength, floorWidth, floorThickness, YoAppearance.Green());
 
       collisonMeshDescription.identity();
-      collisonMeshDescription.translate(offsetX, offsetY, 0.0);
+      collisonMeshDescription.translate(offsetX, offsetY, -floorThickness);
       collisonMeshDescription.rotateEuler(new Vector3d(xRotation, yRotation, 0.0));
-      collisonMeshDescription.addCubeReferencedAtCenter(floorLength, floorWidth, floorThickness);
+      collisonMeshDescription.addCubeReferencedAtBottomMiddle(floorLength, floorWidth, floorThickness);
       collisonMeshDescription.setIsGround(true);
 
 //      groundShapeDescription = collisionShapeFactory.createBox(floorLength / 2.0,  / 2.0, floorThickness / 2.0);
