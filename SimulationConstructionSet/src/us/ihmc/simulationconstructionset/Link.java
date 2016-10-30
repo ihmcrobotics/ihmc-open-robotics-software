@@ -363,9 +363,9 @@ public class Link implements java.io.Serializable
       this.linkGraphics = linkGraphics;
    }
 
-   public void setCollisionMesh(CollisionMeshDescription collisonMeshDescription)
+   public void setCollisionMesh(CollisionMeshDescription collisionMeshDescription)
    {
-      this.collisionMeshDescription = collisonMeshDescription;
+      this.collisionMeshDescription = collisionMeshDescription;
    }
 
    /**
