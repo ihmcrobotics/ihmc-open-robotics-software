@@ -1,6 +1,5 @@
 package us.ihmc.simulationconstructionset.physics;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 
