@@ -130,7 +130,6 @@ public class SpinningCoinRobot
       collisionMeshDescription.addCylinderReferencedAtCenter(coinRadius, coinWidth);
       link.setCollisionMesh(collisionMeshDescription);
 
-      link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
       return link;
    }
 

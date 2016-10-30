@@ -61,7 +61,6 @@ public class RowOfDominosRobot extends Robot
          CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
          collisionMeshDescription.addCubeReferencedAtCenter(dominoDepth, dominoWidth, dominoHeight);
          link.setCollisionMesh(collisionMeshDescription);
-         link.enableCollisions(100.0, this.getRobotsYoVariableRegistry());
 
          floatingJoint.setLink(link);
          this.addRootJoint(floatingJoint);

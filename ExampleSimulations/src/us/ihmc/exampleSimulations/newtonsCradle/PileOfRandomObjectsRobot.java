@@ -10,9 +10,14 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
+import us.ihmc.robotics.robotDescription.FloatingJointDescription;
+import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.RobotFromDescription;
 
 public class PileOfRandomObjectsRobot
 {
@@ -31,33 +36,35 @@ public class PileOfRandomObjectsRobot
    {
       for (int i = 0; i < numberOfObjects; i++)
       {
-         Robot robot = new Robot("RandomRobot" + i);
+         RobotDescription robotDescription = new RobotDescription("RandomRobot" + i);
+//         Robot robot = new Robot("RandomRobot" + i);
 
          Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
-         FloatingJoint floatingJoint = new FloatingJoint("object" + i, "object" + i, offset, robot);
+         FloatingJointDescription floatingJointDescription = new FloatingJointDescription("object" + i);
+         floatingJointDescription.setOffsetFromParentJoint(offset);
 
-         Link link;
+         LinkDescription link;
 
          int shape = random.nextInt(4);
          if (shape == 0)
          {
-            link = createRandomBox(random, i, robot);
+            link = createRandomBox(random, i);
          }
          else if (shape == 1)
          {
-            link = createRandomSphere(random, i, robot);
+            link = createRandomSphere(random, i);
          }
          else if (shape == 2)
          {
-            link = createRandomCapsule(random, i, robot);
+            link = createRandomCapsule(random, i);
          }
          else
          {
-            link = createRandomCylinder(random, i, robot);
+            link = createRandomCylinder(random, i);
          }
 
-         floatingJoint.setLink(link);
-         robot.addRootJoint(floatingJoint);
+         floatingJointDescription.setLink(link);
+         robotDescription.addRootJoint(floatingJointDescription);
 
          double xyExtents = 1.5; //0.25;
          double x = RandomTools.generateRandomDouble(random, -xyExtents, xyExtents);
@@ -68,6 +75,10 @@ public class PileOfRandomObjectsRobot
          double yaw = RandomTools.generateRandomDouble(random, -angleExtents, angleExtents);
          double pitch = RandomTools.generateRandomDouble(random, -angleExtents, angleExtents);
          double roll = RandomTools.generateRandomDouble(random, -angleExtents, angleExtents);
+
+         Robot robot = new RobotFromDescription(robotDescription);
+
+         FloatingJoint floatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
 
          floatingJoint.setPosition(x, y, z);
          floatingJoint.setYawPitchRoll(yaw, pitch, roll);
@@ -134,22 +145,21 @@ public class PileOfRandomObjectsRobot
       collisionMeshDescription.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
       link.setCollisionMesh(collisionMeshDescription);
 
-      link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
       return link;
    }
 
-   private Link createRandomBox(Random random, int i, Robot robot)
+   private LinkDescription createRandomBox(Random random, int i)
    {
       double objectLength = RandomTools.generateRandomDouble(random, 0.04, 0.1);
       double objectWidth = RandomTools.generateRandomDouble(random, 0.04, 0.2);
       double objectHeight = RandomTools.generateRandomDouble(random, 0.04, 0.1);
       double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
 
-      Link link = new Link("object" + i);
+      LinkDescription link = new LinkDescription("object" + i);
       link.setMassAndRadiiOfGyration(objectMass, objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
-      link.setComOffset(0.0, 0.0, 0.0);
+      link.setCenterOfMassOffset(0.0, 0.0, 0.0);
 
-      Graphics3DObject linkGraphics = new Graphics3DObject();
+      LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
       linkGraphics.translate(0.0, 0.0, -objectHeight / 2.0);
       AppearanceDefinition randomColor = YoAppearance.randomColor(random);
       linkGraphics.addCube(objectLength, objectWidth, objectHeight, randomColor);
@@ -159,20 +169,19 @@ public class PileOfRandomObjectsRobot
       collisionMesh.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
       link.setCollisionMesh(collisionMesh);
 
-      link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
       return link;
    }
 
-   private Link createRandomSphere(Random random, int i, Robot robot)
+   private LinkDescription createRandomSphere(Random random, int i)
    {
       double objectRadius = RandomTools.generateRandomDouble(random, 0.01, 0.05);
       double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
 
-      Link link = new Link("object" + i);
+      LinkDescription link = new LinkDescription("object" + i);
       link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectRadius / 2.0);
-      link.setComOffset(0.0, 0.0, 0.0);
+      link.setCenterOfMassOffset(0.0, 0.0, 0.0);
 
-      Graphics3DObject linkGraphics = new Graphics3DObject();
+      LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
       AppearanceDefinition randomColor = YoAppearance.randomColor(random);
       linkGraphics.addSphere(objectRadius, randomColor);
       link.setLinkGraphics(linkGraphics);
@@ -181,21 +190,20 @@ public class PileOfRandomObjectsRobot
       collisionMesh.addSphere(objectRadius);
       link.setCollisionMesh(collisionMesh);
 
-      link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
       return link;
    }
 
-   private Link createRandomCapsule(Random random, int i, Robot robot)
+   private LinkDescription createRandomCapsule(Random random, int i)
    {
       double objectRadius = RandomTools.generateRandomDouble(random, 0.01, 0.05);
       double objectHeight = 2.0 * objectRadius + RandomTools.generateRandomDouble(random, 0.02, 0.05);
       double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
 
-      Link link = new Link("object" + i);
+      LinkDescription link = new LinkDescription("object" + i);
       link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectHeight / 2.0);
-      link.setComOffset(0.0, 0.0, 0.0);
+      link.setCenterOfMassOffset(0.0, 0.0, 0.0);
 
-      Graphics3DObject linkGraphics = new Graphics3DObject();
+      LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
       AppearanceDefinition randomColor = YoAppearance.randomColor(random);
       linkGraphics.addCapsule(objectRadius, objectHeight, randomColor);
       link.setLinkGraphics(linkGraphics);
@@ -204,21 +212,20 @@ public class PileOfRandomObjectsRobot
       collisionMesh.addCapsule(objectRadius, objectHeight);
       link.setCollisionMesh(collisionMesh);
 
-      link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
       return link;
    }
 
-   private Link createRandomCylinder(Random random, int i, Robot robot)
+   private LinkDescription createRandomCylinder(Random random, int i)
    {
       double objectHeight = RandomTools.generateRandomDouble(random, 0.05, 0.15);
       double objectRadius = RandomTools.generateRandomDouble(random, 0.01, 0.10);
       double objectMass = RandomTools.generateRandomDouble(random, 0.2, 1.0);
 
-      Link link = new Link("object" + i);
+      LinkDescription link = new LinkDescription("object" + i);
       link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectHeight / 2.0);
-      link.setComOffset(0.0, 0.0, 0.0);
+      link.setCenterOfMassOffset(0.0, 0.0, 0.0);
 
-      Graphics3DObject linkGraphics = new Graphics3DObject();
+      LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
       linkGraphics.translate(0.0, 0.0, -objectHeight / 2.0);
 
       AppearanceDefinition randomColor = YoAppearance.randomColor(random);
@@ -229,7 +236,6 @@ public class PileOfRandomObjectsRobot
       collisionMesh.addCylinderReferencedAtCenter(objectRadius, objectHeight);
       link.setCollisionMesh(collisionMesh);
 
-      link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
       return link;
    }
 
