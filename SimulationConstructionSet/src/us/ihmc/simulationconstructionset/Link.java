@@ -47,9 +47,6 @@ public class Link implements java.io.Serializable
    private CollisionMeshDescription collisionMeshDescription;
    private CollisionShape collision;
 
-   // external force applied to center of mass
-   protected ExternalForcePoint ef_centerOfMass;
-
    public Link(LinkDefinitionFixedFrame linkDefinition)
    {
       this(linkDefinition.getName());
@@ -229,9 +226,9 @@ public class Link implements java.io.Serializable
    protected void setParentJoint(Joint joint)
    {
       this.parentJoint = joint;
-      if (ef_collision != null) {
+      if (ef_collision != null)
+      {
          joint.addExternalForcePoint(ef_collision);
-         joint.addExternalForcePoint(ef_centerOfMass);
       }
    }
 
@@ -383,9 +380,9 @@ public class Link implements java.io.Serializable
       return collisionMeshDescription;
    }
 
+   //TODO: Get this stuff out of here. Put it in Joint maybe?
 // ///////////// Collision Stuff Here /////////////
 
-   protected double maxVelocity;
    public ExternalForcePoint ef_collision;
 
    /**
@@ -393,13 +390,11 @@ public class Link implements java.io.Serializable
     * @param maxVelocity Maximum velocity of any point on the link. Used for improving collision detection performance.
     * @param polyTree PolyTree defining collision geometry.
     */
-   public void enableCollisions( double maxVelocity, YoVariableRegistry registry)
+   public void enableCollisions(YoVariableRegistry registry)
    {
-      this.maxVelocity = maxVelocity;
       this.ef_collision = new ExternalForcePoint(this.name + "ef_collision", registry);
-      this.ef_centerOfMass = new ExternalForcePoint(this.name + "ef_centerOfMass", registry);
+      if (parentJoint != null) parentJoint.addExternalForcePoint(ef_collision);
    }
-
 
    // ////////// Graphics from Mass Properties Here ///////////////////////
 
@@ -559,11 +554,6 @@ public class Link implements java.io.Serializable
    public void getComOffset(Vector3d comOffsetRet)
    {
       comOffsetRet.set(this.comOffset);
-   }
-
-   public ExternalForcePoint getCenterOfMassForce()
-   {
-      return ef_centerOfMass;
    }
 
    public CollisionShape getCollisionShape()

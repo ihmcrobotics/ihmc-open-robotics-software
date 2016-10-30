@@ -62,7 +62,6 @@ public class StackOfBouncyBallsRobot extends Robot
          CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
          collisionMeshDescription.addSphere(ballRadius);
          link.setCollisionMesh(collisionMeshDescription);
-         link.enableCollisions(100.0, this.getRobotsYoVariableRegistry());
 
          floatingJoint.setLink(link);
          this.addRootJoint(floatingJoint);

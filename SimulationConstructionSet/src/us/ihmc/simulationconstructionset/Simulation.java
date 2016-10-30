@@ -519,24 +519,25 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
       for (Robot robot : robots)
       {
-         createCollisionShapesFromLinks(robot, collisionShapeFactory);
+         createCollisionShapesFromLinks(robot, collisionShapeFactory, robot.getRobotsYoVariableRegistry());
       }
 
       return collisionDetector;
    }
 
-   private static void createCollisionShapesFromLinks(Robot robot, CollisionShapeFactory collisionShapeFactory)
+   private static void createCollisionShapesFromLinks(Robot robot, CollisionShapeFactory collisionShapeFactory, YoVariableRegistry registry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       for (Joint rootJoint : rootJoints)
       {
-         createCollisionShapesFromLinksRecursively(rootJoint, collisionShapeFactory);
+         createCollisionShapesFromLinksRecursively(rootJoint, collisionShapeFactory, registry);
       }
    }
 
-   private static void createCollisionShapesFromLinksRecursively(Joint joint, CollisionShapeFactory collisionShapeFactory)
+   private static void createCollisionShapesFromLinksRecursively(Joint joint, CollisionShapeFactory collisionShapeFactory, YoVariableRegistry registry)
    {
       Link link = joint.getLink();
+      link.enableCollisions(registry);
       CollisionMeshDescription collisionMeshDescription = link.getCollisionMeshDescription();
       if (collisionMeshDescription != null)
       {
@@ -546,7 +547,7 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       ArrayList<Joint> childrenJoints = joint.getChildrenJoints();
       for (Joint childJoint : childrenJoints)
       {
-         createCollisionShapesFromLinksRecursively(childJoint, collisionShapeFactory);
+         createCollisionShapesFromLinksRecursively(childJoint, collisionShapeFactory, registry);
       }
    }
 

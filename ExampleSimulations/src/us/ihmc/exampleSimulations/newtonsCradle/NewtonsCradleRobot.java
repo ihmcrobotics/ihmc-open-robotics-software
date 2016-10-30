@@ -49,7 +49,6 @@ public class NewtonsCradleRobot extends Robot
          collisionMeshDescription.translate(0.0, 0.0, -stringLength);
          collisionMeshDescription.addSphere(ballRadius);
          link.setCollisionMesh(collisionMeshDescription);
-         link.enableCollisions(10,this.getRobotsYoVariableRegistry());
 
          pinJoint.setLink(link);
          this.addRootJoint(pinJoint);

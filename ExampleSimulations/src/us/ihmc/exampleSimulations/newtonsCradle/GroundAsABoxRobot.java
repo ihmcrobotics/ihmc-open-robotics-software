@@ -80,8 +80,6 @@ public class GroundAsABoxRobot extends Robot
       baseLink.setLinkGraphics(baseLinkGraphics);
       baseLink.setCollisionMesh(collisonMeshDescription);
 
-      baseLink.enableCollisions(100.0, this.getRobotsYoVariableRegistry());
-
       baseJoint.setLink(baseLink);
       this.addRootJoint(baseJoint);
       this.addStaticLink(baseLink);
