@@ -8,14 +8,11 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
-import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 
 public class PileOfRandomObjectsRobot
 {
@@ -79,35 +76,35 @@ public class PileOfRandomObjectsRobot
       }
    }
 
-   private void createBoardFrame(CollisionShapeFactory collisionShapeFactory, Random random)
+   private void createBoardFrame(Random random)
    {
       double boardZ = 0.14;
 
-      FloatingJoint board0 = createContainerBoard("board0", collisionShapeFactory, random);
+      FloatingJoint board0 = createContainerBoard("board0", random);
       board0.setPosition(0.51, 0.0, boardZ);
       board0.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
 
-      FloatingJoint board1 = createContainerBoard("board1", collisionShapeFactory, random);
+      FloatingJoint board1 = createContainerBoard("board1", random);
       board1.setPosition(0.0, 0.35, boardZ);
       board1.setYawPitchRoll(0.0, 0.0, 0.0);
 
-      FloatingJoint board2 = createContainerBoard("board2", collisionShapeFactory, random);
+      FloatingJoint board2 = createContainerBoard("board2", random);
       board2.setPosition(0.0, -0.35, boardZ);
       board2.setYawPitchRoll(0.0, 0.0, 0.0);
 
-      FloatingJoint board3 = createContainerBoard("board3", collisionShapeFactory, random);
+      FloatingJoint board3 = createContainerBoard("board3", random);
       board3.setPosition(-0.51, 0.0, boardZ);
       board3.setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
    }
 
-   private FloatingJoint createContainerBoard(String name, CollisionShapeFactory collisionShapeFactory, Random random)
+   private FloatingJoint createContainerBoard(String name, Random random)
    {
       Robot robot = new Robot(name);
 
       Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
       FloatingJoint floatingJoint = new FloatingJoint(name, offset, robot);
 
-      Link link = createContainerBoardLink(name, collisionShapeFactory, random, robot);
+      Link link = createContainerBoardLink(name, random, robot);
       floatingJoint.setLink(link);
       robot.addRootJoint(floatingJoint);
       this.robots.add(robot);
@@ -115,7 +112,7 @@ public class PileOfRandomObjectsRobot
       return floatingJoint;
    }
 
-   private Link createContainerBoardLink(String name, CollisionShapeFactory collisionShapeFactory, Random random, Robot robot)
+   private Link createContainerBoardLink(String name, Random random, Robot robot)
    {
       double objectWidth = 0.2;
       double objectLength = 0.8;
@@ -133,11 +130,10 @@ public class PileOfRandomObjectsRobot
       linkGraphics.addCube(objectLength, objectWidth, objectHeight, randomColor);
       link.setLinkGraphics(linkGraphics);
 
-      CollisionShapeDescription<?> shapeDesc = collisionShapeFactory.createBox(objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
+      CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
+      collisionMeshDescription.addCubeReferencedAtCenter(objectLength, objectWidth, objectHeight);
+      link.setCollisionMesh(collisionMeshDescription);
 
-      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-      shapeToLinkTransform.setTranslation(new Vector3d(0.0, 0.0, 0.0));
-      collisionShapeFactory.addShape(link, shapeToLinkTransform, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
       link.enableCollisions(2.0, robot.getRobotsYoVariableRegistry());
       return link;
    }
