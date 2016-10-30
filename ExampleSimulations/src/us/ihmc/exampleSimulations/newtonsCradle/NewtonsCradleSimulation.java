@@ -34,7 +34,7 @@ public class NewtonsCradleSimulation
       DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(4.0, 4.0, scs, 100);
 
       handler.addListener(visualize);
-      ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
+      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robot);
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
@@ -45,7 +45,6 @@ public class NewtonsCradleSimulation
       SpinningCoinRobot spinningCoinRobot = new SpinningCoinRobot();
       ArrayList<Robot> robots = spinningCoinRobot.getRobots();
 
-      ScsCollisionDetector collisionDetector = spinningCoinRobot.getCollisionDetector();
       Robot groundRobot = new GroundAsABoxRobot();
       robots.add(groundRobot);
 
@@ -65,6 +64,7 @@ public class NewtonsCradleSimulation
       DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(10.0, 10.0, scs, 100);
 
       handler.addListener(visualize);
+      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
@@ -75,22 +75,30 @@ public class NewtonsCradleSimulation
 
    public static void createStackOfBouncyBallsSimulation()
    {
+      ArrayList<Robot> robots = new ArrayList<>();
       StackOfBouncyBallsRobot robot = new StackOfBouncyBallsRobot();
+      robots.add(robot);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      Robot groundRobot = new GroundAsABoxRobot();
+      robots.add(groundRobot);
+
+      Robot[] robotArray = new Robot[robots.size()];
+      robots.toArray(robotArray);
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotArray);
       scs.setDT(0.0001, 100);
       scs.startOnAThread();
 
       //      CollisionHandler handler = new SpringCollisionHandler(2.0, 1.1, 1.1, robot.getRobotsYoVariableRegistry());
       //      CollisionHandler handler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
       //      CollisionHandler handler = new DefaultCollisionHandler(0.98, 0.1, robot);
-      CollisionHandler handler = new DefaultCollisionHandler(1.0, 0.0);
+      CollisionHandler handler = new DefaultCollisionHandler(0.9, 0.0);
       //      CollisionHandler handler = new DefaultCollisionHandler(0.3, 0.7, robot);
 
       DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, scs, 100);
 
       handler.addListener(visualize);
-      ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
+      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
@@ -98,9 +106,17 @@ public class NewtonsCradleSimulation
 
    public static void createRowOfDominosSimulation()
    {
+      ArrayList<Robot> robots = new ArrayList<>();
       RowOfDominosRobot robot = new RowOfDominosRobot();
+      robots.add(robot);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      Robot groundRobot = new GroundAsABoxRobot();
+      robots.add(groundRobot);
+
+      Robot[] robotArray = new Robot[robots.size()];
+      robots.toArray(robotArray);
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotArray);
       scs.setDT(0.0001, 100);
       scs.setGroundVisible(false);
       scs.startOnAThread();
@@ -114,8 +130,7 @@ public class NewtonsCradleSimulation
       //
       //      handler.addListener(visualize);
       DefaultCollisionVisualizer visualize = null;
-
-      ScsCollisionDetector collisionDetector = robot.getCollisionDetector();
+      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
@@ -127,7 +142,6 @@ public class NewtonsCradleSimulation
       StackOfBlocksRobot stackOfBlocksRobot = new StackOfBlocksRobot(numberOfBlocks);
       ArrayList<Robot> robots = stackOfBlocksRobot.getRobots();
 
-      ScsCollisionDetector collisionDetector = stackOfBlocksRobot.getCollisionDetector();
       Robot groundRobot = new GroundAsABoxRobot();
       robots.add(groundRobot);
 
@@ -152,6 +166,7 @@ public class NewtonsCradleSimulation
 //      DefaultCollisionVisualizer visualize = null;
       handler.addListener(visualize);
 
+      ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots);
       collisionDetector.initialize();
 
       scs.initPhysics(new ScsPhysics(null, collisionDetector, handler, visualize));
@@ -210,13 +225,28 @@ public class NewtonsCradleSimulation
    public static void main(String[] args)
    {
 //            createNewtonsCradleSimulation();
+//    createSpinningCoinSimulation();
 //            createStackOfBouncyBallsSimulation();
 //            createRowOfDominosSimulation();
       createPileOfRandomObjectsSimulation();
-//            createSpinningCoinSimulation();
 //      createStackOfBlocksSimulation();
    }
 
+   private static ScsCollisionDetector createCollisionShapesFromLinks(Robot robot)
+   {
+      ScsCollisionDetector collisionDetector;
+
+      //      collisionDetector = new GdxCollisionDetector(100.0);
+      collisionDetector = new SimpleCollisionDetector();
+      ((SimpleCollisionDetector) collisionDetector).setUseSimpleSpeedupMethod();
+
+      CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
+      collisionShapeFactory.setMargin(0.002);
+
+         createCollisionShapesFromLinks(robot, collisionShapeFactory);
+
+      return collisionDetector;
+   }
 
    private static ScsCollisionDetector createCollisionShapesFromLinks(ArrayList<Robot> robots)
    {
