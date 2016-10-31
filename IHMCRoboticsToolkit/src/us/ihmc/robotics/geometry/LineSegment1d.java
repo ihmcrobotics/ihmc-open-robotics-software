@@ -9,8 +9,8 @@ import us.ihmc.robotics.MathTools;
 
 public class LineSegment1d
 {
-   private double endpoint1;
-   private double endpoint2;
+   private double endpoint1 = Double.NaN;
+   private double endpoint2 = Double.NaN;
    private boolean positiveDirection;
 
    public LineSegment1d()
@@ -127,7 +127,7 @@ public class LineSegment1d
       if (positiveDirection)
          return point < endpoint1;
       else
-         return point > endpoint2;
+         return point > endpoint1;
    }
 
    public boolean isAfter(double point)
@@ -135,7 +135,7 @@ public class LineSegment1d
       if (positiveDirection)
          return point > endpoint2;
       else
-         return point < endpoint1;
+         return point < endpoint2;
    }
 
    public void set(double firstEndpoint, double secondEndpoint)
@@ -177,7 +177,7 @@ public class LineSegment1d
 
    public void setMaxPoint(double newMaxPoint)
    {
-      if (newMaxPoint >= getMinPoint())
+      if (newMaxPoint <= getMinPoint())
          throw new RuntimeException("Unexpected newMaxPoint: " + newMaxPoint + ", expected it to be greater than the current min point: " + getMinPoint());
       if (positiveDirection)
          endpoint2 = newMaxPoint;
