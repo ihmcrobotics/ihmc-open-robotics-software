@@ -52,6 +52,7 @@ dependencies {
 	compile ihmc.getProjectDependency(":CommonWalkingControlModules")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
+	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")

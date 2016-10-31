@@ -1,5 +1,7 @@
 package us.ihmc.simulationconstructionset.robotController;
 
+import us.ihmc.robotics.robotController.RobotController;
+
 public class ModularRobotController extends AbstractModularRobotController implements RobotController
 {
    public ModularRobotController(String name)

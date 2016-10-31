@@ -3,6 +3,11 @@ package us.ihmc.simulationconstructionset.robotController;
 import java.util.ArrayList;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.robotController.OutputProcessor;
+import us.ihmc.robotics.robotController.RawOutputWriter;
+import us.ihmc.robotics.robotController.RawSensorReader;
+import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.robotics.robotController.SensorProcessor;
 
 public abstract class AbstractModularRobotController implements RobotController
 {
