@@ -10,11 +10,11 @@ import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
+import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
-import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
-import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.wholeBodyController.diagnostics.logging.JointForceTrackingDelayLogRecord;
 import us.ihmc.wholeBodyController.diagnostics.logging.ProcessedJointPositionDelayLogRecord;
 import us.ihmc.wholeBodyController.diagnostics.logging.ProcessedJointVelocityDelayLogRecord;

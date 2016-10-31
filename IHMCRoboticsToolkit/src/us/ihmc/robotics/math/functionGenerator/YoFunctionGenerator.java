@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.math.functionGenerator;
+package us.ihmc.robotics.math.functionGenerator;
 
 import java.util.ArrayList;
 import java.util.Random;

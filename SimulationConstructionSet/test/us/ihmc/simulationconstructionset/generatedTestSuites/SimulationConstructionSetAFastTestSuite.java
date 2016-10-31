@@ -68,7 +68,7 @@ import us.ihmc.tools.continuousIntegration.IntegrationCategory;
    us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoardTest.class,
    us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardUtilsTest.class,
    us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModelTest.class,
-   us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorTest.class,
+   us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorTest.class,
    us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifierTest.class,
    us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparerTest.class,
    us.ihmc.simulationconstructionset.util.simulationRunner.VariablesThatShouldMatchListTest.class,
