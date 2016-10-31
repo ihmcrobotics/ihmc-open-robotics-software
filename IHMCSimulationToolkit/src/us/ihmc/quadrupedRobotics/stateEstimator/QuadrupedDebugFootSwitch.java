@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
+package us.ihmc.quadrupedRobotics.stateEstimator;
 
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

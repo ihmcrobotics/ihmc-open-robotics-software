@@ -10,7 +10,7 @@ public class LLAQuadrupedSDFViewer
    public static void main(String[] args)
    {
       LLAQuadrupedModelFactory modelFactory = new LLAQuadrupedModelFactory();
-      FloatingRootJointRobot sdfRobot = modelFactory.createSdfRobot();
+      FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
       sdfRobot.setPositionInWorld(new Vector3d(0.0, 0.0, 0.6));
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
       scs.startOnAThread();

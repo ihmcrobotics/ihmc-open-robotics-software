@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.controller;
+package us.ihmc.quadrupedRobotics;
 
 import javax.vecmath.Vector3d;
 
