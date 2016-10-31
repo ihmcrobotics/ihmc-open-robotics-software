@@ -13,7 +13,7 @@ import us.ihmc.tools.testing.MutationTestingTools;
 public class RigidBodyTransformGeneratorTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testSimpleTransformGeneration()
    {
       RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();
@@ -70,7 +70,7 @@ public class RigidBodyTransformGeneratorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testTranslateThenRotateTransformGeneration()
    {
       RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();
@@ -85,7 +85,7 @@ public class RigidBodyTransformGeneratorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testMultiStepTransformGeneration()
    {
       RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();
