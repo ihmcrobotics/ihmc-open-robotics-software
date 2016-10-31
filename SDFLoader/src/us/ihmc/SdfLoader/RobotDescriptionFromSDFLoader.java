@@ -31,6 +31,9 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.robotics.lidar.SimulatedLIDARSensorLimitationParameters;
+import us.ihmc.robotics.lidar.SimulatedLIDARSensorNoiseParameters;
+import us.ihmc.robotics.lidar.SimulatedLIDARSensorUpdateParameters;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
@@ -45,9 +48,6 @@ import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorLimitationParameters;
-import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorNoiseParameters;
-import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedLIDARSensorUpdateParameters;
 
 public class RobotDescriptionFromSDFLoader
 {
