@@ -9,15 +9,12 @@ import us.ihmc.robotics.MathTools;
 
 public class LineSegment1d
 {
-   private double endpoint1;
-   private double endpoint2;
+   private double endpoint1 = Double.NaN;
+   private double endpoint2 = Double.NaN;
    private boolean positiveDirection;
 
    public LineSegment1d()
    {
-      //TODO maybe implement something like this?
-      /*endpoints[0] = new TransformablePoint2d(Double.MIN_VALUE, Double.MIN_VALUE);
-      endpoints[1] = new TransformablePoint2d(Double.MAX_VALUE, Double.MAX_VALUE);*/
    }
 
    public LineSegment1d(double firstEndpoint, double secondEndpoint)
@@ -108,7 +105,7 @@ public class LineSegment1d
    public double distance(double point)
    {
       if (isBetweenEndpointsInclusive(point))
-         return - Math.min(point - getMinPoint(), getMaxPoint() - point);
+         return -Math.min(point - getMinPoint(), getMaxPoint() - point);
       else if (point < getMinPoint())
          return getMinPoint() - point;
       else
@@ -130,7 +127,7 @@ public class LineSegment1d
       if (positiveDirection)
          return point < endpoint1;
       else
-         return point > endpoint1;  //TODO
+         return point > endpoint1;
    }
 
    public boolean isAfter(double point)
@@ -138,7 +135,7 @@ public class LineSegment1d
       if (positiveDirection)
          return point > endpoint2;
       else
-         return point < endpoint2; //TODO
+         return point < endpoint2;
    }
 
    public void set(double firstEndpoint, double secondEndpoint)
@@ -180,7 +177,7 @@ public class LineSegment1d
 
    public void setMaxPoint(double newMaxPoint)
    {
-      if (newMaxPoint <= getMinPoint()) //TODO
+      if (newMaxPoint <= getMinPoint())
          throw new RuntimeException("Unexpected newMaxPoint: " + newMaxPoint + ", expected it to be greater than the current min point: " + getMinPoint());
       if (positiveDirection)
          endpoint2 = newMaxPoint;
