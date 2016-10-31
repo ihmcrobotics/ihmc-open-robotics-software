@@ -6,38 +6,24 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.simulationconstructionset.FloatingJoint;
 
-public class SixDoFState extends JointState<FloatingJoint>
+public class SixDoFState extends JointState
 {
    public static final int numberOfStateVariables = 13;
    
    private final Quat4d rotation = new Quat4d();
-   private final Matrix3d rotationMatrix = new Matrix3d();
    
    private final Vector3d translation = new Vector3d();
    private final Twist twist = new Twist();
    
-   private final Vector3d tempVector = new Vector3d();
 
    public SixDoFState(String name)
    {
-      super(name);
+      super(name, JointType.SiXDoFJoint);
    }
 
-   public void get(FloatingJoint joint)
-   {
-      rotationMatrix.set(rotation);
-      joint.setRotation(rotationMatrix);
-      joint.setPosition(translation);
-
-      twist.getAngularPart(tempVector);
-      joint.setAngularVelocityInBody(tempVector);
-      
-      twist.getLinearPart(tempVector);
-      joint.setVelocity(tempVector);
-   }
 
    public void get(double[] array)
    {
@@ -77,5 +63,28 @@ public class SixDoFState extends JointState<FloatingJoint>
    public int getNumberOfStateVariables()
    {
       return numberOfStateVariables;
+   }
+
+
+   public void getRotation(Matrix3d rotationMatrix)
+   {
+      rotationMatrix.set(rotation);
+   }
+
+
+   public void getTranslation(Vector3d tempVector)
+   {
+      tempVector.set(translation);
+   }
+
+
+   public void getTwistAngularPart(Vector3d tempVector)
+   {
+      twist.getAngularPart(tempVector);
+   }
+   
+   public void getTwistLinearPart(Vector3d tempVector)
+   {
+      twist.getLinearPart(tempVector);
    }
 }

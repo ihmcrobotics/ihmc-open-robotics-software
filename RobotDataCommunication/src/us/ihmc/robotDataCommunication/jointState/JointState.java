@@ -4,15 +4,17 @@ import java.nio.LongBuffer;
 import java.util.List;
 
 import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
-import us.ihmc.simulationconstructionset.Joint;
 
-public abstract class JointState<U extends Joint>
+public abstract class JointState
 {
+   
+   private final JointType type;
    private final String name;
 
-   public JointState(String name)
+   public JointState(String name, JointType type)
    {
       this.name = name;
+      this.type  = type;
    }
 
    public String getName()
@@ -20,9 +22,12 @@ public abstract class JointState<U extends Joint>
       return name;
    }
 
+   public JointType getType()
+   {
+      return type;
+   }
+   
    public abstract void update(LongBuffer buffer);
-
-   public abstract void get(U joint);
 
    public abstract void get(double[] array);
    
@@ -33,7 +38,7 @@ public abstract class JointState<U extends Joint>
       return createJointState(null, type).getNumberOfStateVariables();
    }
    
-   public static JointState<?> createJointState(String name, JointType type)
+   public static JointState createJointState(String name, JointType type)
    {
       switch (type)
       {
@@ -46,7 +51,7 @@ public abstract class JointState<U extends Joint>
       }
    }
    
-   public static int getNumberOfJointStates(List<JointState<? extends Joint>> jointStates)
+   public static int getNumberOfJointStates(List<JointState> jointStates)
    {
       int numberOfJointStates = 0;
       for(int i = 0; i < jointStates.size(); i++)

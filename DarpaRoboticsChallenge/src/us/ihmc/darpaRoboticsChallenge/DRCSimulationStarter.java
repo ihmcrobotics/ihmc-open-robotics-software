@@ -33,12 +33,12 @@ import us.ihmc.darpaRoboticsChallenge.scriptEngine.ScriptBasedControllerCommandG
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCRenderedSceneVideoHandler;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.humanoidBehaviors.BehaviorVisualizer;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotDataCommunication.logger.BehaviorVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;

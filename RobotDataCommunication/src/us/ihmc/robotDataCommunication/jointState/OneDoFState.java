@@ -2,9 +2,9 @@ package us.ihmc.robotDataCommunication.jointState;
 
 import java.nio.LongBuffer;
 
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.robotDataCommunication.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
 
-public class OneDoFState extends JointState<OneDegreeOfFreedomJoint>
+public class OneDoFState extends JointState
 {
    public static final int numberOfStateVariables = 2;
    
@@ -13,7 +13,7 @@ public class OneDoFState extends JointState<OneDegreeOfFreedomJoint>
    
    public OneDoFState(String name)
    {
-      super(name);
+      super(name, JointType.OneDoFJoint);
    }
 
    @Override
@@ -22,20 +22,17 @@ public class OneDoFState extends JointState<OneDegreeOfFreedomJoint>
       q = Double.longBitsToDouble(buffer.get());
       qd = Double.longBitsToDouble(buffer.get());
    }
-
-   @Override
-   public void get(OneDegreeOfFreedomJoint joint)
+   
+   public double getQ()
    {
-      if(!Double.isNaN(q))
-      {
-         joint.setQ(q);
-      }
-      if(!Double.isNaN(qd))
-      {
-         joint.setQd(qd);
-      }
+      return q;
    }
-
+   
+   public double getQd()
+   {
+      return qd;
+   }
+   
    @Override
    public void get(double[] array)
    {

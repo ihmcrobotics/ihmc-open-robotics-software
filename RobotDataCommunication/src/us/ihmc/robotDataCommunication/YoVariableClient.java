@@ -41,7 +41,7 @@ public class YoVariableClient implements LogPacketHandler
    private final LogControlClient logControlClient;
    private final YoVariableHandshakeParser handshakeParser;
    private final List<YoVariable<?>> yoVariablesList;
-   private final List<JointState<?>> jointStates;
+   private final List<JointState> jointStates;
    private final int displayOneInNPackets;
    
    private ByteBuffer decompressed;
