@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -14,13 +13,11 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.*;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.tools.io.printing.PrintTools;
 
@@ -91,11 +88,10 @@ public class ICPOptimizationController
 
    private final DoubleYoVariable forwardFootstepWeight = new DoubleYoVariable(yoNamePrefix + "ForwardFootstepWeight", registry);
    private final DoubleYoVariable lateralFootstepWeight = new DoubleYoVariable(yoNamePrefix + "LateralFootstepWeight", registry);
-   private final YoFramePoint2d yoFootstepWeights = new YoFramePoint2d(yoNamePrefix + "EquivalentFootstepWeights", worldFrame, registry);
+   private final YoFramePoint2d scaledFootstepWeights = new YoFramePoint2d(yoNamePrefix + "ScaledFootstepWeights", worldFrame, registry);
 
    private final DoubleYoVariable feedbackForwardWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackForwardWeight", registry);
    private final DoubleYoVariable feedbackLateralWeight = new DoubleYoVariable(yoNamePrefix + "FeedbackLateralWeight", registry);
-   private final YoFramePoint2d yoFeedbackWeights = new YoFramePoint2d(yoNamePrefix + "EquivalentFeedbackWeights", worldFrame, registry);
    private final YoFramePoint2d scaledFeedbackWeight = new YoFramePoint2d(yoNamePrefix + "ScaledFeedbackWeight", worldFrame, registry);
 
    private final DoubleYoVariable footstepRegularizationWeight = new DoubleYoVariable(yoNamePrefix + "FootstepRegularizationWeight", registry);
@@ -115,8 +111,6 @@ public class ICPOptimizationController
 
    private final ICPOptimizationSolver solver;
    private final FootstepRecursionMultiplierCalculator footstepRecursionMultiplierCalculator;
-
-   private final ICPOptimizationParameters icpOptimizationParameters;
 
    private final ICPOptimizationCMPConstraintHandler cmpConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
@@ -146,7 +140,6 @@ public class ICPOptimizationController
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.icpOptimizationParameters = icpOptimizationParameters;
       this.contactableFeet = contactableFeet;
       this.controlDT = controlDT;
 
@@ -647,10 +640,10 @@ public class ICPOptimizationController
    private void submitFootstepConditionsToSolver(int footstepIndex)
    {
       getTransformedWeights(footstepWeights, forwardFootstepWeight.getDoubleValue(), lateralFootstepWeight.getDoubleValue());
-      yoFootstepWeights.set(footstepWeights);
+      scaledFootstepWeights.set(footstepWeights);
 
       if (localScaleUpcomingStepWeights)
-         footstepWeights.scale(1.0 / (footstepIndex + 1));
+         scaledFootstepWeights.scale(1.0 / (footstepIndex + 1));
 
       double footstepRecursionMultiplier;
       if (localUseTwoCMPs)
@@ -666,7 +659,7 @@ public class ICPOptimizationController
       }
       footstepRecursionMultiplier *= footstepRecursionMultiplierCalculator.getCurrentStateProjectionMultiplier();
 
-      solver.setFootstepAdjustmentConditions(footstepIndex, footstepRecursionMultiplier, footstepWeights.getX(), footstepWeights.getY(),
+      solver.setFootstepAdjustmentConditions(footstepIndex, footstepRecursionMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(),
             upcomingFootstepLocations.get(footstepIndex).getFrameTuple2d());
    }
 
@@ -721,9 +714,8 @@ public class ICPOptimizationController
    private void scaleFeedbackWeightWithGain()
    {
       getTransformedWeights(feedbackWeights, feedbackForwardWeight.getDoubleValue(), feedbackLateralWeight.getDoubleValue());
-      yoFeedbackWeights.set(feedbackWeights);
-
       scaledFeedbackWeight.set(feedbackWeights);
+
       if (scaleFeedbackWeightWithGain.getBooleanValue())
       {
          getTransformedFeedbackGains(feedbackGains);
