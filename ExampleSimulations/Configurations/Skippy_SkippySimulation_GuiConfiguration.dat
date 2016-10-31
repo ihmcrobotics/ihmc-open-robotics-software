@@ -93,14 +93,14 @@
 
 <Extra Panels>
 <Main Viewport>
-Plotter,Plotter Legend,
+Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>7.356587427207448</Camera X>
- <Camera Y>5.992841988913859</Camera Y>
- <Camera Z>4.053471633264499</Camera Z>
+ <Camera X>-1.679078024714068</Camera X>
+ <Camera Y>-9.93133294025152</Camera Y>
+ <Camera Z>1.3136687024083185</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
