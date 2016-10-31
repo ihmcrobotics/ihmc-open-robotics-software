@@ -49,8 +49,6 @@ dependencies {
     compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
 
     compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
-    compile ihmc.getProjectDependency(":SimulationConstructionSet")
-    compile ihmc.getProjectDependency(":Graphics3DAdapter")
     compile ihmc.getProjectDependency(":CommonWalkingControlModules")
     compile ihmc.getProjectDependency(":ConvexOptimizationAdapter")
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
@@ -65,6 +63,7 @@ dependencies {
     testCompile group: 'com.google.caliper', name: 'caliper', version: '1.0-beta-2'
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
     
+    testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
     testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")
     testCompile ihmc.getProjectTestDependency(":CommonWalkingControlModules")
 }
