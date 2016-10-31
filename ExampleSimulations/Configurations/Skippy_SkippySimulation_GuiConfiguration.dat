@@ -13,9 +13,33 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.Skippy.SkippyController.tauHipAngle</Variables>
+		<Variables>root.Skippy.SkippyController.tauHipForAngleTracking</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Skippy.tau_hip</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.Skippy.SkippyController.tauHipAngle</Variables>
+		<GraphConfiguration>
+			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -43,7 +67,7 @@
 	<Graph>
 		<Variables>root.Skippy.SkippyController.desiredCMPFromICPX,root.Skippy.SkippyController.desiredCMPFromICPY</Variables>
 		<GraphConfiguration>
-			<Name>config3</Name>
+			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -55,7 +79,7 @@
 	<Graph>
 		<Variables>root.Skippy.SkippyController.actualICPY</Variables>
 		<GraphConfiguration>
-			<Name>config4</Name>
+			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -67,7 +91,7 @@
 	<Graph>
 		<Variables>root.Skippy.SkippyController.actualICPX</Variables>
 		<GraphConfiguration>
-			<Name>config5</Name>
+			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -79,7 +103,7 @@
 	<Graph>
 		<Variables>root.Skippy.SkippyController.tauOnHipJointAxis</Variables>
 		<GraphConfiguration>
-			<Name>config6</Name>
+			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -98,9 +122,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-1.679078024714068</Camera X>
- <Camera Y>-9.93133294025152</Camera Y>
- <Camera Z>1.3136687024083185</Camera Z>
+ <Camera X>-10.079224948151342</Camera X>
+ <Camera Y>-0.46285582851214363</Camera Y>
+ <Camera Z>0.9936863301854862</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
