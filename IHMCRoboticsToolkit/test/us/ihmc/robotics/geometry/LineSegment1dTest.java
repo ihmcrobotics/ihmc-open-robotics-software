@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.robotics.geometry.LineSegment1d;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.MutationTestingTools;
 
 import org.junit.Test;
@@ -14,7 +15,8 @@ import static org.junit.Assert.*;
 
 public class LineSegment1dTest
 {
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void lineBoundariesTest()
    {
       double firstPoint = 16.7;
@@ -52,7 +54,8 @@ public class LineSegment1dTest
       assertFalse(pointLine.isBetweenEndpoints(secondPoint, 0.0));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void lineOverlapsTest()
    {
       double firstPoint = -10;
@@ -88,7 +91,8 @@ public class LineSegment1dTest
       assertTrue(mainLine.isBetweenEndpointsExclusive(new LineSegment1d(-5, 5)));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testDistance()
    {
       double firstPoint = -10;
@@ -122,7 +126,8 @@ public class LineSegment1dTest
       assertEquals(mainLine.length(), 20, 0.001);
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testExtension()
    {
       double firstPoint = -10;
@@ -143,7 +148,8 @@ public class LineSegment1dTest
 
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testSetters()
    {
       double p1 = 15;
@@ -189,7 +195,8 @@ public class LineSegment1dTest
       assertTrue(fail);
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void toUpperDImensionsTest()
    {
       Point2d point2d = new Point2d(1,1);
