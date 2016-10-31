@@ -296,12 +296,9 @@ public class SkippyRobot extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -LEG_LENGTH);
       linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.White());//Glass(0.75));//
-      /*
-       * Joint
-       */
       linkGraphics.rotate(Math.PI/2,Axis.Y);
       linkGraphics.translate(-LEG_LENGTH+LEG_CUBE_LENGTH/3, 0.0, -LEG_CUBE_LENGTH);
-      linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.LightSteelBlue());
+      linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.Red());
       // associate the linkGraphics object with the link object
       leg.setLinkGraphics(linkGraphics);
 
@@ -310,7 +307,6 @@ public class SkippyRobot extends Robot
          leg.addEllipsoidFromMassProperties(YoAppearance.Gold());
       }
 
-      
       return leg;
    }
 
@@ -370,9 +366,9 @@ public class SkippyRobot extends Robot
       /*
        * Joint
        */
-      linkGraphics.rotate(Math.PI/2,Axis.Y);
-      linkGraphics.translate(-SHOULDER_LENGTH/2, 0.0, -LEG_CUBE_LENGTH);
-      linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.Gold());
+////      linkGraphics.rotate(Math.PI/2,Axis.Y);
+//    linkGraphics.translate(-SHOULDER_LENGTH, 0.0, -LEG_CUBE_LENGTH);
+//      linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, YoAppearance.White());
 
       
       arms.setLinkGraphics(linkGraphics);
