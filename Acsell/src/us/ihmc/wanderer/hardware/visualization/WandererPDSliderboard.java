@@ -3,8 +3,8 @@ package us.ihmc.wanderer.hardware.visualization;
 import java.util.EnumMap;
 
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.robotDataCommunication.YoVariableClient;
-import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
+import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

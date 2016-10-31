@@ -1,0 +1,8 @@
+option java_outer_classname = "YoVariableChangedProto";
+option java_package = "us.ihmc.robotDataLogger.generated";
+
+message YoVariableChanged
+{
+	required uint32 variableID = 1;
+	required double value = 2;
+}

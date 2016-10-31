@@ -2,8 +2,10 @@ package us.ihmc.robotDataCommunication;
 
 import static org.junit.Assert.assertEquals;
 
-import us.ihmc.robotDataCommunication.logger.LogSettings;
-import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
+import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;

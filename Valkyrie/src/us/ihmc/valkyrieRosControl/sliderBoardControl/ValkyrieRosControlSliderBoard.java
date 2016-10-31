@@ -9,7 +9,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
-import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

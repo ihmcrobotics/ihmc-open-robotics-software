@@ -70,7 +70,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParamet
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
-import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;

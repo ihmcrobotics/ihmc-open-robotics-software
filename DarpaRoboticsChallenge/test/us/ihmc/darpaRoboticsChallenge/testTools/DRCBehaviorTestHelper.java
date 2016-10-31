@@ -38,7 +38,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStat
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
