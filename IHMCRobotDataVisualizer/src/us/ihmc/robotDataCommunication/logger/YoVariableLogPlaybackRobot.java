@@ -40,7 +40,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
    private final ByteBuffer compressedBuffer;
    private int index = 0;
 
-   private final List<JointState<? extends Joint>> jointStates;
+   private final List<JointState> jointStates;
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<JointUpdater>();
 
    private final ArrayList<YoVariableLogPlaybackListener> listeners = new ArrayList<>();
@@ -57,7 +57,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
    private int readEveryNTicks = 1;
 
    public YoVariableLogPlaybackRobot(File selectedFile, RobotDescription robotDescription,
-         List<JointState<? extends Joint>> jointStates, List<YoVariable<?>> variables, LogPropertiesReader logProperties, SimulationConstructionSet scs)
+         List<JointState> jointStates, List<YoVariable<?>> variables, LogPropertiesReader logProperties, SimulationConstructionSet scs)
          throws IOException
    {
       super(robotDescription);

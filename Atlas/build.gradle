@@ -87,6 +87,7 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRobotDescription")
     compile ihmc.getProjectDependency(":IHMCRobotModels")
     compile ihmc.getProjectDependency(":IHMCSimulationToolkit")
+    compile ihmc.getProjectDependency(":IHMCRobotDataVisualizer")
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
     testCompile ihmc.getProjectTestDependency(":CommonWalkingControlModules")

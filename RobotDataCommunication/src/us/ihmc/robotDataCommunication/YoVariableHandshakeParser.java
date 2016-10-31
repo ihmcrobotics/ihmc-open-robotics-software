@@ -26,7 +26,6 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic.RemoteGraphicType;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
@@ -41,7 +40,7 @@ public class YoVariableHandshakeParser
    private final String registryPrefix;
    private final boolean registerYoVariables;
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   private final ArrayList<JointState<? extends Joint>> jointStates = new ArrayList<>();
+   private final ArrayList<JointState> jointStates = new ArrayList<>();
 
    private double dt;
    private int bufferSize;
@@ -274,7 +273,7 @@ public class YoVariableHandshakeParser
       return registries.get(0);
    }
 
-   public List<JointState<? extends Joint>> getJointStates()
+   public List<JointState> getJointStates()
    {
       return Collections.unmodifiableList(jointStates);
    }

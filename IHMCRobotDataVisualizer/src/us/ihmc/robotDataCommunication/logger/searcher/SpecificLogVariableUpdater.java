@@ -19,7 +19,6 @@ import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.tools.compression.SnappyUtils;
 
 public class SpecificLogVariableUpdater
@@ -46,7 +45,7 @@ public class SpecificLogVariableUpdater
    private final HashMap<YoVariable<?>, AtomicInteger> indexes = new HashMap<>();
 
    public SpecificLogVariableUpdater(File selectedFile, RobotDescription robotDescription,
-         List<JointState<? extends Joint>> jointStates, List<YoVariable<?>> variables, LogPropertiesReader logProperties, YoVariable<?>... variablesToUpdate )
+         List<JointState> jointStates, List<YoVariable<?>> variables, LogPropertiesReader logProperties, YoVariable<?>... variablesToUpdate )
          throws IOException
    {
       this.variables = variables;

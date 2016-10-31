@@ -24,7 +24,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.ExitActionListener;
-import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -205,7 +205,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       {
          SDFModelLoader modelLoader = new SDFModelLoader();
          modelLoader.load(handshake.modelName, handshake.model, handshake.resourceDirectories, handshake.resourceZip, null);
-         robot = modelLoader.createRobot();
+         robot = new FloatingRootJointRobot(modelLoader.createRobot());
       }
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
@@ -251,7 +251,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
 
-      List<JointState<? extends Joint>> jointStates = handshakeParser.getJointStates();
+      List<JointState> jointStates = handshakeParser.getJointStates();
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = handshakeParser.getDynamicGraphicObjectsListRegistry();

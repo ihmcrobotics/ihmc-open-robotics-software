@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors;
+package us.ihmc.robotDataCommunication.logger;
 
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
