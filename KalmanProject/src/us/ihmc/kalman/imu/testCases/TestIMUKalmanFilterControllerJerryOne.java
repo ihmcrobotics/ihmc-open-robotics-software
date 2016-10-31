@@ -13,7 +13,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.robotics.robotController.RobotController;
 
 public class TestIMUKalmanFilterControllerJerryOne implements RobotController
 {

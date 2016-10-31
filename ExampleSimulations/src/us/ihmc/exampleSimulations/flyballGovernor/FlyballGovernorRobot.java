@@ -7,12 +7,12 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.CylinderJoint;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 @SuppressWarnings("unused")
 public class FlyballGovernorRobot extends Robot implements RobotController

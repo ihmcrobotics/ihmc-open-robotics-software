@@ -5,11 +5,11 @@ import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class RobotFreezeFramer implements RobotController
 {

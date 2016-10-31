@@ -15,7 +15,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.tools.FormattingTools;
 
 /**

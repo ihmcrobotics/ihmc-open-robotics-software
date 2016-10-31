@@ -4,14 +4,14 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.sensorProcessing.sensors.ProcessedIMUSensorsReadOnlyInterface;
-import us.ihmc.simulationconstructionset.processedSensors.ProcessedIMUSensorsWriteOnlyInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.sensors.ProcessedIMUSensorsWriteOnlyInterface;
+import us.ihmc.sensorProcessing.sensors.ProcessedIMUSensorsReadOnlyInterface;
 
 public class ProcessedSensorsReadWrite implements ProcessedIMUSensorsReadOnlyInterface, ProcessedIMUSensorsWriteOnlyInterface
 {

@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.output;
 
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
+import us.ihmc.robotics.robotController.OutputProcessor;
 
 import java.util.ArrayList;
 

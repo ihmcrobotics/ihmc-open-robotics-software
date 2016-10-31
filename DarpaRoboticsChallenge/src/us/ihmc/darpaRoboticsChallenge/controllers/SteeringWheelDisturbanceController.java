@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.controllers;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.environments.ContactableToroidRobot;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;

@@ -12,11 +12,11 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class DRCFlatGroundWalkingTrack

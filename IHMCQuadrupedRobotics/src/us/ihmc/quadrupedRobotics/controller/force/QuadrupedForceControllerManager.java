@@ -42,11 +42,11 @@ import us.ihmc.quadrupedRobotics.state.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.robotController.OutputProcessor;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal finite state machine.

@@ -17,6 +17,8 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotController.OutputProcessor;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -35,8 +37,6 @@ import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameV
 import us.ihmc.simulationconstructionset.JointAxisVisualizer;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;

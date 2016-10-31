@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.imu;
 
-import us.ihmc.simulationconstructionset.robotController.SensorProcessor;
+import us.ihmc.robotics.robotController.SensorProcessor;
 
 public interface IMUSensorProcessor extends SensorProcessor
 {

@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.gui.Debug;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 /**
  * <p>Title: SimulationConstructionSet</p>
