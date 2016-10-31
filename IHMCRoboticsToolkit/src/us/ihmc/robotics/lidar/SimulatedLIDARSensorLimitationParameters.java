@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.simulatedSensors;
+package us.ihmc.robotics.lidar;
 
 public class SimulatedLIDARSensorLimitationParameters
 {

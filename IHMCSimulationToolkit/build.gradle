@@ -66,6 +66,7 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
     compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
     compile ihmc.getProjectDependency(":IHMCWholeBodyController")
+    compile ihmc.getProjectDependency(":SDFLoader")
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
     testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 }

@@ -25,6 +25,7 @@ import us.ihmc.simulationconstructionset.ViewportPanelConfiguration;
 import us.ihmc.simulationconstructionset.commands.RunCommandsExecutor;
 import us.ihmc.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.config.CameraSelector;
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class ViewportPanel extends JPanel implements CameraSelector, ActiveCameraHolder, ActiveCanvas3DHolder
 {
