@@ -14,7 +14,6 @@ import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 ({
    us.ihmc.darpaRoboticsChallenge.DRCConfigParametersTest.class,
    us.ihmc.darpaRoboticsChallenge.frictionCompensation.JointFrictionModelsHolderTest.class,
-   us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.WheelRotationEstimatorTest.class,
    us.ihmc.darpaRoboticsChallenge.odometry.IcpCloud3DTest.class,
    us.ihmc.darpaRoboticsChallenge.ros.IHMCROSTranslationRuntimeToolsTest.class,
    us.ihmc.darpaRoboticsChallenge.stateEstimationEndToEndTests.PelvisPoseHistoryCorrectionUsingSimpleRobotTest.class
