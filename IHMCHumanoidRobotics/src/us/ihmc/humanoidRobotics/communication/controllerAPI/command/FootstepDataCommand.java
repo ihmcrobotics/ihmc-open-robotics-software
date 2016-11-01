@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -14,7 +13,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
-public class FootstepDataControllerCommand implements Command<FootstepDataControllerCommand, FootstepDataMessage>
+public class FootstepDataCommand implements Command<FootstepDataCommand, FootstepDataMessage>
 {
    private RobotSide robotSide;
    private FootstepOrigin origin;
@@ -24,7 +23,7 @@ public class FootstepDataControllerCommand implements Command<FootstepDataContro
    private final Quat4d orientation = new Quat4d();
    private final RecyclingArrayList<Point2d> predictedContactPoints = new RecyclingArrayList<>(4, Point2d.class);
 
-   public FootstepDataControllerCommand()
+   public FootstepDataCommand()
    {
       clear();
    }
@@ -60,7 +59,7 @@ public class FootstepDataControllerCommand implements Command<FootstepDataContro
    }
 
    @Override
-   public void set(FootstepDataControllerCommand other)
+   public void set(FootstepDataCommand other)
    {
       robotSide = other.robotSide;
       origin = other.origin;
