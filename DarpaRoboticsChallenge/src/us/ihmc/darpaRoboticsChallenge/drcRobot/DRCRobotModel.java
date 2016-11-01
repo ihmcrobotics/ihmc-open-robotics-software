@@ -7,7 +7,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import com.jme3.math.Transform;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.darpaRoboticsChallenge.footstepGenerator.HeightCalculatorParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
@@ -95,8 +94,6 @@ public interface DRCRobotModel extends SimulatedWholeBodyControllerParameters
    public abstract LogSettings getLogSettings();
 
    public abstract LogModelProvider getLogModelProvider();
-
-   public abstract HeightCalculatorParameters getHeightCalculatorParameters();
 
    public abstract String getSimpleRobotName();
 
