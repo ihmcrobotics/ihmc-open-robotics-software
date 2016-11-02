@@ -50,7 +50,6 @@ dependencies {
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
-   compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
    compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.12'
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
    compile group: 'us.ihmc', name: 'IHMCJavaDecklinkCapture', version: '0.1.7'
@@ -65,6 +64,7 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
     compile ihmc.getProjectDependency(":IHMCRobotDescription")
     compile ihmc.getProjectDependency(":IHMCRobotModels")
+    compile ihmc.getProjectDependency(":Plotting")
 }
 
 mainClassName = hasProperty('mainClass') ? mainClass : "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher"
