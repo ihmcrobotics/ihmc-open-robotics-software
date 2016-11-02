@@ -59,6 +59,7 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 	compile ihmc.getProjectDependency(":IHMCRobotModels")
+	compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
 //	testCompile ihmc.getProjectDependency(":IHMCUnitTesting") // this class has no unit tests. Once it does, put this back.
 }
 
