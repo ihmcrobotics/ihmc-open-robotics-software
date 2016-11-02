@@ -229,6 +229,7 @@ public class SkippyRobot extends Robot
          Link leg = createLegSkippy();
          hipJoint.setLink(leg);
 
+
          GroundContactPoint footContactPoint = new GroundContactPoint("gc_foot", new Vector3d(0.0, 0.0, -LEG_LENGTH), this);
          hipJoint.addGroundContactPoint(footContactPoint);
 
@@ -294,8 +295,13 @@ public class SkippyRobot extends Robot
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -LEG_LENGTH);
-      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Glass(0.75));//White());//
-
+      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.White());//Glass(0.75));//
+      /*
+       * Joint
+       */
+      linkGraphics.rotate(Math.PI/2,Axis.Y);
+      linkGraphics.translate(-LEG_LENGTH+LEG_CUBE_LENGTH/3, 0.0, -LEG_CUBE_LENGTH);
+      linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.LightSteelBlue());
       // associate the linkGraphics object with the link object
       leg.setLinkGraphics(linkGraphics);
 
@@ -357,9 +363,18 @@ public class SkippyRobot extends Robot
       arms.setMomentOfInertia(0.0001, SHOULDER_MOI, SHOULDER_MOI);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.rotate(Math.toRadians(90), Axis.Y);
+      linkGraphics.rotate(Math.toRadians(90), Axis.Y);	
       linkGraphics.translate(0.0, 0.0, -SHOULDER_LENGTH / 2.0);
       linkGraphics.addCylinder(SHOULDER_LENGTH, SHOULDER_RADIUS, YoAppearance.Red());
+      /*
+       * Joint
+       */
+      linkGraphics.rotate(Math.PI/2,Axis.Y);
+      linkGraphics.rotate(Math.PI/2,Axis.X);
+      linkGraphics.translate(-SHOULDER_LENGTH/2, 0.0, -LEG_CUBE_LENGTH);
+      linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.LightSteelBlue());
+
+      
       arms.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
