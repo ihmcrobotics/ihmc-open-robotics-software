@@ -1,6 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.kinematicsToolboxModule;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.vecmath.Matrix3d;
@@ -11,6 +13,7 @@ import javax.vecmath.Vector3f;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -34,6 +37,11 @@ import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 
 public class KinematicToolboxDiagnosticEnvironment
 {
@@ -42,7 +50,7 @@ public class KinematicToolboxDiagnosticEnvironment
    private final ReferenceFrames referenceFrames = null;
    private final String threadName = "Non Realtime Scheduler";
 
-   public KinematicToolboxDiagnosticEnvironment(DRCRobotModel drcRobotModel)
+   public KinematicToolboxDiagnosticEnvironment(DRCRobotModel drcRobotModel, CommonAvatarEnvironmentInterface environment)
    {
       FullHumanoidRobotModel humanoidFullRobotModel = drcRobotModel.createFullRobotModel();
       HumanoidJointNameMap sdfJointNameMap = drcRobotModel.getJointMap();
@@ -55,91 +63,101 @@ public class KinematicToolboxDiagnosticEnvironment
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(forceSensorDefinitionList);
       JointConfigurationGatherer jointConfigurationGatherer = new JointConfigurationGatherer(humanoidFullRobotModel, forceSensorDataHolder);
 
-      HumanoidGlobalDataProducer dataProducer = null;
+      IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
+      PacketCommunicator controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList);
+      try
+      {
+         controllerPacketCommunicator.connect();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+
+      HumanoidGlobalDataProducer dataProducer = new HumanoidGlobalDataProducer(controllerPacketCommunicator);
       SensorOutputMapReadOnly sensorOutputMapReadOnly = initializeSensorOutputMapReadOnly();
       SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly = initializeSensorRawOutputMapReadOnly();
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();
       IMUSensorReadOnly sensorInformation = initializeIMUSensorReadOnly();
-      //PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler(threadName);
+//      PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler(threadName);
 //      DRCPoseCommunicator poseCommunicator = new DRCPoseCommunicator(humanoidFullRobotModel, jointConfigurationGatherer, sdfPerfectReader /* null */,
 //                                                                     dataProducer, sensorOutputMapReadOnly, sensorRawOutputMapReadOnly,
-//                                                                     robotMotionStatusFromController, sensorInformation, scheduler,
-//                                                                     new IHMCCommunicationKryoNetClassList());
+//                                                                     robotMotionStatusFromController, sensorInformation, scheduler, netClassList);
    }
 
    private IMUSensorReadOnly initializeIMUSensorReadOnly()
    {
       return new IMUSensorReadOnly()
       {
-         
+
          @Override
          public String getSensorName()
          {
             return null;
          }
-         
+
          @Override
          public void getOrientationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
          {
          }
-         
+
          @Override
          public void getOrientationMeasurement(Matrix3f orientationToPack)
          {
          }
-         
+
          @Override
          public void getOrientationMeasurement(Matrix3d orientationToPack)
          {
          }
-         
+
          @Override
          public RigidBody getMeasurementLink()
          {
             return null;
          }
-         
+
          @Override
          public ReferenceFrame getMeasurementFrame()
          {
             return null;
          }
-         
+
          @Override
          public void getLinearAccelerationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
          {
          }
-         
+
          @Override
          public void getLinearAccelerationMeasurement(Vector3f linearAccelerationToPack)
          {
          }
-         
+
          @Override
          public void getLinearAccelerationMeasurement(Vector3d linearAccelerationToPack)
          {
          }
-         
+
          @Override
          public void getLinearAccelerationBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack)
          {
          }
-         
+
          @Override
          public void getAngularVelocityNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
          {
          }
-         
+
          @Override
          public void getAngularVelocityMeasurement(Vector3f angularVelocityToPack)
          {
          }
-         
+
          @Override
          public void getAngularVelocityMeasurement(Vector3d angularVelocityToPack)
          {
          }
-         
+
          @Override
          public void getAngularVelocityBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack)
          {
@@ -151,61 +169,61 @@ public class KinematicToolboxDiagnosticEnvironment
    {
       return new SensorRawOutputMapReadOnly()
       {
-         
+
          @Override
          public long getVisionSensorTimestamp()
          {
             return 0;
          }
-         
+
          @Override
          public long getTimestamp()
          {
             return 0;
          }
-         
+
          @Override
          public long getSensorHeadPPSTimestamp()
          {
             return 0;
          }
-         
+
          @Override
          public double getJointVelocityRawOutput(OneDoFJoint oneDoFJoint)
          {
             return 0;
          }
-         
+
          @Override
          public double getJointTauRawOutput(OneDoFJoint oneDoFJoint)
          {
             return 0;
          }
-         
+
          @Override
          public double getJointPositionRawOutput(OneDoFJoint oneDoFJoint)
          {
             return 0;
          }
-         
+
          @Override
          public double getJointAccelerationRawOutput(OneDoFJoint oneDoFJoint)
          {
             return 0;
          }
-         
+
          @Override
          public List<? extends IMUSensorReadOnly> getIMURawOutputs()
          {
             return null;
          }
-         
+
          @Override
          public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
          {
             return null;
          }
-         
+
          @Override
          public AuxiliaryRobotData getAuxiliaryRobotData()
          {
