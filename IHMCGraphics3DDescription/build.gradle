@@ -57,6 +57,7 @@ dependencies {
     //compile group: 'com.google.guava', name: 'guava', version: '18.0'
     //compile group: 'org.boofcv', name: 'geo', version: '0.19'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile 'net.sf.trove4j:trove4j:3.0.3'
 
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
