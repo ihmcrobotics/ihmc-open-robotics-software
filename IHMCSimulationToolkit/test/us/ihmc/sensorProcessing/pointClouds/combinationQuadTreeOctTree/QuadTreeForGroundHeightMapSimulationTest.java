@@ -38,7 +38,7 @@ import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class QuadTreeForGroundHeightMapTest
+public class QuadTreeForGroundHeightMapSimulationTest
 {
    private static final boolean DO_ASSERTS = true;
 
