@@ -125,6 +125,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.UIConnectedPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
@@ -303,6 +304,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Footstep data
       registerPacketClass(FootstepDataMessage.class);
+      registerPacketClass(AdjustFootstepMessage.class);
       registerPacketField(FootstepOrigin.class);
       registerPacketField(ArrayList.class);
 
