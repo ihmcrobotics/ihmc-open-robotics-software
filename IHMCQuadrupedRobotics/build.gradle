@@ -59,6 +59,7 @@ dependencies {
     compile ihmc.getProjectDependency(":SensorProcessing")
     compile ihmc.getProjectDependency(":IHMCStateEstimation")
     compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+    compile ihmc.getProjectDependency(":IHMCRobotDescription")
 
     testCompile group: 'com.google.caliper', name: 'caliper', version: '1.0-beta-2'
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
