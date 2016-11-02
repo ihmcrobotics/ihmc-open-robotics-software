@@ -48,7 +48,6 @@ dependencies {
     compile group: 'org.georegression', name: 'georegression', version: '0.8'
     compile group: 'org.boofcv', name: 'geo', version: '0.19'
     compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
-//    compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160309'
     compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.1.0-160510'
 
     compile ihmc.getProjectDependency(":IHMCRobotModels")

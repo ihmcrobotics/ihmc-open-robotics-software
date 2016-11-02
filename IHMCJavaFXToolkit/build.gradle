@@ -44,6 +44,5 @@ dependencies {
     compile "org.apache.commons:commons-lang3:3.4"
 
     compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
-//    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 }

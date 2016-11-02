@@ -46,7 +46,6 @@ dependencies {
     compile group: 'org.georegression', name: 'georegression', version: '0.8'
     compile group: 'org.boofcv', name: 'visualize', version: '0.19'
     compile group: 'org.ddogleg', name: 'ddogleg', version: '0.7'
-//    compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160309'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
     compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
     compile group: 'org.jgrapht', name: 'jgrapht-core', version: '0.9.0'
