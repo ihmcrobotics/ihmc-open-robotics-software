@@ -54,21 +54,18 @@ import us.ihmc.simulationToolkit.visualizers.FootstepVisualizer;
 import us.ihmc.simulationToolkit.visualizers.QuadTreeHeightMapVisualizer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class FootstepSnapperTest
+public class FootstepSnapperSimulationTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFootstepAndPointsFromDataFile() throws NumberFormatException, InsufficientDataException, IOException
@@ -175,7 +172,7 @@ public class FootstepSnapperTest
    {
       boolean assertPositionConditions = false;
       boolean assertPointConditions = true;
-      boolean visualizeAndKeepUp = simulationTestingParameters.getKeepSCSUp();;
+      boolean visualizeAndKeepUp = false;
 
 
       double minX = -5.0f;
@@ -243,7 +240,7 @@ public class FootstepSnapperTest
    {
       boolean assertPositionConditions = true;
       boolean assertPointConditions = false;
-      boolean visualizeAndKeepUp = simulationTestingParameters.getKeepSCSUp();;
+      boolean visualizeAndKeepUp = false;
 
       GroundProfile3D groundProfile = createBumpyGroundProfile();
       SimpleFootstepSnapper footstepSnapper = createSimpleFootstepSnapper();
@@ -280,7 +277,7 @@ public class FootstepSnapperTest
    {
       boolean assertPositionConditions = true;
       boolean assertPointConditions = false;
-      boolean visualizeAndKeepUp = simulationTestingParameters.getKeepSCSUp();;
+      boolean visualizeAndKeepUp = false;
 
       CombinedTerrainObject3D groundProfile = createStepsGroundProfile();
       SimpleFootstepSnapper footstepSnapper = createSimpleFootstepSnapper();
@@ -328,7 +325,7 @@ public class FootstepSnapperTest
    {
       boolean assertPositionConditions = true;
       boolean assertPointConditions = true;
-      boolean visualizeAndKeepUp = simulationTestingParameters.getKeepSCSUp();;
+      boolean visualizeAndKeepUp = false;
 
       CombinedTerrainObject3D groundProfile = createStepsGroundProfile();
       FootstepSnapper footstepSnapper = createConvexHullFootstepSnapper();
@@ -371,7 +368,7 @@ public class FootstepSnapperTest
    {
       boolean assertPositionConditions = true;
       boolean assertPointConditions = true;
-      boolean visualizeAndKeepUp = simulationTestingParameters.getKeepSCSUp();;
+      boolean visualizeAndKeepUp = false;
 
       CombinedTerrainObject3D groundProfile = createOddTerrainProfile();
       FootstepSnapper footstepSnapper = createConvexHullFootstepSnapper();
@@ -415,7 +412,7 @@ public class FootstepSnapperTest
    {
       boolean assertPositionConditions = false;
       boolean assertPointConditions = true;
-      boolean visualizeAndKeepUp = simulationTestingParameters.getKeepSCSUp();;
+      boolean visualizeAndKeepUp = false;
 
       CombinedTerrainObject3D groundProfile = createOddTerrainProfile();
       FootstepSnapper footstepSnapper = createAdjustingFootstepSnapper();

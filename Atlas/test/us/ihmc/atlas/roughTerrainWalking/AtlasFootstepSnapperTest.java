@@ -17,7 +17,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapperTest;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapperSimulationTest;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.robotics.geometry.BoundingBox2d;
@@ -30,7 +30,7 @@ import us.ihmc.tools.thread.ThreadTools;
 /**
  * Created by agrabertilton on 3/4/15.
  */
-public class AtlasFootstepSnapperTest extends FootstepSnapperTest
+public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 {
 	@ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
