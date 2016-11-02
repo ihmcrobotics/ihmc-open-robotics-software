@@ -11,6 +11,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
@@ -44,6 +45,8 @@ public class WalkingMessageHandler
 
    // TODO Need to find something better than an ArrayList.
    private final List<Footstep> upcomingFootsteps = new ArrayList<>();
+   private final BooleanYoVariable hasNewFootstepAdjustment = new BooleanYoVariable("hasNewFootstepAdjustement", registry);
+   private final AdjustFootstepCommand requestedFootstepAdjustment = new AdjustFootstepCommand();
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
    private final SideDependentList<Footstep> lastDesiredFootsteps = new SideDependentList<>();
@@ -133,6 +136,20 @@ public class WalkingMessageHandler
       updateVisualization();
    }
 
+   public void handleAdjustFootstepCommand(AdjustFootstepCommand command)
+   {
+      if (isWalkingPaused.getBooleanValue())
+      {
+         PrintTools.warn(this, "Received " + AdjustFootstepCommand.class.getSimpleName() + " but walking is currently paused. Command ignored.");
+         requestedFootstepAdjustment.clear();
+         hasNewFootstepAdjustment.set(false);
+         return;
+      }
+
+      requestedFootstepAdjustment.set(command);
+      hasNewFootstepAdjustment.set(true);
+   }
+
    public void handlePauseWalkingCommand(PauseWalkingCommand command)
    {
       isWalkingPaused.set(command.isPauseRequested());
@@ -173,6 +190,45 @@ public class WalkingMessageHandler
       return upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).poll();
    }
 
+   public boolean applyRequestedFootstepAdjustment(Footstep footstepToAdjust)
+   {
+      if (!hasNewFootstepAdjustment.getBooleanValue())
+         return false;
+
+      if (footstepToAdjust.getRobotSide() != requestedFootstepAdjustment.getRobotSide())
+      {
+         PrintTools.warn(this, "RobotSide does not match: side of footstep to be adjusted: " + footstepToAdjust.getRobotSide() + ", side of adjusted footstep: " + requestedFootstepAdjustment.getRobotSide());
+         hasNewFootstepAdjustment.set(false);
+         requestedFootstepAdjustment.clear();
+         return false;
+      }
+
+      Point3d adjustedPosition = requestedFootstepAdjustment.getPosition();
+      Quat4d adjustedOrientation = requestedFootstepAdjustment.getOrientation();
+
+      switch (requestedFootstepAdjustment.getOrigin())
+      {
+      case AT_ANKLE_FRAME:
+         footstepToAdjust.setPose(adjustedPosition, adjustedOrientation);
+         break;
+      case AT_SOLE_FRAME:
+         footstepToAdjust.setSolePose(adjustedPosition, adjustedOrientation);
+         break;
+      default:
+         throw new RuntimeException("Should not get there.");
+      }
+
+      if (!footstepToAdjust.getPredictedContactPoints().isEmpty())
+      {
+         List<Point2d> contactPoints = new ArrayList<>();
+         for (int i = 0; i < footstepToAdjust.getPredictedContactPoints().size(); i++)
+            contactPoints.add(footstepToAdjust.getPredictedContactPoints().get(i));
+         footstepToAdjust.setPredictedContactPointsFromPoint2ds(contactPoints);
+      }
+
+      return true;
+   }
+
    public void insertNextFootstep(Footstep newNextFootstep)
    {
       if (newNextFootstep != null)
@@ -182,6 +238,16 @@ public class WalkingMessageHandler
    public boolean hasUpcomingFootsteps()
    {
       return !upcomingFootsteps.isEmpty() && !isWalkingPaused.getBooleanValue();
+   }
+
+   public boolean hasRequestedFootstepAdjustment()
+   {
+      if (isWalkingPaused.getBooleanValue())
+      {
+         hasNewFootstepAdjustment.set(false);
+         requestedFootstepAdjustment.clear();
+      }
+      return hasNewFootstepAdjustment.getBooleanValue();
    }
 
    public boolean isNextFootstepFor(RobotSide swingSide)
