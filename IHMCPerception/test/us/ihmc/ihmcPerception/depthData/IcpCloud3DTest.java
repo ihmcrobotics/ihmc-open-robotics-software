@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.odometry;
+package us.ihmc.ihmcPerception.depthData;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -17,6 +17,7 @@ import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
+import us.ihmc.ihmcPerception.depthData.IcpCloud3D;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
