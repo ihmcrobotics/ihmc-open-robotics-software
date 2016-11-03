@@ -417,6 +417,11 @@ public class WalkingMessageHandler
       footstepListVisualizer.update(upcomingFootsteps);
    }
 
+   public void updateVisualizationAfterFootstepAdjustement(Footstep adjustedFootstep)
+   {
+      footstepListVisualizer.updateFirstFootstep(adjustedFootstep);
+   }
+
    public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
    {
       Footstep transferFromFootstep = getFootstepAtCurrentLocation(transferToSide.getOppositeSide());

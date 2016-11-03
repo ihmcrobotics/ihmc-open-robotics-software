@@ -282,9 +282,9 @@ public class FootControlModule
          exploreFootPolygonState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
    }
 
-   public void replanTrajectory(Footstep footstep, double swingTime)
+   public void replanTrajectory(Footstep footstep, double swingTime, boolean continuousReplan)
    {
-      swingState.replanTrajectory(footstep, swingTime);
+      swingState.replanTrajectory(footstep, swingTime, continuousReplan);
    }
 
    public void requestTouchdownForDisturbanceRecovery()
