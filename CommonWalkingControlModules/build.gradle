@@ -52,7 +52,6 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRobotModels")
     compile ihmc.getProjectDependency(":Plotting")
     compile ihmc.getProjectDependency(":SensorProcessing")
-    compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":IHMCCommunication")
     compile ihmc.getProjectDependency(":ConvexOptimizationAdapter")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
@@ -61,6 +60,8 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
 
+
+	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
     testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
     testCompile ihmc.getProjectTestDependency(":ConvexOptimizationAdapter")

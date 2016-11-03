@@ -41,11 +41,11 @@ import us.ihmc.quadrupedRobotics.state.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.robotController.OutputProcessor;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal finite state machine.
@@ -132,7 +132,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    }
 
    /**
-    * Hack for realtime controllers to run all states a lot of times. This hopefully kicks in the JIT compiler and avoids expensive interpeted code paths
+    * Hack for realtime controllers to run all states a lot of times. This hopefully kicks in the JIT compiler and avoids expensive interpreted code paths
     */
    public void warmup(int iterations)
    {
@@ -160,6 +160,11 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       robotTimestamp.set(robotTimeBeforeWarmUp);
    }
 
+   public FiniteStateMachineState<ControllerEvent> getState(QuadrupedForceControllerState state)
+   {
+      return stateMachine.getState(state);
+   }
+   
    @Override
    public void initialize()
    {

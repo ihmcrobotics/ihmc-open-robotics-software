@@ -5,13 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.*;
 
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.exceptions.ShapeNotSupportedException;
@@ -42,6 +36,7 @@ public class Graphics3DObject
    private static final AppearanceDefinition DEFAULT_APPEARANCE = YoAppearance.Black();
 
    private static final int RESOLUTION = 25;
+   private static final int CAPSULE_RESOLUTION = 24;
 
    private ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions;
    private ArrayList<SelectedListener> selectedListeners;
@@ -86,7 +81,7 @@ public class Graphics3DObject
          }
       }
    }
-   
+
    /**
     * Default no-arg constructor.  This creates a new empty Graphics3DObject component.
     */
@@ -496,7 +491,7 @@ public class Graphics3DObject
       MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, false);
       return addMeshData(meshData, cubeApp);
    }
-   
+
    public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, boolean centered, AppearanceDefinition cubeApp)
    {
       MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, centered);
@@ -587,20 +582,23 @@ public class Graphics3DObject
 
       return addMeshData(meshData, sphereApp);
    }
-   
+
    public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height)
    {
       return addCapsule(radius, height, DEFAULT_APPEARANCE);
    }
-   
+
    public Graphics3DAddMeshDataInstruction addCapsule(double radius, double height, AppearanceDefinition capsuleAppearance)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Capsule(height, radius, radius, radius, RESOLUTION, RESOLUTION);
+      MeshDataHolder meshData = MeshDataGenerator.Capsule(height-2.0*radius, radius, radius, radius, CAPSULE_RESOLUTION, CAPSULE_RESOLUTION);
       return addMeshData(meshData, capsuleAppearance);
    }
 
    public Graphics3DAddMeshDataInstruction addMeshData(MeshDataHolder meshData, AppearanceDefinition meshAppearance)
    {
+      // The subsequent classes do not accept null, just create an empty mesh in that case
+      if (meshData == null)
+         meshData = new MeshDataHolder(new Point3f[0], new TexCoord2f[0], new int[0], new Vector3f[0]);
       Graphics3DAddMeshDataInstruction instruction = new Graphics3DAddMeshDataInstruction(meshData, meshAppearance);
       graphics3DInstructions.add(instruction);
 
@@ -1107,7 +1105,7 @@ public class Graphics3DObject
       {
          selectedListeners = new ArrayList<SelectedListener>();
       }
-      
+
       selectedListeners.add(selectedListener);
    }
 

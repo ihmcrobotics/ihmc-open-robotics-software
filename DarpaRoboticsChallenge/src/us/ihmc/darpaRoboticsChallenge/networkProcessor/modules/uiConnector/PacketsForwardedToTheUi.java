@@ -8,6 +8,7 @@ import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ControlStatusPacket;
@@ -75,6 +76,7 @@ public class PacketsForwardedToTheUi
       DetectedObjectPacket.class,
       MultisenseMocapExperimentPacket.class,
       FisheyePacket.class,
+      SimpleCoactiveBehaviorDataPacket.class,
 //      HandPoseStatus.class,
       LocalizationPointMapPacket.class,
       BlackFlyParameterPacket.class,

@@ -30,7 +30,7 @@ repositories {
     jcenter()
     mavenCentral()
     maven {
-        url "http://artifactory.ihmc.us/artifactory/thirdparty"
+        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
 }
 
@@ -60,7 +60,6 @@ dependencies {
     compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
     compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
-//    compile group: 'org.projectbubo', name: 'ProjectBUBO', version: '160309'
     compile group: 'org.ros.rosjava_messages', name: 'sensor_msgs', version: '1.11.7'
     compile group: 'org.ros.rosjava_messages', name: 'multisense_ros', version: '3.4.2'
     compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.1.0-160510'
@@ -78,7 +77,7 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCROSTools")
     compile ihmc.getProjectDependency(":IHMCWholeBodyController")
-    compile ihmc.getProjectDependency(":RobotDataCommunication")
+    compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
     compile ihmc.getProjectDependency(":RobotiqHandDrivers")
     compile ihmc.getProjectDependency(":SDFLoader")
     compile ihmc.getProjectDependency(":SensorProcessing")
@@ -86,6 +85,8 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
     compile ihmc.getProjectDependency(":IHMCRobotDescription")
     compile ihmc.getProjectDependency(":IHMCRobotModels")
+    compile ihmc.getProjectDependency(":IHMCSimulationToolkit")
+    compile ihmc.getProjectDependency(":IHMCRobotDataVisualizer")
 
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
     testCompile ihmc.getProjectTestDependency(":CommonWalkingControlModules")
@@ -141,11 +142,11 @@ startScripts {
         simWindowsScriptVisualizer.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCRemoteAtlasVisualizer").replace("AtlasROSAPINetworkProcessor", "RemoteAtlasVisualizer")
 
         def simUnixScriptLogger = file(outputDir.canonicalPath + "/IHMCLogger")
-        simUnixScriptLogger.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher")
+        simUnixScriptLogger.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher")
         simUnixScriptLogger.setExecutable(true)
 
         def simWindowsScriptLogger = file(outputDir.canonicalPath + "/IHMCLogger.bat")
-        simWindowsScriptLogger.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher")
+        simWindowsScriptLogger.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher")
 
         def simUnixScriptGazebo = file(outputDir.canonicalPath + "/IHMCAtlasGazeboController")
         simUnixScriptGazebo.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasGazeboController").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.atlas.gazebo.AtlasGazeboControllerFactory")

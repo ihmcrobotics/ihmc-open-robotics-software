@@ -25,6 +25,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
    private static final boolean SHOW_ONLY_WRENCH_VISUALIZER = false;
    private static final boolean SHOW_EXPORT_TORQUE_AND_SPEED = true;
    private static final boolean SHOW_OVERHEAD_VIEW = true;
+   public static final boolean MAKE_SLIDER_BOARD = false;
 
    private final SimulationConstructionSetParameters simulationConstructionSetParameters;
 
@@ -118,7 +119,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
       //TODO: Clean this up!
 //      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
 
-      if (DRCConfigParameters.MAKE_SLIDER_BOARD)
+      if (MAKE_SLIDER_BOARD)
       {
          new WalkControllerSliderBoard(scs, scs.getRootRegistry(), null);
       }

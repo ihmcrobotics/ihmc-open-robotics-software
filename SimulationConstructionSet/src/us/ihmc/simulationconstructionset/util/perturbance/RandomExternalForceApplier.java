@@ -2,11 +2,11 @@ package us.ihmc.simulationconstructionset.util.perturbance;
 
 import java.util.Random;
 
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotController.RobotController;
 
 public class RandomExternalForceApplier implements RobotController
 {

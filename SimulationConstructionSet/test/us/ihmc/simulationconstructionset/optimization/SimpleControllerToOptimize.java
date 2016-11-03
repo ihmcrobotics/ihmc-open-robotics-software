@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset.optimization;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.utilities.parameterOptimization.DoubleYoVariableParameterToOptimize;
 import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
 
