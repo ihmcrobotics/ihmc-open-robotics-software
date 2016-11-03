@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
@@ -244,6 +245,9 @@ public class WalkingCommandConsumer
          balanceManager.setDoubleSupportTime(walkingMessageHandler.getTransferTime());
          balanceManager.setSingleSupportTime(walkingMessageHandler.getSwingTime());
       }
+
+      if (commandInputManager.isNewCommandAvailable(AdjustFootstepCommand.class))
+         walkingMessageHandler.handleAdjustFootstepCommand(commandInputManager.pollNewestCommand(AdjustFootstepCommand.class));
    }
 
    public void consumeAbortWalkingCommands(BooleanYoVariable abortWalkingRequested)

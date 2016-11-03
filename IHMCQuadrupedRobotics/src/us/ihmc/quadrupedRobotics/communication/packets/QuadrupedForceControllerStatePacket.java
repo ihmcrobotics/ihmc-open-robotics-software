@@ -22,6 +22,7 @@ public class QuadrupedForceControllerStatePacket extends Packet<QuadrupedForceCo
       return state;
    }
 
+   public void set(QuadrupedForceControllerState state){ this.state = state;}
    @Override public boolean epsilonEquals(QuadrupedForceControllerStatePacket other, double epsilon)
    {
       return (this.state == other.state);
