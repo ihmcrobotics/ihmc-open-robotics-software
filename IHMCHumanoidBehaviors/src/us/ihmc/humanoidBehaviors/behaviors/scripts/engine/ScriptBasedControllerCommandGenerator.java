@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.scriptEngine;
+package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
-import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
