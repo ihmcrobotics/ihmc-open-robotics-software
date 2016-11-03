@@ -18,7 +18,7 @@ import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -57,10 +57,10 @@ public class SphereDetectionBehavior extends AbstractBehavior
    // temp vars
    private final Point3d chestPosition = new Point3d();
 
-   public SphereDetectionBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames)
+   public SphereDetectionBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames)
    {
       super(outgoingCommunicationBridge);
-      this.attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
+      this.attachNetworkListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
       this.humanoidReferenceFrames = referenceFrames;
    }
 

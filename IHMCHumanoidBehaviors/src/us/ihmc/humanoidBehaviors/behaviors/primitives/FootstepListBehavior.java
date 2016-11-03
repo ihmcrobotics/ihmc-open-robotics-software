@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -45,13 +45,13 @@ public class FootstepListBehavior extends AbstractBehavior
    private double defaultSwingTime;
    private double defaultTranferTime;
 
-   public FootstepListBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters)
+   public FootstepListBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>();
-      attachControllerListeningQueue(footstepStatusQueue, FootstepStatus.class);
+      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
       walkingStatusQueue = new ConcurrentListeningQueue<>();
-      attachControllerListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
+      attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
       numberOfFootsteps.set(-1);
       defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       defaultTranferTime = walkingControllerParameters.getDefaultTransferTime();

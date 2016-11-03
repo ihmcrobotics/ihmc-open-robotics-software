@@ -13,16 +13,13 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class CoactiveBehaviorsNetworkManager
 {
-   private OutgoingCommunicationBridgeInterface outgoingCommunicationBridgeInterface;
+   private CommunicationBridgeInterface communicationBridgeInterface;
 
    ArrayList<CoactiveDataListenerInterface> listerners = new ArrayList<CoactiveDataListenerInterface>();
 
-   public CoactiveBehaviorsNetworkManager(OutgoingCommunicationBridgeInterface outgoingCommunicationBridgeInterface,
-         IncomingCommunicationBridgeInterface incomingCommunicationBridgeInterface)
+   public CoactiveBehaviorsNetworkManager(CommunicationBridgeInterface communicationBridgeInterface)
    {
-      this.outgoingCommunicationBridgeInterface = outgoingCommunicationBridgeInterface;
-
-      incomingCommunicationBridgeInterface.attachListener(SimpleCoactiveBehaviorDataPacket.class, new CoactiveDataListener());
+      this.communicationBridgeInterface = communicationBridgeInterface;
    }
 
    public void registerYovaribleForAutoSendToUI(YoVariable var)
@@ -53,35 +50,35 @@ public class CoactiveBehaviorsNetworkManager
    public void sendToUI(String key, double value)
    {
       SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, value);
-      outgoingCommunicationBridgeInterface.sendPacketToUI(newPacket);
+      communicationBridgeInterface.sendPacketToUI(newPacket);
    }
 
    public void sendToUI(String key, Object data)
    {
       SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, data);
-      outgoingCommunicationBridgeInterface.sendPacketToUI(newPacket);
+      communicationBridgeInterface.sendPacketToUI(newPacket);
    }
 
    public void sendToBehavior(String key, double value)
    {
       SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, value);
-      outgoingCommunicationBridgeInterface.sendPacketToBehavior(newPacket);
+      communicationBridgeInterface.sendPacketToBehavior(newPacket);
    }
 
    public void sendToBehavior(String key, Object data)
    {
       SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, data);
-      outgoingCommunicationBridgeInterface.sendPacketToBehavior(newPacket);
+      communicationBridgeInterface.sendPacketToBehavior(newPacket);
    }
 
    public void sendToBehavior(Packet packet)
    {
-      outgoingCommunicationBridgeInterface.sendPacketToBehavior(packet);
+      communicationBridgeInterface.sendPacketToBehavior(packet);
    }
 
    public void sendToUI(Packet packet)
    {
-      outgoingCommunicationBridgeInterface.sendPacketToBehavior(packet);
+      communicationBridgeInterface.sendPacketToBehavior(packet);
    }
 
    public void addListeners(CoactiveDataListenerInterface listener)

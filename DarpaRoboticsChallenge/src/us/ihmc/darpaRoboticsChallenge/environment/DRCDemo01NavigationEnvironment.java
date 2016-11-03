@@ -89,21 +89,22 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    {
       combinedTerrainObject3D = new CombinedTerrainObject3D("DRCDemo01NavigationEnvironment");
 
-//      addCalibrationCube();
-//      combinedTerrainObject3D.addTerrainObject(setUpPath1Rocks3D("Path1 Rocks"));
-//
-//      // setUpPath2SmallCones(combinedTerrainObject);
-//      combinedTerrainObject3D.addTerrainObject(setUpPath3RampsWithLargeBlocks3D("Path3 Ramps With Large Blocks"));
-//      combinedTerrainObject3D.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
-//
-//      // combinedTerrainObject.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourseDifficult());
-//      combinedTerrainObject3D.addTerrainObject(setUpPathDRCTrialsSteps("Ladder"));
-//      combinedTerrainObject3D.addTerrainObject(setUpTrialsQuals("Quals"));
-//
-//      combinedTerrainObject3D.addTerrainObject(setUpPath5NarrowDoor("Path5 Narrow Door"));
-//      combinedTerrainObject3D.addTerrainObject(setUpPath6Barriers("Path6 Barriers"));
-//      combinedTerrainObject3D.addTerrainObject(setUpPath7Stairs("Path7 Stairs"));
-//      combinedTerrainObject3D.addTerrainObject(setUpPath8RampsWithSteppingStones("Path8 Ramps with Stepping Stones"));
+      addCalibrationCube();
+      combinedTerrainObject3D.addTerrainObject(setUpPath1Rocks3D("Path1 Rocks"));
+  
+      // setUpPath2SmallCones(combinedTerrainObject);
+      combinedTerrainObject3D.addTerrainObject(setUpPath3RampsWithLargeBlocks3D("Path3 Ramps With Large Blocks"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
+  
+      // combinedTerrainObject.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourseDifficult());
+      combinedTerrainObject3D.addTerrainObject(setUpPathDRCTrialsSteps("Ladder"));
+      combinedTerrainObject3D.addTerrainObject(setUpTrialsQuals("Quals"));
+  
+      combinedTerrainObject3D.addTerrainObject(setUpPath5NarrowDoor("Path5 Narrow Door"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath6Barriers("Path6 Barriers"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath7Stairs("Path7 Stairs"));
+      combinedTerrainObject3D.addTerrainObject(setUpPath8RampsWithSteppingStones("Path8 Ramps with Stepping Stones"));
+  
 
       combinedTerrainObject3D.addTerrainObject(setUpGround("Ground"));
       

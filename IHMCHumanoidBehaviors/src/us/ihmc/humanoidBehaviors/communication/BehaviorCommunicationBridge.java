@@ -8,7 +8,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
-public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeInterface, IncomingCommunicationBridgeInterface
+public class BehaviorCommunicationBridge implements CommunicationBridgeInterface
 {
    private final PacketCommunicator behaviorPacketCommunicator;
 
