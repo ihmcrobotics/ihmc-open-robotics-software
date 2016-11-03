@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.frictionCompensation;
+package us.ihmc.systemIdentification;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.systemIdentification.JointFrictionModelsHolder;
 import us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousFrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousStribeckFrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
