@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator;
+package us.ihmc.commonWalkingControlModules.reachabilityMapCalculator;
 
 public interface ReachabilityMapListener
 {

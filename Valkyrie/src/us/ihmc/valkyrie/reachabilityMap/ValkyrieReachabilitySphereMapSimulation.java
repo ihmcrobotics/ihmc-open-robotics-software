@@ -2,9 +2,9 @@ package us.ihmc.valkyrie.reachabilityMap;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.ReachabilityMapListener;
+import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.ReachabilitySphereMapCalculator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.ReachabilityMapListener;
-import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.ReachabilitySphereMapCalculator;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.JointAnglesWriter;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

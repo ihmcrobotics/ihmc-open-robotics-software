@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator;
+package us.ihmc.commonWalkingControlModules.reachabilityMapCalculator;
 
 import java.awt.FileDialog;
 import java.awt.Frame;
@@ -14,8 +14,8 @@ import org.apache.poi.poifs.filesystem.NPOIFSFileSystem;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape;
-import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
+import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape;
+import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

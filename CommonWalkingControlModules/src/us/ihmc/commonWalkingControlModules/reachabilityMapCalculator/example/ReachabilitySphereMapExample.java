@@ -1,7 +1,7 @@
-package us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.example;
+package us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.example;
 
-import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.ReachabilityMapListener;
-import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.ReachabilitySphereMapCalculator;
+import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.ReachabilityMapListener;
+import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.ReachabilitySphereMapCalculator;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
