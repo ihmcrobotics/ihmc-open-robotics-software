@@ -276,25 +276,13 @@ public class KickBallBehavior extends AbstractBehavior
    }
 
    @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+   protected void passReceivedObjectToChildBehaviors(Object object)
    {
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.consumeObjectFromNetworkProcessor(object);
+         behavior.consumeObjectFromNetwork(object);
       }
    }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      for (AbstractBehavior behavior : behaviors)
-      {
-         behavior.consumeObjectFromController(object);
-      }
-   }
-
-  
-
 
    public boolean isUseBlobFiltering()
    {

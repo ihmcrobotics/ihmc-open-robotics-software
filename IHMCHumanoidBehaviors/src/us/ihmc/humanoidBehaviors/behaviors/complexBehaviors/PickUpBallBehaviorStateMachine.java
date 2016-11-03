@@ -44,7 +44,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("pickUpBallStateMachine", PickUpBallBehaviorState.class, yoTime, communicationBridge);
-      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge, communicationBridge);
+      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge);
       coactiveBehaviorsNetworkManager.addListeners(this);
       coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
 

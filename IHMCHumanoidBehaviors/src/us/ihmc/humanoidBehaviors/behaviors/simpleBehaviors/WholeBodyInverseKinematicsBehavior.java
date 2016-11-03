@@ -13,7 +13,7 @@ import us.ihmc.communication.packets.KinematicsToolboxStateMessage.KinematicsToo
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
@@ -54,13 +54,13 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final DoubleYoVariable timeSolutionSentToController;
 
    public WholeBodyInverseKinematicsBehavior(FullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
-         OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+         CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       this(null, fullRobotModelFactory, yoTime, outgoingCommunicationBridge);
    }
 
    public WholeBodyInverseKinematicsBehavior(String namePrefix, FullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
-         OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+         CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(namePrefix, outgoingCommunicationBridge);
       this.yoTime = yoTime;
@@ -88,7 +88,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
-      attachNetworkProcessorListeningQueue(kinematicsToolboxOutputQueue, KinematicsToolboxOutputStatus.class);
+      attachNetworkListeningQueue(kinematicsToolboxOutputQueue, KinematicsToolboxOutputStatus.class);
 
       clear();
    }

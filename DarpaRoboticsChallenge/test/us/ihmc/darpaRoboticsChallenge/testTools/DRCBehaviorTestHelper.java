@@ -453,7 +453,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       {
          this.behaviors = new ArrayList<AbstractBehavior>();
          this.behaviors.add(behavior);
-         behaviorCommunicationBridge.attachGlobalListener(behavior.getControllerGlobalPacketConsumer());
+         behaviorCommunicationBridge.attachGlobalListener(behavior.getGlobalPacketConsumer());
       }
 
       public BehaviorRunner(ArrayList<AbstractBehavior> behaviors)
@@ -462,7 +462,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
          for (AbstractBehavior behavior : behaviors)
          {
-            behaviorCommunicationBridge.attachGlobalListener(behavior.getControllerGlobalPacketConsumer());
+            behaviorCommunicationBridge.attachGlobalListener(behavior.getGlobalPacketConsumer());
          }
       }
 
