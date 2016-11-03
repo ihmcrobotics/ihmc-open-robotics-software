@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.scriptEngine;
+package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -8,8 +8,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
-import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptObject;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
