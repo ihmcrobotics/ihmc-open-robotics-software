@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.darpaRoboticsChallenge.controllers.LockPelvisController;
+import us.ihmc.commonWalkingControlModules.controlModules.LockPelvisController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCSteeringWheelEnvironment;

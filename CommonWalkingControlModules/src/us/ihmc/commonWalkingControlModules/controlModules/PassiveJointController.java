@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.controllers;
+package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.YoPDGains;
@@ -25,6 +25,7 @@ public class PassiveJointController implements RobotController
       jointController.setDerivativeGain(1000.0);
    }
 
+   @Override
    public void doControl()
    {
       double currentPosition = simulatedJoint.getQYoVariable().getDoubleValue();
@@ -35,20 +36,24 @@ public class PassiveJointController implements RobotController
       simulatedJoint.setTau(desiredTau);
    }
 
+   @Override
    public void initialize()
    {
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
 
+   @Override
    public String getDescription()
    {
       return getName();
