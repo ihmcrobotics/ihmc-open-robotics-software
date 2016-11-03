@@ -34,6 +34,10 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
+	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+	compile ihmc.getProjectDependency(":SimulationConstructionSet")
+	
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 }
 
