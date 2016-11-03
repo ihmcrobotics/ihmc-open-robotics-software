@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes;
+package us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.voxelPrimitiveShapes;
 
 import java.awt.Color;
 

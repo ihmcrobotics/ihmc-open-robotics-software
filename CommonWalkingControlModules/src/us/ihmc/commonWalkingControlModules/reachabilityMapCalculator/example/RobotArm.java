@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.example;
+package us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.example;
 
 import java.util.EnumMap;
 import java.util.Random;
@@ -7,8 +7,8 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.example.RobotParameters.RobotArmJointParameters;
-import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.example.RobotParameters.RobotArmLinkParameters;
+import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.example.RobotParameters.RobotArmJointParameters;
+import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.example.RobotParameters.RobotArmLinkParameters;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;

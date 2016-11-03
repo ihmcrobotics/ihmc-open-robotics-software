@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.example;
+package us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.example;
 
 import javax.vecmath.Vector3d;
 

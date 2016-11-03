@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator;
+package us.ihmc.commonWalkingControlModules.reachabilityMapCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,10 +7,10 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape;
+import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator;
+package us.ihmc.commonWalkingControlModules.reachabilityMapCalculator;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -12,9 +12,9 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
-import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.example.RobotArm;
-import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape;
-import us.ihmc.darpaRoboticsChallenge.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
+import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.example.RobotArm;
+import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape;
+import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
