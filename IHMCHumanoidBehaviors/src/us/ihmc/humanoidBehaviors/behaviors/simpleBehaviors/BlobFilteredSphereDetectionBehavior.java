@@ -40,8 +40,8 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    {
       super(behaviorCommunicationBridge, referenceFrames);
 
-      behaviorCommunicationBridge.attachGlobalListener(getNetworkProcessorGlobalObjectConsumer());
-      attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
+      behaviorCommunicationBridge.attachGlobalListener(getGlobalPacketConsumer());
+      attachNetworkListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
 
       coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(this);
 

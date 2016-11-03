@@ -23,7 +23,7 @@ public class SearchForValveBehavior extends AbstractBehavior implements Coactive
    public SearchForValveBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge)
    {
       super("SearchForSpehereFar", behaviorCommunicationBridge);
-      networkManager = new CoactiveBehaviorsNetworkManager(behaviorCommunicationBridge, behaviorCommunicationBridge);
+      networkManager = new CoactiveBehaviorsNetworkManager(behaviorCommunicationBridge);
       networkManager.addListeners(this);
    }
 

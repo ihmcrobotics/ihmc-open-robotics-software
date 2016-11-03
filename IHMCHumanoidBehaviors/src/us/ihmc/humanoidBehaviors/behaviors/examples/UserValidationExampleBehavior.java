@@ -16,7 +16,7 @@ public class UserValidationExampleBehavior extends AbstractBehavior implements C
    public UserValidationExampleBehavior(BehaviorCommunicationBridge communicationBridge)
    {
       super(communicationBridge);
-      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge, communicationBridge);
+      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge);
       coactiveBehaviorsNetworkManager.addListeners(this);
    }
 

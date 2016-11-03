@@ -271,16 +271,14 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    {
       if (DEBUG)
          System.out.println(this.getClass().getSimpleName() + ": attach listeners to: " + behavior.getName());
-      communicationBridge.attachGlobalListener(behavior.getControllerGlobalPacketConsumer());
-      communicationBridge.attachGlobalListener(behavior.getNetworkProcessorGlobalObjectConsumer());
+      communicationBridge.attachGlobalListener(behavior.getGlobalPacketConsumer());
    }
 
    private void detachListeners(AbstractBehavior behavior)
    {
       if (DEBUG)
          System.out.println(this.getClass().getSimpleName() + ": detach listeners to: " + behavior.getName());
-      communicationBridge.detachGlobalListener(behavior.getControllerGlobalPacketConsumer());
-      communicationBridge.detachGlobalListener(behavior.getNetworkProcessorGlobalObjectConsumer());
+      communicationBridge.detachGlobalListener(behavior.getGlobalPacketConsumer());
    }
 
    public void start()

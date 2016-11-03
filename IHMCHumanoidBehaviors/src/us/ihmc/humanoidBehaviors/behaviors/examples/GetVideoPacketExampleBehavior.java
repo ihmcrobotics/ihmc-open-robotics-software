@@ -23,8 +23,8 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
    public GetVideoPacketExampleBehavior(BehaviorCommunicationBridge communicationBridge)
    {
       super(communicationBridge);
-      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge, communicationBridge);
-      this.attachNetworkProcessorListeningQueue(videoPacketQueue, VideoPacket.class);
+      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge);
+      this.attachNetworkListeningQueue(videoPacketQueue, VideoPacket.class);
    }
 
    @Override

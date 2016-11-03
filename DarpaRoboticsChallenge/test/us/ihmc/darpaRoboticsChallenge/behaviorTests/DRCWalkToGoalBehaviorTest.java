@@ -185,18 +185,18 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       final WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(communicationBridge, fullRobotModel, yoTime, getRobotModel().getPhysicalProperties()
             .getAnkleHeight());
-      communicationBridge.attachGlobalListener(walkToGoalBehavior.getControllerGlobalPacketConsumer());
+      communicationBridge.attachGlobalListener(walkToGoalBehavior.getGlobalPacketConsumer());
       walkToGoalBehavior.initialize();
 
       WalkToGoalBehaviorPacket requestedGoal = new WalkToGoalBehaviorPacket(desiredMidFeetPose.getX(), desiredMidFeetPose.getY(), desiredMidFeetPose.getYaw(),
             RobotSide.RIGHT);
-      walkToGoalBehavior.consumeObjectFromNetworkProcessor(requestedGoal);
+      walkToGoalBehavior.consumeObjectFromNetwork(requestedGoal);
 
       WalkToGoalBehaviorPacket walkToGoalFindPathPacket = new WalkToGoalBehaviorPacket(WalkToGoalAction.FIND_PATH);
-      walkToGoalBehavior.consumeObjectFromNetworkProcessor(walkToGoalFindPathPacket);
+      walkToGoalBehavior.consumeObjectFromNetwork(walkToGoalFindPathPacket);
 
       WalkToGoalBehaviorPacket walkToGoalExecutePacket = new WalkToGoalBehaviorPacket(WalkToGoalAction.EXECUTE);
-      walkToGoalBehavior.consumeObjectFromNetworkProcessor(walkToGoalExecutePacket);
+      walkToGoalBehavior.consumeObjectFromNetwork(walkToGoalExecutePacket);
       walkToGoalBehavior.doControl();
       assertTrue( walkToGoalBehavior.hasInputBeenSet() );
       
