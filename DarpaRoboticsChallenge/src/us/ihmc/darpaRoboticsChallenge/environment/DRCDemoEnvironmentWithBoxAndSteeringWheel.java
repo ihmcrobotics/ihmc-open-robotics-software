@@ -5,9 +5,9 @@ import java.util.List;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.controlModules.SteeringWheelDisturbanceController;
 import us.ihmc.darpaRoboticsChallenge.VehicleModelObjects;
 import us.ihmc.darpaRoboticsChallenge.VehicleObject;
-import us.ihmc.darpaRoboticsChallenge.controllers.SteeringWheelDisturbanceController;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Box3d;

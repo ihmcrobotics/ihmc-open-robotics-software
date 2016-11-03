@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.controllers;
+package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.controllers.PIDController;
@@ -29,6 +29,7 @@ public class PIDLidarTorqueController implements RobotController
       lidarJointController.setDerivativeGain(1.0);
    }
 
+   @Override
    public void doControl()
    {
       desiredLidarAngle.add(desiredLidarVelocity.getDoubleValue() * controlDT);
@@ -38,20 +39,24 @@ public class PIDLidarTorqueController implements RobotController
       lidarJoint.setTau(lidarJointTau);
    }
 
+   @Override
    public void initialize()
    {
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

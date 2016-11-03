@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.controllers;
+package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
@@ -20,26 +20,32 @@ public class SteeringWheelDisturbanceController implements RobotController
       this.robot = robot;
       fnGenerator.setMode(mode);
    }
+   
+   @Override
    public void initialize()
    {
 
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {      
       return registry;
    }
 
+   @Override
    public String getName()
    {      
       return NAME;
    }
 
+   @Override
    public String getDescription()
    {      
       return "Perturb steering wheel based on a YoFunctionGenerator";
    }
 
+   @Override
    public void doControl()
    {
       robot.setTau(fnGenerator.getValue());
