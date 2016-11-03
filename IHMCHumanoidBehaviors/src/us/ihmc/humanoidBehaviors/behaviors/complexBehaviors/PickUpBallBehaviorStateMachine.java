@@ -1,15 +1,10 @@
-package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.pickUpBallSpecificBehaviors;
+package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import javax.vecmath.Vector3f;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.PickUpBallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickObjectOffGroundBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SearchFarForSphereBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SearchNearForSphereBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToPickUpLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
@@ -36,7 +31,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
 
    private final SearchFarForSphereBehavior searchFarForSphereBehavior;
    private final SearchNearForSphereBehavior searchNearForSphereBehavior;
-   private final WalkToPickUpLocationBehavior walkToPickUpLocationBehavior;
+   private final WalkToPickObjectOffGroundLocationBehavior walkToPickUpLocationBehavior;
    private final PickObjectOffGroundBehavior pickObjectOffGroundBehavior;
    private final PutBallInBucketBehavior putBallInBucketBehavior;
    private final ResetRobotBehavior resetRobotBehavior;
@@ -70,7 +65,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
       searchNearForSphereBehavior = new SearchNearForSphereBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, false,
             atlasPrimitiveActions);
       addChildBehavior(searchNearForSphereBehavior);
-      walkToPickUpLocationBehavior = new WalkToPickUpLocationBehavior(yoTime, referenceFrames, communicationBridge, wholeBodyControllerParameters,
+      walkToPickUpLocationBehavior = new WalkToPickObjectOffGroundLocationBehavior(yoTime, referenceFrames, communicationBridge, wholeBodyControllerParameters,
             fullRobotModel, atlasPrimitiveActions);
       addChildBehavior(walkToPickUpLocationBehavior);
       pickObjectOffGroundBehavior = new PickObjectOffGroundBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, atlasPrimitiveActions);

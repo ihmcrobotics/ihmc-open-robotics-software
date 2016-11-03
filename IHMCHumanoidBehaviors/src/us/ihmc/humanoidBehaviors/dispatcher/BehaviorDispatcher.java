@@ -10,12 +10,12 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleForwardingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
-import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
+import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -25,7 +25,6 @@ import us.ihmc.robotics.stateMachines.StateTransitionAction;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -78,7 +77,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
       stateMachine = new BehaviorStateMachine<E>("behaviorState", "behaviorSwitchTime", behaviourEnum, yoTime, registry);
 
-      SimpleForwardingBehavior simpleForwardingBehavior = new SimpleForwardingBehavior(communicationBridge);
+      SimpleDoNothingBehavior simpleForwardingBehavior = new SimpleDoNothingBehavior(communicationBridge);
       attachListeners(simpleForwardingBehavior);
       addBehavior(stopBehavior, simpleForwardingBehavior);
       stateMachine.setCurrentState(stopBehavior);
@@ -200,12 +199,10 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
             break;
          case PAUSE:
             stateMachine.pause();
-            communicationBridge.setPacketPassThrough(true);
             communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
             break;
          case RESUME:
             stateMachine.resume();
-            communicationBridge.setPacketPassThrough(false);
             communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
             break;
          default:

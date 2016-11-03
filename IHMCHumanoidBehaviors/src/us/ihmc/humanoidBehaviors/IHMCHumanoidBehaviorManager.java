@@ -7,9 +7,11 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.pickUpBallSpecificBehaviors.PickUpBallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDetectionBehavior;
@@ -86,7 +88,7 @@ public class IHMCHumanoidBehaviorManager
       }
 
       FullHumanoidRobotModel fullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
-      BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(behaviorPacketCommunicator, registry);
+      BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(behaviorPacketCommunicator);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
@@ -180,7 +182,14 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
             new PickUpBallBehaviorStateMachine(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
       
-
+      dispatcher.addBehavior(HumanoidBehaviorType.TURN_VALVE,
+            new TurnValveBehaviorStateMachine(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
+      
+      dispatcher.addBehavior(HumanoidBehaviorType.EXAMPLE_BEHAVIOR,
+            new ExampleComplexBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
+      
+      
+      
       
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, new WalkToLocationBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters()));
