@@ -21,8 +21,8 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    public GetLidarScanExampleBehavior(BehaviorCommunicationBridge communicationBridge)
    {
       super(communicationBridge);
-      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge, communicationBridge);
-      this.attachNetworkProcessorListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
+      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge);
+      this.attachNetworkListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
    }
 
    @Override

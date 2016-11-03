@@ -44,8 +44,8 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    {
       super(ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), behaviorInterface);
       
-      getBehaviorInterface().attachNetworkProcessorListeningQueue(videoPacketQueue, VideoPacket.class);
-      getBehaviorInterface().attachNetworkProcessorListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
+      getBehaviorInterface().attachNetworkListeningQueue(videoPacketQueue, VideoPacket.class);
+      getBehaviorInterface().attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
       
       OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
       factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);

@@ -60,7 +60,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("turnValveStateMachine", TurnValveBehaviorState.class, yoTime, communicationBridge);
-      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge, communicationBridge);
+      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge);
       coactiveBehaviorsNetworkManager.addListeners(this);
       coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
       this.atlasPrimitiveActions = atlasPrimitiveActions;

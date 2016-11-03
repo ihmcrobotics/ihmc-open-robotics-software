@@ -36,7 +36,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    {
       super("ExampleStateMachine", ExampleStates.class, yoTime, communicationBridge);
 
-      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge, communicationBridge);
+      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge);
       coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;

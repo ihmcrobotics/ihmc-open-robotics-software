@@ -20,8 +20,8 @@ public abstract class VideoPacketListenerBehavior extends AbstractBehavior imple
 
       videoDataClient = CompressedVideoDataFactory.createCompressedVideoDataClient(this);
 
-      communicationBridge.attachGlobalListener(getNetworkProcessorGlobalObjectConsumer());
-      attachNetworkProcessorListeningQueue(cameraData, VideoPacket.class);
+      communicationBridge.attachGlobalListener(getGlobalPacketConsumer());
+      attachNetworkListeningQueue(cameraData, VideoPacket.class);
    }
 
    @Override

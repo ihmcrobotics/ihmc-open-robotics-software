@@ -6,7 +6,6 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class JointLowLevelPositionControlSimulator implements RobotController
 {
