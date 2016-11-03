@@ -128,7 +128,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       networkProcessor.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerCommunicator);
       networkProcessor.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorCommunicatorClient);
 
-      behaviorCommunicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer, registry);
+      behaviorCommunicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer);
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
@@ -303,11 +303,6 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       if (behaviorCommunicatorServer != null)
       {
          behaviorCommunicatorServer.close();
-      }
-
-      if (behaviorCommunicationBridge != null)
-      {
-         behaviorCommunicationBridge.closeAndDispose();
       }
 
       if (controllerCommunicator != null)

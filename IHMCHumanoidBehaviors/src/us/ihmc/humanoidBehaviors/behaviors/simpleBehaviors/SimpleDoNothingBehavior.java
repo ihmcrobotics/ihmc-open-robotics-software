@@ -18,7 +18,7 @@ public class SimpleDoNothingBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      return true;
+      return false;
    }
 
    public boolean hasInputBeenSet()

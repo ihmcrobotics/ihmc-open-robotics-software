@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.pickUpBallSpecificBehaviors;
+package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import javax.vecmath.Point3d;
 
