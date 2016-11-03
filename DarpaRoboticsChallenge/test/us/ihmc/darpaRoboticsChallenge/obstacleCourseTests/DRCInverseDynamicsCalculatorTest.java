@@ -7,10 +7,10 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;

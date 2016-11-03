@@ -1,10 +1,9 @@
-package us.ihmc.darpaRoboticsChallenge.util;
+package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.util.List;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -12,6 +11,7 @@ import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.perturbance.GroundContactPointsSlipper;
 
 public class OscillateFeetPerturber extends ModularRobotController

@@ -9,8 +9,8 @@ import javax.vecmath.Quat4d;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.robotController.RobotController;

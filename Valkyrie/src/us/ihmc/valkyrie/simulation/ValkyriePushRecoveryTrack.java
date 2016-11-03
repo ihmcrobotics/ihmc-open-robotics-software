@@ -5,8 +5,8 @@ import javax.vecmath.Vector3d;
 import com.martiansoftware.jsap.JSAPException;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCGuiInitialSetup;

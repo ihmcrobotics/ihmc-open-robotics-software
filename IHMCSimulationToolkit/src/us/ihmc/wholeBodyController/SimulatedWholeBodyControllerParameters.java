@@ -1,6 +1,6 @@
 package us.ihmc.wholeBodyController;
 
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 
 public interface SimulatedWholeBodyControllerParameters extends WholeBodyControllerParameters
 {
