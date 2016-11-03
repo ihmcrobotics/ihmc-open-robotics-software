@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -43,6 +43,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTestInterface
@@ -51,8 +52,8 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-//   @ContinuousIntegrationTest(estimatedDuration = 18.1)
-   @Test//(timeout = 90000)
+   @ContinuousIntegrationTest(estimatedDuration = 18.1)
+   @Test(timeout = 90000)
    public void testAdjustFootstepOnce() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
