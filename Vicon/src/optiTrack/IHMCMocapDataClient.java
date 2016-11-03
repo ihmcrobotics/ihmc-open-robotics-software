@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.lidarTests;
+package optiTrack;
 
 import java.util.ArrayList;
 
@@ -6,8 +6,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import optiTrack.MocapDataClient;
-import optiTrack.MocapRigidBody;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
