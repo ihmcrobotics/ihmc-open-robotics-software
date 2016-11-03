@@ -15,6 +15,7 @@ import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
+import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.ContactableStaticCylinderRobot;
 import us.ihmc.simulationconstructionset.util.environments.ContactableToroidRobot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObject;

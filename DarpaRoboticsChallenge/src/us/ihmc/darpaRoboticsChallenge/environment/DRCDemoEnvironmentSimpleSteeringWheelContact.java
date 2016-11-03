@@ -19,6 +19,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
+import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
 import us.ihmc.simulationconstructionset.util.environments.ContactableToroidRobot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObject;
