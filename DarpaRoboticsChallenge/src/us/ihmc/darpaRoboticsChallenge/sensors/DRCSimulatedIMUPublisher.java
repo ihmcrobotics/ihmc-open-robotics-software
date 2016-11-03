@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.controllers;
+package us.ihmc.darpaRoboticsChallenge.sensors;
 
 import java.util.List;
 
