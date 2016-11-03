@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.util;
+package us.ihmc.simulationconstructionset.util;
 
 /**
  * Centralized location for the names related to contols
