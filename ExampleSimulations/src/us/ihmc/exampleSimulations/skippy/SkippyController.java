@@ -97,9 +97,9 @@ public class SkippyController implements RobotController {
 	private final YoFramePoint bodyLocation = new YoFramePoint("body", ReferenceFrame.getWorldFrame(), registry);
 
 	private final ExternalForcePoint forceToCOM;
-	private final YoFramePoint com = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(),
+	private final YoFramePoint com = new YoFramePoint("com", ReferenceFrame.getWorldFrame(),
 			registry);
-	private final YoFrameVector comVelocity = new YoFrameVector("centerOfMassVelocity",
+	private final YoFrameVector comVelocity = new YoFrameVector("comVelocity",
 			ReferenceFrame.getWorldFrame(), registry);
 	private final YoFrameVector desiredReactionForce = new YoFrameVector("desiredReactionForce",
 			ReferenceFrame.getWorldFrame(), registry);
