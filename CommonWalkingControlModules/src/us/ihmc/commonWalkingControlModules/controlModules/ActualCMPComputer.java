@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.awt.Color;
 
@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
-class ActualCMPComputer extends SimpleRobotController
+public class ActualCMPComputer extends SimpleRobotController
 {
    private static final boolean visibleByDefault = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
