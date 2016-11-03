@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.controllers;
+package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -6,7 +6,6 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class JointLowLevelPositionControlSimulator implements RobotController
 {
@@ -69,6 +68,7 @@ public class JointLowLevelPositionControlSimulator implements RobotController
       }
    }
 
+   @Override
    public void doControl()
    {
       if (highLevelControllerOutputJoint.isUnderPositionControl())
@@ -87,20 +87,24 @@ public class JointLowLevelPositionControlSimulator implements RobotController
       jointController.resetIntegrator();
    }
 
+   @Override
    public void initialize()
    {
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
 
+   @Override
    public String getDescription()
    {
       return getName();
