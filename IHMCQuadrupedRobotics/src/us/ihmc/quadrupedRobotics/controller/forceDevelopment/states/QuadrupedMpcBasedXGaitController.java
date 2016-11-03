@@ -1,9 +1,10 @@
-package us.ihmc.quadrupedRobotics.controller.force.states;
+package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
 
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
+import us.ihmc.quadrupedRobotics.controller.forceDevelopment.QuadrupedTimedStepController;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -28,7 +29,7 @@ import us.ihmc.robotics.robotSide.*;
 import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 
-public class QuadrupedMpcBasedXGaitController implements QuadrupedController, QuadrupedTimedStepTransitionCallback
+public class QuadrupedMpcBasedXGaitController implements QuadrupedController, QuadrupedStepTransitionCallback
 {
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
@@ -100,6 +101,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final FramePoint supportCentroid;
    private final FrameVector stepAdjustmentVector;
+   private final FramePoint stepGoalPosition;
 
    // inputs
    private final DoubleYoVariable haltTime = new DoubleYoVariable("haltTime", registry);
@@ -131,7 +133,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       comPositionController = controllerToolbox.getComPositionController();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
-      timedStepController = controllerToolbox.getTimedStepController();
+      timedStepController = new QuadrupedTimedStepController(controllerToolbox.getSolePositionController(), runtimeEnvironment.getRobotTimestamp(), registry,
+            runtimeEnvironment.getGraphicsListRegistry());
       mpcOptimization = new QuadrupedDcmBasedMpcOptimizationWithLaneChange(controllerToolbox.getDcmPositionEstimator(), NUMBER_OF_PREVIEW_STEPS, registry,
             runtimeEnvironment.getGraphicsListRegistry());
       mpcSettings = new QuadrupedMpcOptimizationWithLaneChangeSettings(mpcMaximumPreviewTimeParameter.get(), mpcStepAdjustmentCostParameter.get(),
@@ -164,6 +167,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
          xGaitCurrentSteps.set(robotEnd, new QuadrupedTimedStep());
       }
       stepAdjustmentVector = new FrameVector();
+      stepGoalPosition = new FramePoint();
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
       supportCentroid = new FramePoint();
@@ -301,17 +305,20 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       for (int i = 0; i < timedStepController.getStepSequence().size(); i++)
       {
          QuadrupedTimedStep step = timedStepController.getStepSequence().get(i);
-         step.getGoalPosition().add(stepAdjustmentVector.getVector());
+         step.getGoalPosition(stepGoalPosition);
+         stepGoalPosition.changeFrame(worldFrame);
+         stepGoalPosition.add(stepAdjustmentVector);
          if (step.getTimeInterval().getStartTime() <= currentTime)
          {
-            crossoverProjection.project(step, taskSpaceEstimates.getSolePosition());
+            crossoverProjection.project(stepGoalPosition, taskSpaceEstimates.getSolePosition(), step.getRobotQuadrant());
          }
-         groundPlaneEstimator.projectZ(step.getGoalPosition());
+         groundPlaneEstimator.projectZ(stepGoalPosition);
+         step.setGoalPosition(stepGoalPosition);
       }
    }
 
    @Override
-   public void onLiftOff(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
+   public void onLiftOff(RobotQuadrant thisStepQuadrant)
    {
       // update ground plane estimate
       groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
@@ -324,7 +331,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    }
 
    @Override
-   public void onTouchDown(RobotQuadrant thisStepQuadrant, QuadrantDependentList<ContactState> thisContactState)
+   public void onTouchDown(RobotQuadrant thisStepQuadrant)
    {
       // update current step goal position
       RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
