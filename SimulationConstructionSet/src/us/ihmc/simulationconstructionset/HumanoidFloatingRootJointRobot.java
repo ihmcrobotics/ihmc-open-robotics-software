@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics;
+package us.ihmc.simulationconstructionset;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,9 +7,6 @@ import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.Joint;
 
 public class HumanoidFloatingRootJointRobot extends FloatingRootJointRobot
 {

@@ -2,7 +2,6 @@ package us.ihmc.darpaRoboticsChallenge;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.net.LocalObjectCommunicator;
@@ -13,6 +12,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.OffsetAndYawRobotInitialSetup
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 
