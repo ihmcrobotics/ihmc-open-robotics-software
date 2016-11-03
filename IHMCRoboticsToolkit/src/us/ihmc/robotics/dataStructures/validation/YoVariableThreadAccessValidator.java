@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.validation;
+package us.ihmc.robotics.dataStructures.validation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
