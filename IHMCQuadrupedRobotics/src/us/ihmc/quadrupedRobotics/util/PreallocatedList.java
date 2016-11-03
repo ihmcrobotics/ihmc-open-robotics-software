@@ -5,44 +5,67 @@ import java.util.*;
 
 public class PreallocatedList<E> implements List<E>
 {
-   private int size;
-   private int position;
-   private final List<E> elements;
+   protected final List<E> elements;
+   protected final List<IntegerWrapper> indexes;
+   protected IntegerWrapper size;
 
-   public PreallocatedList(Class<E> element, int capacity)
+   public interface DefaultElementFactory<E>
+   {
+      E createDefaultElement();
+   }
+
+   public PreallocatedList(int capacity, final DefaultElementFactory<E> defaultElementFactory)
    {
       if (capacity < 0)
       {
          throw new RuntimeException("List capacity must be nonnegative.");
       }
 
-      size = 0;
-      position = 0;
       elements = new ArrayList<>();
+      indexes = new ArrayList<>();
       for (int i = 0; i < capacity; i++)
       {
-         try
-         {
-            elements.add(element.newInstance());
-         }
-         catch (InstantiationException | IllegalAccessException e)
-         {
-            e.printStackTrace();
-         }
+         elements.add(defaultElementFactory.createDefaultElement());
+         indexes.add(new IntegerWrapper(i));
       }
+      size = new IntegerWrapper(0);
+   }
+
+   public PreallocatedList(int capacity, final Class<E> element)
+   {
+      this(capacity, new DefaultElementFactory<E>()
+      {
+         @Override
+         public E createDefaultElement()
+         {
+            try
+            {
+               return element.newInstance();
+            }
+            catch (InstantiationException | IllegalAccessException e)
+            {
+               throw new RuntimeException(e);
+            }
+         }
+      });
    }
 
    public PreallocatedList(ArrayList<E> elements)
    {
-      size = 0;
-      position = 0;
-      this.elements = elements;
+      this.elements = new ArrayList<>();
+      this.indexes = new ArrayList<>();
+      for (int i = 0; i < elements.size(); i++)
+      {
+         this.elements.add(elements.get(i));
+         this.indexes.add(new IntegerWrapper(i));
+      }
+      this.size = new IntegerWrapper(elements.size());
    }
 
    @Override
    public int size()
    {
-      return size;
+      return size.getValue();
    }
 
    public int capacity()
@@ -50,47 +73,37 @@ public class PreallocatedList<E> implements List<E>
       return elements.size();
    }
 
-   public void swap(int indexA, int indexB)
+   public void swap(int i1, int i2)
    {
-      if ((indexA >= size) || (indexB >= size))
+      if ((i1 >= size.getValue()) || (i2 >= size.getValue()))
       {
          throw new IndexOutOfBoundsException();
       }
-      swapUnsafe(indexA, indexB);
+      swapUnsafe(i1, i2);
    }
 
    public boolean add()
    {
-      return add(size);
+      return add(size.getValue());
    }
 
    public boolean add(int i)
    {
-      if ((i < 0) || (i > size))
+      if ((i < 0) || (i > size.getValue()))
       {
          throw new IndexOutOfBoundsException();
       }
-      else if (size == elements.size())
+      else if (size.getValue() == elements.size())
       {
          return false;
       }
-      else if (i < size / 2)
-      {
-         for (int j = 0; j < i; j++)
-         {
-            swapUnsafe(j, j - 1);
-         }
-         position = (position - 1) % elements.size();
-         size++;
-         return true;
-      }
       else
       {
-         for (int j = size - 1; j >= i; j--)
+         for (int j = size.getValue() - 1; j >= i; j--)
          {
             swapUnsafe(j, j + 1);
          }
-         size++;
+         size.increment();
          return true;
       }
    }
@@ -98,40 +111,30 @@ public class PreallocatedList<E> implements List<E>
    @Override
    public E get(int i)
    {
-      if ((i < 0) || (i >= size))
+      if ((i < 0) || (i >= size.getValue()))
       {
          throw new IndexOutOfBoundsException();
       }
       else
       {
-         return elements.get((position + i) % elements.size());
+         return elements.get(indexes.get(i).getValue());
       }
    }
 
    @Override
    public E remove(int i)
    {
-      if ((i < 0) || (i >= size))
+      if ((i < 0) || (i >= size.getValue()))
       {
          throw new IndexOutOfBoundsException();
       }
-      else if (i < size / 2)
-      {
-         for (int j = i; j > 0; j--)
-         {
-            swapUnsafe(j, j - 1);
-         }
-         position = (position + 1) % elements.size();
-         size--;
-         return null;
-      }
       else
       {
-         for (int j = i; j < size - 1; j++)
+         for (int j = i; j < size.getValue() - 1; j++)
          {
             swapUnsafe(j, j + 1);
          }
-         size--;
+         size.decrement();
          return null;
       }
    }
@@ -139,7 +142,7 @@ public class PreallocatedList<E> implements List<E>
    @Override
    public boolean remove(Object o)
    {
-      for (int i = 0; i < size; i++)
+      for (int i = 0; i < size.getValue(); i++)
       {
          if (get(i).equals(o))
          {
@@ -153,19 +156,19 @@ public class PreallocatedList<E> implements List<E>
    @Override
    public void clear()
    {
-      size = 0;
+      size.setValue(0);
    }
 
    @Override
    public boolean isEmpty()
    {
-      return size == 0;
+      return size.getValue() == 0;
    }
 
    @Override
    public boolean contains(Object o)
    {
-      for (int index = 0; index < size; index++)
+      for (int index = 0; index < size.getValue(); index++)
       {
          if (get(index).equals(o))
             return true;
@@ -176,7 +179,7 @@ public class PreallocatedList<E> implements List<E>
    @Override
    public int indexOf(Object o)
    {
-      for (int index = 0; index < size; index++)
+      for (int index = 0; index < size.getValue(); index++)
       {
          if (get(index).equals(o))
             return index;
@@ -187,7 +190,7 @@ public class PreallocatedList<E> implements List<E>
    @Override
    public int lastIndexOf(Object o)
    {
-      for (int index = size - 1; index >= 0; index--)
+      for (int index = size.getValue() - 1; index >= 0; index--)
       {
          if (get(index).equals(o))
             return index;
@@ -198,8 +201,8 @@ public class PreallocatedList<E> implements List<E>
    @Override
    public Object[] toArray()
    {
-      Object[] objects = new Object[size];
-      for (int i = 0; i < size; i++)
+      Object[] objects = new Object[size.getValue()];
+      for (int i = 0; i < size.getValue(); i++)
       {
          objects[i] = get(i);
       }
@@ -209,15 +212,15 @@ public class PreallocatedList<E> implements List<E>
    @Override
    public <T> T[] toArray(T[] ts)
    {
-      if (ts.length < size)
+      if (ts.length < size.getValue())
       {
-         ts = (T[]) Array.newInstance(ts.getClass().getComponentType(), size);
+         ts = (T[]) Array.newInstance(ts.getClass().getComponentType(), size.getValue());
       }
-      else if (ts.length > size)
+      else if (ts.length > size.getValue())
       {
-         ts[size] = null;
+         ts[size.getValue()] = null;
       }
-      for (int i = 0; i < size; i++)
+      for (int i = 0; i < size.getValue(); i++)
       {
          ts[i] = (T)get(i);
       }
@@ -296,12 +299,40 @@ public class PreallocatedList<E> implements List<E>
       throw new UnsupportedOperationException();
    }
 
-   private void swapUnsafe(int indexA, int indexB)
+   private void swapUnsafe(int i1, int i2)
    {
-      int a = (position + indexA) % elements.size();
-      int b = (position + indexB) % elements.size();
-      E tmp = elements.get(a);
-      elements.set(a, elements.get(b));
-      elements.set(b, tmp);
+      int indexTmp = indexes.get(i1).getValue();
+      indexes.get(i1).setValue(indexes.get(i2).getValue());
+      indexes.get(i2).setValue(indexTmp);
+   }
+
+   protected class IntegerWrapper
+   {
+      private int value;
+
+      public IntegerWrapper(int value)
+      {
+         this.value = value;
+      }
+
+      public int getValue()
+      {
+         return value;
+      }
+
+      public void setValue(int value)
+      {
+         this.value = value;
+      }
+
+      public void increment()
+      {
+         this.value++;
+      }
+
+      public void decrement()
+      {
+         this.value--;
+      }
    }
 }

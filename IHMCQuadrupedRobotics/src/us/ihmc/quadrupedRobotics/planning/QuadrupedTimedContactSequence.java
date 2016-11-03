@@ -52,7 +52,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
 
    public QuadrupedTimedContactSequence(int pastContactPhaseCapacity, int futureContactPhaseCapacity)
    {
-      super(QuadrupedTimedContactPhase.class, pastContactPhaseCapacity + futureContactPhaseCapacity + 1);
+      super(pastContactPhaseCapacity + futureContactPhaseCapacity + 1, QuadrupedTimedContactPhase.class);
       this.pastContactPhaseCapacity = pastContactPhaseCapacity;
 
       if (capacity() < 1)
@@ -87,7 +87,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
     * @param currentContactState current sole contact state (input)
     * @param currentTime current time (input)
     */
-   public void update(List<QuadrupedTimedStep> stepSequence, QuadrantDependentList<FramePoint> currentSolePosition,
+   public void update(List<? extends QuadrupedTimedStep> stepSequence, QuadrantDependentList<FramePoint> currentSolePosition,
          QuadrantDependentList<ContactState> currentContactState, double currentTime)
    {
       // initialize contact state and sole positions
@@ -114,7 +114,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
             stepTransition[numberOfStepTransitions].time = step.getTimeInterval().getStartTime();
             stepTransition[numberOfStepTransitions].type = QuadrupedStepTransitionType.LIFT_OFF;
             stepTransition[numberOfStepTransitions].robotQuadrant = step.getRobotQuadrant();
-            stepTransition[numberOfStepTransitions].solePosition = step.getGoalPosition();
+            step.getGoalPosition(stepTransition[numberOfStepTransitions].solePosition);
             transitionStep[numberOfStepTransitions] = step;
             numberOfStepTransitions++;
          }
@@ -124,7 +124,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
             stepTransition[numberOfStepTransitions].time = step.getTimeInterval().getEndTime();
             stepTransition[numberOfStepTransitions].type = QuadrupedStepTransitionType.TOUCH_DOWN;
             stepTransition[numberOfStepTransitions].robotQuadrant = step.getRobotQuadrant();
-            stepTransition[numberOfStepTransitions].solePosition = step.getGoalPosition();
+            step.getGoalPosition(stepTransition[numberOfStepTransitions].solePosition);
             transitionStep[numberOfStepTransitions] = step;
             numberOfStepTransitions++;
          }
