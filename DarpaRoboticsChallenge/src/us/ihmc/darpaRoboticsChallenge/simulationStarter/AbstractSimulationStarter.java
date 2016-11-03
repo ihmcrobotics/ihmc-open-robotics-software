@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.darpaRoboticsChallenge.simulationStarter;
 
 import javax.vecmath.Vector3d;
 
@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
+import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.OffsetAndYawRobotInitialSetup;

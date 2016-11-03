@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.darpaRoboticsChallenge.simulationStarter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +22,10 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.darpaRoboticsChallenge.DRCLidar;
+import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
+import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
+import us.ihmc.darpaRoboticsChallenge.SCSPlaybackListener;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;

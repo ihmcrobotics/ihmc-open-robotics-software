@@ -22,7 +22,6 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
-import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCGuiInitialSetup;
@@ -30,6 +29,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameter
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.rosAPI.ThePeoplesGloriousNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.simulationStarter.DRCSimulationStarter;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
