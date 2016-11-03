@@ -5,8 +5,8 @@ import com.martiansoftware.jsap.JSAPException;
 import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.atlas.initialSetup.VRCTask1InVehicleHovering;
 import us.ihmc.darpaRoboticsChallenge.DRCDemo03;
-import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 
 public class AtlasDemo03 extends DRCDemo03
