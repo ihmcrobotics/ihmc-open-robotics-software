@@ -11,12 +11,12 @@ import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListe
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class CinderBlockFieldEnvironment implements CommonAvatarEnvironmentInterface
+public class DRCCinderBlockFieldEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D(getClass().getSimpleName());
    private final List<List<FramePose>> cinderBlockPoses = new ArrayList<>();
 
-   public CinderBlockFieldEnvironment()
+   public DRCCinderBlockFieldEnvironment()
    {
       combinedTerrainObject3D.addTerrainObject(DRCDemo01NavigationEnvironment.setUpGround("FlatGround"));
       combinedTerrainObject3D.addTerrainObject(DRCDemo01NavigationEnvironment.setUpCinderBlockFieldActual("CinderBlockField", 0.0, 0.0, cinderBlockPoses));
