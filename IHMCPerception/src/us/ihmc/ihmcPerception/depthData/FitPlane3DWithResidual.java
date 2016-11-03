@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package us.ihmc.darpaRoboticsChallenge.sensorProcessing.footPlacement;
+package us.ihmc.ihmcPerception.depthData;
 
 import java.util.List;
 
