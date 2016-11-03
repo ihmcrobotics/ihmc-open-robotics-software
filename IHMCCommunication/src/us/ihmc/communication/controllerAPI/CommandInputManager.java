@@ -121,8 +121,16 @@ public class CommandInputManager
     */
    public <M extends Packet<M>> void submitMessage(M message)
    {
-      if (message == null || message.getUniqueId() == Packet.INVALID_MESSAGE_ID)
+      if (message == null)
+      {
+         PrintTools.warn(this, "Received a null message, ignored.");
          return;
+      }
+      if (message.getUniqueId() == Packet.INVALID_MESSAGE_ID)
+      {
+         PrintTools.warn(this, "Received a message with an invalid id, ignored. Message class: " + message.getClass().getSimpleName());
+         return;
+      }
 
       if (message instanceof MultiplePacketHolder)
       {

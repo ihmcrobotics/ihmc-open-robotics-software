@@ -28,7 +28,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
@@ -293,7 +293,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 //	      walk.set(true);
 
 	      FootstepDataListCommand footstepList = new FootstepDataListCommand();
-         FootstepDataControllerCommand footstepCommand = new FootstepDataControllerCommand();
+         FootstepDataCommand footstepCommand = new FootstepDataCommand();
 
          Point3d position = new Point3d(0.0, 0.2, 0.0);
          Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
@@ -328,7 +328,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
 
 	      footstepList = new FootstepDataListCommand();
-         footstepCommand = new FootstepDataControllerCommand();
+         footstepCommand = new FootstepDataCommand();
 
          position = new Point3d(1.0, 0.2, 0.0);
          orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
@@ -402,7 +402,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 //      walk.set(true);
 
         FootstepDataListCommand footstepList = new FootstepDataListCommand();
-        FootstepDataControllerCommand footstepCommand = new FootstepDataControllerCommand();
+        FootstepDataCommand footstepCommand = new FootstepDataCommand();
 
         Point3d position = new Point3d(0.3, 0.2, 0.0);
         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
@@ -432,7 +432,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
         // Some more steps:
         footstepList = new FootstepDataListCommand();
-        footstepCommand = new FootstepDataControllerCommand();
+        footstepCommand = new FootstepDataCommand();
 
         position = new Point3d(0.65, 0.2, 0.0);
         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
