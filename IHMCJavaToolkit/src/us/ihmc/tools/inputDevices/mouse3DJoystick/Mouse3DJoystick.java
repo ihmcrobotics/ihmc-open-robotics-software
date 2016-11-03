@@ -44,7 +44,8 @@ public class Mouse3DJoystick
       controllerScales.put("Space Navigator", 1.0 / 350.0);
       controllerScales.put("SpaceMouse Wireless Receiver", 1.0);
       controllerScales.put("SpaceMouse Pro", 1.0);
-      
+      controllerScales.put("SpaceM", 1.0);
+
       Map<ControllerType, Controller> controllersByType = JInputTools.getControllersByType();
       
       if (controllersByType.containsKey(ControllerType.JOYSTICK_3D))

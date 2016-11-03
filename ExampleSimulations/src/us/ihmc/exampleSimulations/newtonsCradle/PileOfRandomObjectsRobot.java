@@ -12,9 +12,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.NullJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
@@ -41,7 +39,6 @@ public class PileOfRandomObjectsRobot
 
       createFallingObjects(numberOfObjects, collisionShapeFactory, random);
       //      createBoardFrame(collisionShapeFactory, random);
-      createGroundAsABox(collisionShapeFactory);
    }
 
    private void createFallingObjects(int numberOfObjects, CollisionShapeFactory collisionShapeFactory, Random random)
@@ -76,7 +73,7 @@ public class PileOfRandomObjectsRobot
          floatingJoint.setLink(link);
          robot.addRootJoint(floatingJoint);
 
-         double xyExtents = 0.25;
+         double xyExtents = 1.5; //0.25;
          double x = RandomTools.generateRandomDouble(random, -xyExtents, xyExtents);
          double y = RandomTools.generateRandomDouble(random, -xyExtents, xyExtents);
          double z = RandomTools.generateRandomDouble(random, 0.2, 6.0);
@@ -91,36 +88,6 @@ public class PileOfRandomObjectsRobot
 
          this.robots.add(robot);
       }
-   }
-
-   private void createGroundAsABox(CollisionShapeFactory collisionShapeFactory)
-   {
-      Robot baseRobot = new Robot("BaseRobot");
-      NullJoint baseJoint = new NullJoint("base", new Vector3d(), baseRobot);
-
-      //    FloatingJoint baseJoint = new FloatingJoint("base", new Vector3d(), this);
-      Link baseLink = new Link("base");
-      baseLink.setMassAndRadiiOfGyration(1000000000.0, 100.0, 100.0, 100.0);
-      Graphics3DObject baseLinkGraphics = new Graphics3DObject();
-      baseLinkGraphics.translate(0.0, 0.0, -0.05 / 2.0);
-      baseLinkGraphics.addCube(4.0, 4.0, 0.05, YoAppearance.Green());
-      baseLink.setLinkGraphics(baseLinkGraphics);
-      baseLink.enableCollisions(100.0, baseRobot.getRobotsYoVariableRegistry());
-
-      CollisionShapeDescription<?> shapeDesc = collisionShapeFactory.createBox(4.0 / 2.0, 4.0 / 2.0, 0.05 / 2.0);
-
-      RigidBodyTransform shapeToLinkTransform = new RigidBodyTransform();
-      shapeToLinkTransform.setTranslation(new Vector3d(-0.0, 0.0, 0.0));
-      CollisionShape groundShape = collisionShapeFactory.addShape(baseLink, shapeToLinkTransform, shapeDesc, true, 0xFFFFFFFF, 0xFFFFFFFF);
-      groundShape.setIsGround(true);
-
-      //    baseJoint.setVelocity(0.0, 0.0, 1.0);
-
-      baseJoint.setLink(baseLink);
-      baseRobot.addRootJoint(baseJoint);
-
-      baseRobot.addStaticLink(baseLink);
-      this.robots.add(baseRobot);
    }
 
    private void createBoardFrame(CollisionShapeFactory collisionShapeFactory, Random random)

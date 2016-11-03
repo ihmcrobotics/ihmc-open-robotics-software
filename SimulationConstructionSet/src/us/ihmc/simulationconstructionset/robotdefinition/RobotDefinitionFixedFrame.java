@@ -27,8 +27,8 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
-import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.robotdefinition.JointDefinitionFixedFrame.JointType;
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class RobotDefinitionFixedFrame
 {

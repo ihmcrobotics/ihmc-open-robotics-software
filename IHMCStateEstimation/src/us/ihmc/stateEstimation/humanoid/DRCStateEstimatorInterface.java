@@ -3,8 +3,8 @@ package us.ihmc.stateEstimation.humanoid;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public interface DRCStateEstimatorInterface extends RobotController
 {

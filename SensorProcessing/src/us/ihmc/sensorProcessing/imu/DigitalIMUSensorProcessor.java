@@ -4,11 +4,11 @@ package us.ihmc.sensorProcessing.imu;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.simulationconstructionset.processedSensors.ProcessedIMUSensorsWriteOnlyInterface;
-import us.ihmc.simulationconstructionset.rawSensors.RawIMUSensorsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.sensors.ProcessedIMUSensorsWriteOnlyInterface;
+import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
 
 public class DigitalIMUSensorProcessor implements IMUSensorProcessor
 {

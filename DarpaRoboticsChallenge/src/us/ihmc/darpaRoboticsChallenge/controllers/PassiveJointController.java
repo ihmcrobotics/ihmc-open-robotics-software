@@ -3,8 +3,8 @@ package us.ihmc.darpaRoboticsChallenge.controllers;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class PassiveJointController implements RobotController
 {

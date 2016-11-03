@@ -17,6 +17,7 @@ import javax.swing.JFileChooser;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class GUIConfigurationSaveAndLoad
 {

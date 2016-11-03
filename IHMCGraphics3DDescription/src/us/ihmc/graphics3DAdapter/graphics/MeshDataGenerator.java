@@ -139,7 +139,7 @@ public class MeshDataGenerator
 
    /**
     * Create a triangle mesh for the given polygon.
-    * <b> It is assumed that the polygon is convex and clockwise ordered. </b> 
+    * <b> It is assumed that the polygon is convex and clockwise ordered. </b>
     * @param polygonPoints the vertices of the polygon.
     * @return the created triangle mesh.
     */
@@ -150,7 +150,7 @@ public class MeshDataGenerator
 
    /**
     * Create a triangle mesh for the given polygon.
-    * <b> It is assumed that the polygon is convex and clockwise ordered. </b> 
+    * <b> It is assumed that the polygon is convex and clockwise ordered. </b>
     * @param polygonPoints the vertices of the polygon.
     * @param numberOfVertices will read only the vertices from 0 to numberOfVertices - 1.
     * @return the created triangle mesh.
@@ -168,7 +168,7 @@ public class MeshDataGenerator
 
    /**
     * Create a triangle mesh for the given polygon.
-    * <b> It is assumed that the polygon is convex and clockwise ordered. </b> 
+    * <b> It is assumed that the polygon is convex and clockwise ordered. </b>
     * @param polygonPoints the vertices of the polygon.
     * @return the created triangle mesh.
     */
@@ -203,7 +203,7 @@ public class MeshDataGenerator
 
    /**
     * Create a triangle mesh for the given polygon.
-    * <b> It is assumed that the polygon is convex and clockwise ordered. </b> 
+    * <b> It is assumed that the polygon is convex and clockwise ordered. </b>
     * @param polygonPoints the vertices of the polygon.
     * @return the created triangle mesh.
     */
@@ -216,7 +216,7 @@ public class MeshDataGenerator
 
    /**
     * Create a triangle mesh for the given polygon.
-    * <b> It is assumed that the polygon is convex and counter-clockwise ordered. </b> 
+    * <b> It is assumed that the polygon is convex and counter-clockwise ordered. </b>
     * @param polygonPoints the vertices of the polygon.
     * @return the created triangle mesh.
     */
@@ -280,7 +280,7 @@ public class MeshDataGenerator
    /**
     * Create a triangle mesh for the given polygon 2d and extrude it along the z-axis.
     * <b> It is assumed that the polygon is convex and clockwise ordered. </b>
-    * <p> 
+    * <p>
     * TODO: Figure out how to texture an extruded polygon!
     * @param polygonPoints the vertices of the polygon.
     * @return the created triangle mesh.
@@ -1286,7 +1286,7 @@ public class MeshDataGenerator
       normals[21] = new Vector3f((float) Math.cos(frontBackAngle), 0.0f, (float) Math.sin(frontBackAngle));
       textPoints[21] = new TexCoord2f(0.75f, 0.75f);
 
-      // Left face                                                                                       
+      // Left face
       points[22] = new Point3f(0.0f, 0.0f, lz + lh);
       normals[22] = new Vector3f(0.0f, (float) Math.cos(leftRightAngle), (float) Math.sin(leftRightAngle));
       textPoints[22] = new TexCoord2f(0.675f, 0.675f);
@@ -1297,7 +1297,7 @@ public class MeshDataGenerator
       normals[24] = new Vector3f(0.0f, (float) Math.cos(leftRightAngle), (float) Math.sin(leftRightAngle));
       textPoints[24] = new TexCoord2f(0.75f, 0.75f);
 
-      // Right face                                                                                      
+      // Right face
       points[25] = new Point3f(0.0f, 0.0f, lz + lh);
       normals[25] = new Vector3f(0.0f, -(float) Math.cos(leftRightAngle), (float) Math.sin(leftRightAngle));
       textPoints[25] = new TexCoord2f(0.675f, 0.675f);
@@ -1331,7 +1331,7 @@ public class MeshDataGenerator
       normals[33] = new Vector3f((float) Math.cos(frontBackAngle), 0.0f, -(float) Math.sin(frontBackAngle));
       textPoints[33] = new TexCoord2f(0.75f, 0.75f);
 
-      // Left face                                                                                       
+      // Left face
       points[34] = new Point3f(0.0f, 0.0f, -lh);
       normals[34] = new Vector3f(0.0f, (float) Math.cos(leftRightAngle), -(float) Math.sin(leftRightAngle));
       textPoints[34] = new TexCoord2f(0.675f, 0.675f);
@@ -1342,7 +1342,7 @@ public class MeshDataGenerator
       normals[36] = new Vector3f(0.0f, (float) Math.cos(leftRightAngle), -(float) Math.sin(leftRightAngle));
       textPoints[36] = new TexCoord2f(0.75f, 0.75f);
 
-      // Right face                                                                                       
+      // Right face
       points[37] = new Point3f(0.0f, 0.0f, -lh);
       normals[37] = new Vector3f(0.0f, -(float) Math.cos(leftRightAngle), -(float) Math.sin(leftRightAngle));
       textPoints[37] = new TexCoord2f(0.675f, 0.675f);
@@ -1520,6 +1520,8 @@ public class MeshDataGenerator
 
    public static MeshDataHolder Capsule(float height, float xRadius, float yRadius, float zRadius, int latitudeN, int longitudeN)
    {
+      if (latitudeN %2 != 0) throw new RuntimeException("Sorry but latitudeN must be even for now in MeshDataGenerator.Capsule(). Please change or fix Capsule");
+      if (longitudeN %2 != 0) throw new RuntimeException("Sorry but latitudeN must be even for now in MeshDataGenerator.Capsule(). Please change or fix Capsule");
       // Reminder of longitude and latitude: http://www.geographyalltheway.com/ks3_geography/maps_atlases/longitude_latitude.htm
       int numberOfVertices = (latitudeN) * longitudeN + 2;
       Point3f points[] = new Point3f[numberOfVertices];

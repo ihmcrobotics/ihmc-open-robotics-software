@@ -2,7 +2,7 @@ package us.ihmc.simulationconstructionset;
 
 import java.util.StringTokenizer;
 
-import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 /**
  * <p>Title: SimulationConstructionSet</p>

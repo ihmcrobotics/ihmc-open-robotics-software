@@ -4,8 +4,8 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 
 public class PIDLidarTorqueController implements RobotController
 {

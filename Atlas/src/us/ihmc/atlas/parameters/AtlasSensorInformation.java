@@ -8,7 +8,6 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -38,6 +37,11 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
     * PPS Parameters
     */
    private static final String MULTISENSE_SL_PPS_TOPIC = multisense_namespace + "/stamped_pps";
+   
+   /**
+    * Send robot data to ROS
+    */
+   public static final boolean SEND_ROBOT_DATA_TO_ROS = false;
 
    /**
     * Camera Parameters
@@ -162,7 +166,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       cameraParameters[BLACKFLY_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, fisheye_left_camera_info, BLACKFLY_LEFT_CAMERA_ID);
       cameraParameters[BLACKFLY_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, fisheye_right_camera_info, BLACKFLY_RIGHT_CAMERA_ID);
 
-      setupROSLocationService = target == DRCRobotModel.RobotTarget.REAL_ROBOT || (target == DRCRobotModel.RobotTarget.SCS && DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS);
+      setupROSLocationService = target == DRCRobotModel.RobotTarget.REAL_ROBOT || (target == DRCRobotModel.RobotTarget.SCS && SEND_ROBOT_DATA_TO_ROS);
       setupROSParameterSetters = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       isMultisenseHead = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
