@@ -8,6 +8,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
@@ -56,6 +57,7 @@ public abstract class ControllerAPIDefinition
       commands.add(PelvisHeightTrajectoryCommand.class);
       commands.add(StopAllTrajectoryCommand.class);
       commands.add(FootstepDataListCommand.class);
+      commands.add(AdjustFootstepCommand.class);
       commands.add(GoHomeCommand.class);
       commands.add(EndEffectorLoadBearingCommand.class);
       commands.add(ArmDesiredAccelerationsCommand.class);

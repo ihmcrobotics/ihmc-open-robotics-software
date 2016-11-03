@@ -13,7 +13,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    private double swingTime;
    private double transferTime = 0.0;
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
-   private final RecyclingArrayList<FootstepDataControllerCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataControllerCommand.class);
+   private final RecyclingArrayList<FootstepDataCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataCommand.class);
 
    public FootstepDataListCommand()
    {
@@ -52,7 +52,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       swingTime = other.swingTime;
       transferTime = other.transferTime;
       executionMode = other.executionMode;
-      RecyclingArrayList<FootstepDataControllerCommand> otherFootsteps = other.getFootsteps();
+      RecyclingArrayList<FootstepDataCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
       {
          for (int i = 0; i < otherFootsteps.size(); i++)
@@ -65,7 +65,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       clear();
    }
 
-   public void addFootstep(FootstepDataControllerCommand footstep)
+   public void addFootstep(FootstepDataCommand footstep)
    {
       footsteps.add().set(footstep);
    }
@@ -100,7 +100,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       return executionMode;
    }
 
-   public RecyclingArrayList<FootstepDataControllerCommand> getFootsteps()
+   public RecyclingArrayList<FootstepDataCommand> getFootsteps()
    {
       return footsteps;
    }
@@ -110,7 +110,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       footsteps.remove(footstepIndex);
    }
 
-   public FootstepDataControllerCommand getFootstep(int footstepIndex)
+   public FootstepDataCommand getFootstep(int footstepIndex)
    {
       return footsteps.get(footstepIndex);
    }

@@ -21,7 +21,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedOrientationTrajectoryGenerator;
@@ -122,7 +121,6 @@ public class SwingState extends AbstractUnconstrainedState
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
-      doContinuousReplanning.set(footControlHelper.getWalkingControllerParameters().useOptimizationBasedICPController());
 
       footFrame = contactableFoot.getFrameAfterParentJoint();
       toeFrame = createToeFrame(robotSide);
@@ -414,12 +412,13 @@ public class SwingState extends AbstractUnconstrainedState
       desiredToePoseToPack.setPoseIncludingFrame(worldFrame, toePose);
    }
 
-   public void replanTrajectory(Footstep newFootstep, double swingTime)
+   public void replanTrajectory(Footstep newFootstep, double swingTime, boolean continuousReplan)
    {
       setFootstep(newFootstep, swingTime);
       computeSwingTimeRemaining();
 
-      this.replanTrajectory.set(true);
+      replanTrajectory.set(true);
+      doContinuousReplanning.set(continuousReplan);
    }
 
    private void computeSwingTimeRemaining()
