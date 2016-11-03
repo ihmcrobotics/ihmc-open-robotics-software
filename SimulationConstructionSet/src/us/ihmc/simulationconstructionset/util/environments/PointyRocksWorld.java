@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.environment;
+package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +17,6 @@ import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
