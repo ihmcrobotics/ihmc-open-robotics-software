@@ -2,15 +2,16 @@ package us.ihmc.darpaRoboticsChallenge.logProcessor;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,26 +27,36 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegi
 
 public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumanoidControllerToolbox
 {
-//   private final YoFramePoint capturePointUpdatedFromSCS;
+   private static final boolean UPDATE_CAPTURE_POINT_FROM_SCS = false;
+   
    private final SideDependentList<YoFramePoint2d> desiredCoPsUpdatedFromSCS = new SideDependentList<>();
+   
+   private final YoFramePoint capturePointUpdatedFromSCS;
 
-   public UpdatableHighLevelHumanoidControllerToolbox(SimulationConstructionSet scs,
-         FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
-         CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
-         CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-         SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ, double omega0, TwistCalculator twistCalculator,
-         SideDependentList<ContactableFoot> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT, ArrayList<Updatable> updatables,
-         YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
+   public UpdatableHighLevelHumanoidControllerToolbox(SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel,
+                                                      GeometricJacobianHolder robotJacobianHolder, CommonHumanoidReferenceFrames referenceFrames,
+                                                      SideDependentList<FootSwitchInterface> footSwitches,
+                                                      CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
+                                                      SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ,
+                                                      double omega0, TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet,
+                                                      SideDependentList<ContactablePlaneBody> hands, double controlDT, ArrayList<Updatable> updatables,
+                                                      YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
-      super(fullRobotModel, robotJacobianHolder, referenceFrames, footSwitches, centerOfMassDataHolder,
-            wristForceSensors, yoTime, gravityZ, omega0, twistCalculator, feet, hands, controlDT,
-            updatables, yoGraphicsListRegistry, jointsToIgnore);
+      super(fullRobotModel, robotJacobianHolder, referenceFrames, footSwitches, centerOfMassDataHolder, wristForceSensors, yoTime, gravityZ, omega0,
+            twistCalculator, feet, hands, controlDT, updatables, yoGraphicsListRegistry, jointsToIgnore);
 
-      String capturePointNameSpace = HighLevelHumanoidControllerToolbox.class.getSimpleName();
-      DoubleYoVariable capturePointX = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointX");
-      DoubleYoVariable capturePointY = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointY");
-      DoubleYoVariable capturePointZ = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointZ");
-//      capturePointUpdatedFromSCS = new YoFramePoint(capturePointX, capturePointY, capturePointZ, worldFrame);
+      if (UPDATE_CAPTURE_POINT_FROM_SCS)
+      {
+         String capturePointNameSpace = HighLevelHumanoidControllerToolbox.class.getSimpleName();
+         DoubleYoVariable capturePointX = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointX");
+         DoubleYoVariable capturePointY = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointY");
+         DoubleYoVariable capturePointZ = (DoubleYoVariable) scs.getVariable(capturePointNameSpace, "capturePointZ");
+         capturePointUpdatedFromSCS = new YoFramePoint(capturePointX, capturePointY, capturePointZ, worldFrame);
+      }
+      else
+      {
+         capturePointUpdatedFromSCS = null;
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -63,8 +74,11 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
    @Override
    public void update()
    {
-      // update the yoCapturePoint
-//      yoCapturePoint.set(capturePointUpdatedFromSCS);
+      if (UPDATE_CAPTURE_POINT_FROM_SCS)
+      {
+         // update the yoCapturePoint
+         yoCapturePoint.set(capturePointUpdatedFromSCS);
+      }
 
       // update the bipedSupportPolygons
       updateBipedSupportPolygons();
