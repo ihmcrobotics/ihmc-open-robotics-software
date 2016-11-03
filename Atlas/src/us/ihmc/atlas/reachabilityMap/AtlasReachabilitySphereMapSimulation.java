@@ -8,7 +8,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.ReachabilityMapListener;
 import us.ihmc.commonWalkingControlModules.reachabilityMapCalculator.ReachabilitySphereMapCalculator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.JointAnglesWriter;
+import us.ihmc.darpaRoboticsChallenge.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
