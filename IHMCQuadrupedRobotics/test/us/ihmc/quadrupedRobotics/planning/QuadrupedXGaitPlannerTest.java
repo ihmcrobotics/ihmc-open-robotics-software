@@ -5,6 +5,7 @@ import static us.ihmc.tools.continuousIntegration.IntegrationCategory.FAST;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
@@ -56,22 +57,22 @@ public class QuadrupedXGaitPlannerTest
 
       nominalSteps.get(0).setRobotQuadrant(RobotQuadrant.HIND_RIGHT);
       nominalSteps.get(0).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(0).getGoalPosition().set(-0.25, -0.125, 0.0);
+      nominalSteps.get(0).setGoalPosition(new Point3d(-0.25, -0.125, 0.0));
       nominalSteps.get(0).getTimeInterval().setInterval(0.0, 0.25);
 
       nominalSteps.get(1).setRobotQuadrant(RobotQuadrant.FRONT_RIGHT);
       nominalSteps.get(1).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(1).getGoalPosition().set(0.875, -0.125, 0.0);
+      nominalSteps.get(1).setGoalPosition(new Point3d(0.875, -0.125, 0.0));
       nominalSteps.get(1).getTimeInterval().setInterval(0.125, 0.375);
 
       nominalSteps.get(2).setRobotQuadrant(RobotQuadrant.HIND_LEFT);
       nominalSteps.get(2).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(2).getGoalPosition().set(0.0, 0.125, 0.0);
+      nominalSteps.get(2).setGoalPosition(new Point3d(0.0, 0.125, 0.0));
       nominalSteps.get(2).getTimeInterval().setInterval(0.25, 0.5);
 
       nominalSteps.get(3).setRobotQuadrant(RobotQuadrant.FRONT_LEFT);
       nominalSteps.get(3).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(3).getGoalPosition().set(1.125, 0.125, 0.0);
+      nominalSteps.get(3).setGoalPosition(new Point3d(1.125, 0.125, 0.0));
       nominalSteps.get(3).getTimeInterval().setInterval(0.375, 0.625);
 
       double epsilon = 0.00001;
@@ -102,13 +103,13 @@ public class QuadrupedXGaitPlannerTest
       priorSteps.set(RobotEnd.HIND, new QuadrupedTimedStep());
       priorSteps.get(RobotEnd.HIND).setRobotQuadrant(RobotQuadrant.HIND_RIGHT);
       priorSteps.get(RobotEnd.HIND).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      priorSteps.get(RobotEnd.HIND).getGoalPosition().set(-0.25, -0.125, 0.0);
+      priorSteps.get(RobotEnd.HIND).setGoalPosition(new Point3d(-0.25, -0.125, 0.0));
       priorSteps.get(RobotEnd.HIND).getTimeInterval().setInterval(0.0, 0.25);
 
       priorSteps.set(RobotEnd.FRONT, new QuadrupedTimedStep());
       priorSteps.get(RobotEnd.FRONT).setRobotQuadrant(RobotQuadrant.FRONT_RIGHT);
       priorSteps.get(RobotEnd.FRONT).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      priorSteps.get(RobotEnd.FRONT).getGoalPosition().set(0.875, -0.125, 0.0);
+      priorSteps.get(RobotEnd.FRONT).setGoalPosition(new Point3d(0.875, -0.125, 0.0));
       priorSteps.get(RobotEnd.FRONT).getTimeInterval().setInterval(0.125, 0.375);
 
       ArrayList<QuadrupedTimedStep> plannedSteps = new ArrayList<>();
@@ -126,12 +127,12 @@ public class QuadrupedXGaitPlannerTest
 
       nominalSteps.get(0).setRobotQuadrant(RobotQuadrant.HIND_LEFT);
       nominalSteps.get(0).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(0).getGoalPosition().set(0.0, 0.125, 0.0);
+      nominalSteps.get(0).setGoalPosition(new Point3d(0.0, 0.125, 0.0));
       nominalSteps.get(0).getTimeInterval().setInterval(0.25, 0.5);
 
       nominalSteps.get(1).setRobotQuadrant(RobotQuadrant.FRONT_LEFT);
       nominalSteps.get(1).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(1).getGoalPosition().set(1.125, 0.125, 0.0);
+      nominalSteps.get(1).setGoalPosition(new Point3d(1.125, 0.125, 0.0));
       nominalSteps.get(1).getTimeInterval().setInterval(0.375, 0.625);
 
       double epsilon = 0.00001;
