@@ -1,13 +1,10 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.SdfLoader;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
 import javax.xml.bind.JAXBException;
-
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFDescriptionMutator;
 
 public class DRCRobotSDFLoader
 {
