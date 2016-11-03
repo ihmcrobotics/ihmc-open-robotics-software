@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.util;
+package us.ihmc.darpaRoboticsChallenge.ros;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
