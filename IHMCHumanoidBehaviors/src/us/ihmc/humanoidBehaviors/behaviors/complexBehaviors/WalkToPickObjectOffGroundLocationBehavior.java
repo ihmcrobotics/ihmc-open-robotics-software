@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToPickUpLocationBehavior.WalkState;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToPickObjectOffGroundLocationBehavior.WalkState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -21,7 +21,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
-public class WalkToPickUpLocationBehavior extends StateMachineBehavior<WalkState>
+public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehavior<WalkState>
 {
 
    public enum WalkState
@@ -37,7 +37,7 @@ public class WalkToPickUpLocationBehavior extends StateMachineBehavior<WalkState
    private final double standingDistance = 0.4;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public WalkToPickUpLocationBehavior(DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames,
+   public WalkToPickObjectOffGroundLocationBehavior(DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames,
          BehaviorCommunicationBridge outgoingCommunicationBridge, WholeBodyControllerParameters wholeBodyControllerParameters,
          FullHumanoidRobotModel fullRobotModel, AtlasPrimitiveActions atlasPrimitiveActions)
    {

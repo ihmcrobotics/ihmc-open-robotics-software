@@ -74,7 +74,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    private static final boolean ADD_LIMBO_BAR = false;
    private static final boolean ADD_CEILING = false;
    
-   private static final boolean ADD_SOCCER_BALL = false;
+   private static final boolean ADD_SOCCER_BALL = true;
    public static final double SOCCER_BALL_RADIUS = 0.0762;
 
    // private static final double FLOOR_THICKNESS = 0.001;
@@ -88,21 +88,21 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
    {
       combinedTerrainObject3D = new CombinedTerrainObject3D("DRCDemo01NavigationEnvironment");
 
-      addCalibrationCube();
-      combinedTerrainObject3D.addTerrainObject(setUpPath1Rocks3D("Path1 Rocks"));
-
-      // setUpPath2SmallCones(combinedTerrainObject);
-      combinedTerrainObject3D.addTerrainObject(setUpPath3RampsWithLargeBlocks3D("Path3 Ramps With Large Blocks"));
-      combinedTerrainObject3D.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
-
-      // combinedTerrainObject.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourseDifficult());
-      combinedTerrainObject3D.addTerrainObject(setUpPathDRCTrialsSteps("Ladder"));
-      combinedTerrainObject3D.addTerrainObject(setUpTrialsQuals("Quals"));
-
-      combinedTerrainObject3D.addTerrainObject(setUpPath5NarrowDoor("Path5 Narrow Door"));
-      combinedTerrainObject3D.addTerrainObject(setUpPath6Barriers("Path6 Barriers"));
-      combinedTerrainObject3D.addTerrainObject(setUpPath7Stairs("Path7 Stairs"));
-      combinedTerrainObject3D.addTerrainObject(setUpPath8RampsWithSteppingStones("Path8 Ramps with Stepping Stones"));
+//      addCalibrationCube();
+//      combinedTerrainObject3D.addTerrainObject(setUpPath1Rocks3D("Path1 Rocks"));
+//
+//      // setUpPath2SmallCones(combinedTerrainObject);
+//      combinedTerrainObject3D.addTerrainObject(setUpPath3RampsWithLargeBlocks3D("Path3 Ramps With Large Blocks"));
+//      combinedTerrainObject3D.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
+//
+//      // combinedTerrainObject.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourseDifficult());
+//      combinedTerrainObject3D.addTerrainObject(setUpPathDRCTrialsSteps("Ladder"));
+//      combinedTerrainObject3D.addTerrainObject(setUpTrialsQuals("Quals"));
+//
+//      combinedTerrainObject3D.addTerrainObject(setUpPath5NarrowDoor("Path5 Narrow Door"));
+//      combinedTerrainObject3D.addTerrainObject(setUpPath6Barriers("Path6 Barriers"));
+//      combinedTerrainObject3D.addTerrainObject(setUpPath7Stairs("Path7 Stairs"));
+//      combinedTerrainObject3D.addTerrainObject(setUpPath8RampsWithSteppingStones("Path8 Ramps with Stepping Stones"));
 
       combinedTerrainObject3D.addTerrainObject(setUpGround("Ground"));
       
@@ -113,30 +113,30 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
          combinedTerrainObject3D.addSphere(1.5, 0.0, SOCCER_BALL_RADIUS, SOCCER_BALL_RADIUS, YoAppearance.RGBColorFromHex(ballColor));
       }
 
-      if (ADD_LIMBO_BAR)
-      {
-         addLimboBar(combinedTerrainObject3D);
-      }
-
-      if (ADD_CEILING)
-      {
-         Graphics3DObject ceilingGraphics = new Graphics3DObject();
-         ceilingGraphics.translate(new Vector3d(0.0, 0.0, 3.0));
-         ceilingGraphics.addCube(30.0, 30.0, 0.1);
-         combinedTerrainObject3D.addStaticLinkGraphics(ceilingGraphics);
-      }
+//      if (ADD_LIMBO_BAR)
+//      {
+//         addLimboBar(combinedTerrainObject3D);
+//      }
+//
+//      if (ADD_CEILING)
+//      {
+//         Graphics3DObject ceilingGraphics = new Graphics3DObject();
+//         ceilingGraphics.translate(new Vector3d(0.0, 0.0, 3.0));
+//         ceilingGraphics.addCube(30.0, 30.0, 0.1);
+//         combinedTerrainObject3D.addStaticLinkGraphics(ceilingGraphics);
+//      }
 
       // testRotatableRampsSetupForGraphicsAndCollision();
       // addFalseStair();
 
-      if (VISUALIZE_BOUNDING_BOXES)
-      {
-         StringBuffer stringBuffer = new StringBuffer();
-         combinedTerrainObject3D.recursivelyPrintBoundingBoxes(stringBuffer);
-         System.out.println(stringBuffer);
-
-         combinedTerrainObject3D.recursivelyAddBoundingBoxVisualizerToLinkGraphics(YoAppearance.Purple());
-      }
+//      if (VISUALIZE_BOUNDING_BOXES)
+//      {
+//         StringBuffer stringBuffer = new StringBuffer();
+//         combinedTerrainObject3D.recursivelyPrintBoundingBoxes(stringBuffer);
+//         System.out.println(stringBuffer);
+//
+//         combinedTerrainObject3D.recursivelyAddBoundingBoxVisualizerToLinkGraphics(YoAppearance.Purple());
+//      }
    }
 
    public void addCalibrationCube()

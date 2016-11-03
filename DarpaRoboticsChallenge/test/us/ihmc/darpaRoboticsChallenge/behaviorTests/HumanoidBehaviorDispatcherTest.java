@@ -169,7 +169,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       }
 
 
-      this.communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer, registry);
+      this.communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer);
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(new DRCDemo01NavigationEnvironment(), getSimpleRobotName(),
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.swing.SwingUtilities;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -73,10 +74,22 @@ public class CoactiveBehaviorsNetworkManager
       outgoingCommunicationBridgeInterface.sendPacketToBehavior(newPacket);
    }
 
+   public void sendToBehavior(Packet packet)
+   {
+      outgoingCommunicationBridgeInterface.sendPacketToBehavior(packet);
+   }
+
+   public void sendToUI(Packet packet)
+   {
+      outgoingCommunicationBridgeInterface.sendPacketToBehavior(packet);
+   }
+
    public void addListeners(CoactiveDataListenerInterface listener)
    {
       listerners.add(listener);
    }
+   
+   //TODO add the ability to easily listen for any packets
 
    private void notifyListeners(SimpleCoactiveBehaviorDataPacket packet)
    {
