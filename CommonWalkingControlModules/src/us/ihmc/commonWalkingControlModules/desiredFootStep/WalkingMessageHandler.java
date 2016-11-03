@@ -190,7 +190,7 @@ public class WalkingMessageHandler
       return upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).poll();
    }
 
-   public boolean applyRequestedFootstepAdjustment(Footstep footstepToAdjust)
+   public boolean pollRequestedFootstepAdjustment(Footstep footstepToAdjust)
    {
       if (!hasNewFootstepAdjustment.getBooleanValue())
          return false;
@@ -218,13 +218,16 @@ public class WalkingMessageHandler
          throw new RuntimeException("Should not get there.");
       }
 
-      if (!footstepToAdjust.getPredictedContactPoints().isEmpty())
+      if (!requestedFootstepAdjustment.getPredictedContactPoints().isEmpty())
       {
          List<Point2d> contactPoints = new ArrayList<>();
          for (int i = 0; i < footstepToAdjust.getPredictedContactPoints().size(); i++)
             contactPoints.add(footstepToAdjust.getPredictedContactPoints().get(i));
          footstepToAdjust.setPredictedContactPointsFromPoint2ds(contactPoints);
       }
+
+      hasNewFootstepAdjustment.set(false);
+      requestedFootstepAdjustment.clear();
 
       return true;
    }
