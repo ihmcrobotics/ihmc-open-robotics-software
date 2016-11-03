@@ -33,12 +33,12 @@ import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
 public class KinematicToolboxDiagnosticEnvironment
 {
-   private final String robotName = "Floating Robot";
+   private final String robotName = "FloatingRobot";
    private final RobotDescription robotDescription = new RobotDescription(robotName);
    private final ReferenceFrames referenceFrames = null;
-   private final String threadName = "Non Realtime Scheduler";
+   private final String threadName = "NonRealtimeScheduler";
 
-   public KinematicToolboxDiagnosticEnvironment(DRCRobotModel drcRobotModel, CommonAvatarEnvironmentInterface environment)
+   public KinematicToolboxDiagnosticEnvironment(DRCRobotModel drcRobotModel)
    {
       FullHumanoidRobotModel humanoidFullRobotModel = drcRobotModel.createFullRobotModel();
       HumanoidJointNameMap sdfJointNameMap = drcRobotModel.getJointMap();
