@@ -1,7 +1,8 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.darpaRoboticsChallenge.simulationStarter;
 
 import java.util.HashMap;
 
+import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.OffsetAndYawRobotInitialSetup;
 
 public enum DRCSCStartingLocations implements DRCStartingLocation

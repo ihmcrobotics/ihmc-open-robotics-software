@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.darpaRoboticsChallenge.simulationStarter;
 
 import java.awt.BorderLayout;
 import java.awt.Dialog.ModalExclusionType;
@@ -31,6 +31,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
