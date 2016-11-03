@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.networking;
+package us.ihmc.humanoidBehaviors.behaviors.networking;
 
 import java.io.File;
 import java.io.IOException;
