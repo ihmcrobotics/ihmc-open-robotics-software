@@ -50,6 +50,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
     */
    public AdjustFootstepMessage()
    {
+      uniqueId = VALID_MESSAGE_DEFAULT_ID;
       origin = FootstepOrigin.AT_ANKLE_FRAME;
    }
 
@@ -71,6 +72,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public AdjustFootstepMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints,
          TrajectoryType trajectoryType, double swingHeight)
    {
+      uniqueId = VALID_MESSAGE_DEFAULT_ID;
       origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = robotSide;
       this.location = location;
@@ -83,6 +85,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
    public AdjustFootstepMessage(AdjustFootstepMessage footstepData)
    {
+      uniqueId = VALID_MESSAGE_DEFAULT_ID;
       this.origin = footstepData.origin;
       this.robotSide = footstepData.robotSide;
       this.location = new Point3d(footstepData.location);
@@ -109,6 +112,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
    public AdjustFootstepMessage(Footstep footstep)
    {
+      uniqueId = VALID_MESSAGE_DEFAULT_ID;
       origin = FootstepOrigin.AT_ANKLE_FRAME;
       robotSide = footstep.getRobotSide();
       location = new Point3d();
@@ -275,6 +279,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
    public AdjustFootstepMessage(Random random)
    {
+      uniqueId = VALID_MESSAGE_DEFAULT_ID;
       origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
       this.location = RandomTools.generateRandomPointWithEdgeCases(random, 0.05);
