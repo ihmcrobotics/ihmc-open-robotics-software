@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController;
+package us.ihmc.darpaRoboticsChallenge.jointAnglesWriter;
 
 import java.util.ArrayList;
 
@@ -12,9 +12,11 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
+/**
+ * @deprecated This class needs to extend OutputWriter or use some other common class. @dcalvert @sbertrand
+ */
 public class JointAnglesWriter
 {
-
    private String name;
    private FloatingRootJointRobot robot;
    protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
@@ -79,5 +81,4 @@ public class JointAnglesWriter
       RigidBodyTransform transform = sixDoFJoint.getJointTransform3D();
       floatingJoint.setRotationAndTranslation(transform);
    }
-   
 }
