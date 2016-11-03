@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.util.ArrayList;
 
