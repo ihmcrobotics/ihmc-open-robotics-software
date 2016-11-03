@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.frictionCompensation;
+package us.ihmc.systemIdentification;
 
 import java.util.EnumMap;
 
