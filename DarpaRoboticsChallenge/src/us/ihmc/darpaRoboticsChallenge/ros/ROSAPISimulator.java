@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.rosAPI;
+package us.ihmc.darpaRoboticsChallenge.ros;
 
 import java.io.IOException;
 import java.net.URI;
@@ -28,6 +28,7 @@ import us.ihmc.darpaRoboticsChallenge.simulationStarter.DRCSimulationStarter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
