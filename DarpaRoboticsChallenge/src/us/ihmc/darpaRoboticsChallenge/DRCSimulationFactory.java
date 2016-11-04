@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.ActualCMPComputer;
 import us.ihmc.commonWalkingControlModules.controlModules.JointLowLevelPositionControlSimulator;
 import us.ihmc.commonWalkingControlModules.controlModules.PIDLidarTorqueController;
 import us.ihmc.commonWalkingControlModules.controlModules.PassiveJointController;
+import us.ihmc.commonWalkingControlModules.controlModules.SimulatedRobotCenterOfMassVisualizer;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
