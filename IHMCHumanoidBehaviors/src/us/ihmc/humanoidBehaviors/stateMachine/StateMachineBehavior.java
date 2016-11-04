@@ -54,6 +54,8 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
    public boolean isDone()
    {
       //if your current state has finished and there is no transition out of that state... the entire state machine is finished
+      
+      System.out.println(statemachine.getCurrentState()+" "+statemachine.getCurrentState().isDone() +" "+ statemachine.getCurrentState().getStateTransitions().size());
       if (statemachine.getCurrentState().isDone() && statemachine.getCurrentState().getStateTransitions().size() == 0)
       {
          return true;

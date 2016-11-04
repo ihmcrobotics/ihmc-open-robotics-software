@@ -69,19 +69,35 @@ public class WalkingSingleSupportState extends SingleSupportState
       super.doAction();
 
       boolean icpErrorIsTooLarge = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
+      boolean requestSwingSpeedUp = icpErrorIsTooLarge;
 
-      // todo figure out a way of combining these two modules
-      boolean footstepIsBeingAdjusted = false;
-      if (balanceManager.useICPOptimization())
+      if (walkingMessageHandler.hasRequestedFootstepAdjustment())
       {
-         footstepIsBeingAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
-
-         if (footstepIsBeingAdjusted)
+         boolean footstepHasBeenAdjusted = walkingMessageHandler.pollRequestedFootstepAdjustment(nextFootstep);
+         if (footstepHasBeenAdjusted)
          {
+            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getSwingTime());
+            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getSwingTime(), true);
+
+            balanceManager.updateICPPlanForSingleSupportDisturbances();
+         }
+         
+      }
+      else if (balanceManager.useICPOptimization()) // TODO figure out a way of combining the two following modules
+      {
+         boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
+
+         if (footstepIsBeingAdjusted)
+         {
+            requestSwingSpeedUp = true;
+            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
+            failureDetectionControlModule.setNextFootstep(nextFootstep);
+            updateFootstepParameters();
+
+            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getSwingTime(), true);
 
             balanceManager.updateICPPlanForSingleSupportDisturbances();
          }
@@ -91,10 +107,12 @@ public class WalkingSingleSupportState extends SingleSupportState
          boolean footstepHasBeenAdjusted = balanceManager.checkAndUpdateFootstep(nextFootstep);
          if (footstepHasBeenAdjusted)
          {
+            requestSwingSpeedUp = true;
+            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
-            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getSwingTime());
+            feetManager.replanSwingTrajectory(swingSide, nextFootstep, walkingMessageHandler.getSwingTime(), false);
 
             walkingMessageHandler.reportWalkingAbortRequested();
             walkingMessageHandler.clearFootsteps();
@@ -106,7 +124,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          }
       }
 
-      if (icpErrorIsTooLarge || balanceManager.isRecovering() || footstepIsBeingAdjusted)
+      if (requestSwingSpeedUp)
       {
          double swingTimeRemaining = requestSwingSpeedUpIfNeeded();
          balanceManager.updateSwingTimeRemaining(swingTimeRemaining);

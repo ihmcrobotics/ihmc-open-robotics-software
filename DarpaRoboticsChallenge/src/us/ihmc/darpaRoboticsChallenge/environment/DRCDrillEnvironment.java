@@ -14,6 +14,7 @@ import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
+import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.ContactableCylinderRobot;
 import us.ihmc.simulationconstructionset.util.environments.ContactableRobot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;

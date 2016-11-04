@@ -14,7 +14,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -42,6 +41,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -154,7 +154,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       networkProcessor.attachPacketCommunicator(PacketDestination.CONTROLLER, drcSimulationTestHelper.getControllerCommunicator());
       networkProcessor.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorCommunicatorClient);
 
-      communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer, robotToTest.getRobotsYoVariableRegistry());
+      communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.EXCLUDE)
@@ -185,18 +185,18 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       final WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(communicationBridge, fullRobotModel, yoTime, getRobotModel().getPhysicalProperties()
             .getAnkleHeight());
-      communicationBridge.attachGlobalListener(walkToGoalBehavior.getControllerGlobalPacketConsumer());
+      communicationBridge.attachGlobalListener(walkToGoalBehavior.getGlobalPacketConsumer());
       walkToGoalBehavior.initialize();
 
       WalkToGoalBehaviorPacket requestedGoal = new WalkToGoalBehaviorPacket(desiredMidFeetPose.getX(), desiredMidFeetPose.getY(), desiredMidFeetPose.getYaw(),
             RobotSide.RIGHT);
-      walkToGoalBehavior.consumeObjectFromNetworkProcessor(requestedGoal);
+      walkToGoalBehavior.consumeObjectFromNetwork(requestedGoal);
 
       WalkToGoalBehaviorPacket walkToGoalFindPathPacket = new WalkToGoalBehaviorPacket(WalkToGoalAction.FIND_PATH);
-      walkToGoalBehavior.consumeObjectFromNetworkProcessor(walkToGoalFindPathPacket);
+      walkToGoalBehavior.consumeObjectFromNetwork(walkToGoalFindPathPacket);
 
       WalkToGoalBehaviorPacket walkToGoalExecutePacket = new WalkToGoalBehaviorPacket(WalkToGoalAction.EXECUTE);
-      walkToGoalBehavior.consumeObjectFromNetworkProcessor(walkToGoalExecutePacket);
+      walkToGoalBehavior.consumeObjectFromNetwork(walkToGoalExecutePacket);
       walkToGoalBehavior.doControl();
       assertTrue( walkToGoalBehavior.hasInputBeenSet() );
       

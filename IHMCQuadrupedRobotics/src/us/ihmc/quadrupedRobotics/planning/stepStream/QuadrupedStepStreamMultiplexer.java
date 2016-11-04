@@ -2,17 +2,24 @@ package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 
 import java.util.HashMap;
 
 public class QuadrupedStepStreamMultiplexer<E extends Enum<E>> implements QuadrupedStepStream
 {
+   private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final HashMap<E, QuadrupedStepStream> stepStreams = new HashMap<>();
-   private QuadrupedStepStream selectedStepStream = null;
+   private EnumYoVariable<E> selectedStepStream;
 
-   public QuadrupedStepStreamMultiplexer()
+   public QuadrupedStepStreamMultiplexer(Class<E> enumClass, YoVariableRegistry parentRegistry)
    {
+      selectedStepStream = new EnumYoVariable<>("selectedStepStream", registry, enumClass);
+
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
    }
 
    /**
@@ -32,43 +39,47 @@ public class QuadrupedStepStreamMultiplexer<E extends Enum<E>> implements Quadru
     */
    public boolean selectStepStream(E enumValue)
    {
-      selectedStepStream = stepStreams.get(enumValue);
-      return (selectedStepStream != null);
+      selectedStepStream.set(enumValue);
+      return (stepStreams.get(enumValue) != null);
    }
 
    @Override
    public void onEntry()
    {
-      if (selectedStepStream != null)
+      QuadrupedStepStream stepStream = stepStreams.get(selectedStepStream.getEnumValue());
+      if (stepStream != null)
       {
-         selectedStepStream.onEntry();
+         stepStream.onEntry();
       }
    }
 
    @Override
    public void process()
    {
-      if (selectedStepStream != null)
+      QuadrupedStepStream stepStream = stepStreams.get(selectedStepStream.getEnumValue());
+      if (stepStream != null)
       {
-         selectedStepStream.process();
+         stepStream.process();
       }
    }
 
    @Override
    public void onExit()
    {
-      if (selectedStepStream != null)
+      QuadrupedStepStream stepStream = stepStreams.get(selectedStepStream.getEnumValue());
+      if (stepStream != null)
       {
-         selectedStepStream.onExit();
+         stepStream.onExit();
       }
    }
 
    @Override
-   public PreallocatedList<QuadrupedTimedStep> getSteps()
+   public PreallocatedList<? extends QuadrupedTimedStep> getSteps()
    {
-      if (selectedStepStream != null)
+      QuadrupedStepStream stepStream = stepStreams.get(selectedStepStream.getEnumValue());
+      if (stepStream != null)
       {
-         return selectedStepStream.getSteps();
+         return stepStream.getSteps();
       }
       else
       {
@@ -79,9 +90,10 @@ public class QuadrupedStepStreamMultiplexer<E extends Enum<E>> implements Quadru
    @Override
    public void getBodyOrientation(FrameOrientation bodyOrientation)
    {
-      if (selectedStepStream != null)
+      QuadrupedStepStream stepStream = stepStreams.get(selectedStepStream.getEnumValue());
+      if (stepStream != null)
       {
-         selectedStepStream.getBodyOrientation(bodyOrientation);
+         stepStream.getBodyOrientation(bodyOrientation);
       }
       else
       {

@@ -285,6 +285,11 @@ public class Footstep
    {
       ankleReferenceFrame.setPoseAndUpdate(newPosition, newOrientation);
    }
+   
+   public void setPose(Point3d newPosition, Quat4d newOrientation)
+   {
+      ankleReferenceFrame.setPoseAndUpdate(newPosition, newOrientation);
+   }
 
    private RigidBodyTransform transformFromAnkleToWorld;
 
@@ -308,6 +313,16 @@ public class Footstep
 
       newSolePoseInWorldFrame.getPose(transformFromSoleToWorld);
 
+      setSolePose(transformFromSoleToWorld);
+   }
+
+   public void setSolePose(Point3d positionInWorld, Quat4d orientationInWorld)
+   {
+      if (transformFromSoleToWorld == null)
+         transformFromSoleToWorld = new RigidBodyTransform();
+
+      transformFromSoleToWorld.setRotation(orientationInWorld);
+      transformFromSoleToWorld.setTranslation(positionInWorld.getX(), positionInWorld.getY(), positionInWorld.getZ());
       setSolePose(transformFromSoleToWorld);
    }
 

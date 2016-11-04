@@ -29,7 +29,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
@@ -242,7 +242,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final DoubleYoVariable bootyShakeTime = new DoubleYoVariable("diagnosticBehaviorButtyShakeTime", registry);
 
    public DiagnosticBehavior(FullHumanoidRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
-         DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
+         DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, CommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2d yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(outgoingCommunicationBridge);
@@ -408,7 +408,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          currentHandOrientations.put(robotSide, currentHandOrientation);
       }
 
-      this.attachControllerListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
+      this.attachNetworkListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
       
       sleepBehavior = new SleepBehavior(outgoingCommunicationBridge, yoTime);
    }
@@ -2753,30 +2753,18 @@ public class DiagnosticBehavior extends AbstractBehavior
    }
 
    @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+   protected void passReceivedObjectToChildBehaviors(Object object)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         handTrajectoryBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
-         armTrajectoryBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
-         footstepListBehavior.consumeObjectFromNetworkProcessor(object);
-         walkToLocationBehavior.consumeObjectFromNetworkProcessor(object);
-         turnInPlaceBehavior.consumeObjectFromNetworkProcessor(object);
+         handTrajectoryBehaviors.get(robotSide).consumeObjectFromNetwork(object);
+         armTrajectoryBehaviors.get(robotSide).consumeObjectFromNetwork(object);
+         footstepListBehavior.consumeObjectFromNetwork(object);
+         walkToLocationBehavior.consumeObjectFromNetwork(object);
+         turnInPlaceBehavior.consumeObjectFromNetwork(object);
       }
    }
 
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handTrajectoryBehaviors.get(robotSide).consumeObjectFromController(object);
-         armTrajectoryBehaviors.get(robotSide).consumeObjectFromController(object);
-         footstepListBehavior.consumeObjectFromController(object);
-         walkToLocationBehavior.consumeObjectFromController(object);
-         turnInPlaceBehavior.consumeObjectFromController(object);
-      }
-   }
 
    @Override
    public void abort()

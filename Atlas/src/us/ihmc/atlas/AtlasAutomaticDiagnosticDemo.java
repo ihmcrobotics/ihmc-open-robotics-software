@@ -1,9 +1,9 @@
 package us.ihmc.atlas;
 
-import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.darpaRoboticsChallenge.simulationStarter.DRCSimulationStarter;
 
 public class AtlasAutomaticDiagnosticDemo
 {

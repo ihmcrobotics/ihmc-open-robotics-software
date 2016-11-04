@@ -50,6 +50,15 @@ public class FootstepListVisualizer
 
    private final SideDependentList<MutableInt> counters = new SideDependentList<MutableInt>(new MutableInt(0), new MutableInt(0));
 
+   public void updateFirstFootstep(Footstep firstFootstep)
+   {
+      RobotSide robotSide = firstFootstep.getRobotSide();
+      if (counters.get(robotSide).intValue() < 1)
+         return;
+
+      footstepVisualizers.get(robotSide).get(0).update(firstFootstep);
+   }
+
    public void update(List<Footstep> footsteps)
    {
       for (RobotSide robotSide : RobotSide.values)
