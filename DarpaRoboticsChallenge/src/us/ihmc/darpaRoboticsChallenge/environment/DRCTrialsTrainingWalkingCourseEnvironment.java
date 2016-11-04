@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -17,8 +18,8 @@ public class DRCTrialsTrainingWalkingCourseEnvironment implements CommonAvatarEn
    public DRCTrialsTrainingWalkingCourseEnvironment()
    {
       combinedTerrainObject3D = new CombinedTerrainObject3D(getClass().getSimpleName());
-      combinedTerrainObject3D.addTerrainObject(DRCDemo01NavigationEnvironment.setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
-      combinedTerrainObject3D.addTerrainObject(DRCDemo01NavigationEnvironment.setUpGround("Ground"));
+      combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
+      combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
    }
 
    @Override

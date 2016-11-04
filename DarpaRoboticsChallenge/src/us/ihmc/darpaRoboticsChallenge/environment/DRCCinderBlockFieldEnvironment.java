@@ -7,6 +7,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -18,8 +19,8 @@ public class DRCCinderBlockFieldEnvironment implements CommonAvatarEnvironmentIn
 
    public DRCCinderBlockFieldEnvironment()
    {
-      combinedTerrainObject3D.addTerrainObject(DRCDemo01NavigationEnvironment.setUpGround("FlatGround"));
-      combinedTerrainObject3D.addTerrainObject(DRCDemo01NavigationEnvironment.setUpCinderBlockFieldActual("CinderBlockField", 0.0, 0.0, cinderBlockPoses));
+      combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("FlatGround"));
+      combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpCinderBlockFieldActual("CinderBlockField", 0.0, 0.0, cinderBlockPoses));
    }
 
    public List<List<FramePose>> getCinderBlockPoses()
