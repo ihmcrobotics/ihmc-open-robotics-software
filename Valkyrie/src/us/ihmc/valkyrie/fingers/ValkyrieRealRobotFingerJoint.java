@@ -1,9 +1,9 @@
 package us.ihmc.valkyrie.fingers;
 
-import us.ihmc.darpaRoboticsChallenge.util.CommonNames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.util.CommonNames;
 
 public enum ValkyrieRealRobotFingerJoint
 {

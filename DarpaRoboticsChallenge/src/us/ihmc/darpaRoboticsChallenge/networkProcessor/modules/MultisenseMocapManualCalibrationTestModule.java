@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 
+import optiTrack.IHMCMocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.lidarTests.IHMCMocapDataClient;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap.MocapToStateEstimatorFrameConverter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap.RosConnectedZeroPoseRobotConfigurationDataProducer;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
