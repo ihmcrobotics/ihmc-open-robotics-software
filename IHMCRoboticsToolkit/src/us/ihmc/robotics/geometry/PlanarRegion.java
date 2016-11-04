@@ -2,7 +2,6 @@ package us.ihmc.robotics.geometry;
 
 import java.util.List;
 
-import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -21,15 +20,12 @@ public class PlanarRegion
 
    /**
     * Create a new planar region.
-    * @param pointOnPlane 
-    * @param planeNormal
-    * @param planarRegionConvexPolygons
+    * @param transformToWorld transform from the region local coordinate system to world.
+    * @param planarRegionConvexPolygons the list of convex polygon that represents the planar region. Expressed in local coordinate system.
     */
-   public PlanarRegion(Point3d pointOnPlane, Vector3d planeNormal, List<ConvexPolygon2d> planarRegionConvexPolygons)
+   public PlanarRegion(RigidBodyTransform transformToWorld, List<ConvexPolygon2d> planarRegionConvexPolygons)
    {
-      AxisAngle4d orientation = GeometryTools.getRotationBasedOnNormal(planeNormal);
-      fromLocalToWorldTransform.setRotation(orientation);
-      fromLocalToWorldTransform.setTranslation(pointOnPlane.getX(), pointOnPlane.getY(), pointOnPlane.getZ());
+      fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.invert(fromLocalToWorldTransform);
       convexPolygons = planarRegionConvexPolygons;
    }
