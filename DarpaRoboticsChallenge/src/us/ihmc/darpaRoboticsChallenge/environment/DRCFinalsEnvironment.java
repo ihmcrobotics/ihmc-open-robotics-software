@@ -8,7 +8,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment.BLOCKTYPE;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.FramePose;
@@ -28,6 +27,7 @@ import us.ihmc.simulationconstructionset.util.environments.ContactableDoorRobot;
 import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.environments.ValveType;
+import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment.BLOCKTYPE;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;

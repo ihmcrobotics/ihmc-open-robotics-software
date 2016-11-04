@@ -13,6 +13,7 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -40,7 +41,7 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
    public DRCSteeringWheelEnvironment(double x, double y, double z, double yawInDegrees, double pitchInDegrees, double percentOfSteeringWheelRadius)
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
-      combinedTerrainObject.addTerrainObject(DRCDemo01NavigationEnvironment.setUpGround("Ground"));
+      combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
 
       // add Polaris to environment
       RigidBodyTransform polarisTransform = new RigidBodyTransform();
