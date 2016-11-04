@@ -7,7 +7,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.PolarisRobot;
+import us.ihmc.darpaRoboticsChallenge.polaris.PolarisRobot;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;

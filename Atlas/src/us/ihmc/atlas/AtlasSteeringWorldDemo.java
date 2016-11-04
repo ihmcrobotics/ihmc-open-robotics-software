@@ -3,9 +3,9 @@ package us.ihmc.atlas;
 import com.martiansoftware.jsap.JSAPException;
 
 import us.ihmc.atlas.initialSetup.AtlasInitialSetupFromFile;
-import us.ihmc.darpaRoboticsChallenge.DRCSteeringWheelDemo;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.darpaRoboticsChallenge.polaris.DRCSteeringWheelDemo;
 
 public class AtlasSteeringWorldDemo
 {

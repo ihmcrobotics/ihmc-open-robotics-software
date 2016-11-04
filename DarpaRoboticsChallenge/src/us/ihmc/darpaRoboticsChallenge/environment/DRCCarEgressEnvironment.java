@@ -6,7 +6,7 @@ import java.util.List;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.PolarisRobot;
+import us.ihmc.darpaRoboticsChallenge.polaris.PolarisRobot;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.robotics.geometry.RigidBodyTransform;

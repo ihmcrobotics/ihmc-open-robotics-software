@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.darpaRoboticsChallenge.polaris;
 
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
