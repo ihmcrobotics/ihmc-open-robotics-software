@@ -31,7 +31,7 @@ public class FloatingEmergencyButtonEnvironment implements CommonAvatarEnvironme
 		double forceVectorScale = 1.0 / 5.0; 
 		
 		combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
-		combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
+		combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
 		
 		int i = 0;
 		for(Point3d buttonLocation : buttonLocations)
@@ -70,21 +70,6 @@ public class FloatingEmergencyButtonEnvironment implements CommonAvatarEnvironme
 		button.createAvailableContactPoints(1, NUMBER_OF_CONTACT_POINTS, forceVectorScale, true);
 		buttonRobots.add(button);
 		
-	}
-
-	private CombinedTerrainObject3D setUpGround(String name)
-	{
-		CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
-
-		YoAppearanceTexture texture = new YoAppearanceTexture("Textures/ground2.png");
-
-      RigidBodyTransform location = new RigidBodyTransform();
-      location.setTranslation(new Vector3d(0, 0, -0.5));
-
-      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, 45, 45, 1), texture);
-      combinedTerrainObject.addTerrainObject(newBox);
-
-		return combinedTerrainObject;
 	}
 
 	@Override
