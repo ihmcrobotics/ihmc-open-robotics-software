@@ -6,13 +6,12 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class TurnWalkTurnPlanner implements FootstepPlanner
 {
@@ -62,18 +61,19 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
 
       FramePoint2d goalPoint = new FramePoint2d();
       goalPose.getPosition(goalPoint);
-      goalPoint.changeFrame(stanceFootFrame);
 
       ArrayList<FramePose2d> footstepList = new ArrayList<>();
 
       // turn
       Point2d robotOffsetFromStanceFoot = new Point2d(0.0, lastStepSide.negateIfLeftSide(turningStepWidth / 2.0));
       FramePose2d robotPose = new FramePose2d(stanceFootFrame, robotOffsetFromStanceFoot, 0.0);
+      FramePose2d robotPoseInWorld = new FramePose2d(robotPose);
+      robotPoseInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       addTurnInPlaceToFacePoint(footstepList, robotPose, goalPoint);
 
       // walk
       FramePoint2d robotPosition = new FramePoint2d();
-      robotPose.getPosition(robotPosition);
+      robotPoseInWorld.getPosition(robotPosition);
       double distanceToTravel = robotPosition.distance(goalPoint);
       addStraightWalk(footstepList, robotPosition, distanceToTravel);
 
@@ -117,13 +117,10 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       {
          startingPoint.setIncludingFrame(startingPointInWorld);
          startingPoint.changeFrame(stanceFootFrame);
-         FramePoint2d nextFootstepPosition = new FramePoint2d(stanceFootFrame);
-
-         nextFootstepPosition.setX(stepLength);
-         nextFootstepPosition.setY(startingPoint.getY() + lastStepSide.negateIfLeftSide(STRAIGHT_STEP_WIDTH/2.0));
 
          FramePose2d nextFootStep = new FramePose2d(stanceFootFrame);
-         nextFootStep.setPosition(nextFootstepPosition);
+         nextFootStep.setX(stepLength);
+         nextFootStep.setY(startingPoint.getY() + lastStepSide.negateIfLeftSide(STRAIGHT_STEP_WIDTH/2.0));
 
          nextFootStep.changeFrame(ReferenceFrame.getWorldFrame());
          footstepList.add(nextFootStep);
