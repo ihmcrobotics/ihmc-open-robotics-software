@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules;
+package us.ihmc.simulationToolkit.controllers;
 
 import java.awt.Color;
 
