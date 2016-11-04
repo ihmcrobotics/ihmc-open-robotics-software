@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.simulationToolkit;
 
 import us.ihmc.humanoidRobotics.communication.packets.SCSListenerPacket;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
