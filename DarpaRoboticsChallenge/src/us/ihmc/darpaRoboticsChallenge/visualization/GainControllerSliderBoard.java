@@ -1,9 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.visualization;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.darpaRoboticsChallenge.util.CommonNames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.CommonNames;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 
 public class GainControllerSliderBoard

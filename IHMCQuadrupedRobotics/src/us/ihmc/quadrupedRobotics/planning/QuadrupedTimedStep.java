@@ -4,67 +4,52 @@ import javax.vecmath.Point3d;
 
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalProvider
+public class QuadrupedTimedStep implements TimeIntervalProvider
 {
-   /**
-    * The relative time interval of the swing phase (with respect to the start of the previous swing phase).
-    */
+   private RobotQuadrant robotQuadrant;
    private final TimeInterval timeInterval;
-   private boolean absolute = true;
+   private Point3d goalPosition;
+   private double groundClearance;
 
    public QuadrupedTimedStep()
    {
-      super();
+      this.robotQuadrant = RobotQuadrant.FRONT_RIGHT;
       this.timeInterval = new TimeInterval(0.5, 1.0);
+      this.goalPosition = new Point3d(0.0, 0.0, 0.0);
+      this.groundClearance = 0.0;
    }
 
    public QuadrupedTimedStep(RobotQuadrant robotQuadrant, FramePoint goalPosition, double groundClearance, TimeInterval timeInterval)
    {
-      super(robotQuadrant, goalPosition, groundClearance);
-      this.timeInterval = new TimeInterval(timeInterval);
+      this();
+      setRobotQuadrant(robotQuadrant);
+      setGoalPosition(goalPosition);
+      setGroundClearance(groundClearance);
+      setTimeInterval(timeInterval);
    }
 
    public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3d goalPosition, double groundClearance, TimeInterval timeInterval)
    {
-      super(robotQuadrant, goalPosition, groundClearance);
-      this.timeInterval = new TimeInterval(timeInterval);
+      this();
+      setRobotQuadrant(robotQuadrant);
+      setGoalPosition(goalPosition);
+      setGroundClearance(groundClearance);
+      setTimeInterval(timeInterval);
    }
 
-   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3d goalPosition, double groundClearance, TimeInterval timeInterval, boolean absolute)
+   public QuadrupedTimedStep(QuadrupedTimedStep other)
    {
-      super(robotQuadrant, goalPosition, groundClearance);
-      this.timeInterval = new TimeInterval(timeInterval);
-      this.absolute = absolute;
+      this(other.getRobotQuadrant(), other.getGoalPosition(), other.getGroundClearance(), other.getTimeInterval());
    }
 
-   public QuadrupedTimedStep(QuadrupedStep quadrupedStep, TimeInterval timeInterval)
+   public RobotQuadrant getRobotQuadrant()
    {
-      super(quadrupedStep);
-      this.timeInterval = new TimeInterval(timeInterval);
-   }
-
-   public QuadrupedTimedStep(QuadrupedTimedStep quadrupedTimedStep)
-   {
-      super(quadrupedTimedStep);
-      this.timeInterval = new TimeInterval(quadrupedTimedStep.timeInterval);
-      this.absolute = quadrupedTimedStep.absolute;
-   }
-
-   public void set(QuadrupedTimedStep quadrupedTimedStep)
-   {
-      super.set(quadrupedTimedStep);
-      this.timeInterval.set(quadrupedTimedStep.timeInterval);
-      this.absolute = quadrupedTimedStep.absolute;
-   }
-
-   public void get(QuadrupedTimedStep quadrupedTimedStep)
-   {
-      super.get(quadrupedTimedStep);
-      this.timeInterval.get(quadrupedTimedStep.timeInterval);
-      quadrupedTimedStep.absolute = this.absolute;
+      return robotQuadrant;
    }
 
    public TimeInterval getTimeInterval()
@@ -82,26 +67,88 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
       this.timeInterval.set(timeInterval);
    }
 
-   public boolean isAbsolute()
+   public void setRobotQuadrant(RobotQuadrant robotQuadrant)
    {
-      return absolute;
+      this.robotQuadrant = robotQuadrant;
    }
 
-   public void setAbsolute(boolean absolute)
+   /**
+    * Unsafe for external use.
+    */
+   protected Point3d getGoalPosition()
    {
-      this.absolute = absolute;
+      return goalPosition;
+   }
+
+   public void getGoalPosition(Point3d goalPosition)
+   {
+      this.goalPosition.get(goalPosition);
+   }
+
+   public void getGoalPosition(FramePoint goalPosition)
+   {
+      ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
+      goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      goalPosition.setPoint(this.goalPosition);
+      goalPosition.changeFrame(originalFrame);
+   }
+
+   public void setGoalPosition(Point3d goalPosition)
+   {
+      this.goalPosition.set(goalPosition);
+   }
+
+   public void setGoalPosition(FramePoint goalPosition)
+   {
+      ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
+      goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      goalPosition.getPoint(this.goalPosition);
+      goalPosition.changeFrame(originalFrame);
+   }
+
+   public double getGroundClearance()
+   {
+      return groundClearance;
+   }
+
+   public void setGroundClearance(double groundClearance)
+   {
+      this.groundClearance = groundClearance;
+   }
+
+   public void set(QuadrupedTimedStep other)
+   {
+      setRobotQuadrant(other.getRobotQuadrant());
+      setGoalPosition(other.getGoalPosition());
+      setGroundClearance(other.getGroundClearance());
+      setTimeInterval(other.getTimeInterval());
+   }
+
+   public void get(QuadrupedTimedStep other)
+   {
+      other.setRobotQuadrant(getRobotQuadrant());
+      other.setGoalPosition(getGoalPosition());
+      other.setGroundClearance(getGroundClearance());
+      other.setTimeInterval(getTimeInterval());
    }
 
    public boolean epsilonEquals(QuadrupedTimedStep other, double epsilon)
    {
-      return super.epsilonEquals(other, epsilon) && this.timeInterval.epsilonEquals(other.timeInterval, epsilon);
+      return getRobotQuadrant() == other.getRobotQuadrant() &&
+             getGoalPosition().epsilonEquals(other.getGoalPosition(), epsilon) &&
+             MathTools.epsilonEquals(getGroundClearance(), other.getGroundClearance(), epsilon) &&
+             getTimeInterval().epsilonEquals(other.getTimeInterval(), epsilon);
+
    }
 
    @Override public String toString()
    {
       String string = super.toString();
-      string += "\nstartTime: " + timeInterval.getStartTime();
-      string += "\nendTime: " + timeInterval.getEndTime();
+      string += "\nrobotQuadrant: " + getRobotQuadrant();
+      string += "\ngoalPosition:" + getGoalPosition();
+      string += "\ngroundClearance: " + getGroundClearance();
+      string += "\nstartTime: " + getTimeInterval().getStartTime();
+      string += "\nendTime: " + getTimeInterval().getEndTime();
       return string;
    }
 }

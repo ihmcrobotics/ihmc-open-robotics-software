@@ -12,7 +12,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -72,7 +72,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
    private RobotSide lastSide = null;
 
 
-	public WalkToGoalBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, DoubleYoVariable yoTime, double ankleHeight)
+	public WalkToGoalBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, DoubleYoVariable yoTime, double ankleHeight)
 	{
 		super(outgoingCommunicationBridge);
 		DEBUG.set(true);
@@ -84,9 +84,9 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 
 		this.fullRobotModel = fullRobotModel;
 
-		this.attachNetworkProcessorListeningQueue(inputListeningQueue, WalkToGoalBehaviorPacket.class);
-		this.attachNetworkProcessorListeningQueue(plannedPathListeningQueue, FootstepPathPlanPacket.class);
-		this.attachControllerListeningQueue(footstepStatusQueue, FootstepStatus.class);
+		this.attachNetworkListeningQueue(inputListeningQueue, WalkToGoalBehaviorPacket.class);
+		this.attachNetworkListeningQueue(plannedPathListeningQueue, FootstepPathPlanPacket.class);
+		this.attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
 	}
 
 	@Override

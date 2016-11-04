@@ -17,7 +17,6 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.behaviorTests.AtlasHandDesiredConfigurationBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasHeadTrajectoryBehaviorTest.class,
    us.ihmc.atlas.calib.KinematicCalibrationHeadLoopResidualTest.class,
-   us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
    us.ihmc.atlas.drcRobot.AtlasSDFVerificationTest.class,
    us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class,
    us.ihmc.atlas.networkProcessor.depthData.AtlasPointCloudDataReceiverTest.class,

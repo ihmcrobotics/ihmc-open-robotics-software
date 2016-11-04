@@ -69,6 +69,13 @@ public class FramePose2d extends AbstractReferenceFrameHolder implements FrameOb
       orientation.set(pose.orientation);
    }
 
+   public void setIncludingFrame(FramePose2d pose)
+   {
+      this.referenceFrame = pose.getReferenceFrame();
+      position.setIncludingFrame(referenceFrame, pose.getX(), pose.getY());
+      orientation.setIncludingFrame(referenceFrame, pose.getYaw());
+   }
+
    public void setOrientation(FrameOrientation2d orientation)
    {
       this.orientation.set(orientation);

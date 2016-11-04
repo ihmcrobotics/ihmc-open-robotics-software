@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class SleepBehavior extends AbstractBehavior
@@ -11,13 +11,13 @@ public class SleepBehavior extends AbstractBehavior
    protected double behaviorDoneTime = Double.NaN;
    protected double sleepTime = Double.MIN_VALUE;
 
-   public SleepBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public SleepBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       this.yoTime = yoTime;
    }
 
-   public SleepBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, double sleepTime)
+   public SleepBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, double sleepTime)
    {
       super(outgoingCommunicationBridge);
       this.yoTime = yoTime;
