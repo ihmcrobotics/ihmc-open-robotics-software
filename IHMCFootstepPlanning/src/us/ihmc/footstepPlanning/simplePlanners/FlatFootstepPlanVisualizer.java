@@ -38,7 +38,7 @@ public class FlatFootstepPlanVisualizer
       FootstepPlanner planner = new TurnWalkTurnPlanner();
       // create inputs
       RobotSide initialStanceSide = RobotSide.LEFT;
-      FramePose2d goalPose = new FramePose2d(worldFrame, new Point2d(1.0, 0.0), Math.PI / 4.0);
+      FramePose2d goalPose = new FramePose2d(worldFrame, new Point2d(1.0, 1.0), Math.PI / 2.0);
       planner.setInitialStanceFoot(new FramePose2d(worldFrame), initialStanceSide);
       planner.setGoalPose(goalPose);
 
