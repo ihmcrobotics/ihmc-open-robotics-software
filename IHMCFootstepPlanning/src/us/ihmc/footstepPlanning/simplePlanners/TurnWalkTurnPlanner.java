@@ -71,7 +71,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
          FramePose2d robotPose = new FramePose2d(stanceFootFrame, robotOffsetFromStanceFoot, 0.0);
          FramePose2d robotPoseInWorld = new FramePose2d(robotPose);
          robotPoseInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-         addTurnInPlaceToFacePoint(footstepList, robotPose, goalPoint);
+         addTurnInPlaceToFacePoint(footstepList, robotPoseInWorld, goalPoint);
 
 
       // walk
