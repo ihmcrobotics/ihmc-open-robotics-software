@@ -207,4 +207,23 @@ public class PlanarRegion
    {
       transformToPack.set(fromLocalToWorldTransform);
    }
+
+   public boolean epsilonEquals(PlanarRegion other, double epsilon)
+   {
+      if (!fromLocalToWorldTransform.epsilonEquals(other.fromLocalToWorldTransform, epsilon))
+         return false;
+      // Not necessary, but just in case
+      if (!fromWorldToLocalTransform.epsilonEquals(other.fromWorldToLocalTransform, epsilon))
+         return false;
+
+      if (getNumberOfConvexPolygons() != other.getNumberOfConvexPolygons())
+         return false;
+
+      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
+      {
+         if (!convexPolygons.get(i).epsilonEquals(other.convexPolygons.get(i), epsilon))
+            return false;
+      }
+      return true;
+   }
 }

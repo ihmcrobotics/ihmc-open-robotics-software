@@ -345,7 +345,7 @@ public class PlanarRegionTest
       }
    }
 
-   private ConvexPolygon2d translateConvexPolygon(double tx, double ty, ConvexPolygon2d convexPolygon)
+   static ConvexPolygon2d translateConvexPolygon(double tx, double ty, ConvexPolygon2d convexPolygon)
    {
       ConvexPolygon2d translatedConvexPolygon = new ConvexPolygon2d();
       for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
