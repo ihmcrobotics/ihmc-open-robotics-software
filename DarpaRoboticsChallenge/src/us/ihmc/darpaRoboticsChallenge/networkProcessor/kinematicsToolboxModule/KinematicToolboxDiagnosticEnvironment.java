@@ -3,16 +3,15 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.kinematicsToolboxModule;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -29,7 +28,9 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.AuxiliaryRobotDataProvider;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class KinematicToolboxDiagnosticEnvironment
 {
@@ -41,10 +42,13 @@ public class KinematicToolboxDiagnosticEnvironment
    public KinematicToolboxDiagnosticEnvironment(DRCRobotModel drcRobotModel)
    {
       FullHumanoidRobotModel humanoidFullRobotModel = drcRobotModel.createFullRobotModel();
-      HumanoidJointNameMap sdfJointNameMap = drcRobotModel.getJointMap();
-      HumanoidFloatingRootJointRobot humanoidFloatingRobotModel = new HumanoidFloatingRootJointRobot(robotDescription, sdfJointNameMap);
+      DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
+      HumanoidFloatingRootJointRobot humanoidFloatingRobotModel = drcRobotModel.createHumanoidFloatingRootJointRobot(false);
+      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = drcRobotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      robotInitialSetup.initializeRobot(humanoidFloatingRobotModel, jointMap);
       SDFPerfectSimulatedSensorReader sdfPerfectReader = new SDFPerfectSimulatedSensorReader(humanoidFloatingRobotModel, humanoidFullRobotModel,
                                                                                              referenceFrames);
+      sdfPerfectReader.read();
 
       ForceSensorDefinition[] forceSensorDefinitionArray = humanoidFullRobotModel.getForceSensorDefinitions();
       List<ForceSensorDefinition> forceSensorDefinitionList = Arrays.asList(forceSensorDefinitionArray);
@@ -72,6 +76,14 @@ public class KinematicToolboxDiagnosticEnvironment
       DRCPoseCommunicator poseCommunicator = new DRCPoseCommunicator(humanoidFullRobotModel, jointConfigurationGatherer, auxiliaryRobotDataProvider,
                                                                      dataProducer, sensorOutputMapReadOnly, sensorRawOutputMapReadOnly,
                                                                      robotMotionStatusFromController, sensorInformation, scheduler, netClassList);
+      scheduler.schedule(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            poseCommunicator.write();
+         }
+      }, 1, TimeUnit.MILLISECONDS);
    }
 
    private AuxiliaryRobotDataProvider initializeAuxiliaryRobotDataProvider()
