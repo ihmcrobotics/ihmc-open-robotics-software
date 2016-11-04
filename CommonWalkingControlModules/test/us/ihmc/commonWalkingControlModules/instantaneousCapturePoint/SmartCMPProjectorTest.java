@@ -48,7 +48,7 @@ import us.ihmc.tools.testing.MutationTestingTools;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SmartCMPProjectorTest
 {
-   private static boolean showPlotter = true;
+   private static boolean showPlotter = false;
    private static boolean showPlotterOnDirectionChange = false;
    private static boolean showPlotterOnFail = false;
 
