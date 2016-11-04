@@ -8,11 +8,7 @@ import javax.vecmath.Quat4d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.commonWalkingControlModules.controlModules.ActualCMPComputer;
-import us.ihmc.commonWalkingControlModules.controlModules.JointLowLevelPositionControlSimulator;
-import us.ihmc.commonWalkingControlModules.controlModules.PIDLidarTorqueController;
 import us.ihmc.commonWalkingControlModules.controlModules.PassiveJointController;
-import us.ihmc.commonWalkingControlModules.controlModules.SimulatedRobotCenterOfMassVisualizer;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -40,6 +36,10 @@ import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationToolkit.controllers.ActualCMPComputer;
+import us.ihmc.simulationToolkit.controllers.JointLowLevelPositionControlSimulator;
+import us.ihmc.simulationToolkit.controllers.PIDLidarTorqueController;
+import us.ihmc.simulationToolkit.controllers.SimulatedRobotCenterOfMassVisualizer;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
