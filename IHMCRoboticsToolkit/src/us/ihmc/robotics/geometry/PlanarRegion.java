@@ -74,11 +74,22 @@ public class PlanarRegion
       return false;
    }
 
+   /**
+    * Computes if the point is in the region projected onto the world xy-plane.
+    * Note that the z-coordinate of the query is ignored.
+    * @param point3d query coordinates.
+    * @return true if the point is inside this region, false otherwise.
+    */
    public boolean isPointInsideByProjectionOntoXYPlane(Point3d point3d)
    {
       return isPointInsideByProjectionOntoXYPlane(point3d.getX(), point3d.getY());
    }
 
+   /**
+    * Computes if the point is in the region projected onto the world xy-plane.
+    * @param point2d query coordinates.
+    * @return true if the point is inside this region, false otherwise.
+    */
    public boolean isPointInsideByProjectionOntoXYPlane(Point2d point2d)
    {
       return isPointInsideByProjectionOntoXYPlane(point2d.getX(), point2d.getY());
@@ -86,9 +97,9 @@ public class PlanarRegion
 
    /**
     * Computes if the point is in the region projected onto the world xy-plane.
-    * @param x
-    * @param y
-    * @return
+    * @param x x-coordinate of the query.
+    * @param y y-coordinate of the query.
+    * @return true if the point is inside this region, false otherwise.
     */
    public boolean isPointInsideByProjectionOntoXYPlane(double x, double y)
    {
@@ -104,9 +115,9 @@ public class PlanarRegion
 
    /**
     * Given a 3D point in world coordinates, computes whether the point is in this region.
-    * @param point3dInWorld query
+    * @param point3dInWorld query expressed in world coordinates.
     * @param epsilon tolerance expressed as maximum orthogonal distance from the region.
-    * @return
+    * @return true if the point is inside this region, false otherwise.
     */
    public boolean isPointInside(Point3d point3dInWorld, double epsilon)
    {
@@ -121,8 +132,8 @@ public class PlanarRegion
 
    /**
     * Given a 2D point expressed in the plane local frame, computes whether the point is in this region.
-    * @param point2dInLocal
-    * @return
+    * @param point2dInLocal query expressed in local coordinates.
+    * @return true if the point is inside this region, false otherwise.
     */
    public boolean isPointInside(Point2d point2dInLocal)
    {
@@ -156,6 +167,7 @@ public class PlanarRegion
       return z;
    }
 
+   /** Returns the number of convex polygons representing this region. */
    public int getNumberOfConvexPolygons()
    {
       return convexPolygons.size();
@@ -164,14 +176,16 @@ public class PlanarRegion
    /**
     * Returns the i<sup>th</sup> convex polygon representing a portion of this region.
     * The polygon is expressed in the region local coordinates.
-    * @param i
-    * @return
     */
    public ConvexPolygon2d getConvexPolygon(int i)
    {
       return convexPolygons.get(i);
    }
 
+   /**
+    * Retrieves the normal of this planar region and stores it in the given {@link Vector3d}.
+    * @param normalToPack used to store the normal of this planar region.
+    */
    public void getNormal(Vector3d normalToPack)
    {
       normalToPack.setX(fromLocalToWorldTransform.getM02());
@@ -179,11 +193,20 @@ public class PlanarRegion
       normalToPack.setZ(fromLocalToWorldTransform.getM22());
    }
 
+   /**
+    * Retrieves a point that lies in this planar region.
+    * This point is also used as the origin of the local coordinate system of this planar region.
+    * @param pointToPack used to store the point coordinates.
+    */
    public void getPointInRegion(Point3d pointToPack)
    {
       fromLocalToWorldTransform.getTranslation(pointToPack);
    }
 
+   /**
+    * Get the transform from local coordinates to world coordinates.
+    * @param transformToPack used to store the transform.
+    */
    public void getTransformToWorld(RigidBodyTransform transformToPack)
    {
       transformToPack.set(fromLocalToWorldTransform);
