@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.commonWalkingControlModules.controlModules;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
