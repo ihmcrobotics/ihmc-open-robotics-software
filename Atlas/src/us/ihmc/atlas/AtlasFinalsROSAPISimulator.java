@@ -16,13 +16,13 @@ import org.ros.message.MessageFactoryProvider;
 import org.ros.node.NodeConfiguration;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.darpaRoboticsChallenge.DRCSCStartingLocations;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
-import us.ihmc.darpaRoboticsChallenge.ROSAPISimulator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCFinalsEnvironment;
+import us.ihmc.darpaRoboticsChallenge.ros.ROSAPISimulator;
 import us.ihmc.darpaRoboticsChallenge.ros.subscriber.IHMCMsgToPacketSubscriber;
+import us.ihmc.darpaRoboticsChallenge.simulationStarter.DRCSCStartingLocations;
+import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
