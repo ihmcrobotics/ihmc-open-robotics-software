@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge;
+package us.ihmc.darpaRoboticsChallenge.polaris;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;

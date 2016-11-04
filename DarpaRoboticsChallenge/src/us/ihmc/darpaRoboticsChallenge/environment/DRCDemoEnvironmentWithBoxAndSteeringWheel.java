@@ -6,8 +6,8 @@ import java.util.List;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.controlModules.SteeringWheelDisturbanceController;
-import us.ihmc.darpaRoboticsChallenge.VehicleModelObjects;
-import us.ihmc.darpaRoboticsChallenge.VehicleObject;
+import us.ihmc.darpaRoboticsChallenge.polaris.VehicleModelObjects;
+import us.ihmc.darpaRoboticsChallenge.polaris.VehicleObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Box3d;
