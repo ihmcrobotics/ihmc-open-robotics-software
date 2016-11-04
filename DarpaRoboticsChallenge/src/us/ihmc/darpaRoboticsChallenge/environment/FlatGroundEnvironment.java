@@ -1,8 +1,7 @@
-package us.ihmc.darpaRoboticsChallenge.drcRobot;
+package us.ihmc.darpaRoboticsChallenge.environment;
 
 import java.util.List;
 
-import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
