@@ -69,7 +69,7 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
 
    private void createStairs()
    {
-      DarpaRoboticsChallengeStairsEnvironment environment = new DarpaRoboticsChallengeStairsEnvironment();
+      AdjustableStairsEnvironment environment = new AdjustableStairsEnvironment();
       environment.setStairsParameters(4, 1.016, 0.2286, 0.2921);
       environment.setRailingParameters(0.05, 0.3, 0.05, 0.8128, 2, false);
       environment.setLandingPlatformParameters(1.27, 3, 1.143, 2);

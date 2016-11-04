@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class DarpaRoboticsChallengeStairsEnvironment implements CommonAvatarEnvironmentInterface
+public class AdjustableStairsEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject;
 
@@ -50,7 +50,7 @@ public class DarpaRoboticsChallengeStairsEnvironment implements CommonAvatarEnvi
 
    private double railingSupportAngle = stairSlope + Math.PI / 2;
 
-   public DarpaRoboticsChallengeStairsEnvironment()
+   public AdjustableStairsEnvironment()
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
 

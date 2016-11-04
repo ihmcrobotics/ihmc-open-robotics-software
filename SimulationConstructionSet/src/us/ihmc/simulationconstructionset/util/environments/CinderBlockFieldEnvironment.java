@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.environment;
+package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,18 +6,15 @@ import java.util.List;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class DRCCinderBlockFieldEnvironment implements CommonAvatarEnvironmentInterface
+public class CinderBlockFieldEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D(getClass().getSimpleName());
    private final List<List<FramePose>> cinderBlockPoses = new ArrayList<>();
 
-   public DRCCinderBlockFieldEnvironment()
+   public CinderBlockFieldEnvironment()
    {
       combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("FlatGround"));
       combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpCinderBlockFieldActual("CinderBlockField", 0.0, 0.0, cinderBlockPoses));
