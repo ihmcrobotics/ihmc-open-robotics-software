@@ -8,6 +8,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
+import us.ihmc.tools.testing.MutationTestingTools;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -20,7 +22,7 @@ public class TurnWalkTurnPlannerTest
 {
    private final Random random = new Random(727434726273L);
    private boolean succes = true;
-   private boolean showSimulation = true;
+   private boolean showSimulation = false;
 
    private double stepWidth = 0.3;
 
@@ -30,17 +32,17 @@ public class TurnWalkTurnPlannerTest
    public void testJustStraightLine()
    {
       double xGoal = 5.0;
-      double yGoal = 0.0;
+      double yGoal = -stepWidth/2.0;
       double yawGoal = 0.0;
       Point2d goalPosition = new Point2d(xGoal, yGoal);
       FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
 
       double xInitialStanceFoot = 0.0;
-      double yInitialStanceFoot = stepWidth/2.0;
+      double yInitialStanceFoot = 0.0;
       double yawInitial = 0.0;
       Point2d initialStanceFootPosition = new Point2d(xInitialStanceFoot, yInitialStanceFoot);
       FramePose2d initialStanceFootPose = new FramePose2d(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
-      RobotSide initialStanceFootSide = RobotSide.RIGHT;
+      RobotSide initialStanceFootSide = RobotSide.LEFT;
 
       assertTrue(isGoalWithinFeet(goalPose, initialStanceFootPose, initialStanceFootSide));
    }
@@ -50,17 +52,17 @@ public class TurnWalkTurnPlannerTest
    public void testJustTurnInPlace()
    {
       double xGoal = 0.0;
-      double yGoal = 0.0;
-      double yawGoal = 0.0;
+      double yGoal = -stepWidth/2.0;
+      double yawGoal = 20.0;
       Point2d goalPosition = new Point2d(xGoal, yGoal);
       FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
 
       double xInitialStanceFoot = 0.0;
-      double yInitialStanceFoot = stepWidth/2.0;
-      double yawInitial = 20;
+      double yInitialStanceFoot = 0.0;
+      double yawInitial = 0.0;
       Point2d initialStanceFootPosition = new Point2d(xInitialStanceFoot, yInitialStanceFoot);
       FramePose2d initialStanceFootPose = new FramePose2d(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
-      RobotSide initialStanceFootSide = RobotSide.RIGHT;
+      RobotSide initialStanceFootSide = RobotSide.LEFT;
 
       assertTrue(isGoalWithinFeet(goalPose, initialStanceFootPose, initialStanceFootSide));
    }
@@ -110,15 +112,11 @@ public class TurnWalkTurnPlannerTest
       return succes;
    }
 
-   private ConvexPolygon2d makeFootPolygon()
-   {
-      ConvexPolygon2d ret = new ConvexPolygon2d();
-      ret.addVertex(new Point2d(0.1, 0.05));
-      ret.addVertex(new Point2d(-0.1, 0.05));
-      ret.addVertex(new Point2d(0.1, -0.05));
-      ret.addVertex(new Point2d(-0.1, -0.05));
-      ret.update();
-      return ret;
-   }
 
+   public static void main(String[] args)
+   {
+      String targetTests = "us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlannerTest";
+      String targetClasses = "us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner";
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClasses);
+   }
 }

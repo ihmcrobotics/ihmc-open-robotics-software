@@ -101,7 +101,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
 
       robotPosition.changeFrame(stanceFootFrame);
       FramePose2d footstepPose = new FramePose2d(stanceFootFrame);
-      footstepPose.setY(-2.0 * robotPosition.getY());
+      footstepPose.setY(2.0*robotPosition.getY());
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       footstepList.add(footstepPose);
@@ -208,6 +208,8 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
          stanceFootFrame.setPoseAndUpdate(nextFootstep);
          lastStepSide = lastStepSide.getOppositeSide();
       }
+      pointToTurnAbout.setIncludingFrame(pointToTurnAboutInWorld);
+      pointToTurnAbout.changeFrame(stanceFootFrame);
    }
 
 }
