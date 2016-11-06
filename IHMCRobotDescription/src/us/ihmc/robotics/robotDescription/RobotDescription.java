@@ -69,7 +69,7 @@ public class RobotDescription implements RobotDescriptionNode, GraphicsObjectsHo
    }
 
    @Override
-   public Graphics3DObject getCollisionObject(String name)
+   public CollisionMeshDescription getCollisionObject(String name)
    {
       JointDescription jointDescription = getJointDescription(name);
       if (jointDescription == null)

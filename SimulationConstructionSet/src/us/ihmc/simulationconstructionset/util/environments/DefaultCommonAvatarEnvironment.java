@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.environment;
+package us.ihmc.simulationconstructionset.util.environments;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -23,8 +23,6 @@ import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
@@ -34,7 +32,7 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
 
 @SuppressWarnings("unused")
-public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentInterface
+public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D;
 
@@ -80,12 +78,12 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
 
    // private static final double FLOOR_THICKNESS = 0.001;
 
-   enum BLOCKTYPE
+   public enum BLOCKTYPE
    {
       FLAT, FLATSKEW, UPRIGHTSKEW, ANGLED
    }
 
-   public DRCDemo01NavigationEnvironment()
+   public DefaultCommonAvatarEnvironment()
    {
       combinedTerrainObject3D = new CombinedTerrainObject3D("DRCDemo01NavigationEnvironment");
 

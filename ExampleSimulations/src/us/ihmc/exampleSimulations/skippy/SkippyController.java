@@ -213,7 +213,6 @@ public class SkippyController implements RobotController {
 	/*
 	 * Outputs which controller is being executed in output.txt
 	 */
-	boolean createDebugFiles = false;// true;//
 	boolean traceControllerBeingExecuted = false;// true;//
 
 	public SkippyController(SkippyRobot robot, RobotType robotType, String name, double controlDT,
@@ -240,23 +239,27 @@ public class SkippyController implements RobotController {
 		/*
 		 * Set up files for debug
 		 */
-		if (createDebugFiles) {
-			try {
-				writer = new PrintWriter("Output.txt", "UTF-8");
-			} catch (FileNotFoundException | UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			/*
-			 * Set up a file for output
-			 */
-			try {
-				writer1 = new PrintWriter("Output1.txt", "UTF-8");
-			} catch (FileNotFoundException | UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+      try
+      {
+         writer = new PrintWriter("Output.txt", "UTF-8");
+      }
+      catch (FileNotFoundException | UnsupportedEncodingException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      /*
+       * Set up a file for output
+       */
+      try
+      {
+         writer1 = new PrintWriter("Output1.txt", "UTF-8");
+      }
+      catch (FileNotFoundException | UnsupportedEncodingException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
 
 		footToCoMInBodyFrame = new YoFrameVector("footToCoMInBody", robot.updateAndGetBodyFrame(), registry);
 		forceToCOM = new ExternalForcePoint("FORCETOCOM", robot);
@@ -477,16 +480,13 @@ public class SkippyController implements RobotController {
 		setParametersForControlModes();
 		computeFootToCenterOfMassLocation();
 		if (skippyToDo.getEnumValue() == SkippyToDo.BALANCE) {
-			// writer.println(stateMachine.getCurrentStateEnum()+"+-+-"+skippyToDo+"
-			// "+robot.getTime());
-			// balanceControl();
+			 writer.println(stateMachine.getCurrentStateEnum()+"+-+-"+skippyToDo+" "+robot.getTime());
+			 balanceControl();
 		} else if (skippyToDo.getEnumValue() == SkippyToDo.POSITION) {
-			// writer.println(stateMachine.getStateYoVariableName()+"
-			// "+skippyToDo+" "+robot.getTime());
+			 writer.println(stateMachine.getStateYoVariableName()+" "+skippyToDo+" "+robot.getTime());
 			positionControl();
 		} else {
-			// writer.println(stateMachine.getStateYoVariableName()+"
-			// "+skippyToDo+" "+robot.getTime());
+			 writer.println(stateMachine.getStateYoVariableName()+" "+skippyToDo+" "+robot.getTime());
 			jumpControl();
 		}
 	}
@@ -793,7 +793,7 @@ public class SkippyController implements RobotController {
 	 * jumpControl: Allows Skippy model to jump sideways or forward
 	 */
 	private void jumpControl() {
-
+	   System.out.println("jumpControl");
 		stateMachine.doAction();
 		stateMachine.checkTransitionConditions();
 		if (traceControllerBeingExecuted)
@@ -1329,6 +1329,7 @@ public class SkippyController implements RobotController {
 		}
 
 		public boolean checkCondition() {
+		   System.out.println("BalanceToPrepareTransitionCondition");
 			if (skippyToDo.getEnumValue() == SkippyToDo.JUMP_FORWARD) {
 				double time = stateMachine.timeInCurrentState();
 				return time >= 4.0;
@@ -1346,6 +1347,7 @@ public class SkippyController implements RobotController {
 		}
 
 		public boolean checkCondition() {
+         System.out.println("PrepareToLeanTransitionCondition");
 			if (direction == SkippyToDo.JUMP_FORWARD) {
 				double time = stateMachine.timeInCurrentState();
 				return time < 2.3 && time > 2.29;// < 7.01 && time > 6.99;
@@ -1363,6 +1365,7 @@ public class SkippyController implements RobotController {
 		}
 
 		public boolean checkCondition() {
+         System.out.println("LeanToLiftoffTransitionCondition");
 			if (direction == SkippyToDo.JUMP_FORWARD) {
 				double time = stateMachine.timeInCurrentState();
 				return true; // time > 0.2;
@@ -1380,6 +1383,7 @@ public class SkippyController implements RobotController {
 		}
 
 		public boolean checkCondition() {
+		   System.out.println("checkCondition");
 			if (direction == SkippyToDo.JUMP_FORWARD) {
 				double time = stateMachine.timeInCurrentState();
 				return time < 0.36 && time > 0.35;
@@ -1402,8 +1406,9 @@ public class SkippyController implements RobotController {
 		}
 
 		public boolean checkCondition() {
+		   System.out.println("RepositionToRecoverTransitionCondition");
 			double time = stateMachine.timeInCurrentState();
-			return time < 0.70 && time > 0.69;// < 0.60 && time > 0.59;
+			return time < 0.60 && time > 0.59;  //< 0.70 && time > 0.69;// 
 		}
 	}
 
@@ -1416,6 +1421,7 @@ public class SkippyController implements RobotController {
 		}
 
 		public boolean checkCondition() {
+		   System.out.println("RecoverToBalanceTransitionCondition");
 			if (direction == SkippyToDo.JUMP_FORWARD) {
 				double time = stateMachine.timeInCurrentState();
 				return time < 4.01 && time > 3.99;

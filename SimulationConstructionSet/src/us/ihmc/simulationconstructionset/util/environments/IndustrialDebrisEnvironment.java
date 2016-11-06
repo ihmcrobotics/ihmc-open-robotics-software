@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.environment;
+package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +22,10 @@ import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
+public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final ReferenceFrame constructionWorldFrame = ReferenceFrame.constructAWorldFrame("constructionFrame");
 
@@ -49,15 +46,15 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
 
    private final double forceVectorScale = 1.0 / 50.0;
 
-   public DRCDebrisEnvironment()
+   public IndustrialDebrisEnvironment()
    {
       this(new Vector3d(0.0, 0.0, 0.0), 0.0);
    }
 
-   public DRCDebrisEnvironment(Tuple3d robotInitialPosition, double robotInitialYaw)
+   public IndustrialDebrisEnvironment(Tuple3d robotInitialPosition, double robotInitialYaw)
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
-      combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
+      combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
 
       Quat4d robotInitialOrientation = new Quat4d();
       RotationTools.convertYawPitchRollToQuaternion(robotInitialYaw, 0.0, 0.0, robotInitialOrientation);
@@ -160,15 +157,6 @@ public class DRCDebrisEnvironment implements CommonAvatarEnvironmentInterface
       debrisPose.setPose(positionWithRespectToRobot, orientation);
       debrisPose.changeFrame(constructionWorldFrame);
       return debrisPose;
-   }
-
-   private CombinedTerrainObject3D setUpGround(String name)
-   {
-      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
-
-      combinedTerrainObject.addBox(-10.0, -10.0, 10.0, 10.0, -0.05, 0.0, YoAppearance.DarkBlue());
-
-      return combinedTerrainObject;
    }
 
    public void createDebrisContactController()

@@ -62,6 +62,7 @@ dependencies {
     compile group: 'org.boofcv', name: 'io', version: '0.19'
     compile group: 'org.boofcv', name: 'recognition', version: '0.19'
     compile group: 'org.boofcv', name: 'calibration', version: '0.19'
+    compile "org.ddogleg:ddogleg:0.7"
 
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":Graphics3DAdapter")
