@@ -7,13 +7,11 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -22,7 +20,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
@@ -31,6 +31,8 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInterface
 {
+   public static final boolean USE_COLLISIONS_MESHS_FOR_VISUALIZATION = false;
+   
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final RobotSide[] footContactSides;
    private final RobotSide[] handContactSides;
@@ -39,7 +41,7 @@ public class MultiContactTestEnvironment implements CommonAvatarEnvironmentInter
                                       RobotSide[] footContactSides, RobotSide[] handContactSides, SideDependentList<RigidBodyTransform> invisibleContactablePlaneHandContactPointTransforms)
    {
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      HumanoidFloatingRootJointRobot robotForEnvironmentSetup = robotModel.createHumanoidFloatingRootJointRobot(DRCConfigParameters.USE_COLLISIONS_MESHS_FOR_VISUALIZATION);
+      HumanoidFloatingRootJointRobot robotForEnvironmentSetup = robotModel.createHumanoidFloatingRootJointRobot(USE_COLLISIONS_MESHS_FOR_VISUALIZATION);
       robotInitialSetup.initializeRobot(robotForEnvironmentSetup, jointMap);
       robotForEnvironmentSetup.update();
       FullHumanoidRobotModel fullRobotModelForEnvironmentSetup = robotModel.createFullRobotModel();

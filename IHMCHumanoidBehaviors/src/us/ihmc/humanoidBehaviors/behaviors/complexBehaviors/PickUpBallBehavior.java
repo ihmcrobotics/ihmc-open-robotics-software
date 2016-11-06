@@ -694,32 +694,13 @@ public class PickUpBallBehavior extends AbstractBehavior
    }
 
    @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+   protected void passReceivedObjectToChildBehaviors(Object object)
    {
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.consumeObjectFromNetworkProcessor(object);
+         behavior.consumeObjectFromNetwork(object);
       }
    }
 
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      for (AbstractBehavior behavior : behaviors)
-      {
-         behavior.consumeObjectFromController(object);
-      }
-   }
 
-  
-
-   //   public void setHSVRange(HSVRange hsvRange)
-   //   {
-   //      if (initialSphereDetectionBehavior instanceof BlobFilteredSphereDetectionBehavior)
-   //      {
-   //         BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior = (BlobFilteredSphereDetectionBehavior) initialSphereDetectionBehavior;
-   //         blobFilteredSphereDetectionBehavior.resetHSVRanges();
-   //         blobFilteredSphereDetectionBehavior.addHSVRange(hsvRange);
-   //      }
-   //   }
 }

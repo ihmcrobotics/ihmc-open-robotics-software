@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
+import us.ihmc.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;

@@ -181,6 +181,11 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    {
       stateEstimatorTimeStampedTransformBuffer.put(stateEstimatorTransform, timeStamp);
    }
+   
+   public void getStateEstimatorTransform(long timestamp, TimeStampedTransform3D timeStampedTransform3DToPack)
+   {
+      stateEstimatorTimeStampedTransformBuffer.findTransform(timestamp, timeStampedTransform3DToPack);
+   }
 
    /**
     * @param timeStamp

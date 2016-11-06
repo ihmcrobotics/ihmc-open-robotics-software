@@ -6,16 +6,15 @@ import java.util.HashMap;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.ControllerGlobalObjectConsumer;
-import us.ihmc.humanoidBehaviors.communication.NetworkProcessorGlobalObjectConsumer;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.GlobalObjectConsumer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.tools.FormattingTools;
 
 /**
@@ -32,12 +31,9 @@ public abstract class AbstractBehavior implements RobotController
    
    private ArrayList<AbstractBehavior> childBehaviors = new ArrayList<AbstractBehavior>();
 
-   protected final OutgoingCommunicationBridgeInterface outgoingCommunicationBridge;
-   protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> listeningControllerQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
-   protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> listeningNetworkProcessorQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
-
-   private final ControllerGlobalObjectConsumer controllerObjectConsumer;
-   private final NetworkProcessorGlobalObjectConsumer networkProcessorObjectConsumer;
+   protected final CommunicationBridgeInterface outgoingCommunicationBridge;
+   protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> listeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
+   private final GlobalObjectConsumer networkProcessorObjectConsumer;
    protected final String behaviorName;
    
    /**
@@ -51,16 +47,15 @@ public abstract class AbstractBehavior implements RobotController
    protected final BooleanYoVariable isAborted;
    protected final DoubleYoVariable percentCompleted;
 
-   public AbstractBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public AbstractBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       this(null, outgoingCommunicationBridge);
    }
 
-   public AbstractBehavior(String namePrefix, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public AbstractBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       this.outgoingCommunicationBridge = outgoingCommunicationBridge;
-      controllerObjectConsumer = new ControllerGlobalObjectConsumer(this);
-      networkProcessorObjectConsumer = new NetworkProcessorGlobalObjectConsumer(this);
+      networkProcessorObjectConsumer = new GlobalObjectConsumer(this);
       
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
       registry = new YoVariableRegistry(behaviorName);
@@ -103,33 +98,15 @@ public abstract class AbstractBehavior implements RobotController
       outgoingCommunicationBridge.sendPacketToUI(obj);
    }
    
-   public void consumeObjectFromController(Object object)
+   public void consumeObjectFromNetwork(Object object)
    {
-      notifyControllerListeners(object);
-      passReceivedControllerObjectToChildBehaviors(object);
+      notifyNetworkListeners(object);
+      passReceivedObjectToChildBehaviors(object);
    }
 
-   public void consumeObjectFromNetworkProcessor(Object object)
+   private void notifyNetworkListeners(Object object)
    {
-      notifyNetworkProcessorListeners(object);
-      passReceivedNetworkProcessorObjectToChildBehaviors(object);
-   }
-
-   private void notifyControllerListeners(Object object)
-   {
-      ArrayList<ConcurrentListeningQueue> queues = listeningControllerQueues.get(object.getClass());
-      if (queues != null)
-      {
-         for (int i = 0; i < queues.size(); i++)
-         {
-            queues.get(i).put(object);
-         }
-      }
-   }
-   
-   private void notifyNetworkProcessorListeners(Object object)
-   {
-      ArrayList<ConcurrentListeningQueue> queues = listeningNetworkProcessorQueues.get(object.getClass());
+      ArrayList<ConcurrentListeningQueue> queues = listeningNetworkQueues.get(object.getClass());
       if (queues != null)
       {
          for (int i = 0; i < queues.size(); i++)
@@ -139,43 +116,27 @@ public abstract class AbstractBehavior implements RobotController
       }
    }
 
-   public void attachNetworkProcessorListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
+   public void attachNetworkListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
    {
-      if (!listeningNetworkProcessorQueues.containsKey(key))
+      if (!listeningNetworkQueues.containsKey(key))
       {
-         listeningNetworkProcessorQueues.put(key, new ArrayList<ConcurrentListeningQueue>());
+         listeningNetworkQueues.put(key, new ArrayList<ConcurrentListeningQueue>());
       }
-      listeningNetworkProcessorQueues.get(key).add(queue);
+      listeningNetworkQueues.get(key).add(queue);
    }
    
-   public void attachControllerListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
-   {
-      if (!listeningControllerQueues.containsKey(key))
-      {
-         listeningControllerQueues.put(key, new ArrayList<ConcurrentListeningQueue>());
-      }
-      listeningControllerQueues.get(key).add(queue);
-   }
+  
 
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+   protected void passReceivedObjectToChildBehaviors(Object object)
    {
       for (AbstractBehavior behavior : childBehaviors)
       {
-         behavior.consumeObjectFromNetworkProcessor(object);
+         behavior.consumeObjectFromNetwork(object);
       }
 
    }
    
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-
-      for (AbstractBehavior behavior : childBehaviors)
-      {
-         behavior.consumeObjectFromController(object);
-      }
-
-
-   }
+   
 
    @Override
    public YoVariableRegistry getYoVariableRegistry()
@@ -260,13 +221,10 @@ public abstract class AbstractBehavior implements RobotController
    }
    
    
-   public GlobalPacketConsumer getNetworkProcessorGlobalObjectConsumer()
+   public GlobalPacketConsumer getGlobalPacketConsumer()
    {
       return networkProcessorObjectConsumer;
    }
    
-   public GlobalPacketConsumer getControllerGlobalPacketConsumer()
-   {
-      return controllerObjectConsumer;
-   }
+ 
 }

@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
@@ -10,6 +8,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
+import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class DRCDemo01EnvironmentViewer
@@ -36,7 +36,7 @@ public class DRCDemo01EnvironmentViewer
       double simulateDT = .001;
       int initialBufferSize = 16342;
 
-      CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DRCDemo01NavigationEnvironment();
+      CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DefaultCommonAvatarEnvironment();
 //      Link staticLink=new Link("StaticLink");
 //      robot.addStaticLink(staticLink);
 //      robot.addStaticLinkGraphics(commonAvatarEnvironmentInterface.getTerrainObject().getLinkGraphics());

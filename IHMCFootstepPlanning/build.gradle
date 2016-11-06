@@ -1,0 +1,58 @@
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.18"
+  }
+}
+
+apply plugin: "us.ihmc.gradle.ihmc-build"
+
+sourceCompatibility = 1.7
+version = "${getOpenRoboticsSoftwareProject().version}"
+project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
+project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
+project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+project.ext.licenseName = "Apache License, Version 2.0"
+project.ext.bintrayLicenseName = "Apache-2.0"
+
+
+repositories ihmc.ihmcDefaultArtifactProxies()
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven {
+        url "http://artifactory.ihmc.us/artifactory/thirdparty/"
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+
+	compile "javax.vecmath:vecmath:1.5.2"
+	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+	compile ihmc.getProjectDependency(":SimulationConstructionSet")
+	compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+	
+    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+}
+
+jar {
+    manifest {
+        attributes(
+                "Created-By": "IHMC Gradle Build Script",
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version,
+                "Implementation-Vendor": "IHMC",
+
+                "Bundle-Name": project.name,
+                "Bundle-Version": project.version,
+                "Bundle-License": "IHMC Proprietary",
+                "Bundle-Vendor": "IHMC")
+    }
+}

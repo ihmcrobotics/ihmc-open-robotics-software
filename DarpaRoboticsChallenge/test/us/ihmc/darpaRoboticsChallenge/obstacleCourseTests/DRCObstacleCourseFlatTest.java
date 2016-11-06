@@ -16,19 +16,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.humanoidRobotics.HumanoidFloatingRootJointRobot;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
+import us.ihmc.darpaRoboticsChallenge.environment.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
-import us.ihmc.darpaRoboticsChallenge.util.OscillateFeetPerturber;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
@@ -39,6 +37,8 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -293,7 +293,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 //	      walk.set(true);
 
 	      FootstepDataListCommand footstepList = new FootstepDataListCommand();
-         FootstepDataControllerCommand footstepCommand = new FootstepDataControllerCommand();
+         FootstepDataCommand footstepCommand = new FootstepDataCommand();
 
          Point3d position = new Point3d(0.0, 0.2, 0.0);
          Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
@@ -328,7 +328,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
 
 	      footstepList = new FootstepDataListCommand();
-         footstepCommand = new FootstepDataControllerCommand();
+         footstepCommand = new FootstepDataCommand();
 
          position = new Point3d(1.0, 0.2, 0.0);
          orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
@@ -402,7 +402,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 //      walk.set(true);
 
         FootstepDataListCommand footstepList = new FootstepDataListCommand();
-        FootstepDataControllerCommand footstepCommand = new FootstepDataControllerCommand();
+        FootstepDataCommand footstepCommand = new FootstepDataCommand();
 
         Point3d position = new Point3d(0.3, 0.2, 0.0);
         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
@@ -432,7 +432,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
         // Some more steps:
         footstepList = new FootstepDataListCommand();
-        footstepCommand = new FootstepDataControllerCommand();
+        footstepCommand = new FootstepDataCommand();
 
         position = new Point3d(0.65, 0.2, 0.0);
         orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);

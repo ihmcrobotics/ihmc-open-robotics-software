@@ -10,7 +10,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
@@ -43,7 +43,7 @@ public class KickBehavior extends AbstractBehavior
    private final DoubleYoVariable trajectoryTime;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
-   public KickBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public KickBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super(outgoingCommunicationBridge);
@@ -208,22 +208,14 @@ public class KickBehavior extends AbstractBehavior
    }
 
    @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+   protected void passReceivedObjectToChildBehaviors(Object object)
    {
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.consumeObjectFromNetworkProcessor(object);
+         behavior.consumeObjectFromNetwork(object);
       }
    }
 
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      for (AbstractBehavior behavior : behaviors)
-      {
-         behavior.consumeObjectFromController(object);
-      }
-   }
 
    public boolean hasInputBeenSet()
    {

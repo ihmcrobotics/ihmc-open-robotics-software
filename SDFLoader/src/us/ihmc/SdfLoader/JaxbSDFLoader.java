@@ -23,7 +23,6 @@ import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.sensors.ContactSensorType;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 
 public class JaxbSDFLoader
 {
@@ -112,32 +111,32 @@ public class JaxbSDFLoader
       return generalizedSDFRobotModels.get(name);
    }
 
-   public FloatingRootJointRobot createRobot(JointNameMap jointNameMap, boolean useCollisionMeshes)
-   {
-      return createRobot(jointNameMap.getModelName(), jointNameMap, useCollisionMeshes);
-   }
-
-   public FloatingRootJointRobot createRobot(String modelName, boolean useCollisionMeshes)
-   {
-      return createRobot(modelName, null, useCollisionMeshes);
-   }
-
-   private FloatingRootJointRobot createRobot(String modelName, JointNameMap jointNameMap, boolean useCollisionMeshes)
-   {
-      return createRobot(modelName, jointNameMap, useCollisionMeshes, true, true);
-   }
-
-   public FloatingRootJointRobot createRobot(String modelName, JointNameMap jointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits,
-           boolean enableJointDamping)
-   {
-      checkModelName(modelName);
-
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = generalizedSDFRobotModels.get(modelName);
-      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-      RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
-
-      return new FloatingRootJointRobot(description);
-   }
+//   public FloatingRootJointRobot createRobot(JointNameMap jointNameMap, boolean useCollisionMeshes)
+//   {
+//      return createRobot(jointNameMap.getModelName(), jointNameMap, useCollisionMeshes);
+//   }
+//
+//   public FloatingRootJointRobot createRobot(String modelName, boolean useCollisionMeshes)
+//   {
+//      return createRobot(modelName, null, useCollisionMeshes);
+//   }
+//
+//   private FloatingRootJointRobot createRobot(String modelName, JointNameMap jointNameMap, boolean useCollisionMeshes)
+//   {
+//      return createRobot(modelName, jointNameMap, useCollisionMeshes, true, true);
+//   }
+//
+//   public FloatingRootJointRobot createRobot(String modelName, JointNameMap jointNameMap, boolean useCollisionMeshes, boolean enableTorqueVelocityLimits,
+//           boolean enableJointDamping)
+//   {
+//      checkModelName(modelName);
+//
+//      GeneralizedSDFRobotModel generalizedSDFRobotModel = generalizedSDFRobotModels.get(modelName);
+//      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+//      RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+//
+//      return new FloatingRootJointRobot(description);
+//   }
 
    public void addForceSensor(JointNameMap jointMap, String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)
    {
