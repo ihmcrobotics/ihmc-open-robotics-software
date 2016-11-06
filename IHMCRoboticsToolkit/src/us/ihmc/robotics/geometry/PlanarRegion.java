@@ -112,15 +112,15 @@ public class PlanarRegion
    /**
     * Given a 3D point in world coordinates, computes whether the point is in this region.
     * @param point3dInWorld query expressed in world coordinates.
-    * @param epsilon tolerance expressed as maximum orthogonal distance from the region.
+    * @param maximumOrthogonalDistance tolerance expressed as maximum orthogonal distance from the region.
     * @return true if the point is inside this region, false otherwise.
     */
-   public boolean isPointInside(Point3d point3dInWorld, double epsilon)
+   public boolean isPointInside(Point3d point3dInWorld, double maximumOrthogonalDistance)
    {
       Point3d localPoint = new Point3d();
       fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
 
-      if (!MathTools.isInsideBoundsInclusive(localPoint.getZ(), epsilon))
+      if (!MathTools.isInsideBoundsInclusive(localPoint.getZ(), maximumOrthogonalDistance))
          return false;
       else
          return isPointInside(new Point2d(localPoint.getX(), localPoint.getY()));
