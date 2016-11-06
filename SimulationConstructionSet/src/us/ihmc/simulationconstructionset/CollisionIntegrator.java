@@ -203,25 +203,26 @@ public class CollisionIntegrator implements java.io.Serializable
 
       K_inv.set(K);
 
-      if (Math.abs(K_inv.determinant()) < 0.0001)
+      double inverseMinimum = 1e-11;
+      if (Math.abs(K_inv.determinant()) < inverseMinimum)
       {
-         System.err.println("Warning: K is not invertible in " + getClass().getSimpleName());
+         System.err.println("Warning: K is not invertible in " + getClass().getSimpleName() + ". K_inv.determinant() = " + K_inv.determinant());
          System.err.println("K = " + K);
          // Cheesy Solution for now.  Look at the diagonal entries and if any are zero, assume that they are the null space and add a little to the other columns:
          // System.out.println("Having trouble inverting K.  Using cheesy inverse.");
 
-         if (Math.abs(K_inv.getM00()) < 0.0001)
-            K_inv.setM00(0.0001);
-         if (Math.abs(K_inv.getM11()) < 0.0001)
-            K_inv.setM11(0.0001);
-         if (Math.abs(K_inv.getM22()) < 0.0001)
-            K_inv.setM22(0.0001);
+         if (Math.abs(K_inv.getM00()) < inverseMinimum)
+            K_inv.setM00(inverseMinimum);
+         if (Math.abs(K_inv.getM11()) < inverseMinimum)
+            K_inv.setM11(inverseMinimum);
+         if (Math.abs(K_inv.getM22()) < inverseMinimum)
+            K_inv.setM22(inverseMinimum);
 
-         if (Math.abs(K_inv.determinant()) < 0.0001)
+         if (Math.abs(K_inv.determinant()) < inverseMinimum)
          {
-            K_inv.setM00(K_inv.getM00() + 0.0001);
-            K_inv.setM11(K_inv.getM11() + 0.0001);
-            K_inv.setM22(K_inv.getM22() + 0.0001);
+            K_inv.setM00(K_inv.getM00() + inverseMinimum);
+            K_inv.setM11(K_inv.getM11() + inverseMinimum);
+            K_inv.setM22(K_inv.getM22() + inverseMinimum);
          }
       }
 

@@ -1,6 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import org.apache.poi.ss.formula.functions.T;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -290,7 +289,6 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
    {
       Packet packet = null;
       Message translatedMessage;
-      T translated = null;
       try
       {
          Constructor constructor = clazz.getDeclaredConstructor(Random.class);

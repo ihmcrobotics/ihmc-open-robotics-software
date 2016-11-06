@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.environment;
+package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,9 +9,6 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.ContactableDoorRobot;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
@@ -24,14 +21,14 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
  *    <li> Default force to open if weighted = 3lb applied at the handle
  * </ul>
  */
-public class DRCDoorEnvironment implements CommonAvatarEnvironmentInterface
+public class DoorEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final List<ContactableDoorRobot> doorRobots = new ArrayList<ContactableDoorRobot>();
    private final CombinedTerrainObject3D combinedTerrainObject;
       
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
-   public DRCDoorEnvironment()
+   public DoorEnvironment()
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));

@@ -119,6 +119,17 @@ public class LinkDescription
       return momentOfInertia;
    }
 
+   public void setMassAndRadiiOfGyration(double mass, double radiusOfGyrationX, double radiusOfGyrationY, double radiusOfGyrationZ)
+   {
+      this.mass = mass;
+
+      double Ixx = mass * (radiusOfGyrationY * radiusOfGyrationY + radiusOfGyrationZ * radiusOfGyrationZ);
+      double Iyy = mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationZ * radiusOfGyrationZ);
+      double Izz = mass * (radiusOfGyrationX * radiusOfGyrationX + radiusOfGyrationY * radiusOfGyrationY);
+
+      setMomentOfInertia(Ixx, Iyy, Izz);
+   }
+
    public void getMomentOfInertia(DenseMatrix64F momentOfInertiaToPack)
    {
       momentOfInertiaToPack.set(momentOfInertia);

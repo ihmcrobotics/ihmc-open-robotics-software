@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.environment;
+package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +14,10 @@ import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.ContactableCylinderRobot;
-import us.ihmc.simulationconstructionset.util.environments.ContactableRobot;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
+public class HandDrillManipulationEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final ArrayList<ContactableRobot> robots = new ArrayList<ContactableRobot>();
    private final ContactableCylinderRobot drillRobot;
@@ -37,7 +33,7 @@ public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
    private final double drillRadius = 0.025;
    private final double drillMass = 1.5;
    
-   public DRCDrillEnvironment()
+   public HandDrillManipulationEnvironment()
    {
       double forceVectorScale = 1.0 / 500.0;
 
