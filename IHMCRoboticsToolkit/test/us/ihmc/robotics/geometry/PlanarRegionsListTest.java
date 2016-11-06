@@ -1,6 +1,8 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +12,13 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.testing.MutationTestingTools;
+
 public class PlanarRegionsListTest
 {
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testTrivialCase() throws Exception
    {
       // polygons forming a "|"-shaped region.
@@ -35,11 +41,11 @@ public class PlanarRegionsListTest
       polygon2.addVertex(1.0, -5.0);
       polygon2.addVertex(-1.0, -5.0);
       polygon2.addVertex(-1.0, 5.0);
-      
+
       region2ConvexPolygons.add(polygon2);
       for (ConvexPolygon2d convexPolygon : region2ConvexPolygons)
          convexPolygon.update();
-      
+
       RigidBodyTransform region1Transform = new RigidBodyTransform();
       RigidBodyTransform region2Transform = new RigidBodyTransform();
 
@@ -165,5 +171,12 @@ public class PlanarRegionsListTest
       assertNull(result);
       result = planarRegionsList.findPlanarRegionsIntersectingPolygon(PlanarRegionTest.translateConvexPolygon(-2.0, 2.0, convexPolygon));
       assertNull(result);
+   }
+
+   public static void main(String[] args)
+   {
+      String targetTests = PlanarRegionsListTest.class.getName();
+      String targetClassesInSamePackage = PlanarRegionsList.class.getName();
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
    }
 }

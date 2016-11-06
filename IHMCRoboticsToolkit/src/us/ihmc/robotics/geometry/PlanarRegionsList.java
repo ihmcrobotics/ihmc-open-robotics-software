@@ -42,17 +42,17 @@ public class PlanarRegionsList
    /**
     * Find all the planar regions that contain the given point.
     * @param point the query coordinates.
-    * @param epsilon tolerance expressed as maximum orthogonal distance from the region.
+    * @param maximumOrthogonalDistance tolerance expressed as maximum orthogonal distance from the region.
     * @return the list of planar regions containing the query. Returns null when no region contains the query.
     */
-   public List<PlanarRegion> findPlanarRegionsContainingPoint(Point3d point, double epsilon)
+   public List<PlanarRegion> findPlanarRegionsContainingPoint(Point3d point, double maximumOrthogonalDistance)
    {
       List<PlanarRegion> containers = null;
 
       for (int i = 0; i < regions.size(); i++)
       {
          PlanarRegion candidateRegion = regions.get(i);
-         if (candidateRegion.isPointInside(point, epsilon))
+         if (candidateRegion.isPointInside(point, maximumOrthogonalDistance))
          {
             if (containers == null)
                containers = new ArrayList<>();
