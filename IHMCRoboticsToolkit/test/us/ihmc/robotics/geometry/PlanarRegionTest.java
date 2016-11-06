@@ -11,6 +11,7 @@ import java.util.Random;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
@@ -429,30 +430,14 @@ public class PlanarRegionTest
 
    static ConvexPolygon2d translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2d convexPolygon)
    {
-      ConvexPolygon2d translatedConvexPolygon = new ConvexPolygon2d();
-      for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
-      {
-         double x = convexPolygon.getVertex(i).getX() + xTranslation;
-         double y = convexPolygon.getVertex(i).getY() + yTranslation;
-         translatedConvexPolygon.addVertex(x, y);
-      }
-      translatedConvexPolygon.update();
-      return translatedConvexPolygon;
+      Vector2d translation = new Vector2d(xTranslation, yTranslation);
+      return ConvexPolygon2dCalculator.translatePolygonCopy(translation, convexPolygon);
    }
 
    private static ConvexPolygon2d transformConvexPolygon(RigidBodyTransform transform, ConvexPolygon2d convexPolygon)
    {
-      ConvexPolygon2d transformedConvexPolygon = new ConvexPolygon2d();
-      Point3d transformedVertex = new Point3d();
-
-      for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
-      {
-         Point2d vertex = convexPolygon.getVertex(i);
-         transformedVertex.set(vertex.getX(), vertex.getY(), 0.0);
-         transform.transform(transformedVertex);
-         transformedConvexPolygon.addVertex(transformedVertex.getX(), transformedVertex.getY());
-      }
-      transformedConvexPolygon.update();
+      ConvexPolygon2d transformedConvexPolygon = new ConvexPolygon2d(convexPolygon);
+      transformedConvexPolygon.applyTransformAndProjectToXYPlane(transform);
       return transformedConvexPolygon;
    }
 
