@@ -23,11 +23,11 @@ public class QuadrupedStepCrossoverProjection
    public void project(QuadrupedTimedStep step, QuadrantDependentList<FramePoint> solePositionEstimate)
    {
       step.getGoalPosition(goalPosition);
-      project(step.getRobotQuadrant(), goalPosition, solePositionEstimate);
+      project(goalPosition, solePositionEstimate, step.getRobotQuadrant());
       step.setGoalPosition(goalPosition);
    }
 
-   public void project(RobotQuadrant stepQuadrant, FramePoint goalPosition, QuadrantDependentList<FramePoint> solePositionEstimate)
+   public void project(FramePoint goalPosition, QuadrantDependentList<FramePoint> solePositionEstimate, RobotQuadrant stepQuadrant)
    {
       ReferenceFrame referenceFrame = goalPosition.getReferenceFrame();
       goalPosition.changeFrame(bodyZUpFrame);

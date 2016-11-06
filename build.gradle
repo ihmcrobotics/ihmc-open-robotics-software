@@ -60,7 +60,7 @@ task performRelease(type: GradleBuild) {
    }
    buildFile "build.gradle"
    startParameter gradle.startParameter
-   tasks = ["bintrayUpload", ":RobotDataCommunication:publishLoggerDistributionToBintray"]
+   tasks = ["bintrayUpload", ":IHCMRobotDataLogger:publishLoggerDistributionToBintray"]
 }
 
 task publishAllToMavenLocal(type: GradleBuild) {

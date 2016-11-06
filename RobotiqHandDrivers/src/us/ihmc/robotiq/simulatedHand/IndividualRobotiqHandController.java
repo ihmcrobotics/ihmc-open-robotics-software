@@ -7,6 +7,7 @@ import java.util.List;
 
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.partNames.FingerName;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -24,7 +25,6 @@ import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class IndividualRobotiqHandController implements RobotController

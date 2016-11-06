@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 
 public class CountByNumberBehavior extends AbstractBehavior
 {
@@ -13,12 +13,12 @@ public class CountByNumberBehavior extends AbstractBehavior
    int timeToCount;
    double result = 0;
 
-   public CountByNumberBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public CountByNumberBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
    }
 
-   public CountByNumberBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, double numberToCountBy, int timeToCount)
+   public CountByNumberBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, double numberToCountBy, int timeToCount)
    {
       super(outgoingCommunicationBridge);
 

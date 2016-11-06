@@ -7,12 +7,13 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.robotics.Axis;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.MutationTestingTools;
 
 public class RigidBodyTransformGeneratorTest
 {
-
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testSimpleTransformGeneration()
    {
       RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();
@@ -68,7 +69,8 @@ public class RigidBodyTransformGeneratorTest
 
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testTranslateThenRotateTransformGeneration()
    {
       RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();
@@ -82,7 +84,8 @@ public class RigidBodyTransformGeneratorTest
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testMultiStepTransformGeneration()
    {
       RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();

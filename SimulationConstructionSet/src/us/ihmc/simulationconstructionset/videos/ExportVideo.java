@@ -18,10 +18,10 @@ import us.ihmc.simulationconstructionset.commands.ExportVideoCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.RunCommandsExecutor;
 import us.ihmc.simulationconstructionset.gui.ActiveCanvas3DHolder;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
-import us.ihmc.simulationconstructionset.gui.XMLReaderUtility;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class ExportVideo implements ExportVideoCommandExecutor
 {

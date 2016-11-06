@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -17,7 +16,6 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -25,7 +23,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame rootJointFrame, bodyFrame;
-   private final OneDoFJoint[] oneDoFJoints;
+   protected final OneDoFJoint[] oneDoFJoints;
    private final QuadrantDependentList<QuadrantHolder> quadrantHolders = new QuadrantDependentList<QuadrantHolder>();
    private final double[] jointAnglesToPack = new double[3];
 
@@ -95,14 +93,6 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
       quadrantHolders.get(robotQuadrant).setDesiredLegAnglesInFullRobotModel(jointAnglesToPack);
    }
 
-   public void updateSimulationBasedOnFullRobotModel(FloatingRootJointRobot sdfRobot)
-   {
-      for (OneDoFJoint joint : oneDoFJoints)
-      {
-         OneDegreeOfFreedomJoint simulatedJoint = (OneDegreeOfFreedomJoint) sdfRobot.getJoint(joint.getName());
-         simulatedJoint.setQ(joint.getqDesired());
-      }
-   }
 
    private class QuadrantHolder
    {

@@ -10,10 +10,10 @@ import org.ros.internal.message.Message;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
-import us.ihmc.darpaRoboticsChallenge.ROSAPISimulator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
+import us.ihmc.darpaRoboticsChallenge.ros.ROSAPISimulator;
+import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
@@ -30,7 +30,7 @@ public class ValkyrieROSAPISimulator extends ROSAPISimulator
    @Override
    protected CommonAvatarEnvironmentInterface createEnvironment()
    {
-      return new DRCDemo01NavigationEnvironment();
+      return new DefaultCommonAvatarEnvironment();
    }
 
    @Override protected List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> createCustomSubscribers(String nameSpace, PacketCommunicator communicator)

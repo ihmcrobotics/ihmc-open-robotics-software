@@ -64,9 +64,9 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
    }
 
    @Override
-   public FloatingRootJointRobot createSdfRobot()
+   public RobotDescription createSdfRobot()
    {
-      return new FloatingRootJointRobot(robotDescription);
+      return robotDescription;
    }
 
    @Override
