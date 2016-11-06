@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.FramePose2d;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -18,6 +18,7 @@ public class FootstepPlanGenerator implements FootstepGenerator, FootstepPlanner
    private final FootstepPlanner planner;
    private final SideDependentList<RigidBody> feet;
    private final SideDependentList<ReferenceFrame> soleFrames;
+   private final SideDependentList<RigidBodyTransform> transformsSoleToAnkle = new SideDependentList<>();
 
    private RobotSide initialStanceSide;
 
@@ -26,44 +27,50 @@ public class FootstepPlanGenerator implements FootstepGenerator, FootstepPlanner
       this.planner = planner;
       this.feet = feet;
       this.soleFrames = soleFrames;
+
+      for (RobotSide side : RobotSide.values)
+      {
+         RigidBody foot = feet.get(side);
+         ReferenceFrame soleFrame = soleFrames.get(side);
+         RigidBodyTransform transform = new RigidBodyTransform();
+         foot.getParentJoint().getFrameAfterJoint().getTransformToDesiredFrame(transform, soleFrame);
+         transformsSoleToAnkle.put(side, transform);
+      }
    }
 
    @Override
    public List<Footstep> generateDesiredFootstepList()
    {
       ArrayList<Footstep> footsteps = new ArrayList<>();
-      List<FramePose2d> footstepPoses = plan();
+      List<FramePose> footstepPoses = plan();
       RobotSide stepSide = initialStanceSide.getOppositeSide();
 
-      for (FramePose2d footstepPose : footstepPoses)
+      for (FramePose footstepPose : footstepPoses)
       {
-         RigidBodyTransform footstepTransform = new RigidBodyTransform();
-         footstepTransform.setRotationYawAndZeroTranslation(footstepPose.getYaw());
-         footstepTransform.setTranslation(footstepPose.getX(), footstepPose.getY(), 0.0);
-
-         PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("FootstepFrame", ReferenceFrame.getWorldFrame());
-         footstepPoseFrame.setPoseAndUpdate(footstepTransform);
+         footstepPose.applyTransform(transformsSoleToAnkle.get(stepSide));
+         PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("FootstepFrame", footstepPose);
          footsteps.add(new Footstep(feet.get(stepSide), stepSide, soleFrames.get(stepSide), footstepPoseFrame));
+         stepSide = stepSide.getOppositeSide();
       }
 
       return footsteps;
    }
 
    @Override
-   public void setInitialStanceFoot(FramePose2d stanceFootPose, RobotSide side)
+   public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide side)
    {
       initialStanceSide = side;
       planner.setInitialStanceFoot(stanceFootPose, side);
    }
 
    @Override
-   public void setGoalPose(FramePose2d goalPose)
+   public void setGoalPose(FramePose goalPose)
    {
       planner.setGoalPose(goalPose);
    }
 
    @Override
-   public List<FramePose2d> plan()
+   public List<FramePose> plan()
    {
       return planner.plan();
    }

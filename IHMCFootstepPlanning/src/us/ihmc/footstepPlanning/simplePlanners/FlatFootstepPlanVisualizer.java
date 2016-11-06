@@ -2,9 +2,8 @@ package us.ihmc.footstepPlanning.simplePlanners;
 
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.PlanningUtils;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -25,7 +24,6 @@ import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPolygon;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class FlatFootstepPlanVisualizer
 {
@@ -37,11 +35,11 @@ public class FlatFootstepPlanVisualizer
    {
       FootstepPlanner planner = new TurnWalkTurnPlanner();
       // create inputs
-      planner.setInitialStanceFoot(initialStancePose, initialRobotSide);
-      planner.setGoalPose(goalPose);
+      planner.setInitialStanceFoot(PlanningUtils.poseFormPose2d(initialStancePose), initialRobotSide);
+      planner.setGoalPose(PlanningUtils.poseFormPose2d(goalPose));
 
       // visualize output
-      List<FramePose2d> footstepPlan = planner.plan();
+      List<FramePose2d> footstepPlan = PlanningUtils.pose2dListFromPoseList(planner.plan());
       RobotSide previousFootstepSide = initialRobotSide;
       YoFrameConvexPolygon2d yoDefaultFootPolygon = new YoFrameConvexPolygon2d("DefaultFootPolygon", worldFrame, 4, registry);
 

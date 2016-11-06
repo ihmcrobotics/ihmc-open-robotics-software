@@ -1,21 +1,22 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+import java.util.Random;
+
+import javax.vecmath.Point2d;
+
 import org.junit.Test;
+
 import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.footstepPlanning.PlanningUtils;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.testing.MutationTestingTools;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import javax.vecmath.Point2d;
-import java.util.List;
-import java.util.Random;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class TurnWalkTurnPlannerTest
@@ -91,10 +92,10 @@ public class TurnWalkTurnPlannerTest
    {
 
       FootstepPlanner turnWalkTurnPlanner = new TurnWalkTurnPlanner();
-      turnWalkTurnPlanner.setGoalPose(goalPose);
-      turnWalkTurnPlanner.setInitialStanceFoot(initialStanceFootPose, initialStanceFootSide);
+      turnWalkTurnPlanner.setGoalPose(PlanningUtils.poseFormPose2d(goalPose));
+      turnWalkTurnPlanner.setInitialStanceFoot(PlanningUtils.poseFormPose2d(initialStanceFootPose), initialStanceFootSide);
 
-      List<FramePose2d> footstepPlan = turnWalkTurnPlanner.plan();
+      List<FramePose2d> footstepPlan = PlanningUtils.pose2dListFromPoseList(turnWalkTurnPlanner.plan());
 
       FramePose2d lastFoostep = footstepPlan.get(footstepPlan.size() - 1);
       FramePose2d secondLastFoostep = footstepPlan.get(footstepPlan.size()-2);
