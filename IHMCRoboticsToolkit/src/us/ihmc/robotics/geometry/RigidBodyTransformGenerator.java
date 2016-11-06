@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
@@ -78,6 +79,12 @@ public class RigidBodyTransformGenerator
    public void rotateEuler(Vector3d eulerAngles)
    {
       tempTransform.setRotationEulerAndZeroTranslation(eulerAngles);
+      transform.multiply(transform, tempTransform);
+   }
+
+   public void rotate(Matrix3d rotationMatrix)
+   {
+      tempTransform.setRotationAndZeroTranslation(rotationMatrix);
       transform.multiply(transform, tempTransform);
    }
 

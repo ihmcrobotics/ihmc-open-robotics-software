@@ -2,6 +2,7 @@ package us.ihmc.robotics.robotDescription;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.geometry.polytope.ConvexPolytope;
@@ -120,6 +121,11 @@ public class CollisionMeshDescription
       transformGenerator.translate(x, y, z);
    }
 
+   public void translate(Vector3d translationVector)
+   {
+      transformGenerator.translate(translationVector);
+   }
+
    public void identity()
    {
       transformGenerator.identity();
@@ -128,5 +134,10 @@ public class CollisionMeshDescription
    public void rotateEuler(Vector3d eulerAngles)
    {
       transformGenerator.rotateEuler(eulerAngles);
+   }
+
+   public void rotate(Matrix3d rotation)
+   {
+      transformGenerator.rotate(rotation);
    }
 }
