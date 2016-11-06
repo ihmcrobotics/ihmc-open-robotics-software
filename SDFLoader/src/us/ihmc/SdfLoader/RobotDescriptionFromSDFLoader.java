@@ -33,6 +33,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.ForceSensorDescription;
@@ -190,9 +191,8 @@ public class RobotDescriptionFromSDFLoader
       //TODO: Get collision meshes working.
       if (useCollisionMeshes)
       {
-         LinkGraphicsDescription linkGraphicsDescription = new SDFGraphics3DObject(link.getCollisions(), resourceDirectories, rotationTransform);
-
-         scsLink.setLinkGraphics(linkGraphicsDescription);
+         CollisionMeshDescription collisionMeshDescription = new SDFCollisionMeshDescription(link.getCollisions(), rotationTransform);
+         scsLink.setCollisionMesh(collisionMeshDescription);
       }
       else if (link.getVisuals() != null)
       {
