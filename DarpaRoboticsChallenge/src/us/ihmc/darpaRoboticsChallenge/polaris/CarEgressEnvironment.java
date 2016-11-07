@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.environment;
+package us.ihmc.darpaRoboticsChallenge.polaris;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,6 @@ import java.util.List;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.polaris.PolarisRobot;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -20,7 +19,7 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class DRCCarEgressEnvironment implements CommonAvatarEnvironmentInterface
+public class CarEgressEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final double edgeOfStepX = -0.8, edgeOfStepY = 0.5;
    private final static Point3d stepDimensions = new Point3d(1.0, 0.3, 0.2);
@@ -29,7 +28,7 @@ public class DRCCarEgressEnvironment implements CommonAvatarEnvironmentInterface
    private final CombinedTerrainObject3D terrain = new CombinedTerrainObject3D("drcCarEgressTerrain");
    private final List<Robot> robots = new ArrayList<Robot>();
    
-   public DRCCarEgressEnvironment()
+   public CarEgressEnvironment()
    {
       RigidBodyTransform locationStep = new RigidBodyTransform();
       locationStep.setTranslation(new Vector3d(edgeOfStepX + 0.5 * stepDimensions.getX(), edgeOfStepY + 0.5 * stepDimensions.getY(), stepDimensions.getZ() / 2.0));
