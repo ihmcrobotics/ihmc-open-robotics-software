@@ -15,15 +15,16 @@ import org.ejml.data.DenseMatrix64F;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
+import us.ihmc.communication.packets.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.ToolboxStateMessage;
-import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.communication.packets.ToolboxStateMessage;
+import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
@@ -171,7 +172,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
 public class IHMCCommunicationKryoNetClassList extends NetClassList
-{   
+{
    public IHMCCommunicationKryoNetClassList()
    {
       registerPacketClass(Packet.class);
@@ -291,10 +292,11 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Spigot pose
       registerPacketClass(SpigotPosePacket.class);
 
-      // Kinematics toolbox module
-      registerPacketClass(KinematicsToolboxOutputStatus.class);
+      // Toolbox modules
       registerPacketClass(ToolboxStateMessage.class);
       registerPacketField(ToolboxState.class);
+      registerPacketClass(KinematicsToolboxOutputStatus.class);
+      registerPacketClass(FootstepPlanningToolboxOutputStatus.class);
 
       // Joint data
       registerPacketClass(RobotConfigurationData.class);
@@ -483,6 +485,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(TextToSpeechPacket.class);
       registerPacketField(VideoSource.class);
 
-      
+
    }
 }
