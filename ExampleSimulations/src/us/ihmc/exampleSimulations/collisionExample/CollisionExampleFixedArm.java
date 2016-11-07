@@ -170,7 +170,7 @@ public class CollisionExampleFixedArm
          CollisionShapeDescription shapeDesc = factory.createBox(size / 2.0, size / 2.0, size / 2.0);
          factory.addShape(ret, null, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
 
-         ret.enableCollisions(10.0, this.getRobotsYoVariableRegistry());
+         ret.enableCollisions(this.getRobotsYoVariableRegistry());
          return ret;
       }
 
@@ -190,7 +190,7 @@ public class CollisionExampleFixedArm
          linkGraphics.translate(0.0, 0.0, 0.0);
          linkGraphics.addCube(width, width, height, YoAppearance.Beige());
          ground.setLinkGraphics(linkGraphics);
-         ground.enableCollisions(0.0, this.getRobotsYoVariableRegistry());
+         ground.enableCollisions(this.getRobotsYoVariableRegistry());
 
          groundJoint.setLink(ground);
          groundJoint.setPositionAndVelocity(0.0, 0.0, -height, 0.0, 0.0, 0.0);

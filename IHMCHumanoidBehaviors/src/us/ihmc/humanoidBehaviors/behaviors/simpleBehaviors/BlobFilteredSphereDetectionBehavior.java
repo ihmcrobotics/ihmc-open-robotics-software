@@ -11,7 +11,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
@@ -35,12 +35,11 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    
    private final ColoredCircularBlobDetectorBehaviorService coloredCircularBlobDetectorBehaviorService;
    
-   public BlobFilteredSphereDetectionBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge, HumanoidReferenceFrames referenceFrames,
+   public BlobFilteredSphereDetectionBehavior(CommunicationBridge behaviorCommunicationBridge, HumanoidReferenceFrames referenceFrames,
          FullHumanoidRobotModel fullRobotModel)
    {
       super(behaviorCommunicationBridge, referenceFrames);
 
-      behaviorCommunicationBridge.attachGlobalListener(getGlobalPacketConsumer());
       attachNetworkListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
 
       coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(this);

@@ -101,9 +101,9 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
       return supportingVertexHolder;
    }
 
-   public void getProjection(Point3d centerOfSphere, Point3d closestPointOnCylinderToPack)
+   public void getProjection(Point3d pointToProject, Point3d closestPointOnCylinderToPack)
    {
-      closestPointOnCylinderToPack.set(centerOfSphere);
+      closestPointOnCylinderToPack.set(pointToProject);
       cylinder3d.orthogonalProjection(closestPointOnCylinderToPack);
    }
 }

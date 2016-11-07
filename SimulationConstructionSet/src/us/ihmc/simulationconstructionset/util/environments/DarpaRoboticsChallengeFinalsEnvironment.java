@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.environment;
+package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment.BLOCKTYPE;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.FramePose;
@@ -22,26 +21,21 @@ import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.ContactableCylinderRobot;
-import us.ihmc.simulationconstructionset.util.environments.ContactableDoorRobot;
-import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
-import us.ihmc.simulationconstructionset.util.environments.ValveType;
+import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment.BLOCKTYPE;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
+public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final List<Robot> contactableRobots = new ArrayList<Robot>();
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final double WALL_HEIGHT = 2.4384;
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
-   public DRCFinalsEnvironment(boolean door, boolean drill, boolean valve, boolean wakling, boolean stairs)
+   public DarpaRoboticsChallengeFinalsEnvironment(boolean door, boolean drill, boolean valve, boolean wakling, boolean stairs)
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
@@ -75,7 +69,7 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
 
    private void createStairs()
    {
-      DRCStairsEnvironment environment = new DRCStairsEnvironment();
+      AdjustableStairsEnvironment environment = new AdjustableStairsEnvironment();
       environment.setStairsParameters(4, 1.016, 0.2286, 0.2921);
       environment.setRailingParameters(0.05, 0.3, 0.05, 0.8128, 2, false);
       environment.setLandingPlatformParameters(1.27, 3, 1.143, 2);

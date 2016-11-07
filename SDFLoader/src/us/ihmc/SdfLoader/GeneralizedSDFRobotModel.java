@@ -13,6 +13,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
 import us.ihmc.robotics.sensors.ContactSensorType;
 
@@ -153,19 +154,26 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
       return resourceDirectories;
    }
 
-   public Graphics3DObject getCollisionObject(String name)
+   @Override
+   public CollisionMeshDescription getCollisionObject(String name)
    {
+      // TODO: SDF collision stuff to RobotDescription collision stuff.
       for(SDFLinkHolder linkHolder : rootLinks)
       {
          if(linkHolder.getName().equals(name))
          {
-            return new SDFGraphics3DObject(linkHolder.getCollisions(), resourceDirectories);
+            SDFGraphics3DObject sdfGraphics3DObject = new SDFGraphics3DObject(linkHolder.getCollisions(), resourceDirectories);
+            CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
+            return collisionMeshDescription;
          }
       }
 
-      return new SDFGraphics3DObject(joints.get(name).getChildLinkHolder().getCollisions(), resourceDirectories);
+      SDFGraphics3DObject sdfGraphics3DObject = new SDFGraphics3DObject(joints.get(name).getChildLinkHolder().getCollisions(), resourceDirectories);
+      CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
+      return collisionMeshDescription;
    }
 
+   @Override
    public Graphics3DObject getGraphicsObject(String name)
    {
 
