@@ -11,12 +11,12 @@ import java.util.HashMap;
 
 public class PacketRouter<T extends Enum<T>> 
 {
-   private boolean DEBUG = false;
+   private boolean DEBUG = true;
 
    private final T[] destinationConstants;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
    private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all destinations
-   private String[] packetTypesToDebug = {"VideoPacket", "FisheyePacket"}; //set to null to debug all packets
+   private String[] packetTypesToDebug = {"DepthDataStateCommand"}; //set to null to debug all packets
    
    private final int BROADCAST = 0;
 

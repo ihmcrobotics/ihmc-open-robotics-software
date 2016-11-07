@@ -10,7 +10,6 @@ import javax.xml.bind.JAXBException;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFModelVisual;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCWorld;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;

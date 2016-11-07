@@ -21,7 +21,6 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCWallAtDistanceEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.jme.util.JMELidarScanVisualizer;
@@ -32,6 +31,7 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.util.environments.WallAtDistanceEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -99,7 +99,7 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
       drcNetworkModuleParameters.enableUiModule(true);
 
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DRCWallAtDistanceEnvironment(WALL_DISTANCE);
+      CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new WallAtDistanceEnvironment(WALL_DISTANCE);
       testHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, getClass().getSimpleName(), startingLocation, simulationTestingParameters,
             getRobotModel(), drcNetworkModuleParameters, null, null, false, false, false);
       testHelper.setupCameraForUnitTest(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));

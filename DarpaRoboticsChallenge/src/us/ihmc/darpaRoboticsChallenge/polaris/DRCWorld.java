@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.environment;
+package us.ihmc.darpaRoboticsChallenge.polaris;
 
 import java.util.ArrayList;
 import java.util.List;
