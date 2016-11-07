@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
@@ -42,7 +43,8 @@ public class PlanarRegionPolygonSnapperTest
       RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
 
       PlanarRegion planarRegionToSnapTo = new PlanarRegion(planarRegionTransformToWorld, planarRegionConvexPolygons);
-      RigidBodyTransform polygonSnappingTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo);
+      Point3d highestVertexInWorld = new Point3d();
+      RigidBodyTransform polygonSnappingTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo, highestVertexInWorld);
 
       RigidBodyTransform identityTransform = new RigidBodyTransform();
       assertTrue(polygonSnappingTransform.epsilonEquals(identityTransform, 1e-7));
@@ -51,7 +53,7 @@ public class PlanarRegionPolygonSnapperTest
       planarRegionTransformToWorld.setTranslation(1.2, 3.4, 7.6);
 
       planarRegionToSnapTo = new PlanarRegion(planarRegionTransformToWorld, planarRegionConvexPolygons);
-      polygonSnappingTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo);
+      polygonSnappingTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo, highestVertexInWorld);
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       expectedTransform.setTranslation(0.0, 0.0, 7.6);
@@ -81,12 +83,13 @@ public class PlanarRegionPolygonSnapperTest
       RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
       planarRegionTransformToWorld.setTranslation(1.2, 3.4, 7.6);
       double roll = 0.0;
-      double pitch = Math.PI/3.0;
+      double pitch = Math.PI / 3.0;
       double yaw = 0.0;
       planarRegionTransformToWorld.setRotationEulerAndZeroTranslation(roll, pitch, yaw);
 
       PlanarRegion planarRegionToSnapTo = new PlanarRegion(planarRegionTransformToWorld, planarRegionConvexPolygons);
-      RigidBodyTransform polygonSnappingTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo);
+      Point3d highestVertexInWorld = new Point3d();
+      RigidBodyTransform polygonSnappingTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo, highestVertexInWorld);
 
       // Make sure the two equally high vertices just got projected vertically
       Point3d highVertexOne = new Point3d(-1.0, -1.0, 0.0);
@@ -103,26 +106,62 @@ public class PlanarRegionPolygonSnapperTest
       assertEquals(1.0, highVertexTwo.getY(), 1e-7);
       assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(-1.0, 1.0), highVertexTwo.getZ(), 1e-7);
 
-      // Make sure the surface normal is preserved:
-      Vector3d surfaceNormalOne = new Vector3d(0.0, 0.0, 1.0);
-      planarRegionTransformToWorld.transform(surfaceNormalOne);
+      assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(polygonSnappingTransform, planarRegionTransformToWorld);
+   }
 
-      Vector3d surfaceNormalTwo = new Vector3d(0.0, 0.0, 1.0);
-      polygonSnappingTransform.transform(surfaceNormalTwo);
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testYawOfRegionDoesNotYawSnappedPolygon()
+   {
+      ConvexPolygon2d polygonToSnap = new ConvexPolygon2d();
+      polygonToSnap.addVertex(1.0, 1.0);
+      polygonToSnap.addVertex(-1.0, 1.0);
+      polygonToSnap.addVertex(-1.0, -1.0);
+      polygonToSnap.addVertex(1.0, -1.0);
+      polygonToSnap.update();
 
-      JUnitTools.assertTuple3dEquals(surfaceNormalOne, surfaceNormalTwo, 1e-7);
+      ArrayList<ConvexPolygon2d> planarRegionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2d planarRegionPolygon = new ConvexPolygon2d();
+      planarRegionPolygon.addVertex(10.0, 10.0);
+      planarRegionPolygon.addVertex(-10.0, 10.0);
+      planarRegionPolygon.addVertex(-10.0, -10.0);
+      planarRegionPolygon.addVertex(10.0, -10.0);
+      planarRegionPolygon.update();
+      planarRegionConvexPolygons.add(planarRegionPolygon);
 
-      // Make sure the transform has the same rotation (but no yaw)
-      Vector3d eulerAngles = new Vector3d();
-      polygonSnappingTransform.getRotationEuler(eulerAngles);
-      assertEquals(roll, eulerAngles.getX(), 1e-5);
-      assertEquals(pitch, eulerAngles.getY(), 1e-5);
-      assertEquals(yaw, eulerAngles.getZ(), 1e-5);
-      assertEquals(yaw, 0.0, 1e-5);
+      RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
+      planarRegionTransformToWorld.setTranslation(1.2, 3.4, 7.6);
+      double roll = 0.0;
+      double pitch = Math.PI / 3.0;
+      double yaw = 0.2;
+      planarRegionTransformToWorld.setRotationEulerAndZeroTranslation(roll, pitch, yaw);
 
-      // Make sure the xAxis has no y Component:
+      PlanarRegion planarRegionToSnapTo = new PlanarRegion(planarRegionTransformToWorld, planarRegionConvexPolygons);
+      Point3d highestVertexInWorld = new Point3d();
+      RigidBodyTransform polygonSnappingTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo, highestVertexInWorld);
+
+      // Make sure the two equally high vertices just got projected vertically
+      Point3d highVertexOne = new Point3d(-1.0, -1.0, 0.0);
+      polygonSnappingTransform.transform(highVertexOne);
+
+      assertEquals(-1.0, highVertexOne.getX(), 1e-7);
+      assertEquals(-1.0, highVertexOne.getY(), 1e-7);
+      assertEquals(planarRegionToSnapTo.getPlaneZGivenXY(-1.0, -1.0), highVertexOne.getZ(), 1e-7);
+
+      assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(polygonSnappingTransform, planarRegionTransformToWorld);
+   }
+
+   public static void assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(RigidBodyTransform snapTransform, RigidBodyTransform planarRegionTransform)
+   {
+      Vector3d expectedSurfaceNormal = new Vector3d(0.0, 0.0, 1.0);
+      planarRegionTransform.transform(expectedSurfaceNormal);
+
+      Vector3d actualSurfaceNormal = new Vector3d(0.0, 0.0, 1.0);
+      snapTransform.transform(actualSurfaceNormal);
+      JUnitTools.assertTuple3dEquals(expectedSurfaceNormal, actualSurfaceNormal, 1e-7);
+
       Vector3d xAxis = new Vector3d(1.0, 0.0, 0.0);
-      polygonSnappingTransform.transform(xAxis);
+      snapTransform.transform(xAxis);
       assertEquals(0.0, xAxis.getY(), 1e-7);
    }
 
