@@ -11,7 +11,7 @@ import java.util.HashMap;
 
 public class PacketRouter<T extends Enum<T>> 
 {
-   private boolean DEBUG = true;
+   private boolean DEBUG = false;
 
    private final T[] destinationConstants;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
