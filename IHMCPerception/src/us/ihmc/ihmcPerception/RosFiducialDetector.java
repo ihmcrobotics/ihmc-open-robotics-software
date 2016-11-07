@@ -9,10 +9,9 @@ import javax.swing.JFrame;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import boofcv.abst.fiducial.calib.ConfigChessboard;
-import boofcv.struct.image.GrayF32;
 import org.ros.RosCore;
 
+import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.fiducial.FiducialDetector;
 import boofcv.factory.fiducial.FactoryFiducial;
 import boofcv.gui.fiducial.VisualizeFiducial;
@@ -20,6 +19,7 @@ import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.image.ImageFloat32;
 import georegression.metric.UtilAngle;
 import georegression.struct.se.Se3_F64;
 import us.ihmc.robotics.geometry.Transform3d;
@@ -34,14 +34,14 @@ public class RosFiducialDetector extends RosImageSubscriber
    private RosCameraInfoSubscriber cameraInfoSubscriber;
    private RosTf2Publisher tfPublisher = new RosTf2Publisher(false);
 
-   GrayF32 gray = new GrayF32(640, 480);
+   ImageFloat32 gray = new ImageFloat32(640, 480);
    ImagePanel imagePanel = null;
    JFrame frame = null;
    IntrinsicParameters intrinsicParameters = null;
 
-   FiducialDetector<GrayF32> detector = FactoryFiducial.
+   FiducialDetector<ImageFloat32> detector = FactoryFiducial.
    //       squareBinaryRobust(new ConfigFiducialBinary(0.1), 6, ImageFloat32.class);
-         calibChessboard(new ConfigChessboard(5, 6, 0.09), GrayF32.class);
+         calibChessboard(new ConfigChessboard(5, 6, 0.09), ImageFloat32.class);
 
    //       calibSquareGrid(new ConfigSquareGrid(5,7), 0.03, ImageFloat32.class);
 

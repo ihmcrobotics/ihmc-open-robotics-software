@@ -8,9 +8,9 @@ import javax.vecmath.Vector3d;
 
 import multisense_ros.RawImuData;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket.MeasurementStatus;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
