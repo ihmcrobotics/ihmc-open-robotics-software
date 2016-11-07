@@ -135,7 +135,12 @@ public class TurnInPlaceBehavior extends AbstractBehavior
       footstepListBehavior.doControl();
    }
 
-  
+   @Override
+   protected void passReceivedObjectToChildBehaviors(Object object)
+   {
+      if (footstepListBehavior != null)
+         footstepListBehavior.consumeObjectFromNetwork(object);
+   }
 
 
    @Override

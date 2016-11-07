@@ -1,9 +1,14 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CoactiveBehaviorsNetworkManager;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 
 public class GetVideoPacketExampleBehavior extends AbstractBehavior
 {
@@ -13,12 +18,12 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
 
    private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>();
 
-   CommunicationBridge coactiveBehaviorsNetworkManager;
+   CoactiveBehaviorsNetworkManager coactiveBehaviorsNetworkManager;
 
-   public GetVideoPacketExampleBehavior(CommunicationBridge communicationBridge)
+   public GetVideoPacketExampleBehavior(BehaviorCommunicationBridge communicationBridge)
    {
       super(communicationBridge);
-      coactiveBehaviorsNetworkManager = communicationBridge;
+      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge);
       this.attachNetworkListeningQueue(videoPacketQueue, VideoPacket.class);
    }
 

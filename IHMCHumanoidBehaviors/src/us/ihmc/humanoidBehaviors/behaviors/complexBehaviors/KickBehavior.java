@@ -118,7 +118,7 @@ public class KickBehavior extends AbstractBehavior
 
       submitFootPosition(kickFoot, new FramePoint(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0));
 
-      final EndEffectorLoadBearingBehavior footStateBehavior = new EndEffectorLoadBearingBehavior(communicationBridge);
+      final EndEffectorLoadBearingBehavior footStateBehavior = new EndEffectorLoadBearingBehavior(outgoingCommunicationBridge);
       pipeLine.submitSingleTaskStage(new BehaviorAction(footStateBehavior)
       {
 
@@ -207,7 +207,15 @@ public class KickBehavior extends AbstractBehavior
       }
    }
 
-  
+   @Override
+   protected void passReceivedObjectToChildBehaviors(Object object)
+   {
+      for (AbstractBehavior behavior : behaviors)
+      {
+         behavior.consumeObjectFromNetwork(object);
+      }
+   }
+
 
    public boolean hasInputBeenSet()
    {

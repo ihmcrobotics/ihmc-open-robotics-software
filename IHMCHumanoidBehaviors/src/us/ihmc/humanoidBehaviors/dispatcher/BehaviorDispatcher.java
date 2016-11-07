@@ -11,7 +11,7 @@ import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
@@ -50,7 +50,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private final BehaviorTypeSubscriber<E> desiredBehaviorSubscriber;
    private final BehaviorControlModeSubscriber desiredBehaviorControlSubscriber;
-   private final CommunicationBridge communicationBridge;
+   private final BehaviorCommunicationBridge communicationBridge;
 
    private final RobotDataReceiver robotDataReceiver;
 
@@ -61,7 +61,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
 
    public BehaviorDispatcher(DoubleYoVariable yoTime, RobotDataReceiver robotDataReceiver, BehaviorControlModeSubscriber desiredBehaviorControlSubscriber,
-         BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, CommunicationBridge communicationBridge, YoVariableServer yoVaribleServer,
+         BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, BehaviorCommunicationBridge communicationBridge, YoVariableServer yoVaribleServer,
          Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.behaviorEnum = behaviourEnum;
@@ -78,6 +78,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       stateMachine = new BehaviorStateMachine<E>("behaviorState", "behaviorSwitchTime", behaviourEnum, yoTime, registry);
 
       SimpleDoNothingBehavior simpleForwardingBehavior = new SimpleDoNothingBehavior(communicationBridge);
+      attachListeners(simpleForwardingBehavior);
       addBehavior(stopBehavior, simpleForwardingBehavior);
       stateMachine.setCurrentState(stopBehavior);
 
@@ -255,11 +256,30 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       @Override
       public void doTransitionAction()
       {
-        
+         for (AbstractBehavior behavior : fromBehaviorState.getBehaviors())
+         {
+            detachListeners(behavior);
+         }
+         for (AbstractBehavior behavior : toBehaviorState.getBehaviors())
+         {
+            attachListeners(behavior);
+         }
       }
    }
 
+   private void attachListeners(AbstractBehavior behavior)
+   {
+      if (DEBUG)
+         System.out.println(this.getClass().getSimpleName() + ": attach listeners to: " + behavior.getName());
+      communicationBridge.attachGlobalListener(behavior.getGlobalPacketConsumer());
+   }
 
+   private void detachListeners(AbstractBehavior behavior)
+   {
+      if (DEBUG)
+         System.out.println(this.getClass().getSimpleName() + ": detach listeners to: " + behavior.getName());
+      communicationBridge.detachGlobalListener(behavior.getGlobalPacketConsumer());
+   }
 
    public void start()
    {

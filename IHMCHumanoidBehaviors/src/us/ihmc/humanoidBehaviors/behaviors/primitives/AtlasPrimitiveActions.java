@@ -1,5 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import java.util.ArrayList;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
@@ -11,6 +13,7 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class AtlasPrimitiveActions 
 {
+   ArrayList<AbstractBehavior> allPrimitives = new ArrayList<>();
    //ALL Primitive Behaviors Go In Here. Talk To John Carff before changing this.
    public final ArmTrajectoryBehavior leftArmTrajectoryBehavior;
    public final ArmTrajectoryBehavior rightArmTrajectoryBehavior;
@@ -99,9 +102,13 @@ public class AtlasPrimitiveActions
    }
    private void addPrimitive(AbstractBehavior behavior)
    {
+      allPrimitives.add(behavior);
       behaviorRegistry.addChild(behavior.getYoVariableRegistry());
    }
    
-
+   public ArrayList<AbstractBehavior> getAllPrimitiveBehaviors()
+   {
+      return allPrimitives;
+   }
 
 }

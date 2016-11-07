@@ -4,7 +4,8 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine.ExampleStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CoactiveBehaviorsNetworkManager;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
@@ -21,7 +22,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       ENABLE_LIDAR, SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE, RESET_ROBOT_PIPELINE_EXAMPLE, GET_LIDAR, GET_VIDEO, GET_USER_VALIDARION,
    }
 
-   CommunicationBridge coactiveBehaviorsNetworkManager;
+   CoactiveBehaviorsNetworkManager coactiveBehaviorsNetworkManager;
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
@@ -30,12 +31,12 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    private final UserValidationExampleBehavior userValidationExampleBehavior;
    private final ResetRobotBehavior resetRobotBehavior;
 
-   public ExampleComplexBehaviorStateMachine(CommunicationBridge communicationBridge, DoubleYoVariable yoTime,
+   public ExampleComplexBehaviorStateMachine(BehaviorCommunicationBridge communicationBridge, DoubleYoVariable yoTime,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("ExampleStateMachine", ExampleStates.class, yoTime, communicationBridge);
 
-      coactiveBehaviorsNetworkManager = communicationBridge;
+      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge);
       coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;
@@ -46,8 +47,12 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       userValidationExampleBehavior = new UserValidationExampleBehavior(communicationBridge);
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
 
-     
-
+      //add them as children of this behavior so that among other things, all communication packets are shared
+      addChildBehavior(getLidarScanExampleBehavior);
+      addChildBehavior(getVideoPacketExampleBehavior);
+      addChildBehavior(userValidationExampleBehavior);
+      addChildBehavior(resetRobotBehavior);
+      addChildBehaviors(atlasPrimitiveActions.getAllPrimitiveBehaviors());
 
       setupStateMachine();
    }
@@ -87,11 +92,11 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       BehaviorAction<ExampleStates> getVideo = new BehaviorAction<ExampleStates>(ExampleStates.GET_VIDEO, getVideoPacketExampleBehavior);
       BehaviorAction<ExampleStates> getUserValidation = new BehaviorAction<ExampleStates>(ExampleStates.GET_USER_VALIDARION, userValidationExampleBehavior);
 
-      statemachine.addStateWithDoneTransition(enableLidar, ExampleStates.GET_LIDAR);
-//      statemachine.addStateWithDoneTransition(resetRobot, ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE);
-//      statemachine.addStateWithDoneTransition(setupRobot, ExampleStates.GET_LIDAR);
+      statemachine.addStateWithDoneTransition(enableLidar, ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE);
+      statemachine.addStateWithDoneTransition(resetRobot, ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE);
+      statemachine.addStateWithDoneTransition(setupRobot, ExampleStates.GET_LIDAR);
 
-      statemachine.addStateWithDoneTransition(getLidar, ExampleStates.GET_USER_VALIDARION);
+      statemachine.addStateWithDoneTransition(getLidar, ExampleStates.GET_VIDEO);
       statemachine.addStateWithDoneTransition(getVideo, ExampleStates.GET_USER_VALIDARION);
 
       statemachine.addState(getUserValidation);

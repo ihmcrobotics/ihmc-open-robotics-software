@@ -23,7 +23,7 @@ public class EnableLidarBehavior extends AbstractBehavior
    {
       
          enableLidarPacket = new DepthDataStateCommand(lidarState);
-         
+
          if (!packetHasBeenSent.getBooleanValue() && (enableLidarPacket != null))
          {
             sendPacketToNetworkProcessor();
@@ -40,7 +40,6 @@ public class EnableLidarBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         System.out.println("EnableLidarBehavior: sending enable packet");
          sendPacketToNetworkProcessor(enableLidarPacket);
          packetHasBeenSent.set(true);
       }

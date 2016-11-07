@@ -298,7 +298,12 @@ public class WalkToLocationBehavior extends AbstractBehavior
       return ret;
    }
 
-   
+   @Override
+   protected void passReceivedObjectToChildBehaviors(Object object)
+   {
+      if (footstepListBehavior != null)
+         footstepListBehavior.consumeObjectFromNetwork(object);
+   }
 
   
 

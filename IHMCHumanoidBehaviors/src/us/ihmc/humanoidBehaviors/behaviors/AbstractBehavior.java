@@ -6,7 +6,6 @@ import java.util.HashMap;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.GlobalObjectConsumer;
@@ -30,11 +29,11 @@ public abstract class AbstractBehavior implements RobotController
       INITIALIZED, PAUSED, ABORTED, DONE, FINALIZED
    }
    
+   private ArrayList<AbstractBehavior> childBehaviors = new ArrayList<AbstractBehavior>();
 
-   protected final CommunicationBridge communicationBridge;
-   
-  
-
+   protected final CommunicationBridgeInterface outgoingCommunicationBridge;
+   protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> listeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
+   private final GlobalObjectConsumer networkProcessorObjectConsumer;
    protected final String behaviorName;
    
    /**
@@ -48,14 +47,15 @@ public abstract class AbstractBehavior implements RobotController
    protected final BooleanYoVariable isAborted;
    protected final DoubleYoVariable percentCompleted;
 
-   public AbstractBehavior(CommunicationBridgeInterface communicationBridge)
+   public AbstractBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
-      this(null, communicationBridge);
+      this(null, outgoingCommunicationBridge);
    }
 
-   public AbstractBehavior(String namePrefix, CommunicationBridgeInterface communicationBridge)
+   public AbstractBehavior(String namePrefix, CommunicationBridgeInterface outgoingCommunicationBridge)
    {
-      this.communicationBridge = (CommunicationBridge)communicationBridge;
+      this.outgoingCommunicationBridge = outgoingCommunicationBridge;
+      networkProcessorObjectConsumer = new GlobalObjectConsumer(this);
       
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
       registry = new YoVariableRegistry(behaviorName);
@@ -72,38 +72,69 @@ public abstract class AbstractBehavior implements RobotController
       return null;
    }
 
-   public void attachNetworkListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
+   protected void addChildBehavior(AbstractBehavior childBehavior)
    {
-      communicationBridge.attachNetworkListeningQueue(queue, key);
+      childBehaviors.add(childBehavior);
    }
    
-//   protected void addChildBehavior(AbstractBehavior childBehavior)
-//   {
-//      childBehaviors.add(childBehavior);
-//   }
-//   
-//   protected void addChildBehaviors(ArrayList<AbstractBehavior> newChildBehaviors)
-//   {
-//      for(AbstractBehavior behavior: newChildBehaviors)
-//      {
-//         childBehaviors.add(behavior);
-//      }
-//   }
+   protected void addChildBehaviors(ArrayList<AbstractBehavior> newChildBehaviors)
+   {
+      for(AbstractBehavior behavior: newChildBehaviors)
+      {
+         childBehaviors.add(behavior);
+      }
+   }
    public void sendPacketToController(Packet<?> obj)
    {
-      communicationBridge.sendPacketToController(obj);
+      outgoingCommunicationBridge.sendPacketToController(obj);
    }
 
    public void sendPacketToNetworkProcessor(Packet<?> obj)
    {
-      communicationBridge.sendPacketToNetworkProcessor(obj);
+      outgoingCommunicationBridge.sendPacketToNetworkProcessor(obj);
    }
    public void sendPacketToUI(Packet<?> obj)
    {
-      communicationBridge.sendPacketToUI(obj);
+      outgoingCommunicationBridge.sendPacketToUI(obj);
    }
    
+   public void consumeObjectFromNetwork(Object object)
+   {
+      notifyNetworkListeners(object);
+      passReceivedObjectToChildBehaviors(object);
+   }
+
+   private void notifyNetworkListeners(Object object)
+   {
+      ArrayList<ConcurrentListeningQueue> queues = listeningNetworkQueues.get(object.getClass());
+      if (queues != null)
+      {
+         for (int i = 0; i < queues.size(); i++)
+         {
+            queues.get(i).put(object);
+         }
+      }
+   }
+
+   public void attachNetworkListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
+   {
+      if (!listeningNetworkQueues.containsKey(key))
+      {
+         listeningNetworkQueues.put(key, new ArrayList<ConcurrentListeningQueue>());
+      }
+      listeningNetworkQueues.get(key).add(queue);
+   }
    
+  
+
+   protected void passReceivedObjectToChildBehaviors(Object object)
+   {
+      for (AbstractBehavior behavior : childBehaviors)
+      {
+         behavior.consumeObjectFromNetwork(object);
+      }
+
+   }
    
    
 
@@ -188,12 +219,12 @@ public abstract class AbstractBehavior implements RobotController
       isPaused.set(false);
       isAborted.set(false);
    }
-   public CommunicationBridge getCommunicationBridge()
+   
+   
+   public GlobalPacketConsumer getGlobalPacketConsumer()
    {
-      return communicationBridge;
+      return networkProcessorObjectConsumer;
    }
-   
-   
    
  
 }
