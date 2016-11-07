@@ -26,6 +26,8 @@ public class FootstepPlanningToolboxController extends ToolboxController<Footste
    @Override
    protected FootstepPlanningToolboxOutputStatus updateInternal()
    {
+      // TODO
+
       return result;
    }
 
@@ -43,6 +45,8 @@ public class FootstepPlanningToolboxController extends ToolboxController<Footste
       FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame());
       goalPose.setPosition(new Point3d(request.goalPositionInWorld));
       goalPose.setOrientation(new Quat4d(request.goalOrientationInWorld));
+
+      // TODO
 
       return true;
    }
