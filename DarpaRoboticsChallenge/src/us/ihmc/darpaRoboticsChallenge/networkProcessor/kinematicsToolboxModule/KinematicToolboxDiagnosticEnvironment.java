@@ -10,6 +10,8 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -18,6 +20,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
@@ -85,6 +88,12 @@ public class KinematicToolboxDiagnosticEnvironment
             poseCommunicator.write();
          }
       }, 1, TimeUnit.MILLISECONDS);
+      
+      DRCNetworkModuleParameters parameters = new DRCNetworkModuleParameters();
+      parameters.enableUiModule(true);
+      parameters.enableKinematicsToolbox(true);
+      parameters.enableLocalControllerCommunicator(true);
+      new DRCNetworkProcessor(drcRobotModel, parameters);
    }
 
    private AuxiliaryRobotDataProvider initializeAuxiliaryRobotDataProvider()
@@ -167,6 +176,8 @@ public class KinematicToolboxDiagnosticEnvironment
       };
    }
 
+   private long timestamp = 0L;
+   
    private SensorOutputMapReadOnly initializeSensorOutputMapReadOnly()
    {
       return new SensorOutputMapReadOnly()
@@ -175,19 +186,20 @@ public class KinematicToolboxDiagnosticEnvironment
          @Override
          public long getVisionSensorTimestamp()
          {
-            return 0;
+            timestamp += TimeTools.milliSecondsToNanoSeconds(1L);
+            return timestamp;
          }
 
          @Override
          public long getTimestamp()
          {
-            return 0;
+            return timestamp;
          }
 
          @Override
          public long getSensorHeadPPSTimestamp()
          {
-            return 0;
+            return timestamp;
          }
 
          @Override
