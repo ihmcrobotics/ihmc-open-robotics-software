@@ -6,9 +6,9 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.visualization.GainControllerSliderBoard;
-import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.visualization.GainControllerSliderBoard;
+import us.ihmc.avatar.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;

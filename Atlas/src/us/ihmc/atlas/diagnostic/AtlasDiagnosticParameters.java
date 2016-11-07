@@ -1,6 +1,6 @@
 package us.ihmc.atlas.diagnostic;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 
 public class AtlasDiagnosticParameters extends DiagnosticParameters

@@ -3,7 +3,7 @@ package us.ihmc.atlas.multisenseBlobExperiments;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.multisenseMocapExperiments.MultisenseHeadOnAStickManualTestNetworkProcessor;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 
 import java.io.IOException;
 
