@@ -32,7 +32,7 @@ import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior.DiagnosticTask;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisOrientationTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
@@ -128,7 +128,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
    private final boolean DEBUG = false;
 
    private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private CommunicationBridge communicationBridge;
+   private BehaviorCommunicationBridge communicationBridge;
    private DoubleYoVariable yoTime;
 
    private HumanoidFloatingRootJointRobot robot;
@@ -169,7 +169,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       }
 
 
-      this.communicationBridge = new CommunicationBridge(behaviorCommunicatorServer);
+      this.communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer);
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(new DefaultCommonAvatarEnvironment(), getSimpleRobotName(),
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
@@ -210,7 +210,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       return ret;
    }
 
-   private BehaviorDispatcher<HumanoidBehaviorType> setupBehaviorDispatcher(FullHumanoidRobotModel fullRobotModel, CommunicationBridge communicationBridge,
+   private BehaviorDispatcher<HumanoidBehaviorType> setupBehaviorDispatcher(FullHumanoidRobotModel fullRobotModel, BehaviorCommunicationBridge communicationBridge,
          YoGraphicsListRegistry yoGraphicsListRegistry, PacketCommunicator behaviorCommunicatorServer, YoVariableRegistry registry)
    {
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
