@@ -6,6 +6,7 @@ import us.ihmc.communication.packets.Packet;
 
 public interface CommunicationBridgeInterface 
 {
+   public void consumeObjectFromNetwork (Object object);
 	public void sendPacketToController(Packet obj);
 	public void sendPacketToNetworkProcessor(Packet obj);
 	public void sendPacketToUI(Packet obj);
@@ -14,6 +15,5 @@ public interface CommunicationBridgeInterface
    public void detachGlobalListener(GlobalPacketConsumer listener);
    public <T extends Packet<?>> void attachListener(Class<T> clazz, PacketConsumer<T> listener);
    public <T extends Packet> void detachListener(Class<T> clazz, PacketConsumer<T> listener);
-
-
+   public void attachNetworkListeningQueue(ConcurrentListeningQueue queue, Class<?> key);
 }

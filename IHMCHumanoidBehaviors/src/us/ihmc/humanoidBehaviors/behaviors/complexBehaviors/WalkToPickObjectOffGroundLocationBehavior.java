@@ -7,7 +7,7 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToPickObjectOffG
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
@@ -38,7 +38,7 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
    public WalkToPickObjectOffGroundLocationBehavior(DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames,
-         BehaviorCommunicationBridge outgoingCommunicationBridge, WholeBodyControllerParameters wholeBodyControllerParameters,
+         CommunicationBridge outgoingCommunicationBridge, WholeBodyControllerParameters wholeBodyControllerParameters,
          FullHumanoidRobotModel fullRobotModel, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("WalkState", WalkState.class, yoTime, outgoingCommunicationBridge);
@@ -49,7 +49,6 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters());
-      addChildBehavior(walkToLocationBehavior);
 
       setupStateMachine();
    }
