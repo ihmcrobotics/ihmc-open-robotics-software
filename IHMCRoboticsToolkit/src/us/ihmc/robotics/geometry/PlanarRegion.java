@@ -60,7 +60,7 @@ public class PlanarRegion
     */
    private ConvexPolygon2d projectPolygonVerticallyToRegion(ConvexPolygon2d convexPolygon2d)
    {
-      ConvexPolygon2d snappedPolygon = new ConvexPolygon2d();
+      ConvexPolygon2d projectedPolygon = new ConvexPolygon2d();
 
       Point3d snappedVertex3d = new Point3d();
 
@@ -75,10 +75,10 @@ public class PlanarRegion
          // Transform to local coordinates
          fromWorldToLocalTransform.transform(snappedVertex3d);
          // Add the snapped vertex to the snapped polygon
-         snappedPolygon.addVertex(snappedVertex3d.getX(), snappedVertex3d.getY());
+         projectedPolygon.addVertex(snappedVertex3d.getX(), snappedVertex3d.getY());
       }
-      snappedPolygon.update();
-      return snappedPolygon;
+      projectedPolygon.update();
+      return projectedPolygon;
    }
 
    /**
