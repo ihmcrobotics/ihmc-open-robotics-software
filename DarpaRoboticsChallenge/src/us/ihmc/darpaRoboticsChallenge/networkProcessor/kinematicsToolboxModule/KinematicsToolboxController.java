@@ -16,10 +16,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseKinematicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
@@ -36,10 +32,12 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.ToolboxController;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -48,13 +46,14 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
@@ -62,10 +61,11 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public class KinematicsToolboxController
+public class KinematicsToolboxController extends ToolboxController<KinematicsToolboxOutputStatus>
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double updateDT = 1.0e-3;
+   private static final int numberOfTicksToSendSolution = 10;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final FullHumanoidRobotModel desiredFullRobotModel;
@@ -78,8 +78,6 @@ public class KinematicsToolboxController
    private final WholeBodyInverseKinematicsSolver wholeBodyInverseKinematicsSolver;
 
    private final WholeBodyControlCoreToolbox toolbox;
-   private final CommandInputManager commandInputManager;
-   private final StatusMessageOutputManager statusOutputManager;
    private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
 
    private final FloatingInverseDynamicsJoint desiredRootJoint;
@@ -105,20 +103,20 @@ public class KinematicsToolboxController
    private final DoubleYoVariable chestWeight = new DoubleYoVariable("chestWeight", registry);
    private final DoubleYoVariable pelvisOrientationWeight = new DoubleYoVariable("pelvisOrientationWeight", registry);
 
+   private  final CommandInputManager commandInputManager;
    private final DoubleYoVariable solutionQuality = new DoubleYoVariable("solutionQuality", registry);
 
    private final EnumMap<LegJointName, DoubleYoVariable> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
 
-   private PacketDestination packetDestination = null;
-
    private final AtomicReference<PrivilegedConfigurationCommand> privilegedConfigurationCommandReference = new AtomicReference<PrivilegedConfigurationCommand>(null);
 
-   public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModelFactory fullRobotModelFactory,
+   public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModel desiredFullRobotModel,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
+      super(statusOutputManager, numberOfTicksToSendSolution);
       this.commandInputManager = commandInputManager;
-      this.statusOutputManager = statusOutputManager;
-      desiredFullRobotModel = fullRobotModelFactory.createFullRobotModel();
+
+      this.desiredFullRobotModel = desiredFullRobotModel;
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       referenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
       RigidBody elevator = desiredFullRobotModel.getElevator();
@@ -171,29 +169,9 @@ public class KinematicsToolboxController
       parentRegistry.addChild(registry);
    }
 
-   public void setPacketDestination(PacketDestination packetDestination)
+   @Override
+   protected KinematicsToolboxOutputStatus updateInternal()
    {
-      this.packetDestination = packetDestination;
-   }
-
-   public void requestInitialize()
-   {
-      initialize = true;
-   }
-
-   private final int numberOfTicksToSendSolution = 10;
-   private int tickCount = 0;
-
-   public void update()
-   {
-      if (initialize)
-      {
-         boolean success = initializeDesiredFullRobotModelToActual();
-         if (!success) // Return until we receive a robot configuration data to start from
-            return;
-         initialize = false;
-      }
-
       updateTools();
 
       consumeCommands();
@@ -204,19 +182,17 @@ public class KinematicsToolboxController
 
       updateDesiredFullRobotModelState();
 
-      tickCount++;
-      
-      if (packetDestination != null && tickCount == numberOfTicksToSendSolution)
-      {
-         tickCount = 0;
-         inverseKinematicsSolution.setDesiredJointState(desiredRootJoint, oneDoFJoints);
-         inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
-         inverseKinematicsSolution.setDestination(packetDestination);
-         statusOutputManager.reportStatusMessage(inverseKinematicsSolution);
-      }
+      inverseKinematicsSolution.setDesiredJointState(desiredRootJoint, oneDoFJoints);
+      inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
+
+      return inverseKinematicsSolution;
    }
 
-   private boolean initialize = true;
+   @Override
+   protected boolean initialize()
+   {
+      return initializeDesiredFullRobotModelToActual();
+   }
 
    private void consumeCommands()
    {
