@@ -6,15 +6,15 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 
 public class GlobalObjectConsumer implements GlobalPacketConsumer
 {
-   private final AbstractBehavior behavior;
-   public GlobalObjectConsumer(AbstractBehavior behavior)
+   private final CommunicationBridgeInterface communicationBridgeInterface;
+   public GlobalObjectConsumer(CommunicationBridgeInterface communicationBridgeInterface)
    {
-      this.behavior = behavior;
+      this.communicationBridgeInterface = communicationBridgeInterface;
    }
 
    @Override
    public void receivedPacket(Packet<?> packet)
    {
-      behavior.consumeObjectFromNetwork(packet);
+      communicationBridgeInterface.consumeObjectFromNetwork(packet);
    }
 }
