@@ -3,8 +3,9 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector;
 import java.util.HashMap;
 
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
@@ -46,21 +47,21 @@ public class PacketsForwardedToTheUi
    public static final long UI_JOINT_CONFIGURATION_UPDATE_MILLIS = 100l;
    public static final long UI_WRIST_FEET_SENSORS_UPDATE_MILLIS = 500l;
    public static final long UI_MULTISENSE_IMU_CHECK_MILLIS=5000l;
-   
+
    public static Class<?>[] PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE = {
-      FootstepStatus.class,                          
+      FootstepStatus.class,
       ScriptBehaviorStatusPacket.class,
-      PelvisPoseErrorPacket.class,                   
+      PelvisPoseErrorPacket.class,
       BehaviorControlModeResponsePacket.class,
-      BDIBehaviorStatusPacket.class,                 
-      ControlStatusPacket.class,                     
+      BDIBehaviorStatusPacket.class,
+      ControlStatusPacket.class,
       FootstepDataListMessage.class,
-      PelvisHeightTrajectoryMessage.class,                         
-      HeadTrajectoryMessage.class,                   
-      NeckTrajectoryMessage.class,                   
+      PelvisHeightTrajectoryMessage.class,
+      HeadTrajectoryMessage.class,
+      NeckTrajectoryMessage.class,
       PelvisTrajectoryMessage.class,
       PelvisOrientationTrajectoryMessage.class,
-      ChestTrajectoryMessage.class,                  
+      ChestTrajectoryMessage.class,
       SnapFootstepPacket.class,
       VideoPacket.class,
       HandTrajectoryMessage.class,
@@ -82,9 +83,10 @@ public class PacketsForwardedToTheUi
       BlackFlyParameterPacket.class,
       DrillDetectionPacket.class,
       ManipulationAbortedStatus.class,
-      KinematicsToolboxOutputStatus.class
+      KinematicsToolboxOutputStatus.class,
+      FootstepPlanningToolboxOutputStatus.class
    };
-   
+
    public static final HashMap<Class<?>, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class<?>, Long>();
    static {
 //      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotPoseData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
@@ -93,6 +95,6 @@ public class PacketsForwardedToTheUi
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(HeadPosePacket.class, UI_MULTISENSE_IMU_CHECK_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RawIMUPacket.class, UI_MULTISENSE_IMU_CHECK_MILLIS);
    }
-   
-   
+
+
 }

@@ -11,6 +11,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.MultisenseMocapManualCalibrationTestModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.RosModule;
@@ -48,6 +49,7 @@ public class DRCNetworkProcessor
          setupMultisenseManualTestModule(robotModel, params);
          setupDrillDetectionModule(params);
          setupKinematicsToolboxModule(robotModel, params);
+         setupFootstepPlanningToolboxModule(robotModel, params);
          addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts());
          addTextToSpeechEngine(params);
          setupRobotEnvironmentAwarenessModule(params);
@@ -152,6 +154,21 @@ public class DRCNetworkProcessor
 
       String methodName = "setupWholeBodyInverseKinematicsModule";
       printModuleConnectedDebugStatement(PacketDestination.KINEMATICS_TOOLBOX_MODULE, methodName);
+   }
+
+   private void setupFootstepPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   {
+      if (!params.isFootstepPlanningToolboxEnabled())
+         return;
+
+      new FootstepPlanningToolboxModule(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), params.isKinematicsToolboxVisualizerEnabled());
+
+      PacketCommunicator footstepPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
+      packetRouter.attachPacketCommunicator(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, footstepPlanningToolboxCommunicator);
+      footstepPlanningToolboxCommunicator.connect();
+
+      String methodName = "setupFootstepPlanningModule";
+      printModuleConnectedDebugStatement(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, methodName);
    }
 
    private void setupMultisenseManualTestModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
