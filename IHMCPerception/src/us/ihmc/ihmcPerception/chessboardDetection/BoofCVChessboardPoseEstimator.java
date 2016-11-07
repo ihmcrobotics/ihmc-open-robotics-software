@@ -7,15 +7,15 @@ import java.awt.image.BufferedImage;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import boofcv.abst.fiducial.calib.ConfigChessboard;
-import boofcv.struct.image.GrayF32;
 import org.ejml.data.DenseMatrix64F;
 
+import boofcv.abst.calib.ConfigChessboard;
 import boofcv.abst.fiducial.FiducialDetector;
 import boofcv.factory.fiducial.FactoryFiducial;
 import boofcv.gui.fiducial.VisualizeFiducial;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.image.ImageFloat32;
 import georegression.struct.point.Vector3D_F64;
 //import georegression.struct.se.Se3_F64;
 import georegression.struct.se.Se3_F64;
@@ -26,7 +26,7 @@ public class BoofCVChessboardPoseEstimator
    final boolean VISUALIZE = true;
 
    IntrinsicParameters intrinsicParameters = null;
-   FiducialDetector<GrayF32> detector;
+   FiducialDetector<ImageFloat32> detector;
    double gridWidth;
 
    public BoofCVChessboardPoseEstimator(int rows, int cols, double gridWidth)
@@ -34,7 +34,7 @@ public class BoofCVChessboardPoseEstimator
       ConfigChessboard config;
       this.gridWidth=gridWidth;
       config = new ConfigChessboard(cols, rows, gridWidth);
-      detector = FactoryFiducial.calibChessboard(config, GrayF32.class);
+      detector = FactoryFiducial.calibChessboard(config, ImageFloat32.class);
    }
    
    public void setIntrinsicParameter(IntrinsicParameters parameter)
@@ -57,7 +57,7 @@ public class BoofCVChessboardPoseEstimator
    {
       if(intrinsicParameters==null)
          setDefaultIntrinsicParameter(image.getHeight(), image.getWidth(), Math.PI/4);
-      GrayF32 gray = new GrayF32(image.getWidth(), image.getHeight());
+      ImageFloat32 gray = new ImageFloat32(image.getWidth(), image.getHeight());
       ConvertBufferedImage.convertFrom(image, gray);
       detector.setIntrinsic(intrinsicParameters);
       detector.detect(gray);
