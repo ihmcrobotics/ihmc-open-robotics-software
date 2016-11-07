@@ -7,13 +7,13 @@ import java.io.PrintStream;
 
 import javax.vecmath.Vector3d;
 
+import georegression.geometry.UtilEllipse_F32;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import boofcv.io.UtilIO;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
-import georegression.geometry.RotationMatrixGenerator;
 import georegression.struct.so.Quaternion_F64;
 
 /**
@@ -61,10 +61,12 @@ public class CameraLogger
 //            Matrix3d Rm = new Matrix3d();
 //            rosTransformFromHeadBaseToCamera.get(Rm);
 //            MatrixTools.matrix3DToDenseMatrix(Rm,R,0,0);
-      Quaternion_F64 quad = RotationMatrixGenerator.matrixToQuaternion(R, null);
+//      Quaternion_F64 quad = RotationMatrixGenerator.matrixToQuaternion(R, null);
 //            rosTransformFromHeadBaseToCamera.get(T);
 
-      logPose.printf("%d %15f %15f %15f %15f %15f %15f %15f\n", timeStamp, quad.x, quad.y, quad.z, quad.w, T.getX(), T.getY(), T.getZ());
+      Quaternion_F64 unitQuaternion = new Quaternion_F64();
+
+      logPose.printf("%d %15f %15f %15f %15f %15f %15f %15f\n", timeStamp, unitQuaternion.x, unitQuaternion.y, unitQuaternion.z, unitQuaternion.w, T.getX(), T.getY(), T.getZ());
       logPose.flush();
 
       UtilImageIO.saveImage(image, String.format("%s/image%06d.png", outputDir.getAbsolutePath(), tick));

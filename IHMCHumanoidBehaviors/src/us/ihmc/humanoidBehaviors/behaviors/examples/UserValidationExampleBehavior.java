@@ -1,9 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.humanoidBehaviors.communication.CoactiveBehaviorsNetworkManager;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 
 public class UserValidationExampleBehavior extends AbstractBehavior implements CoactiveDataListenerInterface
@@ -11,12 +10,12 @@ public class UserValidationExampleBehavior extends AbstractBehavior implements C
 
    private boolean validated = false;
 
-   CoactiveBehaviorsNetworkManager coactiveBehaviorsNetworkManager;
+   CommunicationBridge coactiveBehaviorsNetworkManager;
 
-   public UserValidationExampleBehavior(BehaviorCommunicationBridge communicationBridge)
+   public UserValidationExampleBehavior(CommunicationBridge communicationBridge)
    {
       super(communicationBridge);
-      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge);
+      coactiveBehaviorsNetworkManager =communicationBridge;
       coactiveBehaviorsNetworkManager.addListeners(this);
    }
 
