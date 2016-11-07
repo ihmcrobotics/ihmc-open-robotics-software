@@ -11,13 +11,11 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCWallWorldEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedHandstepGenerator;
@@ -27,6 +25,7 @@ import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.environments.WallWorldEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -62,7 +61,9 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @Ignore("Needs to be reimplemented")
+   /**
+    * Needs to be reimplemented.
+    */
    @ContinuousIntegrationTest(estimatedDuration = 192.2)
    @Test(timeout = 960000)
    public void testVariousHandstepsOnWalls() throws SimulationExceededMaximumTimeException
@@ -70,7 +71,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       double wallMaxY = 3.5;
-      DRCWallWorldEnvironment environment = new DRCWallWorldEnvironment(-1.0, wallMaxY);
+      WallWorldEnvironment environment = new WallWorldEnvironment(-1.0, wallMaxY);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpToRampShortStepsTest", selectedLocation, simulationTestingParameters,
               getRobotModel());
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

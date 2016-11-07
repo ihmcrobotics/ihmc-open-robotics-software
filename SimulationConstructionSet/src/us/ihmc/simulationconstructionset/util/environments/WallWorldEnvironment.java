@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.environment;
+package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,18 +7,16 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class DRCWallWorldEnvironment implements CommonAvatarEnvironmentInterface
+public class WallWorldEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject;
 
    private final double wallMinY, wallMaxY;
    
-   public DRCWallWorldEnvironment(double wallMinY, double wallMaxY)
+   public WallWorldEnvironment(double wallMinY, double wallMaxY)
    {
       this.wallMinY = wallMinY;
       this.wallMaxY = wallMaxY;
