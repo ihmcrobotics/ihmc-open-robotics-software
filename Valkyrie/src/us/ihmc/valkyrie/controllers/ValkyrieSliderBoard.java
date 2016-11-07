@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import net.java.games.input.Component;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

@@ -15,7 +15,7 @@ import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateM
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDetectionBehavior;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
@@ -88,7 +88,7 @@ public class IHMCHumanoidBehaviorManager
       }
 
       FullHumanoidRobotModel fullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
-      BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(behaviorPacketCommunicator);
+      CommunicationBridge communicationBridge = new CommunicationBridge(behaviorPacketCommunicator);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
@@ -158,7 +158,7 @@ public class IHMCHumanoidBehaviorManager
     * @param fullRobotModel Holds the robot data (like joint angles). The data is updated in the dispatcher and can be shared with the behaviors.
     * @param referenceFrames Give access to useful references related to the robot. They're automatically updated.
     * @param yoTime Holds the controller time. It is updated in the dispatcher and can be shared with the behaviors.
-    * @param outgoingCommunicationBridge used to send packets to the controller.
+    * @param communicationBridge used to send packets to the controller.
     * @param yoGraphicsListRegistry Allows to register YoGraphics that will be displayed in SCS.
     * @param wholeBodyControllerParameters 
     * @param forceSensorDataHolder Holds the force sensor data
@@ -166,7 +166,7 @@ public class IHMCHumanoidBehaviorManager
     */
    private void createAndRegisterBehaviors(BehaviorDispatcher<HumanoidBehaviorType> dispatcher, FullHumanoidRobotModel fullRobotModel,
          SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime,
-         BehaviorCommunicationBridge behaviorCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, CapturePointUpdatable capturePointUpdatable,
+         CommunicationBridge behaviorCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, CapturePointUpdatable capturePointUpdatable,
          WholeBodyControllerParameters wholeBodyControllerParameters)
    {
 

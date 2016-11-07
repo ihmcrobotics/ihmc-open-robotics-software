@@ -5,8 +5,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.internal.AssumptionViolatedException;
 
-import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.DRCFlatGroundWalkingTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;

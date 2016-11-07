@@ -7,11 +7,12 @@ import java.util.Map;
 import com.martiansoftware.jsap.JSAPException;
 
 import org.ros.internal.message.Message;
+
+import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
+import us.ihmc.avatar.DRCStartingLocation;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.ros.ROSAPISimulator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
-import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.ros.ROSAPISimulator;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;

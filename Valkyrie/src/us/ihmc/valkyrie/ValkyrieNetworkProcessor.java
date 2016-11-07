@@ -5,10 +5,10 @@ import java.net.URISyntaxException;
 
 import com.martiansoftware.jsap.JSAPException;
 
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 
 public class ValkyrieNetworkProcessor
 {
