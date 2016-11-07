@@ -2,11 +2,11 @@ package us.ihmc.robotics.numericalMethods;
 
 
 /*
- * 
+ *
  * Is copyrighted, but can be used in any project, non-commercial and commercial.
  * http://www.realtimerendering.com/resources/GraphicsGems/
- * 
- * 
+ *
+ *
 *  From Roots3And4.c in Graphics Gems.
 *
 *  Utility functions to find cubic and quartic roots,
@@ -92,7 +92,6 @@ public class QuarticRootFinder implements java.io.Serializable
       }
    }
 
-
    private double[] cubic_overflow_coeffs = new double[3];
 
    public int SolveCubic(double[] c, double[] s)    // c[4], s[3]
@@ -111,9 +110,8 @@ public class QuarticRootFinder implements java.io.Serializable
          cubic_overflow_coeffs[1] = c[1];
          cubic_overflow_coeffs[2] = c[2];
 
-         return SolveCubic(cubic_overflow_coeffs, s);
+         return SolveQuadric(cubic_overflow_coeffs, s);
       }
-
 
       A = c[2] / c[3];
       B = c[1] / c[3];
@@ -300,7 +298,6 @@ public class QuarticRootFinder implements java.io.Serializable
 
       return num;
    }
-
 
 }
 

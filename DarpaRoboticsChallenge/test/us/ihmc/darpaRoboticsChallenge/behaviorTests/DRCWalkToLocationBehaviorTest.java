@@ -17,11 +17,11 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
+import us.ihmc.darpaRoboticsChallenge.environment.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior.WalkingOrientation;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -540,7 +540,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
    private WalkToLocationBehavior createNewWalkToLocationBehavior()
    {
-      BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
+      CommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
       FullHumanoidRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       HumanoidReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();

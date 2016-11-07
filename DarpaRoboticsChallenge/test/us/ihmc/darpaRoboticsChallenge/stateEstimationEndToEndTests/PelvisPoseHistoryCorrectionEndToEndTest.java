@@ -27,7 +27,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
+import us.ihmc.darpaRoboticsChallenge.environment.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;

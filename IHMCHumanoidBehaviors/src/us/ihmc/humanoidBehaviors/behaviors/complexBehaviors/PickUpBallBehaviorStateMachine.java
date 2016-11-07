@@ -1,16 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import javax.vecmath.Vector3f;
-
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.PickUpBallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.humanoidBehaviors.communication.CoactiveBehaviorsNetworkManager;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -35,18 +32,21 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    private final PickObjectOffGroundBehavior pickObjectOffGroundBehavior;
    private final PutBallInBucketBehavior putBallInBucketBehavior;
    private final ResetRobotBehavior resetRobotBehavior;
-   CoactiveBehaviorsNetworkManager coactiveBehaviorsNetworkManager;
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
+   private CommunicationBridge communicationBridge;
 
-   public PickUpBallBehaviorStateMachine(BehaviorCommunicationBridge communicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public PickUpBallBehaviorStateMachine(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("pickUpBallStateMachine", PickUpBallBehaviorState.class, yoTime, communicationBridge);
-      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge);
-      coactiveBehaviorsNetworkManager.addListeners(this);
-      coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
+      
+      System.out.println("PickUpBallBehaviorStateMachine queue size "+communicationBridge.getListeningNetworkQueues().size());
+      
+      this.communicationBridge = communicationBridge;
+      communicationBridge.addListeners(this);
+//      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
@@ -59,20 +59,13 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
 
       //NEW
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
-      addChildBehavior(resetRobotBehavior);
       searchFarForSphereBehavior = new SearchFarForSphereBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, false, atlasPrimitiveActions);
-      addChildBehavior(searchFarForSphereBehavior);
       searchNearForSphereBehavior = new SearchNearForSphereBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, false,
             atlasPrimitiveActions);
-      addChildBehavior(searchNearForSphereBehavior);
       walkToPickUpLocationBehavior = new WalkToPickObjectOffGroundLocationBehavior(yoTime, referenceFrames, communicationBridge, wholeBodyControllerParameters,
             fullRobotModel, atlasPrimitiveActions);
-      addChildBehavior(walkToPickUpLocationBehavior);
       pickObjectOffGroundBehavior = new PickObjectOffGroundBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, atlasPrimitiveActions);
-      addChildBehavior(pickObjectOffGroundBehavior);
       putBallInBucketBehavior = new PutBallInBucketBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, atlasPrimitiveActions);
-      addChildBehavior(putBallInBucketBehavior);
-      addChildBehaviors(atlasPrimitiveActions.getAllPrimitiveBehaviors());
       setupStateMachine();
    }
 
@@ -106,9 +99,6 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          @Override
          protected void setBehaviorInput()
          {
-            Vector3f tmp = new Vector3f(0, 1, 2); 
-
-            coactiveBehaviorsNetworkManager.sendToUI("3dLocation", searchFarForSphereBehavior.getBallLocation());
             TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To The Ball");
             sendPacketToNetworkProcessor(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);

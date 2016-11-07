@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCTrialsTrainingWalkingCourseEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -29,6 +28,7 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.environments.DarpaRoboticsChallengeTrialsWalkingEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -39,14 +39,14 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
-   private DRCTrialsTrainingWalkingCourseEnvironment environment;
+   private DarpaRoboticsChallengeTrialsWalkingEnvironment environment;
 
    protected abstract DRCRobotModel getRobotModelWithAdditionalFootContactPoints();
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
-      environment = new DRCTrialsTrainingWalkingCourseEnvironment();
+      environment = new DarpaRoboticsChallengeTrialsWalkingEnvironment();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 

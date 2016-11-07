@@ -1,24 +1,22 @@
-package us.ihmc.darpaRoboticsChallenge.environment;
+package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.List;
 
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class DRCTrialsTrainingWalkingCourseEnvironment implements CommonAvatarEnvironmentInterface
+public class DarpaRoboticsChallengeTrialsWalkingEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D;
 
 
-   public DRCTrialsTrainingWalkingCourseEnvironment()
+   public DarpaRoboticsChallengeTrialsWalkingEnvironment()
    {
       combinedTerrainObject3D = new CombinedTerrainObject3D(getClass().getSimpleName());
-      combinedTerrainObject3D.addTerrainObject(DRCDemo01NavigationEnvironment.setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
-      combinedTerrainObject3D.addTerrainObject(DRCDemo01NavigationEnvironment.setUpGround("Ground"));
+      combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
+      combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
    }
 
    @Override

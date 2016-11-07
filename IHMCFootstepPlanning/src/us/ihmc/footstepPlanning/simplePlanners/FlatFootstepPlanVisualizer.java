@@ -33,18 +33,16 @@ public class FlatFootstepPlanVisualizer
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-   public FlatFootstepPlanVisualizer()
+   public FlatFootstepPlanVisualizer(FramePose2d goalPose, FramePose2d initialStancePose, RobotSide initialRobotSide)
    {
       FootstepPlanner planner = new TurnWalkTurnPlanner();
       // create inputs
-      RobotSide initialStanceSide = RobotSide.LEFT;
-      FramePose2d goalPose = new FramePose2d(worldFrame, new Point2d(1.0, 1.0), Math.PI / 2.0);
-      planner.setInitialStanceFoot(new FramePose2d(worldFrame), initialStanceSide);
+      planner.setInitialStanceFoot(initialStancePose, initialRobotSide);
       planner.setGoalPose(goalPose);
 
       // visualize output
       List<FramePose2d> footstepPlan = planner.plan();
-      RobotSide previousFootstepSide = initialStanceSide;
+      RobotSide previousFootstepSide = initialRobotSide;
       YoFrameConvexPolygon2d yoDefaultFootPolygon = new YoFrameConvexPolygon2d("DefaultFootPolygon", worldFrame, 4, registry);
 
       ConvexPolygon2d defaultFootPolygon = new ConvexPolygon2d();
@@ -90,9 +88,14 @@ public class FlatFootstepPlanVisualizer
       scs.run();
    }
 
-   public static void main(String[] args)
-   {
-      PrintTools.info("Visualizing Footstep Plan on Flat Ground");
-      new FlatFootstepPlanVisualizer();
-   }
+//   public static void main(String[] args)
+//   {
+//      FramePose2d goalPose = new FramePose2d(worldFrame, new Point2d(1.0, 1.0), Math.PI / 2.0);
+//      FramePose2d initialStancePose = new FramePose2d(worldFrame);
+//      RobotSide initialRobotSide = RobotSide.RIGHT;
+//
+//
+//      PrintTools.info("Visualizing Footstep Plan on Flat Ground");
+//      new FlatFootstepPlanVisualizer(goalPose, initialStancePose, initialRobotSide);
+//   }
 }

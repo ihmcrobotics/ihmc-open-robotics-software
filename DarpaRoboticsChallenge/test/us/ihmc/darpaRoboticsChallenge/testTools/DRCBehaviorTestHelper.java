@@ -16,10 +16,9 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
@@ -48,6 +47,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -71,7 +71,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final PacketRouter<PacketDestination> networkProcessor;
    private final PacketCommunicator mockUIPacketCommunicatorServer;//send packets as if it was sent from the UI
    private final PacketCommunicator behaviorCommunicatorServer;
-   private final BehaviorCommunicationBridge behaviorCommunicationBridge;
+   private final CommunicationBridge behaviorCommunicationBridge;
    private final HumanoidRobotDataReceiver robotDataReceiver;
    private final HumanoidReferenceFrames referenceFrames;
 
@@ -88,7 +88,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    public DRCBehaviorTestHelper(String name, DRCStartingLocation selectedLocation,
          SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
    {
-      this(new DRCDemo01NavigationEnvironment(), name, selectedLocation, simulationTestingParameters, robotModel);
+      this(new DefaultCommonAvatarEnvironment(), name, selectedLocation, simulationTestingParameters, robotModel);
    }
 
    public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface,
@@ -128,7 +128,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       networkProcessor.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerCommunicator);
       networkProcessor.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorCommunicatorClient);
 
-      behaviorCommunicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer);
+      behaviorCommunicationBridge = new CommunicationBridge(behaviorCommunicatorServer);
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
@@ -194,7 +194,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       return wristForceSensorUpdatables;
    }
 
-   public BehaviorCommunicationBridge getBehaviorCommunicationBridge()
+   public CommunicationBridge getBehaviorCommunicationBridge()
    {
       return behaviorCommunicationBridge;
    }
@@ -453,17 +453,13 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       {
          this.behaviors = new ArrayList<AbstractBehavior>();
          this.behaviors.add(behavior);
-         behaviorCommunicationBridge.attachGlobalListener(behavior.getGlobalPacketConsumer());
       }
 
       public BehaviorRunner(ArrayList<AbstractBehavior> behaviors)
       {
          this.behaviors = behaviors;
 
-         for (AbstractBehavior behavior : behaviors)
-         {
-            behaviorCommunicationBridge.attachGlobalListener(behavior.getGlobalPacketConsumer());
-         }
+        
       }
 
       public void run()

@@ -40,10 +40,10 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
    }
 
    @Override
-   public void setFrom(T sphereShapeDescription)
+   public void setFrom(T capsuleShapeDescription)
    {
-      this.radius = sphereShapeDescription.getRadius();
-      sphereShapeDescription.getLineSegment(this.lineSegment);
+      this.radius = capsuleShapeDescription.getRadius();
+      capsuleShapeDescription.getLineSegment(this.lineSegment);
    }
 
    @Override
