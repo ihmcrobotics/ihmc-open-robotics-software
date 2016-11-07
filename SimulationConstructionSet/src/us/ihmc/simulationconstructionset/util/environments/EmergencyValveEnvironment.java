@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.environment;
+package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -7,37 +7,32 @@ import java.util.List;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
-import us.ihmc.simulationconstructionset.util.environments.ValveType;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
+public class EmergencyValveEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final List<ContactableValveRobot> valveRobot = new ArrayList<ContactableValveRobot>();
    private final CombinedTerrainObject3D combinedTerrainObject;
 
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
-   public DRCValveEnvironment()
+   public EmergencyValveEnvironment()
    {
       this(0.5, 0.0, 1.0, 0.0);
    }
 
-   public DRCValveEnvironment(ArrayList<Point3d> valveLocations, LinkedHashMap<Point3d, Double> valveYawAngles_degrees)
+   public EmergencyValveEnvironment(ArrayList<Point3d> valveLocations, LinkedHashMap<Point3d, Double> valveYawAngles_degrees)
    {
       double forceVectorScale = 1.0 / 50.0;
 
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
-      combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
+      combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
 
       int i = 0;
       for (Point3d valveLocation : valveLocations)
@@ -49,12 +44,12 @@ public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
       }
    }
 
-   public DRCValveEnvironment(double valveX, double valveY, double valveZ, double valveYaw_degrees)
+   public EmergencyValveEnvironment(double valveX, double valveY, double valveZ, double valveYaw_degrees)
    {
       double forceVectorScale = 1.0 / 50.0;
 
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
-      combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
+      combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
 
       createValve("ValveRobot", ValveType.SMALL_VALVE, valveX, valveY, valveZ, valveYaw_degrees, forceVectorScale);
 
@@ -75,15 +70,6 @@ public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
       valve.createAvailableContactPoints(1, 30, forceVectorScale, true);
 
       valveRobot.add(valve);
-   }
-
-   private CombinedTerrainObject3D setUpGround(String name)
-   {
-      CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
-
-      combinedTerrainObject.addBox(-10.0, -10.0, 10.0, 10.0, -0.05, 0.0, YoAppearance.DarkBlue());
-
-      return combinedTerrainObject;
    }
 
    @Override
