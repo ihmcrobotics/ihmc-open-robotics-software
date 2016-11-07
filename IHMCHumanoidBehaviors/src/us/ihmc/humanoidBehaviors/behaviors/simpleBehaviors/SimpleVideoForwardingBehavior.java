@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 
@@ -12,7 +12,7 @@ import java.awt.image.BufferedImage;
 
 public class SimpleVideoForwardingBehavior extends ImageProcessingBehavior
 {
-   public SimpleVideoForwardingBehavior(CommunicationBridge communicationBridge, PacketDestination packetForwardDestination)
+   public SimpleVideoForwardingBehavior(BehaviorCommunicationBridge communicationBridge, PacketDestination packetForwardDestination)
    {
       super("SimplevVideoForwarder", communicationBridge, packetForwardDestination);
    }
@@ -37,7 +37,7 @@ public class SimpleVideoForwardingBehavior extends ImageProcessingBehavior
    @Override
    public void initialize()
    {
-      for(ConcurrentListeningQueue<VideoPacket> queue : communicationBridge.getListeningNetworkQueues().get(VideoPacket.class))
+      for(ConcurrentListeningQueue<VideoPacket> queue : listeningNetworkQueues.get(VideoPacket.class))
       {
          queue.clear();
       }

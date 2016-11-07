@@ -3,9 +3,13 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import javax.vecmath.Point3d;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CoactiveBehaviorsNetworkManager;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class SearchForValveBehavior extends AbstractBehavior implements CoactiveDataListenerInterface
 {
@@ -14,12 +18,12 @@ public class SearchForValveBehavior extends AbstractBehavior implements Coactive
    private double valveRotation;
    private double valveRadius;
    private boolean recievedNewValveLocation = false;
-   private CommunicationBridge networkManager;
+   private CoactiveBehaviorsNetworkManager networkManager;
 
-   public SearchForValveBehavior(CommunicationBridge behaviorCommunicationBridge)
+   public SearchForValveBehavior(BehaviorCommunicationBridge behaviorCommunicationBridge)
    {
       super("SearchForSpehereFar", behaviorCommunicationBridge);
-      networkManager = behaviorCommunicationBridge;
+      networkManager = new CoactiveBehaviorsNetworkManager(behaviorCommunicationBridge);
       networkManager.addListeners(this);
    }
 

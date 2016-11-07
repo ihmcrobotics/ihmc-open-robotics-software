@@ -6,8 +6,9 @@ import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine.TurnValveBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CoactiveBehaviorsNetworkManager;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -42,7 +43,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    Vector3f robotInteractionPointOffset = new Vector3f(-0.39f, -1.1811f, 0.85f);
    Vector3f robotInteractionDirectionPointOffset = new Vector3f(-0.38f, -1.1811f, 0.75f);
 
-   CommunicationBridge coactiveBehaviorsNetworkManager;
+   CoactiveBehaviorsNetworkManager coactiveBehaviorsNetworkManager;
 
    private final SearchForValveBehavior searchForValveBehavior;
    //walk to location
@@ -54,19 +55,22 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   public TurnValveBehaviorStateMachine(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public TurnValveBehaviorStateMachine(BehaviorCommunicationBridge communicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("turnValveStateMachine", TurnValveBehaviorState.class, yoTime, communicationBridge);
-      coactiveBehaviorsNetworkManager = communicationBridge;
+      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge);
       coactiveBehaviorsNetworkManager.addListeners(this);
       coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       searchForValveBehavior = new SearchForValveBehavior(communicationBridge);
+      addChildBehavior(searchForValveBehavior);
 
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
+      addChildBehavior(resetRobotBehavior);
+      addChildBehaviors(atlasPrimitiveActions.getAllPrimitiveBehaviors());
       setupStateMachine();
    }
 

@@ -8,7 +8,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.EnableLidarBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
@@ -38,7 +38,7 @@ public class BasicPipeLineBehavior extends AbstractBehavior
 
    private BasicStates currentState = BasicStates.ENABLE_LIDAR;
 
-   public BasicPipeLineBehavior(String name, DoubleYoVariable yoTime, CommunicationBridge outgoingCommunicationBridge,
+   public BasicPipeLineBehavior(String name, DoubleYoVariable yoTime, BehaviorCommunicationBridge outgoingCommunicationBridge,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);

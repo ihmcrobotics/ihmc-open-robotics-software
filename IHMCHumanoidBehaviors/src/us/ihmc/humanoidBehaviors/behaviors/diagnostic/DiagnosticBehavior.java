@@ -2709,7 +2709,7 @@ public class DiagnosticBehavior extends AbstractBehavior
             TimeStampedTransform3D timeStampedTransform3D = new TimeStampedTransform3D(pelvisTransformWithOffset, timestamp);
             StampedPosePacket stampedPosePacket = new StampedPosePacket("/pelvis", timeStampedTransform3D, 1.0);
 
-            communicationBridge.sendPacketToController(stampedPosePacket);
+            outgoingCommunicationBridge.sendPacketToController(stampedPosePacket);
 
             previousIcpPacketSentTime.set(yoTime.getDoubleValue());
          }
@@ -2752,7 +2752,18 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
    }
 
-  
+   @Override
+   protected void passReceivedObjectToChildBehaviors(Object object)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         handTrajectoryBehaviors.get(robotSide).consumeObjectFromNetwork(object);
+         armTrajectoryBehaviors.get(robotSide).consumeObjectFromNetwork(object);
+         footstepListBehavior.consumeObjectFromNetwork(object);
+         walkToLocationBehavior.consumeObjectFromNetwork(object);
+         turnInPlaceBehavior.consumeObjectFromNetwork(object);
+      }
+   }
 
 
    @Override
@@ -2791,7 +2802,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private BehaviorAction createSleepTask(double sleepTime)
    {
-      SleepBehavior sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
+      SleepBehavior sleepBehavior = new SleepBehavior(outgoingCommunicationBridge, yoTime);
       SleepTask sleepTask = new SleepTask(sleepBehavior,sleepTime);
       return sleepTask;
    }
