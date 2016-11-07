@@ -67,6 +67,29 @@ public class PlanarRegion
    }
 
    /**
+    * Returns all of the intersections when the convexPolygon is projected vertically onto this PlanarRegion.
+    * @param convexPolygon2d Polygon to project vertically.
+    * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
+    */
+   public void getPolygonIntersections(ConvexPolygon2d convexPolygon2d, ArrayList<ConvexPolygon2d> intersectionsToPack)
+   {
+      // Instead of projecting all the polygons of this region onto the world XY-plane,
+      // the given convex polygon is projected along the z-world axis to be snapped onto plane.
+      ConvexPolygon2d projectedPolygon = projectPolygonVerticallyToRegion(convexPolygon2d);
+
+      // Now, just need to go through each polygon of this region and see there is at least one intersection
+      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
+      {
+         ConvexPolygon2d intersectingPolygon = convexPolygons.get(i).intersectionWith(projectedPolygon);
+
+         if (intersectingPolygon != null)
+         {
+            intersectionsToPack.add(intersectingPolygon);
+         }
+      }
+   }
+
+   /**
     * Projects the input ConvexPolygon2d to the plane defined by this PlanarRegion by translating each vertex in world z.
     * Then puts each vertex in local frame. In doing so, the area of the rotated polygon will actually increase on tilted PlanarRegions.
     * @param convexPolygon2d Polygon to project
