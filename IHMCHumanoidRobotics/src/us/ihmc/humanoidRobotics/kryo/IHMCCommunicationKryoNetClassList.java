@@ -18,8 +18,8 @@ import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.KinematicsToolboxStateMessage;
-import us.ihmc.communication.packets.KinematicsToolboxStateMessage.KinematicsToolboxState;
+import us.ihmc.communication.packets.ToolboxStateMessage;
+import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
@@ -293,8 +293,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Kinematics toolbox module
       registerPacketClass(KinematicsToolboxOutputStatus.class);
-      registerPacketClass(KinematicsToolboxStateMessage.class);
-      registerPacketField(KinematicsToolboxState.class);
+      registerPacketClass(ToolboxStateMessage.class);
+      registerPacketField(ToolboxState.class);
 
       // Joint data
       registerPacketClass(RobotConfigurationData.class);

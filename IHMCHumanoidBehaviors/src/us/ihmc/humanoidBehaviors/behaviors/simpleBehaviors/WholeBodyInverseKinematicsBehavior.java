@@ -8,8 +8,8 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.KinematicsToolboxStateMessage;
-import us.ihmc.communication.packets.KinematicsToolboxStateMessage.KinematicsToolboxState;
+import us.ihmc.communication.packets.ToolboxStateMessage;
+import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -166,7 +166,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       hasSentMessageToController.set(false);
       hasSolverFailed.set(false);
       solutionSentToController = null;
-      KinematicsToolboxStateMessage message = new KinematicsToolboxStateMessage(KinematicsToolboxState.WAKE_UP);
+      ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.WAKE_UP);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       sendPacketToNetworkProcessor(message);
    }
@@ -269,7 +269,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    private void deactivateKinematicsToolboxModule()
    {
-      KinematicsToolboxStateMessage message = new KinematicsToolboxStateMessage(KinematicsToolboxState.SLEEP);
+      ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.SLEEP);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       sendPacketToNetworkProcessor(message);
    }
