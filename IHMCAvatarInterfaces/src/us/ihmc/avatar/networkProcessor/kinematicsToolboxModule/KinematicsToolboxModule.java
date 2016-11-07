@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.StatusPacket;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.ToolboxController;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.ToolboxModule;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
