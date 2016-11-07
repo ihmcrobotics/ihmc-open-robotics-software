@@ -11,6 +11,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -214,5 +215,11 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       }
       pointToTurnAbout.setIncludingFrame(pointToTurnAboutInWorld);
       pointToTurnAbout.changeFrame(stanceFootFrame);
+   }
+
+   @Override
+   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
+   {
+      // TODO Auto-generated method stub
    }
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -67,6 +68,12 @@ public class FootstepPlanGenerator implements FootstepGenerator, FootstepPlanner
    public void setGoalPose(FramePose goalPose)
    {
       planner.setGoalPose(goalPose);
+   }
+
+   @Override
+   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
+   {
+      planner.setPlanarRegions(planarRegionsList);
    }
 
    @Override
