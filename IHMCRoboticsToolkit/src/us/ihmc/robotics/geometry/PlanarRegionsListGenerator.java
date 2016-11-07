@@ -77,6 +77,7 @@ public class PlanarRegionsListGenerator
       convexPolygon.addVertex(-lengthX / 2.0, widthY / 2.0);
       convexPolygon.addVertex(-lengthX / 2.0, -widthY / 2.0);
       convexPolygon.addVertex(lengthX / 2.0, -widthY / 2.0);
+      convexPolygon.update();
       return convexPolygon;
    }
 
@@ -104,4 +105,20 @@ public class PlanarRegionsListGenerator
    {
       transformGenerator.rotate(rotation);
    }
+
+   public void setTransform(RigidBodyTransform transform)
+   {
+      transformGenerator.setTransform(transform);
+   }
+
+   public void translateThenRotate(RigidBodyTransform transform)
+   {
+      transformGenerator.translateThenRotate(transform);
+   }
+
+   public PlanarRegionsList getPlanarRegionsList()
+   {
+      return planarRegionsList;
+   }
+
 }
