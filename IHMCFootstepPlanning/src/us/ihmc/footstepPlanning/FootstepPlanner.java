@@ -29,7 +29,8 @@ public interface FootstepPlanner
    public void setPlanarRegions(PlanarRegionsList planarRegionsList);
 
    /**
-    * Plan a sequence of footsteps given initial and goal conditions.
+    * Plan a sequence of footsteps given initial and goal conditions. The poses describe
+    * the location and orientation of the sole frame in world.
     * @return footstepPlan       Sequence of footsteps from initial stance foot to goal
     */
    public List<FramePose> plan();
