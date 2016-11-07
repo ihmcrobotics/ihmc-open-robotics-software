@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.kinematicsToolboxModule;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -149,7 +150,7 @@ public class KinematicToolboxDiagnosticEnvironment
          @Override
          public List<? extends IMUSensorReadOnly> getIMURawOutputs()
          {
-            return null;
+            return Collections.<IMUSensorReadOnly>emptyList();
          }
 
          @Override
