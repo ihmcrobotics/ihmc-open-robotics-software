@@ -7,9 +7,9 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-import us.ihmc.darpaRoboticsChallenge.handControl.HandControlThread;
-import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
-import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.ManualHandControlProvider;
+import us.ihmc.avatar.handControl.HandControlThread;
+import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator;
+import us.ihmc.avatar.handControl.packetsAndConsumers.ManualHandControlProvider;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
