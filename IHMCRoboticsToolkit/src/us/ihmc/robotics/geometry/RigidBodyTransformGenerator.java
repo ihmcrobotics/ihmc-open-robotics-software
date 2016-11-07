@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
@@ -109,6 +110,12 @@ public class RigidBodyTransformGenerator
    public void rotate(Matrix3d rotationMatrix)
    {
       tempTransform.setRotationAndZeroTranslation(rotationMatrix);
+      transform.multiply(transform, tempTransform);
+   }
+
+   public void rotate(Quat4d rotationQuaternion)
+   {
+      tempTransform.setRotationAndZeroTranslation(rotationQuaternion);
       transform.multiply(transform, tempTransform);
    }
 

@@ -31,7 +31,7 @@ public class PolygonSnapperVisualizer
    {
       Robot robot = new Robot("Robot");
       scs = new SimulationConstructionSet(robot);
-      scs.setDT(1.0, 1);
+      scs.setDT(0.1, 1);
 
       polygonToSnap = new YoFrameConvexPolygon2d("polygonToSnap", ReferenceFrame.getWorldFrame(), 4, registry);
       snappedPolygon = new YoFrameConvexPolygon2d("snappedPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
