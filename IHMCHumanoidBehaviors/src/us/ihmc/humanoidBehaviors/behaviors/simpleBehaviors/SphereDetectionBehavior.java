@@ -61,6 +61,8 @@ public class SphereDetectionBehavior extends AbstractBehavior
    {
       super(outgoingCommunicationBridge);
       this.attachNetworkListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
+      System.out.println("SphereDetectionBehavior queue size "+communicationBridge.getListeningNetworkQueues().size());
+
       this.humanoidReferenceFrames = referenceFrames;
    }
 

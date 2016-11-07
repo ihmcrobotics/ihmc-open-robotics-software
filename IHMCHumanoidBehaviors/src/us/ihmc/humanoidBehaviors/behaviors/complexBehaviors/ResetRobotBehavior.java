@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
@@ -26,11 +26,11 @@ public class ResetRobotBehavior extends AbstractBehavior
 
    private final DoubleYoVariable yoTime;
 
-   public ResetRobotBehavior(BehaviorCommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public ResetRobotBehavior(CommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       this(true,true,true,true,outgoingCommunicationBridge,yoTime);
    }
-   public ResetRobotBehavior(boolean leftArm, boolean rightArm, boolean chest, boolean pelvis, BehaviorCommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime)
+   public ResetRobotBehavior(boolean leftArm, boolean rightArm, boolean chest, boolean pelvis, CommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       this.leftArm = leftArm;
@@ -41,16 +41,12 @@ public class ResetRobotBehavior extends AbstractBehavior
       this.yoTime = yoTime;
 
       chestGoHomeBehavior = new GoHomeBehavior("chest", outgoingCommunicationBridge, yoTime);
-      addChildBehavior(chestGoHomeBehavior);
 
       pelvisGoHomeBehavior = new GoHomeBehavior("pelvis", outgoingCommunicationBridge, yoTime);
-      addChildBehavior(pelvisGoHomeBehavior);
 
 
       armGoHomeLeftBehavior = new GoHomeBehavior("leftArm", outgoingCommunicationBridge, yoTime);
-      addChildBehavior(armGoHomeLeftBehavior);
       armGoHomeRightBehavior = new GoHomeBehavior("rightArm", outgoingCommunicationBridge, yoTime);
-      addChildBehavior(armGoHomeRightBehavior);
    }
 
    @Override
