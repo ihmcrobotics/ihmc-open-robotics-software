@@ -1039,14 +1039,16 @@ public class Graphics3DObject
       RigidBodyTransform transform = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transform);
 
+      transform(transform);
+
       for (int i=0; i<numberOfConvexPolygons; i++)
       {
          ConvexPolygon2d convexPolygon = planarRegion.getConvexPolygon(i);
-         ConvexPolygon2d transformedPolygon = new ConvexPolygon2d(convexPolygon);
-         transformedPolygon.applyTransform(transform);
-
-         addPolygon(transformedPolygon, appearances[i % appearances.length]);
+         addPolygon(convexPolygon, appearances[i % appearances.length]);
       }
+
+      transform.invert();
+      transform(transform);
    }
 
    /**
