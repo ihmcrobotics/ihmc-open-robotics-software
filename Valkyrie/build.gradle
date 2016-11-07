@@ -65,7 +65,7 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCSystemIdentification")
    compile ihmc.getProjectDependency(":IHMCStateEstimation")
    compile ihmc.getProjectDependency(":CommonWalkingControlModules")
-   compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
+   compile ihmc.getProjectDependency(":IHMCAvatarInterfaces")
    compile ihmc.getProjectDependency(":Graphics3DAdapter")
    compile ihmc.getProjectDependency(":IHMCROSTools")
    compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
@@ -83,7 +83,7 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCSimulationToolkit")
 
    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
-   testCompile ihmc.getProjectTestDependency(":DarpaRoboticsChallenge")
+   testCompile ihmc.getProjectTestDependency(":IHMCAvatarInterfaces")
 }
 
 apply plugin: 'application'

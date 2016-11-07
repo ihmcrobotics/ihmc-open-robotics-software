@@ -2,7 +2,7 @@ package us.ihmc.atlas.initialSetup;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.initialSetup.OffsetAndYawRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 
 public class SquaredUpDRCDemo01OutsidePen extends OffsetAndYawRobotInitialSetup
 {

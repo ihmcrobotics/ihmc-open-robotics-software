@@ -1,8 +1,8 @@
 package us.ihmc.valkyrie.controllerAPI;
 
-import us.ihmc.darpaRoboticsChallenge.controllerAPI.EndToEndArmDesiredAccelerationsMessageTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.avatar.controllerAPI.EndToEndArmDesiredAccelerationsMessageTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 

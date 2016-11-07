@@ -3,9 +3,9 @@ package us.ihmc.atlas;
 import com.martiansoftware.jsap.JSAPException;
 
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.darpaRoboticsChallenge.simulationStarter.DRCSimulationStarter;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.WallWorldEnvironment;
 
