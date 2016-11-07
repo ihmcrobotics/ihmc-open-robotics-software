@@ -16,8 +16,32 @@ import us.ihmc.robotics.Axis;
  */
 public class RigidBodyTransformGenerator
 {
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform transform = new RigidBodyTransform();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+
+   public RigidBodyTransformGenerator()
+   {
+   }
+
+   public RigidBodyTransformGenerator(RigidBodyTransform transform)
+   {
+      setTransform(transform);
+   }
+
+   public RigidBodyTransformGenerator(RigidBodyTransformGenerator generator)
+   {
+      setTransform(generator.transform);
+   }
+
+   public void set(RigidBodyTransformGenerator transformGenerator)
+   {
+      this.transform.set(transformGenerator.transform);
+   }
+
+   public void setTransform(RigidBodyTransform transform)
+   {
+      this.transform.set(transform);
+   }
 
    public RigidBodyTransform getRigidBodyTransformCopy()
    {
@@ -100,4 +124,5 @@ public class RigidBodyTransformGenerator
       tempTransform.setTranslation(translationVector);
       transform.multiply(transform, tempTransform);
    }
+
 }

@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point2d;
@@ -28,6 +29,19 @@ public class PlanarRegion
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.invert(fromLocalToWorldTransform);
       convexPolygons = planarRegionConvexPolygons;
+   }
+
+   /**
+    * Create a new planar region.
+    * @param transformToWorld transform from the region local coordinate system to world.
+    * @param convexPolygon a single convex polygon that represents the planar region. Expressed in local coordinate system.
+    */
+   public PlanarRegion(RigidBodyTransform transformToWorld, ConvexPolygon2d convexPolygon)
+   {
+      convexPolygons = new ArrayList<>();
+      convexPolygons.add(convexPolygon);
+      fromLocalToWorldTransform.set(transformToWorld);
+      fromWorldToLocalTransform.invert(fromLocalToWorldTransform);
    }
 
    /**
