@@ -28,6 +28,7 @@ public class FootstepPlanningToolboxController extends ToolboxController<Footste
    {
       // TODO
 
+      requestInitialize(); // make updateInternal only called if a planning request is coming in
       return result;
    }
 
