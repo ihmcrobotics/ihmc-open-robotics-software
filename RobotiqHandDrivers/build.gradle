@@ -46,7 +46,7 @@ dependencies {
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
 
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
-	compile ihmc.getProjectDependency(":DarpaRoboticsChallenge")
+	compile ihmc.getProjectDependency(":IHMCAvatarInterfaces")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 	compile ihmc.getProjectDependency(":IHMCWholeBodyController")

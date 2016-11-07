@@ -2,8 +2,8 @@ package us.ihmc.atlas.posePlayback;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.posePlayback.PlaybackPoseSequenceDRCTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.posePlayback.PlaybackPoseSequenceDRCTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 public class AtlasPlaybackPoseSequenceTest extends PlaybackPoseSequenceDRCTest
