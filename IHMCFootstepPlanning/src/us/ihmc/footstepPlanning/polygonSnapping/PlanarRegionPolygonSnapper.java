@@ -1,6 +1,9 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -9,61 +12,83 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class PlanarRegionPolygonSnapper
 {
-
    /**
     * Snaps an XY polygon down onto a PlanarRegion. Returns the RigidBodyTransform required to perform the snap.
     * @param polygonToSnap
     * @param planarRegionToSnapTo
     * @return RigidBodyTransform required to snap the polygon down onto the PlanarRegion
     */
-   public static RigidBodyTransform snapPolygonToPlanarRegion(ConvexPolygon2d polygonToSnap, PlanarRegion planarRegionToSnapTo)
+   public static RigidBodyTransform snapPolygonToPlanarRegion(ConvexPolygon2d polygonToSnap, PlanarRegion planarRegionToSnapTo, Point3d highestVertexInWorld)
    {
-      int numberOfVertices = polygonToSnap.getNumberOfVertices();
+      ArrayList<ConvexPolygon2d> polygonIntersections = new ArrayList<>();
+      planarRegionToSnapTo.getPolygonIntersections(polygonToSnap, polygonIntersections);
 
+      if (polygonIntersections.isEmpty())
+         return null;
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      planarRegionToSnapTo.getTransformToWorld(transform);
+      Point3d vertexInWorld = new Point3d();
+
+      int numberOfIntersectingPolygons = polygonIntersections.size();
       double highestZ = Double.NEGATIVE_INFINITY;
-      Point2d highestVertex = null;
+      Point2d highestIntersectionVertexInPlaneFrame = null;
 
-      for (int i = 0; i < numberOfVertices; i++)
+      for (int i = 0; i < numberOfIntersectingPolygons; i++)
       {
-         Point2d vertex = polygonToSnap.getVertex(i);
-         double zWorld = planarRegionToSnapTo.getPlaneZGivenXY(vertex.getX(), vertex.getY());
+         ConvexPolygon2d intersectingPolygon = polygonIntersections.get(i);
 
-         if (zWorld > highestZ)
+         int numberOfVertices = intersectingPolygon.getNumberOfVertices();
+
+         for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
          {
-            highestZ = zWorld;
-            highestVertex = vertex;
+            Point2d vertex = intersectingPolygon.getVertex(vertexIndex);
+            vertexInWorld.set(vertex.getX(), vertex.getY(), 0.0);
+            transform.transform(vertexInWorld);
+
+            if (vertexInWorld.getZ() > highestZ)
+            {
+               highestZ = vertexInWorld.getZ();
+               highestIntersectionVertexInPlaneFrame = vertex;
+               highestVertexInWorld.set(vertexInWorld);
+            }
          }
       }
-      if (highestVertex == null)
+
+      if (highestIntersectionVertexInPlaneFrame == null)
          return null;
 
       Vector3d surfaceNormal = new Vector3d();
       planarRegionToSnapTo.getNormal(surfaceNormal);
 
+      Point3d highestIntersectionVertexInWorldFrame = new Point3d(highestIntersectionVertexInPlaneFrame.getX(), highestIntersectionVertexInPlaneFrame.getY(), 0.0);
+      transform.transform(highestIntersectionVertexInWorldFrame);
+      highestIntersectionVertexInPlaneFrame.set(highestIntersectionVertexInWorldFrame.getX(), highestIntersectionVertexInWorldFrame.getY());
+
       RigidBodyTransform transformToReturn = createTransformToMatchSurfaceNormalPreserveX(surfaceNormal);
-      setTranslationSettingZAndPreservingXAndY(highestZ, highestVertex, transformToReturn);
+      setTranslationSettingZAndPreservingXAndY(highestIntersectionVertexInWorldFrame, transformToReturn);
 
       return transformToReturn;
    }
 
-   private static void setTranslationSettingZAndPreservingXAndY(double highestZ, Point2d highestVertex, RigidBodyTransform transformToReturn)
+   private static void setTranslationSettingZAndPreservingXAndY(Point3d highestVertex, RigidBodyTransform transformToReturn)
    {
       Vector3d newTranslation = new Vector3d(highestVertex.getX(), highestVertex.getY(), 0.0);
       transformToReturn.transform(newTranslation);
       newTranslation.scale(-1.0);
-      newTranslation.add(new Vector3d(highestVertex.getX(), highestVertex.getY(), highestZ));
+      newTranslation.add(highestVertex);
 
       transformToReturn.setTranslation(newTranslation);
    }
 
    private static RigidBodyTransform createTransformToMatchSurfaceNormalPreserveX(Vector3d surfaceNormal)
    {
-      Vector3d xAxis = new Vector3d(1.0, 0.0, 0.0);
-      Vector3d yAxis = new Vector3d();
+      Vector3d xAxis = new Vector3d();
+      Vector3d yAxis = new Vector3d(0.0, 1.0, 0.0);
 
-      yAxis.cross(surfaceNormal, xAxis);
-      yAxis.normalize();
       xAxis.cross(yAxis, surfaceNormal);
+      xAxis.normalize();
+      yAxis.cross(surfaceNormal, xAxis);
 
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
       transformToReturn.setM00(xAxis.getX());
