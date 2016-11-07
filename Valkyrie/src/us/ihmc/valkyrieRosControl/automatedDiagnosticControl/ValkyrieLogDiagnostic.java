@@ -2,11 +2,11 @@ package us.ihmc.valkyrieRosControl.automatedDiagnosticControl;
 
 import java.io.IOException;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
-import us.ihmc.darpaRoboticsChallenge.logProcessor.DRCLogProcessor;
-import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorHelper;
-import us.ihmc.darpaRoboticsChallenge.logProcessor.diagnostic.DiagnosticAnalysisProcessor;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.avatar.logProcessor.DRCLogProcessor;
+import us.ihmc.avatar.logProcessor.LogDataProcessorHelper;
+import us.ihmc.avatar.logProcessor.diagnostic.DiagnosticAnalysisProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieLogDiagnostic extends DRCLogProcessor

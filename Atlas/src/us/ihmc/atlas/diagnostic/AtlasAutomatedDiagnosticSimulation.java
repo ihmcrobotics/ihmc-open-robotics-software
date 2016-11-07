@@ -8,9 +8,9 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.diagnostics.AutomatedDiagnosticConfiguration;
-import us.ihmc.darpaRoboticsChallenge.diagnostics.AutomatedDiagnosticSimulationFactory;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.avatar.diagnostics.AutomatedDiagnosticConfiguration;
+import us.ihmc.avatar.diagnostics.AutomatedDiagnosticSimulationFactory;
+import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;

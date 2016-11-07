@@ -2,8 +2,8 @@ package us.ihmc.atlas.controllerAPI;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.controllerAPI.EndToEndArmTrajectoryMessageTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.controllerAPI.EndToEndArmTrajectoryMessageTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectoryMessageTest

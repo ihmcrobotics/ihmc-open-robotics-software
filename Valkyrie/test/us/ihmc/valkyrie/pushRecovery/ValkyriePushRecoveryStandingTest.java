@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.pushRecovery;
 
-import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryStandingTest;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.DRCPushRecoveryStandingTest;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;

@@ -107,6 +107,14 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       robotPosition.changeFrame(stanceFootFrame);
       FramePose2d footstepPose = new FramePose2d(stanceFootFrame);
       footstepPose.setY(2.0*robotPosition.getY());
+
+      if(lastStepSide.equals(RobotSide.LEFT) && footstepPose.getY() > 0)
+         throw new RuntimeException("Left foot can not be placed on right side of right foot");
+
+
+      if (lastStepSide.equals(RobotSide.RIGHT) && footstepPose.getY() < 0)
+         throw new RuntimeException("Right foot can not be placed on left side of left foot");
+
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       footstepList.add(footstepPose);
@@ -133,6 +141,14 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
          FramePose2d nextFootStep = new FramePose2d(stanceFootFrame);
          nextFootStep.setX(stepLength);
          nextFootStep.setY(startingPoint.getY() + lastStepSide.negateIfLeftSide(STRAIGHT_STEP_WIDTH / 2.0));
+
+
+         if(lastStepSide.equals(RobotSide.LEFT) && nextFootStep.getY() > 0)
+            throw new RuntimeException("Left foot can not be placed on right side of right foot");
+
+
+         if (lastStepSide.equals(RobotSide.RIGHT) && nextFootStep.getY() < 0)
+            throw new RuntimeException("Right foot can not be placed on left side of left foot");
 
          nextFootStep.changeFrame(ReferenceFrame.getWorldFrame());
          footstepList.add(nextFootStep);
@@ -207,11 +223,21 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
 
          FramePose2d nextFootstep = new FramePose2d(turningFrame);
          nextFootstep.setY(lastStepSide.negateIfLeftSide(turningStepWidth / 2.0));
+
+         if(lastStepSide.equals(RobotSide.LEFT) && nextFootstep.getY() > 0)
+            throw new RuntimeException("Left foot can not be placed on right side of right foot");
+
+
+         if (lastStepSide.equals(RobotSide.RIGHT) && nextFootstep.getY() < 0)
+            throw new RuntimeException("Right foot can not be placed on left side of left foot");
+
          nextFootstep.changeFrame(ReferenceFrame.getWorldFrame());
+
 
          footstepList.add(nextFootstep);
          stanceFootFrame.setPoseAndUpdate(nextFootstep);
          lastStepSide = lastStepSide.getOppositeSide();
+
       }
       pointToTurnAbout.setIncludingFrame(pointToTurnAboutInWorld);
       pointToTurnAbout.changeFrame(stanceFootFrame);

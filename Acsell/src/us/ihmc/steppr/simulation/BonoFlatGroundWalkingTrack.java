@@ -3,11 +3,11 @@ package us.ihmc.steppr.simulation;
 import java.io.IOException;
 
 import net.java.games.input.Component;
+import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
+import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;

@@ -2,7 +2,7 @@ package us.ihmc.atlas.initialSetup;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 

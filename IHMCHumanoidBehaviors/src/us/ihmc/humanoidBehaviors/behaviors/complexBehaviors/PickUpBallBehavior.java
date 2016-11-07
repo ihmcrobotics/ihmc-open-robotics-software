@@ -27,7 +27,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDet
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.WaitForUserValidationBehavior;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
@@ -85,7 +85,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
    private HumanoidReferenceFrames referenceFrames;
 
-   public PickUpBallBehavior(BehaviorCommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
+   public PickUpBallBehavior(CommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);
@@ -280,7 +280,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       HeadTrajectoryMessage message = new HeadTrajectoryMessage(1, desiredHeadQuat);
 
-      HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(communicationBridge, yoTime);
 
       headTrajectoryBehavior.initialize();
       headTrajectoryBehavior.setInput(message);
@@ -303,7 +303,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       HeadTrajectoryMessage messageHeadUp = new HeadTrajectoryMessage(1, desiredHeadUpQuat);
 
-      HeadTrajectoryBehavior headTrajectoryUpBehavior = new HeadTrajectoryBehavior(outgoingCommunicationBridge, yoTime);
+      HeadTrajectoryBehavior headTrajectoryUpBehavior = new HeadTrajectoryBehavior(communicationBridge, yoTime);
 
       headTrajectoryUpBehavior.initialize();
       headTrajectoryUpBehavior.setInput(messageHeadUp);
@@ -693,14 +693,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       return pipeLine.isDone();
    }
 
-   @Override
-   protected void passReceivedObjectToChildBehaviors(Object object)
-   {
-      for (AbstractBehavior behavior : behaviors)
-      {
-         behavior.consumeObjectFromNetwork(object);
-      }
-   }
+  
 
 
 }
