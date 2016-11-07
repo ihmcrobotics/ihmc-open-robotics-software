@@ -3,8 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.examples;
 import javax.vecmath.Point3f;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.humanoidBehaviors.communication.CoactiveBehaviorsNetworkManager;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 
@@ -12,16 +11,16 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
 {
 
    private int scanNumber = 0;
-   private int NUMBER_OF_SCANS = 10;
+   private int NUMBER_OF_SCANS = 100;
 
    protected final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
-   CoactiveBehaviorsNetworkManager coactiveBehaviorsNetworkManager;
+   CommunicationBridge coactiveBehaviorsNetworkManager;
 
-   public GetLidarScanExampleBehavior(BehaviorCommunicationBridge communicationBridge)
+   public GetLidarScanExampleBehavior(CommunicationBridge communicationBridge)
    {
       super(communicationBridge);
-      coactiveBehaviorsNetworkManager = new CoactiveBehaviorsNetworkManager(communicationBridge);
+      coactiveBehaviorsNetworkManager = communicationBridge;
       this.attachNetworkListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
    }
 
@@ -38,7 +37,7 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    {
       scanNumber++;
 
-      //example of forwarding an object to the UI
+      System.out.println("got scan of size "+points.length);
       coactiveBehaviorsNetworkManager.sendToUI("PointCloudRecieved", scanNumber);
    }
 

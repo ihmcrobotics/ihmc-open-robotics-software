@@ -23,7 +23,7 @@ public class TurnWalkTurnPlannerTest
 {
    private final Random random = new Random(727434726273L);
    private boolean succes = true;
-   private boolean showSimulation = false;
+   private boolean showSimulation = true;
 
    private double stepWidth = 0.3;
 
