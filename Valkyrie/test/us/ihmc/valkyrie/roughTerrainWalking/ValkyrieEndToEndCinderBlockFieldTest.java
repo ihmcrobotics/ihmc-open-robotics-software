@@ -20,6 +20,12 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    }
 
    @Override
+   public double getPelvisOffsetHeight()
+   {
+      return 0.09;
+   }
+
+   @Override
    public String getSimpleRobotName()
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
