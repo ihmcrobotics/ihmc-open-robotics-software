@@ -67,7 +67,6 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
    private static final double updateDT = 1.0e-3;
    private static final int numberOfTicksToSendSolution = 10;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
@@ -103,8 +102,9 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
    private final DoubleYoVariable chestWeight = new DoubleYoVariable("chestWeight", registry);
    private final DoubleYoVariable pelvisOrientationWeight = new DoubleYoVariable("pelvisOrientationWeight", registry);
 
-   private  final CommandInputManager commandInputManager;
+   private final CommandInputManager commandInputManager;
    private final DoubleYoVariable solutionQuality = new DoubleYoVariable("solutionQuality", registry);
+   private int tickCount = 0;
 
    private final EnumMap<LegJointName, DoubleYoVariable> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
 
@@ -113,7 +113,7 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModel desiredFullRobotModel,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      super(statusOutputManager, numberOfTicksToSendSolution);
+      super(statusOutputManager, parentRegistry);
       this.commandInputManager = commandInputManager;
 
       this.desiredFullRobotModel = desiredFullRobotModel;
@@ -165,12 +165,10 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
       legJointLimitReductionFactors.put(LegJointName.KNEE_PITCH, kneeReductionFactor);
       legJointLimitReductionFactors.put(LegJointName.ANKLE_PITCH, ankleReductionFactor);
       legJointLimitReductionFactors.put(LegJointName.ANKLE_ROLL, ankleReductionFactor);
-
-      parentRegistry.addChild(registry);
    }
 
    @Override
-   protected KinematicsToolboxOutputStatus updateInternal()
+   protected void updateInternal()
    {
       updateTools();
 
@@ -185,7 +183,12 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
       inverseKinematicsSolution.setDesiredJointState(desiredRootJoint, oneDoFJoints);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
 
-      return inverseKinematicsSolution;
+      tickCount++;
+      if (tickCount == numberOfTicksToSendSolution)
+      {
+         reportMessage(inverseKinematicsSolution);
+         tickCount = 0;
+      }
    }
 
    @Override
@@ -520,5 +523,12 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
    public FullHumanoidRobotModel getDesiredFullRobotModel()
    {
       return desiredFullRobotModel;
+   }
+
+   @Override
+   protected boolean isDone()
+   {
+      // This toolbox should run until if falls asleep.
+      return false;
    }
 }

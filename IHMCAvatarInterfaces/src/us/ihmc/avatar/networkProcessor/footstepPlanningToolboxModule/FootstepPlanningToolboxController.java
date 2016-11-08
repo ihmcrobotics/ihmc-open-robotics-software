@@ -10,6 +10,8 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -17,24 +19,26 @@ public class FootstepPlanningToolboxController extends ToolboxController<Footste
 {
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<FootstepPlanningRequestPacket>(null);
    private final FootstepPlanningToolboxOutputStatus result = new FootstepPlanningToolboxOutputStatus();
+   private final BooleanYoVariable isDone = new BooleanYoVariable("isDone", registry);
 
-   public FootstepPlanningToolboxController(StatusMessageOutputManager statusOutputManager)
+   public FootstepPlanningToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
-      super(statusOutputManager);
+      super(statusOutputManager, parentRegistry);
    }
 
    @Override
-   protected FootstepPlanningToolboxOutputStatus updateInternal()
+   protected void updateInternal()
    {
       // TODO
 
-      requestInitialize(); // make updateInternal only called if a planning request is coming in
-      return result;
+      reportMessage(result);
+      isDone.set(true);
    }
 
    @Override
    protected boolean initialize()
    {
+      isDone.set(false);
       FootstepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
          return false;
@@ -64,6 +68,12 @@ public class FootstepPlanningToolboxController extends ToolboxController<Footste
             latestRequestReference.set(packet);
          }
       };
+   }
+
+   @Override
+   protected boolean isDone()
+   {
+      return isDone.getBooleanValue();
    }
 
 }

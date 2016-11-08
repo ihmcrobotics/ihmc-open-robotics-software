@@ -3,25 +3,20 @@ package us.ihmc.avatar.networkProcessor.modules;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public abstract class ToolboxController<T extends StatusPacket<T>>
 {
+   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final StatusMessageOutputManager statusOutputManager;
-   private final int numberOfTicksToSendSolution;
 
    private boolean initialize = true;
    private PacketDestination packetDestination = null;
-   private int tickCount = 0;
 
-   public ToolboxController(StatusMessageOutputManager statusOutputManager)
-   {
-      this(statusOutputManager, 1);
-   }
-
-   public ToolboxController(StatusMessageOutputManager statusOutputManager, int numberOfTicksToSendSolution)
+   public ToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
-      this.numberOfTicksToSendSolution = numberOfTicksToSendSolution;
+      parentRegistry.addChild(registry);
    }
 
    public void requestInitialize()
@@ -43,17 +38,19 @@ public abstract class ToolboxController<T extends StatusPacket<T>>
          initialize = false;
       }
 
-      T result = updateInternal();
-
-      tickCount++;
-      if (packetDestination != null && tickCount == numberOfTicksToSendSolution)
-      {
-         tickCount = 0;
-         result.setDestination(packetDestination);
-         statusOutputManager.reportStatusMessage(result);
-      }
+      updateInternal();
    }
 
-   abstract protected T updateInternal();
+   protected void reportMessage(T statusMessage)
+   {
+      if (packetDestination == null)
+         return;
+
+      statusMessage.setDestination(packetDestination);
+      statusOutputManager.reportStatusMessage(statusMessage);
+   }
+
+   abstract protected void updateInternal();
    abstract protected boolean initialize();
+   abstract protected boolean isDone();
 }

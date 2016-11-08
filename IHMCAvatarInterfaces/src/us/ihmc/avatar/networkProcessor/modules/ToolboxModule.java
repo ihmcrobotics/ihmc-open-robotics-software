@@ -45,8 +45,7 @@ public abstract class ToolboxModule
 {
    protected static final boolean DEBUG = false;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
-   protected static final int IK_UPDATE_PERIOD_MILLISECONDS = 1;
-   protected static final int THIS_DESTINATION = PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal();
+   protected static final int UPDATE_PERIOD_MILLISECONDS = 1;
 
    protected final String name = getClass().getSimpleName();
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -59,6 +58,7 @@ public abstract class ToolboxModule
    protected final CommandInputManager commandInputManager;
    protected final StatusMessageOutputManager statusOutputManager;
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
+   private final int thisDesitination;
 
    protected final EnumYoVariable<PacketDestination> activeMessageSource = new EnumYoVariable<>("activeMessageSource", registry, PacketDestination.class, true);
 
@@ -73,10 +73,11 @@ public abstract class ToolboxModule
    protected final AtomicBoolean receivedInput = new AtomicBoolean();
 
    public ToolboxModule(FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider,
-         boolean startYoVariableServer) throws IOException
+         boolean startYoVariableServer, PacketDestination toolboxDestination, NetworkPorts toolboxPort) throws IOException
    {
+      this.thisDesitination = toolboxDestination.ordinal();
       this.desiredFullRobotModel = desiredFullRobotModel;
-      packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+      packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(toolboxPort, new IHMCCommunicationKryoNetClassList());
       commandInputManager = new CommandInputManager(createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
       controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, null, packetCommunicator);
@@ -86,7 +87,7 @@ public abstract class ToolboxModule
          executorService = Executors.newScheduledThreadPool(2, threadFactory);
 
          PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("WholeBodyIKScheduler");
-         yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.KINEMATICS_TOOLBOX, YO_VARIABLE_SERVER_DT);
+         yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.TOOLBOX, YO_VARIABLE_SERVER_DT);
          yoVariableServer.setMainRegistry(registry, desiredFullRobotModel, yoGraphicsListRegistry);
          new Thread(new Runnable()
          {
@@ -97,7 +98,7 @@ public abstract class ToolboxModule
             }
          }).start();
 
-         yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(), 0, IK_UPDATE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+         yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(), 0, UPDATE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       }
       else
       {
@@ -133,7 +134,7 @@ public abstract class ToolboxModule
             if (Thread.interrupted())
                return;
 
-            serverTime += IK_UPDATE_PERIOD_MILLISECONDS;
+            serverTime += UPDATE_PERIOD_MILLISECONDS;
             yoVariableServer.update(TimeTools.secondsToNanoSeconds(serverTime));
          }
       };
@@ -146,7 +147,7 @@ public abstract class ToolboxModule
          @Override
          public boolean isMessageValid(Packet<?> message)
          {
-            if (message.getDestination() != THIS_DESTINATION)
+            if (message.getDestination() != thisDesitination)
                return false;
 
             if (message instanceof TrackablePacket)
@@ -219,7 +220,7 @@ public abstract class ToolboxModule
          return;
       }
       createToolboxRunnable();
-      toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, IK_UPDATE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+      toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, UPDATE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       reinitialize();
       activeMessageSource.set(packetDestination);
       getToolboxController().setPacketDestination(packetDestination);
@@ -233,7 +234,7 @@ public abstract class ToolboxModule
 
    public void sleep()
    {
-      destroyInverseKinematicsRunnable();
+      destroyToolboxRunnable();
       activeMessageSource.set(null);
 
       if (toolboxTaskScheduled == null)
@@ -260,7 +261,7 @@ public abstract class ToolboxModule
       if (toolboxRunnable != null)
       {
          if (DEBUG)
-            PrintTools.error(this, "inverseKinematicsRunnable is not null.");
+            PrintTools.error(this, "toolboxRunnable is not null.");
          return;
       }
 
@@ -276,11 +277,13 @@ public abstract class ToolboxModule
             {
                getToolboxController().update();
                controllerNetworkSubscriber.run();
-               yoTime.add(TimeTools.milliSecondsToSeconds(IK_UPDATE_PERIOD_MILLISECONDS));
+               yoTime.add(TimeTools.milliSecondsToSeconds(UPDATE_PERIOD_MILLISECONDS));
 
                if (receivedInput.getAndSet(false))
                   timeOfLastInput.set(yoTime.getDoubleValue());
                if (yoTime.getDoubleValue() - timeOfLastInput.getDoubleValue() >= timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
+                  sleep();
+               else if (getToolboxController().isDone())
                   sleep();
             }
             catch (Exception e)
@@ -293,7 +296,7 @@ public abstract class ToolboxModule
       };
    }
 
-   private void destroyInverseKinematicsRunnable()
+   private void destroyToolboxRunnable()
    {
       toolboxRunnable = null;
    }
