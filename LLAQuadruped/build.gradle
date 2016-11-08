@@ -55,7 +55,6 @@ dependencies {
 //   compile ihmc.getProjectDependency(":IHMCRobotDescription")
    compile ihmc.getProjectDependency(":IHMCRobotModels")
     compile ihmc.getProjectDependency(":IHMCSimulationToolkit")
-    compile ihmc.getProjectDependency(":LLAQuadrupedController")
    
 
    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
