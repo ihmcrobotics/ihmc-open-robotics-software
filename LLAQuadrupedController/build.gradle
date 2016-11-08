@@ -11,6 +11,11 @@ buildscript {
 
 apply plugin: "us.ihmc.gradle.ihmc-build"
 
+if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
+    evaluationDependsOn(':IHMCOpenRoboticsSoftware')
+    evaluationDependsOn(ihmc.getProjectDependencyGradlePath("IHMCQuadrupedRobotics"))
+}
+
 sourceCompatibility = 1.7
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
@@ -18,7 +23,6 @@ project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
 project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
-
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
@@ -31,15 +35,27 @@ repositories {
     }
 }
 
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
+def strings = ['ihmc', 'robotics']
+ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
-	compile "javax.vecmath:vecmath:1.5.2"
-	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-	compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
-	
-	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
-    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+dependencies {
+   testCompile group: 'junit', name: 'junit', version: '4.11'
+
+   compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+
+   compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
+   compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+   compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
+   compile ihmc.getProjectDependency(":IHMCCommunication")
+   compile ihmc.getProjectDependency(":SDFLoader")
+   compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
+   compile ihmc.getProjectDependency(":SensorProcessing")
+   compile ihmc.getProjectDependency(":IHMCRobotDescription")
+   compile ihmc.getProjectDependency(":IHMCRobotModels")
+   
+   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+   
 }
 
 jar {
@@ -52,7 +68,7 @@ jar {
 
                 "Bundle-Name": project.name,
                 "Bundle-Version": project.version,
-                "Bundle-License": "IHMC Proprietary",
+                "Bundle-License": "${project.ext.licenseURL}",
                 "Bundle-Vendor": "IHMC")
     }
 }
