@@ -14,7 +14,7 @@ public enum LogSettings
    STEPPR_IHMC(true, "239.255.25.3"),
    SIMULATION(false, "239.255.25.4"),
    BEHAVIOR(false),
-   KINEMATICS_TOOLBOX(false),
+   TOOLBOX(false),
    EXO_X1A(false),
    EXO_HOPPER(false),
    ETHERCAT(false),
