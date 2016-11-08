@@ -3,6 +3,9 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
@@ -10,9 +13,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
 
 public class TwoSegmentFootstepGenerator implements FootstepGenerator
 {
@@ -66,7 +66,7 @@ public class TwoSegmentFootstepGenerator implements FootstepGenerator
    public Collection<Footstep> generateDesiredFootstepList()
    {
       ArrayList<Footstep> footstepsFirstSegment = new ArrayList<Footstep>(footstepGenerator.generateDesiredFootstepList());
-      
+
       initializeStanceFeetOfSecondSegment(footstepsFirstSegment);
       if (footstepGenerator2.hasDisplacement())
       {
@@ -107,7 +107,7 @@ public class TwoSegmentFootstepGenerator implements FootstepGenerator
       if (!secondSegmentManuallySpecifiesStart)
          footstepGenerator2.setStanceStartPreference(lastStepSide);
       footstepGenerator2.setPriorFootposes(midStanceFeet);
-      
+
       footstepGenerator2.initialize();
    }
 
@@ -133,21 +133,18 @@ public class TwoSegmentFootstepGenerator implements FootstepGenerator
       return firstSetOfSteps;
    }
 
-   @Override
    public void setPoseFinderParams(double footstepFittingBufferSize, double boundingBoxForFootstepHeightFindingSideLength)
    {
       footstepGenerator.setPoseFinderParams(footstepFittingBufferSize, boundingBoxForFootstepHeightFindingSideLength);
       footstepGenerator2.setPoseFinderParams(footstepFittingBufferSize, boundingBoxForFootstepHeightFindingSideLength);
    }
 
-   @Override
    public void setHeightMap(HeightMapWithPoints heightMap, SideDependentList<? extends ContactablePlaneBody> contactableFeet)
    {
       footstepGenerator.setHeightMap(heightMap, contactableFeet);
       footstepGenerator2.setHeightMap(heightMap, contactableFeet);
    }
-   
-   @Override
+
    public boolean hasDisplacement()
    {
       return footstepGenerator.hasDisplacement() || footstepGenerator2.hasDisplacement();
