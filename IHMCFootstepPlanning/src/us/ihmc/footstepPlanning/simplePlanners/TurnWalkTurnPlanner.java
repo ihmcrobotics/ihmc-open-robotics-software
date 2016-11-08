@@ -73,12 +73,11 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       ArrayList<FramePose2d> footstepList = new ArrayList<>();
 
       // turn
-         Point2d robotOffsetFromStanceFoot = new Point2d(0.0, lastStepSide.negateIfLeftSide(turningStepWidth / 2.0));
-         FramePose2d robotPose = new FramePose2d(stanceFootFrame, robotOffsetFromStanceFoot, 0.0);
-         FramePose2d robotPoseInWorld = new FramePose2d(robotPose);
-         robotPoseInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-         addTurnInPlaceToFacePoint(footstepList, robotPoseInWorld, goalPoint);
-
+      Point2d robotOffsetFromStanceFoot = new Point2d(0.0, lastStepSide.negateIfLeftSide(turningStepWidth / 2.0));
+      FramePose2d robotPose = new FramePose2d(stanceFootFrame, robotOffsetFromStanceFoot, 0.0);
+      FramePose2d robotPoseInWorld = new FramePose2d(robotPose);
+      robotPoseInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+      addTurnInPlaceToFacePoint(footstepList, robotPoseInWorld, goalPoint);
 
       // walk
       FramePoint2d robotPosition = new FramePoint2d();
@@ -163,7 +162,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
 
    private void addTurnInPlaceToFacePoint(ArrayList<FramePose2d> footstepList, FramePose2d robotPose, FramePoint2d goalPoint)
    {
-      double turningAngle = AngleTools.calculateHeading(robotPose, goalPoint, 0.0, 0.0);
+      double turningAngle = AngleTools.calculateHeading(robotPose, goalPoint, -robotPose.getYaw(), 0.0);
       FramePoint2d pointToTurnAbout = new FramePoint2d();
       robotPose.getPosition(pointToTurnAbout);
       addTurnInPlace(footstepList, turningAngle, pointToTurnAbout);

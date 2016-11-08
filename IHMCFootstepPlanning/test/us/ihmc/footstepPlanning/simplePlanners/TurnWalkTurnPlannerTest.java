@@ -25,7 +25,7 @@ public class TurnWalkTurnPlannerTest
 {
    private final Random random = new Random(727434726273L);
    private boolean succes = true;
-   private boolean showSimulation = false;
+   private boolean showSimulation = true;
 
    private double stepWidth = 0.3;
 
@@ -43,6 +43,26 @@ public class TurnWalkTurnPlannerTest
       double xInitialStanceFoot = 0.0;
       double yInitialStanceFoot = 0.0;
       double yawInitial = 0.0;
+      Point2d initialStanceFootPosition = new Point2d(xInitialStanceFoot, yInitialStanceFoot);
+      FramePose2d initialStanceFootPose = new FramePose2d(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
+      RobotSide initialStanceFootSide = RobotSide.LEFT;
+
+      assertTrue(isGoalWithinFeet(goalPose, initialStanceFootPose, initialStanceFootSide));
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
+   public void testStraightLineWithInitialTurn()
+   {
+      double xGoal = 5.0;
+      double yGoal = -stepWidth/2.0;
+      double yawGoal = Math.toRadians(20.0);
+      Point2d goalPosition = new Point2d(xGoal, yGoal);
+      FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
+
+      double xInitialStanceFoot = 0.0;
+      double yInitialStanceFoot = 0.0;
+      double yawInitial = Math.toRadians(20.0);
       Point2d initialStanceFootPosition = new Point2d(xInitialStanceFoot, yInitialStanceFoot);
       FramePose2d initialStanceFootPose = new FramePose2d(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
       RobotSide initialStanceFootSide = RobotSide.LEFT;
