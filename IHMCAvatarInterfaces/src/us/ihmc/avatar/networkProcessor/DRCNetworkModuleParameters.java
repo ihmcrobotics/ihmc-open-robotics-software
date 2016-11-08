@@ -28,12 +28,14 @@ public class DRCNetworkModuleParameters
    private boolean useMultisenseManualTestModule;
    private boolean useDrillDetectionModule;
    private boolean useKinematicsToolbox = true;
+   private boolean useFootstepPlanningToolbox = true;
    private boolean useKinematicsToolboxVisualizer = false;
+   private boolean useFootstepPlanningToolboxVisualizer = false;
    private boolean useTextToSpeechModule = false;
    private boolean useRobotEnvironmentAwarenessModule = false;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
-   
+
    private HashMap<NetworkPorts, PacketDestination> extraIntraProcessCommunicatorPorts = new HashMap<NetworkPorts, PacketDestination>();
    private URI rosUri;
 
@@ -64,9 +66,19 @@ public class DRCNetworkModuleParameters
       return useKinematicsToolbox;
    }
 
+   public boolean isFootstepPlanningToolboxEnabled()
+   {
+      return useFootstepPlanningToolbox;
+   }
+
    public boolean isKinematicsToolboxVisualizerEnabled()
    {
       return useKinematicsToolboxVisualizer;
+   }
+
+   public boolean isFootstepPlanningToolboxVisualizerEnabled()
+   {
+      return useFootstepPlanningToolboxVisualizer;
    }
 
    public boolean isHandModuleEnabled()
@@ -83,7 +95,7 @@ public class DRCNetworkModuleParameters
    {
       return useUiModule;
    }
-   
+
    public boolean isMultisenseManualTestModuleEnabled()
    {
       return useMultisenseManualTestModule;
@@ -98,7 +110,7 @@ public class DRCNetworkModuleParameters
    {
       useMultisenseManualTestModule = b;
    }
-   
+
    public void enableZeroPoseRobotConfigurationPublisherModule(boolean b)
    {
       useZeroPoseRobotConfigurationPublisher = b;
@@ -133,9 +145,19 @@ public class DRCNetworkModuleParameters
       this.useKinematicsToolbox = useKinematicsToolbox;
    }
 
+   public void enableFootstepPlanningToolbox(boolean useFootstepPlanningToolbox)
+   {
+      this.useFootstepPlanningToolbox = useFootstepPlanningToolbox;
+   }
+
    public void enableKinematicsToolboxVisualizer(boolean useKinematicsToolboxVisualizer)
    {
       this.useKinematicsToolboxVisualizer = useKinematicsToolboxVisualizer;
+   }
+
+   public void enableFootstepPlanningToolboxVisualizer(boolean useFootstepPlanningToolboxVisualizer)
+   {
+      this.useFootstepPlanningToolboxVisualizer = useFootstepPlanningToolboxVisualizer;
    }
 
    public void enableHandModule(boolean b)
@@ -168,7 +190,7 @@ public class DRCNetworkModuleParameters
             e.printStackTrace();
          }
    }
-   
+
    public boolean isRosModuleEnabled()
    {
       return useRosModule;
@@ -183,7 +205,7 @@ public class DRCNetworkModuleParameters
          enableBehaviorModule(true);
       }
    }
-   
+
    public boolean isAutomaticDiagnosticEnabled()
    {
       return runAutomaticDiagnostic;
@@ -197,32 +219,32 @@ public class DRCNetworkModuleParameters
          this.useController = true;
       }
    }
-   
+
    public boolean isLocalControllerCommunicatorEnabled()
    {
       return useLocalControllerCommunicator;
    }
-   
+
    public boolean isZeroPoseRobotConfigurationPublisherEnabled()
    {
       return useZeroPoseRobotConfigurationPublisher;
    }
-   
+
    public void enableROSAPICommunicator(boolean useROSAPICommunicator)
    {
       this.useROSAPICommunicator = useROSAPICommunicator;
    }
-   
+
    public boolean isROSAPICommunicatorEnabled()
    {
       return useROSAPICommunicator;
    }
-   
+
    public void enableControllerCommunicator(boolean useControllerCommunicator)
    {
       this.useController = useControllerCommunicator;
    }
-   
+
    public boolean isControllerCommunicatorEnabled()
    {
       return useController;
@@ -232,7 +254,7 @@ public class DRCNetworkModuleParameters
    {
       this.useNetworkProcessor = useNetworkProcessor;
    }
-   
+
    public boolean isNetworkProcessorEnabled()
    {
       return useNetworkProcessor;
@@ -242,7 +264,7 @@ public class DRCNetworkModuleParameters
    {
       this.useMocapModule = enableMocapModule;
    }
-   
+
    public boolean isMocapModuleEnabled()
    {
       return this.useMocapModule;
@@ -277,12 +299,12 @@ public class DRCNetworkModuleParameters
    {
       return rosUri;
    }
-   
+
    public double getTimeToWaitBeforeStartingDiagnostics()
    {
       return timeToWaitBeforeStartingDiagnostics;
    }
-   
+
    public void setSimulatedSensorCommunicator(LocalObjectCommunicator simulatedSensorCommunicator)
    {
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
@@ -295,7 +317,7 @@ public class DRCNetworkModuleParameters
    {
       return simulatedSensorCommunicator;
    }
-   
+
    @Override
    public String toString()
    {
@@ -310,7 +332,7 @@ public class DRCNetworkModuleParameters
    {
       extraIntraProcessCommunicatorPorts.put(networkPort, communicatorId);
    }
-   
+
    public HashMap<NetworkPorts, PacketDestination> getRobotSpecificModuleCommunicatorPorts()
    {
       return extraIntraProcessCommunicatorPorts;

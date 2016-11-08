@@ -18,12 +18,12 @@ import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.KinematicsToolboxStateMessage;
-import us.ihmc.communication.packets.KinematicsToolboxStateMessage.KinematicsToolboxState;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.communication.packets.ToolboxStateMessage;
+import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
@@ -141,6 +141,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket.RequestType;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
@@ -171,7 +173,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
 public class IHMCCommunicationKryoNetClassList extends NetClassList
-{   
+{
    public IHMCCommunicationKryoNetClassList()
    {
       registerPacketClass(Packet.class);
@@ -291,10 +293,12 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Spigot pose
       registerPacketClass(SpigotPosePacket.class);
 
-      // Kinematics toolbox module
+      // Toolbox modules
+      registerPacketClass(ToolboxStateMessage.class);
+      registerPacketField(ToolboxState.class);
       registerPacketClass(KinematicsToolboxOutputStatus.class);
-      registerPacketClass(KinematicsToolboxStateMessage.class);
-      registerPacketField(KinematicsToolboxState.class);
+      registerPacketClass(FootstepPlanningToolboxOutputStatus.class);
+      registerPacketClass(FootstepPlanningRequestPacket.class);
 
       // Joint data
       registerPacketClass(RobotConfigurationData.class);
@@ -483,6 +487,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(TextToSpeechPacket.class);
       registerPacketField(VideoSource.class);
 
-      
+
    }
 }
