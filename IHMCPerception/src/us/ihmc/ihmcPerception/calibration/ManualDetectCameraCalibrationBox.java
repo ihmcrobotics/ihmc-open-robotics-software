@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing.calibration;
+package us.ihmc.ihmcPerception.calibration;
 
 import java.awt.Color;
 import java.awt.Dimension;
