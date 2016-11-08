@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector2f;
@@ -25,6 +26,7 @@ import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -218,6 +220,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(SteeringWheelInformationPacket.class);
       registerPacketField(RobotSide.class);
       registerPacketField(Point3d.class);
+      registerPacketField(Point3f.class);
       registerPacketField(Vector3d.class);
       registerPacketField(Vector2f.class);
       registerPacketClass(DesiredSteeringAnglePacket.class);
@@ -299,6 +302,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(KinematicsToolboxOutputStatus.class);
       registerPacketClass(FootstepPlanningToolboxOutputStatus.class);
       registerPacketClass(FootstepPlanningRequestPacket.class);
+      registerPacketClass(FootstepPlanningResult.class);
 
       // Joint data
       registerPacketClass(RobotConfigurationData.class);
