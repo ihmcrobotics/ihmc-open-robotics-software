@@ -1,21 +1,15 @@
 package us.ihmc.sensorProcessing.pointClouds;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintStream;
-
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.thoughtworks.xstream.XStream;
-
-import georegression.geometry.RotationMatrixGenerator;
+import georegression.geometry.ConvertRotation3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.so.Quaternion_F64;
+
+import java.io.*;
 
 /**
  * @author Peter Abeles
@@ -139,7 +133,7 @@ public class GeometryOps {
 
       Quaternion_F64 quatGR = new Quaternion_F64();
 
-      RotationMatrixGenerator.matrixToQuaternion(input.getR(),quatGR);
+      ConvertRotation3D_F64.matrixToQuaternion(input.getR(), quatGR);
 
       Quaternion quatJME = new Quaternion();
       quatJME.set((float)quatGR.x,(float)quatGR.y,(float)quatGR.z,(float)quatGR.w);
@@ -164,7 +158,7 @@ public class GeometryOps {
       quatGR.z = quatJME.getZ();
       quatGR.w = quatJME.getW();
 
-      RotationMatrixGenerator.quaternionToMatrix(quatGR, output.getR());
+      ConvertRotation3D_F64.quaternionToMatrix(quatGR, output.getR());
       output.getT().set(tranJME.x,tranJME.y,tranJME.z);
 
       try {
