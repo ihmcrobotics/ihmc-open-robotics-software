@@ -21,6 +21,12 @@ public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldT
    }
 
    @Override
+   public double getPelvisOffsetHeight()
+   {
+      return 0.08;
+   }
+
+   @Override
    public String getSimpleRobotName()
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);

@@ -83,7 +83,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       FramePoint pelvisPosition = new FramePoint(fullRobotModel.getPelvis().getBodyFixedFrame());
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      pelvisPosition.add(0.0, 0., 0.08);
+      pelvisPosition.add(0.0, 0.0, getPelvisOffsetHeight());
       double desiredHeight = pelvisPosition.getZ();
       simulationTestHelper.send(new PelvisHeightTrajectoryMessage(0.5, desiredHeight));
 
@@ -97,6 +97,8 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       assertTrue(success);
 
    }
+
+   public abstract double getPelvisOffsetHeight();
 
    private static FootstepDataListMessage generateFootstepsForCinderBlockField(List<List<FramePose>> cinderBlockPoses)
    {
