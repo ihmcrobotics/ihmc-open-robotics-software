@@ -9,7 +9,7 @@ public class SkippySimulation
 {
    public static final double DT = 0.0001;
    public static final double controlDT = 0.0001;
-   public static final double TIME = 5.0;//3.5;//8.0;//10.0;//15.0;//25.0;//3.0;//2.5;//60.0;// 
+   public static final double TIME = 30.0;//25.0;//15.0;//10.0;//6.0;//8.0;//3.5;//3.0;//2.5;//60.0;// 
    private static SimulationConstructionSet sim;
 
    public SkippySimulation()
@@ -21,7 +21,7 @@ public class SkippySimulation
 
       sim = new SimulationConstructionSet(skippy);
       sim.setGroundVisible(true);
-      sim.setDT(DT, 10);
+      sim.setDT(DT, 40);
       sim.setSimulateDuration(TIME);
       sim.setCameraPosition(10.0,   0.0, 2.0);
 
