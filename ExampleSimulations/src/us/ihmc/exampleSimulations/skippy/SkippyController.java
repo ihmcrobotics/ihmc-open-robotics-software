@@ -1424,22 +1424,18 @@ public class SkippyController implements RobotController
             /*
              * Torque on hip for keeping track the angle between torso and leg
              */
-            desiredLegToTorsoAngle.set(-0.5075);
-            hipAngleController.setIntegralGain(0.116299896953656563); //);//
-            //            hipAngleController.setDerivativeGain(0.0001); 
+//            desiredLegToTorsoAngle.set(0.5075);
+//            hipAngleController.setIntegralGain(0.116299896953656563); //);//
+            hipAngleController.setProportionalGain(179.53125);
+            hipAngleController.setDerivativeGain(0.00602454); 
+            hipAngleController.setIntegralGain(0.0);
 
             tauHipForAngleTracking.set(hipAngleController.compute(robot.getQ_hip().getDoubleValue(), desiredLegToTorsoAngle.getDoubleValue(),
                                                                   -robot.getQd_hip().getDoubleValue(), 0.0, deltaT));
             /*
-             * Torque on hip for keeping track the angle between torso and leg
-             */
-            
-            
-            /*
              * Apply torque to the joints
              */
-            robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue()
-                  + /* Math.signum(error) **/tauHipForAngleTracking.getDoubleValue());
+            robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue() + tauHipForAngleTracking.getDoubleValue());
             robot.getShoulderJoint().setTau(tauOnShoulderJointAxis.getDoubleValue());
             if (trace)
                writer.println(stateMachine.getCurrentState() + " CMP controller------------------------" + stateMachine.timeInCurrentState());
@@ -1449,7 +1445,8 @@ public class SkippyController implements RobotController
 
       public void doTransitionIntoAction()
       {
-         qd_hip.set(0.6);
+//         qd_hip.set(0.6);
+         desiredLegToTorsoAngle.set(robot.getQ_hip().getDoubleValue());
       }
 
       public void doTransitionOutOfAction()
