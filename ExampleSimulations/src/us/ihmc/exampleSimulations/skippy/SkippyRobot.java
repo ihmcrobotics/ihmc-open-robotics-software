@@ -524,7 +524,7 @@ public class SkippyRobot extends Robot
    public DoubleYoVariable getQd_hip()
    {
       // TODO Auto-generated method stub
-      return hipJoint.getQDDYoVariable();
+      return hipJoint.getQDYoVariable();
    }
 
 }
