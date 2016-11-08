@@ -37,17 +37,24 @@ public class ModifiableMeshDataHolder
 
    public void add(MeshDataHolder meshDataHolder, boolean updateTriangleIndices)
    {
+      Point3f[] otherVertices = meshDataHolder.getVertices();
+      if (otherVertices == null || otherVertices.length < 3)
+         return;
+      int[] otherTriangleIndices = meshDataHolder.getTriangleIndices();
+      if (otherTriangleIndices == null || otherTriangleIndices.length < 3)
+         return;
+
       if (updateTriangleIndices)
       {
          int shift = vertices.size();
-         for (int triangleIndex : meshDataHolder.getTriangleIndices())
+         for (int triangleIndex : otherTriangleIndices)
             triangleIndices.add(triangleIndex + shift);
       }
       else
       {
-         triangleIndices.add(meshDataHolder.getTriangleIndices());
+         triangleIndices.add(otherTriangleIndices);
       }
-      for (Point3f vertex : meshDataHolder.getVertices())
+      for (Point3f vertex : otherVertices)
          vertices.add().set(vertex);
       for (TexCoord2f texturePoint : meshDataHolder.getTexturePoints())
          texturePoints.add().set(texturePoint);
