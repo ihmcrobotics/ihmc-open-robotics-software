@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule.FootstepPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.MultisenseMocapManualCalibrationTestModule;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
@@ -48,6 +49,7 @@ public class DRCNetworkProcessor
          setupMultisenseManualTestModule(robotModel, params);
          setupDrillDetectionModule(params);
          setupKinematicsToolboxModule(robotModel, params);
+         setupFootstepPlanningToolboxModule(robotModel, params);
          addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts());
          addTextToSpeechEngine(params);
          setupRobotEnvironmentAwarenessModule(params);
@@ -77,7 +79,7 @@ public class DRCNetworkProcessor
 
       String methodName = "addTextToSpeechEngine";
       printModuleConnectedDebugStatement(PacketDestination.TEXT_TO_SPEECH, methodName);
-      
+
    }
 
    private void setupZeroPoseRobotConfigurationPublisherModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
@@ -95,7 +97,7 @@ public class DRCNetworkProcessor
          {
             e.printStackTrace();
          }
-      }      
+      }
    }
 
    private void addRobotSpecificModuleCommunicators(HashMap<NetworkPorts, PacketDestination> ports)
@@ -104,7 +106,7 @@ public class DRCNetworkProcessor
       {
          NetworkPorts port = entry.getKey();
          PacketDestination destinationId = entry.getValue();
-         
+
          PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(destinationId, packetCommunicator);
          try
@@ -144,7 +146,7 @@ public class DRCNetworkProcessor
       if (!params.isKinematicsToolboxEnabled())
          return;
 
-      new KinematicsToolboxModule(robotModel, robotModel.getLogModelProvider(), params.isKinematicsToolboxVisualizerEnabled());
+      new KinematicsToolboxModule(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), params.isKinematicsToolboxVisualizerEnabled());
 
       PacketCommunicator kinematicsToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.KINEMATICS_TOOLBOX_MODULE, kinematicsToolboxCommunicator);
@@ -152,6 +154,21 @@ public class DRCNetworkProcessor
 
       String methodName = "setupWholeBodyInverseKinematicsModule";
       printModuleConnectedDebugStatement(PacketDestination.KINEMATICS_TOOLBOX_MODULE, methodName);
+   }
+
+   private void setupFootstepPlanningToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   {
+      if (!params.isFootstepPlanningToolboxEnabled())
+         return;
+
+      new FootstepPlanningToolboxModule(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), params.isFootstepPlanningToolboxVisualizerEnabled());
+
+      PacketCommunicator footstepPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
+      packetRouter.attachPacketCommunicator(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, footstepPlanningToolboxCommunicator);
+      footstepPlanningToolboxCommunicator.connect();
+
+      String methodName = "setupFootstepPlanningModule";
+      printModuleConnectedDebugStatement(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, methodName);
    }
 
    private void setupMultisenseManualTestModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
@@ -170,7 +187,7 @@ public class DRCNetworkProcessor
          {
             e.printStackTrace();
          }
-         
+
          String methodName = "setupMultisenseManualTestModule";
          printModuleConnectedDebugStatement(PacketDestination.MULTISENSE_TEST_MODULE, methodName);
       }
@@ -185,7 +202,7 @@ public class DRCNetworkProcessor
         PacketCommunicator mocapModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, NET_CLASS_LIST);
         packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, mocapModuleCommunicator);
         mocapModuleCommunicator.connect();
-        
+
         String methodName = "setupMocapModule";
         printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);
      }
@@ -202,7 +219,7 @@ public class DRCNetworkProcessor
             PacketDestination destination = robotSide == RobotSide.LEFT ? PacketDestination.LEFT_HAND : PacketDestination.RIGHT_HAND;
             packetRouter.attachPacketCommunicator(destination, handModuleCommunicator);
             handModuleCommunicator.connect();
-            
+
             String methodName = "setupHandModules ";
             printModuleConnectedDebugStatement(destination, methodName);
          }
@@ -224,7 +241,7 @@ public class DRCNetworkProcessor
          {
             new IHMCHumanoidBehaviorManager(robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(), sensorInformation);
          }
-         
+
          PacketCommunicator behaviorModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorModuleCommunicator);
          behaviorModuleCommunicator.connect();
@@ -244,12 +261,12 @@ public class DRCNetworkProcessor
          PacketCommunicator rosModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_MODULE, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.ROS_MODULE, rosModuleCommunicator);
          rosModuleCommunicator.connect();
-         
+
          String methodName = "setupRosModule ";
          printModuleConnectedDebugStatement(PacketDestination.ROS_MODULE, methodName);
       }
    }
-   
+
    private void setupSensorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.isSensorModuleEnabled())
@@ -264,12 +281,12 @@ public class DRCNetworkProcessor
             sensorSuiteManager.initializePhysicalSensors(params.getRosUri());
          }
          sensorSuiteManager.connect();
-         
+
          PacketCommunicator sensorSuiteManagerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.SENSOR_MANAGER, sensorSuiteManagerCommunicator);
          sensorSuiteManagerCommunicator.connect();
-         
-         
+
+
          String methodName = "setupSensorModule ";
          printModuleConnectedDebugStatement(PacketDestination.SENSOR_MANAGER, methodName);
       }
@@ -280,7 +297,7 @@ public class DRCNetworkProcessor
       if (params.isUiModuleEnabled())
       {
          new UiConnectionModule();
-         
+
          PacketCommunicator uiModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.UI, uiModuleCommunicator);
          uiModuleCommunicator.connect();
@@ -311,12 +328,12 @@ public class DRCNetworkProcessor
             PrintTools.info(this, "Connecting to controller using intra process communication");
             controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, NET_CLASS_LIST);
          }
-         else 
+         else
          {
             System.out.println("Connecting to controller using TCP on " + NetworkParameters.getHost(NetworkParameterKeys.robotController));
             controllerPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(NetworkParameters.getHost(NetworkParameterKeys.robotController), NetworkPorts.CONTROLLER_PORT, NET_CLASS_LIST);
          }
-         
+
          packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerPacketCommunicator);
          controllerPacketCommunicator.connect();
 
@@ -351,7 +368,7 @@ public class DRCNetworkProcessor
    {
       return packetRouter;
    }
-   
+
    private void printModuleConnectedDebugStatement(PacketDestination destination, String methodName)
    {
       if (DEBUG)
