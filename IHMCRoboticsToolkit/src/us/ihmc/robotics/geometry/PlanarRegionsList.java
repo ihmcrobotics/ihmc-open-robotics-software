@@ -37,6 +37,8 @@ public class PlanarRegionsList
       for (int i = 0; i < regions.size(); i++)
       {
          PlanarRegion candidateRegion = regions.get(i);
+         if (candidateRegion.isVertical()) continue;
+
          if (candidateRegion.isPolygonIntersecting(convexPolygon))
          {
             if (containers == null)

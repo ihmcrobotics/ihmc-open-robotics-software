@@ -59,8 +59,10 @@ public class PlanarRegion
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
-         if (convexPolygons.get(i).intersectionWith(projectedPolygon, dummyPolygon))
-            return true;
+         ConvexPolygon2d polygonToCheck = convexPolygons.get(i);
+         boolean hasIntersection = polygonToCheck.intersectionWith(projectedPolygon, dummyPolygon);
+         if (hasIntersection)
+            return true; 
       }
       // Did not find any intersection
       return false;
@@ -238,6 +240,16 @@ public class PlanarRegion
    }
 
    /**
+    * Returns true if this PlanarRegion is purely vertical, as far as numerical roundoff is concerned.
+    * Checks z component of surface normal. If absolute value is really small, then returns true.
+    * @return true if vertical. false otherwise.
+    */
+   public boolean isVertical()
+   {
+      return (Math.abs(fromLocalToWorldTransform.getM22()) < 1e-10);
+   }
+
+   /**
     * Retrieves a point that lies in this planar region.
     * This point is also used as the origin of the local coordinate system of this planar region.
     * @param pointToPack used to store the point coordinates.
@@ -274,4 +286,5 @@ public class PlanarRegion
       }
       return true;
    }
+
 }

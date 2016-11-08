@@ -145,6 +145,33 @@ public class PlanarRegionsListPolygonSnapperTest
       doATest(planarRegionsList, xyYawToTest, visualize);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 2.0)
+   @Test(timeout = 30000)
+   public void testBumpyGround()
+   {
+      Random random = new Random(1776L);
+
+      boolean visualize = false;
+      double maxX = 2.0;
+      double maxY = 1.0;
+      double maxZ = 0.2;
+
+      PlanarRegionsList planarRegionsList = generateBumpyGround(random, maxX, maxY, maxZ);
+      ArrayList<double[]> xyYawToTest = new ArrayList<>();
+
+      for (double x = -maxX; x<maxX; x = x + 0.1)
+      {
+         for (double y = -maxY; y<maxY; y = y + 0.1)
+         {
+            double yaw = RandomTools.generateRandomDouble(random, Math.PI);
+
+            xyYawToTest.add(new double[] { x, y, yaw });
+         }
+      }
+
+      doATest(planarRegionsList, xyYawToTest, visualize);
+   }
+
    private static void doATest(PlanarRegionsList planarRegionsList, ArrayList<double[]> xyYawToTest, boolean visualize)
    {
       ConvexPolygon2d originalPolygon = createRectanglePolygon(0.3, 0.15);
@@ -158,7 +185,7 @@ public class PlanarRegionsListPolygonSnapperTest
 
       if (polygonSnapperVisualizer != null)
       {
-         polygonSnapperVisualizer.addPlanarRegionsList(planarRegionsList, YoAppearance.Gold(), YoAppearance.Purple(), YoAppearance.Brown());
+         polygonSnapperVisualizer.addPlanarRegionsList(planarRegionsList, YoAppearance.Gold(), YoAppearance.Purple(), YoAppearance.Brown(), YoAppearance.Blue(), YoAppearance.Chartreuse());
       }
 
       for (double[] xyYaw : xyYawToTest)
@@ -252,6 +279,36 @@ public class PlanarRegionsListPolygonSnapperTest
          generator.rotate(rotation);
 
          generator.addCubeReferencedAtBottomMiddle(length, width, height);
+      }
+
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+      return planarRegionsList;
+   }
+
+   private PlanarRegionsList generateBumpyGround(Random random, double maxX, double maxY, double maxZ)
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+
+      double length = 0.5;
+      double width = 0.5;
+
+      generator.translate(maxX/2.0 + length/2.0, maxY/2.0 - width/2.0, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(1.5 * maxX, 1.25 * maxY, 0.01);
+      generator.identity();
+
+      int sizeX = (int) (maxX/length);
+      int sizeY = (int) (maxY/width);
+
+      for (int i=0; i<sizeY; i++)
+      {
+         generator.identity();
+         generator.translate(0.0, i * width, 0.0);
+         for (int j=0; j<sizeX; j++)
+         {
+            generator.translate(length, 0.0, 0.0);
+            double height = RandomTools.generateRandomDouble(random, 0.01, maxZ);
+            generator.addCubeReferencedAtBottomMiddle(length, width, height + random.nextDouble() * 0.1);
+         }
       }
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();

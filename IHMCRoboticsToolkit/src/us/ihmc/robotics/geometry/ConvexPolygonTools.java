@@ -592,6 +592,16 @@ public class ConvexPolygonTools
          Point2d endQ = polygonQ.getVertex(endIndexQ);
 
          Point2d intersection = GeometryTools.getIntersectionBetweenTwoLines(startP, endP, startQ, endQ);
+         if (intersection == null)
+         {
+            System.err.println("intersection is null in constructPolygonForIntersection!. startP = " + startP + ", endP = " + endP + ", startQ = " + startQ + ", endQ = " + endQ);
+            System.err.println("startIndexP = " + startIndexP + ", endIndexP = " + endIndexP);
+            System.err.println("Returning null polygon");
+
+            intersectingPolygonToPack.clear();
+            intersectingPolygonToPack.update();
+            return false;
+         }
 
          intersectingPolygonToPack.addVertex(intersection);
 
