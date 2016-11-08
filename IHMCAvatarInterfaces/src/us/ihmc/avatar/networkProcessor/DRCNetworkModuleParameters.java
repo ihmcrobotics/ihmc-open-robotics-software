@@ -30,6 +30,7 @@ public class DRCNetworkModuleParameters
    private boolean useKinematicsToolbox = true;
    private boolean useFootstepPlanningToolbox = true;
    private boolean useKinematicsToolboxVisualizer = false;
+   private boolean useFootstepPlanningToolboxVisualizer = false;
    private boolean useTextToSpeechModule = false;
    private boolean useRobotEnvironmentAwarenessModule = false;
 
@@ -73,6 +74,11 @@ public class DRCNetworkModuleParameters
    public boolean isKinematicsToolboxVisualizerEnabled()
    {
       return useKinematicsToolboxVisualizer;
+   }
+
+   public boolean isFootstepPlanningToolboxVisualizerEnabled()
+   {
+      return useFootstepPlanningToolboxVisualizer;
    }
 
    public boolean isHandModuleEnabled()
@@ -147,6 +153,11 @@ public class DRCNetworkModuleParameters
    public void enableKinematicsToolboxVisualizer(boolean useKinematicsToolboxVisualizer)
    {
       this.useKinematicsToolboxVisualizer = useKinematicsToolboxVisualizer;
+   }
+
+   public void enableFootstepPlanningToolboxVisualizer(boolean useFootstepPlanningToolboxVisualizer)
+   {
+      this.useFootstepPlanningToolboxVisualizer = useFootstepPlanningToolboxVisualizer;
    }
 
    public void enableHandModule(boolean b)

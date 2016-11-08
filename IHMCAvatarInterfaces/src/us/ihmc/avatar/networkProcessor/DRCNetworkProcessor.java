@@ -161,7 +161,7 @@ public class DRCNetworkProcessor
       if (!params.isFootstepPlanningToolboxEnabled())
          return;
 
-      new FootstepPlanningToolboxModule(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), params.isKinematicsToolboxVisualizerEnabled());
+      new FootstepPlanningToolboxModule(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), params.isFootstepPlanningToolboxVisualizerEnabled());
 
       PacketCommunicator footstepPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, footstepPlanningToolboxCommunicator);
