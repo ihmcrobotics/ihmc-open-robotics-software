@@ -1326,7 +1326,7 @@ public class SkippyController implements RobotController
          if (direction == SkippyToDo.JUMP_FORWARD)
          {
             double time = stateMachine.timeInCurrentState();
-            return true; // time > 0.2;   //
+            return time >0.5; //> 0.2;   //true; // 
          }
          else
             return false;
@@ -1515,7 +1515,7 @@ public class SkippyController implements RobotController
          {
             hipPlaneControlMode.set(SkippyPlaneControlMode.POSITION);
             qd_hip.set(1.4);
-
+            balanceControl();
          }
       }
 
@@ -1553,11 +1553,12 @@ public class SkippyController implements RobotController
             /*
              * Torque on hip for keeping track the angle between torso and leg
              */
-            desiredLegToTorsoAngle.set(1.5075); //
+            desiredLegToTorsoAngle.set(1.5075/2.0); //
             tauHipForAngleTracking.set(hipAngleController.compute(robot.getQ_hip().getDoubleValue(), desiredLegToTorsoAngle.getDoubleValue(),
                                                                   -robot.getQd_hip().getDoubleValue(), 0.0, deltaT));
             applyTorqueToHip(/*qd_hip.getDoubleValue()+*/tauHipForAngleTracking.getDoubleValue());
-         }
+            applyTorqueToShoulder(qd_shoulder.getDoubleValue());
+       }
       }
 
       public void doTransitionIntoAction()
@@ -1588,13 +1589,13 @@ public class SkippyController implements RobotController
             /*
              * Torque on hip for keeping track the angle between torso and leg
              */
-//            desiredLegToTorsoAngle.set(0.5075);   
+            desiredLegToTorsoAngle.set(-0.745);//-0.5075);   
             tauHipForAngleTracking.set(hipAngleController.compute(robot.getQ_hip().getDoubleValue(), desiredLegToTorsoAngle.getDoubleValue(),
                                                                   -robot.getQd_hip().getDoubleValue(), 0.0, deltaT));
             /*
              * Apply torque to the joints
              */
-            robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue() + tauHipForAngleTracking.getDoubleValue()); 
+            robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue() + tauHipForAngleTracking.getDoubleValue()); //);//
             robot.getShoulderJoint().setTau(tauOnShoulderJointAxis.getDoubleValue());
          }
       }
@@ -1639,7 +1640,7 @@ public class SkippyController implements RobotController
             /*
              * Torque on hip for keeping track the angle between torso and leg
              */
-            robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue() + tauHipForAngleTracking.getDoubleValue());
+            robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue());// + tauHipForAngleTracking.getDoubleValue());
             robot.getShoulderJoint().setTau(tauOnShoulderJointAxis.getDoubleValue());
 
             if (trace)
