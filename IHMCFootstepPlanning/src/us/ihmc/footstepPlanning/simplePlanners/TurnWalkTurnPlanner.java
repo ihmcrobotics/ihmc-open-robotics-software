@@ -6,6 +6,7 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.PlanningUtils;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -62,7 +63,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    }
 
    @Override
-   public List<FramePose> plan()
+   public FootstepPlanningResult plan(List<FramePose> solePosesToPack)
    {
       stanceFootFrame.setPoseAndUpdate(initialStanceFootPose);
 
@@ -95,7 +96,10 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       // square up
       addSquareUp(footstepList, pointToTurnAbout);
 
-      return PlanningUtils.poseListFromPoseList2d(footstepList, groundHeight);
+      solePosesToPack.clear();
+      for (FramePose2d footstepPose2d : footstepList)
+         solePosesToPack.add(PlanningUtils.poseFormPose2d(footstepPose2d, groundHeight));
+      return FootstepPlanningResult.OPTIMAL_SOLUTION;
    }
 
    private void addSquareUp(ArrayList<FramePose2d> footstepList, FramePoint2d robotPosition)

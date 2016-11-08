@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -9,6 +10,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -39,7 +41,9 @@ public class FlatFootstepPlanVisualizer
       planner.setGoalPose(PlanningUtils.poseFormPose2d(goalPose));
 
       // visualize output
-      List<FramePose2d> footstepPlan = PlanningUtils.pose2dListFromPoseList(planner.plan());
+      List<FramePose> footstepPlan3d = new ArrayList<>();
+      planner.plan(footstepPlan3d);
+      List<FramePose2d> footstepPlan = PlanningUtils.pose2dListFromPoseList(footstepPlan3d);
       RobotSide previousFootstepSide = initialRobotSide;
       YoFrameConvexPolygon2d yoDefaultFootPolygon = new YoFrameConvexPolygon2d("DefaultFootPolygon", worldFrame, 4, registry);
 

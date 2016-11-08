@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.simplePlanners;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -11,6 +12,7 @@ import org.junit.Test;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.PlanningUtils;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -23,7 +25,7 @@ public class TurnWalkTurnPlannerTest
 {
    private final Random random = new Random(727434726273L);
    private boolean succes = true;
-   private boolean showSimulation = true;
+   private boolean showSimulation = false;
 
    private double stepWidth = 0.3;
 
@@ -54,7 +56,7 @@ public class TurnWalkTurnPlannerTest
    {
       double xGoal = 0.0;
       double yGoal = -stepWidth/2.0;
-      double yawGoal = 20.0;
+      double yawGoal = Math.toRadians(20.0);
       Point2d goalPosition = new Point2d(xGoal, yGoal);
       FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
 
@@ -95,7 +97,9 @@ public class TurnWalkTurnPlannerTest
       turnWalkTurnPlanner.setGoalPose(PlanningUtils.poseFormPose2d(goalPose));
       turnWalkTurnPlanner.setInitialStanceFoot(PlanningUtils.poseFormPose2d(initialStanceFootPose), initialStanceFootSide);
 
-      List<FramePose2d> footstepPlan = PlanningUtils.pose2dListFromPoseList(turnWalkTurnPlanner.plan());
+      List<FramePose> footstepPlan3d = new ArrayList<>();
+      turnWalkTurnPlanner.plan(footstepPlan3d);
+      List<FramePose2d> footstepPlan = PlanningUtils.pose2dListFromPoseList(footstepPlan3d);
 
       FramePose2d lastFoostep = footstepPlan.get(footstepPlan.size() - 1);
       FramePose2d secondLastFoostep = footstepPlan.get(footstepPlan.size()-2);

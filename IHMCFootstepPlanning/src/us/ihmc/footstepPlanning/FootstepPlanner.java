@@ -33,5 +33,5 @@ public interface FootstepPlanner
     * the location and orientation of the sole frame in world.
     * @return footstepPlan       Sequence of footsteps from initial stance foot to goal
     */
-   public List<FramePose> plan();
+   public FootstepPlanningResult plan(List<FramePose> solePosesToPack);
 }
