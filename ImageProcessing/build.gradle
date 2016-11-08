@@ -55,6 +55,7 @@ dependencies {
     compile group: 'org.boofcv', name: 'feature', version: '0.24.1'
     compile group: 'org.boofcv', name: 'calibration', version: '0.24.1'
     compile group: 'org.boofcv', name: 'visualize', version: '0.24.1'
+    compile "org.boofcv:recognition:0.24.1"
 
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
