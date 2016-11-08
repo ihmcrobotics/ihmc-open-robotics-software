@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point2d;
@@ -31,6 +32,19 @@ public class PlanarRegion
    }
 
    /**
+    * Create a new planar region.
+    * @param transformToWorld transform from the region local coordinate system to world.
+    * @param convexPolygon a single convex polygon that represents the planar region. Expressed in local coordinate system.
+    */
+   public PlanarRegion(RigidBodyTransform transformToWorld, ConvexPolygon2d convexPolygon)
+   {
+      convexPolygons = new ArrayList<>();
+      convexPolygons.add(convexPolygon);
+      fromLocalToWorldTransform.set(transformToWorld);
+      fromWorldToLocalTransform.invert(fromLocalToWorldTransform);
+   }
+
+   /**
     * Verify if the given polygon intersects this region projected onto the XY-plane.
     * @param convexPolygon2d
     * @return
@@ -53,6 +67,29 @@ public class PlanarRegion
    }
 
    /**
+    * Returns all of the intersections when the convexPolygon is projected vertically onto this PlanarRegion.
+    * @param convexPolygon2d Polygon to project vertically.
+    * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
+    */
+   public void getPolygonIntersections(ConvexPolygon2d convexPolygon2d, ArrayList<ConvexPolygon2d> intersectionsToPack)
+   {
+      // Instead of projecting all the polygons of this region onto the world XY-plane,
+      // the given convex polygon is projected along the z-world axis to be snapped onto plane.
+      ConvexPolygon2d projectedPolygon = projectPolygonVerticallyToRegion(convexPolygon2d);
+
+      // Now, just need to go through each polygon of this region and see there is at least one intersection
+      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
+      {
+         ConvexPolygon2d intersectingPolygon = convexPolygons.get(i).intersectionWith(projectedPolygon);
+
+         if (intersectingPolygon != null)
+         {
+            intersectionsToPack.add(intersectingPolygon);
+         }
+      }
+   }
+
+   /**
     * Projects the input ConvexPolygon2d to the plane defined by this PlanarRegion by translating each vertex in world z.
     * Then puts each vertex in local frame. In doing so, the area of the rotated polygon will actually increase on tilted PlanarRegions.
     * @param convexPolygon2d Polygon to project
@@ -60,7 +97,7 @@ public class PlanarRegion
     */
    private ConvexPolygon2d projectPolygonVerticallyToRegion(ConvexPolygon2d convexPolygon2d)
    {
-      ConvexPolygon2d snappedPolygon = new ConvexPolygon2d();
+      ConvexPolygon2d projectedPolygon = new ConvexPolygon2d();
 
       Point3d snappedVertex3d = new Point3d();
 
@@ -75,10 +112,10 @@ public class PlanarRegion
          // Transform to local coordinates
          fromWorldToLocalTransform.transform(snappedVertex3d);
          // Add the snapped vertex to the snapped polygon
-         snappedPolygon.addVertex(snappedVertex3d.getX(), snappedVertex3d.getY());
+         projectedPolygon.addVertex(snappedVertex3d.getX(), snappedVertex3d.getY());
       }
-      snappedPolygon.update();
-      return snappedPolygon;
+      projectedPolygon.update();
+      return projectedPolygon;
    }
 
    /**

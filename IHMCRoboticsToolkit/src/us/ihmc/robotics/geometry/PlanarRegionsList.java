@@ -16,6 +16,15 @@ public class PlanarRegionsList
    }
 
    /**
+    * Adds a planar region to this list of planar regions.
+    * @param region to add.
+    */
+   public void addPlanarRegion(PlanarRegion region)
+   {
+      regions.add(region);
+   }
+
+   /**
     * Find all the planar regions that intersect with the given convex polygon.
     * The algorithm is equivalent to projecting all the regions onto the XY-plane and then finding the regions intersecting with the given convex polygon.
     * @param convexPolygon the query.
