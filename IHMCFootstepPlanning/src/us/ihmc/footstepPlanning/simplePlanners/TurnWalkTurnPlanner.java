@@ -6,9 +6,12 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.PlanningUtils;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -40,24 +43,26 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    private RobotSide lastStepSide;
    private final Pose2dReferenceFrame stanceFootFrame = new Pose2dReferenceFrame("StanceFootFrame", ReferenceFrame.getWorldFrame());
    private final Pose2dReferenceFrame turningFrame = new Pose2dReferenceFrame("TurningFrame", ReferenceFrame.getWorldFrame());
+   private double groundHeight = 0.0;
 
    @Override
-   public void setInitialStanceFoot(FramePose2d stanceFootPose, RobotSide side)
+   public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide side)
    {
-      this.initialStanceFootPose.setIncludingFrame(stanceFootPose);
+      this.initialStanceFootPose.set(PlanningUtils.pose2dFormPose(stanceFootPose));
       this.initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       this.lastStepSide = side;
+      this.groundHeight = stanceFootPose.getZ();
    }
 
    @Override
-   public void setGoalPose(FramePose2d goalPose)
+   public void setGoalPose(FramePose goalPose)
    {
-      this.goalPose.setIncludingFrame(goalPose);
+      this.goalPose.set(PlanningUtils.pose2dFormPose(goalPose));
       this.goalPose.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    @Override
-   public List<FramePose2d> plan()
+   public List<FramePose> plan()
    {
       stanceFootFrame.setPoseAndUpdate(initialStanceFootPose);
 
@@ -90,7 +95,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       // square up
       addSquareUp(footstepList, pointToTurnAbout);
 
-      return footstepList;
+      return PlanningUtils.poseListFromPoseList2d(footstepList, groundHeight);
    }
 
    private void addSquareUp(ArrayList<FramePose2d> footstepList, FramePoint2d robotPosition)
@@ -238,4 +243,9 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       pointToTurnAbout.changeFrame(stanceFootFrame);
    }
 
+   @Override
+   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
+   {
+      // TODO Auto-generated method stub
+   }
 }
