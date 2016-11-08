@@ -194,15 +194,15 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
          {
          case STOP:
             stateMachine.stop();
-            communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
+            communicationBridge.sendPacketToBroadcast(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
             break;
          case PAUSE:
             stateMachine.pause();
-            communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
+            communicationBridge.sendPacketToBroadcast(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
             break;
          case RESUME:
             stateMachine.resume();
-            communicationBridge.sendPacketToNetworkProcessor(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
+            communicationBridge.sendPacketToBroadcast(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
             break;
          default:
             throw new IllegalArgumentException("BehaviorCommunicationBridge, unhandled control!");
