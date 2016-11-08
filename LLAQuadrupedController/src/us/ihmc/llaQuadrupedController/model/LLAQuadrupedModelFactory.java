@@ -1,4 +1,4 @@
-package us.ihmc.llaQuadruped;
+package us.ihmc.llaQuadrupedController.model;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -6,14 +6,13 @@ import java.util.Collection;
 
 import javax.xml.bind.JAXBException;
 
-import us.ihmc.robotModels.FullQuadrupedRobotModelFromDescription;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullQuadrupedRobotModelFromDescription;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.tools.io.printing.PrintTools;
 
