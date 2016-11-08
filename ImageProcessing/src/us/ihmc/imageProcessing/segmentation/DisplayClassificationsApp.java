@@ -1,24 +1,23 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import java.awt.image.BufferedImage;
-
-import javax.swing.JPanel;
-
 import boofcv.gui.image.ShowImages;
 import boofcv.io.UtilIO;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
-import boofcv.struct.image.ImageFloat32;
-import boofcv.struct.image.ImageUInt8;
-import boofcv.struct.image.MultiSpectral;
+import boofcv.struct.image.GrayF32;
+import boofcv.struct.image.InterleavedU8;
+import boofcv.struct.image.Planar;
+
+import javax.swing.*;
+import java.awt.image.BufferedImage;
 
 /**
  * @author Peter Abeles
  */
 public class DisplayClassificationsApp extends JPanel
 {
-   ImageUInt8 binary = new ImageUInt8(1,1);
-   MultiSpectral<ImageFloat32> colorRGB = new MultiSpectral<ImageFloat32>(ImageFloat32.class,1,1,3);
+   InterleavedU8 binary = new InterleavedU8(1, 1, 1);
+   Planar<GrayF32> colorRGB = new Planar<GrayF32>(GrayF32.class, 1, 1, 3);
 
    public void process( BufferedImage image , Gaussian3D_F64 model ) {
 
@@ -33,7 +32,9 @@ public class DisplayClassificationsApp extends JPanel
 
       for( int y = 0; y < binary.height; y++ ) {
          for( int x = 0; x < binary.width; x++ ) {
-            if( binary.unsafe_get(x,y) != 0 ) {
+            int[] data = new int[1];
+            binary.get(x,y, data);
+            if( data[0] != 0 ) {
                image.setRGB(x,y,color);
             }
          }

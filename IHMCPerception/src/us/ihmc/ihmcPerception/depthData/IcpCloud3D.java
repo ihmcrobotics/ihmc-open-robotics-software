@@ -1,21 +1,20 @@
 package us.ihmc.ihmcPerception.depthData;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import boofcv.struct.FastQueueArray_F64;
+import georegression.fitting.MotionTransformPoint;
+import georegression.fitting.se.MotionSe3PointSVD_F64;
+import georegression.geometry.ConvertRotation3D_F64;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+import georegression.struct.so.Rodrigues_F64;
+import georegression.transform.se.SePointOps_F64;
 import org.ddogleg.nn.FactoryNearestNeighbor;
 import org.ddogleg.nn.NearestNeighbor;
 import org.ddogleg.nn.NnData;
 import org.ddogleg.struct.FastQueue;
 
-import boofcv.struct.FastQueueArray_F64;
-import georegression.fitting.MotionTransformPoint;
-import georegression.fitting.se.MotionSe3PointSVD_F64;
-import georegression.geometry.RotationMatrixGenerator;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.struct.so.Rodrigues_F64;
-import georegression.transform.se.SePointOps_F64;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Estimates the rigid body motion between two point clouds.  Guaranteed to find a locally optical solution, and will
@@ -171,7 +170,7 @@ public class IcpCloud3D {
 
          Se3_F64 found = motionAlg.getTransformSrcToDst();
          double change = found.getT().normSq();
-         RotationMatrixGenerator.matrixToRodrigues(found.getR(),rod);
+         ConvertRotation3D_F64.matrixToRodrigues(found.getR(), rod);
 
          if( change < convergenceTol && Math.abs(rod.theta) < convergenceTol )
             break;

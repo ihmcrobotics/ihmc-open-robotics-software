@@ -1,7 +1,8 @@
 package us.ihmc.robotics.kinematics;
 
-import georegression.geometry.RotationMatrixGenerator;
+import georegression.geometry.ConvertRotation3D_F64;
 import georegression.metric.UtilAngle;
+import georegression.struct.EulerType;
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.RegionStepType;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
@@ -298,7 +299,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
 
       MatrixTools.matrix3DToDenseMatrix(rotationMatrix, m, 0, 0);
 
-      RotationMatrixGenerator.matrixToEulerXYZ(m, euler);
+      ConvertRotation3D_F64.matrixToEuler(m, EulerType.XYZ, euler);
       R.setX(euler[0]);
       R.setY(euler[1]);
       R.setZ(euler[2]);

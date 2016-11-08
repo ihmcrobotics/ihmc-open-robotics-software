@@ -1,16 +1,14 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import georegression.struct.point.Point2D_I32;
-
-import java.util.List;
-
-import org.ddogleg.struct.FastQueue;
-
 import boofcv.alg.filter.binary.Contour;
 import boofcv.alg.misc.ImageMiscOps;
-import boofcv.struct.image.ImageFloat32;
-import boofcv.struct.image.ImageUInt8;
-import boofcv.struct.image.MultiSpectral;
+import boofcv.struct.image.GrayF32;
+import boofcv.struct.image.InterleavedU8;
+import boofcv.struct.image.Planar;
+import georegression.struct.point.Point2D_I32;
+import org.ddogleg.struct.FastQueue;
+
+import java.util.List;
 
 /**
  * @author Peter Abeles
@@ -20,15 +18,16 @@ public class LocalGaussianClassifyContour {
    Gaussian3D_F64[]models;
    double thresholdChiSq;
 
-   ImageUInt8 binary;
-   ImageUInt8 changed = new ImageUInt8(1,1);
+   InterleavedU8 binary;
+   InterleavedU8 changed = new InterleavedU8(1, 1, 1);
 
-   ImageFloat32 band0,band1,band2;
+   GrayF32 band0,band1,band2;
 
    FastQueue<ChangeInfo> change = new FastQueue<ChangeInfo>(ChangeInfo.class,true);
    FastQueue<ChangeInfo> changeOld = new FastQueue<ChangeInfo>(ChangeInfo.class,true);
 
    int maxIterations = 5;
+   int[] data = new int[1];
 
    public LocalGaussianClassifyContour(Gaussian3D_F64[] models, double thresholdChiSq ) {
       this.models = models;
@@ -39,7 +38,7 @@ public class LocalGaussianClassifyContour {
       }
    }
 
-   public void process( List<Contour> contours , ImageUInt8 binary , MultiSpectral<ImageFloat32> color ) {
+   public void process( List<Contour> contours , InterleavedU8 binary , Planar<GrayF32> color ) {
       band0 = color.getBand(0);
       band1 = color.getBand(1);
       band2 = color.getBand(2);
@@ -101,7 +100,8 @@ public class LocalGaussianClassifyContour {
       if( !binary.isInBounds(x,y))
          return;
 
-      if( binary.unsafe_get(x, y) == 0 ) {
+      binary.get(x, y, data);
+      if( data[0] == 0 ) {
          float v0 = band0.unsafe_get(x,y);
          float v1 = band1.unsafe_get(x,y);
          float v2 = band2.unsafe_get(x,y);
@@ -117,7 +117,8 @@ public class LocalGaussianClassifyContour {
    }
 
    private void changeValue( int x , int y , int value ) {
-      if( changed.get(x,y) == 0 ) {
+      changed.get(x,y,data);
+      if( data[0] == 0 ) {
          changed.set(x,y,1);
          change.grow().set(x,y,value);
       }
@@ -126,7 +127,7 @@ public class LocalGaussianClassifyContour {
    private void applyChanges() {
       for( int i = 0; i < change.size; i++ ) {
          ChangeInfo c = change.get(i);
-         binary.unsafe_set(c.x, c.y, c.value);
+         binary.set(c.x, c.y, c.value);
 //         System.out.println(" "+c.x+" "+c.y+" = "+c.value);
       }
    }

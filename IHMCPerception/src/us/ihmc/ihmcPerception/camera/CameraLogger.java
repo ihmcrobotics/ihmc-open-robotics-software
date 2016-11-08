@@ -1,20 +1,18 @@
 package us.ihmc.ihmcPerception.camera;
 
+import boofcv.io.UtilIO;
+import boofcv.io.image.UtilImageIO;
+import boofcv.struct.calib.IntrinsicParameters;
+import georegression.geometry.ConvertRotation3D_F64;
+import georegression.struct.so.Quaternion_F64;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import javax.vecmath.Vector3d;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-
-import javax.vecmath.Vector3d;
-
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
-import boofcv.io.UtilIO;
-import boofcv.io.image.UtilImageIO;
-import boofcv.struct.calib.IntrinsicParameters;
-import georegression.geometry.RotationMatrixGenerator;
-import georegression.struct.so.Quaternion_F64;
 
 /**
  * Grabs camera images, camera location, and intrinsic parameters and saves them to a log file
@@ -61,7 +59,7 @@ public class CameraLogger
 //            Matrix3d Rm = new Matrix3d();
 //            rosTransformFromHeadBaseToCamera.get(Rm);
 //            MatrixTools.matrix3DToDenseMatrix(Rm,R,0,0);
-      Quaternion_F64 quad = RotationMatrixGenerator.matrixToQuaternion(R, null);
+      Quaternion_F64 quad = ConvertRotation3D_F64.matrixToQuaternion(R, null);
 //            rosTransformFromHeadBaseToCamera.get(T);
 
       logPose.printf("%d %15f %15f %15f %15f %15f %15f %15f\n", timeStamp, quad.x, quad.y, quad.z, quad.w, T.getX(), T.getY(), T.getZ());

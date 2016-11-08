@@ -1,17 +1,15 @@
 package us.ihmc.sensorProcessing.pointClouds.testbed;
 
-import georegression.geometry.RotationMatrixGenerator;
+import com.thoughtworks.xstream.XStream;
+import georegression.geometry.ConvertRotation3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.so.Rodrigues_F64;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
-
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
-import com.thoughtworks.xstream.XStream;
 
 /**
  * @author Peter Abeles
@@ -50,7 +48,7 @@ public class EvaluateAgainstManualAlignment {
 
 
          CommonOps.multTransA(estimatedToModel.getR(), found.getR(), R);
-         RotationMatrixGenerator.matrixToRodrigues(R,rod);
+         ConvertRotation3D_F64.matrixToRodrigues(R, rod);
          errorsR[i] = rod.theta;
 
          System.out.println("errorT["+i+"] = "+errorsT[i]+"  errorR["+i+"] = "+errorsR[i]);
