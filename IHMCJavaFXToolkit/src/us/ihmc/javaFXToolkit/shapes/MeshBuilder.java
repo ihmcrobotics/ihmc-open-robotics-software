@@ -86,6 +86,11 @@ public class MeshBuilder
       addBox(size, size, size, cubeOffset);
    }
 
+   public void addCube(double size, double xOffset, double yOffset, double zOffset)
+   {
+      addBox(size, size, size, new Point3d(xOffset, yOffset, zOffset));
+   }
+
    public void addBox(float lx, float ly, float lz)
    {
       addMesh(MeshDataGenerator.Cube(lx, ly, lz, true));
