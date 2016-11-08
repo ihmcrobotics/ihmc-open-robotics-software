@@ -161,6 +161,30 @@ public class PlanarRegionTest
       assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.09, 1.09, convexPolygon)));
       assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.21, 1.09, convexPolygon)));
       assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.09, 1.21, convexPolygon)));
+
+      ArrayList<ConvexPolygon2d> intersections = new ArrayList<>();
+      planarRegion.getPolygonIntersections(convexPolygon, intersections);
+      assertEquals(1, intersections.size());
+
+      intersections.clear();
+      planarRegion.getPolygonIntersections(translateConvexPolygon(2.0, 0.0, convexPolygon), intersections);
+      assertEquals(1, intersections.size());
+
+      intersections.clear();
+      planarRegion.getPolygonIntersections(translateConvexPolygon(0.0, 2.0, convexPolygon), intersections);
+      assertEquals(1, intersections.size());
+
+      intersections.clear();
+      planarRegion.getPolygonIntersections(translateConvexPolygon(2.0, 2.0, convexPolygon), intersections);
+      assertEquals(0, intersections.size());
+
+      intersections.clear();
+      planarRegion.getPolygonIntersections(translateConvexPolygon(1.21, 1.21, convexPolygon), intersections);
+      assertEquals(0, intersections.size());
+
+      intersections.clear();
+      planarRegion.getPolygonIntersections(translateConvexPolygon(1.09, 1.09, convexPolygon), intersections);
+      assertEquals(3, intersections.size());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

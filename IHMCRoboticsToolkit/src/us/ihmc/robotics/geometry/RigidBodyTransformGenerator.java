@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
@@ -16,8 +17,32 @@ import us.ihmc.robotics.Axis;
  */
 public class RigidBodyTransformGenerator
 {
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform transform = new RigidBodyTransform();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+
+   public RigidBodyTransformGenerator()
+   {
+   }
+
+   public RigidBodyTransformGenerator(RigidBodyTransform transform)
+   {
+      setTransform(transform);
+   }
+
+   public RigidBodyTransformGenerator(RigidBodyTransformGenerator generator)
+   {
+      setTransform(generator.transform);
+   }
+
+   public void set(RigidBodyTransformGenerator transformGenerator)
+   {
+      this.transform.set(transformGenerator.transform);
+   }
+
+   public void setTransform(RigidBodyTransform transform)
+   {
+      this.transform.set(transform);
+   }
 
    public RigidBodyTransform getRigidBodyTransformCopy()
    {
@@ -88,6 +113,12 @@ public class RigidBodyTransformGenerator
       transform.multiply(transform, tempTransform);
    }
 
+   public void rotate(Quat4d rotationQuaternion)
+   {
+      tempTransform.setRotationAndZeroTranslation(rotationQuaternion);
+      transform.multiply(transform, tempTransform);
+   }
+
    public void translateThenRotate(RigidBodyTransform translateThenRotateTransform)
    {
       tempTransform.set(translateThenRotateTransform);
@@ -100,4 +131,5 @@ public class RigidBodyTransformGenerator
       tempTransform.setTranslation(translationVector);
       transform.multiply(transform, tempTransform);
    }
+
 }
