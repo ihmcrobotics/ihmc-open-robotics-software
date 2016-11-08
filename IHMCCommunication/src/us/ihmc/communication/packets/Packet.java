@@ -27,6 +27,7 @@ public abstract class Packet<T extends Packet<T>> implements EpsilonComparable<T
    @Optional(value = "scripting")
    public String notes;
 
+   
    public void setDestination(PacketDestination destination)
    {
       setDestination(destination.ordinal());

@@ -1,32 +1,32 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import javax.vecmath.Point3d;
-
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public class SearchForValveBehavior extends AbstractBehavior implements CoactiveDataListenerInterface
+public class SearchForValveBehavior extends AbstractBehavior
 {
-   private Point3d valveCenter;
-
-   private double valveRotation;
+   private RigidBodyTransform valveTransformToWorld;
    private double valveRadius;
    private boolean recievedNewValveLocation = false;
-   private CommunicationBridge networkManager;
+
+   protected final ConcurrentListeningQueue<ValveLocationPacket> valveLocationQueue = new ConcurrentListeningQueue<ValveLocationPacket>();
 
    public SearchForValveBehavior(CommunicationBridge behaviorCommunicationBridge)
    {
       super("SearchForSpehereFar", behaviorCommunicationBridge);
-      networkManager = behaviorCommunicationBridge;
-      networkManager.addListeners(this);
+      communicationBridge.attachNetworkListeningQueue(valveLocationQueue, ValveLocationPacket.class);
    }
 
    @Override
    public void doControl()
    {
-      //nothing in do control. simply waiting for the valve location to be sent.
+            if (valveLocationQueue.isNewPacketAvailable())
+            {
+               recievedValveLocation(valveLocationQueue.getLatestPacket());
+            }
    }
 
    @Override
@@ -42,14 +42,9 @@ public class SearchForValveBehavior extends AbstractBehavior implements Coactive
       recievedNewValveLocation = false;
    }
 
-   public Point3d getValveCenter()
+   public RigidBodyTransform getLocation()
    {
-      return valveCenter;
-   }
-
-   public double getValveRotation()
-   {
-      return valveRotation;
+      return valveTransformToWorld;
    }
 
    public double getValveRadius()
@@ -57,20 +52,13 @@ public class SearchForValveBehavior extends AbstractBehavior implements Coactive
       return valveRadius;
    }
 
-   @Override
-   public void coactiveDataRecieved(SimpleCoactiveBehaviorDataPacket data)
+   private void recievedValveLocation(ValveLocationPacket valveLocationPacket)
    {
 
-      if (data.key.equalsIgnoreCase("ValveLocation"))
-      {
-         valveCenter = new Point3d();
-         valveCenter.x = ((double[]) data.dataObject)[0];
-         valveCenter.y = ((double[]) data.dataObject)[1];
-         valveCenter.z = ((double[]) data.dataObject)[2];
-         valveRotation = ((double[]) data.dataObject)[3];
-         valveRadius = ((double[]) data.dataObject)[4];
-         recievedNewValveLocation = true;
-      }
+      valveTransformToWorld = valveLocationPacket.getValveTransformToWorld();
+      
+      valveRadius = valveLocationPacket.getValveRadius();
+      recievedNewValveLocation = true;
 
    }
 

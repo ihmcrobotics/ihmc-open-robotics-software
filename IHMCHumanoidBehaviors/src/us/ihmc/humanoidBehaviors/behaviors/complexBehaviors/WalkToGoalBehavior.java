@@ -262,20 +262,20 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 	private void requestFootstepPlan()
 	{
 		FootstepPlanRequestPacket footstepPlanRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.START_SEARCH, startFootstep,startYaw,goalFootsteps, 10);
-		communicationBridge.sendPacketToNetworkProcessor(footstepPlanRequestPacket);
+		communicationBridge.sendPacketToBroadcast(footstepPlanRequestPacket);
 		waitingForValidPlan.set(true);
 	}
 
 	private void requestSearchStop(){
 		FootstepPlanRequestPacket stopSearchRequestPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.STOP_SEARCH,new FootstepDataMessage(), 0.0, null);
-		communicationBridge.sendPacketToNetworkProcessor(stopSearchRequestPacket);
+		communicationBridge.sendPacketToBroadcast(stopSearchRequestPacket);
 		waitingForValidPlan.set(false);
 	}
 	
 	private void sendUpdateStart(FootstepDataMessage updatedLocation){
 		if (updatedLocation.orientation.epsilonEquals(new Quat4d(), .003)) return;
 		FootstepPlanRequestPacket updateStartPacket = new FootstepPlanRequestPacket(FootstepPlanRequestPacket.RequestType.UPDATE_START, updatedLocation, RotationTools.computeYaw(updatedLocation.orientation), null, 10);
-		communicationBridge.sendPacketToNetworkProcessor(updateStartPacket);
+		communicationBridge.sendPacketToBroadcast(updateStartPacket);
 	}
 	
 	private void sendStepsToController(){

@@ -150,7 +150,6 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
       }
       int bytesSend = sendTCP(object);
       updateDataRateTable(object, bytesSend);
-      
       return bytesSend;
    }
 

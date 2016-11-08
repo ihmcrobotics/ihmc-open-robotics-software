@@ -96,7 +96,7 @@ public abstract class AbstractBehavior implements RobotController
 
    public void sendPacketToNetworkProcessor(Packet<?> obj)
    {
-      communicationBridge.sendPacketToNetworkProcessor(obj);
+      communicationBridge.sendPacketToBroadcast(obj);
    }
    public void sendPacketToUI(Packet<?> obj)
    {

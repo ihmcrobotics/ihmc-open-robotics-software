@@ -10,6 +10,7 @@ import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
@@ -90,16 +91,9 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          {
             super.doTransitionOutOfAction();
             //found the valve location, inform the UI of its location
-            System.out.println(
-                  "BEHAVIOR: found the valve at " + searchForValveBehavior.getValveCenter() + " with a radius of " + searchForValveBehavior.getValveRadius());
-
-            double[] data = new double[5];
-            data[0] = searchForValveBehavior.getValveCenter().x;
-            data[1] = searchForValveBehavior.getValveCenter().y;
-            data[2] = searchForValveBehavior.getValveCenter().z;
-            data[3] = searchForValveBehavior.getValveRotation();
-            data[4] = searchForValveBehavior.getValveRadius();
-            coactiveBehaviorsNetworkManager.sendToUI("ValveLocation", data);
+            
+            ValveLocationPacket valveLocationPacket = new ValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius());
+            coactiveBehaviorsNetworkManager.sendPacketToUI(valveLocationPacket);
 
          }
       };
@@ -136,7 +130,6 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       super.doPostBehaviorCleanup();
       TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
       sendPacketToNetworkProcessor(p1);
-      System.out.println("found the valve it is located at " + searchForValveBehavior.getValveCenter());
    }
 
    @Override
