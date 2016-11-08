@@ -42,6 +42,7 @@ public class PlanarRegionsListPolygonSnapper
       for (int i = 0; i < numberOfIntersectingRegions; i++)
       {
          PlanarRegion planarRegion = intersectingRegions.get(i);
+
          RigidBodyTransform snapTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegion, highestVertexInWorld);
 
          if (highestVertexInWorld.getZ() > highestZ + extraZ)
@@ -57,7 +58,7 @@ public class PlanarRegionsListPolygonSnapper
             planarRegion.getNormal(surfaceNormal);
             highestPlanarRegion.getNormal(highestSurfaceNormal);
 
-            if (surfaceNormal.getZ() > highestSurfaceNormal.getZ())
+            if (Math.abs(surfaceNormal.getZ()) > Math.abs(highestSurfaceNormal.getZ()))
             {
                highestZ = highestVertexInWorld.getZ();
                highestTransform = snapTransform;
@@ -69,7 +70,8 @@ public class PlanarRegionsListPolygonSnapper
       //TODO: For now, just ignore Planar Regions that are tilted too much.
       //TODO: But later, we need to make sure they are not obstacles that need to be avoided...
       highestPlanarRegion.getNormal(highestSurfaceNormal);
-      if (highestSurfaceNormal.getZ() < 0.8) return null;
+      if (Math.abs(highestSurfaceNormal.getZ()) < 0.2)
+         return null;
 
       return highestTransform;
    }
