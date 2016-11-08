@@ -1,4 +1,4 @@
-package us.ihmc.llaQuadruped;
+package us.ihmc.llaQuadrupedController.parameters;
 
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;

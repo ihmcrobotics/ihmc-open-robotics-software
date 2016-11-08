@@ -2,6 +2,7 @@ package us.ihmc.llaQuadruped;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.llaQuadrupedController.model.LLAQuadrupedModelFactory;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 

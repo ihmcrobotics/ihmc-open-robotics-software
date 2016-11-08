@@ -1,4 +1,4 @@
-package us.ihmc.llaQuadruped;
+package us.ihmc.llaQuadrupedController.model;
 
 import java.io.InputStream;
 import java.nio.file.Path;
