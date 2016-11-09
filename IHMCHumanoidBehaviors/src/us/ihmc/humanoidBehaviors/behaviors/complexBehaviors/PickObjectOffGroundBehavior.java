@@ -65,7 +65,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Picking Up The Ball");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), grabLocation.getX(),
                   grabLocation.getY(),
                   grabLocation.getZ() + objectRadius + 0.25);

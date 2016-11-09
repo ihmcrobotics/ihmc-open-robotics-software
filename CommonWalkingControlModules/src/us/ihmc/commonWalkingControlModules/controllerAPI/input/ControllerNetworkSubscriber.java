@@ -123,7 +123,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
             if (messageFilter.get() != null && !messageFilter.get().isMessageValid(message))
             {
-               PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate filter!"); 
+               PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate filter! "+messageFilter.get()+" "+messageFilter.get().isMessageValid(message)); 
                return;
             }
 

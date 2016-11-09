@@ -108,7 +108,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
          id++;
          RigidBodyTransform t = new RigidBodyTransform();
          t.setTranslation(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
-         sendPacketToNetworkProcessor(new DetectedObjectPacket(t, 4));
+         sendPacket(new DetectedObjectPacket(t, 4));
       }
 
       if (balls.size() > 0)
@@ -141,7 +141,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       groundQuadTree[0] = new Point3d();
       pointCloudWorldPacket.setGroundQuadTreeSupport(groundQuadTree);
       
-      sendPacketToNetworkProcessor(pointCloudWorldPacket);
+      sendPacket(pointCloudWorldPacket);
    }
 
    public ArrayList<Sphere3D_F64> detectBalls(Point3f[] fullPoints)

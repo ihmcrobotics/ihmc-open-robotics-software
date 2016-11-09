@@ -100,7 +100,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To The Ball");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
@@ -119,7 +119,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Looking For The Ball Again");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL_NEAR);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.waitingForValidation.set(false);
@@ -136,7 +136,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Picking Up The Ball");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.PICKING_UP_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
@@ -180,7 +180,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    {
       super.doPostBehaviorCleanup();
       TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
-      sendPacketToNetworkProcessor(p1);
+      sendPacket(p1);
 
       coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
 
