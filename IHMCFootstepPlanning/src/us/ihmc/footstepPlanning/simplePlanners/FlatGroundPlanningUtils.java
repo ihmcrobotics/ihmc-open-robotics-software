@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning;
+package us.ihmc.footstepPlanning.simplePlanners;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 
-public class PlanningUtils
+public class FlatGroundPlanningUtils
 {
    public static FramePose poseFormPose2d(FramePose2d pose2d)
    {
