@@ -5,6 +5,7 @@
 /out
 /target
 /pit-reports
+/install
 
 # Top level directories in sub-projects
 */classes
@@ -13,6 +14,7 @@
 */target
 */build
 */pit-reports
+*/install
 
 # directories to always ignore
 **/.gradle

@@ -11,14 +11,20 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredCo
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<ExampleStates>
 {
    public enum ExampleStates
    {
-      ENABLE_LIDAR, SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE, RESET_ROBOT_PIPELINE_EXAMPLE, GET_LIDAR, GET_VIDEO, GET_USER_VALIDARION,
+      ENABLE_LIDAR, SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE, RESET_ROBOT_PIPELINE_EXAMPLE, GET_LIDAR, GET_VIDEO, GET_USER_VALIDATION, WHOLEBODY_EXAMPLE,
    }
 
    CommunicationBridge coactiveBehaviorsNetworkManager;
@@ -29,12 +35,13 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    private final GetVideoPacketExampleBehavior getVideoPacketExampleBehavior;
    private final UserValidationExampleBehavior userValidationExampleBehavior;
    private final ResetRobotBehavior resetRobotBehavior;
+   private final ReferenceFrame midZupFrame;
 
-   public ExampleComplexBehaviorStateMachine(CommunicationBridge communicationBridge, DoubleYoVariable yoTime,
-         AtlasPrimitiveActions atlasPrimitiveActions)
+   public ExampleComplexBehaviorStateMachine(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("ExampleStateMachine", ExampleStates.class, yoTime, communicationBridge);
 
+      midZupFrame = atlasPrimitiveActions.referenceFrames.getMidFeetZUpFrame();
       coactiveBehaviorsNetworkManager = communicationBridge;
       coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
 
@@ -46,10 +53,17 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       userValidationExampleBehavior = new UserValidationExampleBehavior(communicationBridge);
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
 
-     
-
-
       setupStateMachine();
+
+      statemachine.getStateYoVariable().addVariableChangedListener(new VariableChangedListener()
+      {
+
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            System.out.println("ExampleComplexBehaviorStateMachine: Changing state to " + statemachine.getCurrentState());
+         }
+      });
    }
 
    private void setupStateMachine()
@@ -83,25 +97,50 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          }
       };
 
+      BehaviorAction<ExampleStates> wholeBodyExample = new BehaviorAction<ExampleStates>(ExampleStates.WHOLEBODY_EXAMPLE,
+            atlasPrimitiveActions.wholeBodyBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+
+            FramePoint point = new FramePoint(midZupFrame, 0.2, 0.2, 0.3);
+            point.changeFrame(ReferenceFrame.getWorldFrame());
+
+            //the point in the world you want to move the hand to.
+            //i set this high so that more solutions are accepted
+            atlasPrimitiveActions.wholeBodyBehavior.setSolutionQualityThreshold(2.01);
+            //how fast you want the action to be
+            atlasPrimitiveActions.wholeBodyBehavior.setTrajectoryTime(3);
+
+            FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
+            atlasPrimitiveActions.wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
+
+         }
+      };
+
       BehaviorAction<ExampleStates> getLidar = new BehaviorAction<ExampleStates>(ExampleStates.GET_LIDAR, getLidarScanExampleBehavior);
       BehaviorAction<ExampleStates> getVideo = new BehaviorAction<ExampleStates>(ExampleStates.GET_VIDEO, getVideoPacketExampleBehavior);
-      BehaviorAction<ExampleStates> getUserValidation = new BehaviorAction<ExampleStates>(ExampleStates.GET_USER_VALIDARION, userValidationExampleBehavior);
+      BehaviorAction<ExampleStates> getUserValidation = new BehaviorAction<ExampleStates>(ExampleStates.GET_USER_VALIDATION, userValidationExampleBehavior);
 
+      //setup the state machine
+      statemachine.addStateWithDoneTransition(setupRobot, ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE);
+      statemachine.addStateWithDoneTransition(resetRobot, ExampleStates.ENABLE_LIDAR);
       statemachine.addStateWithDoneTransition(enableLidar, ExampleStates.GET_LIDAR);
-//      statemachine.addStateWithDoneTransition(resetRobot, ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE);
-//      statemachine.addStateWithDoneTransition(setupRobot, ExampleStates.GET_LIDAR);
+      statemachine.addStateWithDoneTransition(getLidar, ExampleStates.GET_VIDEO);
+      statemachine.addStateWithDoneTransition(getVideo, ExampleStates.WHOLEBODY_EXAMPLE);
+      statemachine.addStateWithDoneTransition(wholeBodyExample, ExampleStates.GET_USER_VALIDATION);
 
-      statemachine.addStateWithDoneTransition(getLidar, ExampleStates.GET_USER_VALIDARION);
-      statemachine.addStateWithDoneTransition(getVideo, ExampleStates.GET_USER_VALIDARION);
-
+      //this state has no transitions
       statemachine.addState(getUserValidation);
-      statemachine.setCurrentState(ExampleStates.ENABLE_LIDAR);
+
+      //set the starting state
+      statemachine.setCurrentState(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE);
    }
 
    @Override
    public void doPostBehaviorCleanup()
    {
-
       super.doPostBehaviorCleanup();
       System.out.println("IM ALL DONE");
    }

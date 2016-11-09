@@ -22,9 +22,11 @@ import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class DRCNetworkProcessor
 {
@@ -161,7 +163,9 @@ public class DRCNetworkProcessor
       if (!params.isFootstepPlanningToolboxEnabled())
          return;
 
-      new FootstepPlanningToolboxModule(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), params.isFootstepPlanningToolboxVisualizerEnabled());
+      RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      new FootstepPlanningToolboxModule(fullRobotModel, contactPointParameters, robotModel.getLogModelProvider(), params.isFootstepPlanningToolboxVisualizerEnabled());
 
       PacketCommunicator footstepPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, footstepPlanningToolboxCommunicator);

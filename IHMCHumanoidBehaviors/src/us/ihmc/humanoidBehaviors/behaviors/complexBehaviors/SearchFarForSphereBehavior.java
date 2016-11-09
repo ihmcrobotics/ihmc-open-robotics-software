@@ -88,7 +88,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("LOOKING FOR BALL");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
             coactiveElement.ballX.set(0);

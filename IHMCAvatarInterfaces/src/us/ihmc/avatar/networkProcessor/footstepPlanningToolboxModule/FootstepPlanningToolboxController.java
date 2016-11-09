@@ -12,6 +12,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -20,21 +21,29 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class FootstepPlanningToolboxController extends ToolboxController<FootstepPlanningToolboxOutputStatus>
 {
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<FootstepPlanningRequestPacket>(null);
    private final BooleanYoVariable isDone = new BooleanYoVariable("isDone", registry);
 
-   private final FootstepPlanner planner = new TurnWalkTurnPlanner();
+   private final FootstepPlanner planner;
    private RobotSide stepSide;
 
-   public FootstepPlanningToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
+   public FootstepPlanningToolboxController(RobotContactPointParameters contactPointParameters, StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
+
+      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+         footPolygons.set(side, new ConvexPolygon2d(contactPointParameters.getFootContactPoints().get(side)));
+      planner = new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), footPolygons);
    }
 
    @Override

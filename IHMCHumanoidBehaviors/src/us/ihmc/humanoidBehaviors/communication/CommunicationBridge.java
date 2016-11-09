@@ -11,6 +11,7 @@ import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -94,13 +95,11 @@ public class CommunicationBridge implements CommunicationBridgeInterface
    }
 
    @Override
-   public void sendPacketToNetworkProcessor(Packet packet)
+   public void sendPacket(Packet packet)
    {
 
       if (packetCommunicator.isConnected())
       {
-         //TODO this is not right, but was the current way things were done before i cleaned up. -jcarff
-         packet.setDestination(PacketDestination.BROADCAST.ordinal());
          packetCommunicator.send(packet);
       }
    }

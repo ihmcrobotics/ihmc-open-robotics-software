@@ -38,11 +38,14 @@ public class AtlasPrimitiveActions
    public final WalkToLocationBehavior walkToLocationBehavior;
    public final WholeBodyInverseKinematicsBehavior wholeBodyBehavior;
    private final YoVariableRegistry behaviorRegistry;
+   
+   public HumanoidReferenceFrames referenceFrames;
 
    public AtlasPrimitiveActions(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
          HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime,
          WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
    {
+      this.referenceFrames = referenceFrames;
       this.behaviorRegistry = behaviorRegistry;
       leftArmTrajectoryBehavior = new ArmTrajectoryBehavior("left", outgoingCommunicationBridge, yoTime);
       addPrimitive(leftArmTrajectoryBehavior);

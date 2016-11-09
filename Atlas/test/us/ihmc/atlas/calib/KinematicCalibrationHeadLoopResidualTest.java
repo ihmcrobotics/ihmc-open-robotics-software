@@ -18,15 +18,15 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
+import boofcv.abst.fiducial.calib.ConfigChessboard;
+import boofcv.factory.calib.FactoryCalibrationTarget;
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 import org.junit.Test;
 
-import boofcv.abst.calib.ConfigChessboard;
-import boofcv.abst.calib.PlanarCalibrationDetector;
 import boofcv.alg.geo.PerspectiveOps;
-import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
@@ -50,7 +50,7 @@ public class KinematicCalibrationHeadLoopResidualTest
    Random random = new Random(23234);
 
    IntrinsicParameters intrinsic;
-   PlanarCalibrationDetector calibGrid = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(
+   CalibrationDetectorChessboard calibGrid = FactoryCalibrationTarget.detectorChessboard(new ConfigChessboard(
          DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03));
 
    private static final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);

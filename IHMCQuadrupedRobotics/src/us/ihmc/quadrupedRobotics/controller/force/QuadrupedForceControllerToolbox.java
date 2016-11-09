@@ -29,7 +29,10 @@ public class QuadrupedForceControllerToolbox
    {
       double gravity = 9.81;
       double mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
-      runtimeEnvironment.getParentRegistry().addChild(QuadrupedFootStateMachine.getStaticRegistry());
+      
+      QuadrupedFootStateMachineParameters parameters = new QuadrupedFootStateMachineParameters();
+      
+      runtimeEnvironment.getParentRegistry().addChild(parameters.getYoVariableRegistry());
 
       // create controllers and estimators
       referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), physicalProperties);
@@ -48,7 +51,7 @@ public class QuadrupedForceControllerToolbox
                new QuadrupedSolePositionController(robotQuadrant, referenceFrames.getFootReferenceFrames().get(robotQuadrant),
                      runtimeEnvironment.getControlDT(), registry));
          footStateMachine.set(robotQuadrant,
-               new QuadrupedFootStateMachine(robotQuadrant, solePositionController.get(robotQuadrant), runtimeEnvironment.getRobotTimestamp(), registry));
+               new QuadrupedFootStateMachine(parameters, robotQuadrant, solePositionController.get(robotQuadrant), runtimeEnvironment.getRobotTimestamp(), registry));
       }
       soleWaypointController = new QuadrupedSoleWaypointController(referenceFrames.getBodyFrame(), solePositionController, runtimeEnvironment.getRobotTimestamp(), registry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());

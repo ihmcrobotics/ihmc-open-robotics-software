@@ -78,7 +78,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       {
          DepthDataStateCommand enableBehaviorLidar = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
          enableBehaviorLidar.setDestination(PacketDestination.SENSOR_MANAGER);
-         sendPacketToNetworkProcessor(enableBehaviorLidar);
+         sendPacket(enableBehaviorLidar);
          
          ThreadTools.sleep(100);
          
@@ -149,11 +149,11 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       DepthDataStateCommand depthDataStateCommand = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
       depthDataStateCommand.setDestination(PacketDestination.SENSOR_MANAGER);
       
-      sendPacketToNetworkProcessor(depthDataStateCommand);
+      sendPacket(depthDataStateCommand);
       
       TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
       textToSpeechPacket.setDestination(PacketDestination.TEXT_TO_SPEECH);
-      sendPacketToNetworkProcessor(textToSpeechPacket);
+      sendPacket(textToSpeechPacket);
    }
 
    @Override

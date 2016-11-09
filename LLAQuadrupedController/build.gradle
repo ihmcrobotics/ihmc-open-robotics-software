@@ -50,6 +50,9 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCCommunication")
    compile ihmc.getProjectDependency(":SDFLoader")
    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
+   compile ihmc.getProjectDependency(":IHMCStateEstimation")
+   compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+   compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
    compile ihmc.getProjectDependency(":SensorProcessing")
    compile ihmc.getProjectDependency(":IHMCRobotDescription")
    compile ihmc.getProjectDependency(":IHMCRobotModels")
@@ -72,6 +75,12 @@ afterEvaluate {
 }
 
 jar {
+   List depend = []
+   configurations.runtime.each {
+      depend.add('lib/' + it.name)
+   }
+
+
     manifest {
         attributes(
                 "Created-By": "IHMC Gradle Build Script",
@@ -82,6 +91,44 @@ jar {
                 "Bundle-Name": project.name,
                 "Bundle-Version": project.version,
                 "Bundle-License": "${project.ext.licenseURL}",
-                "Bundle-Vendor": "IHMC")
+                "Bundle-Vendor": "IHMC",
+                'Class-Path': depend.join(' '))
+                
     }
 }
+
+task install(dependsOn: ['jar']) {
+
+   doLast {
+
+   	def projectDir = project.buildscript.sourceFile.parent
+
+    File dest = new File(project.rootDir, 'install')
+    
+    File libdest = new File(dest, 'lib')
+    dest.mkdir();
+    libdest.mkdir();
+    
+    
+   configurations.runtime.each {
+   	   def fileToCopy = it.toString()
+       copy{
+    	 from fileToCopy
+    	 into libdest    	 
+       }
+    }
+    
+    copy{
+    	from jar.archivePath
+    	into dest
+    	rename (jar.archiveName, 'LLAQuadrupedController.jar')
+    }
+    
+    File scriptDir = new File(projectDir, "launchScripts/local")
+    copy{
+    	from scriptDir
+    	into dest
+    }
+    
+    	}
+   }

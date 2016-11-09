@@ -284,7 +284,7 @@ public class SkippyController implements RobotController
       boolean drawShoulderToFootPositionVector = false;// true;//
       boolean drawShoulderJointUnitVector = true;//false;// 
       boolean drawTauShoulderJoint = false;// true;//
-      boolean drawRateOfChangeOfAngularMomentum = false;// true;//
+      boolean drawRateOfChangeOfAngularMomentum = true;//false;// 
       /*
        * CoM
        */
@@ -1273,15 +1273,16 @@ public class SkippyController implements RobotController
 
       public boolean checkCondition()
       {
-         if(trace)
-            System.out.println("BalanceToPrepareTransitionCondition");
-         if (skippyToDo.getEnumValue() == SkippyToDo.JUMP_FORWARD)
-         {
-            double time = stateMachine.timeInCurrentState();
-            return time >= 1.0;//4.0;  //
-         }
-         else
-            return false;
+         return false;
+//         if(trace)
+//            System.out.println("BalanceToPrepareTransitionCondition");
+//         if (skippyToDo.getEnumValue() == SkippyToDo.JUMP_FORWARD)
+//         {
+//            double time = stateMachine.timeInCurrentState();
+//            return time >= 1.0;//4.0;  //
+//         }
+//         else
+//            return false;
       }
    }
 
@@ -1417,19 +1418,24 @@ public class SkippyController implements RobotController
 
       public void doAction()
       {
-//         qd_hip.set(0.6);
+         //         qd_hip.set(0.6);
          if (robot.getFootFS())
          {
             /*
              * Torque on hip for keeping track the angle between torso and leg
              */
-            desiredLegToTorsoAngle.set(-0.5075);   //
+//            desiredLegToTorsoAngle.set(0.5075);
+//            hipAngleController.setIntegralGain(0.116299896953656563); //);//
+            hipAngleController.setProportionalGain(179.53125);
+            hipAngleController.setDerivativeGain(0.00602454); 
+            hipAngleController.setIntegralGain(0.0);
+
             tauHipForAngleTracking.set(hipAngleController.compute(robot.getQ_hip().getDoubleValue(), desiredLegToTorsoAngle.getDoubleValue(),
                                                                   -robot.getQd_hip().getDoubleValue(), 0.0, deltaT));
             /*
              * Apply torque to the joints
              */
-            robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue() + tauHipForAngleTracking.getDoubleValue()); 
+            robot.getHipJointTippy().setTau(tauOnHipJointAxis.getDoubleValue() + tauHipForAngleTracking.getDoubleValue());
             robot.getShoulderJoint().setTau(tauOnShoulderJointAxis.getDoubleValue());
             if (trace)
                writer.println(stateMachine.getCurrentState() + " CMP controller------------------------" + stateMachine.timeInCurrentState());
@@ -1439,7 +1445,8 @@ public class SkippyController implements RobotController
 
       public void doTransitionIntoAction()
       {
-         qd_hip.set(0.6);
+//         qd_hip.set(0.6);
+         desiredLegToTorsoAngle.set(robot.getQ_hip().getDoubleValue());
       }
 
       public void doTransitionOutOfAction()

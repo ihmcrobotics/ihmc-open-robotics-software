@@ -11,21 +11,19 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-import org.ejml.data.DenseMatrix64F;
-
-import boofcv.abst.calib.ConfigChessboard;
-import boofcv.abst.calib.PlanarCalibrationDetector;
-import boofcv.abst.calib.PlanarDetectorChessboard;
+import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
+import boofcv.abst.fiducial.calib.ConfigChessboard;
 import boofcv.alg.geo.PerspectiveOps;
+import boofcv.alg.geo.calibration.CalibrationObservation;
 import boofcv.alg.geo.calibration.Zhang99ComputeTargetHomography;
 import boofcv.alg.geo.calibration.Zhang99DecomposeHomography;
-import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
+import boofcv.factory.calib.FactoryCalibrationTarget;
 import boofcv.gui.image.ShowImages;
 import boofcv.io.UtilIO;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
-import boofcv.struct.image.ImageFloat32;
+import boofcv.struct.image.GrayF32;
 import georegression.geometry.GeometryMath_F64;
 import georegression.metric.Intersection2D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
@@ -34,6 +32,7 @@ import georegression.struct.point.Point2D_I32;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.shapes.Polygon2D_F64;
 import georegression.transform.se.SePointOps_F64;
+import org.ejml.data.DenseMatrix64F;
 
 /**
  * @author Peter Abeles
@@ -62,8 +61,11 @@ public class ManualDetectCameraCalibrationBox
          selected.clear();
       }
 
-      public void addCalibPoints( final java.util.List<Point2D_F64> pts ) {
-         calibPts.addAll(pts);
+      public void addCalibPoints( final java.util.List<CalibrationObservation.Point> pts )
+      {
+         for (int i = 0; i < pts.size(); i++) {
+            calibPts.add(pts.get(i).pixel);
+         }
          repaint();
       }
 
@@ -106,8 +108,8 @@ public class ManualDetectCameraCalibrationBox
    }
 
 
-   public static Se3_F64 detectTarget( BufferedImage image , IntrinsicParameters intrinsic , GUI gui ) {
-      ImageFloat32 gray = ConvertBufferedImage.convertFrom(image, (ImageFloat32) null);
+   public static Se3_F64 detectTarget(BufferedImage image , IntrinsicParameters intrinsic , GUI gui ) {
+      GrayF32 gray = ConvertBufferedImage.convertFrom(image, (GrayF32) null);
 
       // Detects the target and calibration point inside the target
 //      ConfigChessboard config = new ConfigChessboard(5, 7, 0.03);
@@ -115,7 +117,7 @@ public class ManualDetectCameraCalibrationBox
 //      PlanarCalibrationDetector detector = FactoryPlanarCalibrationTarget.detectorChessboard(config);
 
       ConfigChessboard config = new ConfigChessboard(5, 7, 0.03);
-      PlanarDetectorChessboard detector = FactoryPlanarCalibrationTarget.detectorChessboard(config);
+      CalibrationDetectorChessboard detector = FactoryCalibrationTarget.detectorChessboard(config);
 
       
 //      DetectChessboardFiducial detector = new DetectChessCalibrationPoints(5,7,4,1,ImageFloat32.class);
@@ -126,7 +128,7 @@ public class ManualDetectCameraCalibrationBox
       // specify target's shape.  This also specifies where the center of the target's coordinate system is.
       // Look at source code to be sure, but it is probably the target's center.  You can change this by
       // creating your own target.. Note z=0 is assumed
-      PlanarCalibrationDetector target = FactoryPlanarCalibrationTarget.detectorChessboard(config);
+      CalibrationDetectorChessboard target = FactoryCalibrationTarget.detectorChessboard(config);
       // Computes the homography
       Zhang99ComputeTargetHomography computeH = new Zhang99ComputeTargetHomography(target.getLayout());
       // decomposes the homography
@@ -139,7 +141,7 @@ public class ManualDetectCameraCalibrationBox
       if( !detector.process(gray) )
          return null;
 
-      gui.addCalibPoints( detector.getDetectedPoints() );
+      gui.addCalibPoints( detector.getDetectedPoints().points );
 
       // Compute the homography
       if( !computeH.computeHomography(detector.getDetectedPoints()) )

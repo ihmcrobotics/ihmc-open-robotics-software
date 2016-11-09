@@ -50,7 +50,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
       {      
          outgoingPelvisHeightTrajectoryMessage.setDestination(PacketDestination.UI);  
          sendPacketToController(outgoingPelvisHeightTrajectoryMessage);
-         sendPacketToNetworkProcessor(outgoingPelvisHeightTrajectoryMessage);
+         sendPacket(outgoingPelvisHeightTrajectoryMessage);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
          trajectoryTime.set(outgoingPelvisHeightTrajectoryMessage.getTrajectoryTime());

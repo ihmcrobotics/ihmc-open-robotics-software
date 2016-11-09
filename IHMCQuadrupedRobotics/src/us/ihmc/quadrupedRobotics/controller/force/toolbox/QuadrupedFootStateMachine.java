@@ -24,25 +24,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedFootStateMachine
 {
-   // static registry
-   private static YoVariableRegistry staticRegistry = new YoVariableRegistry("QuadrupedFootStateMachine");
-
-   public static YoVariableRegistry getStaticRegistry()
-   {
-      return staticRegistry;
-   }
-
-   // static parameters
-   private static ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(QuadrupedFootStateMachine.class, staticRegistry);
-   private static DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory
-         .createDoubleArray("solePositionProportionalGains", 10000, 10000, 5000);
-   private static DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
-   private static DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
-   private static DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
-   private static DoubleParameter touchdownPressureLimitParameter = parameterFactory.createDouble("touchdownPressureLimit", 50);
-   private static IntegerParameter touchdownTriggerWindowParameter = parameterFactory.createInteger("touchdownTriggerWindow", 1);
-   private static DoubleParameter minimumStepAdjustmentTimeParameter = parameterFactory.createDouble("minimumStepAdjustmentTime", 0.1);
-   private static DoubleParameter stepGoalOffsetZParameter = parameterFactory.createDouble("stepGoalOffsetZ", 0.0);
 
    // control variables
    private final YoVariableRegistry registry;
@@ -53,6 +34,7 @@ public class QuadrupedFootStateMachine
    private final YoQuadrupedTimedStep stepCommand;
    private final BooleanYoVariable stepCommandIsValid;
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
+   private final QuadrupedFootStateMachineParameters parameters;
 
    // foot state machine
    public enum FootState
@@ -67,7 +49,7 @@ public class QuadrupedFootStateMachine
    private final FiniteStateMachine<FootState, FootEvent> footStateMachine;
    private QuadrupedStepTransitionCallback stepTransitionCallback;
 
-   public QuadrupedFootStateMachine(RobotQuadrant robotQuadrant, QuadrupedSolePositionController solePositionController,
+   public QuadrupedFootStateMachine(QuadrupedFootStateMachineParameters parameters, RobotQuadrant robotQuadrant, QuadrupedSolePositionController solePositionController,
          DoubleYoVariable timestamp, YoVariableRegistry parentRegistry)
    {
       // control variables
@@ -80,7 +62,7 @@ public class QuadrupedFootStateMachine
       this.stepCommand = new YoQuadrupedTimedStep(prefix + "StepCommand", registry);
       this.stepCommandIsValid = new BooleanYoVariable(prefix + "StepCommandIsValid", registry);
       this.taskSpaceEstimates = new QuadrupedTaskSpaceEstimator.Estimates();
-
+      this.parameters = parameters;
       // state machine
       FiniteStateMachineBuilder<FootState, FootEvent> stateMachineBuilder = new FiniteStateMachineBuilder<>(FootState.class, FootEvent.class,
             prefix + "FootState", registry);
@@ -200,7 +182,7 @@ public class QuadrupedFootStateMachine
          this.goalPosition = new FramePoint();
          this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);
          this.touchdownTrigger = new GlitchFilteredBooleanYoVariable(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
-               touchdownTriggerWindowParameter.get());
+               parameters.getTouchdownTriggerWindowParameter());
       }
 
       @Override
@@ -211,17 +193,17 @@ public class QuadrupedFootStateMachine
          TimeInterval timeInterval = stepCommand.getTimeInterval();
          stepCommand.getGoalPosition(goalPosition);
          goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         goalPosition.add(0.0, 0.0, stepGoalOffsetZParameter.get());
+         goalPosition.add(0.0, 0.0, parameters.getStepGoalOffsetZParameter());
          FramePoint solePosition = taskSpaceEstimates.getSolePosition(robotQuadrant);
          solePosition.changeFrame(goalPosition.getReferenceFrame());
          swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval);
 
          // initialize contact state and feedback gains
          solePositionController.reset();
-         solePositionController.getGains().setProportionalGains(solePositionProportionalGainsParameter.get());
-         solePositionController.getGains().setDerivativeGains(solePositionDerivativeGainsParameter.get());
+         solePositionController.getGains().setProportionalGains(parameters.getSolePositionProportionalGainsParameter());
+         solePositionController.getGains().setDerivativeGains(parameters.getSolePositionDerivativeGainsParameter());
          solePositionController.getGains()
-               .setIntegralGains(solePositionIntegralGainsParameter.get(), solePositionMaxIntegralErrorParameter.get());
+               .setIntegralGains(parameters.getSolePositionIntegralGainsParameter(), parameters.getSolePositionMaxIntegralErrorParameter());
          solePositionControllerSetpoints.initialize(taskSpaceEstimates);
 
          touchdownTrigger.set(false);
@@ -236,10 +218,10 @@ public class QuadrupedFootStateMachine
          // Compute current goal position.
          stepCommand.getGoalPosition(goalPosition);
          goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
-         goalPosition.add(0.0, 0.0, stepGoalOffsetZParameter.get());
+         goalPosition.add(0.0, 0.0, parameters.getStepGoalOffsetZParameter());
 
          // Compute swing trajectory.
-         if (touchDownTime - currentTime > minimumStepAdjustmentTimeParameter.get())
+         if (touchDownTime - currentTime > parameters.getMinimumStepAdjustmentTimeParameter())
          {
             swingTrajectory.adjustTrajectory(goalPosition, currentTime);
          }
@@ -254,13 +236,13 @@ public class QuadrupedFootStateMachine
          double normalizedTimeInSwing = relativeTimeInSwing / stepCommand.getTimeInterval().getDuration();
          if (normalizedTimeInSwing > 0.5)
          {
-            touchdownTrigger.update(pressureEstimate > touchdownPressureLimitParameter.get());
+            touchdownTrigger.update(pressureEstimate > parameters.getTouchdownPressureLimitParameter());
          }
 
          // Compute sole force.
          if (touchdownTrigger.getBooleanValue())
          {
-            double pressureLimit = touchdownPressureLimitParameter.get();
+            double pressureLimit = parameters.getTouchdownPressureLimitParameter();
             soleForceCommand.changeFrame(ReferenceFrame.getWorldFrame());
             soleForceCommand.set(0, 0, -pressureLimit);
          }

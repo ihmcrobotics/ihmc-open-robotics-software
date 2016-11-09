@@ -1,10 +1,8 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import java.awt.Dimension;
-import java.awt.GridLayout;
-
-import javax.swing.JPanel;
-
+import boofcv.struct.image.GrayF32;
+import boofcv.struct.image.InterleavedU8;
+import boofcv.struct.image.Planar;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -13,9 +11,8 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import boofcv.struct.image.ImageFloat32;
-import boofcv.struct.image.ImageUInt8;
-import boofcv.struct.image.MultiSpectral;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Displays selected pixel values in an X-Y scatter plot
@@ -68,7 +65,7 @@ public class VisualizeScatter extends JPanel {
    }
 
 
-   public void update( MultiSpectral<ImageFloat32> color , ImageUInt8 binary ) {
+   public void update(Planar<GrayF32> color , InterleavedU8 binary ) {
       // this is supposed to speed it up.  not sure if it does
       chartHS.chart.setNotify(false);
       chartVS.chart.setNotify(false);
@@ -79,9 +76,9 @@ public class VisualizeScatter extends JPanel {
       XYSeries seriesHS = new XYSeries("1");
       XYSeries seriesVS = new XYSeries("2");
 
-      ImageFloat32 H = color.getBand(0);
-      ImageFloat32 S = color.getBand(1);
-      ImageFloat32 V = color.getBand(2);
+      GrayF32 H = color.getBand(0);
+      GrayF32 S = color.getBand(1);
+      GrayF32 V = color.getBand(2);
 
       for( int y = 0; y < binary.height; y++ ) {
          int index = binary.startIndex + y*binary.stride;
