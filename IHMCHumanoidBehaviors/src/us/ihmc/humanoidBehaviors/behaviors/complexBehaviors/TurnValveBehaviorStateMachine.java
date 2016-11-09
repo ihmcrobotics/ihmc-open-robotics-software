@@ -19,9 +19,9 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -44,8 +44,8 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
 
    }
 
-   private Vector3f valveWalkOffsetPoint1 = new Vector3f(-0.39f, 0.85f, 0.0f);
-   private Vector3f valveWalkOffsetPoint2 = new Vector3f(-0.38f, 0.75f, 0.0f);
+   private Vector3f valveWalkOffsetPoint1 = new Vector3f(-0.39f, 0.0f, 0.85f);
+   private Vector3f valveWalkOffsetPoint2 = new Vector3f(-0.38f, 0.0f, 0.75f);
 
    private final SearchForValveBehavior searchForValveBehavior;
    private final WalkToInteractableObjectBehavior walkToInteractableObjectBehavior;
@@ -80,11 +80,33 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       super.doControl();
    }
 
+   @Override
+   public void initialize()
+   {
+      super.initialize();
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Turn Valve Behavior State Machine");
+      sendPacket(p1);
+   }
+
    private void setupStateMachine()
    {
+      BehaviorAction<TurnValveBehaviorState> resetRobot = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.RESET_ROBOT, resetRobotBehavior);
+
+      BehaviorAction<TurnValveBehaviorState> setup = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.SETUP_ROBOT,
+            atlasPrimitiveActions.rightArmGoHomeBehavior, atlasPrimitiveActions.leftHandDesiredConfigurationBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            
+            GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
+            atlasPrimitiveActions.rightArmGoHomeBehavior.setInput(goHomeRightArmMessage);
+            HandDesiredConfigurationMessage handMessage = new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
+            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(handMessage);
+         }
+      };
 
       //TODO setup search for ball behavior
-
       BehaviorAction<TurnValveBehaviorState> searchForValveFar = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.SEARCHING_FOR_VAVLE,
             searchForValveBehavior)
       {
@@ -100,45 +122,18 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          }
       };
 
-      BehaviorAction<TurnValveBehaviorState> searchForValveNear = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.SEARCHING_FOR_VALVE_FINAL,
-            searchForValveBehavior);
-
-      BehaviorAction<TurnValveBehaviorState> resetRobot = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.RESET_ROBOT, resetRobotBehavior);
-
-      BehaviorAction<TurnValveBehaviorState> setup = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.SETUP_ROBOT,
-            atlasPrimitiveActions.rightArmGoHomeBehavior, atlasPrimitiveActions.leftHandDesiredConfigurationBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
-            atlasPrimitiveActions.rightArmGoHomeBehavior.setInput(goHomeRightArmMessage);
-            HandDesiredConfigurationMessage handMessage = new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
-            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(handMessage);
-         }
-      };
-
       BehaviorAction<TurnValveBehaviorState> walkToValveAction = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.WALKING_TO_VALVE,
             walkToInteractableObjectBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            ReferenceFrame valveFrame = new ReferenceFrame("valveFrame", false, false, true)
-            {
 
-               @Override
-               protected void updateTransformToParent(RigidBodyTransform transformToParent)
-               {
-                  transformToParent = searchForValveBehavior.getLocation();
-               }
-            };
+            PoseReferenceFrame valvePose = new PoseReferenceFrame("valveFrame", ReferenceFrame.getWorldFrame());
+            valvePose.setPoseAndUpdate(new RigidBodyTransform(searchForValveBehavior.getLocation()));
 
-            valveFrame.update();
-            FramePoint2d point1 = new FramePoint2d(valveFrame, valveWalkOffsetPoint1.x, valveWalkOffsetPoint1.y);
-            FramePoint2d point2 = new FramePoint2d(valveFrame, valveWalkOffsetPoint2.x, valveWalkOffsetPoint2.y);
-
-            //            searchForValveBehavior.getLocation().
+            FramePoint point1 = new FramePoint(valvePose, valveWalkOffsetPoint1.x, valveWalkOffsetPoint1.y, valveWalkOffsetPoint1.z);
+            FramePoint point2 = new FramePoint(valvePose, valveWalkOffsetPoint2.x, valveWalkOffsetPoint2.y, valveWalkOffsetPoint2.z);
 
             walkToInteractableObjectBehavior.setWalkPoints(point1, point2);
 
@@ -147,8 +142,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
 
       statemachine.addStateWithDoneTransition(setup, TurnValveBehaviorState.SEARCHING_FOR_VAVLE);
 
-      statemachine.addStateWithDoneTransition(searchForValveFar, TurnValveBehaviorState.RESET_ROBOT);
-      statemachine.addStateWithDoneTransition(resetRobot, TurnValveBehaviorState.WALKING_TO_VALVE);
+      statemachine.addStateWithDoneTransition(searchForValveFar, TurnValveBehaviorState.WALKING_TO_VALVE);
       statemachine.addState(walkToValveAction);
       statemachine.setCurrentState(TurnValveBehaviorState.SETUP_ROBOT);
    }

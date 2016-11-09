@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.examples;
 
 import javax.vecmath.Point3f;
 
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -11,7 +12,7 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
 {
 
    private int scanNumber = 0;
-   private int NUMBER_OF_SCANS = 5;
+   private int NUMBER_OF_SCANS =25;
 
    protected final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
 
@@ -37,7 +38,6 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    {
       scanNumber++;
 
-      System.out.println("got scan of size "+points.length);
       coactiveBehaviorsNetworkManager.sendToUI("PointCloudRecieved", scanNumber);
    }
 
@@ -53,6 +53,8 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
       super.initialize();
       //reset necessary values so this behavior can run again properly
       scanNumber = 0;
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Getting Lidar");
+      sendPacket(p1);
       //let the UI know this specific behavior has started
       coactiveBehaviorsNetworkManager.sendToUI("GetLidarScanExampleBehavior", 1);
    }
