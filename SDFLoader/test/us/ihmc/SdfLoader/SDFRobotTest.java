@@ -1,8 +1,8 @@
 package us.ihmc.SdfLoader;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -19,8 +19,15 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.GroundContactPointGroup;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.JUnitTools;
 
 public class SDFRobotTest
@@ -54,11 +61,14 @@ public class SDFRobotTest
       RobotDescription robotDescription = robotDescriptionFromSDFLoader.getRobotDescription();
       RobotFromDescription robot = new RobotFromDescription(robotDescription);
 
-      checkRobotsMatch(sdfHumanoidRobot, robot);
+      boolean graphicsExist = checkRobotsMatch(sdfHumanoidRobot, robot);
+      assertTrue("Graphics do not all exist!", graphicsExist);
    }
 
-   private void checkRobotsMatch(Robot robotOne, Robot robotTwo)
+   private boolean checkRobotsMatch(Robot robotOne, Robot robotTwo)
    {
+      boolean testSuccessful = true;
+      
       assertEquals(robotOne.getName(), robotTwo.getName());
 
       ArrayList<Joint> rootJointsOne = robotOne.getRootJoints();
@@ -71,12 +81,16 @@ public class SDFRobotTest
          Joint rootJointOne = rootJointsOne.get(i);
          Joint rootJointTwo = rootJointsTwo.get(i);
 
-         checkJointsMatchRecursively(rootJointOne, rootJointTwo);
+         testSuccessful &= checkJointsMatchRecursively(rootJointOne, rootJointTwo);
       }
+      
+      return testSuccessful;
    }
 
-   private void checkJointsMatchRecursively(Joint jointOne, Joint jointTwo)
+   private boolean checkJointsMatchRecursively(Joint jointOne, Joint jointTwo)
    {
+      boolean testSuccessful = true;
+      
       assertEquals(jointOne.getName(), jointTwo.getName());
 
       Vector3d offsetOne = new Vector3d();
@@ -92,7 +106,7 @@ public class SDFRobotTest
       Link linkOne = jointOne.getLink();
       Link linkTwo = jointTwo.getLink();
 
-      checkLinksMatch(linkOne, linkTwo);
+      testSuccessful &= checkLinksMatch(linkOne, linkTwo);
 
       // Check the children
 
@@ -109,6 +123,8 @@ public class SDFRobotTest
 
          checkJointsMatchRecursively(childJointOne, childJointTwo);
       }
+      
+      return testSuccessful;
    }
 
    private void checkGroundContactPointsMatch(Joint jointOne, Joint jointTwo)
@@ -135,7 +151,7 @@ public class SDFRobotTest
       }
    }
 
-   private void checkLinksMatch(Link linkOne, Link linkTwo)
+   private boolean checkLinksMatch(Link linkOne, Link linkTwo)
    {
       assertEquals(linkOne.getName(), linkTwo.getName());
 
@@ -151,9 +167,27 @@ public class SDFRobotTest
 
       Graphics3DObject linkGraphicsOne = linkOne.getLinkGraphics();
       Graphics3DObject linkGraphicsTwo = linkTwo.getLinkGraphics();
-
-      ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructionsOne = linkGraphicsOne.getGraphics3DInstructions();
-      ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructionsTwo = linkGraphicsTwo.getGraphics3DInstructions();
+      
+      ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructionsOne;
+      ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructionsTwo;
+      try
+      {
+         graphics3dInstructionsOne = linkGraphicsOne.getGraphics3DInstructions();
+      }
+      catch (NullPointerException nullPointerException)
+      {
+         PrintTools.error(this, "linkOne lacks graphics");
+         return false;
+      }
+      try
+      {
+         graphics3dInstructionsTwo = linkGraphicsTwo.getGraphics3DInstructions();
+      }
+      catch (NullPointerException nullPointerException)
+      {
+         PrintTools.error(this, "linkTwo lacks graphics");
+         return false;
+      }
 
       assertEquals(graphics3dInstructionsOne.size(), graphics3dInstructionsTwo.size());
 
@@ -166,6 +200,7 @@ public class SDFRobotTest
          assertTrue(instructionOne.getClass() == instructionTwo.getClass());
       }
 
+      return true;
    }
 
 }
