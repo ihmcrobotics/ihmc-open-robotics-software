@@ -1,6 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 
@@ -34,7 +36,9 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    private double maxStepReach;
 
-   private FootstepPlan footstepPlan;
+   //   private FootstepPlan footstepPlan;
+
+   private BipedalFootstepPlannerNode startNode, goalNode;
 
    private BipedalFootstepPlannerListener listener;
 
@@ -90,12 +94,35 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    @Override
    public List<FramePose> getPlan()
    {
-      return null;
+      if (goalNode == null)
+      {
+         return null;
+      }
+
+      ArrayList<FramePose> result = new ArrayList<FramePose>();
+
+      BipedalFootstepPlannerNode node = goalNode;
+
+      while (node != null)
+      {
+         RigidBodyTransform soleTransform = new RigidBodyTransform();
+         node.getSoleTransform(soleTransform);
+
+         FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransform);
+         result.add(framePose);
+
+         node = node.getParentNode();
+      }
+
+      Collections.reverse(result);
+      return result;
    }
 
    @Override
    public FootstepPlanningResult plan()
    {
+      startNode = goalNode = null;
+
       BipedalFootstepPlannerNode startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
       stack.push(startNode);
@@ -125,7 +152,16 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          ConvexPolygon2d currentFootPolygon = new ConvexPolygon2d(footPolygonsInSoleFrame.get(currentSide));
 
          currentFootPolygon.applyTransformAndProjectToXYPlane(soleTransform);
-         RigidBodyTransform nodeToExpandSnapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList);
+
+         RigidBodyTransform nodeToExpandSnapTransform = null;
+         if (planarRegionsList != null)
+         {
+            nodeToExpandSnapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList);
+         }
+         else
+         {
+            nodeToExpandSnapTransform = new RigidBodyTransform();
+         }
 
          if (nodeToExpandSnapTransform == null)
          {
@@ -134,6 +170,10 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          }
 
          nodeToExpand.transformSoleTransform(nodeToExpandSnapTransform);
+         if (startNode == null)
+         {
+            startNode = nodeToExpand;
+         }
          notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
 
          soleZUpTransform.set(soleTransform);
@@ -158,6 +198,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
             notifyListenerSolutionWasFound();
 
+            goalNode = childNode;
+            goalNode.setParentNode(nodeToExpand);
             return FootstepPlanningResult.OPTIMAL_SOLUTION;
          }
 
@@ -165,6 +207,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          nextTransform.setTranslation(idealStep.getX(), idealStep.getY(), idealStep.getZ());
 
          BipedalFootstepPlannerNode childNode = new BipedalFootstepPlannerNode(nextSide, nextTransform);
+         childNode.setParentNode(nodeToExpand);
          nodeToExpand.addChild(childNode);
 
          stack.add(childNode);
@@ -174,7 +217,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
       return FootstepPlanningResult.NO_PATH_EXISTS;
    }
-
 
    private void notifyListenerNodeSelectedForExpansion(BipedalFootstepPlannerNode nodeToExpand)
    {
