@@ -8,8 +8,6 @@ import java.util.Random;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
@@ -31,7 +29,7 @@ public class PlanarRegionsListPolygonSnapperTest
    public void testSimpleVerticalSnap()
    {
       boolean visualize = false;
-      ConvexPolygon2d polygonToSnap = createRectanglePolygon(0.5, 0.25);
+      ConvexPolygon2d polygonToSnap = PlanarRegionsListExamples.createRectanglePolygon(0.5, 0.25);
       RigidBodyTransform nonSnappedTransform = new RigidBodyTransform();
 
       PolygonSnapperVisualizer polygonSnapperVisualizer = null;
@@ -68,7 +66,7 @@ public class PlanarRegionsListPolygonSnapperTest
    public void testSimpleVerticalAndRotatedSnap()
    {
       boolean visualize = false;
-      ConvexPolygon2d polygonToSnap = createRectanglePolygon(0.5, 0.25);
+      ConvexPolygon2d polygonToSnap = PlanarRegionsListExamples.createRectanglePolygon(0.5, 0.25);
       RigidBodyTransform nonSnappedTransform = new RigidBodyTransform();
 
       PolygonSnapperVisualizer polygonSnapperVisualizer = null;
@@ -107,7 +105,7 @@ public class PlanarRegionsListPolygonSnapperTest
    public void testMovingAcrossStaircase()
    {
       boolean visualize = false;
-      PlanarRegionsList planarRegionsList = generateStairCase();
+      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples.generateStairCase();
       ArrayList<double[]> xyYawToTest = new ArrayList<>();
       for (double xTranslation = 0.0; xTranslation < 3.0; xTranslation = xTranslation + 0.1)
       {
@@ -129,7 +127,7 @@ public class PlanarRegionsListPolygonSnapperTest
       double maxY = 1.0;
       double maxZ = 0.5;
 
-      PlanarRegionsList planarRegionsList = generateRandomObjects(random, numberOfRandomObjects, maxX, maxY, maxZ);
+      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples.generateRandomObjects(random, numberOfRandomObjects, maxX, maxY, maxZ);
       ArrayList<double[]> xyYawToTest = new ArrayList<>();
 
       for (double x = -maxX; x<maxX; x = x + 0.1)
@@ -156,7 +154,7 @@ public class PlanarRegionsListPolygonSnapperTest
       double maxY = 1.0;
       double maxZ = 0.2;
 
-      PlanarRegionsList planarRegionsList = generateBumpyGround(random, maxX, maxY, maxZ);
+      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples.generateBumpyGround(random, maxX, maxY, maxZ);
       ArrayList<double[]> xyYawToTest = new ArrayList<>();
 
       for (double x = -maxX; x<maxX; x = x + 0.1)
@@ -174,7 +172,7 @@ public class PlanarRegionsListPolygonSnapperTest
 
    private static void doATest(PlanarRegionsList planarRegionsList, ArrayList<double[]> xyYawToTest, boolean visualize)
    {
-      ConvexPolygon2d originalPolygon = createRectanglePolygon(0.3, 0.15);
+      ConvexPolygon2d originalPolygon = PlanarRegionsListExamples.createRectanglePolygon(0.3, 0.15);
       RigidBodyTransform nonSnappedTransform = new RigidBodyTransform();
 
       PolygonSnapperVisualizer polygonSnapperVisualizer = null;
@@ -235,95 +233,6 @@ public class PlanarRegionsListPolygonSnapperTest
          polygonSnapperVisualizer.cropBuffer();
          ThreadTools.sleepForever();
       }
-   }
-
-   private PlanarRegionsList generateStairCase()
-   {
-      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-
-      int numberOfSteps = 5;
-
-      double length = 0.4;
-      double width = 0.8;
-      double height = 0.1;
-
-      generator.translate(length, 0.0, 0.0);
-      generator.rotateEuler(new Vector3d(0.1, 0.1, 0.0));
-      for (int i = 0; i < numberOfSteps; i++)
-      {
-         generator.addCubeReferencedAtBottomMiddle(length, width, height);
-         generator.translate(length, 0.0, 0.0);
-         height = height + 0.1;
-      }
-
-      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
-      return planarRegionsList;
-   }
-
-   private PlanarRegionsList generateRandomObjects(Random random, int numberOfRandomObjects, double maxX, double maxY, double maxZ)
-   {
-      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-
-      double length = RandomTools.generateRandomDouble(random, 0.2, 1.0);
-      double width = RandomTools.generateRandomDouble(random, 0.2, 1.0);
-      double height = RandomTools.generateRandomDouble(random, 0.2, 1.0);
-
-      for (int i = 0; i < numberOfRandomObjects; i++)
-      {
-         generator.identity();
-
-         Vector3d translationVector = RandomTools.generateRandomVector(random, -maxX, -maxY, 0.0, maxX, maxY, maxZ);
-         generator.translate(translationVector);
-
-         Quat4d rotation = RandomTools.generateRandomQuaternion(random);
-         generator.rotate(rotation);
-
-         generator.addCubeReferencedAtBottomMiddle(length, width, height);
-      }
-
-      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
-      return planarRegionsList;
-   }
-
-   private PlanarRegionsList generateBumpyGround(Random random, double maxX, double maxY, double maxZ)
-   {
-      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-
-      double length = 0.5;
-      double width = 0.5;
-
-      generator.translate(maxX/2.0 + length/2.0, maxY/2.0 - width/2.0, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(1.5 * maxX, 1.25 * maxY, 0.01);
-      generator.identity();
-
-      int sizeX = (int) (maxX/length);
-      int sizeY = (int) (maxY/width);
-
-      for (int i=0; i<sizeY; i++)
-      {
-         generator.identity();
-         generator.translate(0.0, i * width, 0.0);
-         for (int j=0; j<sizeX; j++)
-         {
-            generator.translate(length, 0.0, 0.0);
-            double height = RandomTools.generateRandomDouble(random, 0.01, maxZ);
-            generator.addCubeReferencedAtBottomMiddle(length, width, height + random.nextDouble() * 0.1);
-         }
-      }
-
-      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
-      return planarRegionsList;
-   }
-
-   private static ConvexPolygon2d createRectanglePolygon(double lengthX, double widthY)
-   {
-      ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
-      convexPolygon.addVertex(lengthX / 2.0, widthY / 2.0);
-      convexPolygon.addVertex(-lengthX / 2.0, widthY / 2.0);
-      convexPolygon.addVertex(-lengthX / 2.0, -widthY / 2.0);
-      convexPolygon.addVertex(lengthX / 2.0, -widthY / 2.0);
-      convexPolygon.update();
-      return convexPolygon;
    }
 
    public static void main(String[] args)
