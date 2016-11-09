@@ -14,10 +14,10 @@ public interface FootstepPlanner
    public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide side);
 
    /**
-    * Set the goal pose of the robot (middle of the sole frames)
-    * @param goalPose            Goal pose for footstep plan
+    * Set the FootstepPlannerGoal of the robot.
+    * @param goal FootstepPlannerGoal indicating the goal region, footstep, or other options.
     */
-   public void setGoalPose(FramePose goalPose);
+   public void setGoal(FootstepPlannerGoal goal);
 
    /**
     * Set possible stepping regions for the footstep planner. If null is passed the
