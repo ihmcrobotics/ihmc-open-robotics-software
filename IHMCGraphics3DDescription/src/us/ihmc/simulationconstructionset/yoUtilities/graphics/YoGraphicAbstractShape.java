@@ -119,6 +119,12 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       throw new RuntimeException("Implement Me!");
    }
 
+   public void setPoseToNaN()
+   {
+      yoFramePoint.setToNaN();
+      yoFrameOrientation.setToNaN();
+   }
+
    @Override
    protected boolean containsNaN()
    {
