@@ -86,7 +86,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    @Override
    public void nodeSelectedForExpansion(BipedalFootstepPlannerNode nodeToExpand)
    {
-      RobotSide robotSide = nodeToExpand.getSide();
+      RobotSide robotSide = nodeToExpand.getRobotSide();
       RigidBodyTransform soleTransform = new RigidBodyTransform();
       nodeToExpand.getSoleTransform(soleTransform);
 
@@ -104,7 +104,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    @Override
    public void nodeForExpansionWasAccepted(BipedalFootstepPlannerNode acceptedNode)
    {
-      RobotSide robotSide = acceptedNode.getSide();
+      RobotSide robotSide = acceptedNode.getRobotSide();
       RigidBodyTransform soleTransform = new RigidBodyTransform();
       acceptedNode.getSoleTransform(soleTransform);
 
@@ -122,7 +122,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    @Override
    public void nodeForExpansionWasRejected(BipedalFootstepPlannerNode rejectedNode)
    {
-      RobotSide robotSide = rejectedNode.getSide();
+      RobotSide robotSide = rejectedNode.getRobotSide();
       RigidBodyTransform soleTransform = new RigidBodyTransform();
       rejectedNode.getSoleTransform(soleTransform);
 

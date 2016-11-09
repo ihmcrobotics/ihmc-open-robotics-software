@@ -2,12 +2,12 @@ package us.ihmc.footstepPlanning.flatGroundPlanning;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.simplePlanners.FlatGroundPlanningUtils;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
@@ -39,11 +39,11 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
-      List<FramePose> footstepPlan =
+      FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null);
 
       if (visualize())
-         PlanningTestTools.visualizeAndSleep(null, footstepPlan, initialStanceFootSide.getOppositeSide(), goalPose3d);
+         PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
       assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
    }
 
@@ -64,11 +64,11 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
-      List<FramePose> footstepPlan =
+      FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null);
 
       if (visualize())
-         PlanningTestTools.visualizeAndSleep(null, footstepPlan, initialStanceFootSide.getOppositeSide(), goalPose3d);
+         PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
       assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
    }
 
@@ -89,11 +89,11 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
-      List<FramePose> footstepPlan =
+      FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null);
 
       if (visualize())
-         PlanningTestTools.visualizeAndSleep(null, footstepPlan, initialStanceFootSide.getOppositeSide(), goalPose3d);
+         PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
       assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
    }
 
@@ -114,11 +114,11 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
-      List<FramePose> footstepPlan =
+      FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null);
 
       if (visualize())
-         PlanningTestTools.visualizeAndSleep(null, footstepPlan, initialStanceFootSide.getOppositeSide(), goalPose3d);
+         PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
       assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
    }
 }

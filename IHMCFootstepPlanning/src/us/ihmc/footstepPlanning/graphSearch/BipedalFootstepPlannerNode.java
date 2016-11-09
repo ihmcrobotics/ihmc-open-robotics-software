@@ -22,7 +22,7 @@ public class BipedalFootstepPlannerNode
       this.soleTransform.set(soleTransform);
    }
 
-   public RobotSide getSide()
+   public RobotSide getRobotSide()
    {
       return footstepSide;
    }
