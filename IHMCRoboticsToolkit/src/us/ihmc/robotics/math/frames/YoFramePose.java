@@ -5,6 +5,7 @@ import javax.vecmath.Tuple3d;
 
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -268,5 +269,35 @@ public class YoFramePose extends AbstractReferenceFrameHolder
    {
       getPosition().add(yoFramePose.getPosition());
       getOrientation().add(yoFramePose.getOrientation());
+   }
+
+   public DoubleYoVariable getYoX()
+   {
+      return getPosition().getYoX();
+   }
+   
+   public DoubleYoVariable getYoY()
+   {
+      return getPosition().getYoY();
+   }
+   
+   public DoubleYoVariable getYoZ()
+   {
+      return getPosition().getYoZ();
+   }
+   
+   public DoubleYoVariable getYoPitch()
+   {
+      return getOrientation().getPitch();
+   }
+   
+   public DoubleYoVariable getYoRoll()
+   {
+      return getOrientation().getRoll();
+   }
+   
+   public DoubleYoVariable getYoYaw()
+   {
+      return getOrientation().getYaw();
    }
 }
