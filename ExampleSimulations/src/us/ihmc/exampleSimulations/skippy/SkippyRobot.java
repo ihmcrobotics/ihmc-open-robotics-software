@@ -272,8 +272,9 @@ public class SkippyRobot extends Robot
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Crimson());
-
-      // associate the linkGraphics object with the link object
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       leg.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -302,7 +303,9 @@ public class SkippyRobot extends Robot
       linkGraphics.rotate(Math.PI/2,Axis.Y);
       linkGraphics.translate(-LEG_LENGTH+LEG_CUBE_LENGTH/3, 0.0, -LEG_CUBE_LENGTH);
       linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.LightSteelBlue());
-      // associate the linkGraphics object with the link object
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       leg.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -323,7 +326,9 @@ public class SkippyRobot extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.Glass(0.75));
       linkGraphics.addSphere(0.10, YoAppearance.White());
-
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       torso.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -344,7 +349,9 @@ public class SkippyRobot extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -TORSO_LENGTH / 2);
       linkGraphics.addCylinder(TORSO_LENGTH, TORSO_RADIUS, YoAppearance.Blue());
-
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       torso.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
@@ -373,8 +380,9 @@ public class SkippyRobot extends Robot
       linkGraphics.rotate(Math.PI/2,Axis.X);
       linkGraphics.translate(-SHOULDER_LENGTH/2, 0.0, -LEG_CUBE_LENGTH);
       linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.LightSteelBlue());
-
-      
+      /*
+       * Associate the linkGraphics object with the link object
+       */
       arms.setLinkGraphics(linkGraphics);
 
       if (SHOW_MOI_ELLIPSOIDS)
