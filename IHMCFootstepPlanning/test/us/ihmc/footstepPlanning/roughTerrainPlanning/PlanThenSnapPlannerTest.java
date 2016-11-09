@@ -24,6 +24,13 @@ public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
       super.testSimpleStepOnBox();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testRandomEnvironment()
+   {
+      super.testRandomEnvironment();
+   }
+
    @Override
    public FootstepPlanner getPlanner()
    {
