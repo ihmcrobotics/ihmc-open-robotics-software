@@ -31,7 +31,14 @@ public interface FootstepPlanner
    /**
     * Plan a sequence of footsteps given initial and goal conditions. The poses describe
     * the location and orientation of the sole frame in world.
-    * @return footstepPlan       Sequence of footsteps from initial stance foot to goal
+    * @return FootstepPlanningResult   Whether or not the plan succeeded.
     */
-   public FootstepPlanningResult plan(List<FramePose> solePosesToPack);
+   public FootstepPlanningResult plan();
+
+   /**
+    * Returns the plan that was solved for during the plan() method.
+    *
+    * @return
+    */
+   public List<FramePose> getPlan();
 }

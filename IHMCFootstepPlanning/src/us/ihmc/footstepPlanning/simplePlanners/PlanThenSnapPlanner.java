@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -47,14 +48,18 @@ public class PlanThenSnapPlanner implements FootstepPlanner
       this.planarRegionsList = planarRegionsList;
    }
 
+   private List<FramePose> solePosesPlan = new ArrayList<>();
+
    @Override
-   public FootstepPlanningResult plan(List<FramePose> solePosesToPack)
+   public FootstepPlanningResult plan()
    {
-      FootstepPlanningResult result = internalPlanner.plan(solePosesToPack);
+      FootstepPlanningResult result = internalPlanner.plan();
+      solePosesPlan = internalPlanner.getPlan();
+
       if (planarRegionsList == null)
          return result;
 
-      for (FramePose solePose : solePosesToPack)
+      for (FramePose solePose : solePosesPlan)
       {
          PoseReferenceFrame soleFrameBeforeSnapping = new PoseReferenceFrame("SoleFrameBeforeSnapping", solePose);
          FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(soleFrameBeforeSnapping, footPolygons.get(stepSide));
@@ -67,6 +72,12 @@ public class PlanThenSnapPlanner implements FootstepPlanner
          stepSide = stepSide.getOppositeSide();
       }
       return result;
+   }
+
+   @Override
+   public List<FramePose> getPlan()
+   {
+      return solePosesPlan;
    }
 
 }

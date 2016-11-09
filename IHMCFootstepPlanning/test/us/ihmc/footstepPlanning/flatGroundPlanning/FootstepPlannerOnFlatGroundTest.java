@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.flatGroundPlanning;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.vecmath.Point2d;
@@ -38,7 +39,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
-      ArrayList<FramePose> footstepPlan =
+      List<FramePose> footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null);
 
       if (visualize())
@@ -63,7 +64,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
-      ArrayList<FramePose> footstepPlan =
+      List<FramePose> footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null);
 
       if (visualize())
@@ -88,7 +89,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
-      ArrayList<FramePose> footstepPlan =
+      List<FramePose> footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null);
 
       if (visualize())
@@ -113,7 +114,7 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
-      ArrayList<FramePose> footstepPlan =
+      List<FramePose> footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null);
 
       if (visualize())

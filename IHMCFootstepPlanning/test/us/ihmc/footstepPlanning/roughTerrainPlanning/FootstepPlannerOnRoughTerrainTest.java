@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.vecmath.Quat4d;
@@ -41,7 +41,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
       // run the test
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
-      ArrayList<FramePose> footstepPlan =
+      List<FramePose> footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, initialStanceSide.getOppositeSide(), goalPose);
@@ -59,7 +59,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
       // run the test
       PlanarRegionsList planarRegionsList = generateRandomTerrain(random);
-      ArrayList<FramePose> footstepPlan =
+      List<FramePose> footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, initialStanceSide.getOppositeSide(), goalPose);

@@ -49,8 +49,8 @@ public class FootstepPlanningToolboxController extends ToolboxController<Footste
    @Override
    protected void updateInternal()
    {
-      List<FramePose> footstepPlan = new ArrayList<>();
-      FootstepPlanningResult status = planner.plan(footstepPlan);
+      FootstepPlanningResult status = planner.plan();
+      List<FramePose> footstepPlan = planner.getPlan();
 
       reportMessage(packResult(footstepPlan, status, stepSide));
       isDone.set(true);
