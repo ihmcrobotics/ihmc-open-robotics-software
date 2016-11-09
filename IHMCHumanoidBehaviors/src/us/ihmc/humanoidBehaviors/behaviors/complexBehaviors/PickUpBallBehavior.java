@@ -217,7 +217,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("LOOKING FOR BALL");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
@@ -259,7 +259,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To The Ball");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
             coactiveElement.searchingForBall.set(false);
             coactiveElement.waitingForValidation.set(false);
@@ -353,7 +353,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Looking for the ball");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);
@@ -394,7 +394,7 @@ public class PickUpBallBehavior extends AbstractBehavior
                   initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
 
             TextToSpeechPacket p1 = new TextToSpeechPacket("I think i found the ball");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.REACHING_FOR_BALL);
             FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
                   initialSphereDetectionBehavior.getBallLocation().getY(),
@@ -485,7 +485,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          {
             super.setBehaviorInput();
             TextToSpeechPacket p1 = new TextToSpeechPacket("Putting The Ball In The Bucket");
-            sendPacketToNetworkProcessor(p1);
+            sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET);
          }
       };
@@ -647,7 +647,7 @@ public class PickUpBallBehavior extends AbstractBehavior
    {
       super.doPostBehaviorCleanup();
       TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
-      sendPacketToNetworkProcessor(p1);
+      sendPacket(p1);
 
       coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);
 

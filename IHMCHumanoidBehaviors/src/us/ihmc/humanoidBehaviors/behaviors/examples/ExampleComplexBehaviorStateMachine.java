@@ -104,7 +104,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          protected void setBehaviorInput()
          {
 
-            FramePoint point = new FramePoint(midZupFrame, 0.1, 0.1, 0.3);
+            FramePoint point = new FramePoint(midZupFrame, 0.2, 0.2, 0.3);
             point.changeFrame(ReferenceFrame.getWorldFrame());
 
             //the point in the world you want to move the hand to.
@@ -124,7 +124,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       BehaviorAction<ExampleStates> getUserValidation = new BehaviorAction<ExampleStates>(ExampleStates.GET_USER_VALIDATION, userValidationExampleBehavior);
 
       //setup the state machine
-      statemachine.addStateWithDoneTransition(setupRobot, ExampleStates.WHOLEBODY_EXAMPLE);
+      statemachine.addStateWithDoneTransition(setupRobot, ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE);
       statemachine.addStateWithDoneTransition(resetRobot, ExampleStates.ENABLE_LIDAR);
       statemachine.addStateWithDoneTransition(enableLidar, ExampleStates.GET_LIDAR);
       statemachine.addStateWithDoneTransition(getLidar, ExampleStates.GET_VIDEO);

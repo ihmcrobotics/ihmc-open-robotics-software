@@ -43,7 +43,7 @@ import us.ihmc.util.PeriodicThreadScheduler;
  */
 public abstract class ToolboxModule
 {
-   protected static final boolean DEBUG = false;
+   protected static final boolean DEBUG = true;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
    protected static final int UPDATE_PERIOD_MILLISECONDS = 1;
 
@@ -147,6 +147,7 @@ public abstract class ToolboxModule
          @Override
          public boolean isMessageValid(Packet<?> message)
          {
+            System.out.println("message.getDestination() "+message.getDestination()+" thisDesitination "+ thisDesitination);
             if (message.getDestination() != thisDesitination)
                return false;
 

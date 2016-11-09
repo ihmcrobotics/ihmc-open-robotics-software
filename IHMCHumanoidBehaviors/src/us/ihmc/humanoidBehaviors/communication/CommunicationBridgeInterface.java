@@ -8,7 +8,7 @@ public interface CommunicationBridgeInterface
 {
    public void consumeObjectFromNetwork (Object object);
 	public void sendPacketToController(Packet obj);
-	public void sendPacketToBroadcast(Packet obj);
+	public void sendPacket(Packet obj);
 	public void sendPacketToUI(Packet obj);
 	public void sendPacketToBehavior(Packet obj);
    public void attachGlobalListener(GlobalPacketConsumer listener);

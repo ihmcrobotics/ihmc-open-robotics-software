@@ -103,7 +103,7 @@ public class FootstepListBehavior extends AbstractBehavior
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
          outgoingFootstepDataList.setDestination(PacketDestination.UI);
-         sendPacketToNetworkProcessor(outgoingFootstepDataList);
+         sendPacket(outgoingFootstepDataList);
 
          outgoingFootstepDataList.setDestination(PacketDestination.CONTROLLER);
          sendPacketToController(outgoingFootstepDataList);

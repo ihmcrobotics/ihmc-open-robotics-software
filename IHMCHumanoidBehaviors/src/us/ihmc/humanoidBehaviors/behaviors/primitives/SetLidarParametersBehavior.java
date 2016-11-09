@@ -34,7 +34,7 @@ public class SetLidarParametersBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         sendPacketToNetworkProcessor(lidarParamPacket);
+         sendPacket(lidarParamPacket);
          packetHasBeenSent.set(true);
       }
    }

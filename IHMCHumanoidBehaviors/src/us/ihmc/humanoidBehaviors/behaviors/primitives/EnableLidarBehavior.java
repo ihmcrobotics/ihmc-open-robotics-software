@@ -41,7 +41,7 @@ public class EnableLidarBehavior extends AbstractBehavior
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          System.out.println("EnableLidarBehavior: sending enable packet");
-         sendPacketToNetworkProcessor(enableLidarPacket);
+         sendPacket(enableLidarPacket);
          packetHasBeenSent.set(true);
       }
    }

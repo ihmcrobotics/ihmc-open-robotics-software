@@ -90,7 +90,7 @@ public class GoHomeBehavior extends AbstractBehavior
          outgoingMessage.setDestination(PacketDestination.BROADCAST);
 
          sendPacketToController(outgoingMessage);
-         sendPacketToNetworkProcessor(outgoingMessage);
+         sendPacket(outgoingMessage);
 
          hasPacketBeenSent.set(true);
 

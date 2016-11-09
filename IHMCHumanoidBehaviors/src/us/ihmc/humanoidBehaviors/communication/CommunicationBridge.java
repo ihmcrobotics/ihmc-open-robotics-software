@@ -95,13 +95,11 @@ public class CommunicationBridge implements CommunicationBridgeInterface
    }
 
    @Override
-   public void sendPacketToBroadcast(Packet packet)
+   public void sendPacket(Packet packet)
    {
 
       if (packetCommunicator.isConnected())
       {
-         //TODO this is not right, but was the current way things were done before i cleaned up. -jcarff
-         packet.setDestination(PacketDestination.BROADCAST.ordinal());
          packetCommunicator.send(packet);
       }
    }
