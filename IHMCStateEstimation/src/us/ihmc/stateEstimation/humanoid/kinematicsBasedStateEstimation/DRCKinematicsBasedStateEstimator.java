@@ -46,8 +46,8 @@ import us.ihmc.tools.io.printing.PrintTools;
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {
    public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
-
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
+   public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -74,6 +74,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    private final BooleanYoVariable usePelvisCorrector;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
+
+   private final JointTorqueFromForceSensorVisualizer jointTorqueFromForceSensorVisualizer;
 
    private StateEstimatorModeSubscriber stateEstimatorModeSubscriber = null;
 
@@ -161,6 +163,11 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       {
          copVisualizer = null;
       }
+
+      if (ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ)
+         jointTorqueFromForceSensorVisualizer = new JointTorqueFromForceSensorVisualizer(footSwitches, registry);
+      else
+         jointTorqueFromForceSensorVisualizer = null;
 
       visualizeMeasurementFrames = visualizeMeasurementFrames && yoGraphicsListRegistry != null;
 
@@ -290,6 +297,9 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          for (int i = 0; i < dynamicGraphicMeasurementFrames.size(); i++)
             dynamicGraphicMeasurementFrames.get(i).update();
       }
+
+      if (ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ)
+         jointTorqueFromForceSensorVisualizer.update();
    }
 
    @Override

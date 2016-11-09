@@ -5,6 +5,7 @@ import java.util.HashMap;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
@@ -86,7 +87,8 @@ public class PacketsForwardedToTheUi
       DrillDetectionPacket.class,
       ManipulationAbortedStatus.class,
       KinematicsToolboxOutputStatus.class,
-      FootstepPlanningToolboxOutputStatus.class
+      FootstepPlanningToolboxOutputStatus.class,
+      TextToSpeechPacket.class
    };
 
    public static final HashMap<Class<?>, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class<?>, Long>();

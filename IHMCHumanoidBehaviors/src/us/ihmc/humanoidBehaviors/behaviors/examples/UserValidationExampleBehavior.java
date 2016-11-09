@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -36,8 +37,11 @@ public class UserValidationExampleBehavior extends AbstractBehavior implements C
    {
       super.initialize();
       //reset necessary values so this behavior can run again properly
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Waiting For User Validation");
+      sendPacket(p1);
+      
       validated = false;
-      //let the UI know this specific behavior has started
+      //maybe let the UI know this specific behavior has started
       coactiveBehaviorsNetworkManager.sendToUI("GetLidarScanExampleBehavior", 1);
       coactiveBehaviorsNetworkManager.sendToUI("WaitingForValidation", 1);
    }
@@ -46,6 +50,8 @@ public class UserValidationExampleBehavior extends AbstractBehavior implements C
    public void doPostBehaviorCleanup()
    {
       super.doPostBehaviorCleanup();
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Got User Validation");
+      sendPacket(p1);
       //let the UI know this specific behavior has ended
       coactiveBehaviorsNetworkManager.sendToUI("GetLidarScanExampleBehavior", 0);
       coactiveBehaviorsNetworkManager.sendToUI("WaitingForValidation", 0);

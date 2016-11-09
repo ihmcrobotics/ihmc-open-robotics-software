@@ -1,13 +1,19 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
+import java.util.Random;
+
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine.ExampleStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
@@ -19,6 +25,8 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<ExampleStates>
 {
@@ -66,6 +74,15 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       });
    }
 
+   @Override
+   public void initialize()
+   {
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Example Behavior");
+      statemachine.setCurrentState(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE);
+      sendPacket(p1);
+      super.initialize();
+   }
+
    private void setupStateMachine()
    {
 
@@ -76,20 +93,52 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          @Override
          protected void setBehaviorInput()
          {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Enabling Lidar");
+            sendPacket(p1);
             atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE);
          }
       };
 
-      BehaviorAction<ExampleStates> resetRobot = new BehaviorAction<ExampleStates>(ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE, resetRobotBehavior);
+      BehaviorAction<ExampleStates> resetRobot = new BehaviorAction<ExampleStates>(ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE, resetRobotBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Resetting Robot");
+            sendPacket(p1);
+            super.setBehaviorInput();
+         }
+      };
 
       BehaviorAction<ExampleStates> setupRobot = new BehaviorAction<ExampleStates>(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE,
-            atlasPrimitiveActions.rightArmGoHomeBehavior, atlasPrimitiveActions.rightArmGoHomeBehavior,
+            atlasPrimitiveActions.rightArmTrajectoryBehavior, atlasPrimitiveActions.rightArmGoHomeBehavior,
             atlasPrimitiveActions.leftHandDesiredConfigurationBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            atlasPrimitiveActions.rightArmGoHomeBehavior.setInput(new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2));
+
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Setting Up Robot Pose");
+            sendPacket(p1);
+
+            double[] armConfig = new double[] {-0.5067668142160446, -0.3659876546358431, 1.7973796317575155, -1.2398714600960365, -0.005510224629709242,
+                  0.6123343067479899, 0.12524505635696856};
+
+            ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
+            armTrajectoryMessage.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
+            armTrajectoryMessage.robotSide = RobotSide.RIGHT;
+
+            for (int i = 0; i < armConfig.length; i++)
+            {
+               TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
+               trajectoryPoint.position = armConfig[i];
+               trajectoryPoint.time = 1.0;
+               OneDoFJointTrajectoryMessage jointTrajectory = new OneDoFJointTrajectoryMessage();
+               jointTrajectory.trajectoryPoints = new TrajectoryPoint1DMessage[] {trajectoryPoint};
+               armTrajectoryMessage.jointTrajectoryMessages[i] = jointTrajectory;
+            }
+
+            atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(armTrajectoryMessage);
 
             atlasPrimitiveActions.rightArmGoHomeBehavior.setInput(new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2));
 
@@ -104,6 +153,8 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          protected void setBehaviorInput()
          {
 
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Doing Whole Body Behavior");
+            sendPacket(p1);
             FramePoint point = new FramePoint(midZupFrame, 0.2, 0.2, 0.3);
             point.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -124,15 +175,15 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       BehaviorAction<ExampleStates> getUserValidation = new BehaviorAction<ExampleStates>(ExampleStates.GET_USER_VALIDATION, userValidationExampleBehavior);
 
       //setup the state machine
-      statemachine.addStateWithDoneTransition(setupRobot, ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE);
-      statemachine.addStateWithDoneTransition(resetRobot, ExampleStates.ENABLE_LIDAR);
+      statemachine.addStateWithDoneTransition(setupRobot, ExampleStates.ENABLE_LIDAR);
       statemachine.addStateWithDoneTransition(enableLidar, ExampleStates.GET_LIDAR);
       statemachine.addStateWithDoneTransition(getLidar, ExampleStates.GET_VIDEO);
       statemachine.addStateWithDoneTransition(getVideo, ExampleStates.WHOLEBODY_EXAMPLE);
       statemachine.addStateWithDoneTransition(wholeBodyExample, ExampleStates.GET_USER_VALIDATION);
+      statemachine.addStateWithDoneTransition(getUserValidation, ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE);
 
       //this state has no transitions
-      statemachine.addState(getUserValidation);
+      statemachine.addState(resetRobot);
 
       //set the starting state
       statemachine.setCurrentState(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE);
