@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
@@ -132,6 +133,8 @@ public abstract class AbstractBehavior implements RobotController
    {
       isAborted.set(true);
       isPaused.set(false);
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Aborting Behavior");
+      sendPacket(p1);
    }
 
 
@@ -141,6 +144,8 @@ public abstract class AbstractBehavior implements RobotController
     */
    public void pause()
    {
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Pausing Behavior");
+      sendPacket(p1);
       isPaused.set(true);
    }
 
@@ -150,6 +155,8 @@ public abstract class AbstractBehavior implements RobotController
     */
    public void resume()
    {
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Resuming Behavior");
+      sendPacket(p1);
       isPaused.set(false);      
    }
 

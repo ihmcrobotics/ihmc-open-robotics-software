@@ -8,7 +8,6 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.WalkToLocationBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -76,8 +75,6 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
    private double minDistanceThresholdForWalking, minYawThresholdForWalking;
 
-   private WalkToLocationBehaviorCoactiveElementBehaviorSide coactiveElement;
-
    public WalkToLocationBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
          HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
    {
@@ -98,11 +95,6 @@ public class WalkToLocationBehavior extends AbstractBehavior
          feet.put(robotSide, fullRobotModel.getFoot(robotSide));
          soleFrames.put(robotSide, fullRobotModel.getSoleFrame(robotSide));
       }
-
-      coactiveElement = new WalkToLocationBehaviorCoactiveElementBehaviorSide();
-      coactiveElement.setWalkToBehavior(this);
-      registry.addChild(coactiveElement.getUserInterfaceWritableYoVariableRegistry());
-      registry.addChild(coactiveElement.getMachineWritableYoVariableRegistry());
 
    }
 
@@ -297,10 +289,6 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
       return ret;
    }
-
-   
-
-  
 
    @Override
    public void abort()
