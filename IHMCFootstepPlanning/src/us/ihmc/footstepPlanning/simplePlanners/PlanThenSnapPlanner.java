@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
@@ -37,9 +38,9 @@ public class PlanThenSnapPlanner implements FootstepPlanner
    }
 
    @Override
-   public void setGoalPose(FramePose goalPose)
+   public void setGoal(FootstepPlannerGoal goal)
    {
-      internalPlanner.setGoalPose(goalPose);
+      internalPlanner.setGoal(goal);
    }
 
    @Override

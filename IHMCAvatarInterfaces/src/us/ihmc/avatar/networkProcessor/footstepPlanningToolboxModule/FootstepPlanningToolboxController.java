@@ -10,6 +10,8 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
@@ -72,7 +74,11 @@ public class FootstepPlanningToolboxController extends ToolboxController<Footste
       goalPose.setOrientation(new Quat4d(request.goalOrientationInWorld));
 
       planner.setInitialStanceFoot(initialStancePose, request.initialStanceSide);
-      planner.setGoalPose(goalPose);
+
+      FootstepPlannerGoal goal = new FootstepPlannerGoal();
+      goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
+      goal.setGoalPoseBetweenFeet(goalPose);
+      planner.setGoal(goal);
 
       return true;
    }

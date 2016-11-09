@@ -2,10 +2,10 @@ package us.ihmc.footstepPlanning.testTools;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
-
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -35,8 +35,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public class PlanningTestTools
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final AppearanceDefinition[] appearances = {
-         YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray()};
+   private static final AppearanceDefinition[] appearances = { YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray() };
 
    public static ConvexPolygon2d createDefaultFootPolygon()
    {
@@ -44,10 +43,10 @@ public class PlanningTestTools
       double footWidth = 0.1;
 
       ConvexPolygon2d footPolygon = new ConvexPolygon2d();
-      footPolygon.addVertex(footLength/2.0, footWidth/2.0);
-      footPolygon.addVertex(footLength/2.0, -footWidth/2.0);
-      footPolygon.addVertex(-footLength/2.0, footWidth/2.0);
-      footPolygon.addVertex(-footLength/2.0, -footWidth/2.0);
+      footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
+      footPolygon.addVertex(footLength / 2.0, -footWidth / 2.0);
+      footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
+      footPolygon.addVertex(-footLength / 2.0, -footWidth / 2.0);
       footPolygon.update();
 
       return footPolygon;
@@ -61,8 +60,7 @@ public class PlanningTestTools
       return footPolygons;
    }
 
-   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps,
-         FramePose goalPose)
+   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose goalPose)
    {
       visualizeAndSleep(planarRegionsList, footseps, goalPose, null, null);
    }
@@ -72,8 +70,7 @@ public class PlanningTestTools
       visualizeAndSleep(planarRegionsList, footseps, null, null, null);
    }
 
-   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps,
-         FramePose goalPose, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   public static void visualizeAndSleep(PlanarRegionsList planarRegionsList, FootstepPlan footseps, FramePose goalPose, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       if (registry != null)
@@ -100,7 +97,7 @@ public class PlanningTestTools
 
          int numberOfSteps = footseps.getNumberOfSteps();
 
-         for (int i=0; i<numberOfSteps; i++)
+         for (int i = 0; i < numberOfSteps; i++)
          {
             SimpleFootstep footstep = footseps.getFootstep(i);
             FramePose footstepPose = new FramePose();
@@ -134,11 +131,19 @@ public class PlanningTestTools
       graphicsListRegistry.registerYoGraphic("vizOrientation", new YoGraphicVector("GoalOrientationViz", yoGoal, yoGoalOrientation, 1.0, YoAppearance.White()));
    }
 
-   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose,
-         RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList)
+   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList)
+   {
+      FootstepPlannerGoal goal = new FootstepPlannerGoal();
+      goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
+      goal.setGoalPoseBetweenFeet(goalPose);
+
+      return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList);
+   }
+
+   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerGoal goal, PlanarRegionsList planarRegionsList)
    {
       planner.setInitialStanceFoot(initialStanceFootPose, initialStanceSide);
-      planner.setGoalPose(goalPose);
+      planner.setGoal(goal);
       planner.setPlanarRegions(planarRegionsList);
 
       FootstepPlanningResult result = planner.plan();

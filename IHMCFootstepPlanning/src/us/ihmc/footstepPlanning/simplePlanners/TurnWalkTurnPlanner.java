@@ -6,6 +6,7 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -57,8 +58,9 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    }
 
    @Override
-   public void setGoalPose(FramePose goalPose)
+   public void setGoal(FootstepPlannerGoal goal)
    {
+      FramePose goalPose = goal.getGoalPoseBetweenFeet();
       this.goalPose.set(FlatGroundPlanningUtils.pose2dFormPose(goalPose));
       this.goalPose.changeFrame(ReferenceFrame.getWorldFrame());
    }

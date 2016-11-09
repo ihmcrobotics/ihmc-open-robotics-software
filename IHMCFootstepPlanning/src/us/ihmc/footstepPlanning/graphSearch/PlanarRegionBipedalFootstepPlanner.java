@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -70,8 +71,9 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    }
 
    @Override
-   public void setGoalPose(FramePose goalPose)
+   public void setGoal(FootstepPlannerGoal goal)
    {
+      FramePose goalPose = goal.getGoalPoseBetweenFeet();
       goalPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
       goalPose.getPose(goalLeftFootPose);
