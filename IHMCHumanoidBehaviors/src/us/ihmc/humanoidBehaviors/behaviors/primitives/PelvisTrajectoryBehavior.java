@@ -52,7 +52,7 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
          outgoingPelvisTrajectoryMessage.setDestination(PacketDestination.UI);
-         sendPacketToNetworkProcessor(outgoingPelvisTrajectoryMessage);
+         sendPacket(outgoingPelvisTrajectoryMessage);
          sendPacketToController(outgoingPelvisTrajectoryMessage);
          hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());

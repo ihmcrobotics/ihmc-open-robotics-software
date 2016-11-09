@@ -1,7 +1,7 @@
 <GraphGroup>
-	<Cols>2</Cols>
+	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.Skippy.gc_foot_fs,root.Skippy.SkippyController.stateMachine,root.Skippy.SkippyController.SkippyToDo</Variables>
+		<Variables>root.Skippy.gc_foot_fs,root.Skippy.SkippyController.stateMachine,root.Skippy.SkippyController.SkippyToDo,root.Skippy.t</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>

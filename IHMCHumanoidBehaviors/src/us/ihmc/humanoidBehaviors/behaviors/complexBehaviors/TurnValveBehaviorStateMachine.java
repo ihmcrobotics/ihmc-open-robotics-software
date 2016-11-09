@@ -10,6 +10,7 @@ import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
@@ -18,6 +19,10 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
@@ -39,13 +44,11 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
 
    }
 
-   Vector3f robotInteractionPointOffset = new Vector3f(-0.39f, -1.1811f, 0.85f);
-   Vector3f robotInteractionDirectionPointOffset = new Vector3f(-0.38f, -1.1811f, 0.75f);
-
-   CommunicationBridge coactiveBehaviorsNetworkManager;
+   private Vector3f valveWalkOffsetPoint1 = new Vector3f(-0.39f, 0.85f, 0.0f);
+   private Vector3f valveWalkOffsetPoint2 = new Vector3f(-0.38f, 0.75f, 0.0f);
 
    private final SearchForValveBehavior searchForValveBehavior;
-   //walk to location
+   private final WalkToInteractableObjectBehavior walkToInteractableObjectBehavior;
    //move arm to top of valve
    //touch valve
    //grabvalve
@@ -59,13 +62,13 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("turnValveStateMachine", TurnValveBehaviorState.class, yoTime, communicationBridge);
-      coactiveBehaviorsNetworkManager = communicationBridge;
-      coactiveBehaviorsNetworkManager.addListeners(this);
-      coactiveBehaviorsNetworkManager.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
+
+      communicationBridge.addListeners(this);
+      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       searchForValveBehavior = new SearchForValveBehavior(communicationBridge);
-
+      walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       setupStateMachine();
    }
@@ -90,16 +93,9 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          {
             super.doTransitionOutOfAction();
             //found the valve location, inform the UI of its location
-            System.out.println(
-                  "BEHAVIOR: found the valve at " + searchForValveBehavior.getValveCenter() + " with a radius of " + searchForValveBehavior.getValveRadius());
 
-            double[] data = new double[5];
-            data[0] = searchForValveBehavior.getValveCenter().x;
-            data[1] = searchForValveBehavior.getValveCenter().y;
-            data[2] = searchForValveBehavior.getValveCenter().z;
-            data[3] = searchForValveBehavior.getValveRotation();
-            data[4] = searchForValveBehavior.getValveRadius();
-            coactiveBehaviorsNetworkManager.sendToUI("ValveLocation", data);
+            ValveLocationPacket valveLocationPacket = new ValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius());
+            communicationBridge.sendPacketToUI(valveLocationPacket);
 
          }
       };
@@ -122,11 +118,38 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          }
       };
 
+      BehaviorAction<TurnValveBehaviorState> walkToValveAction = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.WALKING_TO_VALVE,
+            walkToInteractableObjectBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            ReferenceFrame valveFrame = new ReferenceFrame("valveFrame", false, false, true)
+            {
+
+               @Override
+               protected void updateTransformToParent(RigidBodyTransform transformToParent)
+               {
+                  transformToParent = searchForValveBehavior.getLocation();
+               }
+            };
+
+            valveFrame.update();
+            FramePoint2d point1 = new FramePoint2d(valveFrame, valveWalkOffsetPoint1.x, valveWalkOffsetPoint1.y);
+            FramePoint2d point2 = new FramePoint2d(valveFrame, valveWalkOffsetPoint2.x, valveWalkOffsetPoint2.y);
+
+            //            searchForValveBehavior.getLocation().
+
+            walkToInteractableObjectBehavior.setWalkPoints(point1, point2);
+
+         }
+      };
+
       statemachine.addStateWithDoneTransition(setup, TurnValveBehaviorState.SEARCHING_FOR_VAVLE);
 
       statemachine.addStateWithDoneTransition(searchForValveFar, TurnValveBehaviorState.RESET_ROBOT);
-
-      statemachine.addState(resetRobot);
+      statemachine.addStateWithDoneTransition(resetRobot, TurnValveBehaviorState.WALKING_TO_VALVE);
+      statemachine.addState(walkToValveAction);
       statemachine.setCurrentState(TurnValveBehaviorState.SETUP_ROBOT);
    }
 
@@ -135,8 +158,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    {
       super.doPostBehaviorCleanup();
       TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
-      sendPacketToNetworkProcessor(p1);
-      System.out.println("found the valve it is located at " + searchForValveBehavior.getValveCenter());
+      sendPacket(p1);
    }
 
    @Override

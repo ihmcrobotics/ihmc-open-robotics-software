@@ -36,7 +36,7 @@ public class ClearLidarBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         sendPacketToNetworkProcessor(clearLidarPacket);
+         sendPacket(clearLidarPacket);
          packetHasBeenSent.set(true);
       }
    }

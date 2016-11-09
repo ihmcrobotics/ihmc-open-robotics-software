@@ -1,4 +1,4 @@
-package us.ihmc.llaQuadruped;
+package us.ihmc.llaQuadrupedController.model;
 
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotQuadrant;

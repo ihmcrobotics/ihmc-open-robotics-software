@@ -9,7 +9,7 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
 {
 
    private int frameNumber = 0;
-   private int NUMBER_OF_FRAMES = 10;
+   private int NUMBER_OF_FRAMES = 5;
 
    private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>();
 
@@ -34,9 +34,7 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
    protected void processVideoPacket(VideoPacket videoPacket)
    {
       frameNumber++;
-
-      //example of forwarding a packet to the UI
-      coactiveBehaviorsNetworkManager.sendToUI("videoPacketRecieved", frameNumber);
+      System.out.println("GetVideoPacketExampleBehavior: got video frame "+frameNumber);
    }
 
    @Override

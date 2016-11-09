@@ -53,7 +53,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
          if(videoPacketDestination.equals(PacketDestination.CONTROLLER))
             sendPacketToController(videoPacket);
          else
-            sendPacketToNetworkProcessor(videoPacket);
+            sendPacket(videoPacket);
       }
 
       @Override

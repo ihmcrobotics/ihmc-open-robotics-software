@@ -8,13 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
+import boofcv.abst.fiducial.calib.ConfigChessboard;
+import boofcv.factory.calib.FactoryCalibrationTarget;
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 
-import boofcv.abst.calib.ConfigChessboard;
-import boofcv.abst.calib.PlanarCalibrationDetector;
-import boofcv.factory.calib.FactoryPlanarCalibrationTarget;
 import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -45,7 +45,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
 
 
    private IntrinsicParameters intrinsic;
-   private PlanarCalibrationDetector calibGrid = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03));
+   private CalibrationDetectorChessboard calibGrid = FactoryCalibrationTarget.detectorChessboard(new ConfigChessboard(DetectChessboardInKinematicsData.boardWidth, DetectChessboardInKinematicsData.boardHeight, 0.03));
 
    public StandaloneAtlasHeadLoopKinematicsCalibrator(AtlasRobotVersion atlasVersion)
    {

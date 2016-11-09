@@ -1,15 +1,14 @@
 package us.ihmc.imageProcessing.segmentation;
 
-import java.io.IOException;
-import java.io.InputStream;
-
+import boofcv.struct.image.GrayF32;
+import boofcv.struct.image.InterleavedU8;
+import boofcv.struct.image.Planar;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 
-import boofcv.struct.image.ImageFloat32;
-import boofcv.struct.image.ImageUInt8;
-import boofcv.struct.image.MultiSpectral;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author Peter Abeles
@@ -85,11 +84,11 @@ public class GaussianColorClassifier {
       return a*chan0 + b*chan1 + c*chan2;
    }
 
-   public static void classify( MultiSpectral<ImageFloat32> input , Gaussian3D_F64 model , double thresholdChiSq,
-                                ImageUInt8 output ) {
-      ImageFloat32 A = input.getBand(0);
-      ImageFloat32 B = input.getBand(1);
-      ImageFloat32 C = input.getBand(2);
+   public static void classify(Planar<GrayF32> input , Gaussian3D_F64 model , double thresholdChiSq,
+                               InterleavedU8 output ) {
+      GrayF32 A = input.getBand(0);
+      GrayF32 B = input.getBand(1);
+      GrayF32 C = input.getBand(2);
 
       model.computeInverse();
 
@@ -101,18 +100,18 @@ public class GaussianColorClassifier {
 
             double dist = chisq(model.mean,model.covarianceInv,a,b,c);
             if( dist <= thresholdChiSq )
-               output.unsafe_set(x, y, 1);
+               output.set(x, y, 1);
             else
-               output.unsafe_set(x,y,0);
+               output.set(x,y,0);
          }
       }
    }
 
-   public static void classify( MultiSpectral<ImageFloat32> input , Gaussian3D_F64 models[] , double thresholdChiSq,
-                                ImageUInt8 output ) {
-      ImageFloat32 A = input.getBand(0);
-      ImageFloat32 B = input.getBand(1);
-      ImageFloat32 C = input.getBand(2);
+   public static void classify(Planar<GrayF32> input , Gaussian3D_F64 models[] , double thresholdChiSq,
+                               InterleavedU8 output ) {
+      GrayF32 A = input.getBand(0);
+      GrayF32 B = input.getBand(1);
+      GrayF32 C = input.getBand(2);
 
       for( Gaussian3D_F64 model : models )
          model.computeInverse();
@@ -129,25 +128,25 @@ public class GaussianColorClassifier {
 
                double dist = chisq(model.mean,model.covarianceInv,a,b,c);
                if( dist <= thresholdChiSq ) {
-                  output.unsafe_set(x, y, 1);
+                  output.set(x, y, 1);
                   positive = true;
                   break;
                }
             }
 
             if( !positive)
-               output.unsafe_set(x,y,0);
+               output.set(x,y,0);
          }
       }
    }
 
-   public static void classifyEuclidean( MultiSpectral<ImageFloat32> input , Gaussian3D_F64 model , double threshold,
-                                         ImageUInt8 output ) {
+   public static void classifyEuclidean( Planar<GrayF32> input , Gaussian3D_F64 model , double threshold,
+                                         InterleavedU8 output ) {
       threshold = threshold*threshold;
 
-      ImageFloat32 A = input.getBand(0);
-      ImageFloat32 B = input.getBand(1);
-      ImageFloat32 C = input.getBand(2);
+      GrayF32 A = input.getBand(0);
+      GrayF32 B = input.getBand(1);
+      GrayF32 C = input.getBand(2);
 
       double meanA = model.mean[0];
       double meanB = model.mean[1];
@@ -161,9 +160,9 @@ public class GaussianColorClassifier {
 
             double dist = a*a + b*b + c*c;
             if( dist <= threshold )
-               output.unsafe_set(x,y,1);
+               output.set(x,y,1);
             else
-               output.unsafe_set(x,y,0);
+               output.set(x,y,0);
          }
       }
    }

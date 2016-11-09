@@ -64,7 +64,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
          
          outgoingHandDesiredConfigurationMessage.setDestination(PacketDestination.BROADCAST);
          
-         sendPacketToNetworkProcessor(outgoingHandDesiredConfigurationMessage);
+         sendPacket(outgoingHandDesiredConfigurationMessage);
          hasPacketBeenSet.set(true);
          startTime.set(yoTime.getDoubleValue());
 
@@ -82,7 +82,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
          HandDesiredConfigurationMessage stopMessage = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
          stopMessage.setDestination(PacketDestination.UI);
          sendPacketToController(stopMessage);
-         sendPacketToNetworkProcessor(stopMessage);
+         sendPacket(stopMessage);
       }
       isAborted.set(true);
    }
@@ -97,7 +97,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
          HandDesiredConfigurationMessage stopMessage = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
          stopMessage.setDestination(PacketDestination.UI);
          sendPacketToController(stopMessage);
-         sendPacketToNetworkProcessor(stopMessage);
+         sendPacket(stopMessage);
       }
       isPaused.set(true);
 

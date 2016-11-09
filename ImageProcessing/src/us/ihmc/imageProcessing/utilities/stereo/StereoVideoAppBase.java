@@ -37,7 +37,7 @@ import javax.swing.event.ChangeListener;
 import boofcv.io.UtilIO;
 import boofcv.io.image.SimpleImageSequence;
 import boofcv.struct.calib.StereoParameters;
-import boofcv.struct.image.ImageSingleBand;
+import boofcv.struct.image.GrayF;
 import boofcv.struct.image.ImageType;
 
 /**
@@ -45,7 +45,7 @@ import boofcv.struct.image.ImageType;
  *
  * @author Peter Abeles
  */
-public abstract class StereoVideoAppBase <I extends ImageSingleBand>
+public abstract class StereoVideoAppBase <I extends GrayF>
 		extends SelectAlgorithmAndInputPanel implements VisualizeApp, MouseListener, ChangeListener
 {
 	protected StereoParameters config;

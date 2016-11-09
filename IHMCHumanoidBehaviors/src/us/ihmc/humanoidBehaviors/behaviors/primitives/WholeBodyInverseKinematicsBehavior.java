@@ -170,7 +170,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       solutionSentToController = null;
       ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.WAKE_UP);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-      sendPacketToNetworkProcessor(message);
+      sendPacket(message);
    }
 
    @Override
@@ -192,7 +192,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 0.0, desiredHandPosition, desiredHandOrientation);
             handTrajectoryMessage.setSelectionMatrix(handSelectionMatrices.get(robotSide));
             handTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-            sendPacketToNetworkProcessor(handTrajectoryMessage);
+            sendPacket(handTrajectoryMessage);
          }
       }
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable() && !hasSentMessageToController.getBooleanValue())
@@ -228,12 +228,12 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          currentSolutionQuality.set(newestSolution.getSolutionQuality());
 
          newestSolution.setDestination(PacketDestination.UI);
-         sendPacketToNetworkProcessor(newestSolution);
+         sendPacket(newestSolution);
       }
       else if (hasSentMessageToController.getBooleanValue())
       {
          if (solutionSentToController != null && !isDone.getBooleanValue()) // To visualize the solution sent to the controller
-            sendPacketToNetworkProcessor(solutionSentToController);
+            sendPacket(solutionSentToController);
 
          if (yoTime.getDoubleValue() - timeSolutionSentToController.getDoubleValue() > trajectoryTime.getDoubleValue())
          {
@@ -271,7 +271,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    {
       ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.SLEEP);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-      sendPacketToNetworkProcessor(message);
+      sendPacket(message);
    }
 
    

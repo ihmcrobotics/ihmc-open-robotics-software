@@ -9,7 +9,7 @@ public class SkippySimulation
 {
    public static final double DT = 0.0001;
    public static final double controlDT = 0.0001;
-   public static final double TIME = 5.0;//3.5;//8.0;//10.0;//15.0;//25.0;//3.0;//2.5;//60.0;// 
+   public static final double TIME = 3.0;//3.5;//2.0;//30.0;//25.0;//15.0;//10.0;//6.0;//8.0;//60.0;// 
    private static SimulationConstructionSet sim;
 
    public SkippySimulation()

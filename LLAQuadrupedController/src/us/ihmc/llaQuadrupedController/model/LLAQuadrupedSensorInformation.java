@@ -1,4 +1,4 @@
-package us.ihmc.llaQuadruped;
+package us.ihmc.llaQuadrupedController.model;
 
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 
@@ -9,6 +9,6 @@ public class LLAQuadrupedSensorInformation implements QuadrupedSensorInformation
    @Override
    public String[] getImuNames()
    {
-      return null;
+      return imuNames;
    }
 }

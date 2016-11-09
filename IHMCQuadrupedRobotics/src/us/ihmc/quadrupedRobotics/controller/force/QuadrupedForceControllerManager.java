@@ -46,6 +46,7 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal finite state machine.
@@ -239,7 +240,11 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       // Send state information
       quadrupedForceControllerStatePacket.set(stateMachine.getState());
-      runtimeEnvironment.getGlobalDataProducer().queueDataToSend(quadrupedForceControllerStatePacket);
+      
+      if (runtimeEnvironment.getGlobalDataProducer() != null)
+      {
+         runtimeEnvironment.getGlobalDataProducer().queueDataToSend(quadrupedForceControllerStatePacket);
+      }
    }
 
    @Override

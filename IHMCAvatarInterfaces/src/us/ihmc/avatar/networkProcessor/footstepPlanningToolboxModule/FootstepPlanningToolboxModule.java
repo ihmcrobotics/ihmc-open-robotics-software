@@ -14,6 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class FootstepPlanningToolboxModule extends ToolboxModule
 {
@@ -22,11 +23,11 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
 
    private final FootstepPlanningToolboxController footstepPlanningToolboxController;
 
-   public FootstepPlanningToolboxModule(FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer)
+   public FootstepPlanningToolboxModule(FullHumanoidRobotModel desiredFullRobotModel, RobotContactPointParameters contactPointParameters, LogModelProvider modelProvider, boolean startYoVariableServer)
          throws IOException
    {
       super(desiredFullRobotModel, modelProvider, startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
-      footstepPlanningToolboxController = new FootstepPlanningToolboxController(statusOutputManager, registry);
+      footstepPlanningToolboxController = new FootstepPlanningToolboxController(contactPointParameters, statusOutputManager, registry);
       packetCommunicator.attachListener(FootstepPlanningRequestPacket.class, footstepPlanningToolboxController.createRequestConsumer());
    }
 

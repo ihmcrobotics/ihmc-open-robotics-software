@@ -91,7 +91,7 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
          outgoingMessage.setDestination(PacketDestination.UI);
 
          sendPacketToController(outgoingMessage);
-         sendPacketToNetworkProcessor(outgoingMessage);
+         sendPacket(outgoingMessage);
 
          hasPacketBeenSent.set(true);
 

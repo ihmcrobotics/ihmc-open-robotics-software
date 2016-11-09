@@ -81,7 +81,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
          byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
          VideoPacket circleBlobThresholdImagePacket = new VideoPacket(VideoSource.CV_THRESHOLD, videoTimestamp, jpegThresholdImage,
                                                                       videoPacket.getPosition(), videoPacket.getOrientation(), videoPacket.getIntrinsicParameters());
-         getBehaviorInterface().sendPacketToNetworkProcessor(circleBlobThresholdImagePacket);
+         getBehaviorInterface().sendPacket(circleBlobThresholdImagePacket);
 
          if (circles.size() > 0)
             latestBallPosition2d.set(circles.get(0).getCenter());
