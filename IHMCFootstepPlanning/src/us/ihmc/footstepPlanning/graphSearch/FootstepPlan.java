@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-public class SimpleFootstepPath
+public class FootstepPlan
 {
 
 }

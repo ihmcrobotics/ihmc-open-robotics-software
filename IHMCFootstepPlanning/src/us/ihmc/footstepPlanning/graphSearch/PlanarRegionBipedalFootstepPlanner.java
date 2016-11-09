@@ -2,18 +2,23 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class PlanarRegionBipedalFootstepPlanner
+public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
    private PlanarRegionsList planarRegionsList;
    private SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
@@ -29,19 +34,9 @@ public class PlanarRegionBipedalFootstepPlanner
 
    private double maxStepReach;
 
-   private SimpleFootstepPath solution;
+   private FootstepPlan footstepPlan;
 
    private BipedalFootstepPlannerListener listener;
-
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsList = planarRegionsList;
-
-      if (listener != null)
-      {
-         listener.planarRegionsListSet(planarRegionsList);
-      }
-   }
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
    {
@@ -64,24 +59,42 @@ public class PlanarRegionBipedalFootstepPlanner
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
    }
 
-   public void setInitialState(RobotSide initialSide, RigidBodyTransform initialFootPose)
+   @Override
+   public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide initialSide)
    {
+      stanceFootPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       this.initialSide = initialSide;
-      this.initialFootPose.set(initialFootPose);
+      stanceFootPose.getPose(initialFootPose);
    }
 
-   public void setGoalFootsteps(RigidBodyTransform goalLeftFootPose, RigidBodyTransform goalRightFootPose)
+   @Override
+   public void setGoalPose(FramePose goalPose)
    {
-      this.goalLeftFootPose.set(goalLeftFootPose);
-      this.goalRightFootPose.set(goalRightFootPose);
+      goalPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+
+      goalPose.getPose(goalLeftFootPose);
+      goalPose.getPose(goalRightFootPose);
    }
 
-   public SimpleFootstepPath getSolution()
+   @Override
+   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      return solution;
+      this.planarRegionsList = planarRegionsList;
+
+      if (listener != null)
+      {
+         listener.planarRegionsListSet(planarRegionsList);
+      }
    }
 
-   public boolean solve()
+   @Override
+   public List<FramePose> getPlan()
+   {
+      return null;
+   }
+
+   @Override
+   public FootstepPlanningResult plan()
    {
       BipedalFootstepPlannerNode startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
@@ -145,7 +158,7 @@ public class PlanarRegionBipedalFootstepPlanner
 
             notifyListenerSolutionWasFound();
 
-            return true;
+            return FootstepPlanningResult.OPTIMAL_SOLUTION;
          }
 
          // Expand Children...
@@ -159,7 +172,7 @@ public class PlanarRegionBipedalFootstepPlanner
 
       notifyListenerSolutionWasNotFound();
 
-      return false;
+      return FootstepPlanningResult.NO_PATH_EXISTS;
    }
 
 

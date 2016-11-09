@@ -129,15 +129,15 @@ public class PlanningTestTools
       graphicsListRegistry.registerYoGraphic("vizOrientation", new YoGraphicVector("GoalOrientationViz", yoGoal, yoGoalOrientation, 1.0, YoAppearance.White()));
    }
 
-   public static ArrayList<FramePose> runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose,
+   public static List<FramePose> runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose,
          RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList)
    {
       planner.setInitialStanceFoot(initialStanceFootPose, initialStanceSide);
       planner.setGoalPose(goalPose);
       planner.setPlanarRegions(planarRegionsList);
 
-      ArrayList<FramePose> footstepPlan = new ArrayList<>();
-      FootstepPlanningResult result = planner.plan(footstepPlan);
+      FootstepPlanningResult result = planner.plan();
+      List<FramePose> footstepPlan = planner.getPlan();
       assertTrue("Planner was not able to provide valid result.", result.validForExecution());
       return footstepPlan;
    }

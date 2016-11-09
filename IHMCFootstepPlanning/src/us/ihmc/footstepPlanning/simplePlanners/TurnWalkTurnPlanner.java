@@ -61,8 +61,10 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       this.goalPose.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
+   private ArrayList<FramePose> solePosesPlan = new ArrayList<>();
+
    @Override
-   public FootstepPlanningResult plan(List<FramePose> solePosesToPack)
+   public FootstepPlanningResult plan()
    {
       stanceFootFrame.setPoseAndUpdate(initialStanceFootPose);
 
@@ -94,9 +96,9 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       // square up
       addSquareUp(footstepList, pointToTurnAbout);
 
-      solePosesToPack.clear();
+      solePosesPlan.clear();
       for (FramePose2d footstepPose2d : footstepList)
-         solePosesToPack.add(FlatGroundPlanningUtils.poseFormPose2d(footstepPose2d, groundHeight));
+         solePosesPlan.add(FlatGroundPlanningUtils.poseFormPose2d(footstepPose2d, groundHeight));
       return FootstepPlanningResult.OPTIMAL_SOLUTION;
    }
 
@@ -248,6 +250,11 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      // TODO Auto-generated method stub
+   }
+
+   @Override
+   public List<FramePose> getPlan()
+   {
+      return solePosesPlan;
    }
 }
