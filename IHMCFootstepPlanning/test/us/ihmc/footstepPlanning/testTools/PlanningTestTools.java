@@ -34,6 +34,8 @@ import us.ihmc.tools.thread.ThreadTools;
 public class PlanningTestTools
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final AppearanceDefinition[] appearances = {
+         YoAppearance.White(), YoAppearance.Grey(), YoAppearance.DarkGray()};
 
    public static ConvexPolygon2d createDefaultFootPolygon()
    {
@@ -81,7 +83,7 @@ public class PlanningTestTools
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       graphics3DObject.addCoordinateSystem(0.3);
       if (planarRegionsList != null)
-         graphics3DObject.addPlanarRegionsList(planarRegionsList, YoAppearance.Black());
+         graphics3DObject.addPlanarRegionsList(planarRegionsList, appearances);
       scs.addStaticLinkGraphics(graphics3DObject);
 
       YoVariableRegistry vizRegistry = new YoVariableRegistry("FootstepPlanningResult");
