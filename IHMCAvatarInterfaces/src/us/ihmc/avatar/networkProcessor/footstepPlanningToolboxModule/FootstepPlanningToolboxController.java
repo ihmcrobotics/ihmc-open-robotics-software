@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point3d;
@@ -10,8 +8,10 @@ import javax.vecmath.Quat4d;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -34,7 +34,6 @@ public class FootstepPlanningToolboxController extends ToolboxController<Footste
    private final BooleanYoVariable isDone = new BooleanYoVariable("isDone", registry);
 
    private final FootstepPlanner planner;
-   private RobotSide stepSide;
 
    public FootstepPlanningToolboxController(RobotContactPointParameters contactPointParameters, StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
@@ -50,9 +49,9 @@ public class FootstepPlanningToolboxController extends ToolboxController<Footste
    protected void updateInternal()
    {
       FootstepPlanningResult status = planner.plan();
-      List<FramePose> footstepPlan = planner.getPlan();
+      FootstepPlan footstepPlan = planner.getPlan();
 
-      reportMessage(packResult(footstepPlan, status, stepSide));
+      reportMessage(packResult(footstepPlan, status));
       isDone.set(true);
    }
 
@@ -74,7 +73,6 @@ public class FootstepPlanningToolboxController extends ToolboxController<Footste
 
       planner.setInitialStanceFoot(initialStancePose, request.initialStanceSide);
       planner.setGoalPose(goalPose);
-      stepSide = request.initialStanceSide.getOppositeSide();
 
       return true;
    }
@@ -99,22 +97,28 @@ public class FootstepPlanningToolboxController extends ToolboxController<Footste
       return isDone.getBooleanValue();
    }
 
-   private FootstepPlanningToolboxOutputStatus packResult(List<FramePose> footstepPlan, FootstepPlanningResult status, RobotSide firstStepSide)
+   private FootstepPlanningToolboxOutputStatus packResult(FootstepPlan footstepPlan, FootstepPlanningResult status)
    {
       FootstepPlanningToolboxOutputStatus result = new FootstepPlanningToolboxOutputStatus();
       result.footstepDataList = new FootstepDataListMessage();
       result.planningResult = status;
 
-      for (FramePose footstepPose : footstepPlan)
+      int numberOfSteps = footstepPlan.getNumberOfSteps();
+
+      for (int i = 0; i < numberOfSteps; i++)
       {
+         SimpleFootstep footstep = footstepPlan.getFootstep(i);
+
+         FramePose footstepPose = new FramePose();
+         footstep.getSoleFramePose(footstepPose);
+
          Point3d location = new Point3d();
          Quat4d orientation = new Quat4d();
          footstepPose.getPosition(location);
          footstepPose.getOrientation(orientation);
-         FootstepDataMessage footstepData = new FootstepDataMessage(stepSide, location, orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          result.footstepDataList.add(footstepData);
-         stepSide = stepSide.getOppositeSide();
       }
 
       return result;

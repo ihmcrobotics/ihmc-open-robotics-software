@@ -2,12 +2,12 @@ package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
 import java.util.Random;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.geometry.FramePose;
@@ -41,10 +41,10 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
       // run the test
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
-      List<FramePose> footstepPlan =
+      FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList);
       if (visualize())
-         PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, initialStanceSide.getOppositeSide(), goalPose);
+         PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
       assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
    }
 
@@ -59,10 +59,10 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
       // run the test
       PlanarRegionsList planarRegionsList = generateRandomTerrain(random);
-      List<FramePose> footstepPlan =
+      FootstepPlan footstepPlan =
             PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList);
       if (visualize())
-         PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, initialStanceSide.getOppositeSide(), goalPose);
+         PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
    }
 
    private PlanarRegionsList generateRandomTerrain(Random random)

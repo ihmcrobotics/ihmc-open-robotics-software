@@ -1,7 +1,5 @@
 package us.ihmc.footstepPlanning;
 
-import java.util.List;
-
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -40,5 +38,5 @@ public interface FootstepPlanner
     *
     * @return
     */
-   public List<FramePose> getPlan();
+   public FootstepPlan getPlan();
 }

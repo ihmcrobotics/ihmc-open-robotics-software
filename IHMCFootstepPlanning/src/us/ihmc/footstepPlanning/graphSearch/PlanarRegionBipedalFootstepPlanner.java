@@ -1,14 +1,12 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
-import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
@@ -92,14 +90,14 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    }
 
    @Override
-   public List<FramePose> getPlan()
+   public FootstepPlan getPlan()
    {
       if (goalNode == null)
       {
          return null;
       }
 
-      ArrayList<FramePose> result = new ArrayList<FramePose>();
+      FootstepPlan result = new FootstepPlan();
 
       BipedalFootstepPlannerNode node = goalNode;
 
@@ -109,12 +107,12 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          node.getSoleTransform(soleTransform);
 
          FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransform);
-         result.add(framePose);
+         result.addFootstep(node.getRobotSide(), framePose);
 
          node = node.getParentNode();
       }
 
-      Collections.reverse(result);
+      result.reverse();
       return result;
    }
 
@@ -144,7 +142,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          BipedalFootstepPlannerNode nodeToExpand = stack.pop();
          notifyListenerNodeSelectedForExpansion(nodeToExpand);
 
-         RobotSide currentSide = nodeToExpand.getSide();
+         RobotSide currentSide = nodeToExpand.getRobotSide();
          RobotSide nextSide = currentSide.getOppositeSide();
 
          // Make sure popped node is a good one and can be expanded...
