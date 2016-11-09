@@ -29,6 +29,7 @@ public class CommunicationBridge implements CommunicationBridgeInterface
       this.packetCommunicator = packetCommunicator;
       objectCosumer = new GlobalObjectConsumer(this);
       attachGlobalListener(objectCosumer);
+      attachListener(SimpleCoactiveBehaviorDataPacket.class, new CoactiveDataListener());
 
    }
 

@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -9,7 +10,7 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
 {
 
    private int frameNumber = 0;
-   private int NUMBER_OF_FRAMES = 5;
+   private int NUMBER_OF_FRAMES = 25;
 
    private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>();
 
@@ -49,6 +50,8 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
       super.initialize();
       //reset necessary values so this behavior can run again properly
       frameNumber = 0;
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Getting Video Packets");
+      sendPacket(p1);
       //let the UI know this specific behavior has started
       coactiveBehaviorsNetworkManager.sendToUI("GetVideoPacketExampleBehavior", 1);
    }
