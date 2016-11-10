@@ -49,6 +49,7 @@ import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class RobotDescriptionFromSDFLoader
 {
@@ -194,9 +195,27 @@ public class RobotDescriptionFromSDFLoader
          CollisionMeshDescription collisionMeshDescription = new SDFCollisionMeshDescription(link.getCollisions(), rotationTransform);
          scsLink.setCollisionMesh(collisionMeshDescription);
       }
-      else if (link.getVisuals() != null)
+
+      if (link.getVisuals() != null)
       {
-         LinkGraphicsDescription linkGraphicsDescription = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, rotationTransform);
+         LinkGraphicsDescription linkGraphicsDescription;
+
+         try
+         {
+            linkGraphicsDescription = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, rotationTransform);
+         }
+         catch (Throwable e)
+         {
+            PrintTools.warn(this, "Could not load visuals for link " + link.getName() + "! Using an empty LinkGraphicsDescription.");
+
+            if(DEBUG)
+            {
+               e.printStackTrace();
+            }
+
+            linkGraphicsDescription = new LinkGraphicsDescription();
+         }
+
          scsLink.setLinkGraphics(linkGraphicsDescription);
       }
 
