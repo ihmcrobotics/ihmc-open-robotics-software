@@ -137,7 +137,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
             double orientationDiscount = 0.2;
             int maxIterations = 5000;
             boolean solveOrientation = true;
-            double convergeTolerance = 4.0e-6; //1e-12;
+            double convergeTolerance = 4.0e-7; //1e-12;
             double acceptTolLoc = 0.005;
             double acceptTolAngle = 0.02;
             double parameterChangePenalty = 1.0e-4; //0.1;
@@ -317,7 +317,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       
       if (!orientationErrorAcceptable)
       {
-         PrintTools.error("Orientation error not acceptable: positionError: " + orientationError.getDoubleValue() + "  maxAllowed: " + errorThreshold);
+         PrintTools.error("Orientation error not acceptable: orientationError: " + orientationError.getDoubleValue() + "  maxAllowed: " + errorThreshold);
       }
 
       return positionErrorAcceptable && orientationErrorAcceptable;
@@ -371,6 +371,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          case RANDOM :
          {
             generateRandomArmPoseWithForwardKinematics(random);
+
+            break;
          }
 
          default :
