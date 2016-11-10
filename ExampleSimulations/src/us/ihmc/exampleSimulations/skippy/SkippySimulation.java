@@ -1,13 +1,10 @@
 package us.ihmc.exampleSimulations.skippy;
 
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
-<<<<<<< Upstream, based on branch 'develop' of https://abento@stash.ihmc.us/scm/rob/ihmc-open-robotics-software.git
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-=======
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
->>>>>>> fbffe65 Implement listeners for gc point.
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
 
