@@ -1,27 +1,27 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
 
-import us.ihmc.convexOptimization.quadraticProgram.CompositeActiveSetQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.JUnitTools;
 
 public class ConstrainedQPSolverTest
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry("root");
 
    @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testSolveContrainedQP() throws NoConvergenceException
    {
-      YoVariableRegistry registry = new YoVariableRegistry("root");
       int numberOfInequalityConstraints = 1;
       int numberOfEqualityConstraints = 1;
       int numberOfVariables = 2;
@@ -33,11 +33,7 @@ public class ConstrainedQPSolverTest
       DenseMatrix64F Ain = new DenseMatrix64F(numberOfInequalityConstraints, numberOfVariables, true, 2, 1);
       DenseMatrix64F bin = new DenseMatrix64F(numberOfInequalityConstraints, 1, true, 0);
 
-      ConstrainedQPSolver[] optimizers = { //new JOptimizerConstrainedQPSolver(),
-            new OASESConstrainedQPSolver(registry),
-            new QuadProgSolver(),
-            new CompositeActiveSetQPSolver(registry)
-            };
+      ConstrainedQPSolver[] optimizers = createSolvers();
 
       for (int repeat = 0; repeat < 10000; repeat++)
       {
@@ -48,8 +44,6 @@ public class ConstrainedQPSolverTest
             Assert.assertArrayEquals(x.getData(), new double[] { -0.5, 0.5 }, 1e-10);
          }
       }
-
-      registry = new YoVariableRegistry("root");
 
       //TODO: Need more test cases. Can't trust these QP solvers without them...
       optimizers = new ConstrainedQPSolver[]{ //new JOptimizerConstrainedQPSolver(), new CompositeActiveSetQPSolver(registry)
@@ -95,4 +89,48 @@ public class ConstrainedQPSolverTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
+   public void testSolveProblemWithParallelConstraints() throws NoConvergenceException
+   {
+      // our simple active set solver can not solve this:
+      // test problem: x <= -1 and x <= -2
+      DenseMatrix64F Q = new DenseMatrix64F(1, 1);
+      DenseMatrix64F Ain = new DenseMatrix64F(2, 1);
+      DenseMatrix64F bin = new DenseMatrix64F(2, 1);
+      DenseMatrix64F x = new DenseMatrix64F(1, 1);
+
+      Q.set(0, 0, 1.0);
+      Ain.set(0, 0, 1.0);
+      Ain.set(1, 0, 1.0);
+      bin.set(0, -1.0);
+      bin.set(0, -2.0);
+
+      DenseMatrix64F f = new DenseMatrix64F(0);
+      DenseMatrix64F Aeq = new DenseMatrix64F(0, 1);
+      DenseMatrix64F beq = new DenseMatrix64F(0, 1);
+
+      ConstrainedQPSolver[] solvers = createSolvers();
+      for (ConstrainedQPSolver solver : solvers)
+      {
+         if (solver instanceof CompositeActiveSetQPSolver)
+            continue;
+
+         PrintTools.info("Attempting to solve problem with: " + solver.getClass().getSimpleName());
+         solver.solve(Q, f, Aeq, beq, Ain, bin, x, true);
+         boolean correct = MathTools.epsilonEquals(-2.0, x.get(0), 10E-10);
+         if (!correct)
+            PrintTools.info("Failed. Result was " + x.get(0) + ", expected -2.0");
+      }
+   }
+
+   private ConstrainedQPSolver[] createSolvers()
+   {
+      ConstrainedQPSolver[] optimizers = { //new JOptimizerConstrainedQPSolver(),
+            new OASESConstrainedQPSolver(registry),
+            new QuadProgSolver(),
+            new CompositeActiveSetQPSolver(registry)
+      };
+      return optimizers;
+   }
 }
