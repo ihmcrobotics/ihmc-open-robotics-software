@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestC
 
 public class QuadrupedTestBehaviors
 {
-   public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
+   public static void standUpAndSquareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
    {
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
       conductor.simulate();
@@ -22,6 +22,8 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.STAND));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
+      
+      squareUp(conductor, variables);
    }
 
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedPositionTestYoVariables variables) throws AssertionFailedError
@@ -50,7 +52,7 @@ public class QuadrupedTestBehaviors
       conductor.simulate();
    }
 
-   public static void squareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables)
+   private static void squareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables)
    {
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
       conductor.simulate();
