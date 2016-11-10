@@ -39,6 +39,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
@@ -306,7 +307,18 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          scs.tickAndUpdate();
 
       boolean positionErrorAcceptable = (positionError.getDoubleValue() < errorThreshold);
+      
+      if (!positionErrorAcceptable)
+      {
+         PrintTools.error("Position error not acceptable: positionError: " + positionError.getDoubleValue() + "  maxAllowed: " + errorThreshold);
+      }
+      
       boolean orientationErrorAcceptable = (orientationError.getDoubleValue() < errorThreshold);
+      
+      if (!orientationErrorAcceptable)
+      {
+         PrintTools.error("Orientation error not acceptable: positionError: " + orientationError.getDoubleValue() + "  maxAllowed: " + errorThreshold);
+      }
 
       return positionErrorAcceptable && orientationErrorAcceptable;
    }
