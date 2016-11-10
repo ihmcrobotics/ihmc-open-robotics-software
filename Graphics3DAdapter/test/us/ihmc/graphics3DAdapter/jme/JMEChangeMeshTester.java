@@ -1,9 +1,9 @@
 package us.ihmc.graphics3DAdapter.jme;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.MeshDataGenerator;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.robotics.Axis;
 
 import com.jme3.app.SimpleApplication;

@@ -16,8 +16,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
+import us.ihmc.graphics3DDescription.MeshDataGenerator;
+import us.ihmc.graphics3DDescription.MeshDataHolder;
 
 public class MultiColorMeshBuilder
 {

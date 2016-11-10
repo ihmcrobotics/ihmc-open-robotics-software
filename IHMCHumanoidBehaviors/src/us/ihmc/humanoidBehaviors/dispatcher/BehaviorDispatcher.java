@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -24,7 +25,6 @@ import us.ihmc.robotics.stateMachines.StateMachineTools;
 import us.ihmc.robotics.stateMachines.StateTransitionAction;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
