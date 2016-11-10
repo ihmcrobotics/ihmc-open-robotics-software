@@ -10,6 +10,7 @@ import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFramePose extends AbstractReferenceFrameHolder
@@ -61,6 +62,14 @@ public class YoFramePose extends AbstractReferenceFrameHolder
    {
       framePoseToPack.setToZero(getReferenceFrame());
       getFramePose(framePoseToPack);
+   }
+
+   public void getPose(RigidBodyTransform rigidBodyTransformToPack)
+   {
+      position.getFrameTupleIncludingFrame(tempFramePoint);
+      orientation.getFrameOrientationIncludingFrame(tempFrameOrientation);
+      tempFrameOrientation.getTransform3D(rigidBodyTransformToPack);
+      rigidBodyTransformToPack.setTranslation(tempFramePoint.getX(), tempFramePoint.getY(), tempFramePoint.getZ());
    }
 
    public void set(FramePose framePose)
