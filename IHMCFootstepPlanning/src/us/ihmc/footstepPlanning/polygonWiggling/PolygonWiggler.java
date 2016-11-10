@@ -9,7 +9,6 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -35,15 +34,13 @@ public class PolygonWiggler
     */
    public static RigidBodyTransform wigglePolygonIntoRegion(ConvexPolygon2d polygonToWiggleInRegionFrame, PlanarRegion regionToWiggleInto, double maxYaw, double minYaw)
    {
-      ConvexPolygon2d tempPolygon = new ConvexPolygon2d(polygonToWiggleInRegionFrame);
-
       // find the part of the region that has the biggest intersection with the polygon
       ConvexPolygon2d bestMatch = null;
       double overlap = 0.0;
       for (int i = 0; i < regionToWiggleInto.getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2d intersection = new ConvexPolygon2d();
-         regionToWiggleInto.getConvexPolygon(i).intersectionWith(tempPolygon, intersection);
+         regionToWiggleInto.getConvexPolygon(i).intersectionWith(polygonToWiggleInRegionFrame, intersection);
          if (intersection.getArea() > overlap)
          {
             overlap = intersection.getArea();
@@ -52,18 +49,11 @@ public class PolygonWiggler
       }
 
       if (bestMatch == null)
-      {
-         PrintTools.info("Did not find a matching plane!");
          return null;
-      }
 
-      RigidBodyTransform wiggleTransform = findWiggleTransform(tempPolygon, bestMatch, maxYaw, minYaw);
+      RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggleInRegionFrame, bestMatch, maxYaw, minYaw);
       if (wiggleTransform == null || wiggleTransform.containsNaN())
          return null;
-
-      tempPolygon.applyTransformAndProjectToXYPlane(wiggleTransform);
-      if (!ConvexPolygon2dCalculator.isPolygonInside(tempPolygon, 1.0E-5, bestMatch))
-         PrintTools.info("Was not able to move polygon in fully!");
 
       return wiggleTransform;
    }

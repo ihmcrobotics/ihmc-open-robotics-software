@@ -17,7 +17,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class PlanThenSnapPlanner implements FootstepPlanner
 {
@@ -93,10 +92,7 @@ public class PlanThenSnapPlanner implements FootstepPlanner
 
          RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoRegion(footPolygonInRegion, regionToMoveTo, maxWiggleYaw, maxWiggleYaw);
          if (wiggleTransform == null)
-         {
-            PrintTools.info("Did not find a wiggle transform");
             solePose.setToNaN();
-         }
          else
          {
             solePose.changeFrame(regionFrame);
