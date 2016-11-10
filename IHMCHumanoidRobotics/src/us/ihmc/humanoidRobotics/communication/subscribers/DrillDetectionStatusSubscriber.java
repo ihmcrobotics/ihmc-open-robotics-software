@@ -44,16 +44,28 @@ public class DrillDetectionStatusSubscriber implements PacketConsumer<DrillDetec
          @Override
          public void run()
          {
-            DrillDetectionPacket newDrillPacket = incomingDetectedDrillPackets.poll();
-            if (newDrillPacket != null)
+            try
             {
-               for (DrillDetectionStatusListener listener : listOfListeners)
-               {
-                  listener.updateStatusPacket(newDrillPacket);
-               }
+               callListeners();
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
             }
          }
       };
+   }
+   
+   private void callListeners()
+   {
+      DrillDetectionPacket newDrillPacket = incomingDetectedDrillPackets.poll();
+      if (newDrillPacket != null)
+      {
+         for (DrillDetectionStatusListener listener : listOfListeners)
+         {
+            listener.updateStatusPacket(newDrillPacket);
+         }
+      }
    }
 
    public void shutdown()

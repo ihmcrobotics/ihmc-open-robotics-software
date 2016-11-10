@@ -57,19 +57,31 @@ public class DetectedObjectSubscriber implements PacketConsumer<DetectedObjectPa
          @Override
          public void run()
          {
-            DetectedObjectPacket detectedObject = incomingDetectedMocapObject.poll();
-            if (detectedObject != null)
+            try
             {
-               id.set(detectedObject.id);
-               pose.set(detectedObject.pose);
-
-               for (DetectedObjectListener listener : listOfListeners)
-               {
-                  listener.updatePose(detectedObject.pose, detectedObject.id);
-               }
+               callListeners();
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
             }
          }
       };
+   }
+
+   private void callListeners()
+   {
+      DetectedObjectPacket detectedObject = incomingDetectedMocapObject.poll();
+      if (detectedObject != null)
+      {
+         id.set(detectedObject.id);
+         pose.set(detectedObject.pose);
+
+         for (DetectedObjectListener listener : listOfListeners)
+         {
+            listener.updatePose(detectedObject.pose, detectedObject.id);
+         }
+      }
    }
 
    public void shutdown()
