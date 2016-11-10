@@ -97,7 +97,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       pusher = new PushRobotTestConductor(conductor.getScs(), jointToPushOn);
       
-      QuadrupedTestBehaviors.standUpAndSquareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       pusher.applyForce(new Vector3d(0.0, 1.0, 0.0), 30.0, 1.0);
       
@@ -162,7 +162,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       pusher = new PushRobotTestConductor(conductor.getScs(), "head_roll");
       
-      QuadrupedTestBehaviors.standUpAndSquareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
@@ -189,7 +189,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       pusher = new PushRobotTestConductor(conductor.getScs(), "body");
       
-      QuadrupedTestBehaviors.standUpAndSquareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       pusher.applyForce(new Vector3d(0.0, 1.0, 0.0), 30.0, 1.0);
       
@@ -234,7 +234,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       
-      QuadrupedTestBehaviors.standUpAndSquareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));

@@ -59,7 +59,7 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
    @Test(timeout = 200000)
    public void rotate720InPlaceRight() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.standUpAndSquareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputZ().set(-0.5);
@@ -87,7 +87,7 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
    @Test(timeout = 200000)
    public void rotate720InPlaceLeft() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.standUpAndSquareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputZ().set(0.5);
