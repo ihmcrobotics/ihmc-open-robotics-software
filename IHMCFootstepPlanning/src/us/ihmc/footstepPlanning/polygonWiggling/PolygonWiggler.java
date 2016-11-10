@@ -25,17 +25,17 @@ public class PolygonWiggler
 
    /**
     * Returns a transform that will move the given polygon into a planar region. Problematic if the planar region consists of
-    * multiple sub convex polygons.
+    * multiple sub convex polygons. The polygon to wiggle must have the same transform to world as the planar region.
     *
-    * @param polygonToWiggle
+    * @param polygonToWiggleInRegionFrame
     * @param regionToWiggleInto
     * @param maxYaw
     * @param minYaw
     * @return
     */
-   public static RigidBodyTransform wigglePolygonIntoRegion(ConvexPolygon2d polygonToWiggle, PlanarRegion regionToWiggleInto, double maxYaw, double minYaw)
+   public static RigidBodyTransform wigglePolygonIntoRegion(ConvexPolygon2d polygonToWiggleInRegionFrame, PlanarRegion regionToWiggleInto, double maxYaw, double minYaw)
    {
-      ConvexPolygon2d tempPolygon = new ConvexPolygon2d(polygonToWiggle);
+      ConvexPolygon2d tempPolygon = new ConvexPolygon2d(polygonToWiggleInRegionFrame);
 
       // find the part of the region that has the biggest intersection with the polygon
       ConvexPolygon2d bestMatch = null;
