@@ -79,7 +79,15 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
          @Override
          public void run()
          {
-            doActionAsServer();
+            try
+            {
+               doActionAsServer();
+            }
+            catch (Exception e)
+            {
+               if (PRINT_ERRORS)
+                  e.printStackTrace();
+            }
          }
       };
    }
@@ -91,7 +99,15 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
          @Override
          public void run()
          {
-            doActionAsClient();
+            try
+            {
+               doActionAsClient();
+            }
+            catch (Exception e)
+            {
+               if (PRINT_ERRORS)
+                  e.printStackTrace();
+            }
          }
       };
    }
