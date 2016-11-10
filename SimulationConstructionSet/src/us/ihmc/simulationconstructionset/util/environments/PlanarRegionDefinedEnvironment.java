@@ -1,11 +1,16 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationconstructionset.util.ground.PlanarRegionTerrainObject;
+import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
+import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,9 +38,18 @@ public class PlanarRegionDefinedEnvironment implements CommonAvatarEnvironmentIn
       this(PlanarRegionDefinedEnvironment.class.getSimpleName(), planarRegionsList);
    }
 
+   //TODO: centroid height
    private CombinedTerrainObject3D createCombinedTerrainObjectFromPlanarRegionsList(String environmentName, PlanarRegionsList planarRegionsList)
    {
-      return new CombinedTerrainObject3D(environmentName);
+      CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D(environmentName);
+
+      for(int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      {
+         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
+         combinedTerrainObject3D.addTerrainObject(new PlanarRegionTerrainObject(planarRegion));
+      }
+
+      return combinedTerrainObject3D;
    }
 
    @Override
