@@ -71,7 +71,7 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
 
    private void paceFast(double directionX) throws AssertionFailedError
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.standUpAndSquareUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
       variables.getXGaitEndPhaseShiftInput().set(0.0);
@@ -108,7 +108,7 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
 
    private void paceSlow(double directionX) throws AssertionFailedError
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.standUpAndSquareUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
       variables.getXGaitEndPhaseShiftInput().set(0.0);
@@ -160,7 +160,7 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
 
    private void paceInACircle(double directionX, double directionZ) throws AssertionFailedError
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.standUpAndSquareUp(conductor, variables);
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
       variables.getXGaitEndPhaseShiftInput().set(0.0);
