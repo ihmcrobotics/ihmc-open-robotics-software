@@ -173,6 +173,17 @@ public class SkippyController implements RobotController
                                                                                                                               registry,
                                                                                                                               SkippyPlaneControlMode.class);
    private final double deltaT = (double) SkippySimulation.DT;
+   /*
+    * For debug purposes
+    */
+   private final YoFrameVector crossHipPositionVector = new YoFrameVector("dotHipPositionVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector crossShoulderPositionVector = new YoFrameVector("dotShoulderPositionVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector formerShoulderToFootUnitVector = new YoFrameVector("formerShoulderToFootUnitVector", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector formerHipToFootUnitVector = new YoFrameVector("formerHipToFootUnitVector", ReferenceFrame.getWorldFrame(), registry);
+   private final DoubleYoVariable crossShoulderLength = new DoubleYoVariable("crossShoulderLength", registry);
+   private final DoubleYoVariable crossHipLength = new DoubleYoVariable("crossHipLength", registry);
+   
+   boolean firstStick = true;
 
    private String name;
    private SkippyRobot robot;
@@ -186,7 +197,7 @@ public class SkippyController implements RobotController
    double angularMomentumIntegralError = 0.0;
    double lastReactionForce = 0.0;
    int counterForZ0Average = 1;
-   boolean printOnce = true;
+//   boolean printOnce = true;
    PrintWriter writer = null;
    PrintWriter writer1 = null;
    boolean firstEnterBalanceState = true;
@@ -607,7 +618,14 @@ public class SkippyController implements RobotController
       if (trace)
          writer1.println(shoulderToFootPositionVector);
       /*
-       * leg to torso angle to Foot position vector
+       * Position vectors cross product (for debug purpose)
+       */
+      crossShoulderPositionVector.cross(shoulderToFootUnitVector,formerShoulderToFootUnitVector);
+      crossShoulderLength.set(crossShoulderPositionVector.length());
+      crossHipPositionVector.cross(hipToFootUnitVector,formerHipToFootUnitVector);
+      crossHipLength.set(crossHipPositionVector.length());
+      /*
+       * leg to torso angle 
        */
       legToTorsoAngle.set(hipToFootUnitVector.dot(shoulderToFootUnitVector));
    }
@@ -828,6 +846,7 @@ public class SkippyController implements RobotController
     */
    private void balanceControl()
    {
+      
       /*
        * ICP to Foot error
        */
