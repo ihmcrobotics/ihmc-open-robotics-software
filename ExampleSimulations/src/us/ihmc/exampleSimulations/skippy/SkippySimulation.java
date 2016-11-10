@@ -1,9 +1,9 @@
 package us.ihmc.exampleSimulations.skippy;
 
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SkippySimulation
 {
