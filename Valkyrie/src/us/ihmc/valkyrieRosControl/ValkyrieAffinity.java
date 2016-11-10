@@ -15,7 +15,7 @@ public class ValkyrieAffinity
    private final Processor estimatorThreadProcessor;
    private final Processor controlThreadProcessor;
    
-   public ValkyrieAffinity()
+   public ValkyrieAffinity(boolean setAffinity)
    {
       CPUTopology topology = new CPUTopology();
 
@@ -25,7 +25,7 @@ public class ValkyrieAffinity
       }
 
       log.config("Pinning control threads to processor 1 & 2.");
-      setAffinity = true;
+      this.setAffinity = setAffinity;
       Package socket = topology.getPackage(0);
       estimatorThreadProcessor = socket.getCore(1).getDefaultProcessor();
       controlThreadProcessor = socket.getCore(2).getDefaultProcessor();
