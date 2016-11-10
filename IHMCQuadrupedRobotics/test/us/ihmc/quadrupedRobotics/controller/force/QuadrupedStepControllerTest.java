@@ -60,7 +60,7 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
    @Test(timeout = 200000)
    public void testTakingAStep()
    {
-      QuadrupedTestBehaviors.standUpAndSquareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       DoubleYoVariable frontLeftSolePositionX = (DoubleYoVariable) conductor.getScs().getVariable("frontLeftSolePositionX");
       double commandedStepPositionX = frontLeftSolePositionX.getDoubleValue() + 0.2;
