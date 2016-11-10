@@ -181,6 +181,8 @@ public class MultiColorMeshBuilder
 
    private MeshDataHolder setColor(MeshDataHolder input, Color color)
    {
+      if (input == null)
+         return null;
       Point3f[] vertices = input.getVertices();
       int[] triangleIndices = input.getTriangleIndices();
       Vector3f[] vertexNormals = input.getVertexNormals();

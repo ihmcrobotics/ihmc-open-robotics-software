@@ -37,6 +37,8 @@ public class ModifiableMeshDataHolder
 
    public void add(MeshDataHolder meshDataHolder, boolean updateTriangleIndices)
    {
+      if (meshDataHolder == null)
+         return;
       Point3f[] otherVertices = meshDataHolder.getVertices();
       if (otherVertices == null || otherVertices.length < 3)
          return;
