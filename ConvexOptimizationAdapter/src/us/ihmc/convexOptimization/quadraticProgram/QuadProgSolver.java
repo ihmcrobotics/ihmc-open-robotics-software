@@ -52,7 +52,7 @@ public class QuadProgSolver extends ConstrainedQPSolver
          throws NoConvergenceException
    {
 
-      allocateTempraryMatrixOnDemand(Aeq.numCols, Aeq.numRows, Ain.numRows);
+      allocateTempraryMatrixOnDemand(Q.numCols, Aeq.numRows, Ain.numRows);
 
       CommonOps.transpose(Aeq, this.negAeq);
       CommonOps.scale(-1, this.negAeq);
