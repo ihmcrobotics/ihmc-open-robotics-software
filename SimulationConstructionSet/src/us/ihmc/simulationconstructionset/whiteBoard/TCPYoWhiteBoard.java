@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -16,14 +21,17 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
 {
 	private static final boolean VERBOSE = false;
 	private static final boolean PRINT_ERRORS = false;
+	private static final long THREAD_PERIOD = 1L;
+	private static final TimeUnit TIME_UNIT = TimeUnit.SECONDS;
+
+   private final ScheduledExecutorService executorService;
+	private ScheduledFuture<?> activeScheduled = null;
 
    private final String ipAddress;
    private int port;
 
    private ServerSocket serverSocket;
    private Socket tcpSocket;
-
-   private boolean tcpThreadRunning = true;
 
    /**
     * Server constructor.
@@ -34,6 +42,8 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
 
       this.port = port;
       this.ipAddress = null;
+      ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name + "TCPServerThread");
+      executorService = Executors.newScheduledThreadPool(1, threadFactory);
    }
 
    /**
@@ -45,111 +55,122 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
 
       this.ipAddress = ipAddress;
       this.port = port;
+      ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name + "TCPClientThread");
+      executorService = Executors.newScheduledThreadPool(1, threadFactory);
    }
 
    public void startTCPThread()
    {
-      if (!tcpThreadRunning)
+      if (activeScheduled != null)
          throw new RuntimeException("Already running");
 
-      tcpThreadRunning = false;
+      Runnable command;
+      if (isAServer())
+         command = createServerRunnable();
+      else
+         command = createClientRunnable();
+      activeScheduled = executorService.scheduleAtFixedRate(command, 0, THREAD_PERIOD, TIME_UNIT);
+   }
 
-      ThreadTools.startAThread(new Runnable()
+   private Runnable createServerRunnable()
+   {
+      return new Runnable()
       {
          @Override
          public void run()
          {
-            if (isAServer())
-               runServer();
-            else
-               runClient();
+            doActionAsServer();
          }
-      }, getName() + "TCPThread");
+      };
    }
 
-   private void runServer()
+   private Runnable createClientRunnable()
    {
-      while (!tcpThreadRunning)
+      return new Runnable()
       {
+         @Override
+         public void run()
+         {
+            doActionAsClient();
+         }
+      };
+   }
+
+   private void doActionAsServer()
+   {
+      try
+      {
+         synchronized (getConnectionConch())
+         {
+            if (VERBOSE)
+               PrintTools.debug(this, "runServer(): Accepting on port " + port);
+
+            serverSocket = new ServerSocket(port);
+            tcpSocket = serverSocket.accept();
+
+            setupSocket();
+         }
+
+         setupAndConnect();
+         runHandlingThread();
+
+         closeYoWhiteBoard();
+      }
+      catch (IOException connectIOException)
+      {
+         if (PRINT_ERRORS)
+            PrintTools.error(this, connectIOException.getMessage());
+
          try
          {
-            synchronized (getConnectionConch())
-            {
-               PrintTools.debug(VERBOSE, this, "runServer(): Accepting on port " + port);
-
-               serverSocket = new ServerSocket(port);
-               tcpSocket = serverSocket.accept();
-
-               setupSocket();
-            }
-
-            setupAndConnect();
-            runHandlingThread();
-
             closeYoWhiteBoard();
          }
-         catch (IOException connectIOException)
+         catch (IOException closeIOException)
          {
-            if (PRINT_ERRORS)
-               PrintTools.error(this, connectIOException.getMessage());
-
-            try
-            {
-               closeYoWhiteBoard();
-            }
-            catch (IOException closeIOException)
-            {
-               closeIOException.printStackTrace();
-            }
+            closeIOException.printStackTrace();
          }
-
-         ThreadTools.sleepSeconds(1.0);
       }
    }
 
-   private void runClient()
+   private void doActionAsClient()
    {
-      while (!tcpThreadRunning)
+      try
       {
+         synchronized (getConnectionConch())
+         {
+            if (VERBOSE)
+               PrintTools.debug(this, "runClient(): Connecting to " + ipAddress + ":" + port);
+
+            tcpSocket = new Socket(ipAddress, port);
+
+            setupSocket();
+         }
+
+         setupAndConnect();
+         runHandlingThread();
+
+         closeYoWhiteBoard();
+      }
+      catch (ConnectException connectException)
+      {
+         if (PRINT_ERRORS)
+         {
+            PrintTools.error(this, "Failed to connect to " + ipAddress + ":" + port);
+            PrintTools.error(this, connectException.getMessage());
+         }
+      }
+      catch (IOException connectIOException)
+      {
+         connectIOException.printStackTrace();
+
          try
          {
-            synchronized (getConnectionConch())
-            {
-               PrintTools.debug(VERBOSE, this, "runClient(): Connecting to " + ipAddress + ":" + port);
-
-               tcpSocket = new Socket(ipAddress, port);
-
-               setupSocket();
-            }
-            
-            setupAndConnect();
-            runHandlingThread();
-
             closeYoWhiteBoard();
          }
-         catch (ConnectException connectException)
+         catch (IOException closeIOException)
          {
-            if (PRINT_ERRORS)
-            {
-               PrintTools.error(this, "Failed to connect to " + ipAddress + ":" + port);
-               PrintTools.error(this, connectException.getMessage());
-            }
+            closeIOException.printStackTrace();
          }
-         catch (IOException connectIOException)
-         {
-            connectIOException.printStackTrace();
-
-            try
-            {
-               closeYoWhiteBoard();
-            }
-            catch (IOException closeIOException)
-            {
-               closeIOException.printStackTrace();
-            }
-         }
-
-         ThreadTools.sleepSeconds(1.0);
       }
    }
 
@@ -160,7 +181,8 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
       DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(tcpSocket.getInputStream()));
       DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(tcpSocket.getOutputStream()));
 
-      PrintTools.debug(VERBOSE, this, "Connected to " + tcpSocket.getRemoteSocketAddress());
+      if (VERBOSE)
+         PrintTools.debug(this, "Connected to " + tcpSocket.getRemoteSocketAddress());
 
       super.setDataStreams(dataInputStream, dataOutputStream);
    }
@@ -186,8 +208,12 @@ public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
 
    public void close() throws IOException
    {
-      tcpThreadRunning = false;
-
+      if (activeScheduled != null)
+      {
+         activeScheduled.cancel(true);
+         activeScheduled = null;
+      }
+      executorService.shutdownNow();
       closeYoWhiteBoard();
    }
 
