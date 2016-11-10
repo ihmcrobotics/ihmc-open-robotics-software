@@ -1,5 +1,7 @@
-package us.ihmc.footstepPlanning.graphSearch;
+package us.ihmc.footstepPlanning.visualizers;
 
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerListener;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNode;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
