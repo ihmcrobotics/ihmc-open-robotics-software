@@ -43,7 +43,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
-   public ArrayList<Point2d> predictedContactPoints;
+   public List<Point2d> predictedContactPoints;
 
    /**
     * Empty constructor for serialization.
@@ -147,7 +147,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       return origin;
    }
 
-   public ArrayList<Point2d> getPredictedContactPoints()
+   public List<Point2d> getPredictedContactPoints()
    {
       return predictedContactPoints;
    }
@@ -199,7 +199,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       this.orientation.set(orientation);
    }
 
-   public void setPredictedContactPoints(ArrayList<Point2d> predictedContactPoints)
+   public void setPredictedContactPoints(List<Point2d> predictedContactPoints)
    {
       this.predictedContactPoints = predictedContactPoints;
    }
