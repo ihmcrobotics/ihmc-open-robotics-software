@@ -133,14 +133,19 @@ public class PlanningTestTools
 
    public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList)
    {
+      return runPlanner(planner, initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, true);
+   }
+
+   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
+   {
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       goal.setGoalPoseBetweenFeet(goalPose);
 
-      return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList);
+      return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList, assertPlannerReturnedResult);
    }
 
-   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerGoal goal, PlanarRegionsList planarRegionsList)
+   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerGoal goal, PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
    {
       planner.setInitialStanceFoot(initialStanceFootPose, initialStanceSide);
       planner.setGoal(goal);
@@ -148,7 +153,7 @@ public class PlanningTestTools
 
       FootstepPlanningResult result = planner.plan();
       FootstepPlan footstepPlan = planner.getPlan();
-      assertTrue("Planner was not able to provide valid result.", result.validForExecution());
+      if (assertPlannerReturnedResult) assertTrue("Planner was not able to provide valid result.", result.validForExecution());
       return footstepPlan;
    }
 
