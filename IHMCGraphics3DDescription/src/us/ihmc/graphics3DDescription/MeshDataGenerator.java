@@ -223,10 +223,12 @@ public class MeshDataGenerator
    public static MeshDataHolder Polygon(Point3f... polygonPoints)
    {
       // Assume convexity and ccw.
-      TexCoord2f[] textPoints = generateInterpolatedTexturePoints(polygonPoints.length);
-
       int numberOfTriangles = polygonPoints.length - 2;
 
+      if (numberOfTriangles <= 0)
+         return null;
+
+      TexCoord2f[] textPoints = generateInterpolatedTexturePoints(polygonPoints.length);
       // Do a naive way of splitting a polygon into triangles. Assumes convexity and ccw ordering.
       int[] triangleIndices = new int[3 * numberOfTriangles];
       int index = 0;
