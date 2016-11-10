@@ -77,8 +77,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
    @Test(timeout = 500000)
    public void testExtremeRandomWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
 
@@ -102,8 +101,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
    @Test(timeout = 500000)
    public void testWalkingRandomly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
 
@@ -134,8 +132,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
    @Test(timeout = 600000)
    public void testWalkingAtRandomSpeedsWithStops() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
 
@@ -167,7 +164,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
    @Test(timeout = 600000)
    public void testWalkingRandomVelocitiesStoppingAndTurning() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
 

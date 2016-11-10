@@ -44,6 +44,6 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
       boolean updateListenersEachStep = true;
       double errorThreshold = 0.01;
       boolean success = testAPose(random, handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold , updateListenersEachStep);
-      assertTrue(success);
+      assertTrue("testAPose returned false", success);
    }
 }

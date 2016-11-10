@@ -57,8 +57,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingForwardFast()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(1.0);
@@ -74,8 +73,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingForwardSlow()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(0.1);
@@ -91,8 +89,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingBackwardsFast()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(-1.0);
@@ -108,8 +105,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingBackwardsSlow()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(-0.1);
@@ -125,8 +121,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingInAForwardLeftCircle()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(0.6);
@@ -146,8 +141,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingInAForwardRightCircle()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(0.6);
@@ -167,8 +161,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingInABackwardLeftCircle()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(-0.6);
@@ -188,8 +181,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    @Test(timeout = 30000)
    public void testWalkingInABackwardRightCircle()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(-0.6);
