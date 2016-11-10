@@ -105,12 +105,13 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
    private boolean firstTick = true;
 
-   private final ValkyrieAffinity valkyrieAffinity = new ValkyrieAffinity();
+   private final ValkyrieAffinity valkyrieAffinity;
    private boolean isGazebo;
 
    public ValkyrieRosControlController()
    {
-
+      processEnvironmentVariables();
+      valkyrieAffinity = new ValkyrieAffinity(!isGazebo);
    }
 
    private JointTorqueOffsetEstimatorControllerFactory jointTorqueOffsetEstimatorControllerFactory = null;
@@ -154,8 +155,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       /*
        * Create joints
        */
-
-      processEnvironmentVariables();
 
       HashSet<String> torqueControlledJointsSet = new HashSet<>(Arrays.asList(torqueControlledJoints));
       HashSet<String> positionControlledJointsSet = new HashSet<>(Arrays.asList(positionControlledJoints));
