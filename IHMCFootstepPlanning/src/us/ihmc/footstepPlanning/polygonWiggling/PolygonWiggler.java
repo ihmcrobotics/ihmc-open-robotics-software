@@ -9,6 +9,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -34,12 +35,7 @@ public class PolygonWiggler
     */
    public static RigidBodyTransform wigglePolygonIntoRegion(ConvexPolygon2d polygonToWiggle, PlanarRegion regionToWiggleInto, double maxYaw, double minYaw)
    {
-      // move the polygon to transform into the same frame as the region
       ConvexPolygon2d tempPolygon = new ConvexPolygon2d(polygonToWiggle);
-      RigidBodyTransform regionToWorld = new RigidBodyTransform();
-      regionToWiggleInto.getTransformToWorld(regionToWorld);
-      regionToWorld.invert();
-      tempPolygon.applyTransformAndProjectToXYPlane(regionToWorld);
 
       // find the part of the region that has the biggest intersection with the polygon
       ConvexPolygon2d bestMatch = null;
@@ -60,7 +56,16 @@ public class PolygonWiggler
          PrintTools.info("Did not find a matching plane!");
          return null;
       }
-      return findWiggleTransform(tempPolygon, bestMatch, maxYaw, minYaw);
+
+      RigidBodyTransform wiggleTransform = findWiggleTransform(tempPolygon, bestMatch, maxYaw, minYaw);
+      if (wiggleTransform == null || wiggleTransform.containsNaN())
+         return null;
+
+      tempPolygon.applyTransformAndProjectToXYPlane(wiggleTransform);
+      if (!ConvexPolygon2dCalculator.isPolygonInside(tempPolygon, 1.0E-5, bestMatch))
+         PrintTools.info("Was not able to move polygon in fully!");
+
+      return wiggleTransform;
    }
 
    /**

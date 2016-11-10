@@ -13,7 +13,7 @@ import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
 {
-   private static final boolean visualize = false;
+   private static final boolean visualize = true;
    private final PlanThenSnapPlanner planner =
          new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), PlanningTestTools.createDefaultFootPolygons());
 
