@@ -148,8 +148,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
 
    private double standupPrecisely() throws AssertionFailedError
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
-      QuadrupedTestBehaviors.squareUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       double originalHeight = variables.getYoComPositionInputZ().getDoubleValue();
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
