@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -42,7 +42,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
       origin = message.getOrigin();
       adjustedPosition.set(message.getLocation());
       adjustedOrientation.set(message.getOrientation());
-      ArrayList<Point2d> originalPredictedContactPoints = message.getPredictedContactPoints();
+      List<Point2d> originalPredictedContactPoints = message.getPredictedContactPoints();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
       {
