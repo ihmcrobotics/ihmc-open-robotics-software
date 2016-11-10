@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
@@ -16,10 +17,25 @@ public class PlanarRegionDefinedEnvironment implements CommonAvatarEnvironmentIn
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final List<Robot> environmentRobots = new ArrayList<>();
    private final List<ExternalForcePoint> contactPoints = new ArrayList<>();
+   private final String environmentName;
+   private final PlanarRegionsList planarRegionsList;
 
-   public PlanarRegionDefinedEnvironment()
+   public PlanarRegionDefinedEnvironment(String environmentName, PlanarRegionsList planarRegionsList)
    {
-      combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
+      this.environmentName = environmentName;
+      this.planarRegionsList = planarRegionsList;
+
+      combinedTerrainObject = createCombinedTerrainObjectFromPlanarRegionsList(environmentName, this.planarRegionsList);
+   }
+
+   public PlanarRegionDefinedEnvironment(PlanarRegionsList planarRegionsList)
+   {
+      this(PlanarRegionDefinedEnvironment.class.getSimpleName(), planarRegionsList);
+   }
+
+   private CombinedTerrainObject3D createCombinedTerrainObjectFromPlanarRegionsList(String environmentName, PlanarRegionsList planarRegionsList)
+   {
+      return new CombinedTerrainObject3D(environmentName);
    }
 
    @Override
