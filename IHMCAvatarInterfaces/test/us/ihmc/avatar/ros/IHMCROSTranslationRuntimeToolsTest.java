@@ -10,6 +10,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.tools.io.printing.PrintTools;
 
 import java.lang.reflect.*;
 import java.util.HashSet;
@@ -44,6 +45,7 @@ public class IHMCROSTranslationRuntimeToolsTest
 
       for(int i = 0; i < 5000; i++)
       {
+         int packetsFailed = 0;
          for (Class<?> concreteType : concreteTypes)
          {
             Constructor<?> randomConstructor = null;
@@ -57,12 +59,13 @@ public class IHMCROSTranslationRuntimeToolsTest
             }
             catch (Exception e)
             {
-               System.out.println("Conversion failed!");
-               System.out.println("Message type: " + concreteType);
+               PrintTools.error("Conversion failed: " + e.getMessage());
+               PrintTools.error("Message type: " + concreteType);
                e.printStackTrace();
-               fail();
+               ++packetsFailed;
             }
          }
+         assertTrue("Conversion(s) failed for " + packetsFailed + " packets.", packetsFailed < 1);
       }
    }
 }
