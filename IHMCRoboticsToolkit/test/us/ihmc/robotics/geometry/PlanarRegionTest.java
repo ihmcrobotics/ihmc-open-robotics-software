@@ -163,28 +163,65 @@ public class PlanarRegionTest
       assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.09, 1.21, convexPolygon)));
 
       ArrayList<ConvexPolygon2d> intersections = new ArrayList<>();
-      planarRegion.getPolygonIntersections(convexPolygon, intersections);
+      planarRegion.getPolygonIntersectionsWhenProjectedVertically(convexPolygon, intersections);
       assertEquals(1, intersections.size());
 
       intersections.clear();
-      planarRegion.getPolygonIntersections(translateConvexPolygon(2.0, 0.0, convexPolygon), intersections);
+      planarRegion.getPolygonIntersectionsWhenProjectedVertically(translateConvexPolygon(2.0, 0.0, convexPolygon), intersections);
       assertEquals(1, intersections.size());
 
       intersections.clear();
-      planarRegion.getPolygonIntersections(translateConvexPolygon(0.0, 2.0, convexPolygon), intersections);
+      planarRegion.getPolygonIntersectionsWhenProjectedVertically(translateConvexPolygon(0.0, 2.0, convexPolygon), intersections);
       assertEquals(1, intersections.size());
 
       intersections.clear();
-      planarRegion.getPolygonIntersections(translateConvexPolygon(2.0, 2.0, convexPolygon), intersections);
+      planarRegion.getPolygonIntersectionsWhenProjectedVertically(translateConvexPolygon(2.0, 2.0, convexPolygon), intersections);
       assertEquals(0, intersections.size());
 
       intersections.clear();
-      planarRegion.getPolygonIntersections(translateConvexPolygon(1.21, 1.21, convexPolygon), intersections);
+      planarRegion.getPolygonIntersectionsWhenProjectedVertically(translateConvexPolygon(1.21, 1.21, convexPolygon), intersections);
       assertEquals(0, intersections.size());
 
       intersections.clear();
-      planarRegion.getPolygonIntersections(translateConvexPolygon(1.09, 1.09, convexPolygon), intersections);
+      planarRegion.getPolygonIntersectionsWhenProjectedVertically(translateConvexPolygon(1.09, 1.09, convexPolygon), intersections);
       assertEquals(3, intersections.size());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGetPolygonIntersectionsWhenSnapped()
+   {
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
+      transform.setTranslation(1.2, 3.4, 5.6);
+
+      ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
+      convexPolygon.addVertex(0.2, 0.2);
+      convexPolygon.addVertex(0.2, -0.2);
+      convexPolygon.addVertex(-0.2, -0.2);
+      convexPolygon.addVertex(-0.2, 0.2);
+      convexPolygon.update();
+
+      PlanarRegion planarRegion = new PlanarRegion(transform, convexPolygon);
+
+      ConvexPolygon2d polygonToSnap = new ConvexPolygon2d();
+      polygonToSnap.addVertex(0.1, 0.1);
+      polygonToSnap.addVertex(0.1, -0.1);
+      polygonToSnap.addVertex(-0.1, -0.1);
+      polygonToSnap.addVertex(-0.1, 0.1);
+      polygonToSnap.update();
+
+      RigidBodyTransform snappingTransform = new RigidBodyTransform();
+      snappingTransform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
+      snappingTransform.setTranslation(1.2, 3.4, 5.6);
+
+      ArrayList<ConvexPolygon2d> intersectionsToPack = new ArrayList<>();
+      planarRegion.getPolygonIntersectionsWhenSnapped(polygonToSnap, snappingTransform, intersectionsToPack);
+
+      assertEquals(1, intersectionsToPack.size());
+      ConvexPolygon2d intersection = intersectionsToPack.get(0);
+
+      assertEquals(0.04, intersection.getArea(), 1e-7);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

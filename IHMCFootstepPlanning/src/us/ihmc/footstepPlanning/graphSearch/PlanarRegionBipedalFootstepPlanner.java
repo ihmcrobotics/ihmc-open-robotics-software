@@ -1,11 +1,14 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayDeque;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -14,6 +17,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -34,7 +38,9 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    private double idealFootstepLength;
    private double idealFootstepWidth;
 
-   private double maxStepReach;
+   private double maximumStepReach;
+   private double maximumStepZ;
+   private double minimumFootholdPercent;
 
    //   private FootstepPlan footstepPlan;
 
@@ -47,9 +53,19 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       this.listener = listener;
    }
 
-   public void setMaxStepReach(double maxStepReach)
+   public void setMaximumStepReach(double maximumStepReach)
    {
-      this.maxStepReach = maxStepReach;
+      this.maximumStepReach = maximumStepReach;
+   }
+
+   public void setMaximumStepZ(double maximumStepZ)
+   {
+      this.maximumStepZ = maximumStepZ;
+   }
+
+   public void setMinimumFootholdPercent(double minimumFootholdPercent)
+   {
+      this.minimumFootholdPercent = minimumFootholdPercent;
    }
 
    public void setIdealFootstep(double idealFootstepLength, double idealFootstepWidth)
@@ -138,8 +154,10 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
       SideDependentList<Point3d> goalPositions = new SideDependentList<>(goalLeftSolePosition, goalRightSolePosition);
 
+      int count = 0;
       while (!stack.isEmpty())
       {
+         count++;
          BipedalFootstepPlannerNode nodeToExpand = stack.pop();
          notifyListenerNodeSelectedForExpansion(nodeToExpand);
 
@@ -147,15 +165,66 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          RobotSide nextSide = currentSide.getOppositeSide();
 
          // Make sure popped node is a good one and can be expanded...
-         RigidBodyTransform nodeToExpandSnapTransform = getSnapTransform(nodeToExpand);
+         Pair<RigidBodyTransform, PlanarRegion> nodeToExpandSnapTransformAndPlanarRegion = getSnapTransform(nodeToExpand);
 
-         if (nodeToExpandSnapTransform == null)
+         if (nodeToExpandSnapTransformAndPlanarRegion == null)
          {
             notifyListenerNodeForExpansionWasRejected(nodeToExpand);
             continue;
          }
 
-         nodeToExpand.transformSoleTransformWithSnapTransformFromZeroZ(nodeToExpandSnapTransform);
+         nodeToExpand.transformSoleTransformWithSnapTransformFromZeroZ(nodeToExpandSnapTransformAndPlanarRegion);
+
+
+         RigidBodyTransform nodeToExpandTransform = new RigidBodyTransform();
+         nodeToExpand.getSoleTransform(nodeToExpandTransform);
+         PlanarRegion planarRegion = nodeToExpandSnapTransformAndPlanarRegion.getRight();
+         RigidBodyTransform soleTransform = new RigidBodyTransform();
+         nodeToExpand.getSoleTransform(soleTransform);
+         ConvexPolygon2d snappedPolygon = footPolygonsInSoleFrame.get(currentSide);
+         snappedPolygon.update();
+         double footArea = snappedPolygon.getArea();
+
+         ArrayList<ConvexPolygon2d> intersectionsToPack = new ArrayList<>();
+         planarRegion.getPolygonIntersectionsWhenSnapped(snappedPolygon, nodeToExpandTransform, intersectionsToPack);
+
+         double totalArea = 0.0;
+         for (int i=0; i<intersectionsToPack.size(); i++)
+         {
+            ConvexPolygon2d intersectionPolygon = intersectionsToPack.get(i);
+            intersectionPolygon.update();
+            totalArea = totalArea + intersectionPolygon.getArea();
+         }
+
+         if (totalArea < minimumFootholdPercent * footArea)
+         {
+            notifyListenerNodeForExpansionWasRejected(nodeToExpand);
+            continue;
+         }
+
+         RigidBodyTransform transformToParent = nodeToExpand.getTransformToParent();
+         if (transformToParent != null)
+         {
+            Point3d stepFromParent = new Point3d();
+            transformToParent.transform(stepFromParent);
+//            System.out.println("Step From parent:\n" + stepFromParent);
+
+            Vector3d stepFromParentInWorld = new Vector3d(stepFromParent);
+
+            RigidBodyTransform transformToWorld = new RigidBodyTransform();
+
+            nodeToExpand.getParentNode().getSoleTransform(transformToWorld);
+            transformToWorld.transform(stepFromParentInWorld);
+//            System.out.println("Step From parent:\n" + stepFromParentInWorld);
+//            System.out.println();
+
+            if (Math.abs(stepFromParentInWorld.getZ()) > maximumStepZ)
+            {
+               notifyListenerNodeForExpansionWasRejected(nodeToExpand);
+               continue;
+            }
+         }
+
          notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
 
          // Check if goal is reachable:
@@ -167,14 +236,14 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
          Point3d goalSolePosition = goalPositions.get(nextSide);
 
-         if (goalSolePosition.distance(currentSolePosition) < maxStepReach)
+         if (goalSolePosition.distance(currentSolePosition) < maximumStepReach)
          {
             Vector3d finishStep = new Vector3d();
             finishStep.sub(goalSolePosition, currentSolePosition);
 
             goalNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, finishStep);
 
-            RigidBodyTransform goalNodeSnapTransform = getSnapTransform(goalNode);
+            Pair<RigidBodyTransform, PlanarRegion> goalNodeSnapTransform = getSnapTransform(goalNode);
 
             if (goalNodeSnapTransform == null)
             {
@@ -198,12 +267,35 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return FootstepPlanningResult.NO_PATH_EXISTS;
    }
 
-   private void expandChildrenAndAddToQueue(Collection<BipedalFootstepPlannerNode> collectionOfNodes, RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand, RobotSide currentSide)
+   private void expandChildrenAndAddToQueue(Deque<BipedalFootstepPlannerNode> stack, RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand, RobotSide currentSide)
    {
+      ArrayList<BipedalFootstepPlannerNode> nodesToAdd = new ArrayList<>();
+
       Vector3d idealStep = new Vector3d(idealFootstepLength, currentSide.negateIfLeftSide(idealFootstepWidth), 0.0);
       BipedalFootstepPlannerNode childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, idealStep);
+      nodesToAdd.add(childNode);
 
-      collectionOfNodes.add(childNode);
+      for (double xStep = idealFootstepLength/2.0; xStep < 1.6 * idealFootstepLength; xStep = xStep + idealFootstepLength / 2.0)
+      {
+         for (double yStep = idealFootstepWidth; yStep < 1.4 * idealFootstepWidth; yStep = yStep + idealFootstepWidth / 4.0)
+         {
+            //for (double thetaStep = -0.1; thetaStep < 0.1; thetaStep = thetaStep + 0.1 / 2.0)
+            {
+               Vector3d nextStepVector = new Vector3d(xStep, currentSide.negateIfLeftSide(yStep), 0.0);
+               childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector);
+               nodesToAdd.add(childNode);
+            }
+         }
+      }
+
+//      Collections.shuffle(nodesToAdd);
+      Collections.reverse(nodesToAdd);
+
+      for (BipedalFootstepPlannerNode node : nodesToAdd)
+      {
+         stack.push(node);
+      }
+
    }
 
    private BipedalFootstepPlannerNode createAndAddNextNodeGivenStep(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand, Vector3d idealStepVector)
@@ -224,7 +316,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return childNode;
    }
 
-   private RigidBodyTransform getSnapTransform(BipedalFootstepPlannerNode bipedalFootstepPlannerNode)
+   private Pair<RigidBodyTransform, PlanarRegion> getSnapTransform(BipedalFootstepPlannerNode bipedalFootstepPlannerNode)
    {
       RobotSide nodeSide = bipedalFootstepPlannerNode.getRobotSide();
       RigidBodyTransform soleTransformBeforeSnap = new RigidBodyTransform();
@@ -232,19 +324,16 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       bipedalFootstepPlannerNode.getSoleTransform(soleTransformBeforeSnap);
 
       ConvexPolygon2d currentFootPolygon = new ConvexPolygon2d(footPolygonsInSoleFrame.get(nodeSide));
-
       currentFootPolygon.applyTransformAndProjectToXYPlane(soleTransformBeforeSnap);
 
-      RigidBodyTransform nodeToExpandSnapTransform = null;
       if (planarRegionsList != null)
       {
-         nodeToExpandSnapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList);
+         return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList);
       }
       else
       {
-         nodeToExpandSnapTransform = new RigidBodyTransform();
+         return null;
       }
-      return nodeToExpandSnapTransform;
    }
 
    private void notifyListenerNodeSelectedForExpansion(BipedalFootstepPlannerNode nodeToExpand)

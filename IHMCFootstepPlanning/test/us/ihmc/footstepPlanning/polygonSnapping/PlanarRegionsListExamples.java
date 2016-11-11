@@ -37,7 +37,7 @@ public class PlanarRegionsListExamples
       double height = 0.1;
 
       generator.translate(length * numberOfSteps / 2.0, 0.0, 0.001);
-      generator.addRectangle(length * numberOfSteps, 1.2 * width);
+      generator.addRectangle(1.2 * length * numberOfSteps, 1.2 * width);
 
       generator.identity();
       generator.translate(length, 0.0, 0.0);

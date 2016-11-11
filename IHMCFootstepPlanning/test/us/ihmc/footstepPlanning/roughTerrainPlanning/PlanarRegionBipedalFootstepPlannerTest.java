@@ -54,9 +54,11 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    {
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner();
 
-      planner.setMaxStepReach(0.4);
+      planner.setMaximumStepReach(0.4);
+      planner.setMaximumStepZ(0.2);
+      planner.setMinimumFootholdPercent(0.8);
 
-      double idealFootstepLength = 0.1;
+      double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;
       planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
@@ -89,7 +91,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
          footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame, parentRegistry, graphicsListRegistry);
 
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
-         scs.setDT(0.01, 1);
+         scs.setDT(0.1, 1);
          scs.startOnAThread();
       }
 
@@ -132,12 +134,11 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       public void planarRegionsListSet(PlanarRegionsList planarRegionsList)
       {
          Graphics3DObject graphics3dObject = new Graphics3DObject();
-         graphics3dObject.addPlanarRegionsList(planarRegionsList, YoAppearance.Gold(), YoAppearance.Purple(), YoAppearance.Pink());
+         graphics3dObject.addPlanarRegionsList(planarRegionsList, YoAppearance.Blue(), YoAppearance.Purple(), YoAppearance.Pink());
          scs.addStaticLinkGraphics(graphics3dObject);
 
          tickAndUpdateSCS();
       }
-
 
       private void tickAndUpdateSCS()
       {

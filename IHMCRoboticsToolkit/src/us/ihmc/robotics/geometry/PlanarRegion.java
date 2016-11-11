@@ -62,7 +62,7 @@ public class PlanarRegion
          ConvexPolygon2d polygonToCheck = convexPolygons.get(i);
          boolean hasIntersection = polygonToCheck.intersectionWith(projectedPolygon, dummyPolygon);
          if (hasIntersection)
-            return true; 
+            return true;
       }
       // Did not find any intersection
       return false;
@@ -73,7 +73,7 @@ public class PlanarRegion
     * @param convexPolygon2d Polygon to project vertically.
     * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
     */
-   public void getPolygonIntersections(ConvexPolygon2d convexPolygon2d, ArrayList<ConvexPolygon2d> intersectionsToPack)
+   public void getPolygonIntersectionsWhenProjectedVertically(ConvexPolygon2d convexPolygon2d, ArrayList<ConvexPolygon2d> intersectionsToPack)
    {
       // Instead of projecting all the polygons of this region onto the world XY-plane,
       // the given convex polygon is projected along the z-world axis to be snapped onto plane.
@@ -82,6 +82,34 @@ public class PlanarRegion
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
+         ConvexPolygon2d intersectingPolygon = convexPolygons.get(i).intersectionWith(projectedPolygon);
+
+         if (intersectingPolygon != null)
+         {
+            intersectionsToPack.add(intersectingPolygon);
+         }
+      }
+   }
+
+   /**
+    * Returns all of the intersections when the convexPolygon is snapped onto this PlanarRegion with the snappingTransform.
+    * @param convexPolygon2d Polygon to snap.
+    * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have same surface normal as this region.
+    * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
+    */
+   public void getPolygonIntersectionsWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform, ArrayList<ConvexPolygon2d> intersectionsToPack)
+   {
+      RigidBodyTransform transformFoo = new RigidBodyTransform();
+      transformFoo.multiply(fromWorldToLocalTransform, snappingTransform);
+
+      ConvexPolygon2d projectedPolygon = new ConvexPolygon2d(convexPolygon2d);
+      projectedPolygon.applyTransformAndProjectToXYPlane(transformFoo);
+
+      // Now, just need to go through each polygon of this region and see there is at least one intersection
+      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
+      {
+         System.out.println("convexPolygons.get(i) = \n" + convexPolygons.get(i));
+
          ConvexPolygon2d intersectingPolygon = convexPolygons.get(i).intersectionWith(projectedPolygon);
 
          if (intersectingPolygon != null)

@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -12,6 +11,7 @@ import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -71,11 +71,11 @@ public class PlanThenSnapPlanner implements FootstepPlanner
          PoseReferenceFrame soleFrameBeforeSnapping = new PoseReferenceFrame("SoleFrameBeforeSnapping", solePose);
          FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(soleFrameBeforeSnapping, footPolygons.get(footstep.getRobotSide()));
          footPolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
-         RigidBodyTransform snapTransform =
-               PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon.getConvexPolygon2d(), planarRegionsList);
-         if (snapTransform == null)
+         Pair<RigidBodyTransform, PlanarRegion> snapTransformAndRegion = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon.getConvexPolygon2d(), planarRegionsList);
+         if (snapTransformAndRegion == null)
             return FootstepPlanningResult.SNAPPING_FAILED;
-         solePose.applyTransform(snapTransform);
+
+         solePose.applyTransform(snapTransformAndRegion.getLeft());
          footstep.setSoleFramePose(solePose);
       }
       return result;
