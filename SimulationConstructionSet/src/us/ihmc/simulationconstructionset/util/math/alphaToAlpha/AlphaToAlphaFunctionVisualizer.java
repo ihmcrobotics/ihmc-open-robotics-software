@@ -2,8 +2,8 @@ package us.ihmc.simulationconstructionset.util.math.alphaToAlpha;
 
 import java.util.ArrayList;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

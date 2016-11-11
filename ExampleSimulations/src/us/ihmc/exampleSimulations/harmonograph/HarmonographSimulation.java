@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.harmonograph;
 
 
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class HarmonographSimulation
 {

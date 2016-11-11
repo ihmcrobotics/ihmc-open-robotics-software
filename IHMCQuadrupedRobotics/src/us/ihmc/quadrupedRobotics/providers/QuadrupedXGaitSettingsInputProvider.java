@@ -24,7 +24,7 @@ public class QuadrupedXGaitSettingsInputProvider
    private final DoubleParameter defaultStepGroundClearanceParameter = parameterFactory.createDouble("defaultStepGroundClearance", 0.1);
    private final DoubleParameter defaultStepDurationParameter = parameterFactory.createDouble("defaultStepDurationParameter", 0.33);
    private final DoubleParameter defaultEndDoubleSupportDurationParameter = parameterFactory.createDouble("defaultEndDoubleSupportDuration", 0.0);
-   private final DoubleParameter defaultEndPhaseShiftParameter = parameterFactory.createDouble("defaultEndPhaseShift", 90);
+   private final DoubleParameter defaultEndPhaseShiftParameter = parameterFactory.createDouble("defaultEndPhaseShift", 180);
    private final DoubleParameter stanceLengthLowerLimitParameter = parameterFactory.createDouble("stanceLengthLowerLimit", 0.8);
    private final DoubleParameter stanceLengthUpperLimitParameter = parameterFactory.createDouble("stanceLengthUpperLimit", 1.4);
    private final DoubleParameter stanceWidthLowerLimitParameter = parameterFactory.createDouble("stanceWidthLowerLimit", 0.1);

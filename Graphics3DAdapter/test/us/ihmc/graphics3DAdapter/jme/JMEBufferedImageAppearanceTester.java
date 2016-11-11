@@ -17,8 +17,8 @@ import javax.swing.JPanel;
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.jme.util.JME3DLoaderUtils;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.graphics3DAdapter.utils.GraphicsDemoTools.PanBackAndForthTrackingAndDollyPositionHolder;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
 
 import com.jme3.math.FastMath;
 import com.jme3.renderer.queue.RenderQueue;

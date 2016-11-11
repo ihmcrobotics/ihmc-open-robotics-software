@@ -16,8 +16,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
+import us.ihmc.graphics3DDescription.MeshDataGenerator;
+import us.ihmc.graphics3DDescription.MeshDataHolder;
 
 public class MultiColorMeshBuilder
 {
@@ -181,6 +181,8 @@ public class MultiColorMeshBuilder
 
    private MeshDataHolder setColor(MeshDataHolder input, Color color)
    {
+      if (input == null)
+         return null;
       Point3f[] vertices = input.getVertices();
       int[] triangleIndices = input.getTriangleIndices();
       Vector3f[] vertexNormals = input.getVertexNormals();

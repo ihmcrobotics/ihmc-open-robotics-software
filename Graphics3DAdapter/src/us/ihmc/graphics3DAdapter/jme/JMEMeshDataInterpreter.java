@@ -6,8 +6,8 @@ import com.jme3.scene.Mesh;
 import com.jme3.scene.VertexBuffer.Type;
 import com.jme3.util.BufferUtils;
 
-import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
+import us.ihmc.graphics3DDescription.MeshDataHolder;
 
 public class JMEMeshDataInterpreter
 {

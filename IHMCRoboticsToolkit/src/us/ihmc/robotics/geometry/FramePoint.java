@@ -284,4 +284,9 @@ public class FramePoint extends FrameTuple<FramePoint, TransformablePoint3d> imp
    {
       super.setFromReferenceFrame(referenceFrame);
    }
+
+   public double getDistanceFromOrigin()
+   {
+      return this.tuple.getLength();
+   }
 }
