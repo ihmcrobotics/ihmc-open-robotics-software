@@ -4,8 +4,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
+import us.ihmc.graphics3DDescription.HeightMap;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 

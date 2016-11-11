@@ -7,6 +7,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -15,9 +18,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 public class ActualCMPComputer extends SimpleRobotController
 {

@@ -14,7 +14,11 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -35,10 +39,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class OneStepCaptureRegionCalculatorTest

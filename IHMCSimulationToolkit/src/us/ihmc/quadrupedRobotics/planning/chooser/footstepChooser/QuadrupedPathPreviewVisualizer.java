@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.MockQuadrupedReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -16,7 +17,6 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class QuadrupedPathPreviewVisualizer implements RobotController
 {

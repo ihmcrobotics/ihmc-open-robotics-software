@@ -4,6 +4,12 @@ import java.awt.Color;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactLine2d;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactOval;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.artifact.LineArtifact;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -14,12 +20,6 @@ import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition.GraphicType;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLine2d;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactLineSegment2d;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactOval;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPosition;
 
 public class YoArtifactDemo
 {

@@ -3,7 +3,9 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
@@ -24,8 +26,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicCoordinateSystem;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
 {

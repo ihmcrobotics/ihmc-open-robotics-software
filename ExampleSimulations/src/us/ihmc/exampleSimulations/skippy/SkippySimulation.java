@@ -1,9 +1,12 @@
 package us.ihmc.exampleSimulations.skippy;
 
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class SkippySimulation
 {
@@ -27,7 +30,46 @@ public class SkippySimulation
 
       boolean showOverheadView = true;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      /*
+       * Begin YoVariable Listener
+       */
+      DoubleYoVariable variable = (DoubleYoVariable) sim.getVariable("gc_foot_y");
 
+      variable.addVariableChangedListener(new VariableChangedListener()
+      {
+         double previousValue = 0.0;
+
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if ((v.getValueAsDouble() > -0.001) && (v.getValueAsDouble() < 0.001))
+            {
+               System.out.println("gc_foot_y = " + v);
+            }
+
+            previousValue = v.getValueAsDouble();
+         }
+      });
+      DoubleYoVariable variable1 = (DoubleYoVariable) sim.getVariable("gc_foot_x");
+
+      variable.addVariableChangedListener(new VariableChangedListener()
+      {
+         double previousValue = 0.0;
+
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if ((previousValue > 0.0) && (v.getValueAsDouble() < 0.0))
+            {
+               System.out.println("gc_foot_x = " + v);
+            }
+
+            previousValue = v.getValueAsDouble();
+         }
+      });
+     /*
+       * End YoVariable Listener
+       */
       SkippyController skippyController = new SkippyController(skippy, robotType, "skippyController", controlDT, yoGraphicsListRegistry);
       skippy.setController(skippyController);
       // skippy.setController(new ExternalControlServer(skippy,
