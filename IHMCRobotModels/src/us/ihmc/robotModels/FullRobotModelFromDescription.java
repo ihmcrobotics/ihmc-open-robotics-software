@@ -44,6 +44,11 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    private final Map<Enum<?>, RigidBody> endEffectors = new HashMap<>();
 
+   public FullRobotModelFromDescription(FullRobotModelFromDescription modelToCopy)
+   {
+      this(modelToCopy.description, modelToCopy.sdfJointNameMap, modelToCopy.sensorLinksToTrack);
+   }
+   
    public FullRobotModelFromDescription(RobotDescription description, JointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       this(description, sdfJointNameMap, sensorLinksToTrack, false);

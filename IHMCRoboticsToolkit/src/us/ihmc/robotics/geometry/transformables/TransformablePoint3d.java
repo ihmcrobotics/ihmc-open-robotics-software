@@ -121,4 +121,9 @@ public class TransformablePoint3d extends Point3d implements GeometryObject<Tran
       this.set(point);
    }
 
+   public double getLength()
+   {
+      return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+   }
+
 }

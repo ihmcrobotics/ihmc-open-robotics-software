@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -23,8 +25,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.XYPlaneFrom3PointsFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.BagOfBalls;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /**
  * Wrapper for TrajectoryPointOptimizer for the generation of swing trajectories. This is more efficient then

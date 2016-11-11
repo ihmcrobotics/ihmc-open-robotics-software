@@ -8,6 +8,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.geometry.FramePose;
@@ -21,6 +22,30 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 {
    private static final Random random = new Random(42747621889239430L);
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   public void testOnStaircase()
+   {
+      testOnStaircase(new Vector3d(), true);
+   }
+
+   public void testOnStaircase(Vector3d rotationVector, boolean assertPlannerReturnedResult)
+   {
+      PlanarRegionsList stairCase = PlanarRegionsListExamples.generateStairCase(rotationVector);
+
+      // define start and goal conditions
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      RobotSide initialStanceSide = RobotSide.LEFT;
+
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(2.0, 0.0, 0.5);
+
+      // run the test
+      FootstepPlan footstepPlan =
+            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, stairCase, assertPlannerReturnedResult);
+      if (visualize())
+         PlanningTestTools.visualizeAndSleep(stairCase, footstepPlan, goalPose);
+      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+   }
 
    public void testSimpleStepOnBox()
    {

@@ -23,6 +23,11 @@ public class PlanarRegionsListExamples
 
    public static PlanarRegionsList generateStairCase()
    {
+      return generateStairCase(new Vector3d());
+   }
+
+   public static PlanarRegionsList generateStairCase(Vector3d rotationVector)
+   {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
       int numberOfSteps = 5;
@@ -36,7 +41,7 @@ public class PlanarRegionsListExamples
 
       generator.identity();
       generator.translate(length, 0.0, 0.0);
-      generator.rotateEuler(new Vector3d(0.01, 0.01, 0.0));
+      generator.rotateEuler(rotationVector);
       for (int i = 0; i < numberOfSteps; i++)
       {
          generator.addCubeReferencedAtBottomMiddle(length, width, height);

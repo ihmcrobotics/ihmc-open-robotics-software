@@ -38,7 +38,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
    
    public void trotAroundSuperAggressively()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       QuadrupedTestBehaviors.enterXGait(conductor, variables);
       
@@ -84,7 +84,7 @@ public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMult
    
    public void pushDownOnBodyUntilLimits()
    {
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
       double force = 0.0;
       double forceIncreasePerSec = 200.0;

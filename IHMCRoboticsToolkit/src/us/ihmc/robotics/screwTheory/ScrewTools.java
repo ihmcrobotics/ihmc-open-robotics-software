@@ -461,28 +461,20 @@ public class ScrewTools
 
       for (int i = 0; i < inverseDynamicsJoints.length; i++)
       {
-         FramePoint comOffset = new FramePoint();
-         RigidBody successorOriginal = inverseDynamicsJoints[i].getSuccessor();
-
          if (inverseDynamicsJoints[i] instanceof RevoluteJoint)
          {
             RevoluteJoint jointOriginal = (RevoluteJoint) inverseDynamicsJoints[i];
 
             RigidBody predecessorOriginal = jointOriginal.getPredecessor();
-
             RigidBody predecessorCopy;
-            String predecessorNameOriginal = predecessorOriginal.getName();
-            Vector3d predecessorCoMOffsetCopy = comOffset.getVectorCopy();
 
             if (i > 0)
             {
-               predecessorOriginal.getCoMOffset(comOffset);
-               Matrix3d predecessorMassMomentOfInertiaPartCopy = predecessorOriginal.getInertia().getMassMomentOfInertiaPartCopy();
-               double predecessorMass = predecessorOriginal.getInertia().getMass();
-               predecessorCopy = ScrewTools.addRigidBody(predecessorNameOriginal + suffix, cloned[i - 1], predecessorMassMomentOfInertiaPartCopy, predecessorMass, predecessorCoMOffsetCopy);
+               predecessorCopy = cloned[i - 1].getSuccessor();
             }
             else
             {
+               String predecessorNameOriginal = predecessorOriginal.getName();
                ReferenceFrame predecessorFrameAfterParentJointOriginal = predecessorOriginal.getParentJoint().getFrameAfterJoint();
                predecessorCopy = new RigidBody(predecessorNameOriginal + suffix, predecessorFrameAfterParentJointOriginal);
             }
@@ -516,7 +508,10 @@ public class ScrewTools
             throw new RuntimeException("Not implemented for joints of the type: " + inverseDynamicsJoints[i].getClass().getSimpleName());
          }
 
+         FramePoint comOffset = new FramePoint();
+         RigidBody successorOriginal = inverseDynamicsJoints[i].getSuccessor();
          successorOriginal.getCoMOffset(comOffset);
+         comOffset.changeFrame(inverseDynamicsJoints[i].getFrameAfterJoint());
          String successorNameOriginal = successorOriginal.getName();
          Matrix3d successorMassMomentOfInertiaPartCopy = successorOriginal.getInertia().getMassMomentOfInertiaPartCopy();
          double successorMass = successorOriginal.getInertia().getMass();
@@ -538,28 +533,20 @@ public class ScrewTools
 
       for (int i = 0; i < inverseDynamicsJoints.length; i++)
       {
-         FramePoint comOffset = new FramePoint();
-         RigidBody successorOriginal = inverseDynamicsJoints[i].getSuccessor();
-
          if (inverseDynamicsJoints[i] instanceof RevoluteJoint)
          {
             RevoluteJoint jointOriginal = (RevoluteJoint) inverseDynamicsJoints[i];
 
             RigidBody predecessorOriginal = jointOriginal.getPredecessor();
-
             RigidBody predecessorCopy;
-            String predecessorNameOriginal = predecessorOriginal.getName();
-            Vector3d predecessorCoMOffsetCopy = comOffset.getVectorCopy();
 
             if (i > 0)
             {
-               predecessorOriginal.getCoMOffset(comOffset);
-               Matrix3d predecessorMassMomentOfInertiaPartCopy = predecessorOriginal.getInertia().getMassMomentOfInertiaPartCopy();
-               double predecessorMass = predecessorOriginal.getInertia().getMass();
-               predecessorCopy = ScrewTools.addRigidBody(predecessorNameOriginal + suffix, cloned[i - 1], predecessorMassMomentOfInertiaPartCopy, predecessorMass, predecessorCoMOffsetCopy);
+               predecessorCopy = cloned[i - 1].getSuccessor();
             }
             else
             {
+               String predecessorNameOriginal = predecessorOriginal.getName();
                predecessorCopy = new RigidBody(predecessorNameOriginal + suffix, rootBodyFrame);
             }
 
@@ -576,7 +563,10 @@ public class ScrewTools
             throw new RuntimeException("Not implemented for joints of the type: " + inverseDynamicsJoints[i].getClass().getSimpleName());
          }
 
+         RigidBody successorOriginal = inverseDynamicsJoints[i].getSuccessor();
+         FramePoint comOffset = new FramePoint();
          successorOriginal.getCoMOffset(comOffset);
+         comOffset.changeFrame(inverseDynamicsJoints[i].getFrameAfterJoint());
          String successorNameOriginal = successorOriginal.getName();
          Matrix3d successorMassMomentOfInertiaPartCopy = successorOriginal.getInertia().getMassMomentOfInertiaPartCopy();
          double successorMass = successorOriginal.getInertia().getMass();

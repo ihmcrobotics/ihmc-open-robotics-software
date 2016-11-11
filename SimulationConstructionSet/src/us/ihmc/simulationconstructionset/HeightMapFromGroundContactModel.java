@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.graphics3DDescription.HeightMap;
 
 public class HeightMapFromGroundContactModel
 {

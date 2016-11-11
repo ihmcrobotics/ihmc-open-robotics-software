@@ -9,9 +9,9 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple3f;
 
 import javafx.scene.shape.Mesh;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataGenerator;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
-import us.ihmc.graphics3DAdapter.graphics.ModifiableMeshDataHolder;
+import us.ihmc.graphics3DDescription.MeshDataGenerator;
+import us.ihmc.graphics3DDescription.MeshDataHolder;
+import us.ihmc.graphics3DDescription.ModifiableMeshDataHolder;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 
 public class MeshBuilder
