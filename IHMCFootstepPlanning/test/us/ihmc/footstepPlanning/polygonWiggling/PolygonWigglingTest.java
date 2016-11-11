@@ -24,10 +24,13 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.ThreadTools;
 
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PolygonWigglingTest
 {
    private static final boolean visualize = false;
