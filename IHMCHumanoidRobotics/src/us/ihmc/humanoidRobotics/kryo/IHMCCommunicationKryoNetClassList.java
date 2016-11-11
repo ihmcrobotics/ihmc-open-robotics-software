@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.kryo;
 import java.util.ArrayList;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Point2f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
@@ -21,6 +22,9 @@ import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.PlanarRegionMessage;
+import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
@@ -331,6 +335,16 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(FootstepStatus.Status.class);
       registerPacketField(WalkingStatusMessage.Status.class);
       registerPacketClass(AbortWalkingMessage.class);
+
+      // Planar regions
+      registerPacketClass(PlanarRegionsListMessage.class);
+      registerPacketClass(PlanarRegionMessage.class);
+      registerPacketClass(RequestPlanarRegionsListMessage.class);
+      registerPacketClass(RequestPlanarRegionsListMessage.RequestType.class);
+      registerPacketField(Point3f.class);
+      registerPacketField(Vector3f.class);
+      registerPacketField(Point2f.class);
+      registerPacketField(Point2f[].class);
 
       //SCS
       registerPacketClass(SCSListenerPacket.class);
