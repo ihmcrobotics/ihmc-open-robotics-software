@@ -13,6 +13,8 @@ import javax.swing.JFrame;
 import org.junit.Test;
 
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -21,8 +23,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.YoArtifactPolygon;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
