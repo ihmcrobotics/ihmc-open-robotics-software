@@ -98,8 +98,8 @@ public class PolygonWiggler
       DenseMatrix64F A_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + boundConstraints, 3);
       DenseMatrix64F b_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + boundConstraints, 1);
       // add limits on allowed rotation and translation
-      A_full.set(constraintsPerPoint * numberOfPoints + 0, 0, 1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints + 0, parameters.maxX);
+      A_full.set(constraintsPerPoint * numberOfPoints , 0, 1.0);
+      b_full.set(constraintsPerPoint * numberOfPoints , parameters.maxX);
       A_full.set(constraintsPerPoint * numberOfPoints + 1, 0, -1.0);
       b_full.set(constraintsPerPoint * numberOfPoints + 1, -parameters.minX);
       A_full.set(constraintsPerPoint * numberOfPoints + 2, 1, 1.0);
