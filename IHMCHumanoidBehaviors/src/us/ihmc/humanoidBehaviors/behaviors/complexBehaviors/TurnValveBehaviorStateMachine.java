@@ -128,23 +128,26 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          @Override
          protected void setBehaviorInput()
          {
-
-            PoseReferenceFrame valvePose = new PoseReferenceFrame("valveFrame", ReferenceFrame.getWorldFrame());
-            valvePose.setPoseAndUpdate(new RigidBodyTransform(searchForValveBehavior.getLocation()));
-
-            FramePoint point1 = new FramePoint(valvePose, valveWalkOffsetPoint1.x, valveWalkOffsetPoint1.y, valveWalkOffsetPoint1.z);
-            FramePoint point2 = new FramePoint(valvePose, valveWalkOffsetPoint2.x, valveWalkOffsetPoint2.y, valveWalkOffsetPoint2.z);
+            FramePoint point1 =offsetPointFromValve(valveWalkOffsetPoint1);
+            FramePoint point2 =offsetPointFromValve(valveWalkOffsetPoint2);
 
             walkToInteractableObjectBehavior.setWalkPoints(point1, point2);
-
          }
       };
 
       statemachine.addStateWithDoneTransition(setup, TurnValveBehaviorState.SEARCHING_FOR_VAVLE);
-
       statemachine.addStateWithDoneTransition(searchForValveFar, TurnValveBehaviorState.WALKING_TO_VALVE);
       statemachine.addState(walkToValveAction);
       statemachine.setCurrentState(TurnValveBehaviorState.SETUP_ROBOT);
+   }
+   
+   private FramePoint offsetPointFromValve(Vector3f point)
+   {
+      PoseReferenceFrame valvePose = new PoseReferenceFrame("valveFrame", ReferenceFrame.getWorldFrame());
+      valvePose.setPoseAndUpdate(new RigidBodyTransform(searchForValveBehavior.getLocation()));
+
+      FramePoint point1 = new FramePoint(valvePose, point.x, point.y, point.z);
+      return point1;
    }
 
    @Override
