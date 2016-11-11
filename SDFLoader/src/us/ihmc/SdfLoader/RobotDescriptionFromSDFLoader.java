@@ -26,8 +26,8 @@ import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Range;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.HorizontalScan;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Ray.Scan.VerticalScan;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.InertiaTools;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScanParameters;
@@ -49,6 +49,7 @@ import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class RobotDescriptionFromSDFLoader
 {
@@ -194,9 +195,27 @@ public class RobotDescriptionFromSDFLoader
          CollisionMeshDescription collisionMeshDescription = new SDFCollisionMeshDescription(link.getCollisions(), rotationTransform);
          scsLink.setCollisionMesh(collisionMeshDescription);
       }
-      else if (link.getVisuals() != null)
+
+      if (link.getVisuals() != null)
       {
-         LinkGraphicsDescription linkGraphicsDescription = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, rotationTransform);
+         LinkGraphicsDescription linkGraphicsDescription;
+
+         try
+         {
+            linkGraphicsDescription = new SDFGraphics3DObject(link.getVisuals(), resourceDirectories, rotationTransform);
+         }
+         catch (Throwable e)
+         {
+            PrintTools.warn(this, "Could not load visuals for link " + link.getName() + "! Using an empty LinkGraphicsDescription.");
+
+            if(DEBUG)
+            {
+               e.printStackTrace();
+            }
+
+            linkGraphicsDescription = new LinkGraphicsDescription();
+         }
+
          scsLink.setLinkGraphics(linkGraphicsDescription);
       }
 

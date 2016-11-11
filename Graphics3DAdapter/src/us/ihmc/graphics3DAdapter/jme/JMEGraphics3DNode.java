@@ -3,10 +3,10 @@ package us.ihmc.graphics3DAdapter.jme;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
 import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;

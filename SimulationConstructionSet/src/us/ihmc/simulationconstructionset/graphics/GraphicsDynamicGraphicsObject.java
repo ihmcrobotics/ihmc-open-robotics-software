@@ -1,9 +1,9 @@
 package us.ihmc.simulationconstructionset.graphics;
 
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;

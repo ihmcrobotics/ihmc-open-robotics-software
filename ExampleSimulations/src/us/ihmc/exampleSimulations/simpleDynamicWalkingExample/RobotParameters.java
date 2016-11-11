@@ -2,8 +2,8 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
 import java.util.EnumMap;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 
 public class RobotParameters

@@ -8,9 +8,10 @@ import javax.vecmath.Color3f;
 
 
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.input.SelectedListener;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.graphics3DDescription.HeightMap;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.input.SelectedListener;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.tools.inputDevices.keyboard.KeyListener;
 import us.ihmc.tools.inputDevices.mouse.MouseListener;

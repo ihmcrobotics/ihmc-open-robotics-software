@@ -1,6 +1,6 @@
 package us.ihmc.kalman.imu.testCases;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.kalman.imu.QuaternionBasedArrayFullIMUKalmanFilter;
 import us.ihmc.kalman.imu.QuaternionBasedFullIMUKalmanFilter;
 import us.ihmc.kalman.imu.QuaternionBasedJamaFullIMUKalmanFilter;

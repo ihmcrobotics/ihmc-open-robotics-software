@@ -15,23 +15,29 @@ public class ValkyrieAffinity
    private final Processor estimatorThreadProcessor;
    private final Processor controlThreadProcessor;
    
-   public ValkyrieAffinity()
+   public ValkyrieAffinity(boolean setAffinity)
    {
-      CPUTopology topology = new CPUTopology();
+      this.setAffinity = setAffinity;
 
-      if (topology.isHyperThreadingEnabled())
+      if(this.setAffinity)
       {
-         log.severe("WARNING: Hyper-Threading is enabled. Expect higher amounts of jitter");
+         CPUTopology topology = new CPUTopology();
+
+         if (topology.isHyperThreadingEnabled())
+         {
+            log.severe("WARNING: Hyper-Threading is enabled. Expect higher amounts of jitter");
+         }
+
+         log.config("Pinning control threads to processor 1 & 2.");
+         Package socket = topology.getPackage(0);
+         estimatorThreadProcessor = socket.getCore(1).getDefaultProcessor();
+         controlThreadProcessor = socket.getCore(2).getDefaultProcessor();
       }
-
-      log.config("Pinning control threads to processor 1 & 2.");
-      setAffinity = true;
-      Package socket = topology.getPackage(0);
-      estimatorThreadProcessor = socket.getCore(1).getDefaultProcessor();
-      controlThreadProcessor = socket.getCore(2).getDefaultProcessor();
-
-      
-
+      else
+      {
+         estimatorThreadProcessor = null;
+         controlThreadProcessor = null;
+      }
    }
 
    public Processor getEstimatorThreadProcessor()

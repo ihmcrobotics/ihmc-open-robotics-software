@@ -8,15 +8,15 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.HeightMap;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class JMEHeightMapExample

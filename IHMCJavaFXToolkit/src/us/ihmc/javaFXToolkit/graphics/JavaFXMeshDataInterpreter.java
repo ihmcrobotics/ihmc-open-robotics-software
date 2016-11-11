@@ -15,7 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import gnu.trove.list.array.TIntArrayList;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
-import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
+import us.ihmc.graphics3DDescription.MeshDataHolder;
 
 public class JavaFXMeshDataInterpreter
 {

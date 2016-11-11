@@ -15,7 +15,9 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -36,9 +38,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
@@ -136,7 +137,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
             double orientationDiscount = 0.2;
             int maxIterations = 5000;
             boolean solveOrientation = true;
-            double convergeTolerance = 4.0e-6; //1e-12;
+            double convergeTolerance = 4.0e-7; //1e-12;
             double acceptTolLoc = 0.005;
             double acceptTolAngle = 0.02;
             double parameterChangePenalty = 1.0e-4; //0.1;
@@ -306,7 +307,18 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          scs.tickAndUpdate();
 
       boolean positionErrorAcceptable = (positionError.getDoubleValue() < errorThreshold);
+      
+      if (!positionErrorAcceptable)
+      {
+         PrintTools.error("Position error not acceptable: positionError: " + positionError.getDoubleValue() + "  maxAllowed: " + errorThreshold);
+      }
+      
       boolean orientationErrorAcceptable = (orientationError.getDoubleValue() < errorThreshold);
+      
+      if (!orientationErrorAcceptable)
+      {
+         PrintTools.error("Orientation error not acceptable: orientationError: " + orientationError.getDoubleValue() + "  maxAllowed: " + errorThreshold);
+      }
 
       return positionErrorAcceptable && orientationErrorAcceptable;
    }
@@ -359,6 +371,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          case RANDOM :
          {
             generateRandomArmPoseWithForwardKinematics(random);
+
+            break;
          }
 
          default :
