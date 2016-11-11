@@ -32,9 +32,11 @@ public class BipedalFootstepPlannerNode
       soleTransformToPack.set(soleTransform);
    }
 
-   public void transformSoleTransform(RigidBodyTransform transform)
+   public void transformSoleTransformWithSnapTransformFromZeroZ(RigidBodyTransform snapTransform)
    {
-      soleTransform.multiply(transform, soleTransform);
+      // Ignore the z since the snap transform snapped from z = 0. Keep everything else.
+      soleTransform.setM23(0.0);
+      soleTransform.multiply(snapTransform, soleTransform);
    }
 
    public BipedalFootstepPlannerNode getParentNode()

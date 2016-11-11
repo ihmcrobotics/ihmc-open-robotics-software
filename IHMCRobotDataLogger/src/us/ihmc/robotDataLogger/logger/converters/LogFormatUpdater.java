@@ -12,11 +12,11 @@ public class LogFormatUpdater
    {
       try
       {
-         if(properties.getModelLoaderClass() == null)
-         {
-            LogModels model = ModelAttacher.chooseModel(directory);
-            ModelAttacher.addModel(directory, properties, model);
-         }
+//         if(properties.getModelLoaderClass() == null)
+//         {
+//            LogModels model = ModelAttacher.chooseModel(directory);
+//            ModelAttacher.addModel(directory, properties, model);
+//         }
          
          if (properties.getCompressed() && !properties.isTimestampedIndex())
          {

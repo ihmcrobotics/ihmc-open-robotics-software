@@ -8,9 +8,13 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -26,10 +30,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPolygon;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicVector;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class PlanningTestTools
@@ -133,14 +133,19 @@ public class PlanningTestTools
 
    public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList)
    {
+      return runPlanner(planner, initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, true);
+   }
+
+   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
+   {
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       goal.setGoalPoseBetweenFeet(goalPose);
 
-      return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList);
+      return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList, assertPlannerReturnedResult);
    }
 
-   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerGoal goal, PlanarRegionsList planarRegionsList)
+   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerGoal goal, PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
    {
       planner.setInitialStanceFoot(initialStanceFootPose, initialStanceSide);
       planner.setGoal(goal);
@@ -148,7 +153,7 @@ public class PlanningTestTools
 
       FootstepPlanningResult result = planner.plan();
       FootstepPlan footstepPlan = planner.getPlan();
-      assertTrue("Planner was not able to provide valid result.", result.validForExecution());
+      if (assertPlannerReturnedResult) assertTrue("Planner was not able to provide valid result.", result.validForExecution());
       return footstepPlan;
    }
 

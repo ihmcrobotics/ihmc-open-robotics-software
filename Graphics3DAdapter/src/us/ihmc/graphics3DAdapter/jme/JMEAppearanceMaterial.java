@@ -20,16 +20,16 @@ import com.jme3.texture.Texture.WrapMode;
 import com.jme3.texture.Texture2D;
 import com.jme3.texture.plugins.AWTLoader;
 
-import us.ihmc.graphics3DAdapter.HeightMap;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.HeightBasedTerrainBlend;
-import us.ihmc.graphics3DAdapter.graphics.appearances.HeightBasedTerrainBlend.TextureDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.SDFAppearance;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceMaterial;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
+import us.ihmc.graphics3DDescription.HeightMap;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.HeightBasedTerrainBlend;
+import us.ihmc.graphics3DDescription.appearance.SDFAppearance;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.appearance.YoAppearanceMaterial;
+import us.ihmc.graphics3DDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphics3DDescription.appearance.YoAppearanceTexture;
+import us.ihmc.graphics3DDescription.appearance.HeightBasedTerrainBlend.TextureDefinition;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 

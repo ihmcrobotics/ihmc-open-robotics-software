@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -17,21 +18,25 @@ import javax.swing.JTextField;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataLogger.logger.converters.LogFormatUpdater;
 import us.ihmc.robotDataLogger.logger.util.FileSelectionDialog;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.robotics.robotDescription.FloatingJointDescription;
+import us.ihmc.robotics.robotDescription.JointDescription;
+import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class LogVisualizer
 {
@@ -106,7 +111,9 @@ public class LogVisualizer
       YoVariableHandshakeParser parser = new YoVariableHandshakeParser("logged", true);
       parser.parseFrom(handshakeData);
 
-      GeneralizedSDFRobotModel generalizedSDFRobotModel;
+      GeneralizedSDFRobotModel generalizedSDFRobotModel = null;
+      List<JointState> jointStates = parser.getJointStates();
+
       if (logProperties.getModelLoaderClass() != null)
       {
          SDFModelLoader loader = new SDFModelLoader();
@@ -129,19 +136,32 @@ public class LogVisualizer
 
          generalizedSDFRobotModel = loader.createJaxbSDFLoader().getGeneralizedSDFRobotModel(modelName);
       }
-      else
+      else if (jointStates.size() != 0)
       {
-         throw new RuntimeException("No model available for log");
+         throw new RuntimeException("No model available for log, but jointstates are defined.");
       }
 
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = true;
       boolean enableJointDamping = true;
 
-      RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      RobotDescription robotDescription;
+      
+      
+      if(generalizedSDFRobotModel != null)
+      {
+         RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
+         robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);         
+      }
+      else
+      {
+         robotDescription = new RobotDescription("NullRobot");
+         JointDescription rootJoint = new FloatingJointDescription("RootJoint");
+         rootJoint.setLink(new LinkDescription("RootLink"));
+         robotDescription.addRootJoint(rootJoint);
+      }
 
-      robot = new YoVariableLogPlaybackRobot(selectedFile, robotDescription, parser.getJointStates(), parser.getYoVariablesList(), logProperties ,scs);
+      robot = new YoVariableLogPlaybackRobot(selectedFile, robotDescription, jointStates, parser.getYoVariablesList(), logProperties ,scs);
       scs.setTimeVariableName(robot.getRobotsYoVariableRegistry().getName() + ".robotTime");
 
       double dt = parser.getDt();

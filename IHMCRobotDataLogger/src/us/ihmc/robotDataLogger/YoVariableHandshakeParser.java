@@ -10,8 +10,15 @@ import javax.vecmath.Color3f;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
+import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphics3DDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphics3DDescription.yoGraphics.RemoteYoGraphic;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicFactory;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphics3DDescription.yoGraphics.RemoteYoGraphic.RemoteGraphicType;
+import us.ihmc.graphics3DDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake;
 import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage;
@@ -26,13 +33,6 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.RemoteYoGraphic.RemoteGraphicType;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphic;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicFactory;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsList;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class YoVariableHandshakeParser

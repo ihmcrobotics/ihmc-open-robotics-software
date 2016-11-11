@@ -14,6 +14,7 @@ import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
 import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
@@ -24,7 +25,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 

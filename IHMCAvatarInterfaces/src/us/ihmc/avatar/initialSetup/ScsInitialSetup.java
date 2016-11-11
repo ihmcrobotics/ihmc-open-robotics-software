@@ -1,10 +1,10 @@
 package us.ihmc.avatar.initialSetup;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationconstructionset.DynamicIntegrationMethod;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.yoUtilities.graphics.YoGraphicsListRegistry;
 
 /*
  * SCS Initial Setup
