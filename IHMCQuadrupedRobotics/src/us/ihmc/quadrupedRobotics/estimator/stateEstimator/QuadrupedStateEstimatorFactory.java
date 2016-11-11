@@ -39,7 +39,7 @@ public class QuadrupedStateEstimatorFactory
 
    public DRCKinematicsBasedStateEstimator createStateEstimator()
    {
-      FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
+      FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       RigidBody elevator = fullRobotModel.get().getElevator();
       FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.get().getRootJoint();

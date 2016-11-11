@@ -76,7 +76,7 @@ public class QuadrupedFootSwitchFactory
 
    public QuadrantDependentList<FootSwitchInterface> createFootSwitches()
    {
-      FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
+      FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       yoVariableRegistry.get().addChild(registry);
 
