@@ -139,7 +139,7 @@ public class QuadrupedSimulationFactory
 
    private void createPushRobotController()
    {
-      if (usePushRobotController.hasBeenSet() && usePushRobotController.get())
+      if (usePushRobotController.get())
       {
          PushRobotController bodyPushRobotController = new PushRobotController(sdfRobot.get(), "body", new Vector3d(0.0, -0.00057633, 0.0383928));
          yoGraphicsListRegistry.registerYoGraphic("PushRobotControllers", bodyPushRobotController.getForceVisualizer());
@@ -194,10 +194,7 @@ public class QuadrupedSimulationFactory
       footSwitchFactory.setGravity(gravity.get());
       footSwitchFactory.setSimulatedRobot(sdfRobot.get());
       footSwitchFactory.setYoVariableRegistry(sdfRobot.get().getRobotsYoVariableRegistry());
-      if (footSwitchType.hasBeenSet())
-         footSwitchFactory.setFootSwitchType(footSwitchType.get());
-      else
-         footSwitchFactory.setFootSwitchType(FootSwitchType.TouchdownBased);
+      footSwitchFactory.setFootSwitchType(footSwitchType.get());
       footSwitches = footSwitchFactory.createFootSwitches();
    }
 
@@ -252,7 +249,7 @@ public class QuadrupedSimulationFactory
 
    private void createHeadController()
    {
-      if (headControllerFactory.hasBeenSet())
+      if (headControllerFactory.get() != null)
       {
          headControllerFactory.get().setControlDt(controlDT.get());
          headControllerFactory.get().setFullRobotModel(fullRobotModel.get());
@@ -316,7 +313,7 @@ public class QuadrupedSimulationFactory
 
    private void createGroundContactModel()
    {
-      if (groundContactModelType.hasBeenSet() && !providedGroundProfile3D.hasBeenSet())
+      if (providedGroundProfile3D.get() == null)
       {
          switch (groundContactModelType.get())
          {
@@ -346,13 +343,9 @@ public class QuadrupedSimulationFactory
             break;
          }
       }
-      else if (providedGroundProfile3D.hasBeenSet())
-      {
-         groundProfile3D =  providedGroundProfile3D.get();
-      }
       else
       {
-         groundProfile3D = new FlatGroundProfile(0.0);
+         groundProfile3D =  providedGroundProfile3D.get();
       }
 
       groundContactModel = new LinearGroundContactModel(sdfRobot.get(), sdfRobot.get().getRobotsYoVariableRegistry());
@@ -407,8 +400,15 @@ public class QuadrupedSimulationFactory
 
    public SimulationConstructionSet createSimulation() throws IOException
    {
-      FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
-
+      simulatedElasticityParameters.setDefaultValue(null);
+      groundContactModelType.setDefaultValue(QuadrupedGroundContactModelType.FLAT);
+      headControllerFactory.setDefaultValue(null);
+      providedGroundProfile3D.setDefaultValue(null);
+      usePushRobotController.setDefaultValue(false);
+      footSwitchType.setDefaultValue(FootSwitchType.TouchdownBased);
+      
+      FactoryTools.checkAllFactoryFieldsAreSet(this);
+      
       setupYoRegistries();
       createPushRobotController();
       createSensorReader();
@@ -427,7 +427,7 @@ public class QuadrupedSimulationFactory
       setupJointElasticity();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot.get(), scsParameters.get());
-      if (groundContactModelType.hasBeenSet() && groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE)
+      if (groundContactModelType.get() == QuadrupedGroundContactModelType.ROTATABLE)
       {
          scs.setGroundVisible(false);
       }
@@ -457,7 +457,7 @@ public class QuadrupedSimulationFactory
 
    private void setupJointElasticity()
    {
-      if(simulatedElasticityParameters.hasBeenSet())
+      if(simulatedElasticityParameters.get() != null)
       {
          FloatingRootJointRobot floatingRootJointRobot = sdfRobot.get();
          SpringJointOutputWriter springJointOutputWriter = new SpringJointOutputWriter(floatingRootJointRobot, simulatedElasticityParameters.get(), simulationDT.get());
