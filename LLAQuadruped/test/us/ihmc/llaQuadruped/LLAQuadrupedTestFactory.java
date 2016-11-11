@@ -118,7 +118,11 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
       {
          simulationFactory.setUsePushRobotController(usePushRobotController.get());
       }
-      return new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
+      GoalOrientedTestConductor goalOrientedTestConductor = new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
+      
+      FactoryTools.disposeFactory(this);
+      
+      return goalOrientedTestConductor;
    }
 
    @Override
