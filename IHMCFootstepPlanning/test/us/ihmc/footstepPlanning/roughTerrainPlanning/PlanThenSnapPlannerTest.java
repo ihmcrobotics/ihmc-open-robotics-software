@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
+import javax.vecmath.Vector3d;
+
 import org.junit.Test;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -16,6 +18,13 @@ public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
    private static final boolean visualize = true;
    private final PlanThenSnapPlanner planner =
          new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), PlanningTestTools.createDefaultFootPolygons());
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testOnStaircase()
+   {
+      super.testOnStaircase(new Vector3d(), true);
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
