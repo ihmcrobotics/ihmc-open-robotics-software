@@ -18,11 +18,6 @@ public class PolygonWiggler
    private static final boolean DEBUG = false;
 
    /**
-    * Constant weight factor given to rotation in comparison to translation when attempting to move a polygon into a region.
-    */
-   private static final double gamma = 0.2;
-
-   /**
     * Returns a transform that will move the given polygon into a planar region. Problematic if the planar region consists of
     * multiple sub convex polygons. The polygon to wiggle must have the same transform to world as the planar region.
     *
@@ -32,7 +27,7 @@ public class PolygonWiggler
     * @param minYaw
     * @return
     */
-   public static RigidBodyTransform wigglePolygonIntoRegion(ConvexPolygon2d polygonToWiggleInRegionFrame, PlanarRegion regionToWiggleInto, double maxYaw, double minYaw)
+   public static RigidBodyTransform wigglePolygonIntoRegion(ConvexPolygon2d polygonToWiggleInRegionFrame, PlanarRegion regionToWiggleInto, WiggleParameters parameters)
    {
       // find the part of the region that has the biggest intersection with the polygon
       ConvexPolygon2d bestMatch = null;
@@ -51,7 +46,7 @@ public class PolygonWiggler
       if (bestMatch == null)
          return null;
 
-      RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggleInRegionFrame, bestMatch, maxYaw, minYaw);
+      RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggleInRegionFrame, bestMatch, parameters);
       if (wiggleTransform == null || wiggleTransform.containsNaN())
          return null;
 
@@ -69,10 +64,10 @@ public class PolygonWiggler
     * @param minYaw
     * @return
     */
-   public static ConvexPolygon2d wigglePolygon(ConvexPolygon2d polygonToWiggle, ConvexPolygon2d planeToWiggleInto, double maxYaw, double minYaw)
+   public static ConvexPolygon2d wigglePolygon(ConvexPolygon2d polygonToWiggle, ConvexPolygon2d planeToWiggleInto, WiggleParameters parameters)
    {
       ConvexPolygon2d wiggledPolygon = new ConvexPolygon2d(polygonToWiggle);
-      RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggle, planeToWiggleInto, maxYaw, minYaw);
+      RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters);
       if (wiggleTransform == null || wiggleTransform.containsNaN())
          return null;
       wiggledPolygon.applyTransformAndProjectToXYPlane(wiggleTransform);
@@ -89,7 +84,7 @@ public class PolygonWiggler
     * @param minYaw
     * @return
     */
-   public static RigidBodyTransform findWiggleTransform(ConvexPolygon2d polygonToWiggle, ConvexPolygon2d planeToWiggleInto, double maxYaw, double minYaw)
+   public static RigidBodyTransform findWiggleTransform(ConvexPolygon2d polygonToWiggle, ConvexPolygon2d planeToWiggleInto, WiggleParameters parameters)
    {
       int constraintsPerPoint = planeToWiggleInto.getNumberOfVertices();
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();
@@ -99,15 +94,22 @@ public class PolygonWiggler
       DenseMatrix64F b = new DenseMatrix64F(0);
       convertToInequalityConstraints(planeToWiggleInto, A, b);
 
-      DenseMatrix64F A_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + 2, 3);
-      DenseMatrix64F b_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + 2, 1);
-      // add limits on allowed rotation
-      // theta <= 10 degree
-      A_full.set(constraintsPerPoint * numberOfPoints, 2, 1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints, maxYaw);
-      // theta >= -10 degree --> -theta <= 10 degree
-      A_full.set(constraintsPerPoint * numberOfPoints + 1, 2, -1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints + 1, minYaw);
+      int boundConstraints = 6;
+      DenseMatrix64F A_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + boundConstraints, 3);
+      DenseMatrix64F b_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + boundConstraints, 1);
+      // add limits on allowed rotation and translation
+      A_full.set(constraintsPerPoint * numberOfPoints + 0, 0, 1.0);
+      b_full.set(constraintsPerPoint * numberOfPoints + 0, parameters.maxX);
+      A_full.set(constraintsPerPoint * numberOfPoints + 1, 0, -1.0);
+      b_full.set(constraintsPerPoint * numberOfPoints + 1, -parameters.minX);
+      A_full.set(constraintsPerPoint * numberOfPoints + 2, 1, 1.0);
+      b_full.set(constraintsPerPoint * numberOfPoints + 2, parameters.maxY);
+      A_full.set(constraintsPerPoint * numberOfPoints + 3, 1, -1.0);
+      b_full.set(constraintsPerPoint * numberOfPoints + 3, -parameters.minY);
+      A_full.set(constraintsPerPoint * numberOfPoints + 4, 2, 1.0);
+      b_full.set(constraintsPerPoint * numberOfPoints + 4, parameters.maxYaw);
+      A_full.set(constraintsPerPoint * numberOfPoints + 5, 2, -1.0);
+      b_full.set(constraintsPerPoint * numberOfPoints + 5, -parameters.minYaw);
 
       for (int i = 0; i < numberOfPoints; i++)
       {
@@ -139,7 +141,7 @@ public class PolygonWiggler
 
       DenseMatrix64F costMatrix = new DenseMatrix64F(3, 3);
       CommonOps.setIdentity(costMatrix);
-      costMatrix.set(2, 2, gamma);
+      costMatrix.set(2, 2, parameters.rotationWeight);
       DenseMatrix64F costVector = new DenseMatrix64F(3, 1);
       CommonOps.fill(costVector, 0.0);
 
