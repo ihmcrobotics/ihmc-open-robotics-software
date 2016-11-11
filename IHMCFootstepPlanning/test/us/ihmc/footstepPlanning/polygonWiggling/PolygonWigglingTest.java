@@ -29,7 +29,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class PolygonWigglingTest
 {
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -52,8 +52,7 @@ public class PolygonWigglingTest
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      double yawLimit = Math.toRadians(15.0);
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, yawLimit, yawLimit);
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
 
       if (visualize)
       {
@@ -77,8 +76,7 @@ public class PolygonWigglingTest
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      double yawLimit = Math.toRadians(15.0);
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, yawLimit, yawLimit);
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
 
       if (visualize)
       {
@@ -105,8 +103,7 @@ public class PolygonWigglingTest
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      double yawLimit = Math.toRadians(15.0);
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, yawLimit, yawLimit);
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
 
       if (visualize)
       {
@@ -133,8 +130,7 @@ public class PolygonWigglingTest
       initialFootTransform.setTranslationAndIdentityRotation(-0.2, 0.25, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      double yawLimit = Math.toRadians(15.0);
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, yawLimit, yawLimit);
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
 
       if (visualize)
       {
@@ -157,6 +153,13 @@ public class PolygonWigglingTest
       plane.update();
 
       double yawLimit = Math.toRadians(15.0);
+      WiggleParameters wiggleParameters = new WiggleParameters();
+      wiggleParameters.maxYaw = yawLimit;
+      wiggleParameters.minYaw = -yawLimit;
+      wiggleParameters.maxX = 10.0;
+      wiggleParameters.minX = -10.0;
+      wiggleParameters.maxY = 10.0;
+      wiggleParameters.minY = -10.0;
       Random random = new Random(482787427467L);
 
       for (int i = 0; i < 100; i++)
@@ -176,7 +179,7 @@ public class PolygonWigglingTest
          initialFootTransform.setTranslation(x, y, 0.0);
          initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-         ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, yawLimit, yawLimit);
+         ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
          assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
          if (ConvexPolygon2dCalculator.isPolygonInside(initialFoot, 1.0e-5, plane))
             assertTrue(initialFoot.epsilonEquals(foot, 1.0e-10));
@@ -215,8 +218,7 @@ public class PolygonWigglingTest
       initialFootTransform.setTranslation(-0.05, 0.1, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      double yawLimit = Math.toRadians(15.0);
-      RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoRegion(initialFoot, region, yawLimit, yawLimit);
+      RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoRegion(initialFoot, region, new WiggleParameters());
       assertFalse(wiggleTransfrom == null);
 
       ConvexPolygon2d foot = new ConvexPolygon2d(initialFoot);
