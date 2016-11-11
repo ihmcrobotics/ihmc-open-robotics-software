@@ -16,6 +16,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -417,6 +418,32 @@ public class TaskspaceToJointspaceCalculator
       desiredControlFramePose.setPoseIncludingFrame(desiredPose);
       desiredControlFrameTwist.set(desiredTwist);
       computeJointAnglesAndVelocities(desiredControlFramePose, desiredControlFrameTwist);
+   }
+   
+   private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
+   
+   public boolean computeIteratively(FramePose desiredPose, Twist desiredTwist, double maxIterations, double epsilon)
+   {
+      for(int i = 0; i < maxIterations; i++)
+      {
+         compute(desiredPose, desiredTwist);
+         
+         desiredPose.getPositionIncludingFrame(tempPoint);
+         tempPoint.changeFrame(localControlFrame);
+         double translationDistance = tempPoint.getDistanceFromOrigin();
+         
+         desiredPose.getOrientationIncludingFrame(tempOrientation);
+         tempOrientation.changeFrame(localControlFrame);
+         tempOrientation.getAxisAngle(tempAxisAngle);
+         double angle = Math.abs(AngleTools.trimAngleMinusPiToPi(tempAxisAngle.getAngle()));
+         
+         if(translationDistance < epsilon && angle < epsilon)
+         {
+            return true;
+         }
+      }
+      
+      return false;
    }
 
    private void computeJointAnglesAndVelocities(FramePose desiredControlFramePose, Twist desiredControlFrameTwist)
