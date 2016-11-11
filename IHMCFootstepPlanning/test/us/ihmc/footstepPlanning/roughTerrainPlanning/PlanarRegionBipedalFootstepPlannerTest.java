@@ -39,14 +39,14 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    @Test(timeout = 300000)
    public void testSimpleStepOnBox()
    {
-      super.testSimpleStepOnBox();
+      super.testSimpleStepOnBox(true);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testRandomEnvironment()
    {
-      super.testRandomEnvironment();
+      super.testRandomEnvironment(true);
    }
 
    @Override
@@ -55,7 +55,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner();
 
       planner.setMaximumStepReach(0.4);
-      planner.setMaximumStepZ(0.2);
+      planner.setMaximumStepZ(0.25);
       planner.setMinimumFootholdPercent(0.8);
 
       double idealFootstepLength = 0.3;
@@ -134,7 +134,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       public void planarRegionsListSet(PlanarRegionsList planarRegionsList)
       {
          Graphics3DObject graphics3dObject = new Graphics3DObject();
-         graphics3dObject.addPlanarRegionsList(planarRegionsList, YoAppearance.Blue(), YoAppearance.Purple(), YoAppearance.Pink());
+         graphics3dObject.addPlanarRegionsList(planarRegionsList, YoAppearance.Blue(), YoAppearance.Purple(), YoAppearance.Pink(), YoAppearance.Orange(), YoAppearance.Brown());
          scs.addStaticLinkGraphics(graphics3dObject);
 
          tickAndUpdateSCS();

@@ -165,20 +165,20 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          RobotSide nextSide = currentSide.getOppositeSide();
 
          // Make sure popped node is a good one and can be expanded...
-         Pair<RigidBodyTransform, PlanarRegion> nodeToExpandSnapTransformAndPlanarRegion = getSnapTransform(nodeToExpand);
+         PlanarRegion planarRegion = new PlanarRegion();
+         RigidBodyTransform nodeToExpandSnapTransform = getSnapTransform(nodeToExpand, planarRegion);
 
-         if (nodeToExpandSnapTransformAndPlanarRegion == null)
+         if (nodeToExpandSnapTransform == null)
          {
             notifyListenerNodeForExpansionWasRejected(nodeToExpand);
             continue;
          }
 
-         nodeToExpand.transformSoleTransformWithSnapTransformFromZeroZ(nodeToExpandSnapTransformAndPlanarRegion);
+         nodeToExpand.transformSoleTransformWithSnapTransformFromZeroZ(nodeToExpandSnapTransform, planarRegion);
 
 
          RigidBodyTransform nodeToExpandTransform = new RigidBodyTransform();
          nodeToExpand.getSoleTransform(nodeToExpandTransform);
-         PlanarRegion planarRegion = nodeToExpandSnapTransformAndPlanarRegion.getRight();
          RigidBodyTransform soleTransform = new RigidBodyTransform();
          nodeToExpand.getSoleTransform(soleTransform);
          ConvexPolygon2d snappedPolygon = footPolygonsInSoleFrame.get(currentSide);
@@ -243,7 +243,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
             goalNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, finishStep);
 
-            Pair<RigidBodyTransform, PlanarRegion> goalNodeSnapTransform = getSnapTransform(goalNode);
+            planarRegion = new PlanarRegion();
+            RigidBodyTransform goalNodeSnapTransform = getSnapTransform(goalNode, planarRegion);
 
             if (goalNodeSnapTransform == null)
             {
@@ -251,7 +252,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             }
             else
             {
-               goalNode.transformSoleTransformWithSnapTransformFromZeroZ(goalNodeSnapTransform);
+               goalNode.transformSoleTransformWithSnapTransformFromZeroZ(goalNodeSnapTransform, planarRegion);
                notifyListenerNodeForExpansionWasAccepted(goalNode);
 
                notifyListenerSolutionWasFound(goalNode);
@@ -316,7 +317,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return childNode;
    }
 
-   private Pair<RigidBodyTransform, PlanarRegion> getSnapTransform(BipedalFootstepPlannerNode bipedalFootstepPlannerNode)
+   private RigidBodyTransform getSnapTransform(BipedalFootstepPlannerNode bipedalFootstepPlannerNode, PlanarRegion planarRegionToPack)
    {
       RobotSide nodeSide = bipedalFootstepPlannerNode.getRobotSide();
       RigidBodyTransform soleTransformBeforeSnap = new RigidBodyTransform();
@@ -328,7 +329,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
       if (planarRegionsList != null)
       {
-         return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList);
+         return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList, planarRegionToPack);
       }
       else
       {

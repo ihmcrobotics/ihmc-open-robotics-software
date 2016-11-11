@@ -1,8 +1,9 @@
 package us.ihmc.robotics.geometry;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.Serializable;
+import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.AxisAngle4f;
@@ -18,10 +19,11 @@ import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4d;
 import javax.vecmath.Vector4f;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.Serializable;
-import java.util.Random;
+
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.random.RandomTools;
 
 /**
  *
@@ -2293,5 +2295,22 @@ public class RigidBodyTransform implements Serializable
    public double getM23()
    {
       return mat23;
+   }
+
+   public boolean containsNaN()
+   {
+      if (Double.isNaN(mat00)) return true;
+      if (Double.isNaN(mat01)) return true;
+      if (Double.isNaN(mat02)) return true;
+      if (Double.isNaN(mat03)) return true;
+      if (Double.isNaN(mat10)) return true;
+      if (Double.isNaN(mat11)) return true;
+      if (Double.isNaN(mat12)) return true;
+      if (Double.isNaN(mat13)) return true;
+      if (Double.isNaN(mat20)) return true;
+      if (Double.isNaN(mat21)) return true;
+      if (Double.isNaN(mat22)) return true;
+      if (Double.isNaN(mat23)) return true;
+      return false;
    }
 }

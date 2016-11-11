@@ -49,6 +49,11 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
    public void testSimpleStepOnBox()
    {
+      testSimpleStepOnBox(true);
+   }
+
+   public void testSimpleStepOnBox(boolean assertPlannerReturnedResult)
+   {
       // create planar regions
       double stepHeight = 0.2;
       double boxSize = 1.0;
@@ -67,7 +72,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       // run the test
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
       FootstepPlan footstepPlan =
-            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList);
+            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, assertPlannerReturnedResult);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
       assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
@@ -75,17 +80,22 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
    public void testRandomEnvironment()
    {
+      testRandomEnvironment(true);
+   }
+
+   public void testRandomEnvironment(boolean assertPlannerReturnedResult)
+   {
       // define start and goal conditions
       FramePose initialStanceFootPose = new FramePose(worldFrame);
       RobotSide initialStanceSide = RobotSide.LEFT;
       FramePose goalPose = new FramePose(worldFrame);
-      initialStanceFootPose.setPosition(-4.0, 0.0, 0.0);
+      initialStanceFootPose.setPosition(-6.0, 0.0, 0.0);
       goalPose.setPosition(4.0, 0.0, 0.0);
 
       // run the test
       PlanarRegionsList planarRegionsList = generateRandomTerrain(random);
       FootstepPlan footstepPlan =
-            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList);
+            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, assertPlannerReturnedResult);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
    }
@@ -93,18 +103,18 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
    private PlanarRegionsList generateRandomTerrain(Random random)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.translate(0.0, 0.0, -0.001);
-      generator.addRectangle(10.0, 10.0); // floor plane
+      generator.translate(0.0, 0.0, 0.001);
+      generator.addRectangle(14.0, 3.0); // floor plane
 
       double length = RandomTools.generateRandomDouble(random, 0.3, 1.0);
       double width = RandomTools.generateRandomDouble(random, 0.3, 1.0);
-      double height = RandomTools.generateRandomDouble(random, 0.3, 1.0);
+      double height = RandomTools.generateRandomDouble(random, 0.07, 0.3);
 
       for (int i = 0; i < 100; i++)
       {
          generator.identity();
 
-         Vector3d translationVector = RandomTools.generateRandomVector(random, -5.0, -1.0, -0.5, 5.0, 1.0, 0.0);
+         Vector3d translationVector = RandomTools.generateRandomVector(random, -5.0, -1.0, -0.05, 5.0, 1.0, 0.0);
          generator.translate(translationVector);
 
          Quat4d rotation = RandomTools.generateRandomQuaternion(random, Math.toRadians(15.0));

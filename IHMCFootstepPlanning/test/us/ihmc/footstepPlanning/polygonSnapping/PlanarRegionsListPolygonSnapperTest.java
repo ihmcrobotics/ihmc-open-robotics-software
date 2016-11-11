@@ -9,7 +9,6 @@ import java.util.Random;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
@@ -44,17 +43,18 @@ public class PlanarRegionsListPolygonSnapperTest
       generator.addCubeReferencedAtBottomMiddle(1.0, 0.5, 0.7);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      Pair<RigidBodyTransform, PlanarRegion> snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList);
+      PlanarRegion planarRegion = new PlanarRegion();
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, planarRegion);
 
       if (polygonSnapperVisualizer != null)
       {
          polygonSnapperVisualizer.addPlanarRegionsList(planarRegionsList, YoAppearance.Gray());
-         polygonSnapperVisualizer.setSnappedPolygon(nonSnappedTransform, snapTransform.getLeft());
+         polygonSnapperVisualizer.setSnappedPolygon(nonSnappedTransform, snapTransform);
       }
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       expectedTransform.setTranslation(0.0, 0.0, 0.7);
-      assertTrue(expectedTransform.epsilonEquals(snapTransform.getLeft(), 1e-7));
+      assertTrue(expectedTransform.epsilonEquals(snapTransform, 1e-7));
 
       if (visualize)
       {
@@ -85,15 +85,16 @@ public class PlanarRegionsListPolygonSnapperTest
       generator.addCubeReferencedAtBottomMiddle(1.0, 0.5, 0.7);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      Pair<RigidBodyTransform, PlanarRegion> snapTransformAndPlanarRegion = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList);
+      PlanarRegion planarRegion = new PlanarRegion();
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, planarRegion);
 
       if (polygonSnapperVisualizer != null)
       {
          polygonSnapperVisualizer.addPlanarRegionsList(planarRegionsList, YoAppearance.Gray());
-         polygonSnapperVisualizer.setSnappedPolygon(nonSnappedTransform, snapTransformAndPlanarRegion.getLeft());
+         polygonSnapperVisualizer.setSnappedPolygon(nonSnappedTransform, snapTransform);
       }
 
-      PlanarRegionPolygonSnapperTest.assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(snapTransformAndPlanarRegion.getLeft(), planarRegionTransform);
+      PlanarRegionPolygonSnapperTest.assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(snapTransform, planarRegionTransform);
 
       if (visualize)
       {
@@ -195,12 +196,13 @@ public class PlanarRegionsListPolygonSnapperTest
          nonSnappedTransform.setTranslation(xyYaw[0], xyYaw[1], 0.0);
          polygonToSnap.applyTransformAndProjectToXYPlane(nonSnappedTransform);
 
-         Pair<RigidBodyTransform, PlanarRegion> snapTransformAndPlanarRegion = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList);
+         PlanarRegion planarRegionIntersection = new PlanarRegion();
+         RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, planarRegionIntersection);
          //         PlanarRegionPolygonSnapperTest.assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(snapTransform, planarRegionTransform);
 
          //         System.out.println(snapTransform);
 
-         if (snapTransformAndPlanarRegion != null)
+         if (snapTransform != null)
          {
             int numberOfVertices = polygonToSnap.getNumberOfVertices();
             for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
@@ -208,7 +210,7 @@ public class PlanarRegionsListPolygonSnapperTest
                Point2d vertex = polygonToSnap.getVertex(vertexIndex);
                Point3d snappedVertex = new Point3d(vertex.getX(), vertex.getY(), 0.0);
 
-               snapTransformAndPlanarRegion.getLeft().transform(snappedVertex);
+               snapTransform.transform(snappedVertex);
 
                List<PlanarRegion> planarRegions = planarRegionsList.findPlanarRegionsContainingPointByProjectionOntoXYPlane(snappedVertex.getX(), snappedVertex.getY());
 
@@ -225,7 +227,7 @@ public class PlanarRegionsListPolygonSnapperTest
 
          if (polygonSnapperVisualizer != null)
          {
-            polygonSnapperVisualizer.setSnappedPolygon(nonSnappedTransform, snapTransformAndPlanarRegion.getLeft());
+            polygonSnapperVisualizer.setSnappedPolygon(nonSnappedTransform, snapTransform);
          }
       }
 

@@ -5,9 +5,6 @@ import java.util.List;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -23,7 +20,20 @@ public class PlanarRegionsListPolygonSnapper
     * @param planarRegionsListToSnapTo PlanarRegionsList that the polygon will be snapped to.
     * @return RigidBodyTransform Transform required to snap the polygon down onto the PlanarRegion.
     */
-   public static Pair<RigidBodyTransform, PlanarRegion> snapPolygonToPlanarRegionsList(ConvexPolygon2d polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo)
+   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2d polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo)
+   {
+      return snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsListToSnapTo, null);
+   }
+
+   /**
+    * Snaps an XY polygon down onto a PlanarRegionsList. Returns the RigidBodyTransform required to perform the snap.
+    *
+    * @param polygonToSnap ConvexPolygon2d that is to be snapped to the PlanarRegionsList.
+    * @param planarRegionsListToSnapTo PlanarRegionsList that the polygon will be snapped to.
+    * @param regionToPack the planar region that this snaps to will be packed here (can be null).
+    * @return RigidBodyTransform Transform required to snap the polygon down onto the PlanarRegion.
+    */
+   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2d polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo, PlanarRegion regionToPack)
    {
       double extraZ = 0.01; // For close ones. When close, take one that is flatter...
       List<PlanarRegion> intersectingRegions = planarRegionsListToSnapTo.findPlanarRegionsIntersectingPolygon(polygonToSnap);
@@ -76,6 +86,8 @@ public class PlanarRegionsListPolygonSnapper
       if (Math.abs(highestSurfaceNormal.getZ()) < 0.2)
          return null;
 
-      return new ImmutablePair<RigidBodyTransform, PlanarRegion>(highestTransform, highestPlanarRegion);
+      if (regionToPack != null)
+         regionToPack.set(highestPlanarRegion);
+      return highestTransform;
    }
 }
