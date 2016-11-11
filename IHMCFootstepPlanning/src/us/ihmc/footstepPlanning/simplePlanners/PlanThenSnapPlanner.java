@@ -1,13 +1,12 @@
 package us.ihmc.footstepPlanning.simplePlanners;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
+import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -21,6 +20,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class PlanThenSnapPlanner implements FootstepPlanner
 {
+   private static final double maxWiggleYaw = Math.toRadians(10.0);
+
    private final FootstepPlanner internalPlanner;
    private final SideDependentList<ConvexPolygon2d> footPolygons;
    private PlanarRegionsList planarRegionsList;
@@ -70,12 +71,35 @@ public class PlanThenSnapPlanner implements FootstepPlanner
 
          PoseReferenceFrame soleFrameBeforeSnapping = new PoseReferenceFrame("SoleFrameBeforeSnapping", solePose);
          FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(soleFrameBeforeSnapping, footPolygons.get(footstep.getRobotSide()));
-         footPolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
-         Pair<RigidBodyTransform, PlanarRegion> snapTransformAndRegion = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon.getConvexPolygon2d(), planarRegionsList);
-         if (snapTransformAndRegion == null)
-            return FootstepPlanningResult.SNAPPING_FAILED;
+         footPolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame()); // this works if the soleFrames are z up.
 
-         solePose.applyTransform(snapTransformAndRegion.getLeft());
+         PlanarRegion regionToMoveTo = new PlanarRegion();
+         RigidBodyTransform snapTransform =
+               PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon.getConvexPolygon2d(), planarRegionsList, regionToMoveTo);
+         if (snapTransform == null)
+            return FootstepPlanningResult.SNAPPING_FAILED;
+         solePose.applyTransform(snapTransform);
+
+         RigidBodyTransform regionToWorld = new RigidBodyTransform();
+         regionToMoveTo.getTransformToWorld(regionToWorld);
+         PoseReferenceFrame regionFrame = new PoseReferenceFrame("RegionFrame", ReferenceFrame.getWorldFrame());
+         regionFrame.setPoseAndUpdate(regionToWorld);
+         PoseReferenceFrame soleFrameBeforeWiggle = new PoseReferenceFrame("SoleFrameBeforeWiggle", solePose);
+
+         RigidBodyTransform soleToRegion = soleFrameBeforeWiggle.getTransformToDesiredFrame(regionFrame);
+         ConvexPolygon2d footPolygonInRegion = new ConvexPolygon2d(footPolygons.get(footstep.getRobotSide()));
+         footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
+
+         RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoRegion(footPolygonInRegion, regionToMoveTo, maxWiggleYaw, maxWiggleYaw);
+         if (wiggleTransform == null)
+            solePose.setToNaN();
+         else
+         {
+            solePose.changeFrame(regionFrame);
+            solePose.applyTransform(wiggleTransform);
+            solePose.changeFrame(ReferenceFrame.getWorldFrame());
+         }
+
          footstep.setSoleFramePose(solePose);
       }
       return result;

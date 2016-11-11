@@ -20,6 +20,14 @@ public class PlanarRegion
    private final List<ConvexPolygon2d> convexPolygons;
 
    /**
+    * Create a new, empty planar region.
+    */
+   public PlanarRegion()
+   {
+      convexPolygons = new ArrayList<>();
+   }
+
+   /**
     * Create a new planar region.
     * @param transformToWorld transform from the region local coordinate system to world.
     * @param planarRegionConvexPolygons the list of convex polygon that represents the planar region. Expressed in local coordinate system.
@@ -108,8 +116,6 @@ public class PlanarRegion
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
-         System.out.println("convexPolygons.get(i) = \n" + convexPolygons.get(i));
-
          ConvexPolygon2d intersectingPolygon = convexPolygons.get(i).intersectionWith(projectedPolygon);
 
          if (intersectingPolygon != null)
@@ -313,6 +319,15 @@ public class PlanarRegion
             return false;
       }
       return true;
+   }
+
+   public void set(PlanarRegion other)
+   {
+      fromLocalToWorldTransform.set(other.fromLocalToWorldTransform);
+      fromWorldToLocalTransform.set(other.fromWorldToLocalTransform);
+      convexPolygons.clear();
+      for (int i = 0; i < other.getNumberOfConvexPolygons(); i++)
+         convexPolygons.add(new ConvexPolygon2d(other.convexPolygons.get(i)));
    }
 
 }
