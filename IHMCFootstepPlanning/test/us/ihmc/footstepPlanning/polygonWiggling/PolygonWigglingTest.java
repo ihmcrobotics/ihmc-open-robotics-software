@@ -24,6 +24,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class PolygonWigglingTest
@@ -250,5 +251,12 @@ public class PolygonWigglingTest
       frame.setVisible(true);
       artifacts.addArtifactsToPlotter(plotter);
       ThreadTools.sleepForever();
+   }
+
+   public static void main(String[] args)
+   {
+      String targetTests = PolygonWigglingTest.class.getName();
+      String targetClassesInSamePackage = PolygonWiggler.class.getName();
+      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
    }
 }
