@@ -47,7 +47,9 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    {
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner();
 
-      planner.setMaxStepReach(1.0);
+      planner.setMaximumStepReach(0.4);
+      planner.setMaximumStepZ(0.2);
+      planner.setMinimumFootholdPercent(0.6);
 
       double idealFootstepLength = 0.2;
       double idealFootstepWidth = 0.3;

@@ -2,6 +2,9 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -22,6 +25,20 @@ public class BipedalFootstepPlannerNode
       this.soleTransform.set(soleTransform);
    }
 
+   public RigidBodyTransform getTransformToParent()
+   {
+      if (parentNode == null)
+         return null;
+
+      RigidBodyTransform transformToParent = new RigidBodyTransform();
+
+      parentNode.getSoleTransform(transformToParent);
+      transformToParent.invert();
+
+      transformToParent.multiply(transformToParent, soleTransform);
+      return transformToParent;
+   }
+
    public RobotSide getRobotSide()
    {
       return footstepSide;
@@ -32,11 +49,11 @@ public class BipedalFootstepPlannerNode
       soleTransformToPack.set(soleTransform);
    }
 
-   public void transformSoleTransformWithSnapTransformFromZeroZ(RigidBodyTransform snapTransform)
+   public void transformSoleTransformWithSnapTransformFromZeroZ(Pair<RigidBodyTransform, PlanarRegion> snapTransformAndRegion)
    {
       // Ignore the z since the snap transform snapped from z = 0. Keep everything else.
       soleTransform.setM23(0.0);
-      soleTransform.multiply(snapTransform, soleTransform);
+      soleTransform.multiply(snapTransformAndRegion.getLeft(), soleTransform);
    }
 
    public BipedalFootstepPlannerNode getParentNode()
@@ -93,6 +110,5 @@ public class BipedalFootstepPlannerNode
    {
       this.estimatedCostToGoal = estimatedCostToGoal;
    }
-
 
 }

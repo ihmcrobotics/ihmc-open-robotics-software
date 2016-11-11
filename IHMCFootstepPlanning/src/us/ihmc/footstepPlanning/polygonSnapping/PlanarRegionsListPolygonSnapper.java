@@ -5,6 +5,9 @@ import java.util.List;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -20,7 +23,7 @@ public class PlanarRegionsListPolygonSnapper
     * @param planarRegionsListToSnapTo PlanarRegionsList that the polygon will be snapped to.
     * @return RigidBodyTransform Transform required to snap the polygon down onto the PlanarRegion.
     */
-   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2d polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo)
+   public static Pair<RigidBodyTransform, PlanarRegion> snapPolygonToPlanarRegionsList(ConvexPolygon2d polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo)
    {
       double extraZ = 0.01; // For close ones. When close, take one that is flatter...
       List<PlanarRegion> intersectingRegions = planarRegionsListToSnapTo.findPlanarRegionsIntersectingPolygon(polygonToSnap);
@@ -73,6 +76,6 @@ public class PlanarRegionsListPolygonSnapper
       if (Math.abs(highestSurfaceNormal.getZ()) < 0.2)
          return null;
 
-      return highestTransform;
+      return new ImmutablePair<RigidBodyTransform, PlanarRegion>(highestTransform, highestPlanarRegion);
    }
 }
