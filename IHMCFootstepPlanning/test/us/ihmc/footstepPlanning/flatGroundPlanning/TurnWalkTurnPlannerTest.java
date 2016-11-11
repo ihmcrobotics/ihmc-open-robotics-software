@@ -7,10 +7,10 @@ import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class TurnWalkTurnPlannerTest extends FootstepPlannerOnFlatGroundTest
 {
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private final TurnWalkTurnPlanner planner = new TurnWalkTurnPlanner();
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
