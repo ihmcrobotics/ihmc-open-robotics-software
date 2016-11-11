@@ -1394,6 +1394,18 @@ public class RigidBodyTransform implements Serializable
    }
 
    /**
+    * Return translational part as Point3f
+    *
+    * @param point
+    */
+   public final void getTranslation(Point3f point)
+   {
+      point.setX((float) mat03);
+      point.setY((float) mat13);
+      point.setZ((float) mat23);
+   }
+
+   /**
     * Return RigidBodyTransform as array of doubles
     *
     * @param ret
