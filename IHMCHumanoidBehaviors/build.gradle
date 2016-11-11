@@ -52,6 +52,7 @@ dependencies {
     compile "org.boofcv:ip:0.24.1"
     compile "org.boofcv:io:0.24.1"
     compile "org.boofcv:recognition:0.24.1"
+    compile "us.ihmc:IHMCNativeLibraryLoader:1.0"
 
     compile ihmc.getProjectDependency(":IHMCRobotModels")
 	compile ihmc.getProjectDependency(":IHMCCommunication")
@@ -65,7 +66,6 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCPerception")
     compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
-	compile ihmc.getProjectDependency(":IHMCNativeLibraryLoader")
 	
     testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
 }
