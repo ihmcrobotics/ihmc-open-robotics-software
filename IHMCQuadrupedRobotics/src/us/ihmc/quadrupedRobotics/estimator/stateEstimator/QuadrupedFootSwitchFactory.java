@@ -95,6 +95,8 @@ public class QuadrupedFootSwitchFactory
       default:
          setupSettableFootSwitches(footSwitches, totalRobotWeight);
       }
+      
+      FactoryTools.disposeFactory(this);
 
       return footSwitches;
    }

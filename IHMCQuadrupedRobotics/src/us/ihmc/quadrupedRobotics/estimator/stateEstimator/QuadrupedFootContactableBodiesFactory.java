@@ -31,6 +31,8 @@ public class QuadrupedFootContactableBodiesFactory
                                                                                                                        .getFootGroundContactPoints(robotQuadrant));
          footContactableBodies.set(robotQuadrant, footContactableBody);
       }
+      
+      FactoryTools.disposeFactory(this);
 
       return footContactableBodies;
    }

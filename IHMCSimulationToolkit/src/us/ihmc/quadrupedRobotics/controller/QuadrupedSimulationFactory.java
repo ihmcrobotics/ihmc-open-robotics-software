@@ -447,6 +447,9 @@ public class QuadrupedSimulationFactory
             scs.getStandardSimulationGUI().selectPanel("Plotter");
          }
       }
+      
+      FactoryTools.disposeFactory(this);
+      
       return scs;
    }
 
