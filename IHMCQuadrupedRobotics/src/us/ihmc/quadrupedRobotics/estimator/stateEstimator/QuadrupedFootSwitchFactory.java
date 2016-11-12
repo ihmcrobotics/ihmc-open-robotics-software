@@ -76,7 +76,7 @@ public class QuadrupedFootSwitchFactory
 
    public QuadrantDependentList<FootSwitchInterface> createFootSwitches()
    {
-      FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
+      FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       yoVariableRegistry.get().addChild(registry);
 
@@ -95,6 +95,8 @@ public class QuadrupedFootSwitchFactory
       default:
          setupSettableFootSwitches(footSwitches, totalRobotWeight);
       }
+      
+      FactoryTools.disposeFactory(this);
 
       return footSwitches;
    }

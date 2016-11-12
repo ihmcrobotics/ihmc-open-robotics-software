@@ -19,7 +19,6 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class SimulatedQuadrupedFootSwitchFactory extends QuadrupedFootSwitchFactory
 {
-   
    // Used to create the ground contact point based foot switches.
    private final OptionalFactoryField<FloatingRootJointRobot> simulatedRobot = new OptionalFactoryField<>("simulatedRobot");
 
@@ -27,9 +26,11 @@ public class SimulatedQuadrupedFootSwitchFactory extends QuadrupedFootSwitchFact
    @Override
    protected void setupGroundContactPointFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
-      if (!simulatedRobot.hasBeenSet())
+      simulatedRobot.setDefaultValue(null);
+      
+      if (simulatedRobot.get() == null)
       {
-         PrintTools.warn(this, "simulatedRobot is not set, creating touchdown based foot switches.");
+         PrintTools.warn(this, "simulatedRobot is null, creating touchdown based foot switches.");
          setupTouchdownBasedFootSwitches(footSwitches, totalRobotWeight);
          return;
       }

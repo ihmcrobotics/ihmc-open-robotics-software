@@ -56,7 +56,12 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
    @Override
    public GoalOrientedTestConductor createTestConductor() throws IOException
    {
-      FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
+      useStateEstimator.setDefaultValue(USE_STATE_ESTIMATOR);
+      groundContactModelType.setDefaultValue(null);
+      providedGroundProfile3D.setDefaultValue(null);
+      usePushRobotController.setDefaultValue(false);
+
+      FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       QuadrupedModelFactory modelFactory = new LLAQuadrupedModelFactory();
       QuadrupedPhysicalProperties physicalProperties = new LLAQuadrupedPhysicalProperties();
@@ -92,33 +97,27 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setPhysicalProperties(physicalProperties);
       simulationFactory.setUseNetworking(USE_NETWORKING);
       simulationFactory.setTimestampHolder(timestampProvider);
-      if (useStateEstimator.hasBeenSet())
-      {
-         simulationFactory.setUseStateEstimator(useStateEstimator.get());
-      }
-      else
-      {
-         simulationFactory.setUseStateEstimator(USE_STATE_ESTIMATOR);
-      }
+      simulationFactory.setUseStateEstimator(useStateEstimator.get());
       simulationFactory.setStateEstimatorParameters(stateEstimatorParameters);
       simulationFactory.setSensorInformation(sensorInformation);
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setControlMode(controlMode.get());
-      if (groundContactModelType.hasBeenSet())
+      if (groundContactModelType.get() != null)
       {
          simulationFactory.setGroundContactModelType(groundContactModelType.get());
       }
-      if (providedGroundProfile3D.hasBeenSet())
+      if (providedGroundProfile3D.get() != null)
       {
          simulationFactory.setGroundProfile3D(providedGroundProfile3D.get());
       }
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
-      if (usePushRobotController.hasBeenSet())
-      {
-         simulationFactory.setUsePushRobotController(usePushRobotController.get());
-      }
-      return new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
+      simulationFactory.setUsePushRobotController(usePushRobotController.get());
+      GoalOrientedTestConductor goalOrientedTestConductor = new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
+
+      FactoryTools.disposeFactory(this);
+
+      return goalOrientedTestConductor;
    }
 
    @Override

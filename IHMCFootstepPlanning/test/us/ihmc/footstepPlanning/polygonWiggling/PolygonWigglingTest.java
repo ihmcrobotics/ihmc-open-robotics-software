@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.JFrame;
@@ -23,13 +24,16 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.ThreadTools;
 
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PolygonWigglingTest
 {
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -52,8 +56,7 @@ public class PolygonWigglingTest
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      double yawLimit = Math.toRadians(15.0);
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, yawLimit, yawLimit);
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
 
       if (visualize)
       {
@@ -62,6 +65,8 @@ public class PolygonWigglingTest
          addPolygonToArtifacts("Foot", foot, Color.BLUE);
          showPlotterAndSleep(artifacts);
       }
+
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -77,8 +82,7 @@ public class PolygonWigglingTest
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      double yawLimit = Math.toRadians(15.0);
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, yawLimit, yawLimit);
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
 
       if (visualize)
       {
@@ -87,6 +91,38 @@ public class PolygonWigglingTest
          addPolygonToArtifacts("Foot", foot, Color.BLUE);
          showPlotterAndSleep(artifacts);
       }
+
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testRotationLimit()
+   {
+      ConvexPolygon2d plane = PlanningTestTools.createDefaultFootPolygon();
+      plane.scale(1.1);
+
+      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      RigidBodyTransform initialFootTransform = new RigidBodyTransform();
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-13.0));
+      initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
+      initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
+
+      WiggleParameters parameters = new WiggleParameters();
+      parameters.maxYaw = 0.0;
+      parameters.minYaw = 0.0;
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
+
+      if (visualize)
+      {
+         addPolygonToArtifacts("Plane", plane, Color.BLACK);
+         addPolygonToArtifacts("InitialFoot", initialFoot, Color.RED);
+         addPolygonToArtifacts("Foot", foot, Color.BLUE);
+         showPlotterAndSleep(artifacts);
+      }
+
+      // The rotation limit should make it impossible to reach goal since rotation is required in this case.
+      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
    }
 
    /**
@@ -105,8 +141,7 @@ public class PolygonWigglingTest
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      double yawLimit = Math.toRadians(15.0);
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, yawLimit, yawLimit);
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
 
       if (visualize)
       {
@@ -133,8 +168,7 @@ public class PolygonWigglingTest
       initialFootTransform.setTranslationAndIdentityRotation(-0.2, 0.25, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      double yawLimit = Math.toRadians(15.0);
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, yawLimit, yawLimit);
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
 
       if (visualize)
       {
@@ -143,6 +177,39 @@ public class PolygonWigglingTest
          addPolygonToArtifacts("Foot", foot, Color.BLUE);
          showPlotterAndSleep(artifacts);
       }
+
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testProjectionTranslationLimits()
+   {
+      ConvexPolygon2d plane = new ConvexPolygon2d();
+      plane.addVertex(0.0, 0.0);
+      plane.addVertex(0.5, 0.0);
+      plane.addVertex(0.0, 0.5);
+      plane.addVertex(0.5, 0.5);
+      plane.update();
+
+      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      RigidBodyTransform initialFootTransform = new RigidBodyTransform();
+      initialFootTransform.setTranslationAndIdentityRotation(-0.2, 0.25, 0.0);
+      initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
+
+      WiggleParameters parameters = new WiggleParameters();
+      parameters.maxX = 0.1;
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
+
+      if (visualize)
+      {
+         addPolygonToArtifacts("Plane", plane, Color.BLACK);
+         addPolygonToArtifacts("InitialFoot", initialFoot, Color.RED);
+         addPolygonToArtifacts("Foot", foot, Color.BLUE);
+         showPlotterAndSleep(artifacts);
+      }
+
+      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -157,6 +224,13 @@ public class PolygonWigglingTest
       plane.update();
 
       double yawLimit = Math.toRadians(15.0);
+      WiggleParameters wiggleParameters = new WiggleParameters();
+      wiggleParameters.maxYaw = yawLimit;
+      wiggleParameters.minYaw = -yawLimit;
+      wiggleParameters.maxX = 10.0;
+      wiggleParameters.minX = -10.0;
+      wiggleParameters.maxY = 10.0;
+      wiggleParameters.minY = -10.0;
       Random random = new Random(482787427467L);
 
       for (int i = 0; i < 100; i++)
@@ -176,7 +250,7 @@ public class PolygonWigglingTest
          initialFootTransform.setTranslation(x, y, 0.0);
          initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-         ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, yawLimit, yawLimit);
+         ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
          assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
          if (ConvexPolygon2dCalculator.isPolygonInside(initialFoot, 1.0e-5, plane))
             assertTrue(initialFoot.epsilonEquals(foot, 1.0e-10));
@@ -199,24 +273,39 @@ public class PolygonWigglingTest
    @Test(timeout = 300000)
    public void testProjectionIntoPlanarRegion()
    {
-      ConvexPolygon2d plane = new ConvexPolygon2d();
-      plane.addVertex(0.0, 0.0);
-      plane.addVertex(0.5, 0.0);
-      plane.addVertex(0.0, 0.5);
-      plane.addVertex(0.5, 0.5);
-      plane.update();
+      ArrayList<ConvexPolygon2d> planes = new ArrayList<>();
+      ConvexPolygon2d plane1 = new ConvexPolygon2d();
+      plane1.addVertex(0.0, 0.0);
+      plane1.addVertex(0.5, 0.0);
+      plane1.addVertex(0.0, 0.5);
+      plane1.addVertex(0.5, 0.5);
+      plane1.update();
+      planes.add(plane1);
+      ConvexPolygon2d plane2 = new ConvexPolygon2d();
+      plane2.addVertex(-0.6, 0.0);
+      plane2.addVertex(-0.1, 0.0);
+      plane2.addVertex(-0.6, 0.5);
+      plane2.addVertex(-0.1, 0.5);
+      plane2.update();
+      planes.add(plane2);
+      ConvexPolygon2d plane3 = new ConvexPolygon2d();
+      plane3.addVertex(-0.25, 0.0);
+      plane3.addVertex(0.25, 0.0);
+      plane3.addVertex(-0.25, -0.5);
+      plane3.addVertex(0.25, -0.5);
+      plane3.update();
+      planes.add(plane3);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      PlanarRegion region = new PlanarRegion(transformToWorld , plane);
+      PlanarRegion region = new PlanarRegion(transformToWorld, planes);
 
       ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
-      initialFootTransform.setTranslation(-0.05, 0.1, 0.0);
+      initialFootTransform.setTranslation(-0.05, 0.09, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      double yawLimit = Math.toRadians(15.0);
-      RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoRegion(initialFoot, region, yawLimit, yawLimit);
+      RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoRegion(initialFoot, region, new WiggleParameters());
       assertFalse(wiggleTransfrom == null);
 
       ConvexPolygon2d foot = new ConvexPolygon2d(initialFoot);
@@ -224,11 +313,14 @@ public class PolygonWigglingTest
 
       if (visualize)
       {
-         addPolygonToArtifacts("Plane", plane, Color.BLACK);
+         for (int i = 0; i < region.getNumberOfConvexPolygons(); i++)
+            addPolygonToArtifacts("Plane" + i, region.getConvexPolygon(i), Color.BLACK);
          addPolygonToArtifacts("InitialFoot", initialFoot, Color.RED);
          addPolygonToArtifacts("Foot", foot, Color.BLUE);
          showPlotterAndSleep(artifacts);
       }
+
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane2));
    }
 
    private void addPolygonToArtifacts(String name, ConvexPolygon2d polygon, Color color)
