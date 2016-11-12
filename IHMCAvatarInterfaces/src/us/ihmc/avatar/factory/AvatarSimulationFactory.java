@@ -31,15 +31,18 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
+import us.ihmc.simulationToolkit.controllers.ActualCMPComputer;
 import us.ihmc.simulationToolkit.controllers.JointLowLevelPositionControlSimulator;
 import us.ihmc.simulationToolkit.controllers.PIDLidarTorqueController;
 import us.ihmc.simulationToolkit.controllers.PassiveJointController;
+import us.ihmc.simulationToolkit.controllers.SimulatedRobotCenterOfMassVisualizer;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
 import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
@@ -69,7 +72,7 @@ public class AvatarSimulationFactory
    private final RequiredFactoryField<DRCSCSInitialSetup> scsInitialSetup = new RequiredFactoryField<>("scsInitialSetup");
    private final RequiredFactoryField<DRCGuiInitialSetup> guiInitialSetup = new RequiredFactoryField<>("guiInitialSetup");
    private final RequiredFactoryField<HumanoidGlobalDataProducer> humanoidGlobalDataProducer = new RequiredFactoryField<>("humanoidGlobalDataProducer");
-   
+
    private final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity");
    private final OptionalFactoryField<Boolean> doSlowIntegrationForTorqueOffset = new OptionalFactoryField<>("doSlowIntegrationForTorqueOffset");
    private final OptionalFactoryField<Boolean> doSmoothJointTorquesAtControllerStateChanges = new OptionalFactoryField<>("doSmoothJointTorquesAtControllerStateChanges");
@@ -88,6 +91,7 @@ public class AvatarSimulationFactory
    private AbstractThreadedRobotController threadedRobotController;
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
+   private ActualCMPComputer actualCMPComputer;
 
    private void createHumanoidFloatingRootJointRobot()
    {
@@ -338,6 +342,45 @@ public class AvatarSimulationFactory
       humanoidFloatingRootJointRobot.setController(simulatedRobotTimeProvider);
    }
 
+   private void setupCMPVisualization()
+   {
+      actualCMPComputer = new ActualCMPComputer(addActualCMPVisualization.get(), simulationConstructionSet, humanoidFloatingRootJointRobot);
+      if (addActualCMPVisualization.get())
+      {
+         humanoidFloatingRootJointRobot.setController(actualCMPComputer);
+      }
+   }
+
+   private void setupCOMVisualization()
+   {
+      SimulatedRobotCenterOfMassVisualizer simulatedRobotCenterOfMassVisualizer = new SimulatedRobotCenterOfMassVisualizer(humanoidFloatingRootJointRobot,
+                                                                                                                           robotModel.get().getSimulateDT());
+      humanoidFloatingRootJointRobot.setController(simulatedRobotCenterOfMassVisualizer);
+   }
+
+   private void initializeSimulationConstructionSet()
+   {
+      humanoidFloatingRootJointRobot.setDynamicIntegrationMethod(scsInitialSetup.get().getDynamicIntegrationMethod());
+      scsInitialSetup.get().initializeSimulation(simulationConstructionSet);
+
+      if (guiInitialSetup.get().isGuiShown())
+      {
+         VisualizerUtils.createOverheadPlotter(simulationConstructionSet, guiInitialSetup.get().isShowOverheadView(), "centerOfMass",
+                                               controllerThread.getDynamicGraphicObjectsListRegistry(),
+                                               stateEstimationThread.getDynamicGraphicObjectsListRegistry(), actualCMPComputer.getYoGraphicsListRegistry());
+         guiInitialSetup.get().initializeGUI(simulationConstructionSet, humanoidFloatingRootJointRobot, robotModel.get());
+      }
+
+      if (commonAvatarEnvironment.get() != null && commonAvatarEnvironment.get().getTerrainObject3D() != null)
+      {
+         simulationConstructionSet.addStaticLinkGraphics(commonAvatarEnvironment.get().getTerrainObject3D().getLinkGraphics());
+      }
+
+      scsInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get(), null);
+      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
+      humanoidFloatingRootJointRobot.update();
+   }
+
    public AvatarSimulation createAvatarSimulation()
    {
       gravity.setDefaultValue(-9.81);
@@ -345,9 +388,9 @@ public class AvatarSimulationFactory
       doSmoothJointTorquesAtControllerStateChanges.setDefaultValue(false);
       addActualCMPVisualization.setDefaultValue(true);
       createCollisionMeshes.setDefaultValue(false);
-      
+
       FactoryTools.checkAllFactoryFieldsAreSet(this);
-      
+
       createHumanoidFloatingRootJointRobot();
       setupYoVariableServer();
       setupSimulationConstructionSet();
@@ -364,6 +407,9 @@ public class AvatarSimulationFactory
       setupPositionControlledJointsForSimulation();
       setupPassiveJoints();
       setupSimulatedRobotTimeProvider();
+      setupCMPVisualization();
+      setupCOMVisualization();
+      initializeSimulationConstructionSet();
 
       AvatarSimulation avatarSimulation = new AvatarSimulation();
       avatarSimulation.setSimulationConstructionSet(simulationConstructionSet);
@@ -377,9 +423,9 @@ public class AvatarSimulationFactory
       avatarSimulation.setHumanoidFloatingRootJointRobot(humanoidFloatingRootJointRobot);
       avatarSimulation.setSimulatedRobotTimeProvider(simulatedRobotTimeProvider);
       avatarSimulation.setThreadDataSynchronizer(threadDataSynchronizer);
-      
+
       FactoryTools.disposeFactory(this);
-      
+
       return avatarSimulation;
    }
 
