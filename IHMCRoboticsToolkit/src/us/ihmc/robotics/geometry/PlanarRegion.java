@@ -5,7 +5,9 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
 
 import us.ihmc.robotics.MathTools;
 
@@ -274,6 +276,17 @@ public class PlanarRegion
    }
 
    /**
+    * Retrieves the normal of this planar region and stores it in the given {@link Vector3f}.
+    * @param normalToPack used to store the normal of this planar region.
+    */
+   public void getNormal(Vector3f normalToPack)
+   {
+      normalToPack.setX((float) fromLocalToWorldTransform.getM02());
+      normalToPack.setY((float) fromLocalToWorldTransform.getM12());
+      normalToPack.setZ((float) fromLocalToWorldTransform.getM22());
+   }
+
+   /**
     * Returns true if this PlanarRegion is purely vertical, as far as numerical roundoff is concerned.
     * Checks z component of surface normal. If absolute value is really small, then returns true.
     * @return true if vertical. false otherwise.
@@ -289,6 +302,16 @@ public class PlanarRegion
     * @param pointToPack used to store the point coordinates.
     */
    public void getPointInRegion(Point3d pointToPack)
+   {
+      fromLocalToWorldTransform.getTranslation(pointToPack);
+   }
+
+   /**
+    * Retrieves a point that lies in this planar region.
+    * This point is also used as the origin of the local coordinate system of this planar region.
+    * @param pointToPack used to store the point coordinates.
+    */
+   public void getPointInRegion(Point3f pointToPack)
    {
       fromLocalToWorldTransform.getTranslation(pointToPack);
    }

@@ -37,7 +37,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       RobotSide initialStanceSide = RobotSide.LEFT;
 
       FramePose goalPose = new FramePose(worldFrame);
-      goalPose.setPosition(2.0, 0.0, 0.5);
+      goalPose.setPosition(2.0, -0.2, 0.35);
 
       // run the test
       FootstepPlan footstepPlan =

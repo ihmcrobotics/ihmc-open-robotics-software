@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public interface BipedalFootstepPlannerListener
 {
@@ -10,4 +11,5 @@ public interface BipedalFootstepPlannerListener
    public abstract void notifyListenerSolutionWasFound();
    public abstract void notifyListenerSolutionWasNotFound();
    public abstract void planarRegionsListSet(PlanarRegionsList planarRegionsList);
+   public abstract void goalWasSet(RigidBodyTransform goalLeftFootPose, RigidBodyTransform goalRightFootPose);
 }
