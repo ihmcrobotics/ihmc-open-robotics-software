@@ -34,8 +34,8 @@ public class StepprFlatGroundCircularWalkingTrack
 
       DRCFlatGroundWalkingTrack flatGroundWalkingTrack=new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
                                     useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel);
-      flatGroundWalkingTrack.getDrcSimulation().start();
-      flatGroundWalkingTrack.getDrcSimulation().simulate();
+      flatGroundWalkingTrack.getAvatarSimulation().start();
+      flatGroundWalkingTrack.getAvatarSimulation().simulate();
       SimulationConstructionSet scs = flatGroundWalkingTrack.getSimulationConstructionSet();
       
       scs.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot").setValueFromDouble(0.1); 

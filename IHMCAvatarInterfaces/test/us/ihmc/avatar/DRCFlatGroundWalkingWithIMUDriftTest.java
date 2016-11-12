@@ -8,15 +8,14 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Before;
 
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
-import us.ihmc.avatar.DRCSimulationFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -62,7 +61,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
    }
    
 
-   private DRCSimulationFactory drcSimulation;
+   private AvatarSimulation avatarSimulation;
    private RobotVisualizer robotVisualizer;
 
    private static final double standingTimeDuration = 1.0;
@@ -76,10 +75,10 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
    @After
    public void tearDown()
    {
-      if (drcSimulation != null)
+      if (avatarSimulation != null)
       {
-         drcSimulation.dispose();
-         drcSimulation = null;
+         avatarSimulation.dispose();
+         avatarSimulation = null;
       }
 
       if (robotVisualizer != null)
@@ -181,7 +180,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
 
       setupCameraForUnitTest(scs);
 
-      drcSimulation = drcFlatGroundWalkingTrack.getDrcSimulation();
+      avatarSimulation = drcFlatGroundWalkingTrack.getAvatarSimulation();
 
       return drcFlatGroundWalkingTrack;
    }

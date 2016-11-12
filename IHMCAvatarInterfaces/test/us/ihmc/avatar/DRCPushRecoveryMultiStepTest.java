@@ -121,7 +121,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       Point3d center = new Point3d(0.0, 0.0, 0.8882009563211146);
       Vector3d plusMinusVector = new Vector3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      DRCSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox, drcFlatGroundWalkingTrack.getDrcSimulation().getRobot());
+      DRCSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox, drcFlatGroundWalkingTrack.getAvatarSimulation().getHumanoidFloatingRootJointRobot());
 
       createVideo(scs);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -156,7 +156,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       Point3d center = new Point3d(0.0, 0.0, 0.8882009563211146);
       Vector3d plusMinusVector = new Vector3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      DRCSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox, drcFlatGroundWalkingTrack.getDrcSimulation().getRobot());
+      DRCSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox, drcFlatGroundWalkingTrack.getAvatarSimulation().getHumanoidFloatingRootJointRobot());
 
       createVideo(scs);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -167,7 +167,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       boolean runMultiThreaded = false;
       setupTrack(runMultiThreaded, robotModel);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      pushRobotController = new PushRobotController(drcFlatGroundWalkingTrack.getDrcSimulation().getRobot(), fullRobotModel);
+      pushRobotController = new PushRobotController(drcFlatGroundWalkingTrack.getAvatarSimulation().getHumanoidFloatingRootJointRobot(), fullRobotModel);
 
       if (VISUALIZE_FORCE)
       {
@@ -201,7 +201,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       scsInitialSetup.setRunMultiThreaded(runMultiThreaded);
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, true, false, robotModel);
-      drcFlatGroundWalkingTrack.getDrcSimulation();
+      drcFlatGroundWalkingTrack.getAvatarSimulation();
    }
 
    private class DoubleSupportStartCondition implements StateTransitionCondition
