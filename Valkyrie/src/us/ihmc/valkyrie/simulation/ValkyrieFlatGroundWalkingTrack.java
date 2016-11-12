@@ -66,8 +66,8 @@ public class ValkyrieFlatGroundWalkingTrack
 
   		 
          ValkyrieSliderBoard.setupJoyStickAndTreadmill(scs.getRootRegistry());
-         flatGroundWalkingTrack.getDrcSimulation().start();
-         flatGroundWalkingTrack.getDrcSimulation().simulate();
+         flatGroundWalkingTrack.getAvatarSimulation().start();
+         flatGroundWalkingTrack.getAvatarSimulation().simulate();
       }
    }
 

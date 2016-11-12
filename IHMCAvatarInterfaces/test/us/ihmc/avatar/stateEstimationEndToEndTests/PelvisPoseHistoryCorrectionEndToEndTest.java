@@ -883,12 +883,12 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
             getRobotModel());
 
       simulationConstructionSet = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-      robot = drcFlatGroundWalkingTrack.getDrcSimulation().getRobot();
+      robot = drcFlatGroundWalkingTrack.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
       registry = robot.getRobotsYoVariableRegistry();
 
       externalPelvisPosePublisher = new ExternalPelvisPoseCreator();
-      DRCSimulationFactory drcSimulationFactory = drcFlatGroundWalkingTrack.getDrcSimulation();
-      drcSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisPosePublisher);
+      AvatarSimulation avatarSimulation = drcFlatGroundWalkingTrack.getAvatarSimulation();
+      avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisPosePublisher);
       BooleanYoVariable walk = (BooleanYoVariable) simulationConstructionSet.getVariable("walk");
       walk.set(true);
       return drcFlatGroundWalkingTrack;

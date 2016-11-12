@@ -67,7 +67,7 @@ public class AtlasFlatGroundWalkingTrack
    private static void createOscillateFeetPerturber(DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack)
    {
       SimulationConstructionSet simulationConstructionSet = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-      HumanoidFloatingRootJointRobot robot = drcFlatGroundWalkingTrack.getDrcSimulation().getRobot();
+      HumanoidFloatingRootJointRobot robot = drcFlatGroundWalkingTrack.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
 
       int ticksPerPerturbation = 10;
       OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * ((double) ticksPerPerturbation));
