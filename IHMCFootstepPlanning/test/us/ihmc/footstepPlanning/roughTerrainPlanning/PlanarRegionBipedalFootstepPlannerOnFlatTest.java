@@ -62,8 +62,11 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
-      SCSPlanarRegionBipedalFootstepPlannerVisualizer visualizer = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
-      planner.setBipedalFootstepPlannerListener(visualizer);
+      if (visualize)
+      {
+         SCSPlanarRegionBipedalFootstepPlannerVisualizer visualizer = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
+         planner.setBipedalFootstepPlannerListener(visualizer);
+      }
 
       planner.setMaximumNumberOfNodesToExpand(1000);
 
