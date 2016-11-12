@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.flatGroundPlanning;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
 import java.util.Random;
 
 import javax.vecmath.Point2d;
@@ -24,6 +23,11 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
 
    public void testJustStraightLine()
    {
+      testJustStraightLine(true);
+   }
+
+   public void testJustStraightLine(boolean assertPlannerReturnedResult)
+   {
       double xGoal = 5.0;
       double yGoal = -stepWidth/2.0;
       double yawGoal = 0.0;
@@ -40,14 +44,20 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlan footstepPlan =
-            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null);
+            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null, assertPlannerReturnedResult);
 
       if (visualize())
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
+
+      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
    }
 
    public void testStraightLineWithInitialTurn()
+   {
+      testStraightLineWithInitialTurn(true);
+   }
+
+   public void testStraightLineWithInitialTurn(boolean assertPlannerReturnedResult)
    {
       double xGoal = 5.0;
       double yGoal = -stepWidth/2.0;
@@ -65,18 +75,23 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlan footstepPlan =
-            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null);
+            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null, assertPlannerReturnedResult);
 
       if (visualize())
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
+      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
    }
 
    public void testJustTurnInPlace()
    {
+      testJustTurnInPlace(true);
+   }
+
+   public void testJustTurnInPlace(boolean assertPlannerReturnedResult)
+   {
       double xGoal = 0.0;
       double yGoal = -stepWidth/2.0;
-      double yawGoal = Math.toRadians(20.0);
+      double yawGoal = Math.toRadians(160.0);
       Point2d goalPosition = new Point2d(xGoal, yGoal);
       FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
 
@@ -90,14 +105,19 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlan footstepPlan =
-            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null);
+            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null, assertPlannerReturnedResult);
 
       if (visualize())
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
+      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
    }
 
    public void testRandomPoses()
+   {
+      testRandomPoses(true);
+   }
+
+   public void testRandomPoses(boolean assertPlannerReturnedResult)
    {
       double xGoal = random.nextDouble();
       double yGoal = random.nextDouble();
@@ -115,10 +135,10 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
       FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
       FootstepPlan footstepPlan =
-            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null);
+            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null, assertPlannerReturnedResult);
 
       if (visualize())
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
-      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
+      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
    }
 }
