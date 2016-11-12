@@ -7,6 +7,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
+import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -20,7 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class PlanThenSnapPlanner implements FootstepPlanner
 {
-   private static final double maxWiggleYaw = Math.toRadians(10.0);
+   private final WiggleParameters wiggleParameters = new WiggleParameters();
 
    private final FootstepPlanner internalPlanner;
    private final SideDependentList<ConvexPolygon2d> footPolygons;
@@ -90,7 +91,7 @@ public class PlanThenSnapPlanner implements FootstepPlanner
          ConvexPolygon2d footPolygonInRegion = new ConvexPolygon2d(footPolygons.get(footstep.getRobotSide()));
          footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
 
-         RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoRegion(footPolygonInRegion, regionToMoveTo, maxWiggleYaw, maxWiggleYaw);
+         RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoRegion(footPolygonInRegion, regionToMoveTo, wiggleParameters);
          if (wiggleTransform == null)
             solePose.setToNaN();
          else
