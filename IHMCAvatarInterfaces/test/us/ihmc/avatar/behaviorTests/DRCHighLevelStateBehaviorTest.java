@@ -132,6 +132,6 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
 
    private HighLevelState getCurrentHighLevelState()
    {
-      return drcBehaviorTestHelper.getDRCSimulationFactory().getControllerFactory().getCurrentHighLevelState();
+      return drcBehaviorTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory().getCurrentHighLevelState();
    }
 }
