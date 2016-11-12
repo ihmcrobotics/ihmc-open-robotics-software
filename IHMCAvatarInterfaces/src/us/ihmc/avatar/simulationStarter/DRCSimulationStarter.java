@@ -10,7 +10,6 @@ import javax.vecmath.Vector3d;
 import com.github.quickhull3d.Point3d;
 
 import us.ihmc.avatar.DRCLidar;
-import us.ihmc.avatar.DRCSimulationFactory;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
