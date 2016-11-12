@@ -115,7 +115,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       ThreadTools.sleep(1000);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getDRCSimulationFactory().getThreadDataSynchronizer().getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getAvatarSimulation().getControllerFullRobotModel();
 
       FootstepDataListMessage corruptedFootstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator);
       

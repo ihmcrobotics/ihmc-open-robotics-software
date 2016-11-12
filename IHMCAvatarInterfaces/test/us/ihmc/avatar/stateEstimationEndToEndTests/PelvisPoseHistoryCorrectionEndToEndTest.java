@@ -15,17 +15,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCSimulationFactory;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -36,6 +31,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -48,6 +44,9 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
@@ -55,6 +54,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
 import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -863,8 +864,8 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       registry = robot.getRobotsYoVariableRegistry();
 
       externalPelvisPosePublisher = new ExternalPelvisPoseCreator();
-      DRCSimulationFactory drcSimulationFactory = drcSimulationTestHelper.getDRCSimulationFactory();
-      drcSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisPosePublisher);
+      AvatarSimulation avatarSimulation = drcSimulationTestHelper.getAvatarSimulation();
+      avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisPosePublisher);
 
       setupCameraForWalkingUpToRamp();
    }
