@@ -17,7 +17,6 @@ import org.junit.Test;
 
 import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
-import us.ihmc.avatar.DRCSimulationFactory;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;

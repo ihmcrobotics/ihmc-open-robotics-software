@@ -1,18 +1,22 @@
 package us.ihmc.avatar;
 
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.ros.RosCore;
 import org.ros.internal.message.Message;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.avatar.DRCEstimatorThread;
-import us.ihmc.avatar.DRCSimulationFactory;
-import us.ihmc.avatar.DRCSimulationOutputWriter;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
@@ -32,12 +36,15 @@ import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -52,15 +59,6 @@ import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 {
@@ -97,10 +95,10 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
    @After
    public void destroyOtherStuff()
    {
-      if (drcSimulation != null)
+      if (avatarSimulation != null)
       {
-         drcSimulation.dispose();
-         drcSimulation = null;
+         avatarSimulation.dispose();
+         avatarSimulation = null;
       }
    }
 
@@ -218,7 +216,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       rosAPI_communicator_server.close();
    }
 
-   private DRCSimulationFactory drcSimulation;
+   private AvatarSimulation avatarSimulation;
 
    @ContinuousIntegrationTest(estimatedDuration = 2.7)
    @Test(timeout = 30000)
