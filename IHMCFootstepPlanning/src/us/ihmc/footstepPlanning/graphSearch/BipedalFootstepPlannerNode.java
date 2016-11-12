@@ -2,7 +2,8 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayList;
 
-import org.apache.commons.lang3.tuple.Pair;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -18,6 +19,8 @@ public class BipedalFootstepPlannerNode
    private double costFromParent;
    private double costToHereFromStart;
    private double estimatedCostToGoal;
+
+   private boolean isAtGoal = false;
 
    public BipedalFootstepPlannerNode(RobotSide footstepSide, RigidBodyTransform soleTransform)
    {
@@ -44,9 +47,33 @@ public class BipedalFootstepPlannerNode
       return footstepSide;
    }
 
+   public void setIsAtGoal()
+   {
+      this.isAtGoal = true;
+   }
+
+   public boolean isAtGoal()
+   {
+      return isAtGoal;
+   }
+
    public void getSoleTransform(RigidBodyTransform soleTransformToPack)
    {
       soleTransformToPack.set(soleTransform);
+   }
+
+   public Point3d getSolePosition()
+   {
+      Point3d currentSolePosition = new Point3d();
+      soleTransform.transform(currentSolePosition);
+      return currentSolePosition;
+   }
+
+   public double getSoleYaw()
+   {
+      Vector3d eulerAngles = new Vector3d();
+      soleTransform.getRotationEuler(eulerAngles);
+      return eulerAngles.getZ();
    }
 
    public void transformSoleTransformWithSnapTransformFromZeroZ(RigidBodyTransform snapTransform, PlanarRegion planarRegion)
