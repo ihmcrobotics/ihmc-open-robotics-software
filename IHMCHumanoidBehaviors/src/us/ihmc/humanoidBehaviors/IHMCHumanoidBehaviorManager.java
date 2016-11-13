@@ -17,6 +17,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.qrCode.FollowQRCodes;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDetectionBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.LocateFiducialBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
@@ -192,7 +193,9 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_QR_CODES,
             new FollowQRCodes(yoTime, behaviorCommunicationBridge));
 
-
+      double fiducialWidth = 0.12;
+      dispatcher.addBehavior(HumanoidBehaviorType.FIND_FIDUCIAL, new LocateFiducialBehavior(behaviorCommunicationBridge, fiducialWidth));
+      
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, new WalkToLocationBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters()));
 

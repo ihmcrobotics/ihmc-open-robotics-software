@@ -6,11 +6,13 @@ import boofcv.factory.fiducial.FactoryFiducial;
 import boofcv.factory.filter.binary.ConfigThreshold;
 import boofcv.factory.filter.binary.ThresholdType;
 import boofcv.io.image.ConvertBufferedImage;
+import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.ImageType;
 import georegression.geometry.ConvertRotation3D_F64;
 import georegression.struct.EulerType;
 import georegression.struct.se.Se3_F64;
+import us.ihmc.communication.producers.BufferedImageProvider;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
@@ -34,6 +36,7 @@ public class LocateFiducialBehavior extends AbstractBehavior
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
    private BufferedImage latestUnmodifiedCameraImage;
    private final FiducialDetector<GrayF32> detector;
+   private IntrinsicParameters intrinsicParameters = null;
 
    private final LongYoVariable fiducialToSearchFor = new LongYoVariable("fiducialToSearchFor", registry);
    private final LongYoVariable fiducialFound = new LongYoVariable("fiducialFound", registry);
@@ -54,12 +57,19 @@ public class LocateFiducialBehavior extends AbstractBehavior
       detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(fiducialWidth), ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
 
       fiducialFound.set(-1);
+      fiducialToSearchFor.set(-1);
    }
 
    @Override public void doControl()
    {
       VideoPacket videoPacket = videoPacketQueue.getLatestPacket();
       latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData());
+
+      if(intrinsicParameters == null)
+      {
+         setIntrinsicParameters(latestUnmodifiedCameraImage);
+      }
+
       detectFiducials();
    }
 
@@ -89,20 +99,54 @@ public class LocateFiducialBehavior extends AbstractBehavior
          storeFiducial(0);
       }
    }
+
+   static boolean hasStoredFiducial = false;
+
    private void storeFiducial(int fiducialIndexInDetector)
    {
-      detector.getFiducialToCamera(fiducialIndexInDetector, targetToSensor);
-      fiducialFound.set(detector.getId(fiducialIndexInDetector));
+      if(!hasStoredFiducial)
+      {
+         detector.getFiducialToCamera(fiducialIndexInDetector, targetToSensor);
+         fiducialFound.set(detector.getId(fiducialIndexInDetector));
 
-      fiducialPositionX.set(targetToSensor.getX());
-      fiducialPositionY.set(targetToSensor.getY());
-      fiducialPositionZ.set(targetToSensor.getZ());
+         fiducialPositionX.set(targetToSensor.getX());
+         fiducialPositionY.set(targetToSensor.getY());
+         fiducialPositionZ.set(targetToSensor.getZ());
 
-      ConvertRotation3D_F64.matrixToEuler(targetToSensor.R, EulerType.XYZ, eulerAngles);
+         ConvertRotation3D_F64.matrixToEuler(targetToSensor.R, EulerType.XYZ, eulerAngles);
 
-      fiducialEulerRotX.set(eulerAngles[0]);
-      fiducialEulerRotY.set(eulerAngles[1]);
-      fiducialEulerRotZ.set(eulerAngles[2]);
+         fiducialEulerRotX.set(eulerAngles[0]);
+         fiducialEulerRotY.set(eulerAngles[1]);
+         fiducialEulerRotZ.set(eulerAngles[2]);
+
+         System.out.println("fiducial pose: " + targetToSensor);
+
+         hasStoredFiducial = true;
+      }
+   }
+
+   private void setIntrinsicParameters(BufferedImage image)
+   {
+      this.intrinsicParameters = new IntrinsicParameters();
+
+      // fov values from http://carnegierobotics.com/multisense-s7/
+      double fovXinRadian = Math.toRadians(80.0);
+      double fovYinRadian = Math.toRadians(45.0);
+
+      int height = image.getHeight();
+      int width = image.getWidth();
+
+      double fx = (width / 2.0) / Math.tan(fovXinRadian / 2.0);
+      double fy = (height / 2.0) / Math.tan(fovYinRadian / 2.0);
+      intrinsicParameters = new IntrinsicParameters();
+      intrinsicParameters.width = width;
+      intrinsicParameters.height = height;
+      intrinsicParameters.cx = width / 2;
+      intrinsicParameters.cy = height / 2;
+      intrinsicParameters.fx = fx;
+      intrinsicParameters.fy = fy;
+
+      detector.setIntrinsic(intrinsicParameters);
    }
 
    @Override public boolean isDone()
