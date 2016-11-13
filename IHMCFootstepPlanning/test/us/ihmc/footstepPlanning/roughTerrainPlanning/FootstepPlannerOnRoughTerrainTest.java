@@ -40,8 +40,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       goalPose.setPosition(2.0, -0.2, 0.35);
 
       // run the test
-      FootstepPlan footstepPlan =
-            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, stairCase, assertPlannerReturnedResult);
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, stairCase, assertPlannerReturnedResult);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(stairCase, footstepPlan, goalPose);
       assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
@@ -58,7 +57,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       double stepHeight = 0.2;
       double boxSize = 1.0;
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.translate(1.0 + boxSize/2.0, 0.0, 0.0);
+      generator.translate(1.0 + boxSize / 2.0, 0.0, 0.0);
       generator.addCubeReferencedAtBottomMiddle(boxSize, boxSize, stepHeight);
       generator.translate(0.0, 0.0, -0.001);
       generator.addRectangle(5.0, 5.0); // floor plane
@@ -67,12 +66,11 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       FramePose initialStanceFootPose = new FramePose(worldFrame);
       RobotSide initialStanceSide = RobotSide.LEFT;
       FramePose goalPose = new FramePose(worldFrame);
-      goalPose.setPosition(1.0 + boxSize/2.0, 0.0, stepHeight);
+      goalPose.setPosition(1.0 + boxSize / 2.0, 0.0, stepHeight);
 
       // run the test
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
-      FootstepPlan footstepPlan =
-            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, assertPlannerReturnedResult);
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, assertPlannerReturnedResult);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
       assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
@@ -94,8 +92,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
       // run the test
       PlanarRegionsList planarRegionsList = generateRandomTerrain(random);
-      FootstepPlan footstepPlan =
-            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, assertPlannerReturnedResult);
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, assertPlannerReturnedResult);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
    }

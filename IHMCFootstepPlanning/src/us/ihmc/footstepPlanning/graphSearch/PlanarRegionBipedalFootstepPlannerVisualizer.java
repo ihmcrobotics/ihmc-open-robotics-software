@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
@@ -8,6 +10,7 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -28,6 +31,9 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    private final YoGraphicPolygon leftRejectedFootstepViz, rightRejectedFootstepViz;
 
    private final SideDependentList<YoGraphicPolygon> footstepGoalsViz, footstepsToExpandViz, acceptedFootstepsViz, rejectedFootstepsViz;
+
+   private final YoFrameVector leftAcceptedFootstepSurfaceNormal, rightAcceptedFootstepSurfaceNormal;
+   private final SideDependentList<YoFrameVector> acceptedFootstepSurfaceNormals;
 
    private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -88,6 +94,9 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       graphicsListRegistry.registerYoGraphic("FootstepPlanner", leftRejectedFootstepViz);
       graphicsListRegistry.registerYoGraphic("FootstepPlanner", rightRejectedFootstepViz);
 
+      leftAcceptedFootstepSurfaceNormal = new YoFrameVector("leftAcceptedFootstepSurfaceNormal", worldFrame, registry);
+      rightAcceptedFootstepSurfaceNormal = new YoFrameVector("rightAcceptedFootstepSurfaceNormal", worldFrame, registry);
+      acceptedFootstepSurfaceNormals = new SideDependentList<>(leftAcceptedFootstepSurfaceNormal, rightAcceptedFootstepSurfaceNormal);
       parentRegistry.addChild(registry);
    }
 
@@ -145,6 +154,11 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
       YoGraphicPolygon footstepToExpandViz = acceptedFootstepsViz.get(robotSide);
       footstepToExpandViz.setTransformToWorld(soleTransform);
+
+      Vector3d surfaceNormal = new Vector3d(0.0, 0.0, 1.0);
+      soleTransform.transform(surfaceNormal);
+      acceptedFootstepSurfaceNormals.get(robotSide).set(surfaceNormal);
+
       footstepToExpandViz.update();
    }
 
