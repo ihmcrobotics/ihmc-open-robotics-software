@@ -120,6 +120,12 @@ public class MeshDataGeneratorVisualizer extends Application
       capsule.setTranslateY(0.0);
       rootNode.getChildren().add(capsule);
 
+      MeshView tetrahedron = new MeshView(JavaFXMeshDataInterpreter.interpretMeshData(MeshDataGenerator.Tetrahedron(0.3)));
+      tetrahedron.setMaterial(defaultMaterial);
+      tetrahedron.setTranslateX(-1.0);
+      tetrahedron.setTranslateY(1.0);
+      rootNode.getChildren().add(tetrahedron);
+
       primaryStage.setMaximized(true);
       primaryStage.setScene(scene);
       primaryStage.show();
