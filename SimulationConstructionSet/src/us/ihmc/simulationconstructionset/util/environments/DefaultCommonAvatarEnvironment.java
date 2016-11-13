@@ -72,7 +72,8 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
    private static final boolean ADD_LIMBO_BAR = false;
    private static final boolean ADD_CEILING = false;
-   
+
+   private static final boolean ADD_FIDUCIAL_ABOVE_VALVE = true;
    private static final boolean ADD_SOCCER_BALL = false;
    public static final double SOCCER_BALL_RADIUS = 0.0762;
 
@@ -635,6 +636,17 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
          double outsideRadius = 0.2;
          double gripRadius = 0.022;
          linkGraphics.addArcTorus(0, Math.PI * 2, outsideRadius, gripRadius, YoAppearance.randomColor(random));
+
+         if(ADD_FIDUCIAL_ABOVE_VALVE)
+         {
+            point[0] = 3.2;
+            point[1] = 0.0;
+            rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
+            YoAppearanceTexture fiducialTexture = new YoAppearanceTexture("fiducials/fiducial50.png");
+            double boxSideLength = 0.3;
+            setUpSlopedBox(combinedTerrainObject, rotatedPoint[0], rotatedPoint[1], 1.5, 0.3, 0.3, 0.3, 0.5 * Math.PI,
+                           courseAngleDeg, fiducialTexture);
+         }
 
          combinedTerrainObject.addStaticLinkGraphics(linkGraphics); // new
       }
