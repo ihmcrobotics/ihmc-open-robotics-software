@@ -35,7 +35,7 @@ public class PlanarRegionsListPolygonSnapper
     */
    public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2d polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo, PlanarRegion regionToPack)
    {
-      double extraZ = 0.01; // For close ones. When close, take one that is flatter...
+      double allowableExtraZ = 0.003; // For close ones. When close, take one that is flatter...
       List<PlanarRegion> intersectingRegions = planarRegionsListToSnapTo.findPlanarRegionsIntersectingPolygon(polygonToSnap);
 
       if ((intersectingRegions == null) || (intersectingRegions.isEmpty()))
@@ -58,14 +58,14 @@ public class PlanarRegionsListPolygonSnapper
 
          RigidBodyTransform snapTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegion, highestVertexInWorld);
 
-         if (highestVertexInWorld.getZ() > highestZ + extraZ)
+         if (highestVertexInWorld.getZ() > highestZ + allowableExtraZ)
          {
             highestZ = highestVertexInWorld.getZ();
             highestTransform = snapTransform;
             highestPlanarRegion = planarRegion;
          }
 
-         else if (highestVertexInWorld.getZ() > highestZ - extraZ)
+         else if (highestVertexInWorld.getZ() > highestZ - allowableExtraZ)
          {
             // Tie. Let's take the one with the flatter surface normal.
             planarRegion.getNormal(surfaceNormal);
