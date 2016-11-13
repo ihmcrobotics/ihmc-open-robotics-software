@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNode;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
@@ -29,6 +30,9 @@ public class SCSPlanarRegionBipedalFootstepPlannerVisualizer implements BipedalF
 
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.setDT(0.1, 1);
+
+      scs.setCameraFix(-6.0, 0.0, 0.0);
+      scs.setCameraPosition(-11.0, 0.0, 8.0);
       scs.startOnAThread();
    }
 
@@ -54,9 +58,9 @@ public class SCSPlanarRegionBipedalFootstepPlannerVisualizer implements BipedalF
    }
 
    @Override
-   public void nodeForExpansionWasRejected(BipedalFootstepPlannerNode rejectedNode)
+   public void nodeForExpansionWasRejected(BipedalFootstepPlannerNode rejectedNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      footstepPlannerVisualizer.nodeForExpansionWasRejected(rejectedNode);
+      footstepPlannerVisualizer.nodeForExpansionWasRejected(rejectedNode, reason);
       tickAndUpdateSCS();
    }
 
