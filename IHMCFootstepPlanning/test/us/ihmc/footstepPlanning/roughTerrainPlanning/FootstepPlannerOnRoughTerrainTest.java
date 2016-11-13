@@ -142,6 +142,48 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
    }
 
+   public void testSimpleGaps()
+   {
+      testSimpleGaps(true);
+   }
+
+   public void testSimpleGaps(boolean assertPlannerReturnedResult)
+   {
+      // create planar regions
+      double boxHeight = 0.2;
+      double boxSize = 0.87;
+      double gapSize = 0.2;
+      int numberOfGaps = 6;
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addCubeReferencedAtBottomMiddle(boxSize, boxSize, boxHeight);
+
+      for (int i=0; i<numberOfGaps; i++)
+      {
+         generator.translate(boxSize + gapSize, 0.0, 0.0);
+         generator.addCubeReferencedAtBottomMiddle(boxSize, boxSize, boxHeight);
+      }
+
+//      generator.identity();
+//      generator.translate(0.0, 0.0, 0.001);
+//      generator.addRectangle(5.0, 5.0); // floor plane
+
+      // define start and goal conditions
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      initialStanceFootPose.setPosition(0.0, 0.0, boxHeight);
+      RobotSide initialStanceSide = RobotSide.LEFT;
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(numberOfGaps * (boxSize + gapSize), 0.0, boxHeight);
+      goalPose.setOrientation(new AxisAngle4d(new Vector3d(0.0, 0.0, 1.0), Math.PI));
+
+      // run the test
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, assertPlannerReturnedResult);
+      if (visualize())
+         PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
+      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+   }
+
    private PlanarRegionsList generateRandomTerrain(Random random)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();

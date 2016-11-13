@@ -440,9 +440,9 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       BipedalFootstepPlannerNode childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, idealStepVector, idealStepYaw);
       nodesToAdd.add(childNode);
 
-      for (double xStep = idealFootstepLength / 2.0; xStep < 1.6 * idealFootstepLength; xStep = xStep + idealFootstepLength / 2.0)
+      for (double xStep = idealFootstepLength / 2.0; xStep < 1.6 * idealFootstepLength; xStep = xStep + idealFootstepLength / 4.0)
       {
-         for (double yStep = idealFootstepWidth; yStep < 1.4 * idealFootstepWidth; yStep = yStep + idealFootstepWidth / 4.0)
+         for (double yStep = idealFootstepWidth; yStep < 1.6 * idealFootstepWidth; yStep = yStep + idealFootstepWidth / 4.0)
          {
             //for (double thetaStep = -0.1; thetaStep < 0.1; thetaStep = thetaStep + 0.1 / 2.0)
             {

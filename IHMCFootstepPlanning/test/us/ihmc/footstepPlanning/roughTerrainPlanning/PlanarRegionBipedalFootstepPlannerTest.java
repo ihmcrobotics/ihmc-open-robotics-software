@@ -46,6 +46,13 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       super.testRandomEnvironment(true);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testSimpleGaps()
+   {
+      super.testSimpleGaps(true);
+   }
+
    @Override
    public FootstepPlanner getPlanner()
    {
