@@ -111,7 +111,7 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
 =======
                
                //JJC 140417 reversed y to fix camera click locations. jme canvas y is reversed 
-               if(reverseY)
+               if(reverseY) 
                click2d.y = jmeCamera.getHeight()-click2d.y;
                Vector3f click3d = jmeCamera.getWorldCoordinates(
                    new Vector2f(click2d.x, click2d.y), 0f).clone();
