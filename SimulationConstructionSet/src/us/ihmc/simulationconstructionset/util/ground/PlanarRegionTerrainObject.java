@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
 import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -30,7 +30,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    public double heightAt(double x, double y, double z)
    {
       double planeZGivenXY = planarRegion.getPlaneZGivenXY(x, y);
-      if(planeZGivenXY >= z)
+      if (planeZGivenXY >= z)
       {
          return planeZGivenXY;
       }
@@ -85,7 +85,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
       RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
       planarRegion.getTransformToWorld(planarRegionTransformToWorld);
 
-      for(int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
+      for (int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2d convexPolygonInWorld = planarRegion.getConvexPolygon(i).applyTransformCopy(planarRegionTransformToWorld);
 
@@ -94,12 +94,12 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
             Point2d vertex = convexPolygonInWorld.getVertex(j);
             double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.x, vertex.y);
 
-            if(planeZGivenXY > zMax)
+            if (planeZGivenXY > zMax)
             {
                zMax = planeZGivenXY;
             }
 
-            if(planeZGivenXY < zMin)
+            if (planeZGivenXY < zMin)
             {
                zMin = planeZGivenXY;
             }
@@ -108,22 +108,22 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
          Point2d maxPoint2d = convexPolygonInWorld.getBoundingBox().getMaxPoint();
          Point2d minPoint2d = convexPolygonInWorld.getBoundingBox().getMinPoint();
 
-         if(minPoint2d.x < xMin)
+         if (minPoint2d.x < xMin)
          {
             xMin = minPoint2d.x;
          }
 
-         if(minPoint2d.y < yMin)
+         if (minPoint2d.y < yMin)
          {
             yMin = minPoint2d.y;
          }
 
-         if(maxPoint2d.x > xMax)
+         if (maxPoint2d.x > xMax)
          {
             xMax = maxPoint2d.x;
          }
 
-         if(maxPoint2d.y > yMax)
+         if (maxPoint2d.y > yMax)
          {
             yMax = maxPoint2d.y;
          }
