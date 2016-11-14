@@ -71,6 +71,39 @@ public class PolygonWigglingTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
+   public void testSimpleProjectionWithWiggleLimits()
+   {
+      ConvexPolygon2d plane = new ConvexPolygon2d();
+      plane.addVertex(0.0, 0.0);
+      plane.addVertex(0.5, 0.0);
+      plane.addVertex(0.0, 0.5);
+      plane.addVertex(0.5, 0.5);
+      plane.update();
+
+      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      RigidBodyTransform initialFootTransform = new RigidBodyTransform();
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
+      initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
+      initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
+
+      WiggleParameters parameters = new WiggleParameters();
+      parameters.minX = 0.02;
+      parameters.maxX = 0.02;
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, parameters);
+
+      if (visualize)
+      {
+         addPolygonToArtifacts("Plane", plane, Color.BLACK);
+         addPolygonToArtifacts("InitialFoot", initialFoot, Color.RED);
+         addPolygonToArtifacts("Foot", foot, Color.BLUE);
+         showPlotterAndSleep(artifacts);
+      }
+
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
    public void testProjectionThatRequiredRotation()
    {
       ConvexPolygon2d plane = PlanningTestTools.createDefaultFootPolygon();

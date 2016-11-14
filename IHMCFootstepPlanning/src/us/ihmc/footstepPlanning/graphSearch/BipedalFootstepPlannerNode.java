@@ -28,6 +28,11 @@ public class BipedalFootstepPlannerNode
       this.soleTransform.set(soleTransform);
    }
 
+   public BipedalFootstepPlannerNode(BipedalFootstepPlannerNode nodeToCopy)
+   {
+      this(nodeToCopy.footstepSide, nodeToCopy.soleTransform);
+   }
+
    public RigidBodyTransform getTransformToParent()
    {
       if (parentNode == null)
