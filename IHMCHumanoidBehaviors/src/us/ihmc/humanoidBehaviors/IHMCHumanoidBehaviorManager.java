@@ -194,7 +194,7 @@ public class IHMCHumanoidBehaviorManager
             new FollowQRCodes(yoTime, behaviorCommunicationBridge));
 
       double fiducialWidth = 0.12;
-      dispatcher.addBehavior(HumanoidBehaviorType.FIND_FIDUCIAL, new LocateFiducialBehavior(behaviorCommunicationBridge, fiducialWidth));
+      dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateFiducialBehavior(behaviorCommunicationBridge, fiducialWidth));
       
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, new WalkToLocationBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters()));
