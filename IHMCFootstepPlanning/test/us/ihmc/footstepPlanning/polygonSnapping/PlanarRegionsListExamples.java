@@ -119,7 +119,7 @@ public class PlanarRegionsListExamples
          generator.translate(cinderBlockSize, -cinderBlockSize * 6, 0.0);
       }
       
-      generator.setTransform(new RigidBodyTransform());
+      generator.identity();
       generator.translate(9.0, 0.0, 0.001);
       generator.addRectangle(0.6, courseWidth);
       
