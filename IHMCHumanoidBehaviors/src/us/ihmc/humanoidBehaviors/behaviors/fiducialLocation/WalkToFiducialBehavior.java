@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors.qrCode;
+package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -12,17 +12,16 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class WalkTowardGoalBehavior extends AbstractBehavior
+public class WalkToFiducialBehavior extends AbstractBehavior
 {
    private final BooleanYoVariable sentPlanningRequest = new BooleanYoVariable("SentPlanningRequest", registry);
    private final BooleanYoVariable recievedPlan = new BooleanYoVariable("RecievedPlan", registry);
    private final BooleanYoVariable planValid = new BooleanYoVariable("PlanValid", registry);
 
    private final FramePose goalPose = new FramePose();
-   private final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footstepPlanQueue =
-         new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>();
+   private final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footstepPlanQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>();
 
-   public WalkTowardGoalBehavior(CommunicationBridgeInterface communicationBridge)
+   public WalkToFiducialBehavior(CommunicationBridgeInterface communicationBridge)
    {
       super(communicationBridge);
       attachNetworkListeningQueue(footstepPlanQueue, FootstepPlanningToolboxOutputStatus.class);
@@ -74,5 +73,4 @@ public class WalkTowardGoalBehavior extends AbstractBehavior
    {
       goalPose.setIncludingFrame(goalPose);
    }
-
 }
