@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.swing.JCheckBox;
@@ -23,13 +24,15 @@ import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.YoGraph;
+import us.ihmc.tools.io.files.FileTools;
 
-public class MatlabExportGraphsToFileGenerator implements ExportGraphsToFileConstructor
+public class ExportGraphsToFileGenerator implements ExportGraphsToFileConstructor
 {
-   private final static String fileEnding = ".mat";
+   private final static String matEnding = ".mat";
+   private final static String csvEnding = ".csv";
 
-   private javax.swing.filechooser.FileFilter dataFileFilter = new MyFileFilter(new String[] {fileEnding}, "Matlab/octave file (.mat)");
-   private File chosenFile;
+   private javax.swing.filechooser.FileFilter matFileFilter = new MyFileFilter(new String[] {matEnding}, "Matlab/octave file (.mat)");
+   private javax.swing.filechooser.FileFilter csvFileFilter = new MyFileFilter(new String[] {csvEnding}, "CSV file (.csv)");
    private JFileChooser dataFileChooser;
    private JFrame frame;
    private GUIEnablerAndDisabler guiEnablerAndDisabler;
@@ -41,7 +44,7 @@ public class MatlabExportGraphsToFileGenerator implements ExportGraphsToFileCons
    
    private DataBuffer dataBuffer;
 
-   public MatlabExportGraphsToFileGenerator(SimulationConstructionSet scs, JFrame frame, GraphArrayPanel graphArrayPanel, StandardSimulationGUI myGUI)
+   public ExportGraphsToFileGenerator(SimulationConstructionSet scs, JFrame frame, GraphArrayPanel graphArrayPanel, StandardSimulationGUI myGUI)
    {
       this.frame = frame;
       this.guiEnablerAndDisabler = scs;
@@ -53,7 +56,8 @@ public class MatlabExportGraphsToFileGenerator implements ExportGraphsToFileCons
       
       this.dataFileChooser = new JFileChooser();
       this.dataFileChooser.setAcceptAllFileFilterUsed(false);
-      this.dataFileChooser.addChoosableFileFilter(dataFileFilter);
+      this.dataFileChooser.addChoosableFileFilter(matFileFilter);
+      this.dataFileChooser.addChoosableFileFilter(csvFileFilter);
       this.accessory = new JPanel();
       this.saveAllGraphs = new JCheckBox("Save graphs in all graph windows");
       this.accessory.setLayout(new BorderLayout());
@@ -70,18 +74,8 @@ public class MatlabExportGraphsToFileGenerator implements ExportGraphsToFileCons
       this.saveAllGraphs.setSelected(false);
       if (dataFileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
       {
-         chosenFile = dataFileChooser.getSelectedFile();
-
-         String filename = chosenFile.getName();
-
-         if (!filename.endsWith(fileEnding))
-         {
-            chosenFile = new File(chosenFile.getParent(), filename.concat(fileEnding));
-         }
-         
          
          ArrayList<DataEntry> entriesToExport = new ArrayList<>();
-         
          
          if(saveAllGraphs.isSelected())
          {
@@ -105,32 +99,89 @@ public class MatlabExportGraphsToFileGenerator implements ExportGraphsToFileCons
                entriesToExport.addAll(graph.getEntriesOnThisGraph());
             }
          }
-         
-         
-         ArrayList<MLArray>  matlabData = new ArrayList<>();
 
-         for(DataEntry entry : entriesToExport)
+         
+         
+         if(dataFileChooser.getFileFilter() == matFileFilter)
          {
-            matlabData.add(convertToMatlabArray(entry, dataBuffer.getInPoint(), dataBuffer.getOutPoint()));
+            exportToMAT(dataFileChooser.getSelectedFile(), entriesToExport);
          }
-        
-         try
+         else if (dataFileChooser.getFileFilter() == csvFileFilter)
          {
-            new MatFileWriter(chosenFile, matlabData);
+            exportToCSV(dataFileChooser.getSelectedFile(), entriesToExport);
          }
-         catch (IOException e)
+         else
          {
-            e.printStackTrace();
+            throw new RuntimeException("Unknown data type selected " + dataFileChooser.getFileFilter());
          }
          
       }
       guiEnablerAndDisabler.enableGUIComponents();
    }
 
+   private void exportToCSV(File chosenFile, ArrayList<DataEntry> entriesToExport)
+   {
+      String filename = chosenFile.getName();
+
+      if (!filename.endsWith(csvEnding))
+      {
+         chosenFile = new File(chosenFile.getParent(), filename.concat(csvEnding));
+      }
+      
+      
+      PrintWriter writer = FileTools.newPrintWriter(chosenFile.toPath());
+      
+      for (DataEntry dataEntry : entriesToExport)
+      {
+         writer.print(dataEntry.getVariableName() + ",");
+      }
+      
+      writer.println();
+      
+      for (int i = dataBuffer.getInPoint(); i < dataBuffer.getOutPoint(); i++)
+      {
+         for (DataEntry dataEntry : entriesToExport)
+         {
+            writer.print(dataEntry.getData()[i] + ",");
+         }
+         
+         writer.println();
+      }
+      
+      writer.close();
+   }
+   
+   private void exportToMAT(File chosenFile, ArrayList<DataEntry> entriesToExport)
+   {
+      String filename = chosenFile.getName();
+
+      if (!filename.endsWith(matEnding))
+      {
+         chosenFile = new File(chosenFile.getParent(), filename.concat(matEnding));
+      }
+      
+      
+      ArrayList<MLArray>  matlabData = new ArrayList<>();
+
+      for(DataEntry entry : entriesToExport)
+      {
+         matlabData.add(convertToMatlabArray(entry, dataBuffer.getInPoint(), dataBuffer.getOutPoint()));
+      }
+      
+      try
+      {
+         new MatFileWriter(chosenFile, matlabData);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
    public void closeAndDispose()
    {
-      dataFileFilter = null;
-      chosenFile = null;
+      matFileFilter = null;
+      csvFileFilter = null;
       dataFileChooser = null;
       frame = null;
       myGUI = null;

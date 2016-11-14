@@ -159,13 +159,13 @@ public class YoVariableExporter extends YoVariableLogReader
       String name =  variable.getName();
       if (variable instanceof EnumYoVariable<?>)
       {
-         return new DataHolder<Integer>(offset, new MLInt32(name, dims))
+         return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {
 
             @Override
             public void set(long entryAsLong)
             {
-               set((Integer) ((int) entryAsLong));
+               set((Long) (entryAsLong));
             }
 
          };
