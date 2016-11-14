@@ -327,7 +327,7 @@ public abstract class DRCPushRecoveryTest
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       RobotSide footSide = RobotSide.LEFT;
       FramePose footPose = new FramePose(
-            drcSimulationTestHelper.getDRCSimulationFactory().getControllerFullRobotModel().getEndEffectorFrame(footSide, LimbName.LEG));
+            drcSimulationTestHelper.getAvatarSimulation().getControllerFullRobotModel().getEndEffectorFrame(footSide, LimbName.LEG));
       footPose.changeFrame(ReferenceFrame.getWorldFrame());
       footPose.translate(0.0, 0.0, 0.2);
       Point3d desiredFootPosition = new Point3d();

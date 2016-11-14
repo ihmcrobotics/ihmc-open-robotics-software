@@ -6,8 +6,9 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.SwingWorker;
 
-import us.ihmc.avatar.DRCSimulationFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.AvatarSimulation;
+import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
@@ -71,12 +72,19 @@ public class HumanoidDiagnosticsWhenHangingSimulation
 
       HumanoidGlobalDataProducer globalDataProducer = null;
 
-      DRCSimulationFactory drcSimulation = new DRCSimulationFactory(model, momentumBasedControllerFactory, environment, robotInitialSetup, scsInitialSetup,
-            guiInitialSetup, globalDataProducer);
+      AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
+      avatarSimulationFactory.setRobotModel(model);
+      avatarSimulationFactory.setMomentumBasedControllerFactory(momentumBasedControllerFactory);
+      avatarSimulationFactory.setCommonAvatarEnvironment(environment);
+      avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
+      avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
+      avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
+      avatarSimulationFactory.setHumanoidGlobalDataProducer(globalDataProducer);
+      AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
-      simulationConstructionSet = drcSimulation.getSimulationConstructionSet();
+      simulationConstructionSet = avatarSimulation.getSimulationConstructionSet();
 
-      drcSimulation.start();
+      avatarSimulation.start();
 //      drcSimulation.simulate();
        
 //      if (DRCSimulationFactory.RUN_MULTI_THREADED)
@@ -84,7 +92,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
 //         throw new RuntimeException("This only works with single threaded right now. Change DRCSimulationFactory.RUN_MULTI_THREADED to false!");
 //      }
       
-      FullRobotModelCorruptor fullRobotModelCorruptor = drcSimulation.getFullRobotModelCorruptor();
+      FullRobotModelCorruptor fullRobotModelCorruptor = avatarSimulation.getFullRobotModelCorruptor();
       if(fullRobotModelCorruptor == null)
     	  throw new RuntimeException("This only works with model corruption on. Change DRCControllerThread.ALLOW_MODEL_CORRUPTION to true!");
       

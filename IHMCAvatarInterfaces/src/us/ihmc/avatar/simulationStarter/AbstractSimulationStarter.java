@@ -2,8 +2,8 @@ package us.ihmc.avatar.simulationStarter;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.avatar.DRCSimulationFactory;
 import us.ihmc.avatar.DRCStartingLocation;
+import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -133,7 +133,7 @@ public interface AbstractSimulationStarter
 
    public abstract LocalObjectCommunicator createSimulatedSensorsPacketCommunicator();
 
-   public abstract DRCSimulationFactory getDRCSimulationFactory();
+   public abstract AvatarSimulation getAvatarSimulation();
 
    public abstract SimulationConstructionSet getSimulationConstructionSet();
 

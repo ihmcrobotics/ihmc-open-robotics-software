@@ -6,15 +6,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.avatar.DRCSimulationFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -29,8 +29,8 @@ import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEn
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiRobotTestInterface
@@ -69,7 +69,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    private final SideDependentList<StateTransitionCondition> swingFinishConditions = new SideDependentList<>();
 
    private PushRobotController pushRobotController;
-   private DRCSimulationFactory drcSimulation;
+   private AvatarSimulation avatarSimulation;
    private RobotVisualizer robotVisualizer;
    private SimulationConstructionSet scs;
    
@@ -79,10 +79,10 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
    @After
    public void tearDown()
    {
-      if (drcSimulation != null)
+      if (avatarSimulation != null)
       {
-         drcSimulation.dispose();
-         drcSimulation = null;
+         avatarSimulation.dispose();
+         avatarSimulation = null;
       }
 
       if (robotVisualizer != null)

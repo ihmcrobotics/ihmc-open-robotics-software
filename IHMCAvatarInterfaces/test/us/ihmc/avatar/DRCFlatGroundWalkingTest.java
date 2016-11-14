@@ -8,17 +8,15 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Before;
 
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
-import us.ihmc.avatar.DRCSimulationFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -167,10 +165,10 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    @After
    public void destroyOtherStuff()
    {
-      if (drcSimulation != null)
+      if (avatarSimulation != null)
       {
-         drcSimulation.dispose();
-         drcSimulation = null;
+         avatarSimulation.dispose();
+         avatarSimulation = null;
       }
 
       if (robotVisualizer != null)
@@ -180,7 +178,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       }
    }
 
-   private DRCSimulationFactory drcSimulation;
+   private AvatarSimulation avatarSimulation;
    private RobotVisualizer robotVisualizer;
 
    protected void setupAndTestFlatGroundSimulationTrackTwice(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, ControllerFailureException

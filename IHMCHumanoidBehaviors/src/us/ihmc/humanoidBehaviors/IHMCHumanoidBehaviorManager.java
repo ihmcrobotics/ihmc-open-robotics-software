@@ -13,9 +13,9 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorSta
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
+import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.qrCode.FollowQRCodes;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.LocateFiducialBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -191,10 +191,10 @@ public class IHMCHumanoidBehaviorManager
             new ExampleComplexBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_QR_CODES,
-            new FollowQRCodes(yoTime, behaviorCommunicationBridge));
+            new FollowFiducialBehavior(yoTime, behaviorCommunicationBridge));
 
       double fiducialWidth = 0.12;
-      dispatcher.addBehavior(HumanoidBehaviorType.FIND_FIDUCIAL, new LocateFiducialBehavior(behaviorCommunicationBridge, fiducialWidth));
+      dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateFiducialBehavior(behaviorCommunicationBridge, fiducialWidth));
       
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, new WalkToLocationBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters()));

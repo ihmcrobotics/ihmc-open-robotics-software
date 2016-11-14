@@ -35,11 +35,16 @@ public class BambooTools
 
    public static boolean isRunningOnBamboo()
    {
-      String buildType = System.getProperty("build.type");
-      if (buildType != null)
+      String isBamboo = System.getenv("IS_BAMBOO");
+      
+      if (isBamboo == null || !isBamboo.equals("true"))
+      {
+         return false;
+      }
+      else
+      {
          return true;
-
-      return false;
+      }
    }
 
    public static boolean isNightlyBuild()

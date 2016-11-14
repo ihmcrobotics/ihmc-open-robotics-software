@@ -47,7 +47,7 @@ public class ValkyriePushRecoveryTrack
       DRCFlatGroundWalkingTrack track = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
             cheatWithGroundHeightAtForFootstep, model);
 
-      FloatingRootJointRobot robot = track.getDrcSimulation().getRobot();
+      FloatingRootJointRobot robot = track.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
       FullHumanoidRobotModel fullRobotModel = model.createFullRobotModel();
       PushRobotController pushRobotController = new PushRobotController(robot, fullRobotModel);
 

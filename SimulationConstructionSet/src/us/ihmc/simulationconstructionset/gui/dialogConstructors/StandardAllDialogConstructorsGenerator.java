@@ -22,8 +22,6 @@ import us.ihmc.simulationconstructionset.videos.ExportVideo;
 
 public class StandardAllDialogConstructorsGenerator implements AllDialogConstructorsHolder
 {
-   private static final boolean USE_CSV_INSTEAD_OF_MATLAB = false;
-   
    private ExportDataDialogConstructor exportDataDialogConstructor;
    private ImportDataDialogConstructor importDataDialogConstructor;
    
@@ -79,15 +77,7 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
       this.saveGraphConfigurationDialogConstructor = new SaveGraphConfigurationDialogGenerator(sim, frame, myGraphArrayPanel);
       this.loadGraphGroupDialogConstructor = new LoadGraphGroupDialogGenerator(sim, myGUI, myGUI, frame, myGraphArrayPanel);
       
-      ExportGraphsToFileConstructor exportGraphsToFileConstructor;
-      if (USE_CSV_INSTEAD_OF_MATLAB)
-      {
-         exportGraphsToFileConstructor = new CsvExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, myGUI);
-      }
-      else
-      {
-         exportGraphsToFileConstructor = new MatlabExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, myGUI);
-      }
+      ExportGraphsToFileConstructor exportGraphsToFileConstructor = new ExportGraphsToFileGenerator(sim, frame, myGraphArrayPanel, myGUI);
       this.exportGraphsToFileConstructor = exportGraphsToFileConstructor;
 
       this.saveRobotConfigurationDialogConstructor = new SaveRobotConfigurationDialogGenerator(sim, frame);

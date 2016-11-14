@@ -12,11 +12,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
-import us.ihmc.avatar.DRCSimulationFactory;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
@@ -35,6 +34,7 @@ import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
@@ -62,7 +62,7 @@ public class DRCSimulationTestHelper
 {
    private final SimulationConstructionSet scs;
    private final HumanoidFloatingRootJointRobot sdfRobot;
-   private final DRCSimulationFactory drcSimulationFactory;
+   private final AvatarSimulation avatarSimulation;
    protected final PacketCommunicator controllerCommunicator;
    private final CommonAvatarEnvironmentInterface testEnvironment;
 
@@ -164,7 +164,7 @@ public class DRCSimulationTestHelper
 
       scs = simulationStarter.getSimulationConstructionSet();
       sdfRobot = simulationStarter.getSDFRobot();
-      drcSimulationFactory = simulationStarter.getDRCSimulationFactory();
+      avatarSimulation = simulationStarter.getAvatarSimulation();
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
       simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
 
@@ -217,20 +217,20 @@ public class DRCSimulationTestHelper
       return scs;
    }
 
-   public DRCSimulationFactory getDRCSimulationFactory()
+   public AvatarSimulation getAvatarSimulation()
    {
-      return drcSimulationFactory;
+      return avatarSimulation;
    }
 
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
-      MomentumBasedControllerFactory controllerFactory = drcSimulationFactory.getControllerFactory();
+      MomentumBasedControllerFactory controllerFactory = avatarSimulation.getMomentumBasedControllerFactory();
       controllerFactory.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
    public FullHumanoidRobotModel getControllerFullRobotModel()
    {
-      return drcSimulationFactory.getControllerFullRobotModel();
+      return avatarSimulation.getControllerFullRobotModel();
    }
 
    public FullHumanoidRobotModel getSDFFullRobotModel()
@@ -245,7 +245,7 @@ public class DRCSimulationTestHelper
     */
    public void addRobotControllerOnControllerThread(RobotController controller)
    {
-      drcSimulationFactory.addRobotControllerOnControllerThread(controller);
+      avatarSimulation.addRobotControllerOnControllerThread(controller);
    }
 
    public CommonAvatarEnvironmentInterface getTestEnviroment()
@@ -293,9 +293,9 @@ public class DRCSimulationTestHelper
    {
       blockingSimulationRunner.destroySimulation();
       blockingSimulationRunner = null;
-      if (drcSimulationFactory != null)
+      if (avatarSimulation != null)
       {
-         drcSimulationFactory.dispose();
+         avatarSimulation.dispose();
       }
       GlobalTimer.clearTimers();
 
