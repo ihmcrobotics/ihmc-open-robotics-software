@@ -175,7 +175,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       double ankleDamping = 1.0;
-      HumanoidFloatingRootJointRobot simulatedRobot = drcSimulationTestHelper.getDRCSimulationFactory().getRobot();
+      HumanoidFloatingRootJointRobot simulatedRobot = drcSimulationTestHelper.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
       for (RobotSide robotSide : RobotSide.values)
       {
          String firstAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getName();
@@ -242,7 +242,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       double ankleDamping = 1.0;
-      HumanoidFloatingRootJointRobot simulatedRobot = drcSimulationTestHelper.getDRCSimulationFactory().getRobot();
+      HumanoidFloatingRootJointRobot simulatedRobot = drcSimulationTestHelper.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
       for (RobotSide robotSide : RobotSide.values)
       {
          String firstAnkleName = fullRobotModel.getFoot(robotSide).getParentJoint().getName();
@@ -777,7 +777,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       RobotSide robotSide = RobotSide.LEFT;
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
-      HighLevelHumanoidControllerToolbox momentumBasedController = drcSimulationTestHelper.getDRCSimulationFactory().getControllerFactory().getMomentumBasedController();
+      HighLevelHumanoidControllerToolbox momentumBasedController = drcSimulationTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory()
+                                                                                          .getMomentumBasedController();
 
       int numberOfChanges = 4;
 
@@ -838,7 +839,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
          double testTransferTime, double chickenPercentage)
    {
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      HumanoidFloatingRootJointRobot simulatedRobot = drcSimulationTestHelper.getDRCSimulationFactory().getRobot();
+      HumanoidFloatingRootJointRobot simulatedRobot = drcSimulationTestHelper.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
 
       for (RobotSide robotSide : RobotSide.values)
       {

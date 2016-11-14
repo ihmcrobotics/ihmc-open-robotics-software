@@ -51,8 +51,8 @@ public class BonoFlatGroundWalkingTrack
       if (USE_JOYSTICK_CONTROLLER)
       {
          setupJoyStick(scs);
-         flatGroundWalkingTrack.getDrcSimulation().start();
-         flatGroundWalkingTrack.getDrcSimulation().simulate();
+         flatGroundWalkingTrack.getAvatarSimulation().start();
+         flatGroundWalkingTrack.getAvatarSimulation().simulate();
       }
    }
 

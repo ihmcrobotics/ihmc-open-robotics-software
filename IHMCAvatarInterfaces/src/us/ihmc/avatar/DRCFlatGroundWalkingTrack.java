@@ -1,6 +1,8 @@
 package us.ihmc.avatar;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.AvatarSimulation;
+import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
@@ -25,7 +27,8 @@ public class DRCFlatGroundWalkingTrack
 {
    // looking for CREATE_YOVARIABLE_WALKING_PROVIDERS ?  use the second constructor and pass in WalkingProvider = YOVARIABLE_PROVIDER
 
-   private final DRCSimulationFactory drcSimulation;
+   private final AvatarSimulation avatarSimulation;
+   
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
@@ -70,31 +73,39 @@ public class DRCFlatGroundWalkingTrack
       
       controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, heightMapForFootstepZ);
 
-      drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
+      AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
+      avatarSimulationFactory.setRobotModel(model);
+      avatarSimulationFactory.setMomentumBasedControllerFactory(controllerFactory);
+      avatarSimulationFactory.setCommonAvatarEnvironment(null);
+      avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
+      avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
+      avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
+      avatarSimulationFactory.setHumanoidGlobalDataProducer(null);
+      avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
-      drcSimulation.start();
+      avatarSimulation.start();
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)
    {
-      drcSimulation.getControllerFactory().attachControllerFailureListener(listener);
+      avatarSimulation.getMomentumBasedControllerFactory().attachControllerFailureListener(listener);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
    {
-      return drcSimulation.getSimulationConstructionSet();
+      return avatarSimulation.getSimulationConstructionSet();
    }
 
-   public DRCSimulationFactory getDrcSimulation()
+   public AvatarSimulation getAvatarSimulation()
    {
-      return drcSimulation;
+      return avatarSimulation;
    }
 
    public void destroySimulation()
    {
-      if (drcSimulation != null)
+      if (avatarSimulation != null)
       {
-         drcSimulation.dispose();
+         avatarSimulation.dispose();
       }
       GlobalTimer.clearTimers();
    }

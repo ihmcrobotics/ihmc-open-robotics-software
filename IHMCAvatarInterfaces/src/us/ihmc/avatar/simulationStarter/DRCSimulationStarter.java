@@ -10,9 +10,10 @@ import javax.vecmath.Vector3d;
 import com.github.quickhull3d.Point3d;
 
 import us.ihmc.avatar.DRCLidar;
-import us.ihmc.avatar.DRCSimulationFactory;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.AvatarSimulation;
+import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
@@ -71,7 +72,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
 
    private HumanoidFloatingRootJointRobot sdfRobot;
    private MomentumBasedControllerFactory controllerFactory;
-   private DRCSimulationFactory drcSimulationFactory;
+   private AvatarSimulation avatarSimulation;
    private SimulationConstructionSet simulationConstructionSet;
 
    private ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator;
@@ -224,8 +225,8 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    @Override
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
    {
-      if (drcSimulationFactory != null)
-         drcSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
+      if (avatarSimulation != null)
+         avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
       else
          this.externalPelvisCorrectorSubscriber = externalPelvisCorrectorSubscriber;
    }
@@ -364,7 +365,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       createSimulationFactory();
 
       if (automaticallyStartSimulation)
-         drcSimulationFactory.simulate();
+         avatarSimulation.simulate();
 
       if ((networkParameters != null) && networkParameters.isNetworkProcessorEnabled()) //&& (networkParameters.useController()))
       {
@@ -414,13 +415,21 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       else if (addFootstepMessageGenerator)
          controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript);
 
-      drcSimulationFactory = new DRCSimulationFactory(robotModel, controllerFactory, environment, robotInitialSetup, scsInitialSetup, guiInitialSetup, dataProducer);
+      AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
+      avatarSimulationFactory.setRobotModel(robotModel);
+      avatarSimulationFactory.setMomentumBasedControllerFactory(controllerFactory);
+      avatarSimulationFactory.setCommonAvatarEnvironment(environment);
+      avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
+      avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
+      avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
+      avatarSimulationFactory.setHumanoidGlobalDataProducer(dataProducer);
+      avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       if (externalPelvisCorrectorSubscriber != null)
-         drcSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
+         avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
 
-      simulationConstructionSet = drcSimulationFactory.getSimulationConstructionSet();
-      sdfRobot = drcSimulationFactory.getRobot();
+      simulationConstructionSet = avatarSimulation.getSimulationConstructionSet();
+      sdfRobot = avatarSimulation.getHumanoidFloatingRootJointRobot();
 
       simulationConstructionSet.setCameraPosition(scsCameraPosition.x, scsCameraPosition.y, scsCameraPosition.z);
       simulationConstructionSet.setCameraFix(scsCameraFix.x, scsCameraFix.y, scsCameraFix.z);
@@ -428,7 +437,7 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       PlaybackListener playbackListener = new SCSPlaybackListener(dataProducer);
       simulationConstructionSet.attachPlaybackListener(playbackListener);
 
-      drcSimulationFactory.start();
+      avatarSimulation.start();
    }
 
    public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()
@@ -445,8 +454,8 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       {
          DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
          DRCRobotJointMap jointMap = robotModel.getJointMap();
-         TimestampProvider timeStampProvider = drcSimulationFactory.getTimeStampProvider();
-         HumanoidFloatingRootJointRobot robot = drcSimulationFactory.getRobot();
+         TimestampProvider timeStampProvider = avatarSimulation.getSimulatedRobotTimeProvider();
+         HumanoidFloatingRootJointRobot robot = avatarSimulation.getHumanoidFloatingRootJointRobot();
          Graphics3DAdapter graphics3dAdapter = simulationConstructionSet.getGraphics3dAdapter();
 
          printIfDebug("Streaming SCS Video");
@@ -497,9 +506,9 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    }
 
    @Override
-   public DRCSimulationFactory getDRCSimulationFactory()
+   public AvatarSimulation getAvatarSimulation()
    {
-      return drcSimulationFactory;
+      return avatarSimulation;
    }
 
    @Override
