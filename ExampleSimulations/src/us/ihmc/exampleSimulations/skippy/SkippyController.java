@@ -1465,10 +1465,10 @@ public class SkippyController implements RobotController
              * Torque on hip for keeping track the angle between torso and leg
              */
             //            desiredLegToTorsoAngle.set(0.5075);
-            hipAngleController.setProportionalGain(0.0);
+//            hipAngleController.setProportionalGain(0.0);
             hipAngleController.setDerivativeGain(0.0);
             hipAngleController.setIntegralGain(0.0);
-////                        hipAngleController.setProportionalGain(179.53125);
+                        hipAngleController.setProportionalGain(300.0);//179.53125);
 //                        hipAngleController.setDerivativeGain(0.00602454); 
 //                        hipAngleController.setIntegralGain(0.116299896953656563); //);//
             tauHipForAngleTracking.set(hipAngleController.compute(robot.getQ_hip().getDoubleValue(), desiredLegToTorsoAngle.getDoubleValue(),
