@@ -194,6 +194,11 @@ public class MultiColorMeshBuilder
       return new MeshDataHolder(vertices, outputTexturePoints, triangleIndices, vertexNormals);
    }
 
+   public MeshDataHolder generateMeshDataHolder()
+   {
+      return meshBuilder.generateMeshDataHolder();
+   }
+
    public Mesh generateMesh()
    {
       return meshBuilder.generateMesh();

@@ -37,8 +37,8 @@ import us.ihmc.simulationconstructionset.util.environments.PointyRocksWorld;
 import us.ihmc.simulationconstructionset.util.environments.PointyRocksWorld.PointyRocksType;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class HumanoidPointyRocksEnvironmentContactsTest implements MultiRobotTestInterface
@@ -253,7 +253,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
             return location;
          }
       };
-      DRCRobotModel robotModel = getRobotModel(20, 10, onlyEdgeContacts);
+      DRCRobotModel robotModel = getRobotModel(30, 15, onlyEdgeContacts);
       drcSimulationTestHelper = new DRCSimulationTestHelper(environment, className, startingLocation, simulationTestingParameters, robotModel);
       drcSimulationTestHelper.getSimulationConstructionSet().hideAllDynamicGraphicObjects();
 

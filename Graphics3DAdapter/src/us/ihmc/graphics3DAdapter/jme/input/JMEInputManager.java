@@ -48,7 +48,7 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
    private final Node rootNode;
    private final JMECamera jmeCamera;
    private final InputManager inputManager;
-   
+
    private final Object controllerConch = new Object();
 
    private final ModifierKeyHolder modifierKeyHolder = new ModifierKeyHolder();
@@ -69,7 +69,7 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
       this.mouse3DListenerHolder = jmeRenderer.getMouse3DListenerHolder();
       this.mouse3DJoystick = jmeRenderer.getMouse3DJoystick();
    }
-   
+
    @Override
    public void onAction(String name, boolean isPressed, float tpf)
    {
@@ -77,72 +77,68 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
       {
          try
          {
-            if(name.equals("LeftMouseClick"))
+            if (name.equals("LeftMouseClick"))
             {
                leftMouseClicked = isPressed;
             }
-            else if(name.equals("MiddleMouseClick"))
+            else if (name.equals("MiddleMouseClick"))
             {
                middleMouseClicked = isPressed;
             }
-            else if(name.equals("RightMouseClick"))
+            else if (name.equals("RightMouseClick"))
             {
                rightMouseClicked = isPressed;
             }
-            
+
             if (name.equals("LeftMouseClick") && !isPressed)
             {
                CollisionResults results = new CollisionResults();
-               
+
                Vector2f click2d = inputManager.getCursorPosition();
-               
-               //JJC 140417 reversed y to fix camera click locations. jme canvas y is reversed 
-               click2d.y = jmeCamera.getHeight()-click2d.y;
-               Vector3f click3d = jmeCamera.getWorldCoordinates(
-                   new Vector2f(click2d.x, click2d.y), 0f).clone();
-               Vector3f direction = jmeCamera.getWorldCoordinates(
-                   new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
+
+               //JJC 140417 reversed y to fix camera click locations. jme canvas y is reversed
+               //JEP 161113. Undid this since it didn't seem to be working for SCS. Now it does. See LinkExampleSimulation for example.
+               //               click2d.y = jmeCamera.getHeight()-click2d.y;
+               Vector3f click3d = jmeCamera.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
+               Vector3f direction = jmeCamera.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
                Ray ray = new Ray(click3d, direction);
-               
+
                rootNode.collideWith(ray, results);
-               
-               
-               if(results.size() > 0)
+
+               if (results.size() > 0)
                {
                   CollisionResult closest = results.getClosestCollision();
-                  if(closest.getGeometry().getQueueBucket() == Bucket.Sky)
+                  if (closest.getGeometry().getQueueBucket() == Bucket.Sky)
                   {
                      return;
                   }
                   Node parentNode = closest.getGeometry().getParent();
-                  
-                  
-                  while(!jmeGraphicsNodes.containsKey(parentNode))
+
+                  while (!jmeGraphicsNodes.containsKey(parentNode))
                   {
                      parentNode = parentNode.getParent();
-                     if(parentNode == null)
+                     if (parentNode == null)
                      {
                         break;
                      }
                   }
-                  
+
                   Vector3f location3f = new Vector3f(closest.getContactPoint());
                   JMEGeometryUtils.transformFromJMECoordinatesToZup(location3f);
-                  
+
                   Point3d location = JMEDataTypeUtils.jmeVector3fToJ3DPoint3d(location3f);
                   Point3d cameraLocation = jmeCamera.getCameraPosition();
                   Quat4d cameraRotation = jmeCamera.getCameraRotation();
-                  
-                  
+
                   Graphics3DNode graphics3dNode = null;
-                  if(parentNode != null)
+                  if (parentNode != null)
                   {
                      graphics3dNode = jmeGraphicsNodes.get(parentNode);
-                     graphics3dNode.notifySelectedListeners(modifierKeyHolder, location, cameraLocation, cameraRotation);        
+                     graphics3dNode.notifySelectedListeners(modifierKeyHolder, location, cameraLocation, cameraRotation);
                   }
                   selectedListenerHolder.selected(graphics3dNode, modifierKeyHolder, location, cameraLocation, cameraRotation);
                }
-               
+
             }
             else if (!name.equals("SelectedObject"))
             {
@@ -158,13 +154,13 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
                modifierKeyHolder.setKeyState(key, isPressed);
             }
          }
-         catch(Exception e)
+         catch (Exception e)
          {
             System.err.println("TODO: Fix exception in JMESelectedListener properly");
          }
       }
    }
-   
+
    @Override
    public void mouseDragged(double dx, double dy, double dz, double drx, double dry, double drz)
    {
@@ -181,7 +177,7 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
       {
          if (!leftMouseClicked && !middleMouseClicked && !rightMouseClicked)
             return;
-   
+
          float dx = 0, dy = 0;
          if (name.equals("MouseLeft"))
          {
@@ -199,48 +195,48 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
          {
             dy = -value * mouseFactor;
          }
-         if(leftMouseClicked && rightMouseClicked)
+         if (leftMouseClicked && rightMouseClicked)
          {
             mouseListenerHolder.mouseDragged(MouseButton.LEFTRIGHT, dx, dy);
          }
-         else if(leftMouseClicked)
+         else if (leftMouseClicked)
          {
             mouseListenerHolder.mouseDragged(MouseButton.LEFT, dx, dy);
          }
-         else if(middleMouseClicked)
+         else if (middleMouseClicked)
          {
             mouseListenerHolder.mouseDragged(MouseButton.MIDDLE, dx, dy);
          }
-         else if(rightMouseClicked)
+         else if (rightMouseClicked)
          {
             mouseListenerHolder.mouseDragged(MouseButton.RIGHT, dx, dy);
          }
       }
-  }
+   }
 
    public void registerWithInputManager()
    {
-       for(Key modifierKey : Key.values())
-       {
-          if(modifierKey == Key.UNDEFINED)
-             continue;
-          inputManager.addMapping(modifierKey.toString(), new KeyTrigger(JMEModifierKey.fromModifierKey(modifierKey)));
-          inputManager.addListener(this, modifierKey.toString());
-       }
-       
-       inputManager.addMapping("LeftMouseClick", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-       inputManager.addMapping("MiddleMouseClick", new MouseButtonTrigger(MouseInput.BUTTON_MIDDLE));
-       inputManager.addMapping("RightMouseClick", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
-       
-       inputManager.addMapping("MouseRight", new MouseAxisTrigger(MouseInput.AXIS_X, false));
-       inputManager.addMapping("MouseLeft", new MouseAxisTrigger(MouseInput.AXIS_X, true));
-       inputManager.addMapping("MouseUp", new MouseAxisTrigger(MouseInput.AXIS_Y, true));
-       inputManager.addMapping("MouseDown", new MouseAxisTrigger(MouseInput.AXIS_Y, false));
-       
-       inputManager.addListener(this, new String[]{"MouseLeft", "MouseRight", "MouseUp", "MouseDown"});
-       inputManager.addListener(this, new String[] { "LeftMouseClick", "MiddleMouseClick", "RightMouseClick" });
-       
-       mouse3DJoystick.addMouse3DListener(this);
+      for (Key modifierKey : Key.values())
+      {
+         if (modifierKey == Key.UNDEFINED)
+            continue;
+         inputManager.addMapping(modifierKey.toString(), new KeyTrigger(JMEModifierKey.fromModifierKey(modifierKey)));
+         inputManager.addListener(this, modifierKey.toString());
+      }
+
+      inputManager.addMapping("LeftMouseClick", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+      inputManager.addMapping("MiddleMouseClick", new MouseButtonTrigger(MouseInput.BUTTON_MIDDLE));
+      inputManager.addMapping("RightMouseClick", new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
+
+      inputManager.addMapping("MouseRight", new MouseAxisTrigger(MouseInput.AXIS_X, false));
+      inputManager.addMapping("MouseLeft", new MouseAxisTrigger(MouseInput.AXIS_X, true));
+      inputManager.addMapping("MouseUp", new MouseAxisTrigger(MouseInput.AXIS_Y, true));
+      inputManager.addMapping("MouseDown", new MouseAxisTrigger(MouseInput.AXIS_Y, false));
+
+      inputManager.addListener(this, new String[] { "MouseLeft", "MouseRight", "MouseUp", "MouseDown" });
+      inputManager.addListener(this, new String[] { "LeftMouseClick", "MiddleMouseClick", "RightMouseClick" });
+
+      mouse3DJoystick.addMouse3DListener(this);
    }
 
    public void reset()
@@ -248,9 +244,9 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
       leftMouseClicked = false;
       middleMouseClicked = false;
       rightMouseClicked = false;
-      for(Key key : Key.values())
+      for (Key key : Key.values())
       {
-         if(modifierKeyHolder.isKeyPressed(key))
+         if (modifierKeyHolder.isKeyPressed(key))
          {
             keyListenerHolder.keyReleased(key);
             modifierKeyHolder.setKeyState(key, false);

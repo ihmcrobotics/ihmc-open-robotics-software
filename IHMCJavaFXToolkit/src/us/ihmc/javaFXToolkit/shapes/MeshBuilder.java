@@ -191,6 +191,11 @@ public class MeshBuilder
       }
    }
 
+   public MeshDataHolder generateMeshDataHolder()
+   {
+      return meshDataHolder.createMeshDataHolder();
+   }
+
    public Mesh generateMesh()
    {
       return JavaFXMeshDataInterpreter.interpretMeshData(meshDataHolder.createMeshDataHolder());

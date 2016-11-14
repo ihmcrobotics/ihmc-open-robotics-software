@@ -18,10 +18,13 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.ThreadTools;
 
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionsListPolygonSnapperTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -43,7 +46,8 @@ public class PlanarRegionsListPolygonSnapperTest
       generator.addCubeReferencedAtBottomMiddle(1.0, 0.5, 0.7);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList);
+      PlanarRegion planarRegion = new PlanarRegion();
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, planarRegion);
 
       if (polygonSnapperVisualizer != null)
       {
@@ -84,7 +88,8 @@ public class PlanarRegionsListPolygonSnapperTest
       generator.addCubeReferencedAtBottomMiddle(1.0, 0.5, 0.7);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList);
+      PlanarRegion planarRegion = new PlanarRegion();
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, planarRegion);
 
       if (polygonSnapperVisualizer != null)
       {
@@ -194,7 +199,8 @@ public class PlanarRegionsListPolygonSnapperTest
          nonSnappedTransform.setTranslation(xyYaw[0], xyYaw[1], 0.0);
          polygonToSnap.applyTransformAndProjectToXYPlane(nonSnappedTransform);
 
-         RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList);
+         PlanarRegion planarRegionIntersection = new PlanarRegion();
+         RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, planarRegionIntersection);
          //         PlanarRegionPolygonSnapperTest.assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(snapTransform, planarRegionTransform);
 
          //         System.out.println(snapTransform);
