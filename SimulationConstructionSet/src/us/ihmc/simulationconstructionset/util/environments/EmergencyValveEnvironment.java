@@ -24,7 +24,8 @@ public class EmergencyValveEnvironment implements CommonAvatarEnvironmentInterfa
 
    public EmergencyValveEnvironment()
    {
-      this(0.5, 0.0, 1.0, 0.0);
+      
+      this(0.75f,-0.38f,1.1811f, 0.0);
    }
 
    public EmergencyValveEnvironment(ArrayList<Point3d> valveLocations, LinkedHashMap<Point3d, Double> valveYawAngles_degrees)

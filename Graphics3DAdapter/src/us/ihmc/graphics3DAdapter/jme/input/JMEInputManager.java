@@ -48,7 +48,12 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
    private final Node rootNode;
    private final JMECamera jmeCamera;
    private final InputManager inputManager;
+<<<<<<< Upstream, based on branch 'develop' of https://jcarff@stash.ihmc.us/scm/rob/ihmc-open-robotics-software.git
 
+=======
+   private boolean reverseY = true;
+   
+>>>>>>> fffcee6 working on valve turning and bug fixes
    private final Object controllerConch = new Object();
 
    private final ModifierKeyHolder modifierKeyHolder = new ModifierKeyHolder();
@@ -57,7 +62,7 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
    private boolean middleMouseClicked = false;
    private boolean rightMouseClicked = false;
 
-   public JMEInputManager(JMERenderer jmeRenderer, Node rootNode, JMECamera jmeCamera)
+   public JMEInputManager(JMERenderer jmeRenderer, Node rootNode, JMECamera jmeCamera, boolean reverseY)
    {
       this.jmeGraphicsNodes = jmeRenderer.getJmeGraphicsNodes().inverse();
       this.jmeCamera = jmeCamera;
@@ -68,6 +73,7 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
       this.mouseListenerHolder = jmeRenderer.getMouseListenerHolder();
       this.mouse3DListenerHolder = jmeRenderer.getMouse3DListenerHolder();
       this.mouse3DJoystick = jmeRenderer.getMouse3DJoystick();
+      this.reverseY = reverseY;
    }
 
    @Override
@@ -95,12 +101,23 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
                CollisionResults results = new CollisionResults();
 
                Vector2f click2d = inputManager.getCursorPosition();
+<<<<<<< Upstream, based on branch 'develop' of https://jcarff@stash.ihmc.us/scm/rob/ihmc-open-robotics-software.git
 
                //JJC 140417 reversed y to fix camera click locations. jme canvas y is reversed
                //JEP 161113. Undid this since it didn't seem to be working for SCS. Now it does. See LinkExampleSimulation for example.
                //               click2d.y = jmeCamera.getHeight()-click2d.y;
                Vector3f click3d = jmeCamera.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
                Vector3f direction = jmeCamera.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
+=======
+               
+               //JJC 140417 reversed y to fix camera click locations. jme canvas y is reversed 
+               if(reverseY)
+               click2d.y = jmeCamera.getHeight()-click2d.y;
+               Vector3f click3d = jmeCamera.getWorldCoordinates(
+                   new Vector2f(click2d.x, click2d.y), 0f).clone();
+               Vector3f direction = jmeCamera.getWorldCoordinates(
+                   new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
+>>>>>>> fffcee6 working on valve turning and bug fixes
                Ray ray = new Ray(click3d, direction);
 
                rootNode.collideWith(ray, results);

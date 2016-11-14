@@ -35,8 +35,6 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       SEARCHING_FOR_VAVLE,
       WALKING_TO_VALVE,
       SEARCHING_FOR_VALVE_FINAL,
-      MOVE_ARM_TO_INITAL_GRAB_LOCATION,
-      GRABBING_VALVE,
       TURNING_VALVE,
       WAITING_FOR_USER_CONFIRMATION,
       RESET_ROBOT,
@@ -49,6 +47,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
 
    private final SearchForValveBehavior searchForValveBehavior;
    private final WalkToInteractableObjectBehavior walkToInteractableObjectBehavior;
+   private final GraspAndTurnValveBehavior graspAndTurnValveBehavior;
    //move arm to top of valve
    //touch valve
    //grabvalve
@@ -70,6 +69,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       searchForValveBehavior = new SearchForValveBehavior(communicationBridge);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
+      graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(yoTime, referenceFrames, communicationBridge, atlasPrimitiveActions);
       setupStateMachine();
    }
 
@@ -98,7 +98,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          @Override
          protected void setBehaviorInput()
          {
-            
+
             GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
             atlasPrimitiveActions.rightArmGoHomeBehavior.setInput(goHomeRightArmMessage);
             HandDesiredConfigurationMessage handMessage = new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
@@ -128,19 +128,32 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          @Override
          protected void setBehaviorInput()
          {
-            FramePoint point1 =offsetPointFromValve(valveWalkOffsetPoint1);
-            FramePoint point2 =offsetPointFromValve(valveWalkOffsetPoint2);
+            FramePoint point1 = offsetPointFromValve(valveWalkOffsetPoint1);
+            FramePoint point2 = offsetPointFromValve(valveWalkOffsetPoint2);
 
             walkToInteractableObjectBehavior.setWalkPoints(point1, point2);
          }
       };
 
+      BehaviorAction<TurnValveBehaviorState> graspAndTurnValve = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.TURNING_VALVE,
+            graspAndTurnValveBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            PoseReferenceFrame valvePose = new PoseReferenceFrame("TurnValveReferenceFrame", ReferenceFrame.getWorldFrame());
+            valvePose.setPoseAndUpdate(new RigidBodyTransform(searchForValveBehavior.getLocation()));
+            graspAndTurnValveBehavior.setGrabLocation(valvePose, searchForValveBehavior.getValveRadius());
+         }
+      };
+
       statemachine.addStateWithDoneTransition(setup, TurnValveBehaviorState.SEARCHING_FOR_VAVLE);
-      statemachine.addStateWithDoneTransition(searchForValveFar, TurnValveBehaviorState.WALKING_TO_VALVE);
-      statemachine.addState(walkToValveAction);
+      statemachine.addStateWithDoneTransition(searchForValveFar, TurnValveBehaviorState.TURNING_VALVE);
+      statemachine.addStateWithDoneTransition(walkToValveAction, TurnValveBehaviorState.TURNING_VALVE);
+      statemachine.addState(graspAndTurnValve);
       statemachine.setCurrentState(TurnValveBehaviorState.SETUP_ROBOT);
    }
-   
+
    private FramePoint offsetPointFromValve(Vector3f point)
    {
       PoseReferenceFrame valvePose = new PoseReferenceFrame("valveFrame", ReferenceFrame.getWorldFrame());

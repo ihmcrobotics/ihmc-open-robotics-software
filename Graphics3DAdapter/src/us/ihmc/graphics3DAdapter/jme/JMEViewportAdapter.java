@@ -42,7 +42,10 @@ import com.jme3.texture.Image.Format;
 
 public class JMEViewportAdapter extends ViewportAdapter implements InputMapSetter, SceneProcessor
 {
-   public enum ViewportType {OFFSCREEN, CANVAS, MULTICAM}
+   public enum ViewportType
+   {
+      OFFSCREEN, CANVAS, MULTICAM
+   }
 
    private JMECamera jmeCamera;
    private JMEInputManager jmeInputManager;
@@ -64,7 +67,7 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 
    private DirectionalLight primaryLight;
    private FilterPostProcessor fpp;
-   
+
    private final JMERenderer jmeRenderer;
 
    private Timer frameTimer = new Timer().start();
@@ -73,13 +76,20 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
    {
       this(jmeRenderer, rootNode, isMainViewport, viewportType, false, Color.LIGHT_GRAY);
    }
-   
+
    public JMEViewportAdapter(JMERenderer jmeRenderer, Node rootNode, boolean isMainViewport, ViewportType viewportType, boolean addExtraVisuals)
    {
       this(jmeRenderer, rootNode, isMainViewport, viewportType, addExtraVisuals, Color.LIGHT_GRAY);
    }
 
-   public JMEViewportAdapter(JMERenderer jmeRenderer, Node rootNode, boolean isMainViewport, ViewportType viewportType, boolean addExtraVisuals, Color backgroundColor)
+   public JMEViewportAdapter(JMERenderer jmeRenderer, Node rootNode, boolean isMainViewport, ViewportType viewportType, boolean addExtraVisuals,
+         Color backgroundColor)
+   {
+      this(jmeRenderer, rootNode, isMainViewport, viewportType, addExtraVisuals, backgroundColor, true);
+   }
+
+   public JMEViewportAdapter(JMERenderer jmeRenderer, Node rootNode, boolean isMainViewport, ViewportType viewportType, boolean addExtraVisuals,
+         Color backgroundColor, boolean flipY)
    {
       this.jmeRenderer = jmeRenderer;
       this.assetManager = jmeRenderer.getAssetManager();
@@ -109,14 +119,15 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
       if (viewportType.equals(ViewportType.MULTICAM) || viewportType.equals(ViewportType.CANVAS))
       {
          jmeRenderer.getContextManager().addJMEViewportAdapter(this);
-         this.jmeInputManager = new JMEInputManager(jmeRenderer, rootNode, jmeCamera);
+         this.jmeInputManager = new JMEInputManager(jmeRenderer, rootNode, jmeCamera, flipY);
       }
-      
+
       jmeRenderer.registerViewport(this);
    }
 
    @Override
-   public void addFrameListener(Graphics3DFrameListener frameListener) {
+   public void addFrameListener(Graphics3DFrameListener frameListener)
+   {
       super.addFrameListener(frameListener);
       jmeRenderer.play();
    }
@@ -179,14 +190,16 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
    }
 
    private boolean alreadyClosing = false;
+
    public void closeAndDispose()
    {
-      if (alreadyClosing) return;
+      if (alreadyClosing)
+         return;
       alreadyClosing = true;
-      
+
       viewPort.setEnabled(false);
       renderManager.removeMainView(viewPort);
-      
+
       viewPort = null;
       renderManager = null;
 
@@ -221,12 +234,13 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
       fpp = null;
       frameTimer = null;
    }
-   
-   
+
    public void closeViewportAdapter()
    {
-      if (viewPort != null) viewPort.setEnabled(false);
-      if (renderManager != null) renderManager.removeMainView(viewPort);
+      if (viewPort != null)
+         viewPort.setEnabled(false);
+      if (renderManager != null)
+         renderManager.removeMainView(viewPort);
    }
 
    boolean addedPostProcessors = false;
@@ -245,24 +259,21 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
    {
       if (fpp == null)
       {
-//         fpp = new FilterPostProcessor(assetManager);
-//
-//         CartoonEdgeFilter f = new CartoonEdgeFilter();
-//
-//         f.setEdgeWidth(0.5f);
-//         f.setEdgeIntensity(0.5f);
-//
-////
-//         fpp.addFilter(f);
+         //         fpp = new FilterPostProcessor(assetManager);
+         //
+         //         CartoonEdgeFilter f = new CartoonEdgeFilter();
+         //
+         //         f.setEdgeWidth(0.5f);
+         //         f.setEdgeIntensity(0.5f);
+         //
+         ////
+         //         fpp.addFilter(f);
 
-//       SSAOFilter ssaoFilter = new SSAOFilter(12.940201f, 43.928635f, 0.32999992f, 0.6059958f);
-//       fpp.addFilter(ssaoFilter);
-//         getViewPort().addProcessor(fpp);
-
+         //       SSAOFilter ssaoFilter = new SSAOFilter(12.940201f, 43.928635f, 0.32999992f, 0.6059958f);
+         //       fpp.addFilter(ssaoFilter);
+         //         getViewPort().addProcessor(fpp);
 
       }
-
-
 
    }
 
@@ -431,8 +442,9 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 
    public void postFrame(FrameBuffer out)
    {
-      if (alreadyClosing) return; 
-      
+      if (alreadyClosing)
+         return;
+
       double timePerFrame = frameTimer.lap();
       for (Graphics3DFrameListener listener : getFrameListeners())
       {
