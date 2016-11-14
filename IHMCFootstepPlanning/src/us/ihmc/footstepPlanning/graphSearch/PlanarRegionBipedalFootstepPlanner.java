@@ -4,7 +4,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.List;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -13,6 +15,8 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
+import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
+import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -45,6 +49,12 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    private double minimumStepWidth;
 
    private double minimumFootholdPercent;
+
+   private double maximumXYWiggleDistance = 0.1;
+   private double maximumYawWiggle = 0.1;
+
+   private double minimumSurfaceNormalZ = 0.7;
+   private double maximumZPenetrationOnVRegions = 0.008;
 
    private int maximumNumberOfNodesToExpand;
    //   private FootstepPlan footstepPlan;
@@ -195,8 +205,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
       stack.push(startNode);
 
-      RigidBodyTransform soleZUpTransform = new RigidBodyTransform();
-
       int numberOfNodesExpanded = 0;
       while ((!stack.isEmpty()) && (numberOfNodesExpanded < maximumNumberOfNodesToExpand))
       {
@@ -227,6 +235,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             }
          }
 
+         RigidBodyTransform soleZUpTransform = new RigidBodyTransform();
          nodeToExpand.getSoleTransform(soleZUpTransform);
          setTransformZUpPreserveX(soleZUpTransform);
 
@@ -268,7 +277,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             inverseTransform.invert();
             inverseTransform.transform(finishStep);
 
-            goalNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, finishStep, stepYaw);
+            BipedalFootstepPlannerNode goalNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, finishStep, stepYaw);
             goalNode.setIsAtGoal();
 
             stack.push(goalNode);
@@ -281,11 +290,19 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    private boolean checkIfGoodFootstep(BipedalFootstepPlannerNode nodeToExpand)
    {
+      RobotSide robotSide = nodeToExpand.getRobotSide();
+
       RigidBodyTransform transformToParent = nodeToExpand.getTransformToParent();
       if (transformToParent != null)
       {
          Point3d stepFromParent = new Point3d();
          transformToParent.transform(stepFromParent);
+
+         if (((robotSide == RobotSide.LEFT) && (stepFromParent.getY() < minimumStepWidth)) || ((robotSide == RobotSide.RIGHT) && (stepFromParent.getY() > -minimumStepWidth)))
+         {
+            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
+            return false;
+         }
 
          Vector3d stepFromParentInWorld = new Vector3d(stepFromParent);
 
@@ -296,7 +313,13 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
          if (Math.abs(stepFromParentInWorld.getZ()) > maximumStepZ)
          {
-            notifyListenerNodeForExpansionWasRejected(nodeToExpand);
+            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
+            return false;
+         }
+
+         if (stepFromParentInWorld.length() > maximumStepReach)
+         {
+            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
             return false;
          }
       }
@@ -309,11 +332,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       if (planarRegionsList != null)
       {
          PlanarRegion planarRegion = new PlanarRegion();
-         RigidBodyTransform nodeToExpandSnapTransform = getSnapTransform(nodeToExpand, planarRegion);
+         RigidBodyTransform nodeToExpandSnapTransform = getSnapAndWiggleTransform(nodeToExpand, planarRegion);
 
          if (nodeToExpandSnapTransform == null)
          {
-            notifyListenerNodeForExpansionWasRejected(nodeToExpand);
+//            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.BAD_SNAP_OR_WIGGLE);
             return false;
          }
 
@@ -327,20 +350,20 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          snappedPolygon.update();
          double footArea = snappedPolygon.getArea();
 
-         ArrayList<ConvexPolygon2d> intersectionsToPack = new ArrayList<>();
-         planarRegion.getPolygonIntersectionsWhenSnapped(snappedPolygon, nodeToExpandTransform, intersectionsToPack);
+         ArrayList<ConvexPolygon2d> polygonIntersectionsOnPlanarRegion = new ArrayList<>();
+         planarRegion.getPolygonIntersectionsWhenSnapped(snappedPolygon, nodeToExpandTransform, polygonIntersectionsOnPlanarRegion);
 
          double totalArea = 0.0;
-         for (int i = 0; i < intersectionsToPack.size(); i++)
+         for (int i = 0; i < polygonIntersectionsOnPlanarRegion.size(); i++)
          {
-            ConvexPolygon2d intersectionPolygon = intersectionsToPack.get(i);
+            ConvexPolygon2d intersectionPolygon = polygonIntersectionsOnPlanarRegion.get(i);
             intersectionPolygon.update();
             totalArea = totalArea + intersectionPolygon.getArea();
          }
 
          if (totalArea < minimumFootholdPercent * footArea)
          {
-            notifyListenerNodeForExpansionWasRejected(nodeToExpand);
+            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
             return false;
          }
       }
@@ -417,9 +440,9 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       BipedalFootstepPlannerNode childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, idealStepVector, idealStepYaw);
       nodesToAdd.add(childNode);
 
-      for (double xStep = idealFootstepLength / 2.0; xStep < 1.6 * idealFootstepLength; xStep = xStep + idealFootstepLength / 2.0)
+      for (double xStep = idealFootstepLength / 2.0; xStep < 1.6 * idealFootstepLength; xStep = xStep + idealFootstepLength / 4.0)
       {
-         for (double yStep = idealFootstepWidth; yStep < 1.4 * idealFootstepWidth; yStep = yStep + idealFootstepWidth / 4.0)
+         for (double yStep = idealFootstepWidth; yStep < 1.6 * idealFootstepWidth; yStep = yStep + idealFootstepWidth / 4.0)
          {
             //for (double thetaStep = -0.1; thetaStep < 0.1; thetaStep = thetaStep + 0.1 / 2.0)
             {
@@ -463,7 +486,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return childNode;
    }
 
-   private RigidBodyTransform getSnapTransform(BipedalFootstepPlannerNode bipedalFootstepPlannerNode, PlanarRegion planarRegionToPack)
+   private RigidBodyTransform getSnapAndWiggleTransform(BipedalFootstepPlannerNode bipedalFootstepPlannerNode, PlanarRegion planarRegionToPack)
    {
       if (planarRegionsList == null)
       {
@@ -478,7 +501,130 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       ConvexPolygon2d currentFootPolygon = new ConvexPolygon2d(footPolygonsInSoleFrame.get(nodeSide));
       currentFootPolygon.applyTransformAndProjectToXYPlane(soleTransformBeforeSnap);
 
-      return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList, planarRegionToPack);
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList, planarRegionToPack);
+      if (snapTransform == null)
+      {
+         notifyListenerNodeForExpansionWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
+         return null;
+      }
+
+      if (Math.abs(snapTransform.getM22()) < minimumSurfaceNormalZ)
+      {
+         notifyListenerNodeForExpansionWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
+         return null;
+      }
+
+      BipedalFootstepPlannerNode nodeAfterSnap = new BipedalFootstepPlannerNode(bipedalFootstepPlannerNode);
+      nodeAfterSnap.transformSoleTransformWithSnapTransformFromZeroZ(snapTransform, planarRegionToPack);
+      notifyListenerNodeSnappedAndStillSelectedForExpansion(nodeAfterSnap);
+
+      WiggleParameters parameters = new WiggleParameters();
+//      parameters.minX = -0.1;
+//      parameters.maxX = 0.1;
+//      parameters.minY = -0.1;
+//      parameters.maxY = 0.1;
+//      parameters.minYaw = -0.1;
+//      parameters.maxYaw = 0.1;
+//      parameters.rotationWeight = 1.0;
+
+      ConvexPolygon2d polygonToWiggleInRegionFrame = planarRegionToPack.snapPolygonIntoRegionAndChangeFrameToRegionFrame(currentFootPolygon, snapTransform);
+//      System.out.println("polygonToWiggleInRegionFrame = \n" + polygonToWiggleInRegionFrame);
+//      System.out.println("planarRegionToPack = \n" + planarRegionToPack);
+
+      RigidBodyTransform wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoRegion(polygonToWiggleInRegionFrame, planarRegionToPack, parameters);
+      if (wiggleTransformLocalToLocal == null) return snapTransform;
+
+//      System.out.println("wiggleTransformLocalToLocal = \n" + wiggleTransformLocalToLocal);
+
+//      wiggleTransform = new RigidBodyTransform();
+//      wiggleTransform.setTranslation(0.2, 0.0, 0.0);
+
+      Point3d wiggleTranslation = new Point3d();
+      wiggleTransformLocalToLocal.transform(wiggleTranslation);
+      Vector3d wiggleVector = new Vector3d(wiggleTranslation);
+      if (wiggleVector.length() > maximumXYWiggleDistance)
+      {
+         wiggleVector.scale(maximumXYWiggleDistance/wiggleVector.length());
+      }
+
+      Vector3d rotationEuler = new Vector3d();
+      wiggleTransformLocalToLocal.getRotationEuler(rotationEuler);
+      double yaw = rotationEuler.getZ();
+      yaw = MathTools.clipToMinMax(yaw, maximumYawWiggle);
+
+      rotationEuler.setZ(yaw);
+      wiggleTransformLocalToLocal.setRotationEulerAndZeroTranslation(rotationEuler);
+      wiggleTransformLocalToLocal.setTranslation(wiggleVector);
+
+//      System.out.println("Limited wiggleTransformLocalToLocal = \n" + wiggleTransformLocalToLocal);
+
+
+      RigidBodyTransform wiggleTransformWorldToWorld = new RigidBodyTransform();
+      RigidBodyTransform transformOne = new RigidBodyTransform();
+      planarRegionToPack.getTransformToWorld(transformOne);
+      RigidBodyTransform transformTwo = new RigidBodyTransform(transformOne);
+      transformTwo.invert();
+
+      wiggleTransformWorldToWorld.multiply(transformOne, wiggleTransformLocalToLocal);
+      wiggleTransformWorldToWorld.multiply(wiggleTransformWorldToWorld, transformTwo);
+
+//      System.out.println("wiggleTransformWorldToWorld = \n" + wiggleTransformWorldToWorld);
+
+
+      RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform();
+      snapAndWiggleTransform.multiply(wiggleTransformWorldToWorld, snapTransform);
+
+      // Ensure polygon will be completely above the planarRegions with this snap and wiggle:
+      ConvexPolygon2d checkFootPolygonInWorld = new ConvexPolygon2d(currentFootPolygon);
+      checkFootPolygonInWorld.applyTransformAndProjectToXYPlane(snapAndWiggleTransform);
+
+      List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon = planarRegionsList.findPlanarRegionsIntersectingPolygon(checkFootPolygonInWorld);
+
+      ArrayList<ConvexPolygon2d> intersectionsInPlaneFrameToPack = new ArrayList<>();
+      RigidBodyTransform transformToWorldFromIntersectingPlanarRegion = new RigidBodyTransform();
+
+      if (planarRegionsIntersectingSnappedAndWiggledPolygon != null)
+      {
+         for (PlanarRegion planarRegionIntersectingSnappedAndWiggledPolygon : planarRegionsIntersectingSnappedAndWiggledPolygon)
+         {
+            planarRegionIntersectingSnappedAndWiggledPolygon.getTransformToWorld(transformToWorldFromIntersectingPlanarRegion);
+            intersectionsInPlaneFrameToPack.clear();
+            planarRegionIntersectingSnappedAndWiggledPolygon.getPolygonIntersectionsWhenProjectedVertically(checkFootPolygonInWorld, intersectionsInPlaneFrameToPack);
+
+            // If any points are above the plane of the planarRegionToPack, then this is stepping into a v type problem.
+            for (ConvexPolygon2d intersectionPolygon : intersectionsInPlaneFrameToPack)
+            {
+               int numberOfVertices = intersectionPolygon.getNumberOfVertices();
+               for (int i=0; i<numberOfVertices; i++)
+               {
+                  Point2d vertex2d = intersectionPolygon.getVertex(i);
+                  Point3d vertex3dInWorld = new Point3d(vertex2d.getX(), vertex2d.getY(), 0.0);
+                  transformToWorldFromIntersectingPlanarRegion.transform(vertex3dInWorld);
+
+                  double planeZGivenXY = planarRegionToPack.getPlaneZGivenXY(vertex3dInWorld.getX(), vertex3dInWorld.getY());
+
+                  double zPenetration = vertex3dInWorld.getZ() - planeZGivenXY;
+                  //               System.out.println("zPenetration = " + zPenetration);
+
+                  if (zPenetration > maximumZPenetrationOnVRegions)
+                  {
+                     notifyListenerNodeForExpansionWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
+                     return null;
+                  }
+               }
+            }
+         }
+      }
+
+      return snapAndWiggleTransform;
+   }
+
+   private void notifyListenerNodeSnappedAndStillSelectedForExpansion(BipedalFootstepPlannerNode nodeAfterSnap)
+   {
+      if (listener != null)
+      {
+         listener.nodeSelectedForExpansion(nodeAfterSnap);
+      }
    }
 
    private void notifyListenerNodeSelectedForExpansion(BipedalFootstepPlannerNode nodeToExpand)
@@ -497,11 +643,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private void notifyListenerNodeForExpansionWasRejected(BipedalFootstepPlannerNode nodeToExpand)
+   private void notifyListenerNodeForExpansionWasRejected(BipedalFootstepPlannerNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       if (listener != null)
       {
-         listener.nodeForExpansionWasRejected(nodeToExpand);
+         listener.nodeForExpansionWasRejected(nodeToExpand, reason);
       }
    }
 

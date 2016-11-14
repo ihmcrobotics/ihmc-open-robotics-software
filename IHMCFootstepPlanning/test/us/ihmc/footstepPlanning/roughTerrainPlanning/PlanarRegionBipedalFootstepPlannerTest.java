@@ -34,9 +34,30 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
+   public void testSimpleStepOnBoxTwo()
+   {
+      super.testSimpleStepOnBoxTwo(true);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
    public void testRandomEnvironment()
    {
       super.testRandomEnvironment(true);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testSimpleGaps()
+   {
+      super.testSimpleGaps(true);
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testOverCinderBlockField()
+   {
+      super.testOverCinderBlockField(true);
    }
 
    @Override
@@ -44,7 +65,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    {
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner();
 
-      planner.setMaximumStepReach(0.4);
+      planner.setMaximumStepReach(0.45);
       planner.setMaximumStepZ(0.25);
       planner.setMaximumStepYaw(0.15);
       planner.setMinimumStepWidth(0.15);
@@ -63,7 +84,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
          planner.setBipedalFootstepPlannerListener(visualizer);
       }
 
-      planner.setMaximumNumberOfNodesToExpand(1000);
+      planner.setMaximumNumberOfNodesToExpand(100);
 
       return planner;
    }

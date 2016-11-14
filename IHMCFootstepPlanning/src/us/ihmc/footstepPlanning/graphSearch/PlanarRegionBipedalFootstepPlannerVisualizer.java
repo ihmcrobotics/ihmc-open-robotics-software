@@ -1,13 +1,18 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -28,6 +33,11 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    private final YoGraphicPolygon leftRejectedFootstepViz, rightRejectedFootstepViz;
 
    private final SideDependentList<YoGraphicPolygon> footstepGoalsViz, footstepsToExpandViz, acceptedFootstepsViz, rejectedFootstepsViz;
+
+   private final EnumYoVariable<BipedalFootstepPlannerNodeRejectionReason> nodeRejectedReason;
+
+   private final YoFrameVector leftAcceptedFootstepSurfaceNormal, rightAcceptedFootstepSurfaceNormal;
+   private final SideDependentList<YoFrameVector> acceptedFootstepSurfaceNormals;
 
    private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -88,6 +98,13 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       graphicsListRegistry.registerYoGraphic("FootstepPlanner", leftRejectedFootstepViz);
       graphicsListRegistry.registerYoGraphic("FootstepPlanner", rightRejectedFootstepViz);
 
+      leftAcceptedFootstepSurfaceNormal = new YoFrameVector("leftAcceptedFootstepSurfaceNormal", worldFrame, registry);
+      rightAcceptedFootstepSurfaceNormal = new YoFrameVector("rightAcceptedFootstepSurfaceNormal", worldFrame, registry);
+      acceptedFootstepSurfaceNormals = new SideDependentList<>(leftAcceptedFootstepSurfaceNormal, rightAcceptedFootstepSurfaceNormal);
+
+      nodeRejectedReason = new EnumYoVariable<>("nodeRejectedReason", registry, BipedalFootstepPlannerNodeRejectionReason.class, true);
+      nodeRejectedReason.set(null);
+
       parentRegistry.addChild(registry);
    }
 
@@ -121,9 +138,12 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
       acceptedFootstepsViz.get(robotSide).setPoseToNaN();
       rejectedFootstepsViz.get(robotSide).setPoseToNaN();
+      nodeRejectedReason.set(null);
 
       YoGraphicPolygon footstepToExpandViz = footstepsToExpandViz.get(robotSide);
       footstepToExpandViz.setTransformToWorld(soleTransform);
+
+      moveUpSlightlyToEnsureVisible(footstepToExpandViz);
       footstepToExpandViz.update();
    }
 
@@ -143,13 +163,19 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       footstepsToExpandViz.get(robotSide).setPoseToNaN();
       rejectedFootstepsViz.get(robotSide).setPoseToNaN();
 
-      YoGraphicPolygon footstepToExpandViz = acceptedFootstepsViz.get(robotSide);
-      footstepToExpandViz.setTransformToWorld(soleTransform);
-      footstepToExpandViz.update();
+      YoGraphicPolygon acceptedFootstepViz = acceptedFootstepsViz.get(robotSide);
+      acceptedFootstepViz.setTransformToWorld(soleTransform);
+
+      Vector3d surfaceNormal = new Vector3d(0.0, 0.0, 1.0);
+      soleTransform.transform(surfaceNormal);
+      acceptedFootstepSurfaceNormals.get(robotSide).set(surfaceNormal);
+
+      moveUpSlightlyToEnsureVisible(acceptedFootstepViz);
+      acceptedFootstepViz.update();
    }
 
    @Override
-   public void nodeForExpansionWasRejected(BipedalFootstepPlannerNode rejectedNode)
+   public void nodeForExpansionWasRejected(BipedalFootstepPlannerNode rejectedNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       RobotSide robotSide = rejectedNode.getRobotSide();
       RigidBodyTransform soleTransform = new RigidBodyTransform();
@@ -164,9 +190,21 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       footstepsToExpandViz.get(robotSide).setPoseToNaN();
       acceptedFootstepsViz.get(robotSide).setPoseToNaN();
 
-      YoGraphicPolygon footstepToExpandViz = rejectedFootstepsViz.get(robotSide);
-      footstepToExpandViz.setTransformToWorld(soleTransform);
-      footstepToExpandViz.update();
+      YoGraphicPolygon rejectedFootstepViz = rejectedFootstepsViz.get(robotSide);
+      rejectedFootstepViz.setTransformToWorld(soleTransform);
+
+      moveUpSlightlyToEnsureVisible(rejectedFootstepViz);
+      rejectedFootstepViz.update();
+
+      nodeRejectedReason.set(reason);
+   }
+
+   private void moveUpSlightlyToEnsureVisible(YoGraphicPolygon footstepToExpandViz)
+   {
+      FramePoint framePointToPack = new FramePoint(worldFrame);
+      footstepToExpandViz.getPosition(framePointToPack);
+      framePointToPack.setZ(framePointToPack.getZ() + 0.0001);
+      footstepToExpandViz.setPosition(framePointToPack);
    }
 
    @Override
