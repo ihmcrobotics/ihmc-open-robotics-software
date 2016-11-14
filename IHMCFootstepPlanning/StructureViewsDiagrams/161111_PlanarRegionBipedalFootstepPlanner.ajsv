@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2016-Nov-13 16:15" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20160414-2044">
+        <filterScript>
+
+// no filter script yet defined for this class diagram
+// use CTRL+SPACE for completion suggestions
+hide all methods
+hide all fields
+
+</filterScript>
+        <class className="us.ihmc.footstepPlanning.roughTerrainPlanning.PlanarRegionBipedalFootstepPlannerOnFlatTest" modelMemberId="us.ihmc.footstepPlanning.roughTerrainPlanning.PlanarRegionBipedalFootstepPlannerOnFlatTest" project="IHMCFootstepPlanning" xLocation="254" yLocation="198"/>
+        <class className="us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer" modelMemberId="us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer" project="IHMCFootstepPlanning" xLocation="1090" yLocation="437"/>
+        <class className="us.ihmc.footstepPlanning.roughTerrainPlanning.PlanarRegionBipedalFootstepPlannerTest" modelMemberId="us.ihmc.footstepPlanning.roughTerrainPlanning.PlanarRegionBipedalFootstepPlannerTest" project="IHMCFootstepPlanning" xLocation="775" yLocation="200"/>
+        <class className="us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner" modelMemberId="us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner" project="IHMCFootstepPlanning" xLocation="651" yLocation="389"/>
+        <class className="us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper" modelMemberId="us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper" project="IHMCFootstepPlanning" xLocation="266" yLocation="596"/>
+        <class className="us.ihmc.robotics.geometry.PlanarRegionsList" modelMemberId="us.ihmc.robotics.geometry.PlanarRegionsList" project="IHMCRoboticsToolkit" xLocation="733" yLocation="685"/>
+        <class className="us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler" modelMemberId="us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler" project="IHMCFootstepPlanning" xLocation="366" yLocation="476"/>
+        <class className="us.ihmc.robotics.geometry.PlanarRegion" modelMemberId="us.ihmc.robotics.geometry.PlanarRegion" project="IHMCRoboticsToolkit" xLocation="728" yLocation="808"/>
+    </diagram>
+</ajsv>

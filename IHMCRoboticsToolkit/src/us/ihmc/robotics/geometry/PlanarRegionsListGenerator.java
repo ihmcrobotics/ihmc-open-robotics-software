@@ -112,6 +112,11 @@ public class PlanarRegionsListGenerator
       transformGenerator.rotate(rotation);
    }
 
+   public void rotate(double rotationAngle, Axis axis)
+   {
+      transformGenerator.rotate(rotationAngle, axis);
+   }
+
    public void setTransform(RigidBodyTransform transform)
    {
       transformGenerator.setTransform(transform);

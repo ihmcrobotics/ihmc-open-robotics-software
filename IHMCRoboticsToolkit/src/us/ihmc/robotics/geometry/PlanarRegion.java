@@ -5,7 +5,9 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
 
 import us.ihmc.robotics.MathTools;
 
@@ -18,6 +20,14 @@ public class PlanarRegion
     * They are in the local frame of the plane.
     */
    private final List<ConvexPolygon2d> convexPolygons;
+
+   /**
+    * Create a new, empty planar region.
+    */
+   public PlanarRegion()
+   {
+      convexPolygons = new ArrayList<>();
+   }
 
    /**
     * Create a new planar region.
@@ -62,7 +72,7 @@ public class PlanarRegion
          ConvexPolygon2d polygonToCheck = convexPolygons.get(i);
          boolean hasIntersection = polygonToCheck.intersectionWith(projectedPolygon, dummyPolygon);
          if (hasIntersection)
-            return true; 
+            return true;
       }
       // Did not find any intersection
       return false;
@@ -70,14 +80,36 @@ public class PlanarRegion
 
    /**
     * Returns all of the intersections when the convexPolygon is projected vertically onto this PlanarRegion.
-    * @param convexPolygon2d Polygon to project vertically.
-    * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
+    * @param convexPolygonInWorld Polygon to project vertically.
+    * @param intersectionsInPlaneFrameToPack ArrayList of ConvexPolygon2d to pack with the intersections.
     */
-   public void getPolygonIntersections(ConvexPolygon2d convexPolygon2d, ArrayList<ConvexPolygon2d> intersectionsToPack)
+   public void getPolygonIntersectionsWhenProjectedVertically(ConvexPolygon2d convexPolygonInWorld, ArrayList<ConvexPolygon2d> intersectionsInPlaneFrameToPack)
    {
       // Instead of projecting all the polygons of this region onto the world XY-plane,
       // the given convex polygon is projected along the z-world axis to be snapped onto plane.
-      ConvexPolygon2d projectedPolygon = projectPolygonVerticallyToRegion(convexPolygon2d);
+      ConvexPolygon2d projectedPolygon = projectPolygonVerticallyToRegion(convexPolygonInWorld);
+
+      // Now, just need to go through each polygon of this region and see there is at least one intersection
+      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
+      {
+         ConvexPolygon2d intersectingPolygon = convexPolygons.get(i).intersectionWith(projectedPolygon);
+
+         if (intersectingPolygon != null)
+         {
+            intersectionsInPlaneFrameToPack.add(intersectingPolygon);
+         }
+      }
+   }
+
+   /**
+    * Returns all of the intersections when the convexPolygon is snapped onto this PlanarRegion with the snappingTransform.
+    * @param convexPolygon2d Polygon to snap.
+    * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have same surface normal as this region.
+    * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
+    */
+   public void getPolygonIntersectionsWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform, ArrayList<ConvexPolygon2d> intersectionsToPack)
+   {
+      ConvexPolygon2d projectedPolygon = snapPolygonIntoRegionAndChangeFrameToRegionFrame(convexPolygon2d, snappingTransform);
 
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
@@ -92,20 +124,47 @@ public class PlanarRegion
    }
 
    /**
+    * Snaps the given polygon to the frame of this planar region and then transforms it to be in this planar region.
+    * If the snappingTransform is not consistent with this PlanarRegion, then it prints an error message.
+    *
+    * @param polygonToSnap
+    * @param snappingTransform
+    * @return ConvexPolygon2d Snapped polygon in the frame of this PlanarRegion.
+    */
+   public ConvexPolygon2d snapPolygonIntoRegionAndChangeFrameToRegionFrame(ConvexPolygon2d polygonToSnap, RigidBodyTransform snappingTransform)
+   {
+      RigidBodyTransform fromPolygonToPlanarRegionTransform = new RigidBodyTransform();
+      fromPolygonToPlanarRegionTransform.multiply(fromWorldToLocalTransform, snappingTransform);
+
+      double m02 = Math.abs(fromPolygonToPlanarRegionTransform.getM02());
+      double m12 = Math.abs(fromPolygonToPlanarRegionTransform.getM12());
+
+      if ((Math.abs(m02) > 1e-4) || (Math.abs(m12) > 1e-4))
+      {
+         System.err.println("Snapping transform does not seem consistent with PlanarRegion transform!");
+      }
+
+      ConvexPolygon2d snappedPolygonToReturn = new ConvexPolygon2d(polygonToSnap);
+      snappedPolygonToReturn.applyTransformAndProjectToXYPlane(fromPolygonToPlanarRegionTransform);
+
+      return snappedPolygonToReturn;
+   }
+
+   /**
     * Projects the input ConvexPolygon2d to the plane defined by this PlanarRegion by translating each vertex in world z.
     * Then puts each vertex in local frame. In doing so, the area of the rotated polygon will actually increase on tilted PlanarRegions.
-    * @param convexPolygon2d Polygon to project
+    * @param convexPolygonInWorld Polygon to project
     * @return new projected ConvexPolygon2d
     */
-   private ConvexPolygon2d projectPolygonVerticallyToRegion(ConvexPolygon2d convexPolygon2d)
+   private ConvexPolygon2d projectPolygonVerticallyToRegion(ConvexPolygon2d convexPolygonInWorld)
    {
       ConvexPolygon2d projectedPolygon = new ConvexPolygon2d();
 
       Point3d snappedVertex3d = new Point3d();
 
-      for (int i = 0; i < convexPolygon2d.getNumberOfVertices(); i++)
+      for (int i = 0; i < convexPolygonInWorld.getNumberOfVertices(); i++)
       {
-         Point2d originalVertex = convexPolygon2d.getVertex(i);
+         Point2d originalVertex = convexPolygonInWorld.getVertex(i);
          // Find the vertex 3d that is snapped to the plane following z-world.
          snappedVertex3d.setX(originalVertex.getX());
          snappedVertex3d.setY(originalVertex.getY());
@@ -240,6 +299,17 @@ public class PlanarRegion
    }
 
    /**
+    * Retrieves the normal of this planar region and stores it in the given {@link Vector3f}.
+    * @param normalToPack used to store the normal of this planar region.
+    */
+   public void getNormal(Vector3f normalToPack)
+   {
+      normalToPack.setX((float) fromLocalToWorldTransform.getM02());
+      normalToPack.setY((float) fromLocalToWorldTransform.getM12());
+      normalToPack.setZ((float) fromLocalToWorldTransform.getM22());
+   }
+
+   /**
     * Returns true if this PlanarRegion is purely vertical, as far as numerical roundoff is concerned.
     * Checks z component of surface normal. If absolute value is really small, then returns true.
     * @return true if vertical. false otherwise.
@@ -255,6 +325,16 @@ public class PlanarRegion
     * @param pointToPack used to store the point coordinates.
     */
    public void getPointInRegion(Point3d pointToPack)
+   {
+      fromLocalToWorldTransform.getTranslation(pointToPack);
+   }
+
+   /**
+    * Retrieves a point that lies in this planar region.
+    * This point is also used as the origin of the local coordinate system of this planar region.
+    * @param pointToPack used to store the point coordinates.
+    */
+   public void getPointInRegion(Point3f pointToPack)
    {
       fromLocalToWorldTransform.getTranslation(pointToPack);
    }
@@ -285,6 +365,15 @@ public class PlanarRegion
             return false;
       }
       return true;
+   }
+
+   public void set(PlanarRegion other)
+   {
+      fromLocalToWorldTransform.set(other.fromLocalToWorldTransform);
+      fromWorldToLocalTransform.set(other.fromWorldToLocalTransform);
+      convexPolygons.clear();
+      for (int i = 0; i < other.getNumberOfConvexPolygons(); i++)
+         convexPolygons.add(new ConvexPolygon2d(other.convexPolygons.get(i)));
    }
 
 }

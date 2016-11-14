@@ -48,7 +48,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
       addMapping(DRCObstacleCourseStartingLocation.OFFSET_ONE_METER_X_AND_Y_ROTATED_PI, new OffsetAndYawRobotInitialSetup(1.0, 1.0, 0, Math.PI));
       addMapping(DRCObstacleCourseStartingLocation.EASY_STEPPING_STONES, new OffsetAndYawRobotInitialSetup(-7.22, -0.8, 0.3, Math.PI - 0.01));
       addMapping(DRCObstacleCourseStartingLocation.MEDIUM_PLATFORM, SquaredUpDRCDemo01RobotAtPlatformsInitialSetup.createInitialSetupAtNthPlatformToesTouching(3));
-      addMapping(DRCObstacleCourseStartingLocation.DRC_TRIALS_QUALS, new SquaredUpDRCDemo01Robot(0.0, 2.708, Math.toRadians(-41.1147), 0.0));
+      addMapping(DRCObstacleCourseStartingLocation.DRC_TRIALS_QUALS, new SquaredUpDRCDemo01Robot(0.0, 1.5, Math.toRadians(-41.1147), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.NARROW_DOORWAY, new SquaredUpDRCDemo01Robot(0.0, 2.7094, Math.toRadians(-89.2852), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM, SquaredUpDRCDemo01RobotOnPlatformsInitialSetup.createInitialSetupOnNthPlatform(3));
       addMapping(DRCObstacleCourseStartingLocation.RAMP_BOTTOM, new SquaredUpDRCDemo01Robot(0.0, 2.6179, 0.0, 0.0));

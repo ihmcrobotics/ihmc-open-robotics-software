@@ -21,7 +21,7 @@ public class PlanarRegionPolygonSnapper
    public static RigidBodyTransform snapPolygonToPlanarRegion(ConvexPolygon2d polygonToSnap, PlanarRegion planarRegionToSnapTo, Point3d highestVertexInWorld)
    {
       ArrayList<ConvexPolygon2d> polygonIntersections = new ArrayList<>();
-      planarRegionToSnapTo.getPolygonIntersections(polygonToSnap, polygonIntersections);
+      planarRegionToSnapTo.getPolygonIntersectionsWhenProjectedVertically(polygonToSnap, polygonIntersections);
 
       if (polygonIntersections.isEmpty())
          return null;

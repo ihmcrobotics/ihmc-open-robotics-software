@@ -1688,6 +1688,119 @@ public class MeshDataGenerator
       return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
+   public static MeshDataHolder Tetrahedron(double edgeLength)
+   {
+      return Tetrahedron((float) edgeLength);
+   }
+
+   public static MeshDataHolder Tetrahedron(float edgeLength)
+   {
+      /*
+       * Base vertices ordering
+       *     0
+       *     /\
+       *    /  \
+       *   /    \
+       * 2 ------ 1
+       * 
+       */
+      float height = (float) Math.sqrt(6.0f) / 3.0f * edgeLength;
+      float sqrt3 = (float) Math.sqrt(3.0f);
+
+      float cosFaceEdgeFace = 1.0f / 3.0f;
+      float faceEdgeFaceAngle = (float) Math.acos(cosFaceEdgeFace);
+      float sinFaceEdgeFace = (float) Math.sin(faceEdgeFaceAngle);
+
+      float cosEdgeVertexEdge = 0.5f;
+      float sinEdgeVertexEdge = sqrt3 / 2.0f;
+
+      Point3f topVertex = new Point3f(0.0f, 0.0f, height);
+      Point3f baseVertex0 = new Point3f(  edgeLength * sqrt3 / 3.0f, 0.0f, 0.0f);
+      Point3f baseVertex1 = new Point3f(- edgeLength * sqrt3 / 6.0f,  edgeLength / 2.0f, 0.0f);
+      Point3f baseVertex2 = new Point3f(- edgeLength * sqrt3 / 6.0f, - edgeLength / 2.0f, 0.0f);
+
+      TexCoord2f baseTex0 = new TexCoord2f(0.5f, 1.0f);
+      TexCoord2f baseTex1 = new TexCoord2f(0.75f, 1.0f - sqrt3 / 4.0f);
+      TexCoord2f baseTex2 = new TexCoord2f(0.25f, 1.0f - sqrt3 / 4.0f);
+
+      Vector3f frontNormal = new Vector3f(- sinFaceEdgeFace, 0.0f, cosFaceEdgeFace);
+      Vector3f rightNormal = new Vector3f(sinFaceEdgeFace * sinEdgeVertexEdge, sinFaceEdgeFace * cosEdgeVertexEdge, cosFaceEdgeFace);
+      Vector3f leftNormal = new Vector3f(sinFaceEdgeFace * sinEdgeVertexEdge, -sinFaceEdgeFace * cosEdgeVertexEdge, cosFaceEdgeFace);
+      Vector3f baseNormal = new Vector3f(0.0f, 0.0f, -1.0f);
+
+      int numberOfVertices = 12;
+      Point3f[] vertices = new Point3f[numberOfVertices];
+      TexCoord2f[] texCoords = new TexCoord2f[numberOfVertices];
+      Vector3f[] normals = new Vector3f[numberOfVertices];
+
+      // Front face
+      vertices[0] = new Point3f(baseVertex2);
+      texCoords[0] = new TexCoord2f(baseTex2);
+      normals[0] = new Vector3f(frontNormal);
+      vertices[1] = new Point3f(baseVertex1);
+      texCoords[1] = new TexCoord2f(baseTex1);
+      normals[1] = new Vector3f(frontNormal);
+      vertices[2] = new Point3f(topVertex);
+      texCoords[2] = new TexCoord2f(0.50f, 1.0f - sqrt3 / 2.0f);
+      normals[2] = new Vector3f(frontNormal);
+
+      // Right face
+      vertices[3] = new Point3f(baseVertex1);
+      texCoords[3] = new TexCoord2f(baseTex1);
+      normals[3] = new Vector3f(rightNormal);
+      vertices[4] = new Point3f(baseVertex0);
+      texCoords[4] = new TexCoord2f(baseTex0);
+      normals[4] = new Vector3f(rightNormal);
+      vertices[5] = new Point3f(topVertex);
+      texCoords[5] = new TexCoord2f(1.0f, 1.0f);
+      normals[5] = new Vector3f(rightNormal);
+      
+      // Left face
+      vertices[6] = new Point3f(baseVertex0);
+      texCoords[6] = new TexCoord2f(baseTex0);
+      normals[6] = new Vector3f(leftNormal);
+      vertices[7] = new Point3f(baseVertex2);
+      texCoords[7] = new TexCoord2f(baseTex2);
+      normals[7] = new Vector3f(leftNormal);
+      vertices[8] = new Point3f(topVertex);
+      texCoords[8] = new TexCoord2f(0.0f, 1.0f);
+      normals[8] = new Vector3f(leftNormal);
+
+      // Bottom face
+      vertices[9] = new Point3f(baseVertex0);
+      texCoords[9] = new TexCoord2f(baseTex0);
+      normals[9] = new Vector3f(baseNormal);
+      vertices[10] = new Point3f(baseVertex1);
+      texCoords[10] = new TexCoord2f(baseTex1);
+      normals[10] = new Vector3f(baseNormal);
+      vertices[11] = new Point3f(baseVertex2);
+      texCoords[11] = new TexCoord2f(baseTex2);
+      normals[11] = new Vector3f(baseNormal);
+
+      int numberOfTriangles = 4;
+
+      int[] triangleIndices = new int[3 * numberOfTriangles];
+      int index = 0;
+      // Front face
+      triangleIndices[index++] = 0;
+      triangleIndices[index++] = 2;
+      triangleIndices[index++] = 1;
+      // Right face
+      triangleIndices[index++] = 3;
+      triangleIndices[index++] = 5;
+      triangleIndices[index++] = 4;
+      // Left face
+      triangleIndices[index++] = 6;
+      triangleIndices[index++] = 8;
+      triangleIndices[index++] = 7;
+      // Bottom face
+      triangleIndices[index++] = 9;
+      triangleIndices[index++] = 11;
+      triangleIndices[index++] = 10;
+
+      return new MeshDataHolder(vertices, texCoords, triangleIndices, normals);
+   }
+
    private static TexCoord2f[] generateInterpolatedTexturePoints(int numPoints)
    {
       TexCoord2f[] textPoints = new TexCoord2f[numPoints];

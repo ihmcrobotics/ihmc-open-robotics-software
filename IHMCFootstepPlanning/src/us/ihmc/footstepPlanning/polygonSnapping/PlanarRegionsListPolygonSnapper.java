@@ -22,7 +22,20 @@ public class PlanarRegionsListPolygonSnapper
     */
    public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2d polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo)
    {
-      double extraZ = 0.01; // For close ones. When close, take one that is flatter...
+      return snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsListToSnapTo, null);
+   }
+
+   /**
+    * Snaps an XY polygon down onto a PlanarRegionsList. Returns the RigidBodyTransform required to perform the snap.
+    *
+    * @param polygonToSnap ConvexPolygon2d that is to be snapped to the PlanarRegionsList.
+    * @param planarRegionsListToSnapTo PlanarRegionsList that the polygon will be snapped to.
+    * @param regionToPack the planar region that this snaps to will be packed here (can be null).
+    * @return RigidBodyTransform Transform required to snap the polygon down onto the PlanarRegion.
+    */
+   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2d polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo, PlanarRegion regionToPack)
+   {
+      double allowableExtraZ = 0.003; // For close ones. When close, take one that is flatter...
       List<PlanarRegion> intersectingRegions = planarRegionsListToSnapTo.findPlanarRegionsIntersectingPolygon(polygonToSnap);
 
       if ((intersectingRegions == null) || (intersectingRegions.isEmpty()))
@@ -45,14 +58,14 @@ public class PlanarRegionsListPolygonSnapper
 
          RigidBodyTransform snapTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegion, highestVertexInWorld);
 
-         if (highestVertexInWorld.getZ() > highestZ + extraZ)
+         if (highestVertexInWorld.getZ() > highestZ + allowableExtraZ)
          {
             highestZ = highestVertexInWorld.getZ();
             highestTransform = snapTransform;
             highestPlanarRegion = planarRegion;
          }
 
-         else if (highestVertexInWorld.getZ() > highestZ - extraZ)
+         else if (highestVertexInWorld.getZ() > highestZ - allowableExtraZ)
          {
             // Tie. Let's take the one with the flatter surface normal.
             planarRegion.getNormal(surfaceNormal);
@@ -73,6 +86,8 @@ public class PlanarRegionsListPolygonSnapper
       if (Math.abs(highestSurfaceNormal.getZ()) < 0.2)
          return null;
 
+      if (regionToPack != null)
+         regionToPack.set(highestPlanarRegion);
       return highestTransform;
    }
 }

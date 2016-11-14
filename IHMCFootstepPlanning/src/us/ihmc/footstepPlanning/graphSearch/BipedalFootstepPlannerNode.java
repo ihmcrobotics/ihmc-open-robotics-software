@@ -2,6 +2,10 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -16,10 +20,31 @@ public class BipedalFootstepPlannerNode
    private double costToHereFromStart;
    private double estimatedCostToGoal;
 
+   private boolean isAtGoal = false;
+
    public BipedalFootstepPlannerNode(RobotSide footstepSide, RigidBodyTransform soleTransform)
    {
       this.footstepSide = footstepSide;
       this.soleTransform.set(soleTransform);
+   }
+
+   public BipedalFootstepPlannerNode(BipedalFootstepPlannerNode nodeToCopy)
+   {
+      this(nodeToCopy.footstepSide, nodeToCopy.soleTransform);
+   }
+
+   public RigidBodyTransform getTransformToParent()
+   {
+      if (parentNode == null)
+         return null;
+
+      RigidBodyTransform transformToParent = new RigidBodyTransform();
+
+      parentNode.getSoleTransform(transformToParent);
+      transformToParent.invert();
+
+      transformToParent.multiply(transformToParent, soleTransform);
+      return transformToParent;
    }
 
    public RobotSide getRobotSide()
@@ -27,12 +52,36 @@ public class BipedalFootstepPlannerNode
       return footstepSide;
    }
 
+   public void setIsAtGoal()
+   {
+      this.isAtGoal = true;
+   }
+
+   public boolean isAtGoal()
+   {
+      return isAtGoal;
+   }
+
    public void getSoleTransform(RigidBodyTransform soleTransformToPack)
    {
       soleTransformToPack.set(soleTransform);
    }
 
-   public void transformSoleTransformWithSnapTransformFromZeroZ(RigidBodyTransform snapTransform)
+   public Point3d getSolePosition()
+   {
+      Point3d currentSolePosition = new Point3d();
+      soleTransform.transform(currentSolePosition);
+      return currentSolePosition;
+   }
+
+   public double getSoleYaw()
+   {
+      Vector3d eulerAngles = new Vector3d();
+      soleTransform.getRotationEuler(eulerAngles);
+      return eulerAngles.getZ();
+   }
+
+   public void transformSoleTransformWithSnapTransformFromZeroZ(RigidBodyTransform snapTransform, PlanarRegion planarRegion)
    {
       // Ignore the z since the snap transform snapped from z = 0. Keep everything else.
       soleTransform.setM23(0.0);
@@ -93,6 +142,5 @@ public class BipedalFootstepPlannerNode
    {
       this.estimatedCostToGoal = estimatedCostToGoal;
    }
-
 
 }

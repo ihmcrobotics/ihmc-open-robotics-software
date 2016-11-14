@@ -6,9 +6,12 @@ public class OptionalFactoryField<T> extends FactoryField<T>
    {
       super(fieldName);
    }
-
-   public boolean hasBeenSet()
+   
+   public void setDefaultValue(T defaultValue)
    {
-      return hasBeenSet;
+      if (!hasBeenSet)
+      {
+         set(defaultValue);
+      }
    }
 }

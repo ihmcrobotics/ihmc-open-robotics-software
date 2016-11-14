@@ -106,7 +106,6 @@ public class SkippyController implements RobotController
    private final YoFrameVector comVelocity = new YoFrameVector("comVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector desiredReactionForce = new YoFrameVector("desiredReactionForce", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector actualReactionForce = new YoFrameVector("actualReactionForce", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector reactionUnitVector = new YoFrameVector("reactionUnitVector", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector angularMomentum = new YoFrameVector("angularMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector lastAngularMomentum = new YoFrameVector("lastAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector linearMomentum = new YoFrameVector("linearMomentum", ReferenceFrame.getWorldFrame(), registry);
@@ -125,10 +124,12 @@ public class SkippyController implements RobotController
    private final DoubleYoVariable tauOnHipJointAxis = new DoubleYoVariable("tauOnHipJointAxis", registry);
 
    private final YoFramePoint hipJointPosition = new YoFramePoint("hipJointPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint formerHipJointPosition = new YoFramePoint("formerHipJointPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector hipJointUnitVector = new YoFrameVector("hipJointUnitVector", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector hipToFootPositionVector = new YoFrameVector("hipToFootPositionVector", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector hipToFootUnitVector = new YoFrameVector("hipToFootUnitVector", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint shoulderJointPosition = new YoFramePoint("shoulderJointPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint formerShoulderJointPosition = new YoFramePoint("formerShoulderJointPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector shoulderJointUnitVector = new YoFrameVector("shoulderJointUnitVector", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector shoulderToFootPositionVector = new YoFrameVector("shoulderToFootPositionVector", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector shoulderToFootUnitVector = new YoFrameVector("shoulderToFootUnitVector", ReferenceFrame.getWorldFrame(), registry);
@@ -142,6 +143,7 @@ public class SkippyController implements RobotController
    //   private PIDController controllerCmpX;
    //   private PIDController controllerCmpY;
    private final YoFramePoint footLocation = new YoFramePoint("footLocation", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint formerFootLocation = new YoFramePoint("formerFootLocation", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint achievedCMP = new YoFramePoint("achievedCMP", ReferenceFrame.getWorldFrame(), registry);
 
    private final DoubleYoVariable robotMass = new DoubleYoVariable("robotMass", registry);
@@ -163,7 +165,6 @@ public class SkippyController implements RobotController
    private final DoubleYoVariable z0 = new DoubleYoVariable("z0", registry);
    private final DoubleYoVariable averageZ0 = new DoubleYoVariable("averageZ0", registry);
    private final DoubleYoVariable kCapture = new DoubleYoVariable("kCapture", registry);
-   private final DoubleYoVariable virtualMassOnFoot = new DoubleYoVariable("virtualMassOnFoot", registry);
    private final DoubleYoVariable desiredLegToTorsoAngle = new DoubleYoVariable("desiredLegToTorsoAngle", registry);
 
    private final EnumYoVariable<SkippyToDo> skippyToDo = new EnumYoVariable<SkippyToDo>("SkippyToDo", registry, SkippyToDo.class);
@@ -206,6 +207,7 @@ public class SkippyController implements RobotController
     * Outputs which controller is being executed in output.txt
     */
    boolean trace = false;//true;// 
+   boolean traceCrossProduct = true;
 
    public SkippyController(SkippyRobot robot, RobotType robotType, String name, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistries)
    {
@@ -585,50 +587,70 @@ public class SkippyController implements RobotController
       tauOnHipAxisToPack.set(tempTauHipJointProjectionModulus);
    }
 
-   /**
-    * Hip and Shoulder to Foot joints position vectors
-    */
-   public void jointsToFootPositionVectors()
-   {
-      FrameVector hipToFootInWorld = new FrameVector(ReferenceFrame.getWorldFrame());
-      FrameVector shoulderToFootInWorld = new FrameVector(ReferenceFrame.getWorldFrame());
-      Point3d footLocationInWorld = new Point3d();
-      /*
-       * Foot location in world
-       */
-      footLocationInWorld.set(robot.computeFootLocation());
-      /*
-       * Foot to hip position vector
-       */
-      robot.getHipJoint().getTranslationToWorld(hipToFootInWorld.getVector());
-      hipJointPosition.set(hipToFootInWorld);
-      hipToFootPositionVector.sub(footLocationInWorld, hipToFootInWorld.getVector());
-      hipToFootUnitVector.set(hipToFootPositionVector);
-      hipToFootUnitVector.normalize();
-      if (trace)
-         writer1.println(hipToFootPositionVector);
-      /*
-       * Shoulder to Foot position vector
-       */
-      robot.getShoulderJoint().getTranslationToWorld(shoulderToFootInWorld.getVector());
-      shoulderJointPosition.set(shoulderToFootInWorld);
-      shoulderToFootPositionVector.sub(footLocationInWorld, shoulderToFootInWorld.getVector());
-      shoulderToFootUnitVector.set(shoulderToFootPositionVector);
-      shoulderToFootUnitVector.normalize();
-      if (trace)
-         writer1.println(shoulderToFootPositionVector);
-      /*
-       * Position vectors cross product (for debug purpose)
-       */
-      crossShoulderPositionVector.cross(shoulderToFootUnitVector,formerShoulderToFootUnitVector);
-      crossShoulderLength.set(crossShoulderPositionVector.length());
-      crossHipPositionVector.cross(hipToFootUnitVector,formerHipToFootUnitVector);
-      crossHipLength.set(crossHipPositionVector.length());
-      /*
-       * leg to torso angle 
-       */
-      legToTorsoAngle.set(hipToFootUnitVector.dot(shoulderToFootUnitVector));
-   }
+	/**
+	 * Hip and Shoulder to Foot joints position vectors
+	 */
+	public void jointsToFootPositionVectors() {
+		FrameVector hipToFootInWorld = new FrameVector(ReferenceFrame.getWorldFrame());
+		FrameVector shoulderToFootInWorld = new FrameVector(ReferenceFrame.getWorldFrame());
+		Point3d footLocationInWorld = new Point3d();
+		/*
+		 * Foot location in world
+		 */
+		footLocationInWorld.set(robot.computeFootLocation());
+		/*
+		 * Foot to hip position vector
+		 */
+		robot.getHipJoint().getTranslationToWorld(hipToFootInWorld.getVector());
+		hipJointPosition.set(hipToFootInWorld);
+		hipToFootPositionVector.sub(footLocationInWorld, hipToFootInWorld.getVector());
+		hipToFootUnitVector.set(hipToFootPositionVector);
+		hipToFootUnitVector.normalize();
+		/*
+		 * Shoulder to Foot position vector
+		 */
+		robot.getShoulderJoint().getTranslationToWorld(shoulderToFootInWorld.getVector());
+		shoulderJointPosition.set(shoulderToFootInWorld);
+		shoulderToFootPositionVector.sub(footLocationInWorld, shoulderToFootInWorld.getVector());
+		shoulderToFootUnitVector.set(shoulderToFootPositionVector);
+		shoulderToFootUnitVector.normalize();
+		/*
+		 * ONLY FOR DEBUG
+		 * Cross product between actual and former position vectors
+		 */
+		crossShoulderPositionVector.cross(shoulderToFootUnitVector, formerShoulderToFootUnitVector);
+		crossShoulderLength.set(crossShoulderPositionVector.length());
+		crossHipPositionVector.cross(hipToFootUnitVector, formerHipToFootUnitVector);
+		crossHipLength.set(crossHipPositionVector.length());
+		if(crossShoulderLength.getDoubleValue()>1.0E-3 || crossHipLength.getDoubleValue()>1.0E-3)
+			System.out.println(crossShoulderLength.toString()+"\t"+crossHipLength.toString());
+		if (traceCrossProduct) 
+			writer.println(crossHipLength.toString()+crossShoulderLength.toString());
+		/*
+		 * Distance between consecutive points
+		 */
+		double hipJointDistance = hipJointPosition.distance(formerHipJointPosition);
+		double shoulderJointDistance = shoulderJointPosition.distance(formerShoulderJointPosition);
+		double footDistance = footLocation.distance(formerFootLocation);
+		if(hipJointDistance>1.0E-3 || shoulderJointDistance>1.0E-3)
+			System.out.println(robot.getTime()+"\t"+hipJointDistance+"\t"+shoulderJointDistance);
+		if (traceCrossProduct) 
+			writer1.println(robot.getTime()+"\t"+footDistance+"\t"+hipJointDistance+"\t"+shoulderJointDistance);
+		if(footDistance>1.0E-3 || hipJointDistance>1.0E-3  || shoulderJointDistance>1.0E-3)
+			System.out.println(robot.getTime()+"\t"+footDistance+"\t"+hipJointDistance+"\t"+shoulderJointDistance);
+		/*
+		 * Actualize former variables
+		 */
+		formerFootLocation.set(footLocationInWorld);
+		formerHipJointPosition.set(hipJointPosition);
+		formerShoulderJointPosition.set(shoulderJointPosition);
+		formerHipToFootUnitVector.set(hipToFootUnitVector);
+		formerShoulderToFootUnitVector.set(shoulderToFootUnitVector);
+		/*
+		 * leg to torso angle
+		 */
+		legToTorsoAngle.set(hipToFootUnitVector.dot(shoulderToFootUnitVector));
+	}
 
    /**
     * Hip and Shoulder joint unit vectors
@@ -1443,12 +1465,12 @@ public class SkippyController implements RobotController
              * Torque on hip for keeping track the angle between torso and leg
              */
             //            desiredLegToTorsoAngle.set(0.5075);
-            hipAngleController.setProportionalGain(0.0);
+//            hipAngleController.setProportionalGain(0.0);
             hipAngleController.setDerivativeGain(0.0);
             hipAngleController.setIntegralGain(0.0);
-            //            hipAngleController.setProportionalGain(179.53125);
-            //            hipAngleController.setDerivativeGain(0.00602454); 
-            //            hipAngleController.setIntegralGain(0.116299896953656563); //);//
+                        hipAngleController.setProportionalGain(300.0);//179.53125);
+//                        hipAngleController.setDerivativeGain(0.00602454); 
+//                        hipAngleController.setIntegralGain(0.116299896953656563); //);//
             tauHipForAngleTracking.set(hipAngleController.compute(robot.getQ_hip().getDoubleValue(), desiredLegToTorsoAngle.getDoubleValue(),
                                                                   -robot.getQd_hip().getDoubleValue(), 0.0, deltaT));
             /*

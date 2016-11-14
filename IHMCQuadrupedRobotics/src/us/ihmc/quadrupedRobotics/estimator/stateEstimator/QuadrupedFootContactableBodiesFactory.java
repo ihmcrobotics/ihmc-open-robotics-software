@@ -19,7 +19,7 @@ public class QuadrupedFootContactableBodiesFactory
 
    public QuadrantDependentList<ContactablePlaneBody> createFootContactableBodies()
    {
-      FactoryTools.checkAllRequiredFactoryFieldsAreSet(this);
+      FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       QuadrantDependentList<ContactablePlaneBody> footContactableBodies = new QuadrantDependentList<ContactablePlaneBody>();
 
@@ -31,6 +31,8 @@ public class QuadrupedFootContactableBodiesFactory
                                                                                                                        .getFootGroundContactPoints(robotQuadrant));
          footContactableBodies.set(robotQuadrant, footContactableBody);
       }
+      
+      FactoryTools.disposeFactory(this);
 
       return footContactableBodies;
    }
