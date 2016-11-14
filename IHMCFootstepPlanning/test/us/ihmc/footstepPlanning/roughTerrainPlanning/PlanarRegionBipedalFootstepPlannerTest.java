@@ -52,6 +52,13 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    {
       super.testSimpleGaps(true);
    }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testOverCinderBlockField()
+   {
+      super.testOverCinderBlockField(true);
+   }
 
    @Override
    public FootstepPlanner getPlanner()
