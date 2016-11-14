@@ -24,8 +24,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    {
       this.planarRegion = planarRegion;
       this.boundingBox3d = setupBoundingBox3d();
-      this.linkGraphics = new Graphics3DObject();
-      linkGraphics.addPlanarRegion(planarRegion);
+      this.linkGraphics = setupLinkGraphics();
    }
 
    @Override
@@ -64,19 +63,57 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      return false;
+      return boundingBox3d.isInside(x, y, z);
    }
 
    @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
-      return false;
+      // We will recycle intersectionToPack here so we don't have to make an allocation.
+      double oldX, oldY, oldZ;
+
+      // Store current values of intersectionToPack
+      oldX = intersectionToPack.x;
+      oldY = intersectionToPack.y;
+      oldZ = intersectionToPack.z;
+
+      // Set intersection to pack with the values to test so that we can use it with planarRegion's isPointInside() method call
+      intersectionToPack.x = x;
+      intersectionToPack.y = y;
+      intersectionToPack.z = z;
+
+      // Check if the point is inside, modulo some small epislon
+      boolean isPointInside = planarRegion.isPointInside(intersectionToPack, 1e-3);
+
+      if(!isPointInside)
+      {
+         // If the point is not inside, switch intersectionToPack back to its original values.
+         // Just in case the caller of this method was using those old values for something in
+         // event of failure
+         intersectionToPack.x = oldX;
+         intersectionToPack.y = oldY;
+         intersectionToPack.z = oldZ;
+      }
+      else
+      {
+         // If the point is inside, update the normal to pack.
+         planarRegion.getNormal(normalToPack);
+      }
+
+      return isPointInside;
    }
 
    @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
-      return null;
+      return this;
+   }
+
+   private Graphics3DObject setupLinkGraphics()
+   {
+      Graphics3DObject graphics3DObject = new Graphics3DObject();
+      graphics3DObject.addPlanarRegion(planarRegion);
+      return graphics3DObject;
    }
 
    private BoundingBox3d setupBoundingBox3d()
