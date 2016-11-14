@@ -18,12 +18,14 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
 {
    private final PlanarRegion planarRegion;
    private final BoundingBox3d boundingBox3d;
+   private final Graphics3DObject linkGraphics;
 
    public PlanarRegionTerrainObject(PlanarRegion planarRegion)
    {
       this.planarRegion = planarRegion;
-
       this.boundingBox3d = setupBoundingBox3d();
+      this.linkGraphics = new Graphics3DObject();
+      linkGraphics.addPlanarRegion(planarRegion);
    }
 
    @Override
@@ -56,7 +58,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    @Override
    public Graphics3DObject getLinkGraphics()
    {
-      return null;
+      return this.linkGraphics;
    }
 
    @Override
