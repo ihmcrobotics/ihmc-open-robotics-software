@@ -185,6 +185,21 @@ public class PlanarRegionTest
       intersections.clear();
       planarRegion.getPolygonIntersectionsWhenProjectedVertically(translateConvexPolygon(1.09, 1.09, convexPolygon), intersections);
       assertEquals(3, intersections.size());
+
+      BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transformToWorld);
+
+      for (ConvexPolygon2d convexPolygon2dInWorld : regionConvexPolygons)
+      {
+         for(int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
+         {
+            Point2d vertex = convexPolygon2dInWorld.getVertex(i);
+            double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.x, vertex.y);
+
+            assertTrue("Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: " + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.x, vertex.y, planeZGivenXY));
+         }
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -410,6 +425,22 @@ public class PlanarRegionTest
          assertTrue(planarRegion.isPolygonIntersecting(transformConvexPolygon(regionTransform, translateConvexPolygon(1.09, 1.09, convexPolygon))));
          assertTrue(planarRegion.isPolygonIntersecting(transformConvexPolygon(regionTransform, translateConvexPolygon(1.21, 1.09, convexPolygon))));
          assertTrue(planarRegion.isPolygonIntersecting(transformConvexPolygon(regionTransform, translateConvexPolygon(1.09, 1.21, convexPolygon))));
+
+         BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+         RigidBodyTransform transformToWorld = new RigidBodyTransform();
+         planarRegion.getTransformToWorld(transformToWorld);
+
+         for (ConvexPolygon2d convexPolygon2d : regionConvexPolygons)
+         {
+            ConvexPolygon2d convexPolygon2dInWorld = convexPolygon2d.applyTransformAndProjectToXYPlaneCopy(transformToWorld);
+            for(int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
+            {
+               Point2d vertex = convexPolygon2dInWorld.getVertex(i);
+               double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.x, vertex.y);
+
+               assertTrue("Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: " + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.x, vertex.y, planeZGivenXY));
+            }
+         }
       }
    }
 
