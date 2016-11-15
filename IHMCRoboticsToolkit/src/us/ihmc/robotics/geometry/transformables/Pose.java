@@ -6,7 +6,6 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
@@ -158,6 +157,12 @@ public class Pose implements GeometryObject<Pose>
       return orientation.toString();
    }
 
+   public void setPose(RigidBodyTransform transform)
+   {
+      transform.getTranslation(position);
+      transform.getRotation(orientation);
+   }
+
    public void setPose(Tuple3d position, Quat4d orientation)
    {
       setPosition(position);
@@ -181,12 +186,9 @@ public class Pose implements GeometryObject<Pose>
       setY(point.getY());     
    }
    
-   private final Vector3d tempVector = new Vector3d();
-
    public void getPose(RigidBodyTransform transformToPack)
    {
-      position.get(tempVector);
-      transformToPack.set(orientation, tempVector);
+      transformToPack.set(orientation, position);
    }
    
    public void getPosition(Tuple3d tupleToPack)
@@ -197,6 +199,11 @@ public class Pose implements GeometryObject<Pose>
    public void getRigidBodyTransform(RigidBodyTransform transformToPack)
    {
       getPose(transformToPack);
+   }
+
+   public void setOrientation(double qx, double qy, double qz, double qs)
+   {
+      this.orientation.set(qx, qy, qz, qs);
    }
 
    public void setOrientation(Quat4d quat4d)
