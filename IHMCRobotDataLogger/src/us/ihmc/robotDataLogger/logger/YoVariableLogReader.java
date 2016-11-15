@@ -17,7 +17,7 @@ public class YoVariableLogReader
 {
 
    private boolean initialized = false;
-   private final File logDirectory;
+   protected final File logDirectory;
    protected final LogProperties logProperties;
    
    
