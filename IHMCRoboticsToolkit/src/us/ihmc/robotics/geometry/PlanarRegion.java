@@ -21,7 +21,7 @@ public class PlanarRegion
     */
    private final List<ConvexPolygon2d> convexPolygons;
 
-   private final BoundingBox3d boundingBox3d = new BoundingBox3d(new Point3d(), new Point3d());
+   private final BoundingBox3d boundingBox3dInWorld = new BoundingBox3d(new Point3d(), new Point3d());
 
    /**
     * Create a new, empty planar region.
@@ -353,6 +353,37 @@ public class PlanarRegion
       transformToPack.set(fromLocalToWorldTransform);
    }
 
+   /**
+    * Get a reference to the PlanarRegion's axis-aligned minimal bounding box (AABB) in world.
+    * @return the axis-aligned minimal bounding box for the planar region, in world coordinates.
+    */
+   public BoundingBox3d getBoundingBox3dInWorld()
+   {
+      return this.boundingBox3dInWorld;
+   }
+
+   /**
+    * Get a deep copy of this PlanarRegion's axis-aligned minimal bounding box (AABB) in world
+    * @return a deep copy of the axis-aligned minimal bounding box for the planar region, in world coordinates.
+    */
+   public BoundingBox3d getBoundingBox3dInWorldCopy()
+   {
+      return new BoundingBox3d(this.boundingBox3dInWorld);
+   }
+
+   /**
+    * Set defining points of the passed-in BoundingBox3d to the same as
+    * those in this PlanarRegion's axis-aligned minimal bounding box (AABB) in world coordinates.
+    *
+    * @param boundingBox3dToPack the bounding box that will be updated to reflect this PlanarRegion's AABB
+    */
+   public void getBoundingBox3dInWorld(BoundingBox3d boundingBox3dToPack)
+   {
+      boundingBox3dToPack.set(this.boundingBox3dInWorld.getXMin(), this.boundingBox3dInWorld.getYMin(), this.boundingBox3dInWorld
+                  .getZMin(), this.boundingBox3dInWorld.getXMax(),
+            this.boundingBox3dInWorld.getYMax(), this.boundingBox3dInWorld.getZMax());
+   }
+
    public boolean epsilonEquals(PlanarRegion other, double epsilon)
    {
       if (!fromLocalToWorldTransform.epsilonEquals(other.fromLocalToWorldTransform, epsilon))
@@ -390,7 +421,7 @@ public class PlanarRegion
 
       for (int i = 0; i < this.getNumberOfConvexPolygons(); i++)
       {
-         ConvexPolygon2d convexPolygonInWorld = this.getConvexPolygon(i).applyTransformCopy(fromLocalToWorldTransform);
+         ConvexPolygon2d convexPolygonInWorld = this.getConvexPolygon(i).applyTransformAndProjectToXYPlaneCopy(fromLocalToWorldTransform);
 
          for (int j = 0; j < convexPolygonInWorld.getNumberOfVertices(); j++)
          {
@@ -433,7 +464,6 @@ public class PlanarRegion
 
       }
 
-      this.boundingBox3d.set(xMin, yMin, zMin, xMax, yMax, zMax);
+      this.boundingBox3dInWorld.set(xMin, yMin, zMin, xMax, yMax, zMax);
    }
-
 }
