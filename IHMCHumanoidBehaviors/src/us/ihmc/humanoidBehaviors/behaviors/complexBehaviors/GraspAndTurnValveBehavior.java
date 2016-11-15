@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
 import com.jme3.math.Quaternion;
@@ -58,8 +59,12 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
    private PoseReferenceFrame valvePose = null;
    private double valveRadius = 0;
-   private double valveRadiusInitalOffset = 0.127;
+   private double valveRadiusInitalOffset = 0.125;
+   private double valveRadiusfinalOffset = 0.0254;
    private double valveRadiusInitalForwardOffset = 0.2032;
+   
+   private final double DEGREES_TO_ROTATE = 90;
+   private final double ROTATION_SEGMENTS = 2;
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final HumanoidReferenceFrames referenceFrames;
@@ -71,7 +76,15 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       this.referenceFrames = referenceFrames;
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
+   }
+
+   @Override
+   public void initialize()
+   {
+      // TODO Auto-generated method stub
+      super.initialize();
       setupPipeline();
+
    }
 
    private void setupPipeline()
@@ -109,33 +122,60 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       //      MOVE_HAND_ABOVE_AND_IN_FRONT_OF_VALVE,
       //      BehaviorAction moveHandToApproachPointViaHandTrajectory = moveHand(-0.05357945674961795, 0.04256176948547363, 0.15017291083938378, Math.toRadians(-86.487420629448),
       //            Math.toRadians(98.3359137072094), Math.toRadians(0.5464370649115582), "testPose");
-      BehaviorAction moveHandAboveAndInFrontOfValve = moveHand(0.0, valveRadius + valveRadiusInitalOffset, valveRadiusInitalForwardOffset, Math.toRadians(-90),
-            Math.toRadians(90), 0.0, "Moving Hand Above And In Front Of The Valve");
+      BehaviorAction moveHandAboveAndInFrontOfValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            moveHand(0.0, valveRadius + valveRadiusInitalOffset, valveRadiusInitalForwardOffset, 1.607778783110418, 1.442441289823466, -3.1298946145335043,
+                  "Moving Hand Above And In Front Of The Valve");
+         }
+      };
+
       //      MOVE_HAND_ABOVE_VALVE,
 
-      BehaviorAction moveHandAboveValve = moveHand(0.0, valveRadius + valveRadiusInitalOffset, 0.0, Math.toRadians(-90), Math.toRadians(90), 0.0,
-            "Moving Hand Above The Valve");
+      BehaviorAction moveHandAboveValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            moveHand(0.0, valveRadius + valveRadiusInitalOffset, 0.0, 1.607778783110418, 1.442441289823466, -3.1298946145335043, "Moving Hand Above The Valve");
+         }
+      };
 
-      //      MOVE_HAND_DOWN_TO_VALVE,
-
-      BehaviorAction moveHandDownToValve = moveHand(0.0, valveRadius, 0.0, Math.toRadians(-90), Math.toRadians(90), 0.0, "Moving Hand Down To Valve");
+      BehaviorAction moveHandDownToValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            moveHand(0.0, valveRadius+valveRadiusfinalOffset, 0.0, 1.607778783110418, 1.442441289823466, -3.1298946145335043, "Moving Hand Down To Valve");
+         }
+      };
 
       //      ROTATE,
       //      MOVE_HAND_AWAY_FROM_VALVE,
-      BehaviorAction moveHandAwayFromValve = moveHand(0.0, -valveRadius - valveRadiusInitalOffset, 0.0, Math.toRadians(90), Math.toRadians(90), 0.0,
-            "Moving Hand Away From Valve");
+      BehaviorAction moveHandAwayFromValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            Vector3d orient = new Vector3d();
+            referenceFrames.getHandFrame(RobotSide.RIGHT).getTransformToDesiredFrame(valvePose).getRotationEuler(orient);
+            moveHand(0.0, -valveRadius - valveRadiusInitalOffset, 0.0, orient.x, orient.y, orient.z, "Moving Hand Away From Valve");
+         }
+      };
 
       //    CLOSE_HAND,
-      pipeLine.submitSingleTaskStage(closeHand);
+//      pipeLine.submitSingleTaskStage(closeHand);
 
       //    MOVE_HAND_TO_APPROACH_POINT,
       pipeLine.submitSingleTaskStage(moveHandToApproachPoint);
 //      pipeLine.submitSingleTaskStage(moveHandAboveAndInFrontOfValve);
       //    MOVE_HAND_ABOVE_VALVE,
-      pipeLine.submitSingleTaskStage(moveHandAboveValve);
+      //      pipeLine.submitSingleTaskStage(moveHandAboveValve);
 
       //    OPEN_HAND,
-      pipeLine.submitSingleTaskStage(openFingersOnly);
+//      pipeLine.submitSingleTaskStage(openFingersOnly);
 
       //    MOVE_HAND_DOWN_TO_VALVE,
       pipeLine.submitSingleTaskStage(moveHandDownToValve);
@@ -144,10 +184,11 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       pipeLine.submitSingleTaskStage(closeHand);
 
       //    ROTATE,
-
-      for (int i = 1; i < 10; i++)
+      
+      
+      for (int i = 1; i <= 10; i++)
       {
-         pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-18 * i)));
+         pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-18 * i), valveRadiusfinalOffset));
 
       }
 
@@ -156,19 +197,23 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
       //    MOVE_HAND_AWAY_FROM_VALVE,
 
-            pipeLine.submitSingleTaskStage(moveHandAwayFromValve);
+      pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-180), .2));
+
+      //      pipeLine.submitSingleTaskStage(moveHandAwayFromValve);
 
    }
 
-   private BehaviorAction rotateAroundValve(final double degrees)
+   private BehaviorAction rotateAroundValve(final double degrees, final double distanceFromValve)
    {
       BehaviorAction moveHandAroundToValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-
-            FramePose point = offsetPointFromValveInWorldFrame(0.0, valveRadius, 0.0, 0, Math.toRadians(90), Math.toRadians(90));
+            TextToSpeechPacket p1 = new TextToSpeechPacket("rotate Valve");
+            sendPacket(p1);
+            FramePose point = offsetPointFromValveInWorldFrame(0.0, valveRadius + distanceFromValve, 0.0, 1.607778783110418, 1.442441289823466,
+                  -3.1298946145335043);
 
             point.rotatePoseAboutAxis(valvePose, Axis.Z, degrees);
 
@@ -184,36 +229,30 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       return moveHandAroundToValve;
    }
 
-   private BehaviorAction moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll,
-         final String description)
+   private void moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll, final String description)
    {
-      BehaviorAction moveHand = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
+      TextToSpeechPacket p1 = new TextToSpeechPacket(description);
+      sendPacket(p1);
 
-            TextToSpeechPacket p1 = new TextToSpeechPacket(description);
-            sendPacket(p1);
+      //      Vector3d orient = new Vector3d();
+      //      referenceFrames.getHandFrame(RobotSide.RIGHT).getTransformToDesiredFrame(valvePose).getRotationEuler(orient);
 
-            FramePose point = offsetPointFromValveInWorldFrame(x, y, z, yaw, pitch, roll);
+      //      1.607778783110418,1.442441289823466,-3.1298946145335043`
+      FramePose point = offsetPointFromValveInWorldFrame(x, y, z, yaw, pitch, roll);
+      //      System.out.println("-orient.x,orient.y, orient.z " + (-orient.x) + "," + orient.y + "," + orient.z);
 
-            sendPacketToUI(new UIPositionCheckerPacket(new Vector3f((float) point.getX(), (float) point.getY(), (float) point.getZ())));
-            
-            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 1, point.getFramePointCopy().getPoint(),
-                  point.getFrameOrientationCopy().getQuaternion());
+      sendPacketToUI(new UIPositionCheckerPacket(new Vector3f((float) point.getX(), (float) point.getY(), (float) point.getZ())));
 
-            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
-         }
-      };
-      return moveHand;
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 1, point.getFramePointCopy().getPoint(),
+            point.getFrameOrientationCopy().getQuaternion());
+
+      atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
    }
 
    public void setGrabLocation(PoseReferenceFrame valvePose, double valveRadius)
    {
       this.valvePose = valvePose;
       this.valveRadius = valveRadius;
-      System.out.println("valveRadius " + valveRadius);
    }
 
    @Override
