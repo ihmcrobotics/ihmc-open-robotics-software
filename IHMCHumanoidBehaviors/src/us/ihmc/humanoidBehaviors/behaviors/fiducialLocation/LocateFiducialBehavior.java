@@ -1,58 +1,61 @@
 package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.math.frames.YoFramePose;
 
 public class LocateFiducialBehavior extends AbstractBehavior
 {
-   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>();
+   private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
+   
+   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(communicationBridge, yoGraphicsListRegistry, FollowFiducialBehavior.DEFAULT_FIDUCIAL_TO_FOLLOW);
+   }
 
-   private final BooleanYoVariable fiducialFound = new BooleanYoVariable("fiducialFound", registry);
-   private final FramePose fiducialPose = new FramePose(ReferenceFrame.getWorldFrame());
-
-   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge)
+   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, int targetFiducial)
    {
       super(communicationBridge);
-      attachNetworkListeningQueue(videoPacketQueue, VideoPacket.class);
+      
+      fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(this, yoGraphicsListRegistry);
+      fiducialDetectorBehaviorService.setLocationEnabled(true);
+      fiducialDetectorBehaviorService.setTargetIDToLocate(targetFiducial);
    }
 
    @Override
    public void doControl()
    {
-      if (!videoPacketQueue.isNewPacketAvailable())
-         return;
-
-      VideoPacket videoPacket = videoPacketQueue.getLatestPacket();
-      // locate code...
-
-      fiducialPose.setPose(new Point3d(2.0, 0.0, 0.0), new Quat4d(0.0, 0.0, 0.0, 1.0));
-      fiducialFound.set(true);
+      
    }
 
    @Override
    public boolean isDone()
    {
-      return fiducialFound.getBooleanValue();
+      return false;
    }
 
    @Override
    public void initialize()
    {
       super.initialize();
-      fiducialFound.set(false);
-      fiducialPose.setToNaN();
+      
+      fiducialDetectorBehaviorService.initialize();
+
+//      HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(3.0, new Quat4d(-2.0659514928934525E-6, -0.03904875558882198,
+//                                                                                              1.6862782077278572E-6, 0.9992373064892308));
+//      sendPacketToController(headTrajectoryMessage);
    }
 
-   public FramePose getFiducialPose()
+   public void setTargetIDToLocate(int targetIDToLocate)
    {
-      return fiducialPose;
+      fiducialDetectorBehaviorService.setLocationEnabled(true);
+      fiducialDetectorBehaviorService.setTargetIDToLocate(targetIDToLocate);
+   }
+
+   public YoFramePose getFiducialPoseWorldFrame()
+   {
+      return fiducialDetectorBehaviorService.getLocatedFiducialPoseWorldFrame();
    }
 }

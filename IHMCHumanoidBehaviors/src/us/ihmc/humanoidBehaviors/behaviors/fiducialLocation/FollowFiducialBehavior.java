@@ -10,46 +10,41 @@ import us.ihmc.robotics.geometry.FramePose;
 
 public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialBehaviorStates>
 {
+   public static final int DEFAULT_FIDUCIAL_TO_FOLLOW = 50;
+
    public enum FollowFiducialBehaviorStates
    {
       LOCATE_FIDUCIAL, WALK_TO_FIDUCIAL,
    }
 
-   private final FramePose latestFiducialPose = new FramePose();
+   private final FramePose latestFiducialPoseWorld = new FramePose();
 
-   private final LocateFiducialBehavior locateFiducialBehavior;
    private final WalkToFiducialBehavior walkToFiducialBehavior;
 
    public FollowFiducialBehavior(DoubleYoVariable yoTime, CommunicationBridge communicationBridge)
    {
       super(FollowFiducialBehavior.class.getSimpleName(), FollowFiducialBehaviorStates.class, yoTime, communicationBridge);
 
-      locateFiducialBehavior = new LocateFiducialBehavior(communicationBridge);
       walkToFiducialBehavior = new WalkToFiducialBehavior(communicationBridge);
       setupStateMachine();
+   }
+   
+   public void setTargetFiducialId(int targetFiducialId)
+   {
+//      locateFiducialBehavior.setTargetIDToLocate(targetFiducialId);
    }
 
    private void setupStateMachine()
    {
-      BehaviorAction<FollowFiducialBehaviorStates> locateFiducialBehaviorAction = new BehaviorAction<FollowFiducialBehaviorStates>(FollowFiducialBehaviorStates.LOCATE_FIDUCIAL,
-                                                                                                                                   this.locateFiducialBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket("Locating fiducial");
-            sendPacket(textToSpeechPacket);
-         }
-      };
 
       BehaviorAction<FollowFiducialBehaviorStates> walkToFiducialBehaviorAction = new BehaviorAction<FollowFiducialBehaviorStates>(FollowFiducialBehaviorStates.WALK_TO_FIDUCIAL,
-                                                                                                                                   this.walkToFiducialBehavior)
+                                                                                                                                   walkToFiducialBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            latestFiducialPose.setIncludingFrame(locateFiducialBehavior.getFiducialPose());
-            walkToFiducialBehavior.setGoalPose(latestFiducialPose);
+//            locateFiducialBehavior.getFiducialPoseWorldFrame().getFramePoseIncludingFrame(latestFiducialPoseWorld);
+            walkToFiducialBehavior.setGoalPose(latestFiducialPoseWorld);
 
             TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket("Walking to fiducial");
             sendPacket(textToSpeechPacket);
@@ -57,9 +52,9 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialB
       };
 
       // for now just alternate between locating and walking:
-      statemachine.addStateWithDoneTransition(locateFiducialBehaviorAction, FollowFiducialBehaviorStates.WALK_TO_FIDUCIAL);
+//      statemachine.addStateWithDoneTransition(locateFiducialBehaviorAction, FollowFiducialBehaviorStates.WALK_TO_FIDUCIAL);
       statemachine.addStateWithDoneTransition(walkToFiducialBehaviorAction, FollowFiducialBehaviorStates.LOCATE_FIDUCIAL);
 
-      statemachine.setCurrentState(FollowFiducialBehaviorStates.LOCATE_FIDUCIAL);
+//      statemachine.setCurrentState(FollowFiducialBehaviorStates.LOCATE_FIDUCIAL);
    }
 }
