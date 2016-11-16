@@ -61,7 +61,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    private double valveRadius = 0;
    private double valveRadiusInitalOffset = 0.125;
    private double valveRadiusfinalOffset = 0.0254;
-   private double valveRadiusInitalForwardOffset = 0.2032;
+   private double valveRadiusInitalForwardOffset = 0.125;
    
    private final double DEGREES_TO_ROTATE = 90;
    private final double ROTATION_SEGMENTS = 2;
@@ -166,16 +166,16 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       };
 
       //    CLOSE_HAND,
-//      pipeLine.submitSingleTaskStage(closeHand);
+      pipeLine.submitSingleTaskStage(closeHand);
 
       //    MOVE_HAND_TO_APPROACH_POINT,
       pipeLine.submitSingleTaskStage(moveHandToApproachPoint);
-//      pipeLine.submitSingleTaskStage(moveHandAboveAndInFrontOfValve);
+      pipeLine.submitSingleTaskStage(moveHandAboveAndInFrontOfValve);
       //    MOVE_HAND_ABOVE_VALVE,
-      //      pipeLine.submitSingleTaskStage(moveHandAboveValve);
+            pipeLine.submitSingleTaskStage(moveHandAboveValve);
 
       //    OPEN_HAND,
-//      pipeLine.submitSingleTaskStage(openFingersOnly);
+      pipeLine.submitSingleTaskStage(openFingersOnly);
 
       //    MOVE_HAND_DOWN_TO_VALVE,
       pipeLine.submitSingleTaskStage(moveHandDownToValve);
