@@ -155,7 +155,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameX</Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameX,root.SimpleBoxRobotWithQRCode.q_qrCode_x</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -167,7 +167,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameY</Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameY,root.SimpleBoxRobotWithQRCode.q_qrCode_y</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -179,7 +179,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameZ</Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameZ,root.SimpleBoxRobotWithQRCode.q_qrCode_z</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -191,7 +191,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameQx</Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameQx,root.SimpleBoxRobotWithQRCode.q_qrCode_qx</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -203,7 +203,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameQy</Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameQy,root.SimpleBoxRobotWithQRCode.q_qrCode_qy</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -215,7 +215,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameQz</Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameQz,root.SimpleBoxRobotWithQRCode.q_qrCode_qz</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -236,9 +236,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.24502267200020855</Camera X>
- <Camera Y>2.396329083708631</Camera Y>
- <Camera Z>2.6915481719898735</Camera Z>
+ <Camera X>-5.981536264187958</Camera X>
+ <Camera Y>0.5948727203215127</Camera Y>
+ <Camera Z>0.7653794631193509</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -262,8 +262,8 @@ Tab0
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>6.000003814697266</Fix X>
-<Fix Y>-0.08683907985687256</Fix Y>
-<Fix Z>2.085258960723877</Fix Z>
+<Fix X>0.01323143022768658</Fix X>
+<Fix Y>0.2930968290030505</Fix Y>
+<Fix Z>1.1282728378307771</Fix Z>
 </Fix Position>
 </Canvas 1>
