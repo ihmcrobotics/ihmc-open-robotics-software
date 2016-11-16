@@ -9,6 +9,7 @@ import java.util.List;
 
 import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
+import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.simulationconstructionset.PlaybackListener;
@@ -115,14 +116,14 @@ public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
    {
       if (activePlayer != null)
       {
-         CustomProgressMonitor monitor = new CustomProgressMonitor("Exporting " + activePlayer.getName(), selectedFile.getAbsolutePath(), 0, 100);
+         ProgressMonitorInterface monitor = new CustomProgressMonitor("Exporting " + activePlayer.getName(), selectedFile.getAbsolutePath(), 0, 100);
          monitor.setProgress(10);
          activePlayer.exportVideo(selectedFile, startTimestamp, endTimestamp, monitor);
          monitor.close();
       }
    }
 
-   public void crop(File selectedDirectory, long startTimestamp, long endTimestamp, CustomProgressMonitor monitor) throws IOException
+   public void crop(File selectedDirectory, long startTimestamp, long endTimestamp, ProgressMonitorInterface monitor) throws IOException
    {
 
       for (int i = 0; i < videos.size(); i++)

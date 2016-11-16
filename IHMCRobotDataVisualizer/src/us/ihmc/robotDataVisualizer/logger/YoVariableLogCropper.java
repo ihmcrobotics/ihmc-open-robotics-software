@@ -9,6 +9,7 @@ import java.nio.channels.FileChannel;
 import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
+import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
 
 public class YoVariableLogCropper extends YoVariableLogReader
 {
@@ -27,7 +28,7 @@ public class YoVariableLogCropper extends YoVariableLogReader
 
    public synchronized void crop(File destination, long inStamp, long outStamp)
    {
-      CustomProgressMonitor monitor = new CustomProgressMonitor("Cropping data file", "Initializing cropper", 0, 100);
+      ProgressMonitorInterface monitor = new CustomProgressMonitor("Cropping data file", "Initializing cropper", 0, 100);
 
       if (!initialize())
       {
