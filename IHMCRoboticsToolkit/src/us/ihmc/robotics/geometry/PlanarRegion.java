@@ -22,6 +22,7 @@ public class PlanarRegion
    private final List<ConvexPolygon2d> convexPolygons;
 
    private final BoundingBox3d boundingBox3dInWorld = new BoundingBox3d(new Point3d(), new Point3d());
+   private final Point3d tempPointForConvexPolygonProjection = new Point3d();
 
    /**
     * Create a new, empty planar region.
@@ -419,47 +420,44 @@ public class PlanarRegion
 
       for (int i = 0; i < this.getNumberOfConvexPolygons(); i++)
       {
-         ConvexPolygon2d convexPolygonInWorld = this.getConvexPolygon(i).applyTransformAndProjectToXYPlaneCopy(fromLocalToWorldTransform);
+         ConvexPolygon2d convexPolygon = this.getConvexPolygon(i);
 
-         for (int j = 0; j < convexPolygonInWorld.getNumberOfVertices(); j++)
+         for (int j = 0; j < convexPolygon.getNumberOfVertices(); j++)
          {
-            Point2d vertex = convexPolygonInWorld.getVertex(j);
-            double planeZGivenXY = this.getPlaneZGivenXY(vertex.x, vertex.y);
+            Point2d vertex = convexPolygon.getVertex(j);
+            tempPointForConvexPolygonProjection.set(vertex.x, vertex.y, 0.0);
+            fromLocalToWorldTransform.transform(tempPointForConvexPolygonProjection);
 
-            if (planeZGivenXY > zMax)
+            if (tempPointForConvexPolygonProjection.z > zMax)
             {
-               zMax = planeZGivenXY;
+               zMax = tempPointForConvexPolygonProjection.z;
             }
 
-            if (planeZGivenXY < zMin)
+            if (tempPointForConvexPolygonProjection.z < zMin)
             {
-               zMin = planeZGivenXY;
+               zMin = tempPointForConvexPolygonProjection.z;
+            }
+
+            if (tempPointForConvexPolygonProjection.x < xMin)
+            {
+               xMin = tempPointForConvexPolygonProjection.x;
+            }
+
+            if (tempPointForConvexPolygonProjection.y < yMin)
+            {
+               yMin = tempPointForConvexPolygonProjection.y;
+            }
+
+            if (tempPointForConvexPolygonProjection.x > xMax)
+            {
+               xMax = tempPointForConvexPolygonProjection.x;
+            }
+
+            if (tempPointForConvexPolygonProjection.y > yMax)
+            {
+               yMax = tempPointForConvexPolygonProjection.y;
             }
          }
-
-         Point2d maxPoint2d = convexPolygonInWorld.getBoundingBox().getMaxPoint();
-         Point2d minPoint2d = convexPolygonInWorld.getBoundingBox().getMinPoint();
-
-         if (minPoint2d.x < xMin)
-         {
-            xMin = minPoint2d.x;
-         }
-
-         if (minPoint2d.y < yMin)
-         {
-            yMin = minPoint2d.y;
-         }
-
-         if (maxPoint2d.x > xMax)
-         {
-            xMax = maxPoint2d.x;
-         }
-
-         if (maxPoint2d.y > yMax)
-         {
-            yMax = maxPoint2d.y;
-         }
-
       }
 
       this.boundingBox3dInWorld.set(xMin, yMin, zMin, xMax, yMax, zMax);
