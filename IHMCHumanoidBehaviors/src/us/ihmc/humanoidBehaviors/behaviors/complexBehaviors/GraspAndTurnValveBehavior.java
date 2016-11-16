@@ -1,38 +1,25 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
-import com.jme3.math.Quaternion;
-
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
-import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.GoHomeTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.HandTrajectoryTask;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -62,9 +49,9 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    private double valveRadiusInitalOffset = 0.125;
    private double valveRadiusfinalOffset = 0.0254;
    private double valveRadiusInitalForwardOffset = 0.125;
-   
-   private final double DEGREES_TO_ROTATE = 90;
-   private final double ROTATION_SEGMENTS = 2;
+
+   private final double DEGREES_TO_ROTATE = 180;
+   private final double ROTATION_SEGMENTS = 4;
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final HumanoidReferenceFrames referenceFrames;
@@ -148,7 +135,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            moveHand(0.0, valveRadius+valveRadiusfinalOffset, 0.0, 1.607778783110418, 1.442441289823466, -3.1298946145335043, "Moving Hand Down To Valve");
+            moveHand(0.0, valveRadius + valveRadiusfinalOffset, 0.0, 1.607778783110418, 1.442441289823466, -3.1298946145335043, "Moving Hand Down To Valve");
          }
       };
 
@@ -172,7 +159,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       pipeLine.submitSingleTaskStage(moveHandToApproachPoint);
       pipeLine.submitSingleTaskStage(moveHandAboveAndInFrontOfValve);
       //    MOVE_HAND_ABOVE_VALVE,
-            pipeLine.submitSingleTaskStage(moveHandAboveValve);
+      pipeLine.submitSingleTaskStage(moveHandAboveValve);
 
       //    OPEN_HAND,
       pipeLine.submitSingleTaskStage(openFingersOnly);
@@ -184,11 +171,10 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       pipeLine.submitSingleTaskStage(closeHand);
 
       //    ROTATE,
-      
-      
-      for (int i = 1; i <= 10; i++)
+
+      for (int i = 1; i <= ROTATION_SEGMENTS; i++)
       {
-         pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-18 * i), valveRadiusfinalOffset));
+         pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-(DEGREES_TO_ROTATE / ROTATION_SEGMENTS) * i), valveRadiusfinalOffset));
 
       }
 
@@ -197,7 +183,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
       //    MOVE_HAND_AWAY_FROM_VALVE,
 
-      pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-180), .2));
+      pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-DEGREES_TO_ROTATE), .2));
 
       //      pipeLine.submitSingleTaskStage(moveHandAwayFromValve);
 
@@ -220,7 +206,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
             sendPacketToUI(new UIPositionCheckerPacket(new Vector3f((float) point.getFramePointCopy().getPoint().getX(),
                   (float) point.getFramePointCopy().getPoint().getY(), (float) point.getFramePointCopy().getPoint().getZ())));
 
-            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 1, point.getFramePointCopy().getPoint(),
+            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
                   point.getFrameOrientationCopy().getQuaternion());
 
             atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
@@ -243,7 +229,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
       sendPacketToUI(new UIPositionCheckerPacket(new Vector3f((float) point.getX(), (float) point.getY(), (float) point.getZ())));
 
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 1, point.getFramePointCopy().getPoint(),
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
             point.getFrameOrientationCopy().getQuaternion());
 
       atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
