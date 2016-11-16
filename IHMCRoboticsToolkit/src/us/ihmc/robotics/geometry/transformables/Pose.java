@@ -144,7 +144,7 @@ public class Pose implements GeometryObject<Pose>
    {
       position.interpolate(pose1.position, pose2.position, alpha);
       orientation.interpolate(pose1.orientation, pose2.orientation, alpha);
-      orientation.normalizeAndLimitToPiMinusPi();
+      orientation.normalize();
    }
 
    public String printOutPosition()

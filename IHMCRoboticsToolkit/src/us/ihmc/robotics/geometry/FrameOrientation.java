@@ -377,6 +377,15 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
     */
    public void normalize()
    {
+      quaternion.normalize();
+   }
+   
+   /**
+    * Normalize the quaternion and also limits the described angle magnitude in [-Pi, Pi].
+    * The latter prevents some controllers to poop their pants.
+    */
+   public void normalizeAndLimitToPiMinusPi()
+   {
       quaternion.normalizeAndLimitToPiMinusPi();
    }
 
