@@ -37,6 +37,11 @@ public class WalkingStatusMessage extends StatusPacket<WalkingStatusMessage>
       status = RandomTools.generateRandomEnum(random, Status.class);
    }
 
+   public WalkingStatusMessage(Status status)
+   {
+      this.status = status;
+   }
+
    @Override
    public void set(WalkingStatusMessage other)
    {
