@@ -30,7 +30,7 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>root.SimpleRobotWithCamera.qd_qrCode_wz,root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialLocationEnabled,root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialTargetIDToLocate,root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.expectedFiducialSize,root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fovXRadians,root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fovYRadians,root.SimpleRobotWithCamera.qd_qrCode_wx,root.SimpleRobotWithCamera.q_qrCode_x</Entry Boxes>
+<Entry Boxes>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialLocationEnabled,root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialTargetIDToLocate,root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.expectedFiducialSize,root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fovXRadians,root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fovYRadians</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -119,7 +119,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialLocatedPoseWorldFrameX,root.SimpleRobotWithCamera.q_qrCode_x</Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialLocatedPoseWorldFrameX</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -131,7 +131,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialLocatedPoseWorldFrameY,root.SimpleRobotWithCamera.q_qrCode_y</Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialLocatedPoseWorldFrameY</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -143,7 +143,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialLocatedPoseWorldFrameZ,root.SimpleRobotWithCamera.q_qrCode_z</Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialLocatedPoseWorldFrameZ</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -155,7 +155,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameX</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -167,7 +167,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameY</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -179,7 +179,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameZ</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -191,7 +191,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameX,root.SimpleRobotWithCamera.q_qrCode_x</Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameQx</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -203,7 +203,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameY,root.SimpleRobotWithCamera.q_qrCode_y</Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameQy</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -215,57 +215,9 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameZ,root.SimpleRobotWithCamera.q_qrCode_z</Variables>
+		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameQz</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameQx,root.SimpleRobotWithCamera.q_qrCode_qx</Variables>
-		<GraphConfiguration>
-			<Name>config18</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameQy,root.SimpleRobotWithCamera.q_qrCode_qy</Variables>
-		<GraphConfiguration>
-			<Name>config19</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages.fiducialReportedPoseWorldFrameQz,root.SimpleRobotWithCamera.q_qrCode_qz</Variables>
-		<GraphConfiguration>
-			<Name>config20</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.SimpleRobotWithCamera.q_qrCode_qs</Variables>
-		<GraphConfiguration>
-			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -284,9 +236,9 @@ Tab0
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-0.7424112181108864</Camera X>
- <Camera Y>1.6724154907878468</Camera Y>
- <Camera Z>3.186483453541512</Camera Z>
+ <Camera X>0.24502267200020855</Camera X>
+ <Camera Y>2.396329083708631</Camera Y>
+ <Camera Z>2.6915481719898735</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -310,8 +262,8 @@ Tab0
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>5.999998092651367</Fix X>
-<Fix Y>0.05797767639160156</Fix Y>
-<Fix Z>1.8492374420166016</Fix Z>
+<Fix X>6.000003814697266</Fix X>
+<Fix Y>-0.08683907985687256</Fix Y>
+<Fix Z>2.085258960723877</Fix Z>
 </Fix Position>
 </Canvas 1>

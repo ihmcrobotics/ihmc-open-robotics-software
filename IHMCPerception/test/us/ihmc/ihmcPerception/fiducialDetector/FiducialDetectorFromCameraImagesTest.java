@@ -16,15 +16,21 @@ import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.CameraMount;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.FiducialsFlatGroundEnvironment.Fiducial;
+import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
@@ -32,6 +38,8 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class FiducialDetectorFromCameraImagesTest
 {
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+
    @ContinuousIntegrationTest(estimatedDuration = 5.0)
    @Test//(timeout = 30000)
    public void testUsingSimulationConstructionSet()
@@ -39,7 +47,7 @@ public class FiducialDetectorFromCameraImagesTest
       double fieldOfView = 0.81;
 
       final Robot simpleRobotWithCamera = createCameraRobot(fieldOfView);
-      Robot simpleBoxRobotWithQRCode = createQRCodeRobot(simpleRobotWithCamera);
+      final QRCodeRobot simpleBoxRobotWithQRCode = new QRCodeRobot();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
@@ -61,8 +69,6 @@ public class FiducialDetectorFromCameraImagesTest
 
       scsForDetecting.setDT(0.001, 10);
       scsForDetecting.setSimulateNoFasterThanRealTime(true);
-      scsForDetecting.startOnAThread();
-      scsForDetecting.simulate();
 
       int width = 800;
       int height = 800;
@@ -113,38 +119,76 @@ public class FiducialDetectorFromCameraImagesTest
 
       scsForDetecting.startStreamingVideoData(cameraConfiguration, width, height, videoDataServer, timestampProvider, framesPerSecond);
 
+      GoalOrientedTestConductor testConductor = new GoalOrientedTestConductor(scsForDetecting, simulationTestingParameters);
+
+
+      BooleanYoVariable fiducialTargetIDHasBeenLocated = (BooleanYoVariable) scsForDetecting.getVariable("fiducialTargetIDHasBeenLocated");
+
+      DoubleYoVariable fiducialReportedPoseWorldFrameX = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameX");
+      DoubleYoVariable fiducialReportedPoseWorldFrameY = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameY");
+      DoubleYoVariable fiducialReportedPoseWorldFrameZ = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameZ");
+
+      DoubleYoVariable fiducialReportedPoseWorldFrameQS = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameQS");
+      DoubleYoVariable fiducialReportedPoseWorldFrameQX = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameQX");
+      DoubleYoVariable fiducialReportedPoseWorldFrameQY = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameQY");
+      DoubleYoVariable fiducialReportedPoseWorldFrameQZ = (DoubleYoVariable) scsForDetecting.getVariable("fiducialReportedPoseWorldFrameQZ");
+
+
+      DoubleYoVariable q_qrCode_x = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_x");
+      DoubleYoVariable q_qrCode_y = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_y");
+      DoubleYoVariable q_qrCode_z = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_z");
+
+      DoubleYoVariable q_qrCode_qs = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_qs");
+      DoubleYoVariable q_qrCode_qx = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_qx");
+      DoubleYoVariable q_qrCode_qy = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_qy");
+      DoubleYoVariable q_qrCode_qz = (DoubleYoVariable) scsForDetecting.getVariable("q_qrCode_qz");
+
+      final DoubleYoVariable time = simpleRobotWithCamera.getYoTime();
+
+      time.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            double t = time.getDoubleValue();
+            double amp = 0.1;
+            double freqX = 1.0;
+            double freqY = 1.27;
+            double freqZ = 1.92;
+
+            double wX = amp * Math.sin(2.0 * Math.PI * freqX * t);
+            double wY = amp * Math.sin(2.0 * Math.PI * freqY * t);
+            double wZ = amp * Math.sin(2.0 * Math.PI * freqZ * t);
+
+            Vector3d angularVelocityInBody = new Vector3d(wX, wY, wZ);
+            simpleBoxRobotWithQRCode.setAngularVelocity(angularVelocityInBody );
+         }
+      });
+
+      testConductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(time, 3.0));
+
+      testConductor.addSustainGoal(YoVariableTestGoal.booleanEquals(fiducialTargetIDHasBeenLocated, true));
+
+      double okTrackingDeltaPosition = 0.15;
+      testConductor.addSustainGoal(YoVariableTestGoal.variablesEqual(fiducialReportedPoseWorldFrameX, q_qrCode_x, okTrackingDeltaPosition));
+      testConductor.addSustainGoal(YoVariableTestGoal.variablesEqual(fiducialReportedPoseWorldFrameY, q_qrCode_y, okTrackingDeltaPosition));
+      testConductor.addSustainGoal(YoVariableTestGoal.variablesEqual(fiducialReportedPoseWorldFrameZ, q_qrCode_z, okTrackingDeltaPosition));
+
+      double okTrackingDeltaQuaternion = 0.1;
+      testConductor.addSustainGoal(YoVariableTestGoal.variablesEqual(fiducialReportedPoseWorldFrameQS, q_qrCode_qs, okTrackingDeltaQuaternion));
+      testConductor.addSustainGoal(YoVariableTestGoal.variablesEqual(fiducialReportedPoseWorldFrameQX, q_qrCode_qx, okTrackingDeltaQuaternion));
+      testConductor.addSustainGoal(YoVariableTestGoal.variablesEqual(fiducialReportedPoseWorldFrameQY, q_qrCode_qy, okTrackingDeltaQuaternion));
+      testConductor.addSustainGoal(YoVariableTestGoal.variablesEqual(fiducialReportedPoseWorldFrameQZ, q_qrCode_qz, okTrackingDeltaQuaternion));
+
+      testConductor.simulate();
+
       if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
       {
          ThreadTools.sleepForever();
       }
-   }
 
-   private Robot createQRCodeRobot(final Robot simpleRobotWithCamera)
-   {
-      Robot simpleBoxRobotWithQRCode = new Robot("SimpleBoxRobotWithQRCode");
-      FloatingJoint qrCodeJoint = new FloatingJoint("qrCode", "qrCode", new Vector3d(), simpleRobotWithCamera);
-      Link qrCodeLink = new Link("qrCode");
-      qrCodeLink.setMassAndRadiiOfGyration(1.0, 0.1, 0.1, 0.1);
-      Graphics3DObject qrCodeLinkGraphics = new Graphics3DObject();
-//      qrCodeLinkGraphics.addCoordinateSystem(2.0);
-      double cubeLength = 1.0;
-      qrCodeLinkGraphics.translate(0.0, 0.0, -cubeLength);
-      AppearanceDefinition cubeAppearance = YoAppearance.Texture(Fiducial.FIDUCIAL50.getPathString());
+      testConductor.concludeTesting();
 
-      qrCodeLinkGraphics.addCube(cubeLength * 0.99, cubeLength * 1.01, cubeLength * 0.99, YoAppearance.Yellow());
-
-      boolean[] textureFaces = new boolean[]{true, true, false, false, true, true};
-      qrCodeLinkGraphics.addCube(cubeLength, cubeLength, cubeLength, cubeAppearance, textureFaces);
-
-      qrCodeLink.setLinkGraphics(qrCodeLinkGraphics);
-      qrCodeJoint.setLink(qrCodeLink);
-      simpleBoxRobotWithQRCode.addRootJoint(qrCodeJoint);
-      simpleBoxRobotWithQRCode.setGravity(0.0);
-
-      qrCodeJoint.setPosition(6.0, 0.0, 2.0);
-      qrCodeJoint.setYawPitchRoll(0.0, -Math.PI/2.0, 0.0);
-//      qrCodeJoint.setAngularVelocityInBody(new Vector3d(0.0, 0.0, 1.0));
-      return simpleBoxRobotWithQRCode;
    }
 
    private Robot createCameraRobot(double fieldOfView)
@@ -173,4 +217,41 @@ public class FiducialDetectorFromCameraImagesTest
       return simpleRobotWithCamera;
    }
 
+   private class QRCodeRobot extends Robot
+   {
+      private final FloatingJoint qrCodeJoint;
+
+      public QRCodeRobot()
+      {
+         super("SimpleBoxRobotWithQRCode");
+
+         qrCodeJoint = new FloatingJoint("qrCode", "qrCode", new Vector3d(), this);
+         Link qrCodeLink = new Link("qrCode");
+         qrCodeLink.setMassAndRadiiOfGyration(1.0, 0.1, 0.1, 0.1);
+         Graphics3DObject qrCodeLinkGraphics = new Graphics3DObject();
+         //      qrCodeLinkGraphics.addCoordinateSystem(2.0);
+         double cubeLength = 1.0;
+         qrCodeLinkGraphics.translate(0.0, 0.0, -0.99*cubeLength);
+         AppearanceDefinition cubeAppearance = YoAppearance.Texture(Fiducial.FIDUCIAL50.getPathString());
+         qrCodeLinkGraphics.addCube(cubeLength * 0.98, cubeLength * 1.01, cubeLength * 0.98, YoAppearance.Yellow());
+
+         boolean[] textureFaces = new boolean[]{true, true, false, false, true, true};
+         qrCodeLinkGraphics.translate(0.0, 0.0, -0.01 * cubeLength);
+         qrCodeLinkGraphics.addCube(cubeLength, cubeLength, cubeLength, cubeAppearance, textureFaces);
+
+         qrCodeLink.setLinkGraphics(qrCodeLinkGraphics);
+         qrCodeJoint.setLink(qrCodeLink);
+         addRootJoint(qrCodeJoint);
+         setGravity(0.0);
+
+         qrCodeJoint.setPosition(6.0, 0.0, 2.0);
+         qrCodeJoint.setYawPitchRoll(0.0, -Math.PI/2.0, 0.0);
+         //      qrCodeJoint.setAngularVelocityInBody(new Vector3d(0.0, 0.0, 1.0));
+      }
+
+      public void setAngularVelocity(Vector3d angularVelocityInBody)
+      {
+         qrCodeJoint.setAngularVelocityInBody(angularVelocityInBody);
+      }
+   }
 }
