@@ -55,6 +55,7 @@ public class FiducialDetectorFromCameraImages
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private FiducialDetector<GrayF32> detector;
+   private Object detectorConch = new Object();
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
 
@@ -95,7 +96,10 @@ public class FiducialDetectorFromCameraImages
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()), ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
+            synchronized (detectorConch)
+            {
+               detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()), ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
+            }
          }
       });
 
@@ -187,82 +191,85 @@ public class FiducialDetectorFromCameraImages
 
    public void setNewVideoPacket(BufferedImage bufferedImage, Point3d cameraPositionInWorld, Quat4d cameraOrientationInWorldXForward)
    {
-      if (!locationEnabled.getBooleanValue())
-         return;
-
-      setIntrinsicParameters(bufferedImage);
-
-      cameraRigidTransform.setRotation(cameraOrientationInWorldXForward);
-      cameraRigidPosition.set(cameraPositionInWorld);
-      cameraRigidTransform.setTranslation(cameraRigidPosition);
-
-      cameraReferenceFrame.update();
-      detectorReferenceFrame.update();
-
-      cameraPose.setOrientation(cameraOrientationInWorldXForward);
-      cameraPose.setPosition(cameraPositionInWorld);
-
-      GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
-
-      detector.detect(grayImage);
-
-      int matchingFiducial = -1;
-      for (int i = 0; i < detector.totalFound(); i++)
+      synchronized (detectorConch)
       {
-         if (detector.getId(i) == targetIDToLocate.getLongValue())
+         if (!locationEnabled.getBooleanValue())
+            return;
+
+         setIntrinsicParameters(bufferedImage);
+
+         cameraRigidTransform.setRotation(cameraOrientationInWorldXForward);
+         cameraRigidPosition.set(cameraPositionInWorld);
+         cameraRigidTransform.setTranslation(cameraRigidPosition);
+
+         cameraReferenceFrame.update();
+         detectorReferenceFrame.update();
+
+         cameraPose.setOrientation(cameraOrientationInWorldXForward);
+         cameraPose.setPosition(cameraPositionInWorld);
+
+         GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
+
+         detector.detect(grayImage);
+
+         int matchingFiducial = -1;
+         for (int i = 0; i < detector.totalFound(); i++)
          {
-            matchingFiducial = i;
-            //            System.out.println("matchingFiducial = " + matchingFiducial);
+            if (detector.getId(i) == targetIDToLocate.getLongValue())
+            {
+               matchingFiducial = i;
+               //            System.out.println("matchingFiducial = " + matchingFiducial);
+            }
          }
-      }
 
-      if (matchingFiducial > -1)
-      {
-         detector.getFiducialToCamera(matchingFiducial, fiducialToCamera);
-
-         //         System.out.println("fiducialToCamera = \n" + fiducialToCamera);
-
-         detectorPositionX.set(fiducialToCamera.getX());
-         detectorPositionY.set(fiducialToCamera.getY());
-         detectorPositionZ.set(fiducialToCamera.getZ());
-         ConvertRotation3D_F64.matrixToEuler(fiducialToCamera.R, EulerType.XYZ, eulerAngles);
-         detectorEulerRotX.set(eulerAngles[0]);
-         detectorEulerRotY.set(eulerAngles[1]);
-         detectorEulerRotZ.set(eulerAngles[2]);
-
-         fiducialRotationMatrix.set(fiducialToCamera.getR().data);
-         RotationTools.convertMatrixToQuaternion(fiducialRotationMatrix, tempFiducialRotationQuat);
-
-         tempFiducialDetectorFrame.setToZero(detectorReferenceFrame);
-         tempFiducialDetectorFrame.setOrientation(tempFiducialRotationQuat);
-         tempFiducialDetectorFrame.setPosition(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
-         tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
-
-         locatedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
-
-         locatedFiducialReferenceFrame.update();
-
-         tempFiducialDetectorFrame.setToZero(reportedFiducialReferenceFrame);
-         tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
-
-         tempFiducialDetectorFrame.getOrientationIncludingFrame(tempFudictionalDetectorOrientation);
-         fiducialReportedOrientationQuaternionInWorldFrame.set(tempFudictionalDetectorOrientation);
-
-         reportedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
-
-         targetIDHasBeenLocated.set(true);
-
-         if (visualize)
+         if (matchingFiducial > -1)
          {
-            cameraGraphic.update();
-            detectorGraphic.update();
-            locatedFiducialGraphic.update();
-            reportedFiducialGraphic.update();
+            detector.getFiducialToCamera(matchingFiducial, fiducialToCamera);
+
+            //         System.out.println("fiducialToCamera = \n" + fiducialToCamera);
+
+            detectorPositionX.set(fiducialToCamera.getX());
+            detectorPositionY.set(fiducialToCamera.getY());
+            detectorPositionZ.set(fiducialToCamera.getZ());
+            ConvertRotation3D_F64.matrixToEuler(fiducialToCamera.R, EulerType.XYZ, eulerAngles);
+            detectorEulerRotX.set(eulerAngles[0]);
+            detectorEulerRotY.set(eulerAngles[1]);
+            detectorEulerRotZ.set(eulerAngles[2]);
+
+            fiducialRotationMatrix.set(fiducialToCamera.getR().data);
+            RotationTools.convertMatrixToQuaternion(fiducialRotationMatrix, tempFiducialRotationQuat);
+
+            tempFiducialDetectorFrame.setToZero(detectorReferenceFrame);
+            tempFiducialDetectorFrame.setOrientation(tempFiducialRotationQuat);
+            tempFiducialDetectorFrame.setPosition(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
+            tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
+
+            locatedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
+
+            locatedFiducialReferenceFrame.update();
+
+            tempFiducialDetectorFrame.setToZero(reportedFiducialReferenceFrame);
+            tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
+
+            tempFiducialDetectorFrame.getOrientationIncludingFrame(tempFudictionalDetectorOrientation);
+            fiducialReportedOrientationQuaternionInWorldFrame.set(tempFudictionalDetectorOrientation);
+
+            reportedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
+
+            targetIDHasBeenLocated.set(true);
+
+            if (visualize)
+            {
+               cameraGraphic.update();
+               detectorGraphic.update();
+               locatedFiducialGraphic.update();
+               reportedFiducialGraphic.update();
+            }
          }
-      }
-      else
-      {
-         targetIDHasBeenLocated.set(false);
+         else
+         {
+            targetIDHasBeenLocated.set(false);
+         }
       }
    }
 
@@ -287,6 +294,11 @@ public class FiducialDetectorFromCameraImages
 
       return intrinsicParameters;
    }
+   
+   public void setExpectedFiducialSize(double expectedFiducialSize)
+   {
+      this.expectedFiducialSize.set(expectedFiducialSize);
+   }
 
    public void setTargetIDToLocate(long targetIDToLocate)
    {
@@ -301,11 +313,6 @@ public class FiducialDetectorFromCameraImages
    public boolean getTargetIDHasBeenLocated()
    {
       return targetIDHasBeenLocated.getBooleanValue();
-   }
-
-   public void getLocatedFiducialPoseWorldFrame(FramePose framePoseToPack)
-   {
-      locatedFiducialPoseInWorldFrame.getFramePoseIncludingFrame(framePoseToPack);
    }
 
    public void getReportedFiducialPoseWorldFrame(FramePose framePoseToPack)
