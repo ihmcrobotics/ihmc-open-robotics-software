@@ -40,7 +40,7 @@ import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 
 public class FiducialDetectorFromCameraImages
 {
-   private boolean visualize = false;
+   private boolean visualize = true;
 
    private final Se3_F64 fiducialToCamera;
    private final Matrix3d fiducialRotationMatrix;
