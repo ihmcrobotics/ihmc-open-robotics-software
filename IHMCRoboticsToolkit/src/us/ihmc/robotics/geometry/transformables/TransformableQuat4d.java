@@ -30,6 +30,7 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
       normalize();
    }
 
+   // Has to be public because this is sent in packets and packets' fields need to be public.
    public Quat4d tempQuaternionForTransform;
 
    @Override
