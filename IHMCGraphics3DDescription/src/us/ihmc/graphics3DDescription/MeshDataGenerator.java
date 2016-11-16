@@ -1018,10 +1018,10 @@ public class MeshDataGenerator
       }
       else
       {
-         textPoints[7] = new TexCoord2f(0.0f, 0.0f);
-         textPoints[4] = new TexCoord2f(0.0f, 0.0f);
-         textPoints[5] = new TexCoord2f(0.0f, 0.0f);
-         textPoints[6] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[8] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[9] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[10] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[11] = new TexCoord2f(0.0f, 0.0f);
       }
 
       if (textureFaces == null || textureFaces[3])
