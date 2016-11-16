@@ -50,7 +50,7 @@ public class JMEMeshDataInterpreterTest
    @Test(timeout = 30000)
    public void testForASimpleCube()
    {
-      MeshDataHolder meshData = MeshDataGenerator.Cube(1.0f, 1.0f, 1.0f, true);
+      MeshDataHolder meshData = MeshDataGenerator.Cube(1.0f, 1.0f, 1.0f, true, null);
       Mesh interpretMeshData = JMEMeshDataInterpreter.interpretMeshData(meshData);
 
       assertEquals(12, interpretMeshData.getTriangleCount());

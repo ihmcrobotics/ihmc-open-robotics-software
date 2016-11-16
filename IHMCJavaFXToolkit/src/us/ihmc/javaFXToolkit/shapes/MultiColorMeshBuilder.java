@@ -71,17 +71,17 @@ public class MultiColorMeshBuilder
 
    public void addBox(float lx, float ly, float lz, Color color)
    {
-      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true), color);
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), color);
    }
 
    public void addBox(float lx, float ly, float lz, Tuple3f offset, Color color)
    {
-      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true), offset, color);
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), offset, color);
    }
 
    public void addBox(double lx, double ly, double lz, Tuple3d offset, Color color)
    {
-      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true), offset, color);
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), offset, color);
    }
 
    public void addCube(float size, Color color)
