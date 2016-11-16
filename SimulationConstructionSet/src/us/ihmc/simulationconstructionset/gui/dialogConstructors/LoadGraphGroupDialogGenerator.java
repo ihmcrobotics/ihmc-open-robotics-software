@@ -10,9 +10,9 @@ import javax.swing.JFrame;
 
 import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroupSelector;
+import us.ihmc.tools.gui.MyFileFilter;
 import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class LoadGraphGroupDialogGenerator implements LoadGraphGroupDialogConstructor

@@ -6,7 +6,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.Window;
 import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -18,24 +18,48 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.apache.commons.io.output.TeeOutputStream;
+
 import us.ihmc.tools.gui.TextAreaOutputStream;
 import us.ihmc.tools.thread.ThreadTools;
 
 
-public class CustomProgressMonitor extends JDialog
+public class CustomProgressMonitor extends JDialog implements ProgressMonitorInterface
 {
    private static final long serialVersionUID = 2256156304298596266L;
-   private final JProgressBar progressBar;
-   private final JTextArea commandOutput;
-   private final JLabel noteLabel;
+   private JProgressBar progressBar;
+   private JTextArea commandOutput;
+   private JLabel noteLabel;
    
-   private final TextAreaOutputStream outputStream ;
+   private TextAreaOutputStream outputStream ;
+   private PrintStream printStream;
+   
+   private boolean echoToConsole = false;
+   
+   public CustomProgressMonitor()
+   {
+      super((Window) null, "Progress");
+      setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);  
+   }
    
    public CustomProgressMonitor(String message, String note, int min, int max)
    {
-      super((Window) null, "Progress");
-      setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-      
+      this();
+      initialize(message, note, min, max);
+   }
+   
+   public void setEchoToConsole(boolean echoToConsole)
+   {
+      if(printStream != null)
+      {
+         throw new RuntimeException("Call setEchoToConsole before initialize()");
+      }
+      this.echoToConsole = echoToConsole;
+   }
+   
+   @Override
+   public void initialize(String message, String note, int min, int max)
+   {
       JPanel mainPanel = new JPanel(new BorderLayout());
       mainPanel.setOpaque(true);;
       
@@ -56,6 +80,17 @@ public class CustomProgressMonitor extends JDialog
       commandOutput.setMargin(new Insets(5, 5, 5, 5));
       commandOutput.setEditable(false);
       outputStream = new TextAreaOutputStream(commandOutput);
+      
+      OutputStream stream;
+      if(echoToConsole)
+      {
+         stream = new TeeOutputStream(outputStream, System.out);
+      }
+      else
+      {
+         stream = outputStream;
+      }
+      printStream = new PrintStream(stream, true);
 
       JPanel panel = new JPanel();
       panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -78,23 +113,28 @@ public class CustomProgressMonitor extends JDialog
       setSize(800, getHeight());
       setLocationByPlatform(true);
       setVisible(true);
+
    }
    
+   @Override
    public void setNote(String note)
    {
       noteLabel.setText(note);
    }
 
+   @Override
    public void setProgress(int i)
    {
       progressBar.setValue(i);
    }
    
-   public OutputStream getOutputStream()
+   @Override
+   public PrintStream getPrintStream()
    {
-      return outputStream;
+      return printStream;
    }
    
+   @Override
    public void close()
    {
       setVisible(false);
@@ -103,8 +143,8 @@ public class CustomProgressMonitor extends JDialog
    
    public static void main(String[] args)
    {
-      CustomProgressMonitor monitor = new CustomProgressMonitor("test", "testNote", 0, 100);
-      PrintWriter writer = new PrintWriter(monitor.getOutputStream(), true);
+      ProgressMonitorInterface monitor = new CustomProgressMonitor("test", "testNote", 0, 100);
+      PrintStream writer = monitor.getPrintStream();
       for(int i = 0; i < 100; i++)
       {
          monitor.setProgress(i);
@@ -117,6 +157,7 @@ public class CustomProgressMonitor extends JDialog
 
    }
 
+   @Override
    public void setError(String string)
    {
       noteLabel.setText(string);
