@@ -147,7 +147,6 @@ public abstract class ToolboxModule
          @Override
          public boolean isMessageValid(Packet<?> message)
          {
-            System.out.println("message.getDestination() "+message.getDestination()+" thisDesitination "+ thisDesitination);
             if (message.getDestination() != thisDesitination)
                return false;
 

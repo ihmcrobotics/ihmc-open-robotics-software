@@ -24,7 +24,7 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    public void setOrientation(Quat4d orientation)
    {
       this.orientation.set(orientation);
-      this.orientation.normalizeAndLimitToPiMinusPi();
+      this.orientation.normalize();
    }
 
    @Override
@@ -50,7 +50,6 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    {
       orientation.set(other.orientation);
       angularVelocity.set(other.angularVelocity);
-      orientation.normalizeAndLimitToPiMinusPi();
    }
 
    @Override

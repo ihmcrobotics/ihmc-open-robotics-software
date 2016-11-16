@@ -28,6 +28,7 @@ public class YoGraphicReferenceFrame extends YoGraphicCoordinateSystem
       this.referenceFrame = referenceFrame;
    }
 
+   @Override
    public void update()
    {
       this.setToReferenceFrame(referenceFrame);
