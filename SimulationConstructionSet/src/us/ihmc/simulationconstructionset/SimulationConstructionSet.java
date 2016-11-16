@@ -2349,7 +2349,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          // for(int i=0;i<RECORD_FREQ;i++)
          for (int i = 0; i < ticksThisCycle; i++)
          {
-            if (synchronizeGraphicsAndCamerasWhileSimulating)
+            if ((myGUI != null) && (synchronizeGraphicsAndCamerasWhileSimulating))
             {
                synchronized (myGUI.getGraphicsConch())
                {
