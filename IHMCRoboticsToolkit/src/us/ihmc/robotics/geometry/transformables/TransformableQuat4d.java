@@ -11,7 +11,6 @@ import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 public class TransformableQuat4d extends Quat4d implements GeometryObject<TransformableQuat4d>
 {
    private static final long serialVersionUID = -3751421971526302255L;
-   private final Quat4d tempQuaternionForTransform = new Quat4d();
 
    public TransformableQuat4d(Quat4d tuple)
    {
@@ -31,9 +30,13 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
       normalize();
    }
 
+   public Quat4d tempQuaternionForTransform;
+
    @Override
    public void applyTransform(RigidBodyTransform transform3D)
    {
+      if (tempQuaternionForTransform == null)
+         tempQuaternionForTransform = new Quat4d();
       transform3D.getRotation(tempQuaternionForTransform);
       this.mul(tempQuaternionForTransform, this);
       normalize();
@@ -157,23 +160,19 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
       return "yaw-pitch-roll: (" + yawPitchRoll[0] + ", " + yawPitchRoll[1] + ", " + yawPitchRoll[2] + ")";
    }
 
-   private double[] tempYawPitchRoll = new double[3];
    public double getYaw()
    {
-      RotationTools.convertQuaternionToYawPitchRoll(this, tempYawPitchRoll);
-      return tempYawPitchRoll[0];
+      return RotationTools.computeYaw(this);
    }
 
    public double getPitch()
    {
-      RotationTools.convertQuaternionToYawPitchRoll(this, tempYawPitchRoll);
-      return tempYawPitchRoll[1];
+      return RotationTools.computePitch(this);
    }
 
    public double getRoll()
    {
-      RotationTools.convertQuaternionToYawPitchRoll(this, tempYawPitchRoll);
-      return tempYawPitchRoll[2];
+      return RotationTools.computeRoll(this);
    }
 
 }
