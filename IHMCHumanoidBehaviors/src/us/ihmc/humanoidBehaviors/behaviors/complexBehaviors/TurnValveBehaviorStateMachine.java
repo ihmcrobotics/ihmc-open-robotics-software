@@ -164,7 +164,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
 
       statemachine.addStateWithDoneTransition(setup, TurnValveBehaviorState.SEARCHING_FOR_VAVLE);
       statemachine.addStateWithDoneTransition(searchForValveFar, TurnValveBehaviorState.WALKING_TO_VALVE);
-      statemachine.addStateWithDoneTransition(walkToValveAction, TurnValveBehaviorState.SEARCHING_FOR_VALVE_FINAL);
+      statemachine.addStateWithDoneTransition(walkToValveAction, TurnValveBehaviorState.TURNING_VALVE);
       statemachine.addStateWithDoneTransition(searchForValveNear, TurnValveBehaviorState.TURNING_VALVE);
       statemachine.addState(graspAndTurnValve);
       statemachine.setCurrentState(TurnValveBehaviorState.SETUP_ROBOT);
