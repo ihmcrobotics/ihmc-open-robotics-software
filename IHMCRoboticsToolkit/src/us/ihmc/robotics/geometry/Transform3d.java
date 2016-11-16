@@ -1,7 +1,5 @@
 package us.ihmc.robotics.geometry;
 
-import org.ejml.data.DenseMatrix64F;
-
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.AxisAngle4f;
 import javax.vecmath.Matrix3d;
@@ -10,8 +8,12 @@ import javax.vecmath.Matrix4d;
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
+import javax.vecmath.Tuple3d;
+import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
+
+import org.ejml.data.DenseMatrix64F;
 
 /**
  * 
@@ -1797,57 +1799,57 @@ public class Transform3d extends RigidBodyTransform
    }
 
    /**
-    * Pack rotation part into Matrix3d and translation part into Vector3d
+    * Pack rotation part into Matrix3d and translation part into Tuple3d
     * 
-    * @param matrix
-    * @param vector
+    * @param matrixToPack
+    * @param translationToPack
     */
    @Override
-   public final void get(Matrix3d matrix, Vector3d vector)
+   public final void get(Matrix3d matrixToPack, Tuple3d translationToPack)
    {
-      getRotation(matrix);
-      getTranslation(vector);
+      getRotation(matrixToPack);
+      getTranslation(translationToPack);
    }
 
    /**
-    * Pack rotation part into Matrix3f and translation part into Vector3f
+    * Pack rotation part into Matrix3f and translation part into Tuple3f
     * 
-    * @param matrix
-    * @param vector
+    * @param matrixToPack
+    * @param translationToPack
     */
    @Override
-   public final void get(Matrix3f matrix, Vector3f vector)
+   public final void get(Matrix3f matrixToPack, Tuple3f translationToPack)
    {
-      getRotation(matrix);
-      getTranslation(vector);
+      getRotation(matrixToPack);
+      getTranslation(translationToPack);
    }
 
    /**
     * Convert and pack rotation part of transform into Quat4d and pack
-    * translation into Vector3d.
+    * translation into Tuple3d.
     * 
-    * @param quat
-    * @param vector
+    * @param quaternionToPack
+    * @param translationToPack
     */
    @Override
-   public final void get(Quat4d quat, Vector3d vector)
+   public final void get(Quat4d quaternionToPack, Tuple3d translationToPack)
    {
-      getRotation(quat);
-      getTranslation(vector);
+      getRotation(quaternionToPack);
+      getTranslation(translationToPack);
    }
 
    /**
     * Convert and pack rotation part of transform into Quat4f and pack
-    * translation into Vector3f.
+    * translation into Tuple3f.
     * 
-    * @param quat
-    * @param vector
+    * @param quaternionToPack
+    * @param translationToPack
     */
    @Override
-   public final void get(Quat4f quat, Vector3f vector)
+   public final void get(Quat4f quaternionToPack, Tuple3f translationToPack)
    {
-      getRotation(quat);
-      getTranslation(vector);
+      getRotation(quaternionToPack);
+      getTranslation(translationToPack);
    }
 
    /**

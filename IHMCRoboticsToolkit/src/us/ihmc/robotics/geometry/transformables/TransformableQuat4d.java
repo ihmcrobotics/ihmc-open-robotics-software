@@ -11,12 +11,11 @@ import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 public class TransformableQuat4d extends Quat4d implements GeometryObject<TransformableQuat4d>
 {
    private static final long serialVersionUID = -3751421971526302255L;
-   private final Quat4d tempQuaternionForTransform = new Quat4d();
 
    public TransformableQuat4d(Quat4d tuple)
    {
       super(tuple);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    public TransformableQuat4d()
@@ -28,15 +27,19 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public TransformableQuat4d(double[] quaternion)
    {
       super(quaternion);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
+
+   public Quat4d tempQuaternionForTransform;
 
    @Override
    public void applyTransform(RigidBodyTransform transform3D)
    {
+      if (tempQuaternionForTransform == null)
+         tempQuaternionForTransform = new Quat4d();
       transform3D.getRotation(tempQuaternionForTransform);
       this.mul(tempQuaternionForTransform, this);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    /**
@@ -73,25 +76,25 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public void set(TransformableQuat4d other)
    {
       super.set(other);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
    
    public void setOrientation(Quat4d quat4d)
    {
       super.set(quat4d);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
    
    public void setOrientation(Matrix3d matrix3d)
    {
       super.set(matrix3d);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    public void setOrientation(AxisAngle4d axisAngle4d)
    {
       super.set(axisAngle4d);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    @Override
@@ -136,13 +139,13 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public void setYawPitchRoll(double[] yawPitchRoll)
    {
       RotationTools.convertYawPitchRollToQuaternion(yawPitchRoll, this);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
       RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, this);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    public void getYawPitchRoll(double[] yawPitchRollToPack)
@@ -157,23 +160,19 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
       return "yaw-pitch-roll: (" + yawPitchRoll[0] + ", " + yawPitchRoll[1] + ", " + yawPitchRoll[2] + ")";
    }
 
-   private double[] tempYawPitchRoll = new double[3];
    public double getYaw()
    {
-      RotationTools.convertQuaternionToYawPitchRoll(this, tempYawPitchRoll);
-      return tempYawPitchRoll[0];
+      return RotationTools.computeYaw(this);
    }
 
    public double getPitch()
    {
-      RotationTools.convertQuaternionToYawPitchRoll(this, tempYawPitchRoll);
-      return tempYawPitchRoll[1];
+      return RotationTools.computePitch(this);
    }
 
    public double getRoll()
    {
-      RotationTools.convertQuaternionToYawPitchRoll(this, tempYawPitchRoll);
-      return tempYawPitchRoll[2];
+      return RotationTools.computeRoll(this);
    }
 
 }

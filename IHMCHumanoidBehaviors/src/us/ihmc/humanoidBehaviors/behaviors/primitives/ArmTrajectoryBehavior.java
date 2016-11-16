@@ -88,9 +88,9 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         outgoingMessage.setDestination(PacketDestination.UI);
+//         outgoingMessage.setDestination(PacketDestination.UI);
 
-         sendPacketToController(outgoingMessage);
+//         sendPacketToController(outgoingMessage);
          sendPacket(outgoingMessage);
 
          hasPacketBeenSent.set(true);

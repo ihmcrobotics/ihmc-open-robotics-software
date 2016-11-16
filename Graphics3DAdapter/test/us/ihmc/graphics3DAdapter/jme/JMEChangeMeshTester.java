@@ -18,12 +18,12 @@ public class JMEChangeMeshTester extends SimpleApplication
 {
    Graphics3DAddMeshDataInstruction instruction;
    private Node node;
-   
+
    int counter = 0;
    @Override
    public void simpleInitApp()
    {
-      
+
       Graphics3DObject graphics = new Graphics3DObject();
       graphics.setChangeable(true);
       graphics.rotate(Math.PI/2.0, Axis.Z);
@@ -32,7 +32,7 @@ public class JMEChangeMeshTester extends SimpleApplication
 
       node = graphicsObject.getNode();
       rootNode.attachChild(node);
-      
+
       flyCam.setDragToRotate(true);
       setupLighting();
    }
@@ -65,13 +65,13 @@ public class JMEChangeMeshTester extends SimpleApplication
       rootNode.addLight(a1);
 
    }
-   
+
    @Override
    public void simpleUpdate(float tpf)
    {
       if(counter % 1000 == 0)
       {
-         instruction.setMesh(MeshDataGenerator.Cube(1.0, 1.0, 1.0,false));
+         instruction.setMesh(MeshDataGenerator.Cube(1.0, 1.0, 1.0,false, null));
          instruction.setAppearance(YoAppearance.Yellow());
       }
       else if (counter % 500 == 0)
@@ -81,7 +81,7 @@ public class JMEChangeMeshTester extends SimpleApplication
       }
       counter++;
    }
-   
+
    public static void main(String[] args)
    {
       JMEChangeMeshTester jmeChangeMeshTester = new JMEChangeMeshTester();

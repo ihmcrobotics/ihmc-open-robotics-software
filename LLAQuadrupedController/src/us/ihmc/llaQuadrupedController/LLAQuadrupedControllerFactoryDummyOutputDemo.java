@@ -43,7 +43,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
 
-public class LLAQuardrupedControllerFactoryDummyOutputDemo
+public class LLAQuadrupedControllerFactoryDummyOutputDemo
 {
    private static final boolean USE_KINEMATICS_BASED_STATE_ESTIMATOR = true;
    private static final double GRAVITY = 9.81;
@@ -55,7 +55,7 @@ public class LLAQuardrupedControllerFactoryDummyOutputDemo
    private DRCStateEstimatorInterface simulationStateEstimator;
    private QuadrupedRuntimeEnvironment runtimeEnvironment;
    
-   public LLAQuardrupedControllerFactoryDummyOutputDemo() throws IOException
+   public LLAQuadrupedControllerFactoryDummyOutputDemo() throws IOException
    {
       // Load parameters. Note that this happens after initializing all other modules so all parameters are registered before loading.
       ParameterRegistry.getInstance().loadFromResources(QuadrupedParameterSet.SIMULATION_IDEAL.getPath());
@@ -220,7 +220,7 @@ public class LLAQuardrupedControllerFactoryDummyOutputDemo
    
    public static void main(String[] args) throws IOException
    {
-      LLAQuardrupedControllerFactoryDummyOutputDemo llaQuadrupedControllerFactoryDummyOutputDemo = new LLAQuardrupedControllerFactoryDummyOutputDemo();
+      LLAQuadrupedControllerFactoryDummyOutputDemo llaQuadrupedControllerFactoryDummyOutputDemo = new LLAQuadrupedControllerFactoryDummyOutputDemo();
       
       llaQuadrupedControllerFactoryDummyOutputDemo.run();
       
