@@ -44,12 +44,12 @@ public class MeshBuilder
    {
       addMesh(MeshDataHolder.translate(meshDataHolder, offset));
    }
-   
+
    public void addMesh(MeshDataHolder meshDataHolder, Tuple3d offset, AxisAngle4d orientation)
    {
       addMesh(MeshDataHolder.rotate(meshDataHolder, orientation), offset);
    }
-   
+
    public void addMesh(MeshDataHolder meshDataHolder, Tuple3f offset)
    {
       addMesh(MeshDataHolder.translate(meshDataHolder, offset));
@@ -65,7 +65,7 @@ public class MeshBuilder
    {
       addMesh(MeshDataGenerator.Sphere(radius, DEFAULT_RES, DEFAULT_RES));
    }
-   
+
    public void addSphere(float radius, Tuple3f offset)
    {
       addMesh(MeshDataGenerator.Sphere(radius, DEFAULT_RES, DEFAULT_RES), offset);
@@ -75,7 +75,7 @@ public class MeshBuilder
    {
       addMesh(MeshDataGenerator.Polygon(polygon));
    }
-   
+
    public void addCube(float size, Tuple3f cubeOffset)
    {
       addBox(size, size, size, cubeOffset);
@@ -93,17 +93,17 @@ public class MeshBuilder
 
    public void addBox(float lx, float ly, float lz)
    {
-      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true));
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null));
    }
 
    public void addBox(float lx, float ly, float lz, Tuple3f offset)
    {
-      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true), offset);
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), offset);
    }
 
    public void addBox(double lx, double ly, double lz, Tuple3d offset)
    {
-      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true), offset);
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), offset);
    }
 
    public void addCylinder(double height, double radius, Tuple3d offset)

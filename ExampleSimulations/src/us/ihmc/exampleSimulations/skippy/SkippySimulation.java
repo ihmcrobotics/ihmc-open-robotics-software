@@ -12,8 +12,8 @@ public class SkippySimulation
 {
    public static final double DT = 0.0001;
    public static final double controlDT = 0.0001;
-   public static final double TIME = 3.0;//3.5;//2.0;//30.0;//25.0;//15.0;//10.0;//6.0;//8.0;//60.0;// 
-   private static SimulationConstructionSet sim;
+   public static final double TIME = 6.0;//3.5;//3.0;//2.0;//30.0;//25.0;//15.0;//10.0;//8.0;//60.0;// 
+   private SimulationConstructionSet sim;
 
    public SkippySimulation()
    {
@@ -25,51 +25,12 @@ public class SkippySimulation
       sim = new SimulationConstructionSet(skippy);
       sim.setGroundVisible(true);
       sim.setDT(DT, 10);
+      sim.setMaxBufferSize(64000);
       sim.setSimulateDuration(TIME);
-      sim.setCameraPosition(10.0,   0.0, 2.0);
+      sim.setCameraPosition(10.0, 0.0, 2.0);
 
       boolean showOverheadView = true;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      /*
-       * Begin YoVariable Listener
-       */
-      DoubleYoVariable variable = (DoubleYoVariable) sim.getVariable("gc_foot_y");
-
-      variable.addVariableChangedListener(new VariableChangedListener()
-      {
-         double previousValue = 0.0;
-
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            if ((v.getValueAsDouble() > -0.001) && (v.getValueAsDouble() < 0.001))
-            {
-               System.out.println("gc_foot_y = " + v);
-            }
-
-            previousValue = v.getValueAsDouble();
-         }
-      });
-      DoubleYoVariable variable1 = (DoubleYoVariable) sim.getVariable("gc_foot_x");
-
-      variable.addVariableChangedListener(new VariableChangedListener()
-      {
-         double previousValue = 0.0;
-
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            if ((previousValue > 0.0) && (v.getValueAsDouble() < 0.0))
-            {
-               System.out.println("gc_foot_x = " + v);
-            }
-
-            previousValue = v.getValueAsDouble();
-         }
-      });
-     /*
-       * End YoVariable Listener
-       */
       SkippyController skippyController = new SkippyController(skippy, robotType, "skippyController", controlDT, yoGraphicsListRegistry);
       skippy.setController(skippyController);
       // skippy.setController(new ExternalControlServer(skippy,
@@ -91,6 +52,7 @@ public class SkippySimulation
       skippyController.closeFile();
 
    }
+
 
    /*
     * When your simulation is run, first the main method will be called. In

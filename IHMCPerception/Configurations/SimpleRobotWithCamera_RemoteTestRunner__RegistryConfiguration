@@ -1,0 +1,4 @@
+root*false*false
+root.SimpleRobotWithCamera*false*false
+root.SimpleRobotWithCamera.FiducialDetectorFromCameraImages*false*false
+root.SimpleBoxRobotWithQRCode*false*false

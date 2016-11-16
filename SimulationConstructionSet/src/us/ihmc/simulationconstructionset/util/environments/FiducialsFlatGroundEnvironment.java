@@ -57,13 +57,13 @@ public class FiducialsFlatGroundEnvironment implements CommonAvatarEnvironmentIn
    private CombinedTerrainObject3D addFiducial(double x, double y, double rotation, Fiducial fiducial)
    {
       YoAppearanceTexture fiducialTexture = new YoAppearanceTexture(fiducial.getPathString());
-      double boxSideLength = 0.3;
+      double boxSideLength = 1.0;
 
       CombinedTerrainObject3D fiducualTerrainObject = new CombinedTerrainObject3D(fiducial.name());
       
       RigidBodyTransform location = new RigidBodyTransform();
       location.setRotationEulerAndZeroTranslation(Math.toRadians(90.0), 0.0, rotation - Math.toRadians(90.0));
-      location.setTranslation(new Vector3d(x, y, 0.7));
+      location.setTranslation(new Vector3d(x, y, 1.7));
       
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, boxSideLength, boxSideLength, boxSideLength), fiducialTexture);
       fiducualTerrainObject.addTerrainObject(newBox);

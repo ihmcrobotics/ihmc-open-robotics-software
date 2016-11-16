@@ -475,7 +475,7 @@ public class Graphics3DObject
     */
    public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz)
    {
-      return addCube(lx, ly, lz, DEFAULT_APPEARANCE);
+      return addCube(lx, ly, lz, DEFAULT_APPEARANCE, null);
    }
 
    /**
@@ -494,19 +494,29 @@ public class Graphics3DObject
     * @param ly length of the cube in the y direction.
     * @param lz length of the cube in the z direction.
     * @param cubeApp Appearance of the cube.  See {@link YoAppearance YoAppearance} for implementations.
+    * @param textureFace Whether or not to texture map each of the 6 faces. Only relevant if the AppearanceDefinition is a texture map.
     * @return
     */
+   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp, boolean[] textureFaces)
+   {
+      MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, false, textureFaces);
+      return addMeshData(meshData, cubeApp);
+   }
+
    public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, AppearanceDefinition cubeApp)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, false);
+      return addCube(lx, ly, lz, cubeApp, null);
+   }
+
+   public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, boolean centered, AppearanceDefinition cubeApp, boolean[] textureFaces)
+   {
+      MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, centered, textureFaces);
       return addMeshData(meshData, cubeApp);
    }
 
    public Graphics3DAddMeshDataInstruction addCube(double lx, double ly, double lz, boolean centered, AppearanceDefinition cubeApp)
    {
-      MeshDataHolder meshData = MeshDataGenerator.Cube(lx, ly, lz, centered);
-
-      return addMeshData(meshData, cubeApp);
+      return addCube(lx, ly, lz, centered, cubeApp, null);
    }
 
    /**

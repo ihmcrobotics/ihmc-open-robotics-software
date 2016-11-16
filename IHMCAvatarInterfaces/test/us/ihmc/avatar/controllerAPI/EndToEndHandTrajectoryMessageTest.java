@@ -36,6 +36,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
+import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -779,6 +780,69 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime()); // Don't want to check the time here.
          assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, EPSILON_FOR_DESIREDS));
       }
+   }
+
+   /*
+    * Test revealing a bug that was preventing the trajectory from flipping the sign of the final orientation (necessary to prevent an extra rotation).
+    * This bug was due to limiting the angle described by a TransformableQuat4d to be in [-Pi; Pi].
+    */
+   @ContinuousIntegrationTest(estimatedDuration = 23.2)
+   @Test(timeout = 120000)
+   public void testBugFromActualSimDataWithTwoTrajectoryPoints() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      assertTrue(success);
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      RobotSide robotSide = RobotSide.RIGHT;
+
+      double trajectoryTime = 1.0;
+      RigidBody chest = fullRobotModel.getChest();
+
+      FramePose waypoint0 = new FramePose(chest.getBodyFixedFrame());
+      waypoint0.setPosition(0.85602, -0.33869, -0.01085);
+      waypoint0.setOrientation(0.99766, 0.01831, 0.06483, 0.01143);
+      FramePose waypoint1 = new FramePose(chest.getBodyFixedFrame());
+      waypoint1.setPosition(0.97144, -0.38298, -0.02078);
+      waypoint1.setOrientation(-0.98753, -0.00886, -0.06093, 0.14487);
+
+      waypoint0.changeFrame(ReferenceFrame.getWorldFrame());
+      waypoint1.changeFrame(ReferenceFrame.getWorldFrame());
+
+      Point3d waypointPosition0 = new Point3d();
+      Quat4d waypointOrientation0 = new Quat4d();
+      Point3d waypointPosition1 = new Point3d();
+      Quat4d waypointOrientation1 = new Quat4d();
+      waypoint0.getPose(waypointPosition0, waypointOrientation0);
+      waypoint1.getPose(waypointPosition1, waypointOrientation1);
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, BaseForControl.CHEST, 2);
+      handTrajectoryMessage.setTrajectoryPoint(0, trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3d(), new Vector3d());
+      handTrajectoryMessage.setTrajectoryPoint(1, 2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3d(), new Vector3d());
+
+      drcSimulationTestHelper.send(handTrajectoryMessage);
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + 2.0 * trajectoryTime);
+      assertTrue(success);
+
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      String handName = fullRobotModel.getHand(robotSide).getName();
+      String nameSpace = handName + AxisAngleOrientationController.class.getSimpleName();
+      String varname = handName + "RotationErrorInBody";
+      Vector3d rotationError = findVector3d(nameSpace, varname, scs);
+
+      /*
+       * Checking the tracking error should be enough.
+       * As went the bug is present, the error magnitude goes up to [-0.31, 0.002, -0.027] (as rotation vector) against [-0.03, -0.01, -0.01] without the bug.
+       */
+      assertTrue(rotationError.length() < 0.05);
    }
 
    public static FrameOrientation computeBestOrientationForDesiredPosition(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide,
