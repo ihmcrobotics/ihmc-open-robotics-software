@@ -379,9 +379,7 @@ public class PlanarRegion
     */
    public void getBoundingBox3dInWorld(BoundingBox3d boundingBox3dToPack)
    {
-      boundingBox3dToPack.set(this.boundingBox3dInWorld.getXMin(), this.boundingBox3dInWorld.getYMin(), this.boundingBox3dInWorld
-                  .getZMin(), this.boundingBox3dInWorld.getXMax(),
-            this.boundingBox3dInWorld.getYMax(), this.boundingBox3dInWorld.getZMax());
+      boundingBox3dToPack.set(this.boundingBox3dInWorld);
    }
 
    public boolean epsilonEquals(PlanarRegion other, double epsilon)
