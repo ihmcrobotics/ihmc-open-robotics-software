@@ -21,6 +21,27 @@ project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
 project.ext.licenseName = "Apache License, Version 2.0"
 project.ext.bintrayLicenseName = "Apache-2.0"
 
+project.sourceSets {
+    main {
+        java {
+            srcDirs = ['src', 'visualizers']
+        }
+
+        resources {
+            srcDirs = ['src', 'resources']
+        }
+    }
+
+    test {
+        java {
+            srcDirs = ['test']
+        }
+
+        resources {
+            srcDirs = ['testResources']
+        }
+    }
+}
 
 repositories ihmc.ihmcDefaultArtifactProxies()
 
