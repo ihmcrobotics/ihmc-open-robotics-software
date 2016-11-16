@@ -42,14 +42,14 @@ public class FiducialDetectorFromCameraImages
 {
    private boolean visualize = true;
 
-   private final Se3_F64 fiducialToCamera;
-   private final Matrix3d fiducialRotationMatrix;
-   private final Quat4d tempFiducialRotationQuat;
-   private final FramePose tempFiducialDetectorFrame;
-   private final FrameOrientation tempFudictionalDetectorOrientation;
-   private final Vector3d cameraRigidPosition;
-   private final double[] eulerAngles;
-   private final RigidBodyTransform cameraRigidTransform;
+   private final Se3_F64 fiducialToCamera = new Se3_F64();
+   private final Matrix3d fiducialRotationMatrix = new Matrix3d();
+   private final Quat4d tempFiducialRotationQuat = new Quat4d();
+   private final FramePose tempFiducialDetectorFrame = new FramePose();
+   private final FrameOrientation tempFudictionalDetectorOrientation = new FrameOrientation();
+   private final Vector3d cameraRigidPosition = new Vector3d();
+   private final double[] eulerAngles = new double[3];
+   private final RigidBodyTransform cameraRigidTransform = new RigidBodyTransform();
 
    private final ReferenceFrame cameraReferenceFrame, detectorReferenceFrame, locatedFiducialReferenceFrame, reportedFiducialReferenceFrame;
 
@@ -81,8 +81,6 @@ public class FiducialDetectorFromCameraImages
    private final YoFramePose locatedFiducialPoseInWorldFrame = new YoFramePose(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePose reportedFiducialPoseInWorldFrame = new YoFramePose(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
 
-
-//   private final YoFrameQuaternion fiducialOrientationQuaternionInWorldFrame = new YoFrameQuaternion(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameQuaternion fiducialReportedOrientationQuaternionInWorldFrame = new YoFrameQuaternion(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
 
    public FiducialDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -102,26 +100,13 @@ public class FiducialDetectorFromCameraImages
       });
 
       // fov values from http://carnegierobotics.com/multisense-s7/
-      //      fieldOfViewXinRadians.set(Math.toRadians(80.0));
-      //      fieldOfViewYinRadians.set(Math.toRadians(45.0));
-
-      //      fieldOfViewXinRadians.set(Math.PI/4.0);
-      //      fieldOfViewYinRadians.set(Math.PI/4.0);
-
-      fieldOfViewXinRadians.set(1.0);
-      fieldOfViewYinRadians.set(1.0);
-
-      fiducialToCamera = new Se3_F64();
-      eulerAngles = new double[3];
-      fiducialRotationMatrix = new Matrix3d();
-      tempFiducialRotationQuat = new Quat4d();
-      cameraRigidPosition = new Vector3d();
-      cameraRigidTransform = new RigidBodyTransform();
-      tempFiducialDetectorFrame = new FramePose();
-      tempFudictionalDetectorOrientation = new FrameOrientation();
+      fieldOfViewXinRadians.set(Math.toRadians(80.0));
+      fieldOfViewYinRadians.set(Math.toRadians(45.0));
 
       cameraReferenceFrame = new ReferenceFrame(prefix + "CameraReferenceFrame", ReferenceFrame.getWorldFrame())
       {
+         private static final long serialVersionUID = 4455939689271999057L;
+
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -131,6 +116,8 @@ public class FiducialDetectorFromCameraImages
 
       detectorReferenceFrame = new ReferenceFrame(prefix + "DetectorReferenceFrame", cameraReferenceFrame)
       {
+         private static final long serialVersionUID = -6695542420802533867L;
+
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -151,6 +138,8 @@ public class FiducialDetectorFromCameraImages
 
       locatedFiducialReferenceFrame = new ReferenceFrame(prefix + "LocatedReferenceFrame", ReferenceFrame.getWorldFrame())
       {
+         private static final long serialVersionUID = 9164127391552081524L;
+
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -170,11 +159,11 @@ public class FiducialDetectorFromCameraImages
          cameraGraphic = new YoGraphicReferenceFrame(cameraReferenceFrame, registry, 0.5);
          detectorGraphic = new YoGraphicReferenceFrame(detectorReferenceFrame, registry, 1.0);
          locatedFiducialGraphic = new YoGraphicReferenceFrame(locatedFiducialReferenceFrame, registry, 0.1);
-         reportedFiducialGraphic = new YoGraphicReferenceFrame(reportedFiducialReferenceFrame, registry, 0.1);
+         reportedFiducialGraphic = new YoGraphicReferenceFrame(reportedFiducialReferenceFrame, registry, 0.2);
 
          //         yoGraphicsListRegistry.registerYoGraphic("Fiducials", cameraGraphic);
          //         yoGraphicsListRegistry.registerYoGraphic("Fiducials", detectorGraphic);
-         yoGraphicsListRegistry.registerYoGraphic("Fiducials", locatedFiducialGraphic);
+         //         yoGraphicsListRegistry.registerYoGraphic("Fiducials", locatedFiducialGraphic);
          yoGraphicsListRegistry.registerYoGraphic("Fiducials", reportedFiducialGraphic);
       }
       else
@@ -196,15 +185,12 @@ public class FiducialDetectorFromCameraImages
       setNewVideoPacket(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
    }
 
-   private boolean showedImage = false;
-
    public void setNewVideoPacket(BufferedImage bufferedImage, Point3d cameraPositionInWorld, Quat4d cameraOrientationInWorldXForward)
    {
       if (!locationEnabled.getBooleanValue())
          return;
 
-      //TODO: Don't make a new one every tick. Reuse it.
-      IntrinsicParameters intrinsicParameters = setIntrinsicParameters(bufferedImage);
+      setIntrinsicParameters(bufferedImage);
 
       cameraRigidTransform.setRotation(cameraOrientationInWorldXForward);
       cameraRigidPosition.set(cameraPositionInWorld);
@@ -234,7 +220,7 @@ public class FiducialDetectorFromCameraImages
       {
          detector.getFiducialToCamera(matchingFiducial, fiducialToCamera);
 
-//         System.out.println("fiducialToCamera = \n" + fiducialToCamera);
+         //         System.out.println("fiducialToCamera = \n" + fiducialToCamera);
 
          detectorPositionX.set(fiducialToCamera.getX());
          detectorPositionY.set(fiducialToCamera.getY());
@@ -273,27 +259,6 @@ public class FiducialDetectorFromCameraImages
             locatedFiducialGraphic.update();
             reportedFiducialGraphic.update();
          }
-
-         //         if (!showedImage)
-         //         {
-         //            System.out.println("Showing image...");
-         //            showedImage = true;
-         //            Se3_F64 fiducialToCamera = new Se3_F64();
-         //            detector.getFiducialToCamera(0, fiducialToCamera);
-         //
-         //            fiducialToCamera.setTranslation(0.0, 0.0, 0.2);
-         //            System.out.println("fiducialToCamera = " + fiducialToCamera);
-         //
-         //            BufferedImage bufferedImageCopy = new BufferedImage(bufferedImage.getWidth(), bufferedImage.getHeight(), bufferedImage.getType());
-         //
-         //            Graphics2D graphics = bufferedImageCopy.createGraphics();
-         //
-         //            VisualizeFiducial.drawCube(fiducialToCamera, intrinsicParameters, detector.getWidth(0), 3, graphics);
-         //            VisualizeFiducial.drawLabelCenter(fiducialToCamera, intrinsicParameters, "" + detector.getId(0), graphics);
-         ////
-         //            ShowImages.showWindow(bufferedImage, "FiducialDetectionImageTest");
-         //            System.out.println("Done showing image...");
-         //         }
       }
       else
       {
@@ -301,16 +266,16 @@ public class FiducialDetectorFromCameraImages
       }
    }
 
+   private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
+
    private IntrinsicParameters setIntrinsicParameters(BufferedImage image)
    {
-      IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
-
       int height = image.getHeight();
       int width = image.getWidth();
 
       double fx = (width / 2.0) / Math.tan(fieldOfViewXinRadians.getDoubleValue() / 2.0);
       double fy = (height / 2.0) / Math.tan(fieldOfViewYinRadians.getDoubleValue() / 2.0);
-      intrinsicParameters = new IntrinsicParameters();
+
       intrinsicParameters.width = width;
       intrinsicParameters.height = height;
       intrinsicParameters.cx = width / 2;

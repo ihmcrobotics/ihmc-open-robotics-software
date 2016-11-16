@@ -33,14 +33,15 @@ import us.ihmc.simulationconstructionset.util.environments.FiducialsFlatGroundEn
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class FiducialDetectorFromCameraImagesTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 5.0)
+   @Test(timeout = 300000)
    public void testUsingSimulationConstructionSet()
    {
       double fieldOfView = 0.81;
@@ -58,13 +59,14 @@ public class FiducialDetectorFromCameraImagesTest
 
       detector.setFieldOfView(fieldOfView, fieldOfView);
 
-      SimulationConstructionSet scsForDetecting = new SimulationConstructionSet(new Robot[] { simpleRobotWithCamera, simpleBoxRobotWithQRCode}, simulationTestingParameters);
+      SimulationConstructionSet scsForDetecting = new SimulationConstructionSet(new Robot[] { simpleRobotWithCamera, simpleBoxRobotWithQRCode });
       scsForDetecting.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       CameraConfiguration cameraConfiguration = new CameraConfiguration("cameraMount");
       cameraConfiguration.setCameraMount("cameraMount");
       //      cameraConfiguration.setCameraFieldOfView(fieldOfView);
       scsForDetecting.setupCamera(cameraConfiguration);
+      scsForDetecting.selectCamera("cameraMount");
 
       scsForDetecting.setDT(0.001, 10);
       scsForDetecting.setSimulateNoFasterThanRealTime(true);
@@ -193,10 +195,10 @@ public class FiducialDetectorFromCameraImagesTest
       ThreadTools.sleep(2000L);
       testConductor.simulate();
 
-//      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
-//      {
-//         ThreadTools.sleepForever();
-//      }
+      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      {
+         ThreadTools.sleepForever();
+      }
 
       testConductor.concludeTesting();
 
