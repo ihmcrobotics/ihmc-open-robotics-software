@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyTrajectoryCommand;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -43,7 +43,7 @@ public class KinematicsToolboxModule extends ToolboxModule
       commands.add(HandTrajectoryCommand.class);
       commands.add(FootTrajectoryCommand.class);
       commands.add(ChestTrajectoryCommand.class);
-      commands.add(PelvisTrajectoryCommand.class);
+      commands.add(PelvisOrientationTrajectoryCommand.class);
       commands.add(WholeBodyTrajectoryCommand.class);
       return commands;
    }
