@@ -38,6 +38,7 @@ import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -221,6 +222,14 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
          FrameOrientation desiredChestOrientation = new FrameOrientation(worldFrame);
          command.getLastTrajectoryPoint().getOrientation(desiredChestOrientation);
          desiredChestOrientationReference.set(desiredChestOrientation);
+      }
+      
+      if (commandInputManager.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
+      {
+         PelvisOrientationTrajectoryCommand command = commandInputManager.pollNewestCommand(PelvisOrientationTrajectoryCommand.class);  
+         FrameOrientation desiredPelvisOrientation = new FrameOrientation(worldFrame);
+         command.getLastTrajectoryPoint().getOrientation(desiredPelvisOrientation);
+         desiredPelvisOrientationReference.set(desiredPelvisOrientation);
       }
 
       if (commandInputManager.isNewCommandAvailable(FootTrajectoryCommand.class))
@@ -485,15 +494,9 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
       initialCoMXY.changeFrameAndProjectToXYPlane(referenceFrames.getMidFeetZUpFrame());
       desiredCenterOfMassXYReference.set(initialCoMXY);
 
-      desiredChestOrientationReference.getAndSet(null);
-      
-//      FrameOrientation initialChestOrientation = new FrameOrientation(desiredFullRobotModel.getChest().getBodyFixedFrame());
-//      initialChestOrientation.changeFrame(worldFrame);
-//      desiredChestOrientationReference.set(initialChestOrientation);
+      desiredChestOrientationReference.set(null);
 
-      FrameOrientation initialPelvisOrientation = new FrameOrientation(desiredFullRobotModel.getPelvis().getBodyFixedFrame());
-      initialPelvisOrientation.changeFrame(worldFrame);
-      desiredPelvisOrientationReference.set(initialPelvisOrientation);
+      desiredPelvisOrientationReference.set(null);
 
       for (RobotSide robotSide : RobotSide.values)
       {
