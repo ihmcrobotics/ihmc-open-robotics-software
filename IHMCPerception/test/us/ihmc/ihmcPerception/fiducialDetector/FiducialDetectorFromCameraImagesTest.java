@@ -33,7 +33,6 @@ import us.ihmc.simulationconstructionset.util.environments.FiducialsFlatGroundEn
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class FiducialDetectorFromCameraImagesTest
@@ -59,7 +58,7 @@ public class FiducialDetectorFromCameraImagesTest
 
       detector.setFieldOfView(fieldOfView, fieldOfView);
 
-      SimulationConstructionSet scsForDetecting = new SimulationConstructionSet(new Robot[] { simpleRobotWithCamera, simpleBoxRobotWithQRCode});
+      SimulationConstructionSet scsForDetecting = new SimulationConstructionSet(new Robot[] { simpleRobotWithCamera, simpleBoxRobotWithQRCode}, simulationTestingParameters);
       scsForDetecting.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       CameraConfiguration cameraConfiguration = new CameraConfiguration("cameraMount");
@@ -191,12 +190,13 @@ public class FiducialDetectorFromCameraImagesTest
       testConductor.addSustainGoal(YoVariableTestGoal.variablesEqual(fiducialReportedPoseWorldFrameQY, q_qrCode_qy, okTrackingDeltaQuaternion));
       testConductor.addSustainGoal(YoVariableTestGoal.variablesEqual(fiducialReportedPoseWorldFrameQZ, q_qrCode_qz, okTrackingDeltaQuaternion));
 
+      ThreadTools.sleep(2000L);
       testConductor.simulate();
 
-      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
-      {
-         ThreadTools.sleepForever();
-      }
+//      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+//      {
+//         ThreadTools.sleepForever();
+//      }
 
       testConductor.concludeTesting();
 
