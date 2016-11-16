@@ -874,6 +874,11 @@ public class MeshDataGenerator
       return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
+   public static MeshDataHolder Cube(double lx, double ly, double lz, boolean centered)
+   {
+      return Cube(lx, ly, lz, centered, null);
+   }
+
    public static MeshDataHolder Cube(double lx, double ly, double lz, boolean centered, boolean[] textureFaces)
    {
       return Cube((float) lx, (float) ly, (float) lz, centered, textureFaces);
