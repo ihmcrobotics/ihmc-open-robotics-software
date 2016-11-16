@@ -29,6 +29,7 @@ import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
+import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
@@ -170,6 +171,8 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAngle
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.remote.serialization.JointConfigurationData;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
+import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -402,7 +405,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketClass(TestbedClientPacket.class);
 
-     // registerPacketClass(FishEyeControlPacket.class);
+      // registerPacketClass(FishEyeControlPacket.class);
       registerPacketClass(ControlStatusPacket.class);
       registerPacketField(ControlStatusPacket.ControlStatus.class);
 
@@ -500,10 +503,13 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(UIConnectedPacket.class);
       registerPacketClass(LegCompliancePacket.class);
       registerPacketClass(DrillDetectionPacket.class);
-
+      registerPacketClass(UIPositionCheckerPacket.class);
       registerPacketClass(BatchedDesiredSteeringAngleAndSingleJointAnglePacket.class);
       registerPacketClass(TextToSpeechPacket.class);
       registerPacketField(VideoSource.class);
+      
+      registerPacketField(TransformableQuat4d.class);
+      registerPacketField(TransformablePoint3d.class);
 
 
    }

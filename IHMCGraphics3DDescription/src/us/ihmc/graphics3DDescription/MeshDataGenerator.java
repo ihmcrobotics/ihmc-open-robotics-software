@@ -874,12 +874,43 @@ public class MeshDataGenerator
       return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
+   /**
+    * Generate a {@link MeshDataHolder} for a cube of size (lx, ly, lz).
+    * @param lx cube size along the x-axis.
+    * @param ly cube size along the y-axis.
+    * @param lz cube size along the z-axis.
+    * @param centered whether the generated cube is centered at 0 along the z-axis only.
+    * @return the cube mesh in a {@link MeshDataHolder}.
+    */
    public static MeshDataHolder Cube(double lx, double ly, double lz, boolean centered)
    {
-      return (Cube((float) lx, (float) ly, (float) lz, centered));
+      return Cube(lx, ly, lz, centered, null);
    }
 
-   public static MeshDataHolder Cube(float lx, float ly, float lz, boolean centered)
+   /**
+    * Generate a {@link MeshDataHolder} for a cube of size (lx, ly, lz).
+    * @param lx cube size along the x-axis.
+    * @param ly cube size along the y-axis.
+    * @param lz cube size along the z-axis.
+    * @param centered whether the generated cube is centered at 0 along the z-axis only.
+    * @param textureFaces specifies for each face whether the texture coordinates should be computed or not. When null, the texture coordinates for all the faces are computed.
+    * @return the cube mesh in a {@link MeshDataHolder}.
+    */
+   public static MeshDataHolder Cube(double lx, double ly, double lz, boolean centered, boolean[] textureFaces)
+   {
+      return Cube((float) lx, (float) ly, (float) lz, centered, textureFaces);
+   }
+
+   /**
+    * Generate a {@link MeshDataHolder} for a cube of size (lx, ly, lz).
+    * @param lx cube size along the x-axis.
+    * @param ly cube size along the y-axis.
+    * @param lz cube size along the z-axis.
+    * @param centered whether the generated cube is centered at 0 along the z-axis only.
+    * @param textureFaces specifies for each face whether the texture coordinates should be computed or not. When null, the texture coordinates for all the faces are computed.
+    * @return the cube mesh in a {@link MeshDataHolder}.
+    */
+   public static MeshDataHolder Cube(float lx, float ly, float lz, boolean centered, boolean[] textureFaces)
    {
       Point3f points[] = new Point3f[24];
       Vector3f[] normals = new Vector3f[24];
@@ -891,86 +922,152 @@ public class MeshDataGenerator
       // Bottom vertices for bottom face
       points[0] = new Point3f(-lx / 2.0f, -ly / 2.0f, za);
       normals[0] = new Vector3f(0.0f, 0.0f, -1.0f);
-      textPoints[0] = new TexCoord2f(0.0f, 0.0f);
       points[1] = new Point3f(lx / 2.0f, -ly / 2.0f, za);
       normals[1] = new Vector3f(0.0f, 0.0f, -1.0f);
-      textPoints[1] = new TexCoord2f(1.0f, 0.0f);
       points[2] = new Point3f(lx / 2.0f, ly / 2.0f, za);
       normals[2] = new Vector3f(0.0f, 0.0f, -1.0f);
-      textPoints[2] = new TexCoord2f(1.0f, 1.0f);
       points[3] = new Point3f(-lx / 2.0f, ly / 2.0f, za);
       normals[3] = new Vector3f(0.0f, 0.0f, -1.0f);
-      textPoints[3] = new TexCoord2f(0.0f, 1.0f);
 
       // Top vertices for top face
       points[4] = new Point3f(-lx / 2.0f, -ly / 2.0f, zb);
       normals[4] = new Vector3f(0.0f, 0.0f, 1.0f);
-      textPoints[4] = new TexCoord2f(0.0f, 0.0f);
       points[5] = new Point3f(lx / 2.0f, -ly / 2.0f, zb);
       normals[5] = new Vector3f(0.0f, 0.0f, 1.0f);
-      textPoints[5] = new TexCoord2f(1.0f, 0.0f);
       points[6] = new Point3f(lx / 2.0f, ly / 2.0f, zb);
       normals[6] = new Vector3f(0.0f, 0.0f, 1.0f);
-      textPoints[6] = new TexCoord2f(1.0f, 1.0f);
       points[7] = new Point3f(-lx / 2.0f, ly / 2.0f, zb);
       normals[7] = new Vector3f(0.0f, 0.0f, 1.0f);
-      textPoints[7] = new TexCoord2f(0.0f, 1.0f);
 
       // Left face vertices
       points[8] = new Point3f(points[2]);
       normals[8] = new Vector3f(0.0f, 1.0f, 0.0f);
-      textPoints[8] = new TexCoord2f(textPoints[2]);
       points[9] = new Point3f(points[3]);
       normals[9] = new Vector3f(0.0f, 1.0f, 0.0f);
-      textPoints[9] = new TexCoord2f(textPoints[3]);
       points[10] = new Point3f(points[6]);
       normals[10] = new Vector3f(0.0f, 1.0f, 0.0f);
-      textPoints[10] = new TexCoord2f(textPoints[6]);
       points[11] = new Point3f(points[7]);
       normals[11] = new Vector3f(0.0f, 1.0f, 0.0f);
-      textPoints[11] = new TexCoord2f(textPoints[7]);
 
       // Right face vertices
       points[12] = new Point3f(points[0]);
       normals[12] = new Vector3f(0.0f, -1.0f, 0.0f);
-      textPoints[12] = new TexCoord2f(textPoints[0]);
       points[13] = new Point3f(points[1]);
       normals[13] = new Vector3f(0.0f, -1.0f, 0.0f);
-      textPoints[13] = new TexCoord2f(textPoints[1]);
       points[14] = new Point3f(points[4]);
       normals[14] = new Vector3f(0.0f, -1.0f, 0.0f);
-      textPoints[14] = new TexCoord2f(textPoints[4]);
       points[15] = new Point3f(points[5]);
       normals[15] = new Vector3f(0.0f, -1.0f, 0.0f);
-      textPoints[15] = new TexCoord2f(textPoints[5]);
 
       // Front face vertices
       points[16] = new Point3f(points[0]);
       normals[16] = new Vector3f(-1.0f, 0.0f, 0.0f);
-      textPoints[16] = new TexCoord2f(textPoints[0]);
       points[17] = new Point3f(points[3]);
       normals[17] = new Vector3f(-1.0f, 0.0f, 0.0f);
-      textPoints[17] = new TexCoord2f(textPoints[3]);
       points[18] = new Point3f(points[4]);
       normals[18] = new Vector3f(-1.0f, 0.0f, 0.0f);
-      textPoints[18] = new TexCoord2f(textPoints[4]);
       points[19] = new Point3f(points[7]);
       normals[19] = new Vector3f(-1.0f, 0.0f, 0.0f);
-      textPoints[19] = new TexCoord2f(textPoints[7]);
 
       // Back face vertices
       points[20] = new Point3f(points[1]);
       normals[20] = new Vector3f(1.0f, 0.0f, 0.0f);
-      textPoints[20] = new TexCoord2f(textPoints[1]);
       points[21] = new Point3f(points[2]);
       normals[21] = new Vector3f(1.0f, 0.0f, 0.0f);
-      textPoints[21] = new TexCoord2f(textPoints[2]);
       points[22] = new Point3f(points[5]);
       normals[22] = new Vector3f(1.0f, 0.0f, 0.0f);
-      textPoints[22] = new TexCoord2f(textPoints[5]);
       points[23] = new Point3f(points[6]);
       normals[23] = new Vector3f(1.0f, 0.0f, 0.0f);
-      textPoints[23] = new TexCoord2f(textPoints[6]);
+
+      if (textureFaces == null || textureFaces[0])
+      {
+         textPoints[0] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[1] = new TexCoord2f(0.0f, 1.0f);
+         textPoints[2] = new TexCoord2f(1.0f, 1.0f);
+         textPoints[3] = new TexCoord2f(1.0f, 0.0f);
+      }
+      else
+      {
+         textPoints[0] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[1] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[2] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[3] = new TexCoord2f(0.0f, 0.0f);
+      }
+
+      if (textureFaces == null || textureFaces[1])
+      {
+         textPoints[7] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[4] = new TexCoord2f(1.0f, 0.0f);
+         textPoints[5] = new TexCoord2f(1.0f, 1.0f);
+         textPoints[6] = new TexCoord2f(0.0f, 1.0f);
+      }
+      else
+      {
+         textPoints[7] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[4] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[5] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[6] = new TexCoord2f(0.0f, 0.0f);
+      }
+
+      if (textureFaces == null || textureFaces[2])
+      {
+         textPoints[8] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[9] = new TexCoord2f(1.0f, 0.0f);
+         textPoints[10] = new TexCoord2f(0.0f, 1.0f);
+         textPoints[11] = new TexCoord2f(1.0f, 1.0f);
+      }
+      else
+      {
+         textPoints[8] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[9] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[10] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[11] = new TexCoord2f(0.0f, 0.0f);
+      }
+
+      if (textureFaces == null || textureFaces[3])
+      {
+         textPoints[12] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[13] = new TexCoord2f(1.0f, 0.0f);
+         textPoints[14] = new TexCoord2f(0.0f, 1.0f);
+         textPoints[15] = new TexCoord2f(1.0f, 1.0f);
+      }
+      else
+      {
+         textPoints[12] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[13] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[14] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[15] = new TexCoord2f(0.0f, 0.0f);
+      }
+
+      if (textureFaces == null || textureFaces[4])
+      {
+         textPoints[17] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[19] = new TexCoord2f(0.0f, 1.0f);
+         textPoints[18] = new TexCoord2f(1.0f, 1.0f);
+         textPoints[16] = new TexCoord2f(1.0f, 0.0f);
+      }
+      else
+      {
+         textPoints[17] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[19] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[18] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[16] = new TexCoord2f(0.0f, 0.0f);
+      }
+
+      if (textureFaces == null || textureFaces[5])
+      {
+         textPoints[20] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[22] = new TexCoord2f(0.0f, 1.0f);
+         textPoints[23] = new TexCoord2f(1.0f, 1.0f);
+         textPoints[21] = new TexCoord2f(1.0f, 0.0f);
+      }
+      else
+      {
+         textPoints[20] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[22] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[23] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[21] = new TexCoord2f(0.0f, 0.0f);
+      }
 
       int numberOfTriangles = 2 * 6;
 
@@ -1458,7 +1555,7 @@ public class MeshDataGenerator
       Vector3f lineDirection = new Vector3f(x1 - x0, y1 - y0, z1 - z0);
       float lineLength = lineDirection.length();
       lineDirection.scale(1.0f / lineLength);
-      MeshDataHolder line = Cube(width, width, lineLength, false);
+      MeshDataHolder line = Cube(width, width, lineLength, false, null);
       Point3f[] vertices = line.getVertices();
       Vector3f[] normals = line.getVertexNormals();
 
@@ -1702,7 +1799,7 @@ public class MeshDataGenerator
        *    /  \
        *   /    \
        * 2 ------ 1
-       * 
+       *
        */
       float height = (float) Math.sqrt(6.0f) / 3.0f * edgeLength;
       float sqrt3 = (float) Math.sqrt(3.0f);
@@ -1754,7 +1851,7 @@ public class MeshDataGenerator
       vertices[5] = new Point3f(topVertex);
       texCoords[5] = new TexCoord2f(1.0f, 1.0f);
       normals[5] = new Vector3f(rightNormal);
-      
+
       // Left face
       vertices[6] = new Point3f(baseVertex0);
       texCoords[6] = new TexCoord2f(baseTex0);

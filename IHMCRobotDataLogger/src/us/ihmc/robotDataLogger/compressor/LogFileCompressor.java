@@ -1,15 +1,20 @@
 package us.ihmc.robotDataLogger.compressor;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.tukaani.xz.LZMA2Options;
 import org.tukaani.xz.XZOutputStream;
+
+import com.google.common.hash.Hashing;
+import com.google.common.io.Files;
 
 import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
@@ -23,10 +28,11 @@ LogFileCompressor extends YoVariableLogReader
    public static final int MAX_BUFFER_SIZE_IN_BYTE = 100000000;
    public static final int COMPRESSION_LEVEL = 3;
 
-   public static final String out = "/home/jesper/scratch/";
+   public static final String out = "/home/jesper/scratch/compressed/";
 
    private int bufferedElements;
-
+   private volatile int compressedDataFiles = 0;
+   
    private final ExecutorService threadPool = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
    private final LinkedBlockingQueue<DataBuffer> availableBuffers = new LinkedBlockingQueue<>();
    private final LinkedBlockingQueue<DataBuffer> writableBuffers = new LinkedBlockingQueue<>();
@@ -44,6 +50,7 @@ LogFileCompressor extends YoVariableLogReader
       System.out.println("Found " + getNumberOfVariables() + " variables.");
       System.out.println("Writing " + bufferedElements + " data points at a time");
       System.out.println("Total space " + (getNumberOfEntries() * getNumberOfVariables() * 8) / (1024 * 1024) + " MB.");
+
 
       if (bufferedElements > getNumberOfEntries())
       {
@@ -64,17 +71,40 @@ LogFileCompressor extends YoVariableLogReader
       }
 
       decompressData();
+      
+      
+      copyMetaData(new File(out));
+      
+      CompressionProperties properties = new CompressionProperties();
+      properties.setNumberOfBufferedElements(bufferedElements);
+      properties.setCompressedDataFiles(compressedDataFiles);
+      setChecksums(properties);
+      
+      FileOutputStream propertiesFile = new FileOutputStream(new File(out, "robotData.compressed"));
+      properties.store(propertiesFile, "Description of compression properties");
+      propertiesFile.close();
 
       close();
+   }
+   
+   private void setChecksums(CompressionProperties properties) throws IOException
+   {
+      System.out.println("Saving checksums to file");
+      File logdata = new File(logDirectory, logProperties.getVariableDataFile());
+      properties.setDataChecksum(Files.hash(logdata, Hashing.sha1()).toString());
+      
+      File index = new File(logDirectory, logProperties.getVariablesIndexFile());
+      properties.setTimestampChecksum(Files.hash(index, Hashing.sha1()).toString());
+      System.out.println("Saved checksums");
    }
 
    private void decompressData() throws IOException
    {
 
-      int currentFile = 0;
+      int fileIndex = 0;
       int currentFileEntry = 0;
 
-      DataBuffer buffer = getFreeDataBuffer(currentFile);
+      DataBuffer buffer = getFreeDataBuffer(fileIndex);
 
       for (int i = 0; i < getNumberOfEntries(); i++)
       {
@@ -95,25 +125,32 @@ LogFileCompressor extends YoVariableLogReader
          currentFileEntry++;
          if (currentFileEntry >= bufferedElements)
          {
-            try
-            {
-               writableBuffers.put(buffer);
-               threadPool.execute(new DataWriter());
-            }
-            catch (InterruptedException e)
-            {
-               throw new RuntimeException(e);
-            }
-            buffer = getFreeDataBuffer(currentFile);
+            submitBuffer(buffer, currentFileEntry);
+            fileIndex++;
+            buffer = getFreeDataBuffer(fileIndex);
             currentFileEntry = 0;
-            currentFile++;
          }
       }
+      submitBuffer(buffer, currentFileEntry);
 
       System.out.println("All data read");
       threadPool.shutdown();
 
-      copyMetaData(new File(out));
+   }
+
+   private void submitBuffer(DataBuffer buffer, int numberOfEntries)
+   {
+      try
+      {
+         buffer.length = numberOfEntries;
+         writableBuffers.put(buffer);
+         threadPool.execute(new DataWriter());
+         compressedDataFiles++;
+      }
+      catch (InterruptedException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 
    private DataBuffer getFreeDataBuffer(int currentFile)
@@ -135,6 +172,7 @@ LogFileCompressor extends YoVariableLogReader
    {
       private final byte[][] data;
       private int fileID;
+      private int length;
 
       public DataBuffer(int variables, int elements)
       {
@@ -159,12 +197,11 @@ LogFileCompressor extends YoVariableLogReader
             int writtenLength = 0;
             for (int i = 0; i < getNumberOfVariables(); i++)
             {
-               writtenLength += dataBuffers[i].length;
-               xzOutputStream.write(dataBuffers[i]);
+               writtenLength += buffer.length * 8;
+               xzOutputStream.write(dataBuffers[i], 0, buffer.length * 8);
             }
 
-            System.out.println("Wrote " + writtenLength / (1024 * 1024) + " MB");
-
+            System.out.println("Wrote " + writtenLength / (1024 * 1024) + " MB to robotData." + currentFile + ".xz");
             xzOutputStream.close();
             logOutputStream.close();
             availableBuffers.put(buffer);
