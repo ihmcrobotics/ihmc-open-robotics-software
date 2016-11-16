@@ -16,6 +16,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -46,6 +47,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final DoubleYoVariable trajectoryTime;
 
    private final KinematicsToolboxOutputConverter outputConverter;
+   private final FullHumanoidRobotModel fullHumanoidRobotModel;
 
    private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>();
    private KinematicsToolboxOutputStatus solutionSentToController = null;
@@ -54,16 +56,17 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final DoubleYoVariable timeSolutionSentToController;
 
    public WholeBodyInverseKinematicsBehavior(FullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
-         CommunicationBridgeInterface outgoingCommunicationBridge)
+         CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel)
    {
-      this(null, fullRobotModelFactory, yoTime, outgoingCommunicationBridge);
+      this(null, fullRobotModelFactory, yoTime, outgoingCommunicationBridge, fullRobotModel);
    }
 
    public WholeBodyInverseKinematicsBehavior(String namePrefix, FullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
-         CommunicationBridgeInterface outgoingCommunicationBridge)
+         CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel)
    {
       super(namePrefix, outgoingCommunicationBridge);
       this.yoTime = yoTime;
+      this.fullHumanoidRobotModel = fullRobotModel;
 
       solutionQualityThreshold = new DoubleYoVariable(behaviorName + "SolutionQualityThreshold", registry);
       solutionQualityThreshold.set(0.005);
