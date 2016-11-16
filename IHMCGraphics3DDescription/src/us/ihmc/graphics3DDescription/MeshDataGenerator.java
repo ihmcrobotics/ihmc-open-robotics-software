@@ -874,16 +874,42 @@ public class MeshDataGenerator
       return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
+   /**
+    * Generate a {@link MeshDataHolder} for a cube of size (lx, ly, lz).
+    * @param lx cube size along the x-axis.
+    * @param ly cube size along the y-axis.
+    * @param lz cube size along the z-axis.
+    * @param centered whether the generated cube is centered at 0 along the z-axis only.
+    * @return the cube mesh in a {@link MeshDataHolder}.
+    */
    public static MeshDataHolder Cube(double lx, double ly, double lz, boolean centered)
    {
       return Cube(lx, ly, lz, centered, null);
    }
 
+   /**
+    * Generate a {@link MeshDataHolder} for a cube of size (lx, ly, lz).
+    * @param lx cube size along the x-axis.
+    * @param ly cube size along the y-axis.
+    * @param lz cube size along the z-axis.
+    * @param centered whether the generated cube is centered at 0 along the z-axis only.
+    * @param textureFaces specifies for each face whether the texture coordinates should be computed or not. When null, the texture coordinates for all the faces are computed.
+    * @return the cube mesh in a {@link MeshDataHolder}.
+    */
    public static MeshDataHolder Cube(double lx, double ly, double lz, boolean centered, boolean[] textureFaces)
    {
       return Cube((float) lx, (float) ly, (float) lz, centered, textureFaces);
    }
 
+   /**
+    * Generate a {@link MeshDataHolder} for a cube of size (lx, ly, lz).
+    * @param lx cube size along the x-axis.
+    * @param ly cube size along the y-axis.
+    * @param lz cube size along the z-axis.
+    * @param centered whether the generated cube is centered at 0 along the z-axis only.
+    * @param textureFaces specifies for each face whether the texture coordinates should be computed or not. When null, the texture coordinates for all the faces are computed.
+    * @return the cube mesh in a {@link MeshDataHolder}.
+    */
    public static MeshDataHolder Cube(float lx, float ly, float lz, boolean centered, boolean[] textureFaces)
    {
       Point3f points[] = new Point3f[24];
@@ -953,60 +979,94 @@ public class MeshDataGenerator
       points[23] = new Point3f(points[6]);
       normals[23] = new Vector3f(1.0f, 0.0f, 0.0f);
 
-      for (int i=0; i<24; i++)
+      if (textureFaces == null || textureFaces[0])
       {
-         textPoints[i] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[0] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[1] = new TexCoord2f(0.0f, 1.0f);
+         textPoints[2] = new TexCoord2f(1.0f, 1.0f);
+         textPoints[3] = new TexCoord2f(1.0f, 0.0f);
+      }
+      else
+      {
+         textPoints[0] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[1] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[2] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[3] = new TexCoord2f(0.0f, 0.0f);
       }
 
-      if (textureFaces != null)
+      if (textureFaces == null || textureFaces[1])
       {
-         if (textureFaces[0])
-         {
-            textPoints[0] = new TexCoord2f(0.0f, 0.0f);
-            textPoints[1] = new TexCoord2f(0.0f, 1.0f);
-            textPoints[2] = new TexCoord2f(1.0f, 1.0f);
-            textPoints[3] = new TexCoord2f(1.0f, 0.0f);
-         }
+         textPoints[7] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[4] = new TexCoord2f(1.0f, 0.0f);
+         textPoints[5] = new TexCoord2f(1.0f, 1.0f);
+         textPoints[6] = new TexCoord2f(0.0f, 1.0f);
+      }
+      else
+      {
+         textPoints[7] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[4] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[5] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[6] = new TexCoord2f(0.0f, 0.0f);
+      }
 
-         if (textureFaces[1])
-         {
-            textPoints[7] = new TexCoord2f(0.0f, 0.0f);
-            textPoints[4] = new TexCoord2f(1.0f, 0.0f);
-            textPoints[5] = new TexCoord2f(1.0f, 1.0f);
-            textPoints[6] = new TexCoord2f(0.0f, 1.0f);
-         }
+      if (textureFaces == null || textureFaces[2])
+      {
+         textPoints[8] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[9] = new TexCoord2f(1.0f, 0.0f);
+         textPoints[10] = new TexCoord2f(0.0f, 1.0f);
+         textPoints[11] = new TexCoord2f(1.0f, 1.0f);
+      }
+      else
+      {
+         textPoints[7] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[4] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[5] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[6] = new TexCoord2f(0.0f, 0.0f);
+      }
 
-         if (textureFaces[2])
-         {
-            textPoints[8] = new TexCoord2f(0.0f, 0.0f);
-            textPoints[9] = new TexCoord2f(1.0f, 0.0f);
-            textPoints[10] = new TexCoord2f(0.0f, 1.0f);
-            textPoints[11] = new TexCoord2f(1.0f, 1.0f);
-         }
+      if (textureFaces == null || textureFaces[3])
+      {
+         textPoints[12] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[13] = new TexCoord2f(1.0f, 0.0f);
+         textPoints[14] = new TexCoord2f(0.0f, 1.0f);
+         textPoints[15] = new TexCoord2f(1.0f, 1.0f);
+      }
+      else
+      {
+         textPoints[12] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[13] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[14] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[15] = new TexCoord2f(0.0f, 0.0f);
+      }
 
-         if (textureFaces[3])
-         {
-            textPoints[12] = new TexCoord2f(0.0f, 0.0f);
-            textPoints[13] = new TexCoord2f(1.0f, 0.0f);
-            textPoints[14] = new TexCoord2f(0.0f, 1.0f);
-            textPoints[15] = new TexCoord2f(1.0f, 1.0f);
-         }
+      if (textureFaces == null || textureFaces[4])
+      {
+         textPoints[17] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[19] = new TexCoord2f(0.0f, 1.0f);
+         textPoints[18] = new TexCoord2f(1.0f, 1.0f);
+         textPoints[16] = new TexCoord2f(1.0f, 0.0f);
+      }
+      else
+      {
+         textPoints[17] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[19] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[18] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[16] = new TexCoord2f(0.0f, 0.0f);
+      }
 
-         if (textureFaces[4])
-         {
-            textPoints[17] = new TexCoord2f(0.0f, 0.0f);
-            textPoints[19] = new TexCoord2f(0.0f, 1.0f);
-            textPoints[18] = new TexCoord2f(1.0f, 1.0f);
-            textPoints[16] = new TexCoord2f(1.0f, 0.0f);
-         }
-
-         if (textureFaces[5])
-         {
-            textPoints[20] = new TexCoord2f(0.0f, 0.0f);
-            textPoints[22] = new TexCoord2f(0.0f, 1.0f);
-            textPoints[23] = new TexCoord2f(1.0f, 1.0f);
-            textPoints[21] = new TexCoord2f(1.0f, 0.0f);
-         }
+      if (textureFaces == null || textureFaces[5])
+      {
+         textPoints[20] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[22] = new TexCoord2f(0.0f, 1.0f);
+         textPoints[23] = new TexCoord2f(1.0f, 1.0f);
+         textPoints[21] = new TexCoord2f(1.0f, 0.0f);
+      }
+      else
+      {
+         textPoints[20] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[22] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[23] = new TexCoord2f(0.0f, 0.0f);
+         textPoints[21] = new TexCoord2f(0.0f, 0.0f);
       }
 
       int numberOfTriangles = 2 * 6;
