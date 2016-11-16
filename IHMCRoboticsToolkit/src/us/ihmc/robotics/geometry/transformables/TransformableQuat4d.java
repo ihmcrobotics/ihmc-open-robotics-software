@@ -16,7 +16,7 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public TransformableQuat4d(Quat4d tuple)
    {
       super(tuple);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    public TransformableQuat4d()
@@ -28,7 +28,7 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public TransformableQuat4d(double[] quaternion)
    {
       super(quaternion);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    @Override
@@ -36,7 +36,7 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    {
       transform3D.getRotation(tempQuaternionForTransform);
       this.mul(tempQuaternionForTransform, this);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    /**
@@ -73,25 +73,25 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public void set(TransformableQuat4d other)
    {
       super.set(other);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
    
    public void setOrientation(Quat4d quat4d)
    {
       super.set(quat4d);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
    
    public void setOrientation(Matrix3d matrix3d)
    {
       super.set(matrix3d);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    public void setOrientation(AxisAngle4d axisAngle4d)
    {
       super.set(axisAngle4d);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    @Override
@@ -136,13 +136,13 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public void setYawPitchRoll(double[] yawPitchRoll)
    {
       RotationTools.convertYawPitchRollToQuaternion(yawPitchRoll, this);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
       RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, this);
-      normalizeAndLimitToPiMinusPi();
+      normalize();
    }
 
    public void getYawPitchRoll(double[] yawPitchRollToPack)
