@@ -83,7 +83,9 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       drcBehaviorTestHelper.updateRobotModel();
 
-      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(), drcBehaviorTestHelper.getBehaviorCommunicationBridge());
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
+                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                     getRobotModel().createFullRobotModel());
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
 
