@@ -907,4 +907,42 @@ public class MathToolsTest
       assertEquals(3, MathTools.orderOfMagnitude(1000.0));
       assertEquals(4, MathTools.orderOfMagnitude(10000.0));
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testLessThanOrEpsilonEquals()
+   {
+      Random random = new Random(1976L);
+      final double epsilon = 1e-6;
+
+      for(int i = 0; i < 10000; i++)
+      {
+         double randomDouble = random.nextDouble();
+
+         double smallerDouble = randomDouble - 100;
+         double epsilonSmallerDouble = randomDouble - (epsilon * 10);
+
+         assertTrue(MathTools.lessThanOrEpsilonEquals(smallerDouble, randomDouble, epsilon));
+         assertTrue(MathTools.lessThanOrEpsilonEquals(epsilonSmallerDouble, randomDouble, epsilon));
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testGreaterThanOrEpsilonEquals()
+   {
+      Random random = new Random(1976L);
+      final double epsilon = 1e-6;
+
+      for(int i = 0; i < 10000; i++)
+      {
+         double randomDouble = random.nextDouble();
+
+         double largerDouble = randomDouble + 100;
+         double epsilonLargerDouble = randomDouble + (epsilon * 10);
+
+         assertTrue(MathTools.greaterThanOrEpsilonEquals(largerDouble, randomDouble, epsilon));
+         assertTrue(MathTools.greaterThanOrEpsilonEquals(epsilonLargerDouble, randomDouble, epsilon));
+      }
+   }
 }
