@@ -155,7 +155,8 @@ public abstract class ToolboxModule
          {
             if (message.getDestination() != thisDesitination)
             {
-               System.err.println("ToolboxModule: isMessageValid " + message.getDestination() + "!=" + thisDesitination);
+               if (DEBUG)
+                  PrintTools.error("ToolboxModule: isMessageValid " + message.getDestination() + "!=" + thisDesitination);
                return false;
             }
 
