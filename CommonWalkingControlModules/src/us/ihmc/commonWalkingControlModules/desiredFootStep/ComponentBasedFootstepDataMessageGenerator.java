@@ -88,7 +88,6 @@ public class ComponentBasedFootstepDataMessageGenerator
       if (!walk.getBooleanValue())
          return;
       RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
-      componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg);
 
       FootstepDataListMessage footsteps = computeNextFootsteps(supportLeg);
       footsteps.setSwingTime(swingTime.getDoubleValue());
@@ -137,9 +136,10 @@ public class ComponentBasedFootstepDataMessageGenerator
    {
       double stepTime = swingTime.getDoubleValue() + transferTime.getDoubleValue();
 
+      componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg, stepTime);
       FootstepDataMessage footstep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
       FootstepDataMessage nextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime);
-      FootstepDataMessage nextNextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, 2.0 * stepTime);
+      FootstepDataMessage nextNextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, stepTime);
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage(Double.NaN, Double.NaN);
       footsteps.add(footstep);
