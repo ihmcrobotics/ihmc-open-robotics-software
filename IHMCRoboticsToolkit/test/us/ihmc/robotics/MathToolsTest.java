@@ -922,6 +922,7 @@ public class MathToolsTest
          double smallerDouble = randomDouble - 100;
          double epsilonSmallerDouble = randomDouble - (epsilon * 10);
 
+         assertTrue(MathTools.lessThanOrEpsilonEquals(randomDouble, randomDouble, epsilon));
          assertTrue(MathTools.lessThanOrEpsilonEquals(smallerDouble, randomDouble, epsilon));
          assertTrue(MathTools.lessThanOrEpsilonEquals(epsilonSmallerDouble, randomDouble, epsilon));
       }
@@ -941,6 +942,7 @@ public class MathToolsTest
          double largerDouble = randomDouble + 100;
          double epsilonLargerDouble = randomDouble + (epsilon * 10);
 
+         assertTrue(MathTools.greaterThanOrEpsilonEquals(randomDouble, randomDouble, epsilon));
          assertTrue(MathTools.greaterThanOrEpsilonEquals(largerDouble, randomDouble, epsilon));
          assertTrue(MathTools.greaterThanOrEpsilonEquals(epsilonLargerDouble, randomDouble, epsilon));
       }
