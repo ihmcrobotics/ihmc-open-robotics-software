@@ -23,8 +23,7 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
    @Override
    public void setOrientation(Quat4d orientation)
    {
-      this.orientation.set(orientation);
-      this.orientation.normalize();
+      this.orientation.setOrientation(orientation);
    }
 
    @Override
