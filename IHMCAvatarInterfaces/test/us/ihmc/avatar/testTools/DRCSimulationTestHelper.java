@@ -143,7 +143,8 @@ public class DRCSimulationTestHelper
          simulationStarter.registerHighLevelController(highLevelBehaviorFactoryToAdd);
       if (initialSetup != null)
          simulationStarter.setRobotInitialSetup(initialSetup);
-      simulationStarter.setStartingLocation(selectedLocation);
+      if (selectedLocation != null)
+         simulationStarter.setStartingLocation(selectedLocation);
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);
 
