@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
+import us.ihmc.tools.gui.MyFileFilter;
 
 public class SaveRobotConfigurationDialogGenerator implements SaveRobotConfigurationDialogConstructor
 {

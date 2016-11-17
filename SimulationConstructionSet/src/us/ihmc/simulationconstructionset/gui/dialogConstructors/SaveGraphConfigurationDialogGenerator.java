@@ -9,7 +9,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
+import us.ihmc.tools.gui.MyFileFilter;
 
 public class SaveGraphConfigurationDialogGenerator implements SaveGraphConfigurationDialogConstructor
 {

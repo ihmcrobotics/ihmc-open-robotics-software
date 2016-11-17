@@ -11,6 +11,7 @@ import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.generated.EUsageType;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
+import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
 
 public class VideoConverter
 {
@@ -26,7 +27,7 @@ public class VideoConverter
     * 
     * @throws IOException
     */
-   public static int crop(File source, File target, long startPTS, long endPTS, CustomProgressMonitor monitor) throws IOException
+   public static int crop(File source, File target, long startPTS, long endPTS, ProgressMonitorInterface monitor) throws IOException
    {
       MP4MJPEGMovieBuilder builder = null;
       MP4VideoDemuxer demuxer = new MP4VideoDemuxer(source);
@@ -74,7 +75,7 @@ public class VideoConverter
     * 
     * @throws IOException
     */
-   public static void convert(File source, File target, long startPTS, long endPTS, int bitrate, CustomProgressMonitor monitor) throws IOException
+   public static void convert(File source, File target, long startPTS, long endPTS, int bitrate, ProgressMonitorInterface monitor) throws IOException
    {
       MP4H264MovieBuilder builder = null;
       MP4VideoDemuxer demuxer = new MP4VideoDemuxer(source);
