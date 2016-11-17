@@ -12,7 +12,6 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
-import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -128,7 +127,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
       double idealFootstepWidth = 0.25;
       planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       planner.setMaximumNumberOfNodesToExpand(1000);
@@ -136,9 +135,35 @@ public class FollowFiducialBehavior extends AbstractBehavior
       return planner;
    }
 
+   public static ConvexPolygon2d createDefaultFootPolygon()
+   {
+      double footLength = 0.2;
+      double footWidth = 0.1;
+
+      ConvexPolygon2d footPolygon = new ConvexPolygon2d();
+      footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
+      footPolygon.addVertex(footLength / 2.0, -footWidth / 2.0);
+      footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
+      footPolygon.addVertex(-footLength / 2.0, -footWidth / 2.0);
+      footPolygon.update();
+
+      return footPolygon;
+   }
+
+   public static SideDependentList<ConvexPolygon2d> createDefaultFootPolygons()
+   {
+      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+         footPolygons.put(side, createDefaultFootPolygon());
+      return footPolygons;
+   }
+
    @Override
    public void doControl()
    {
+//      determineWhichFootIsSwinging();
+
+
       if (footstepSentTimer.totalElapsed() < 0.5)
       {
          return;
@@ -147,9 +172,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
       WalkingStatusMessage walkingStatusLatestPacket = walkingStatusQueue.getLatestPacket();
       if (walkingStatusLatestPacket != null && walkingStatusLatestPacket.getWalkingStatus() != Status.COMPLETED)
       {
-         return;
-
 //         determineWhichFootIsSwinging();
+         return;
       }
 //      else if (walkingStatusLatestPacket != null)
 //      {
