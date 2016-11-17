@@ -301,9 +301,9 @@ public class BoundingBox3dTest
          BoundingBox3d.getCenterPoint(actualCenterPoint);
 
          Point3d inPoint = new Point3d(centerX + (randomX * 0.9), centerY + (randomY * 0.9), centerZ + (randomZ * 0.9));
-         assertTrue(BoundingBox3d.isInside(inPoint));
+         assertTrue("In Point not inside of bounding box: " + inPoint + "\nBox: " + BoundingBox3d, BoundingBox3d.isInside(inPoint));
          Point3d onPoint = new Point3d(centerX + randomX, centerY + randomY, centerZ + randomZ);
-         assertTrue(BoundingBox3d.isInside(onPoint));
+         assertTrue("On Point not on bounding box: " + onPoint + "\nBox: " + BoundingBox3d, BoundingBox3d.isInside(onPoint));
 
          int randomInt = random.nextInt(6);
          double xOffset = 0.0;
