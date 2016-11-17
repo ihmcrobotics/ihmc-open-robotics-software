@@ -1,25 +1,23 @@
 package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.robotics.math.frames.YoFramePose;
 
 public class LocateFiducialBehavior extends AbstractBehavior
 {
    private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
    
-   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, FiducialDetectorBehaviorService fiducialDetectorBehaviorService)
    {
-      this(communicationBridge, yoGraphicsListRegistry, FollowFiducialBehavior.DEFAULT_FIDUCIAL_TO_FOLLOW);
+      this(communicationBridge, fiducialDetectorBehaviorService, 50);
    }
 
-   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, int targetFiducial)
+   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, FiducialDetectorBehaviorService fiducialDetectorBehaviorService, int targetFiducial)
    {
       super(communicationBridge);
       
-      fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(this, yoGraphicsListRegistry);
+      this.fiducialDetectorBehaviorService = fiducialDetectorBehaviorService;
       fiducialDetectorBehaviorService.setLocationEnabled(true);
       fiducialDetectorBehaviorService.setTargetIDToLocate(targetFiducial);
    }
@@ -47,15 +45,26 @@ public class LocateFiducialBehavior extends AbstractBehavior
 //                                                                                              1.6862782077278572E-6, 0.9992373064892308));
 //      sendPacketToController(headTrajectoryMessage);
    }
-
-   public void setTargetIDToLocate(int targetIDToLocate)
+   
+   @Override
+   public void pause()
    {
-      fiducialDetectorBehaviorService.setLocationEnabled(true);
-      fiducialDetectorBehaviorService.setTargetIDToLocate(targetIDToLocate);
+      super.pause();
+      fiducialDetectorBehaviorService.pause();
    }
 
-   public YoFramePose getFiducialPoseWorldFrame()
+   @Override
+   public void abort()
    {
-      return fiducialDetectorBehaviorService.getLocatedFiducialPoseWorldFrame();
+      super.abort();
+      fiducialDetectorBehaviorService.stop();
    }
+
+   @Override
+   public void resume()
+   {
+      super.resume();
+      fiducialDetectorBehaviorService.resume();
+   }
+
 }

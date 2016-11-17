@@ -9,10 +9,11 @@ import javax.vecmath.Point2d;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+
 import us.ihmc.communication.producers.JPEGCompressor;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.OpenCVTools;
@@ -40,12 +41,12 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
 
    private static final Scalar circleColor = new Scalar(160, 0, 0);
 
-   public ColoredCircularBlobDetectorBehaviorService(AbstractBehavior behaviorInterface)
+   public ColoredCircularBlobDetectorBehaviorService(CommunicationBridgeInterface communicationBridge)
    {
-      super(ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), behaviorInterface);
+      super(ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), communicationBridge);
       
-      getBehaviorInterface().attachNetworkListeningQueue(videoPacketQueue, VideoPacket.class);
-      getBehaviorInterface().attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
+      getCommunicationBridge().attachNetworkListeningQueue(videoPacketQueue, VideoPacket.class);
+      getCommunicationBridge().attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
       
       OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
       factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);
@@ -81,7 +82,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
          byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
          VideoPacket circleBlobThresholdImagePacket = new VideoPacket(VideoSource.CV_THRESHOLD, videoTimestamp, jpegThresholdImage,
                                                                       videoPacket.getPosition(), videoPacket.getOrientation(), videoPacket.getIntrinsicParameters());
-         getBehaviorInterface().sendPacket(circleBlobThresholdImagePacket);
+         getCommunicationBridge().sendPacket(circleBlobThresholdImagePacket);
 
          if (circles.size() > 0)
             latestBallPosition2d.set(circles.get(0).getCenter());

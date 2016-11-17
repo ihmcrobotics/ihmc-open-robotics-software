@@ -17,6 +17,7 @@ import com.jmatio.types.MLNumericArray;
 import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
+import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -44,7 +45,7 @@ public class YoVariableExporter extends YoVariableLogReader
 
    public void exportGraphs(File file, long start, long end)
    {
-      CustomProgressMonitor monitor = new CustomProgressMonitor("Export data to Matlab", "Reading variable data", 0, 100);
+      ProgressMonitorInterface monitor = new CustomProgressMonitor("Export data to Matlab", "Reading variable data", 0, 100);
 
       
       if (!initialize())

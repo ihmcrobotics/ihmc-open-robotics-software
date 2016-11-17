@@ -21,9 +21,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.YoGraph;
+import us.ihmc.tools.gui.MyFileFilter;
 import us.ihmc.tools.io.files.FileTools;
 
 public class ExportGraphsToFileGenerator implements ExportGraphsToFileConstructor

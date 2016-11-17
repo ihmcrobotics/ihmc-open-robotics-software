@@ -8,10 +8,10 @@ import javax.swing.JFrame;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.ExportDataDialogListener;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.gui.dialogs.ExportDataDialog;
 import us.ihmc.simulationconstructionset.gui.dialogs.SCSExportDataFormat;
+import us.ihmc.tools.gui.MyFileFilter;
 
 public class ExportDataDialogGenerator implements ExportDataDialogConstructor, ExportDataDialogListener
 {

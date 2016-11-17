@@ -7,7 +7,6 @@ import java.util.List;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3f;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
@@ -17,6 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateComm
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -42,7 +42,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 
       attachNetworkListeningQueue(pointCloudQueue, PointCloudWorldPacket.class);
 
-      coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(this);
+      coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(behaviorCommunicationBridge);
 
       this.headFrame = fullRobotModel.getHead().getBodyFixedFrame();
    }
@@ -162,19 +162,22 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       return super.isDone();
    }
 
-   @Override public void pause()
+   @Override
+   public void pause()
    {
       super.pause();
       coloredCircularBlobDetectorBehaviorService.pause();
    }
 
-   @Override public void abort()
+   @Override
+   public void abort()
    {
       super.abort();
       coloredCircularBlobDetectorBehaviorService.stop();
    }
 
-   @Override public void resume()
+   @Override
+   public void resume()
    {
       super.resume();
       coloredCircularBlobDetectorBehaviorService.resume();

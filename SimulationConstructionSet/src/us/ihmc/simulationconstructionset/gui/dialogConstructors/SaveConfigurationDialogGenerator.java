@@ -10,8 +10,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
+import us.ihmc.tools.gui.MyFileFilter;
 
 public class SaveConfigurationDialogGenerator implements SaveConfigurationDialogConstructor
 {
