@@ -45,6 +45,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -385,7 +386,7 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
       errorFramePose.getOrientation(errorAxisAngle);
 
       errorRotation.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
-      errorRotation.scale(errorAxisAngle.getAngle());
+      errorRotation.scale(AngleTools.trimAngleMinusPiToPi(errorAxisAngle.getAngle()));
 
       ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
       Twist desiredTwist = new Twist();
@@ -413,7 +414,7 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
       errorFrameOrientation.getAxisAngle(errorAxisAngle);
 
       errorRotation.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
-      errorRotation.scale(errorAxisAngle.getAngle());
+      errorRotation.scale(AngleTools.trimAngleMinusPiToPi(errorAxisAngle.getAngle()));
 
       if (errorMagnitude != null)
          errorMagnitude.setValue(errorRotation.length());

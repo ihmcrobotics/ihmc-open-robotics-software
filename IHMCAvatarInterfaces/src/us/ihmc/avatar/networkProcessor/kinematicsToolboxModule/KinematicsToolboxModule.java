@@ -33,6 +33,7 @@ public class KinematicsToolboxModule extends ToolboxModule
       super(desiredFullRobotModel, modelProvider, startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
       kinematicsToolBoxController = new KinematicsToolboxController(commandInputManager, statusOutputManager, desiredFullRobotModel, yoGraphicsListRegistry, registry);
       packetCommunicator.attachListener(RobotConfigurationData.class, kinematicsToolBoxController.createRobotConfigurationDataConsumer());
+      startYoVariableServer();
    }
 
    @Override

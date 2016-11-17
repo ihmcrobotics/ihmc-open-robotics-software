@@ -307,6 +307,14 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       return midFeetUnderPelvisWalkDirectionFrame;
    }
 
+   /**
+    * Returns the control frame of a hand.
+    * The control frame is robot specific and is meant to be located at a key position for grasping.
+    * <p>
+    * TODO rename the method to getHandControlFrame(RobotSide).
+    * @param robotSide from which hand the control frame has to be returned. 
+    * @return the hand control frame.
+    */
    public ReferenceFrame getHandFrame(RobotSide robotSide)
    {
       return fullRobotModel.getHandControlFrame(robotSide);
