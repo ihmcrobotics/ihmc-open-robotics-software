@@ -4,8 +4,10 @@ import javax.vecmath.Vector3f;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine.TurnValveBehaviorState;
+import us.ihmc.humanoidBehaviors.behaviors.examples.UserValidationExampleBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
@@ -24,6 +26,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValveBehaviorState> implements CoactiveDataListenerInterface
@@ -39,7 +42,6 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       WAITING_FOR_USER_CONFIRMATION,
       RESET_ROBOT,
       BACK_AWAY_FROM_VALVE
-
    }
 
    private Vector3f valveWalkOffsetPoint1 = new Vector3f(-0.39f, 0.0f, 0.85f);
@@ -55,6 +57,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    private final ResetRobotBehavior resetRobotBehavior;
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
+   private final UserValidationExampleBehavior userValidationExampleBehavior;
 
    public TurnValveBehaviorStateMachine(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
@@ -70,6 +73,8 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(yoTime, referenceFrames, communicationBridge, atlasPrimitiveActions);
+      userValidationExampleBehavior = new UserValidationExampleBehavior(communicationBridge);
+
       setupStateMachine();
    }
 
@@ -162,11 +167,58 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          }
       };
 
+      BehaviorAction<TurnValveBehaviorState> doneState = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.BACK_AWAY_FROM_VALVE,
+            new SimpleDoNothingBehavior(communicationBridge))
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Finished Turning Valve");
+            sendPacket(p1);
+         }
+      };
+
+      BehaviorAction<TurnValveBehaviorState> getUserValidation = new BehaviorAction<TurnValveBehaviorState>(
+            TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION, userValidationExampleBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Did I Turn It Far Enough?");
+            sendPacket(p1);
+            super.setBehaviorInput();
+         }
+      };
+
+      StateTransitionCondition notValidatedCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return userValidationExampleBehavior.isDone() && !userValidationExampleBehavior.isValidated();
+         }
+      };
+      StateTransitionCondition validatedCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return userValidationExampleBehavior.isDone() && userValidationExampleBehavior.isValidated();
+         }
+      };
+
       statemachine.addStateWithDoneTransition(setup, TurnValveBehaviorState.SEARCHING_FOR_VAVLE);
       statemachine.addStateWithDoneTransition(searchForValveFar, TurnValveBehaviorState.WALKING_TO_VALVE);
-      statemachine.addStateWithDoneTransition(walkToValveAction, TurnValveBehaviorState.TURNING_VALVE);
+      statemachine.addStateWithDoneTransition(walkToValveAction, TurnValveBehaviorState.SEARCHING_FOR_VALVE_FINAL);
       statemachine.addStateWithDoneTransition(searchForValveNear, TurnValveBehaviorState.TURNING_VALVE);
-      statemachine.addState(graspAndTurnValve);
+      statemachine.addStateWithDoneTransition(graspAndTurnValve, TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION);
+      statemachine.addState(getUserValidation);
+
+      getUserValidation.addStateTransition(TurnValveBehaviorState.TURNING_VALVE, notValidatedCondition);
+      getUserValidation.addStateTransition(TurnValveBehaviorState.BACK_AWAY_FROM_VALVE, validatedCondition);
+
+      statemachine.addState(doneState);
+
       statemachine.setCurrentState(TurnValveBehaviorState.SETUP_ROBOT);
    }
 
