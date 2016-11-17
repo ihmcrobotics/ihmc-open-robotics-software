@@ -43,6 +43,13 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
       setupStateMachine();
    }
 
+   @Override
+   public void initialize()
+   {
+      super.initialize();
+      statemachine.setCurrentState(WalkToObjectState.GET_READY_TO_WALK);
+   }
+
    private void setupStateMachine()
    {
 
@@ -86,7 +93,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Walking TO Point Two");
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To Point Two");
             sendPacket(p1);
 
             walkToPoint2.changeFrame(ReferenceFrame.getWorldFrame());
