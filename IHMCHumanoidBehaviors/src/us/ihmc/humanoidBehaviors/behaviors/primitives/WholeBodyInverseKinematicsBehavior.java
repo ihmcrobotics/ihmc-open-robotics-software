@@ -15,6 +15,9 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -47,7 +50,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final DoubleYoVariable trajectoryTime;
 
    private final KinematicsToolboxOutputConverter outputConverter;
-   private final FullHumanoidRobotModel fullHumanoidRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
 
    private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>();
    private KinematicsToolboxOutputStatus solutionSentToController = null;
@@ -66,7 +69,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    {
       super(namePrefix, outgoingCommunicationBridge);
       this.yoTime = yoTime;
-      this.fullHumanoidRobotModel = fullRobotModel;
+      this.fullRobotModel = fullRobotModel;
 
       solutionQualityThreshold = new DoubleYoVariable(behaviorName + "SolutionQualityThreshold", registry);
       solutionQualityThreshold.set(0.005);
@@ -197,6 +200,25 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             handTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(handTrajectoryMessage);
          }
+         
+         ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+         Quat4d desiredChestOrientation = new Quat4d();
+         FrameOrientation desiredOrientation = new FrameOrientation(chestFrame);
+         desiredOrientation.changeFrame(worldFrame);
+         desiredOrientation.getQuaternion(desiredChestOrientation);
+         ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(0.0, desiredChestOrientation);
+         chestTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+         sendPacket(chestTrajectoryMessage);
+         
+         ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
+         Point3d desiredPosition = new Point3d();
+         Quat4d desiredPelvisOrientation = new Quat4d();
+         FramePose desiredPelvisPose = new FramePose(pelvisFrame);
+         desiredPelvisPose.changeFrame(worldFrame);
+         desiredPelvisPose.getPose(desiredPosition, desiredPelvisOrientation);
+         PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage = new PelvisOrientationTrajectoryMessage(0.0, desiredPelvisOrientation);
+         pelvisOrientationTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+         sendPacket(pelvisOrientationTrajectoryMessage);         
       }
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable() && !hasSentMessageToController.getBooleanValue())
       {
