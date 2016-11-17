@@ -43,7 +43,7 @@ import us.ihmc.util.PeriodicThreadScheduler;
  */
 public abstract class ToolboxModule
 {
-   protected static final boolean DEBUG = true;
+   protected static final boolean DEBUG = false;
    protected static final double YO_VARIABLE_SERVER_DT = 0.01;
    protected static final int UPDATE_PERIOD_MILLISECONDS = 1;
 
@@ -73,8 +73,8 @@ public abstract class ToolboxModule
    private final LogModelProvider modelProvider;
    private final boolean startYoVariableServer;
 
-   public ToolboxModule(FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider,
-         boolean startYoVariableServer, PacketDestination toolboxDestination, NetworkPorts toolboxPort) throws IOException
+   public ToolboxModule(FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer,
+         PacketDestination toolboxDestination, NetworkPorts toolboxPort) throws IOException
    {
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
@@ -124,7 +124,8 @@ public abstract class ToolboxModule
          }
       }).start();
 
-      yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer), 0, UPDATE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
+      yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer), 0, UPDATE_PERIOD_MILLISECONDS,
+            TimeUnit.MILLISECONDS);
    }
 
    private Runnable createYoVariableServerRunnable(final YoVariableServer yoVariableServer)
@@ -132,6 +133,7 @@ public abstract class ToolboxModule
       return new Runnable()
       {
          double serverTime = 0.0;
+
          @Override
          public void run()
          {
@@ -152,7 +154,10 @@ public abstract class ToolboxModule
          public boolean isMessageValid(Packet<?> message)
          {
             if (message.getDestination() != thisDesitination)
+            {
+               System.err.println("ToolboxModule: isMessageValid " + message.getDestination() + "!=" + thisDesitination);
                return false;
+            }
 
             if (message instanceof TrackablePacket)
             {
@@ -164,7 +169,8 @@ public abstract class ToolboxModule
                else if (activeMessageSource.getOrdinal() != trackableMessage.getSource())
                {
                   if (DEBUG)
-                     PrintTools.error(ToolboxModule.this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: " + PacketDestination.values[trackableMessage.getSource()]);
+                     PrintTools.error(ToolboxModule.this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: "
+                           + PacketDestination.values[trackableMessage.getSource()]);
                   return false;
                }
             }
@@ -190,7 +196,8 @@ public abstract class ToolboxModule
             if (toolboxTaskScheduled != null && activeMessageSource.getOrdinal() != message.getSource())
             {
                if (DEBUG)
-                  PrintTools.error(this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: " + PacketDestination.values[message.getDestination()]);
+                  PrintTools.error(this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: "
+                        + PacketDestination.values[message.getDestination()]);
                return;
             }
 
@@ -306,6 +313,8 @@ public abstract class ToolboxModule
    }
 
    abstract public ToolboxController<? extends StatusPacket<?>> getToolboxController();
+
    abstract public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands();
+
    abstract public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus();
 }
