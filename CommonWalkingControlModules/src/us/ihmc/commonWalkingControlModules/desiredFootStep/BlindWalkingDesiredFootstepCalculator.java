@@ -70,7 +70,7 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
    }
 
    @Override
-   public void initializeDesiredFootstep(RobotSide supportLegSide)
+   public void initializeDesiredFootstep(RobotSide supportLegSide, double timeFromNow)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
       ZUpFrame supportZUpFrame = soleZUpFrames.get(supportLegSide);

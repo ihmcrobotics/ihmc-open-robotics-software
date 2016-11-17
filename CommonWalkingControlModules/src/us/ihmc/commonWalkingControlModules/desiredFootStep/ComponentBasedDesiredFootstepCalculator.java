@@ -93,7 +93,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
    }
 
    @Override
-   public void initializeDesiredFootstep(RobotSide supportLegSide)
+   public void initializeDesiredFootstep(RobotSide supportLegSide, double timeFromNow)
    {
       RobotSide swingLegSide = supportLegSide.getOppositeSide();
       ReferenceFrame supportZUpFrame = soleZUpFrames.get(supportLegSide);
@@ -102,7 +102,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
       Matrix3d footToWorldRotation = computeDesiredFootRotation(desiredHeadingFrame);
 
-      FramePoint footstepPosition = getDesiredFootstepPosition(supportZUpFrame, swingLegSide, desiredHeadingFrame, footToWorldRotation, 0.0);
+      FramePoint footstepPosition = getDesiredFootstepPosition(supportZUpFrame, swingLegSide, desiredHeadingFrame, footToWorldRotation, timeFromNow);
 
       setYoVariables(swingLegSide, footToWorldRotation, footstepPosition.getVectorCopy());
    }
@@ -155,11 +155,12 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
       velocityMagnitudeInHeading.set(desiredVelocity.dot(desiredHeading));
       velocityMagnitudeToLeftOfHeading.set(desiredVelocity.dot(toLeftOfDesiredHeading));
 
-      FrameVector2d desiredVelocityInHeadingFrame = new FrameVector2d(desiredVelocity);
-      desiredVelocityInHeadingFrame.changeFrame(desiredHeadingFrame);
+      FrameVector2d desiredOffsetInHeadingFrame = new FrameVector2d(desiredVelocity);
+      desiredOffsetInHeadingFrame.changeFrame(desiredHeadingFrame);
+      desiredOffsetInHeadingFrame.scale(timeFromNow);
 
       FrameVector2d desiredOffsetFromSupport = new FrameVector2d(desiredHeadingFrame, 0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue())); // desiredVelocityInHeadingFrame);
-      desiredOffsetFromSupport.add(desiredVelocityInHeadingFrame);
+      desiredOffsetFromSupport.add(desiredOffsetInHeadingFrame);
 
       if (swingLegSide == RobotSide.LEFT)
       {
