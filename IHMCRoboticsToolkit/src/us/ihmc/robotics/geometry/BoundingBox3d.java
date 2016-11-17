@@ -1,14 +1,24 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.robotics.MathTools;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 
 public class BoundingBox3d
 {
+   private static final double DEFAULT_EPSILON = 1e-14;
+   private final double epsilon;
+
    private final Point3d minPoint = new Point3d();
    private final Point3d maxPoint = new Point3d();
 
    public static BoundingBox3d createUsingCenterAndPlusMinusVector(Point3d center, Tuple3d plusMinusVector)
+   {
+      return createUsingCenterAndPlusMinusVector(center, plusMinusVector, DEFAULT_EPSILON);
+   }
+
+   public static BoundingBox3d createUsingCenterAndPlusMinusVector(Point3d center, Tuple3d plusMinusVector, double epsilon)
    {
       Point3d minimumPoint = new Point3d(center);
       Point3d maximumPoint = new Point3d(center);
@@ -16,7 +26,7 @@ public class BoundingBox3d
       minimumPoint.sub(plusMinusVector);
       maximumPoint.add(plusMinusVector);
 
-      return new BoundingBox3d(minimumPoint, maximumPoint);
+      return new BoundingBox3d(minimumPoint, maximumPoint, epsilon);
    }
 
    public static BoundingBox3d union(BoundingBox3d boundingBoxOne, BoundingBox3d boundingBoxTwo)
@@ -32,27 +42,50 @@ public class BoundingBox3d
       Point3d unionMin = new Point3d(minX, minY, minZ);
       Point3d unionMax = new Point3d(maxX, maxY, maxZ);
 
-      return new BoundingBox3d(unionMin, unionMax);
+      return new BoundingBox3d(unionMin, unionMax, Math.min(boundingBoxOne.epsilon, boundingBoxTwo.epsilon));
+   }
+
+   public BoundingBox3d(Point3d min, Point3d max, double epsilon)
+   {
+      this.epsilon = epsilon;
+      set(min, max);
    }
 
    public BoundingBox3d(Point3d min, Point3d max)
    {
-      set(min, max);
+      this(min, max, DEFAULT_EPSILON);
+   }
+
+   public BoundingBox3d(double xMin, double yMin, double zMin, double xMax, double yMax, double zMax, double epsilon)
+   {
+      this.epsilon = epsilon;
+      set(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
    public BoundingBox3d(double xMin, double yMin, double zMin, double xMax, double yMax, double zMax)
    {
-      set(xMin, yMin, zMin, xMax, yMax, zMax);
+      this(xMin, yMin, zMin, xMax, yMax, zMax, DEFAULT_EPSILON);
+   }
+
+   public BoundingBox3d(double[] min, double[] max, double epsilon)
+   {
+      this.epsilon = epsilon;
+      set(min, max);
    }
 
    public BoundingBox3d(double[] min, double[] max)
    {
-      set(min, max);
+      this(min, max, DEFAULT_EPSILON);
+   }
+
+   public BoundingBox3d(BoundingBox3d boundingBox, double epsilon)
+   {
+      this(boundingBox.minPoint, boundingBox.maxPoint, epsilon);
    }
 
    public BoundingBox3d(BoundingBox3d boundingBox)
    {
-      this(boundingBox.minPoint, boundingBox.maxPoint);
+      this(boundingBox, boundingBox.epsilon);
    }
 
    public void set(Point3d min, Point3d max)
@@ -219,22 +252,22 @@ public class BoundingBox3d
    // TODO isInside is not consistent with the other methods (> vs. >=)
    public boolean isXYInside(double x, double y)
    {
-      if (y < minPoint.getY())
+      if (y < minPoint.getY() && !MathTools.epsilonEquals(y, minPoint.getY(), epsilon))
       {
          return false;
       }
 
-      if (y > maxPoint.getY())
+      if (y > maxPoint.getY() && !MathTools.epsilonEquals(y, maxPoint.getY(), epsilon))
       {
          return false;
       }
 
-      if (x < minPoint.getX())
+      if (x < minPoint.getX() && !MathTools.epsilonEquals(x, minPoint.getX(), epsilon))
       {
          return false;
       }
 
-      if (x > maxPoint.getX())
+      if (x > maxPoint.getX() && !MathTools.epsilonEquals(x, maxPoint.getX(), epsilon))
       {
          return false;
       }
@@ -246,14 +279,16 @@ public class BoundingBox3d
    public boolean isInside(double x, double y, double z)
    {
       if (!isXYInside(x, y))
-         return false;
-
-      if (z < minPoint.getZ())
       {
          return false;
       }
 
-      if (z > maxPoint.getZ())
+      if (z < minPoint.getZ() && !MathTools.epsilonEquals(z, minPoint.getZ(), epsilon))
+      {
+         return false;
+      }
+
+      if (z > maxPoint.getZ() && !MathTools.epsilonEquals(z, maxPoint.getZ(), epsilon))
       {
          return false;
       }
