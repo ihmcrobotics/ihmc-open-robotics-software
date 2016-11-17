@@ -74,7 +74,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
    private static final boolean ADD_CEILING = false;
 
    private static final boolean ADD_FIDUCIAL_ABOVE_VALVE = true;
-   private static final boolean ADD_SOCCER_BALL = false;
+   private static final boolean ADD_SOCCER_BALL = true;
    public static final double SOCCER_BALL_RADIUS = 0.0762;
 
    // private static final double FLOOR_THICKNESS = 0.001;
