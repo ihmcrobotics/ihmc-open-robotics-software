@@ -1,15 +1,10 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.robotics.MathTools;
+
+import javax.vecmath.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
-import us.ihmc.robotics.MathTools;
 
 public class PlanarRegion
 {
@@ -21,7 +16,8 @@ public class PlanarRegion
     */
    private final List<ConvexPolygon2d> convexPolygons;
 
-   private final BoundingBox3d boundingBox3dInWorld = new BoundingBox3d(new Point3d(), new Point3d());
+   private final BoundingBox3d boundingBox3dInWorld = new BoundingBox3d(new Point3d(Double.NaN, Double.NaN, Double.NaN),
+         new Point3d(Double.NaN, Double.NaN, Double.NaN));
    private final Point3d tempPointForConvexPolygonProjection = new Point3d();
 
    /**
@@ -113,7 +109,8 @@ public class PlanarRegion
     * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have same surface normal as this region.
     * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
     */
-   public void getPolygonIntersectionsWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform, ArrayList<ConvexPolygon2d> intersectionsToPack)
+   public void getPolygonIntersectionsWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform,
+         ArrayList<ConvexPolygon2d> intersectionsToPack)
    {
       ConvexPolygon2d projectedPolygon = snapPolygonIntoRegionAndChangeFrameToRegionFrame(convexPolygon2d, snappingTransform);
 
@@ -415,8 +412,12 @@ public class PlanarRegion
 
    private void updateBoundingBox()
    {
-      double xMin, xMax, yMin, yMax, zMin, zMax;
-      xMin = xMax = yMin = yMax = zMin = zMax = 0.0;
+      double xMin = boundingBox3dInWorld.getXMin();
+      double yMin = boundingBox3dInWorld.getYMin();
+      double zMin = boundingBox3dInWorld.getZMin();
+      double xMax = boundingBox3dInWorld.getXMax();
+      double yMax = boundingBox3dInWorld.getYMax();
+      double zMax = boundingBox3dInWorld.getZMax();
 
       for (int i = 0; i < this.getNumberOfConvexPolygons(); i++)
       {
@@ -428,34 +429,34 @@ public class PlanarRegion
             tempPointForConvexPolygonProjection.set(vertex.x, vertex.y, 0.0);
             fromLocalToWorldTransform.transform(tempPointForConvexPolygonProjection);
 
-            if (tempPointForConvexPolygonProjection.z > zMax)
-            {
-               zMax = tempPointForConvexPolygonProjection.z;
-            }
-
-            if (tempPointForConvexPolygonProjection.z < zMin)
-            {
-               zMin = tempPointForConvexPolygonProjection.z;
-            }
-
-            if (tempPointForConvexPolygonProjection.x < xMin)
+            if (Double.isNaN(xMin) || (tempPointForConvexPolygonProjection.x < xMin))
             {
                xMin = tempPointForConvexPolygonProjection.x;
             }
 
-            if (tempPointForConvexPolygonProjection.y < yMin)
+            if (Double.isNaN(yMin) || (tempPointForConvexPolygonProjection.y < yMin))
             {
                yMin = tempPointForConvexPolygonProjection.y;
             }
 
-            if (tempPointForConvexPolygonProjection.x > xMax)
+            if (Double.isNaN(zMin) || (tempPointForConvexPolygonProjection.z < zMin))
+            {
+               zMin = tempPointForConvexPolygonProjection.z;
+            }
+
+            if (Double.isNaN(xMax) || (tempPointForConvexPolygonProjection.x > xMax))
             {
                xMax = tempPointForConvexPolygonProjection.x;
             }
 
-            if (tempPointForConvexPolygonProjection.y > yMax)
+            if (Double.isNaN(yMax) || (tempPointForConvexPolygonProjection.y > yMax))
             {
                yMax = tempPointForConvexPolygonProjection.y;
+            }
+
+            if (Double.isNaN(zMax) || (tempPointForConvexPolygonProjection.z > zMax))
+            {
+               zMax = tempPointForConvexPolygonProjection.z;
             }
          }
       }
