@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -88,6 +89,14 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
                                                                                      getRobotModel().createFullRobotModel());
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
+      
+      ReferenceFrame chestControlFrame = drcBehaviorTestHelper.getReferenceFrames().getChestFrame();
+      FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);   
+      initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      ReferenceFrame pelvisControlFrame = drcBehaviorTestHelper.getReferenceFrames().getPelvisFrame();
+      FrameOrientation initialPelvisOrientation = new FrameOrientation(pelvisControlFrame);   
+      initialPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -112,8 +121,17 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       FramePose currentHandPose = new FramePose(handControlFrame);
       currentHandPose.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      FrameOrientation finalChestOrientation = new FrameOrientation(chestControlFrame);   
+      finalChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      FrameOrientation finalPelvisOrientation = new FrameOrientation(pelvisControlFrame);   
+      finalPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       assertTrue("Expect: " + desiredHandPose + "\nActual: " + currentHandPose, currentHandPose.epsilonEquals(desiredHandPose, 1.0e-2));
+      
+      //assertEquals(initialChestOrientation, finalChestOrientation);
+      //assertEquals(initialPelvisOrientation, finalPelvisOrientation);
    }
 
    private void setupKinematicsToolboxModule() throws IOException
