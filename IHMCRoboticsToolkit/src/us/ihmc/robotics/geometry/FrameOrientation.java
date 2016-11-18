@@ -109,8 +109,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
 
    public void set(AxisAngle4d axisAngle4d)
    {
-      quaternion.set(axisAngle4d);
-      normalize();
+      quaternion.setOrientation(axisAngle4d);
    }
 
    public void set(Quat4d quaternion)
