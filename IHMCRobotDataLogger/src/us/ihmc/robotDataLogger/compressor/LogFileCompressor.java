@@ -27,7 +27,7 @@ import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
 public class LogFileCompressor extends YoVariableLogReader
 {
    public static final int NUMBER_OF_THREADS = 8;
-   public static final int MAX_BUFFER_SIZE_IN_BYTE = 100000000;
+   public static final int MAX_BUFFER_SIZE_IN_BYTE = 1000000000;
    public static final int COMPRESSION_LEVEL = 3;
 
    private final PrintStream out;
@@ -157,7 +157,10 @@ public class LogFileCompressor extends YoVariableLogReader
             currentFileEntry = 0;
          }
       }
-      submitBuffer(buffer, currentFileEntry);
+      if(currentFileEntry != 0)
+      {
+         submitBuffer(buffer, currentFileEntry);
+      }
 
       out.println("All data read");
       threadPool.shutdown();
