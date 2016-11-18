@@ -1,13 +1,11 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.MathTools;
-
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 
 public class BoundingBox3d
 {
-   private static final double DEFAULT_EPSILON = 1e-14;
+   private static final double DEFAULT_EPSILON = 0.0;
    private final double epsilon;
 
    private final Point3d minPoint = new Point3d();
@@ -252,22 +250,22 @@ public class BoundingBox3d
    // TODO isInside is not consistent with the other methods (> vs. >=)
    public boolean isXYInside(double x, double y)
    {
-      if (y < minPoint.getY() && !MathTools.epsilonEquals(y, minPoint.getY(), epsilon))
+      if (y < (minPoint.getY() - epsilon))
       {
          return false;
       }
 
-      if (y > maxPoint.getY() && !MathTools.epsilonEquals(y, maxPoint.getY(), epsilon))
+      if (y > (maxPoint.getY() + epsilon))
       {
          return false;
       }
 
-      if (x < minPoint.getX() && !MathTools.epsilonEquals(x, minPoint.getX(), epsilon))
+      if (x < (minPoint.getX() - epsilon))
       {
          return false;
       }
 
-      if (x > maxPoint.getX() && !MathTools.epsilonEquals(x, maxPoint.getX(), epsilon))
+      if (x > (maxPoint.getX() + epsilon))
       {
          return false;
       }
@@ -283,12 +281,12 @@ public class BoundingBox3d
          return false;
       }
 
-      if (z < minPoint.getZ() && !MathTools.epsilonEquals(z, minPoint.getZ(), epsilon))
+      if (z < (minPoint.getZ() - epsilon))
       {
          return false;
       }
 
-      if (z > maxPoint.getZ() && !MathTools.epsilonEquals(z, maxPoint.getZ(), epsilon))
+      if (z > (maxPoint.getZ() + epsilon))
       {
          return false;
       }
