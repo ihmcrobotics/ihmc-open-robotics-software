@@ -60,6 +60,7 @@ import us.ihmc.tools.thread.ThreadTools;
  */
 public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 {
+   private static final IHMCCommunicationKryoNetClassList NET_CLASS_LIST = new IHMCCommunicationKryoNetClassList();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable yoTimeRobot;
    private final DoubleYoVariable yoTimeBehaviorDispatcher;
@@ -105,11 +106,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       yoTimeLastFullRobotModelUpdate = new DoubleYoVariable("yoTimeRobotModelUpdate", registry);
 
       
-      this.mockUIPacketCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
-      mockUIPacketCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
+      this.mockUIPacketCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, NET_CLASS_LIST);
+      mockUIPacketCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, NET_CLASS_LIST);
       
-      behaviorCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
-      behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+      behaviorCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, NET_CLASS_LIST);
+      behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, NET_CLASS_LIST);
 
       try
       {
@@ -203,6 +204,13 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    {
       yoTimeLastFullRobotModelUpdate.set(yoTimeRobot.getDoubleValue());
       robotDataReceiver.updateRobotModel();
+   }
+
+   public void createAndStartPacketCommunicator(NetworkPorts port, PacketDestination destination) throws IOException
+   {
+      PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, NET_CLASS_LIST);
+      networkProcessor.attachPacketCommunicator(destination, packetCommunicator);
+      packetCommunicator.connect();
    }
 
    public void dispatchBehavior(AbstractBehavior behaviorToTest) throws SimulationExceededMaximumTimeException

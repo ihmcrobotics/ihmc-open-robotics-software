@@ -15,7 +15,6 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -23,7 +22,6 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
-import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
@@ -38,9 +36,6 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class KinematicToolboxDiagnosticEnvironment
 {
-   private final String robotName = "FloatingRobot";
-   private final RobotDescription robotDescription = new RobotDescription(robotName);
-   private final ReferenceFrames referenceFrames = null;
    private final String threadName = "NonRealtimeScheduler";
 
    public KinematicToolboxDiagnosticEnvironment(DRCRobotModel drcRobotModel)
@@ -51,7 +46,7 @@ public class KinematicToolboxDiagnosticEnvironment
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = drcRobotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       robotInitialSetup.initializeRobot(humanoidFloatingRobotModel, jointMap);
       SDFPerfectSimulatedSensorReader sdfPerfectReader = new SDFPerfectSimulatedSensorReader(humanoidFloatingRobotModel, humanoidFullRobotModel,
-                                                                                             referenceFrames);
+                                                                                             null);
       sdfPerfectReader.read();
 
       ForceSensorDefinition[] forceSensorDefinitionArray = humanoidFullRobotModel.getForceSensorDefinitions();
@@ -92,6 +87,7 @@ public class KinematicToolboxDiagnosticEnvironment
       DRCNetworkModuleParameters parameters = new DRCNetworkModuleParameters();
       parameters.enableUiModule(true);
       parameters.enableKinematicsToolbox(true);
+      parameters.enableKinematicsToolboxVisualizer(true);
       parameters.enableLocalControllerCommunicator(true);
       new DRCNetworkProcessor(drcRobotModel, parameters);
    }

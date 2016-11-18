@@ -12,11 +12,12 @@ public class UserValidationExampleBehavior extends AbstractBehavior implements C
    private boolean validated = false;
 
    CommunicationBridge coactiveBehaviorsNetworkManager;
+   private boolean recievedMessage = false;
 
    public UserValidationExampleBehavior(CommunicationBridge communicationBridge)
    {
       super(communicationBridge);
-      coactiveBehaviorsNetworkManager =communicationBridge;
+      coactiveBehaviorsNetworkManager = communicationBridge;
       coactiveBehaviorsNetworkManager.addListeners(this);
    }
 
@@ -26,10 +27,15 @@ public class UserValidationExampleBehavior extends AbstractBehavior implements C
 
    }
 
+   public boolean isValidated()
+   {
+      return validated;
+   }
+
    @Override
    public boolean isDone()
    {
-      return validated;
+      return recievedMessage;
    }
 
    @Override
@@ -39,8 +45,9 @@ public class UserValidationExampleBehavior extends AbstractBehavior implements C
       //reset necessary values so this behavior can run again properly
       TextToSpeechPacket p1 = new TextToSpeechPacket("Waiting For User Validation");
       sendPacket(p1);
-      
+
       validated = false;
+      recievedMessage = false;
       //maybe let the UI know this specific behavior has started
       coactiveBehaviorsNetworkManager.sendToUI("GetLidarScanExampleBehavior", 1);
       coactiveBehaviorsNetworkManager.sendToUI("WaitingForValidation", 1);
@@ -67,6 +74,12 @@ public class UserValidationExampleBehavior extends AbstractBehavior implements C
          {
             validated = true;
          }
+         else
+         {
+            validated = false;
+
+         }
+         recievedMessage = true;
       }
    }
 }
