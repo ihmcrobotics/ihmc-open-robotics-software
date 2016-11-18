@@ -2,6 +2,9 @@ package us.ihmc.humanoidBehaviors.behaviors.examples;
 
 import java.util.Random;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine.ExampleStates;
@@ -13,6 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
@@ -23,6 +27,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -42,6 +47,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    private final GetLidarScanExampleBehavior getLidarScanExampleBehavior;
    private final GetVideoPacketExampleBehavior getVideoPacketExampleBehavior;
    private final UserValidationExampleBehavior userValidationExampleBehavior;
+   private final SimpleArmMotionBehavior simpleArmMotionBehavior;
    private final ResetRobotBehavior resetRobotBehavior;
    private final ReferenceFrame midZupFrame;
 
@@ -60,6 +66,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       getVideoPacketExampleBehavior = new GetVideoPacketExampleBehavior(communicationBridge);
       userValidationExampleBehavior = new UserValidationExampleBehavior(communicationBridge);
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
+      simpleArmMotionBehavior = new SimpleArmMotionBehavior(yoTime, atlasPrimitiveActions.referenceFrames, communicationBridge, atlasPrimitiveActions);
 
       setupStateMachine();
 
@@ -78,9 +85,8 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    public void initialize()
    {
       TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Example Behavior");
-      statemachine.setCurrentState(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE);
       sendPacket(p1);
-      super.initialize();
+      statemachine.setCurrentState(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE);
    }
 
    private void setupStateMachine()
@@ -111,40 +117,60 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       };
 
       BehaviorAction<ExampleStates> setupRobot = new BehaviorAction<ExampleStates>(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE,
-            atlasPrimitiveActions.rightArmTrajectoryBehavior, atlasPrimitiveActions.rightArmGoHomeBehavior,
-            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior)
+            simpleArmMotionBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-
             TextToSpeechPacket p1 = new TextToSpeechPacket("Setting Up Robot Pose");
             sendPacket(p1);
-
-            double[] armConfig = new double[] {-0.5067668142160446, -0.3659876546358431, 1.7973796317575155, -1.2398714600960365, -0.005510224629709242,
-                  0.6123343067479899, 0.12524505635696856};
-
-            ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
-            armTrajectoryMessage.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
-            armTrajectoryMessage.robotSide = RobotSide.RIGHT;
-
-            for (int i = 0; i < armConfig.length; i++)
-            {
-               TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
-               trajectoryPoint.position = armConfig[i];
-               trajectoryPoint.time = 1.0;
-               OneDoFJointTrajectoryMessage jointTrajectory = new OneDoFJointTrajectoryMessage();
-               jointTrajectory.trajectoryPoints = new TrajectoryPoint1DMessage[] {trajectoryPoint};
-               armTrajectoryMessage.jointTrajectoryMessages[i] = jointTrajectory;
-            }
-
-            atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(armTrajectoryMessage);
-
-            atlasPrimitiveActions.rightArmGoHomeBehavior.setInput(new GoHomeMessage(BodyPart.ARM, RobotSide.LEFT, 2));
-
-            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE));
+            super.setBehaviorInput();
          }
       };
+      //      BehaviorAction<ExampleStates> setupRobot = new BehaviorAction<ExampleStates>(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE,
+      //            atlasPrimitiveActions.rightArmTrajectoryBehavior, atlasPrimitiveActions.leftHandTrajectoryBehavior,
+      //            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior)
+      //      {
+      //         @Override
+      //         protected void setBehaviorInput()
+      //         {
+      //
+      //            TextToSpeechPacket p1 = new TextToSpeechPacket("Setting Up Robot Pose");
+      //            sendPacket(p1);
+      //
+      //            double[] armConfig = new double[] {-0.5067668142160446, -0.3659876546358431, 1.7973796317575155, -1.2398714600960365, -0.005510224629709242,
+      //                  0.6123343067479899, 0.12524505635696856};
+      //
+      //            ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
+      //            armTrajectoryMessage.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
+      //            armTrajectoryMessage.robotSide = RobotSide.RIGHT;
+      //
+      //            for (int i = 0; i < armConfig.length; i++)
+      //            {
+      //               TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
+      //               trajectoryPoint.position = armConfig[i];
+      //               trajectoryPoint.time = 1.0;
+      //               OneDoFJointTrajectoryMessage jointTrajectory = new OneDoFJointTrajectoryMessage();
+      //               jointTrajectory.trajectoryPoints = new TrajectoryPoint1DMessage[] {trajectoryPoint};
+      //               armTrajectoryMessage.jointTrajectoryMessages[i] = jointTrajectory;
+      //            }
+      //
+      //            atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(armTrajectoryMessage);
+      //
+      //            FramePoint point1 = new FramePoint(ReferenceFrame.getWorldFrame(), .5, .5, 1);
+      //            point1.changeFrame(ReferenceFrame.getWorldFrame());
+      //            FrameOrientation orient = new FrameOrientation(ReferenceFrame.getWorldFrame(),1.5708, 1.5708, -3.1415);
+      //            orient.changeFrame(ReferenceFrame.getWorldFrame());
+      //
+      //            FramePose pose = new FramePose(point1, orient);
+      //            
+      //            HandTrajectoryMessage handmessage = new HandTrajectoryMessage(RobotSide.LEFT, 2, pose.getFramePointCopy().getPoint(),pose.getFrameOrientationCopy().getQuaternion());
+      //            
+      //            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(handmessage);
+      //
+      //            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE));
+      //         }
+      //      };
 
       BehaviorAction<ExampleStates> wholeBodyExample = new BehaviorAction<ExampleStates>(ExampleStates.WHOLEBODY_EXAMPLE,
             atlasPrimitiveActions.wholeBodyBehavior)
@@ -175,18 +201,20 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       BehaviorAction<ExampleStates> getUserValidation = new BehaviorAction<ExampleStates>(ExampleStates.GET_USER_VALIDATION, userValidationExampleBehavior);
 
       //setup the state machine
-      statemachine.addStateWithDoneTransition(setupRobot, ExampleStates.ENABLE_LIDAR);
+
+      statemachine.addStateWithDoneTransition(setupRobot, ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE);
+
+      statemachine.addStateWithDoneTransition(resetRobot, ExampleStates.ENABLE_LIDAR);
+
       statemachine.addStateWithDoneTransition(enableLidar, ExampleStates.GET_LIDAR);
       statemachine.addStateWithDoneTransition(getLidar, ExampleStates.GET_VIDEO);
       statemachine.addStateWithDoneTransition(getVideo, ExampleStates.WHOLEBODY_EXAMPLE);
       statemachine.addStateWithDoneTransition(wholeBodyExample, ExampleStates.GET_USER_VALIDATION);
-      statemachine.addStateWithDoneTransition(getUserValidation, ExampleStates.RESET_ROBOT_PIPELINE_EXAMPLE);
+      statemachine.addState(getUserValidation);
 
       //this state has no transitions
-      statemachine.addState(resetRobot);
 
       //set the starting state
-      statemachine.setCurrentState(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE);
    }
 
    @Override

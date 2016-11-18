@@ -88,9 +88,9 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    @Override
    public void initialize()
    {
-      super.initialize();
       TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Turn Valve Behavior State Machine");
       sendPacket(p1);
+      statemachine.setCurrentState(TurnValveBehaviorState.SETUP_ROBOT);
    }
 
    private void setupStateMachine()

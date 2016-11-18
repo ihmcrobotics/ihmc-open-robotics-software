@@ -78,7 +78,6 @@ public class LogFileDecompressor extends YoVariableLogReader
       byte[] data = new byte[bufferedElements * numberOfVariables * 8];
       for (int i = 0; i < properties.getCompressedDataFiles(); i++)
       {
-
          FileInputStream logInputStream = new FileInputStream(new File(compressedDirectory, "robotData." + i + ".xz"));
          XZInputStream xzInputStream = new XZInputStream(logInputStream);
 
@@ -109,6 +108,7 @@ public class LogFileDecompressor extends YoVariableLogReader
       checkChecksums(properties);
       incrementProgress();
       
+      progressMonitor.close();
    }
    
    private void incrementProgress()

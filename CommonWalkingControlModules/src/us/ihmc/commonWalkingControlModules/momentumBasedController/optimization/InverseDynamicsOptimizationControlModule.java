@@ -161,7 +161,6 @@ public class InverseDynamicsOptimizationControlModule
       }
       catch (NoConvergenceException e)
       {
-
          if (!hasNotConvergedInPast.getBooleanValue())
          {
             e.printStackTrace();
