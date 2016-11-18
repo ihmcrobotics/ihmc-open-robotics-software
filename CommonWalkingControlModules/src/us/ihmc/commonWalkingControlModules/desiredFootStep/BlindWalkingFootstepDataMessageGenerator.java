@@ -114,9 +114,10 @@ public class BlindWalkingFootstepDataMessageGenerator
       double stepTime = 0.0; //TODO get the time right.
       blindWalkingDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg, stepTime);
       FootstepDataMessage footstep = blindWalkingDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-      FootstepDataMessage nextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime);
-      FootstepDataMessage nextNextFootstep = blindWalkingDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(),
-            nextFootstep, stepTime);
+      FootstepDataMessage nextFootstep = blindWalkingDesiredFootstepCalculator
+            .predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime, stepTime);
+      FootstepDataMessage nextNextFootstep = blindWalkingDesiredFootstepCalculator
+            .predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, 2.0 * stepTime, stepTime);
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage(Double.NaN, Double.NaN);
       footsteps.add(footstep);

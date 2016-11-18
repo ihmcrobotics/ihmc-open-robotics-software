@@ -17,6 +17,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -138,8 +139,10 @@ public class ComponentBasedFootstepDataMessageGenerator
 
       componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg, stepTime);
       FootstepDataMessage footstep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-      FootstepDataMessage nextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime);
-      FootstepDataMessage nextNextFootstep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, stepTime);
+      FootstepDataMessage nextFootstep = componentBasedDesiredFootstepCalculator
+            .predictFootstepAfterDesiredFootstep(supportLeg, footstep, stepTime, stepTime);
+      FootstepDataMessage nextNextFootstep = componentBasedDesiredFootstepCalculator
+            .predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, 2.0 * stepTime, stepTime);
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage(Double.NaN, Double.NaN);
       footsteps.add(footstep);
