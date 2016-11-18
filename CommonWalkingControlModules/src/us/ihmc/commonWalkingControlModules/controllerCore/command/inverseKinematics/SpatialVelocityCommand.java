@@ -198,7 +198,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + "endEffector = " + endEffector.getName() + ", spatialAcceleration = " + spatialVelocity;
+      String ret = getClass().getSimpleName() + ": base = " + base.getName() + "endEffector = " + endEffector.getName() + ", spatialVelocity = " + spatialVelocity;
       return ret;
    }
 }
