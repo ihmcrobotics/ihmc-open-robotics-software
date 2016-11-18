@@ -118,7 +118,6 @@ public class SkippyController implements RobotController
 
    private final YoFrameVector icpToFootError = new YoFrameVector("actualIcpToFootError", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector comToFootError = new YoFrameVector("comToFootError", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector actualIcpToFootErrorVelocity = new YoFrameVector("actualIcpToFootErrorVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final DoubleYoVariable fixedW0 = new DoubleYoVariable("fixedW0", registry);
    private final DoubleYoVariable averagedW0 = new DoubleYoVariable("averagedW0", registry);
 
@@ -144,13 +143,11 @@ public class SkippyController implements RobotController
    private final YoFrameVector footToCoMInBodyFrame;
    private final YoFramePoint icp = new YoFramePoint("actualICP", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint icpVelocity = new YoFramePoint("icpVelocity", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint actualCMPFromDefinition = new YoFramePoint("actualCMPFromDefinition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint desiredCmpFromIcp = new YoFramePoint("desiredCMPFromICP", ReferenceFrame.getWorldFrame(), registry);
-   //   private PIDController controllerCmpX;
-   //   private PIDController controllerCmpY;
+   private final YoFramePoint cmpFromDefinition = new YoFramePoint("cmpFromDefinition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint cmpFromIcp = new YoFramePoint("cmpFromIcp", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint achievedCMP = new YoFramePoint("achievedCMP", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint footLocation = new YoFramePoint("footLocation", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint previousFootLocation = new YoFramePoint("previousFootLocation", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint achievedCMP = new YoFramePoint("achievedCMP", ReferenceFrame.getWorldFrame(), registry);
 
    private final DoubleYoVariable robotMass = new DoubleYoVariable("robotMass", registry);
    private final DoubleYoVariable robotWeight = new DoubleYoVariable("robotWeight", registry);
@@ -346,7 +343,7 @@ public class SkippyController implements RobotController
        */
       if (drawActualCMPFromDefinition)
       {
-         YoGraphicPosition cmpPositionYoGraphic = new YoGraphicPosition("CMP from definition", actualCMPFromDefinition, 0.01, YoAppearance.Red(),
+         YoGraphicPosition cmpPositionYoGraphic = new YoGraphicPosition("CMP from definition", cmpFromDefinition, 0.01, YoAppearance.Red(),
                                                                         GraphicType.BALL_WITH_ROTATED_CROSS);
          yoGraphicsListRegistries.registerYoGraphic("allGraphics", cmpPositionYoGraphic);
          yoGraphicsListRegistries.registerArtifact("allGraphics", cmpPositionYoGraphic.createArtifact());
@@ -366,7 +363,7 @@ public class SkippyController implements RobotController
        */
       if (drawDesiredCMPFromICP)
       {
-         YoGraphicPosition cmpFromIcpPositionYoGraphic = new YoGraphicPosition("CMP from ICP", desiredCmpFromIcp, 0.0125, YoAppearance.DarkMagenta(),
+         YoGraphicPosition cmpFromIcpPositionYoGraphic = new YoGraphicPosition("CMP from ICP", cmpFromIcp, 0.0125, YoAppearance.DarkMagenta(),
                                                                                GraphicType.BALL_WITH_ROTATED_CROSS);
          yoGraphicsListRegistries.registerYoGraphic("actuallGraphicsalICP", cmpFromIcpPositionYoGraphic);
          yoGraphicsListRegistries.registerArtifact("allGraphics", cmpFromIcpPositionYoGraphic.createArtifact());
@@ -394,7 +391,7 @@ public class SkippyController implements RobotController
        */
       if (drawCmpToComPositionVector)
       {
-         YoGraphicVector cmpToComPositionVectorYoGraphic = new YoGraphicVector("cmpToComPositionVectorYoGraphic", desiredCmpFromIcp, cmpToComPositionVector,
+         YoGraphicVector cmpToComPositionVectorYoGraphic = new YoGraphicVector("cmpToComPositionVectorYoGraphic", cmpFromIcp, cmpToComPositionVector,
                                                                                1.0, YoAppearance.LightBlue(), true);
          yoGraphicsListRegistries.registerYoGraphic("cmpToComPositionVector", cmpToComPositionVectorYoGraphic);
       }
@@ -749,8 +746,8 @@ public class SkippyController implements RobotController
    public void positionVectorFomCmpToCom()
    {
       cmpToComPositionVector.set(com);
-      cmpToComPositionVector.sub(desiredCmpFromIcp);
-      cmpToComPositionVector.sub(com, desiredCmpFromIcp);
+      cmpToComPositionVector.sub(cmpFromIcp);
+      cmpToComPositionVector.sub(com, cmpFromIcp);
    }
 
    /**
@@ -778,9 +775,9 @@ public class SkippyController implements RobotController
       /*
        * Compute CMP from ICP-CMP dynamics
        */
-      desiredCmpFromIcp.set(icpToFootError);
-      desiredCmpFromIcp.scale(kCapture.getDoubleValue());
-      desiredCmpFromIcp.add(icp);
+      cmpFromIcp.set(icpToFootError);
+      cmpFromIcp.scale(kCapture.getDoubleValue());
+      cmpFromIcp.add(icp);
    }
 
    /**
@@ -791,11 +788,11 @@ public class SkippyController implements RobotController
    {
       if (robot.getFootFS())
       {
-         actualCMPFromDefinition.setX((-rateOfChangeOfAngularMomentum.getY() + com.getX() * actualReactionForce.getZ()
+         cmpFromDefinition.setX((-rateOfChangeOfAngularMomentum.getY() + com.getX() * actualReactionForce.getZ()
                - com.getZ() * actualReactionForce.getX()) / actualReactionForce.getZ());
-         actualCMPFromDefinition.setY((-rateOfChangeOfAngularMomentum.getX() + com.getY() * actualReactionForce.getZ()
+         cmpFromDefinition.setY((-rateOfChangeOfAngularMomentum.getX() + com.getY() * actualReactionForce.getZ()
                - com.getZ() * actualReactionForce.getY()) / actualReactionForce.getZ());
-         actualCMPFromDefinition.setZ(0.0);
+         cmpFromDefinition.setZ(0.0);
       }
 
    }
@@ -839,9 +836,8 @@ public class SkippyController implements RobotController
       achievedCMP.add(com.getFramePoint2dCopy());
       this.achievedCMP.setXY(achievedCMP);
    }
-
    /*
-    * Compute ICP
+    * Compute ICP and ICP velocity
     */
    private void computeICP()
    {
@@ -917,7 +913,7 @@ public class SkippyController implements RobotController
       /*
        * Compute position and unit vectors from CMP to COM
        */
-      cmpToComPositionVector.sub(com, desiredCmpFromIcp);
+      cmpToComPositionVector.sub(com, cmpFromIcp);
       /*
        * Unit vector from CMP to COM
        */
