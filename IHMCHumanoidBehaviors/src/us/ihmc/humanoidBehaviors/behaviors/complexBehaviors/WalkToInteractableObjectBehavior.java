@@ -46,7 +46,6 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
    @Override
    public void initialize()
    {
-      super.initialize();
       statemachine.setCurrentState(WalkToObjectState.GET_READY_TO_WALK);
    }
 

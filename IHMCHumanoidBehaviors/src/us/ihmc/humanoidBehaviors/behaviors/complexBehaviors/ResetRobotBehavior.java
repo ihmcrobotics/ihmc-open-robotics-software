@@ -57,7 +57,7 @@ public class ResetRobotBehavior extends AbstractBehavior
 
    private void setupPipeline()
    {
-      
+      pipeLine.clearAll();
       //RESET BODY POSITIONS *******************************************
       GoHomeMessage goHomeChestMessage = new GoHomeMessage(BodyPart.CHEST, 2);
       chestGoHomeBehavior.setInput(goHomeChestMessage);
