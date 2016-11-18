@@ -8,6 +8,7 @@ import java.util.List;
 
 public class PlanarRegion
 {
+   public static final double DEFAULT_BOUNDING_BOX_EPSILON = 1e-15;
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
    /**
@@ -26,6 +27,7 @@ public class PlanarRegion
    public PlanarRegion()
    {
       convexPolygons = new ArrayList<>();
+      boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
       updateBoundingBox();
    }
 
@@ -39,6 +41,7 @@ public class PlanarRegion
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.invert(fromLocalToWorldTransform);
       convexPolygons = planarRegionConvexPolygons;
+      boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
       updateBoundingBox();
    }
 
@@ -53,6 +56,7 @@ public class PlanarRegion
       convexPolygons.add(convexPolygon);
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.invert(fromLocalToWorldTransform);
+      boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
       updateBoundingBox();
    }
 
