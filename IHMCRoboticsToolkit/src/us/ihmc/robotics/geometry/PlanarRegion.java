@@ -412,12 +412,12 @@ public class PlanarRegion
 
    private void updateBoundingBox()
    {
-      double xMin = boundingBox3dInWorld.getXMin();
-      double yMin = boundingBox3dInWorld.getYMin();
-      double zMin = boundingBox3dInWorld.getZMin();
-      double xMax = boundingBox3dInWorld.getXMax();
-      double yMax = boundingBox3dInWorld.getYMax();
-      double zMax = boundingBox3dInWorld.getZMax();
+      double xMin = Double.POSITIVE_INFINITY; //boundingBox3dInWorld.getXMin();
+      double yMin = Double.POSITIVE_INFINITY; //boundingBox3dInWorld.getYMin();
+      double zMin = Double.POSITIVE_INFINITY; //boundingBox3dInWorld.getZMin();
+      double xMax = Double.NEGATIVE_INFINITY; //boundingBox3dInWorld.getXMax();
+      double yMax = Double.NEGATIVE_INFINITY; //boundingBox3dInWorld.getYMax();
+      double zMax = Double.NEGATIVE_INFINITY; //boundingBox3dInWorld.getZMax();
 
       for (int i = 0; i < this.getNumberOfConvexPolygons(); i++)
       {
