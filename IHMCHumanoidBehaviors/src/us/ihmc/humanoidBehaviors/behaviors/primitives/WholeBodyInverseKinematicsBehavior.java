@@ -17,7 +17,6 @@ import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputCon
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -301,6 +300,9 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       hasSolverFailed.set(false);
       hasSentMessageToController.set(false);
       solutionSentToController = null;
+      handTrajectoryMessage.set(null);
+      chestTrajectoryMessage.set(null);
+      pelvisOrientationTrajectoryMessage.set(null);
       deactivateKinematicsToolboxModule();
    }
 
