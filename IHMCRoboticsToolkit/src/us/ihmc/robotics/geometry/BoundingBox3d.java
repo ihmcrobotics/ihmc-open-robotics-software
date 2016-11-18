@@ -1,12 +1,14 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.robotics.MathTools;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
 
 public class BoundingBox3d
 {
    private static final double DEFAULT_EPSILON = 0.0;
-   private final double epsilon;
+   private double epsilon;
 
    private final Point3d minPoint = new Point3d();
    private final Point3d maxPoint = new Point3d();
@@ -371,6 +373,18 @@ public class BoundingBox3d
       // return tmin/tmax within 0-1
       return tmin < 1 && tmax > 0;
 
+   }
+
+   public void setEpsilonToShrink(double epsilon)
+   {
+      MathTools.checkIfNegative(epsilon);
+      this.epsilon = epsilon;
+   }
+
+   public void setEpsilonToGrow(double epsilon)
+   {
+      MathTools.checkIfPositive(epsilon);
+      this.epsilon = epsilon;
    }
 
    @Override
