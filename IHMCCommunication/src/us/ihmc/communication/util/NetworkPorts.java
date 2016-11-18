@@ -44,6 +44,7 @@ public class NetworkPorts
    public static final NetworkPorts REA_MODULE_PORT = new NetworkPorts(6019);
    public static final NetworkPorts FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT = new NetworkPorts(6020);
    public static final NetworkPorts HEIGHT_QUADTREE_TOOLBOX_MODULE_PORT = new NetworkPorts(6021);
+   public static final NetworkPorts REA_MODULE_UI_PORT = new NetworkPorts(6022);
 
    // Mission control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046);
