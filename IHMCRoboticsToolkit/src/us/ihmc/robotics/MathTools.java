@@ -580,16 +580,6 @@ public class MathTools
       return (valueBigDecimal.doubleValue() <= valueToCompareAgainstBigDecimal.doubleValue());
    }
 
-   public static boolean lessThanOrEpsilonEquals(double value, double valueToCompareAgainst, double epsilon)
-   {
-      return (value < valueToCompareAgainst) || (value == valueToCompareAgainst) || epsilonEquals(value, valueToCompareAgainst, epsilon);
-   }
-
-   public static boolean greaterThanOrEpsilonEquals(double value, double valueToCompareAgainst, double epsilon)
-   {
-      return (value > valueToCompareAgainst) || (value == valueToCompareAgainst) || epsilonEquals(value, valueToCompareAgainst, epsilon);
-   }
-
    public static void checkIfEqual(int val, int desired)
    {
       if (val != desired)
