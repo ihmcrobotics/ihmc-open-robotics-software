@@ -41,7 +41,7 @@ public abstract class DRCSimulationTools
 {
 
    @SuppressWarnings({ "hiding", "unchecked" })
-   public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(AbstractSimulationStarter simulationStarter, Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs, T... possibleStartingLocations)
+   public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(SimulationStarterInterface simulationStarter, Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs, T... possibleStartingLocations)
    {
       List<Modules> modulesToStart = new ArrayList<Modules>();
       DRCStartingLocation startingLocation = null;
