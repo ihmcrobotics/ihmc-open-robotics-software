@@ -27,6 +27,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private Footstep nextFootstep;
    private final FramePose actualFootPoseInWorld = new FramePose(worldFrame);
+   private final FramePose desiredFootPoseInWorld = new FramePose(worldFrame);
    private final FramePoint nextExitCMP = new FramePoint();
 
    private final HighLevelHumanoidControllerToolbox momentumBasedController;
@@ -84,7 +85,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             balanceManager.updateICPPlanForSingleSupportDisturbances();
          }
-         
+
       }
       else if (balanceManager.useICPOptimization()) // TODO figure out a way of combining the two following modules
       {
@@ -180,7 +181,13 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
 
       feetManager.requestSwing(swingSide, nextFootstep, walkingMessageHandler.getSwingTime());
-      walkingMessageHandler.reportFootstepStarted(swingSide);
+
+      nextFootstep.getPose(desiredFootPoseInWorld);
+      desiredFootPoseInWorld.changeFrame(worldFrame);
+
+      actualFootPoseInWorld.setToZero(fullRobotModel.getEndEffectorFrame(swingSide, LimbName.LEG));
+      actualFootPoseInWorld.changeFrame(worldFrame);
+      walkingMessageHandler.reportFootstepStarted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld);
    }
 
    @Override

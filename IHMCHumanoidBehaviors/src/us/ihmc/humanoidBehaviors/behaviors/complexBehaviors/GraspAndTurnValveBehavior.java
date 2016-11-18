@@ -34,26 +34,12 @@ import us.ihmc.tools.taskExecutor.Task;
 
 public class GraspAndTurnValveBehavior extends AbstractBehavior
 {
-
-   /**
-      CLOSE_HAND,
-      MOVE_HAND_TO_APPROACH_POINT,
-      MOVE_HAND_ABOVE_VALVE,
-      OPEN_HAND,
-      CLOSE_THUMB,
-      MOVE_HAND_DOWN_TO_VALVE,
-      CLOSE_FINGERS,
-      ROTATE,
-      OPEN_FINGERS_ONLY,
-      MOVE_HAND_AWAY_FROM_VALVE,
-    */
-
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
    private PoseReferenceFrame valvePose = null;
    private double valveRadius = 0;
-   private double valveRadiusInitalOffset = 0.125;
-   private double valveRadiusfinalOffset = 0.0254;
+   //   private double valveRadiusInitalOffset = 0.125;
+   private double valveRadiusfinalOffset = -0.055;
    private double valveRadiusInitalForwardOffset = 0.125;
 
    private final double DEGREES_TO_ROTATE = 220;
@@ -63,7 +49,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    private final HumanoidReferenceFrames referenceFrames;
 
    private final ResetRobotBehavior resetRobotBehavior;
-   private final PassPacketBehavior passPacketBehavior;
+   //   private final PassPacketBehavior passPacketBehavior;
 
    //compliance does not currently work
    private boolean enableCompliance = false;
@@ -76,7 +62,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
-      passPacketBehavior = new PassPacketBehavior(outgoingCommunicationBridge);
+      //      passPacketBehavior = new PassPacketBehavior(outgoingCommunicationBridge);
 
    }
 
@@ -126,98 +112,82 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       //      MOVE_HAND_ABOVE_AND_IN_FRONT_OF_VALVE,
       //      BehaviorAction moveHandToApproachPointViaHandTrajectory = moveHand(-0.05357945674961795, 0.04256176948547363, 0.15017291083938378, Math.toRadians(-86.487420629448),
       //            Math.toRadians(98.3359137072094), Math.toRadians(0.5464370649115582), "testPose");
-      BehaviorAction moveHandAboveAndInFrontOfValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      BehaviorAction moveHandInFrontOfValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            moveHand(0.0, valveRadius + valveRadiusInitalOffset, valveRadiusInitalForwardOffset, 1.5708, 1.5708, -3.14159,
-                  "Moving Hand Above And In Front Of The Valve");
+            moveHand(0.0, valveRadius + valveRadiusfinalOffset, valveRadiusInitalForwardOffset, 1.5708, 1.5708, -3.14159, "Moving Hand In Front Of The Valve");
          }
       };
 
-      //      MOVE_HAND_ABOVE_VALVE,
-
-      BehaviorAction moveHandAboveValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      BehaviorAction moveHandCloseToValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            moveHand(0.0, valveRadius + valveRadiusInitalOffset, 0.0, 1.5708, 1.5708, -3.14159, "Moving Hand Above The Valve");
+            moveHand(0.0, valveRadius + valveRadiusfinalOffset, 0.0, 1.5708, 1.5708, -3.14159, "Aligning Hand With The Valve");
          }
       };
 
-      BehaviorAction moveHandDownToValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      BehaviorAction moveHandToValveGraspLocation = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            moveHand(0.0, valveRadius + valveRadiusfinalOffset, 0.0, 1.5708, 1.5708, -3.14159, "Moving Hand Down To Valve");
-         }
-      };
-
-      //      ROTATE,
-      //      MOVE_HAND_AWAY_FROM_VALVE,
-      BehaviorAction moveHandAwayFromValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            Vector3d orient = new Vector3d();
-            referenceFrames.getHandFrame(RobotSide.RIGHT).getTransformToDesiredFrame(valvePose).getRotationEuler(orient);
-            moveHand(0.0, -valveRadius - valveRadiusInitalOffset, 0.0, orient.x, orient.y, orient.z, "Moving Hand Away From Valve");
+            moveHand(0.0, valveRadius + valveRadiusfinalOffset, 0.0, 1.5708, 1.5708, -3.14159, "Moving Hand To Grasp Valve");
          }
       };
 
       //    CLOSE_HAND,
-      pipeLine.submitSingleTaskStage(closeHand);
+       pipeLine.submitSingleTaskStage(closeHand);
 
       //    MOVE_HAND_TO_APPROACH_POINT,
       pipeLine.submitSingleTaskStage(moveHandToApproachPoint);
-      pipeLine.submitSingleTaskStage(moveHandAboveAndInFrontOfValve);
+      pipeLine.submitSingleTaskStage(moveHandInFrontOfValve);
       //    MOVE_HAND_ABOVE_VALVE,
-      pipeLine.submitSingleTaskStage(moveHandAboveValve);
+      pipeLine.submitSingleTaskStage(moveHandCloseToValve);
 
       //    OPEN_HAND,
       pipeLine.submitSingleTaskStage(openFingersOnly);
 
-      if (enableCompliance)
-      {
-         RequestWristForceSensorCalibrationPacket requestWristForceSensorCalibrationPacket = new RequestWristForceSensorCalibrationPacket();
-         requestWristForceSensorCalibrationPacket.setDestination(PacketDestination.CONTROLLER);
-
-         PassMessageTask calibrateWristTask = new PassMessageTask(requestWristForceSensorCalibrationPacket, passPacketBehavior);
-         pipeLine.submitSingleTaskStage(calibrateWristTask);
-      }
-
-      if (enableCompliance)
-      {
-
-         HandComplianceControlParametersMessage handComplianceControlParametersPacket = new HandComplianceControlParametersMessage(RobotSide.RIGHT);
-         handComplianceControlParametersPacket.setDestination(PacketDestination.CONTROLLER);
-
-         boolean[] enableLinearCompliance = new boolean[] {true, true, true};
-         boolean[] enableAngularCompliance = new boolean[] {false, false, false};
-
-         float forceDeadzone = 10.0f;
-         float torqueDeadzone = 10.0f;
-
-         Vector3f desiredForce = new Vector3f();
-         Vector3f desiredTorque = new Vector3f();
-
-         handComplianceControlParametersPacket.setEnableLinearCompliance(enableLinearCompliance);
-         handComplianceControlParametersPacket.setEnableAngularCompliance(enableAngularCompliance);
-         handComplianceControlParametersPacket.setWrenchDeadzone(forceDeadzone, torqueDeadzone);
-         handComplianceControlParametersPacket.setDesiredForce(desiredForce);
-         handComplianceControlParametersPacket.setDesiredTorque(desiredTorque);
-
-         PassMessageTask enableComplianceTask = new PassMessageTask(handComplianceControlParametersPacket, passPacketBehavior);
-         pipeLine.submitSingleTaskStage(enableComplianceTask);
-
-      }
+      //      if (enableCompliance)
+      //      {
+      //         RequestWristForceSensorCalibrationPacket requestWristForceSensorCalibrationPacket = new RequestWristForceSensorCalibrationPacket();
+      //         requestWristForceSensorCalibrationPacket.setDestination(PacketDestination.CONTROLLER);
+      //
+      //         PassMessageTask calibrateWristTask = new PassMessageTask(requestWristForceSensorCalibrationPacket, passPacketBehavior);
+      //         pipeLine.submitSingleTaskStage(calibrateWristTask);
+      //      }
+      //
+      //      if (enableCompliance)
+      //      {
+      //
+      //         HandComplianceControlParametersMessage handComplianceControlParametersPacket = new HandComplianceControlParametersMessage(RobotSide.RIGHT);
+      //         handComplianceControlParametersPacket.setDestination(PacketDestination.CONTROLLER);
+      //
+      //         boolean[] enableLinearCompliance = new boolean[] {true, true, true};
+      //         boolean[] enableAngularCompliance = new boolean[] {false, false, false};
+      //
+      //         float forceDeadzone = 10.0f;
+      //         float torqueDeadzone = 10.0f;
+      //
+      //         Vector3f desiredForce = new Vector3f();
+      //         Vector3f desiredTorque = new Vector3f();
+      //
+      //         handComplianceControlParametersPacket.setEnableLinearCompliance(enableLinearCompliance);
+      //         handComplianceControlParametersPacket.setEnableAngularCompliance(enableAngularCompliance);
+      //         handComplianceControlParametersPacket.setWrenchDeadzone(forceDeadzone, torqueDeadzone);
+      //         handComplianceControlParametersPacket.setDesiredForce(desiredForce);
+      //         handComplianceControlParametersPacket.setDesiredTorque(desiredTorque);
+      //
+      //         PassMessageTask enableComplianceTask = new PassMessageTask(handComplianceControlParametersPacket, passPacketBehavior);
+      //         pipeLine.submitSingleTaskStage(enableComplianceTask);
+      //
+      //      }
 
       //    MOVE_HAND_DOWN_TO_VALVE,
-      pipeLine.submitSingleTaskStage(moveHandDownToValve);
+      pipeLine.submitSingleTaskStage(moveHandToValveGraspLocation);
 
       //    CLOSE_FINGERS,
       pipeLine.submitSingleTaskStage(closeHand);
@@ -226,7 +196,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
       for (int i = 1; i <= ROTATION_SEGMENTS; i++)
       {
-         pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-(DEGREES_TO_ROTATE / ROTATION_SEGMENTS) * i), valveRadiusfinalOffset));
+         pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-(DEGREES_TO_ROTATE / ROTATION_SEGMENTS) * i), 0.0));
 
       }
 
@@ -235,18 +205,18 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
       //    MOVE_HAND_AWAY_FROM_VALVE,
 
-      pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-DEGREES_TO_ROTATE), .2));
+      pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-DEGREES_TO_ROTATE), valveRadiusInitalForwardOffset));
 
-      if (enableCompliance)
-      {
-         HandComplianceControlParametersMessage handComplianceControlParametersPacket = new HandComplianceControlParametersMessage(RobotSide.RIGHT);
-         handComplianceControlParametersPacket.setDestination(PacketDestination.CONTROLLER);
+      //      if (enableCompliance)
+      //      {
+      //         HandComplianceControlParametersMessage handComplianceControlParametersPacket = new HandComplianceControlParametersMessage(RobotSide.RIGHT);
+      //         handComplianceControlParametersPacket.setDestination(PacketDestination.CONTROLLER);
+      //
+      //         PassMessageTask calibrateWristTask = new PassMessageTask(handComplianceControlParametersPacket, passPacketBehavior);
+      //         pipeLine.submitSingleTaskStage(calibrateWristTask);
+      //      }
 
-         PassMessageTask calibrateWristTask = new PassMessageTask(handComplianceControlParametersPacket, passPacketBehavior);
-         pipeLine.submitSingleTaskStage(calibrateWristTask);
-      }
-
-      pipeLine.submitSingleTaskStage(resetRobot);
+            pipeLine.submitSingleTaskStage(resetRobot);
 
    }
 
@@ -259,7 +229,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("rotate Valve");
             sendPacket(p1);
-            FramePose point = offsetPointFromValveInWorldFrame(0.0, valveRadius + distanceFromValve, 0.0, 1.5708, 1.5708, -3.14159);
+            FramePose point = offsetPointFromValveInWorldFrame(0.0, valveRadius + valveRadiusfinalOffset, distanceFromValve, 1.5708, 1.5708, -3.14159);
 
             point.rotatePoseAboutAxis(valvePose, Axis.Z, degrees);
 
@@ -317,7 +287,6 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      // TODO Auto-generated method stub
       return pipeLine.isDone();
    }
 

@@ -12,7 +12,6 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
-import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -22,7 +21,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage.Status;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -48,7 +46,9 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue;
 
    private final SideDependentList<FootstepStatus> latestFootstepStatus;
-   private final SideDependentList<YoFramePose> footStatusPoses;
+   private final SideDependentList<EnumYoVariable<FootstepStatus.Status>> latestFootstepStatusEnum;
+   private final SideDependentList<YoFramePose> desiredFootStatusPoses;
+   private final SideDependentList<YoFramePose> actualFootStatusPoses;
 
    private final EnumYoVariable<RobotSide> nextSideToSwing;
    private final EnumYoVariable<RobotSide> currentlySwingingFoot;
@@ -58,8 +58,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private final YoFramePose footstepPlannerInitialStepPose;
    private final YoFramePose footstepPlannerGoalPose;
    private final FramePose tempFootstepPlannerGoalPose;
-   private final FramePose tempLeftFootPose;
-   private final FramePose tempRightFootPose;
+   private final FramePose leftFootPose;
+   private final FramePose rightFootPose;
    private final FramePose tempStanceFootPose;
    private final FramePose tempFirstFootstepPose;
    private final Point3d tempFootstepPosePosition;
@@ -90,8 +90,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
       tempFootstepPlannerGoalPose = new FramePose();
       tempStanceFootPose = new FramePose();
       tempFirstFootstepPose = new FramePose();
-      tempLeftFootPose = new FramePose();
-      tempRightFootPose = new FramePose();
+      leftFootPose = new FramePose();
+      rightFootPose = new FramePose();
       tempFootstepPosePosition = new Point3d();
       tempFirstFootstepPoseOrientation = new Quat4d();
       footstepSentTimer = new Timer();
@@ -101,13 +101,23 @@ public class FollowFiducialBehavior extends AbstractBehavior
       footstepPlannerGoalPose = new YoFramePose(prefix + "FootstepGoalPose", ReferenceFrame.getWorldFrame(), registry);
       footstepPlannerInitialStepPose = new YoFramePose(prefix + "InitialStepPose", ReferenceFrame.getWorldFrame(), registry);
 
+      YoFramePose desiredLeftFootstepStatusPose = new YoFramePose(prefix + "DesiredLeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePose desiredRightFootstepStatusPose = new YoFramePose(prefix + "DesiredRightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
+      desiredFootStatusPoses = new SideDependentList<>(desiredLeftFootstepStatusPose, desiredRightFootstepStatusPose);
+
       YoFramePose leftFootstepStatusPose = new YoFramePose(prefix + "LeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
       YoFramePose rightFootstepStatusPose = new YoFramePose(prefix + "RightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
-      footStatusPoses = new SideDependentList<>(leftFootstepStatusPose, rightFootstepStatusPose);
+      actualFootStatusPoses = new SideDependentList<>(leftFootstepStatusPose, rightFootstepStatusPose);
 
       robotConfigurationDataQueue = new ConcurrentListeningQueue<RobotConfigurationData>();
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>();
+
       latestFootstepStatus = new SideDependentList<>();
+
+      EnumYoVariable<FootstepStatus.Status> leftFootstepStatus = new EnumYoVariable<FootstepStatus.Status>("leftFootstepStatus", registry, FootstepStatus.Status.class);
+      EnumYoVariable<FootstepStatus.Status> rightFootstepStatus = new EnumYoVariable<FootstepStatus.Status>("rightFootstepStatus", registry, FootstepStatus.Status.class);
+      latestFootstepStatusEnum = new SideDependentList<>(leftFootstepStatus, rightFootstepStatus);
+
       walkingStatusQueue = new ConcurrentListeningQueue<WalkingStatusMessage>();
       behaviorCommunicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
       behaviorCommunicationBridge.attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
@@ -128,7 +138,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
       double idealFootstepWidth = 0.25;
       planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
-      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       planner.setMaximumNumberOfNodesToExpand(1000);
@@ -136,31 +146,55 @@ public class FollowFiducialBehavior extends AbstractBehavior
       return planner;
    }
 
+   public static ConvexPolygon2d createDefaultFootPolygon()
+   {
+      double footLength = 0.2;
+      double footWidth = 0.1;
+
+      ConvexPolygon2d footPolygon = new ConvexPolygon2d();
+      footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
+      footPolygon.addVertex(footLength / 2.0, -footWidth / 2.0);
+      footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
+      footPolygon.addVertex(-footLength / 2.0, -footWidth / 2.0);
+      footPolygon.update();
+
+      return footPolygon;
+   }
+
+   public static SideDependentList<ConvexPolygon2d> createDefaultFootPolygons()
+   {
+      SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+         footPolygons.put(side, createDefaultFootPolygon());
+      return footPolygons;
+   }
+
    @Override
    public void doControl()
    {
+      checkFootstepStatusAndDetermineSwingingFoot();
+
       if (footstepSentTimer.totalElapsed() < 0.5)
       {
          return;
       }
 
-      WalkingStatusMessage walkingStatusLatestPacket = walkingStatusQueue.getLatestPacket();
-      if (walkingStatusLatestPacket != null && walkingStatusLatestPacket.getWalkingStatus() != Status.COMPLETED)
-      {
-         return;
+      //      WalkingStatusMessage walkingStatusLatestPacket = walkingStatusQueue.getLatestPacket();
+      //      if (walkingStatusLatestPacket != null && walkingStatusLatestPacket.getWalkingStatus() != Status.COMPLETED)
+      //      {
+      ////         determineWhichFootIsSwinging();
+      //         return;
+      //      }
+      //      else if (walkingStatusLatestPacket != null)
+      //      {
+      //         currentlySwingingFoot.set(null);
+      //      }
 
-//         determineWhichFootIsSwinging();
-      }
-//      else if (walkingStatusLatestPacket != null)
-//      {
-//         currentlySwingingFoot.set(null);
-//      }
-
-      boolean okToSendMoreFootsteps = getLatestFootstepStatusAndCheckIfOkToSendMoreFootsteps();
-      if (!okToSendMoreFootsteps)
-      {
-         return;
-      }
+      //      boolean okToSendMoreFootsteps = getLatestFootstepStatusAndCheckIfOkToSendMoreFootsteps();
+      //      if (!okToSendMoreFootsteps)
+      //      {
+      //         return;
+      //      }
 
       if (!fiducialDetectorBehaviorService.getTargetIDHasBeenLocated())
       {
@@ -182,7 +216,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
          return;
       }
 
-      FootstepDataListMessage footstepDataListMessage = createFootstepDataListFromPlan(plan);
+      int maxNumberOfStepsToTake = 3;
+      FootstepDataListMessage footstepDataListMessage = createFootstepDataListFromPlan(plan, maxNumberOfStepsToTake);
       sendFootstepDataListMessage(footstepDataListMessage);
    }
 
@@ -192,32 +227,13 @@ public class FollowFiducialBehavior extends AbstractBehavior
       sendPacketToUI(textToSpeechPacket);
    }
 
-   private boolean getLatestFootstepStatusAndCheckIfOkToSendMoreFootsteps()
+   private void checkFootstepStatusAndDetermineSwingingFoot()
    {
       while (footstepStatusQueue.isNewPacketAvailable())
       {
          FootstepStatus poll = footstepStatusQueue.poll();
          latestFootstepStatus.set(poll.getRobotSide(), poll);
-      }
-
-      for (RobotSide side : RobotSide.values)
-      {
-         if (latestFootstepStatus.get(side) != null && latestFootstepStatus.get(side).getStatus() == FootstepStatus.Status.STARTED)
-         {
-            PrintTools.debug(this, side + " footstep not complete");
-            return false;
-         }
-      }
-
-      return true;
-   }
-
-   private void determineWhichFootIsSwinging()
-   {
-      while (footstepStatusQueue.isNewPacketAvailable())
-      {
-         FootstepStatus poll = footstepStatusQueue.poll();
-         latestFootstepStatus.set(poll.getRobotSide(), poll);
+         nextSideToSwing.set(poll.getRobotSide().getOppositeSide());
       }
 
       currentlySwingingFoot.set(null);
@@ -225,9 +241,14 @@ public class FollowFiducialBehavior extends AbstractBehavior
       for (RobotSide side : RobotSide.values)
       {
          FootstepStatus status = latestFootstepStatus.get(side);
-         if ((status != null) && (status.getStatus() == FootstepStatus.Status.STARTED))
+         if (status != null)
          {
-            currentlySwingingFoot.set(side);
+            latestFootstepStatusEnum.get(side).set(status.getStatus());
+
+            if (status.getStatus() == FootstepStatus.Status.STARTED)
+            {
+               currentlySwingingFoot.set(side);
+            }
          }
       }
 
@@ -236,29 +257,35 @@ public class FollowFiducialBehavior extends AbstractBehavior
          FootstepStatus status = latestFootstepStatus.get(side);
          if (status != null)
          {
+            Point3d desiredFootPositionInWorld = status.getDesiredFootPositionInWorld();
+            Quat4d desiredFootOrientationInWorld = status.getDesiredFootOrientationInWorld();
+
+            desiredFootStatusPoses.get(side).setPosition(desiredFootPositionInWorld);
+            desiredFootStatusPoses.get(side).setOrientation(desiredFootOrientationInWorld);
+
             Point3d actualFootPositionInWorld = status.getActualFootPositionInWorld();
             Quat4d actualFootOrientationInWorld = status.getActualFootOrientationInWorld();
 
-            footStatusPoses.get(side).setPosition(actualFootPositionInWorld);
-            footStatusPoses.get(side).setOrientation(actualFootOrientationInWorld);
+            actualFootStatusPoses.get(side).setPosition(actualFootPositionInWorld);
+            actualFootStatusPoses.get(side).setOrientation(actualFootOrientationInWorld);
          }
       }
    }
 
    private void setGoalAndInitialStanceFootToBeClosestToGoal(FramePose goalPose)
    {
-      tempLeftFootPose.setToZero(referenceFrames.getFootFrame(RobotSide.LEFT));
-      tempRightFootPose.setToZero(referenceFrames.getFootFrame(RobotSide.RIGHT));
-      tempLeftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-      tempRightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      leftFootPose.setToZero(referenceFrames.getFootFrame(RobotSide.LEFT));
+      rightFootPose.setToZero(referenceFrames.getFootFrame(RobotSide.RIGHT));
+      leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       Point3d temp = new Point3d();
       Point3d pointBetweenFeet = new Point3d();
       Vector3d vectorFromFeetToGoal = new Vector3d();
 
-      tempLeftFootPose.getPosition(temp);
+      leftFootPose.getPosition(temp);
       pointBetweenFeet.set(temp);
-      tempLeftFootPose.getPosition(temp);
+      leftFootPose.getPosition(temp);
       pointBetweenFeet.add(temp);
       pointBetweenFeet.scale(0.5);
 
@@ -269,34 +296,33 @@ public class FollowFiducialBehavior extends AbstractBehavior
       AxisAngle4d goalOrientation = new AxisAngle4d(0.0, 0.0, 1.0, headingFromFeetToGoal);
       goalPose.setOrientation(goalOrientation);
 
-      //      double distanceFromGoalToLeftFoot = tempLeftFootPose.getPositionDistance(goalPose);
-      //      double distanceFromGoalToRightFoot = tempRightFootPose.getPositionDistance(goalPose);
-
-      RobotSide stanceSide = nextSideToSwing.getEnumValue().getOppositeSide();
-      if (stanceSide == RobotSide.LEFT)
+      RobotSide stanceSide;
+      if (currentlySwingingFoot.getEnumValue() != null)
       {
-         tempStanceFootPose.set(tempLeftFootPose);
-         goalPose.setZ(tempLeftFootPose.getZ());
+         stanceSide = currentlySwingingFoot.getEnumValue();
+
+         this.desiredFootStatusPoses.get(stanceSide).getFramePose(tempStanceFootPose);
+         goalPose.setZ(tempStanceFootPose.getZ());
       }
+
       else
       {
-         tempStanceFootPose.set(tempRightFootPose);
-         goalPose.setZ(tempRightFootPose.getZ());
-      }
-      //      if (distanceFromGoalToLeftFoot > distanceFromGoalToRightFoot)
-      //      {
-      //         stanceSide = RobotSide.LEFT;
-      //         tempStanceFootPose.set(tempLeftFootPose);
-      //         goalPose.setZ(tempLeftFootPose.getZ());
-      //      }
-      //      else
-      //      {
-      //         stanceSide = RobotSide.RIGHT;
-      //         tempStanceFootPose.set(tempRightFootPose);
-      //         goalPose.setZ(tempRightFootPose.getZ());
-      //      }
+         stanceSide = nextSideToSwing.getEnumValue().getOppositeSide();
 
-      sendTextToSpeechPacket("Planning footsteps from " + tempStanceFootPose + " to " + goalPose);
+         if (stanceSide == RobotSide.LEFT)
+         {
+            tempStanceFootPose.set(leftFootPose);
+            goalPose.setZ(leftFootPose.getZ());
+         }
+         else
+         {
+            tempStanceFootPose.set(rightFootPose);
+            goalPose.setZ(rightFootPose.getZ());
+         }
+      }
+
+//      sendTextToSpeechPacket("Planning footsteps from " + tempStanceFootPose + " to " + goalPose);
+      sendTextToSpeechPacket("Planning footsteps to the fudicial");
       footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
       footstepPlanner.setGoal(footstepPlannerGoal);
 
@@ -316,12 +342,11 @@ public class FollowFiducialBehavior extends AbstractBehavior
       footstepSentTimer.reset();
    }
 
-   private FootstepDataListMessage createFootstepDataListFromPlan(FootstepPlan plan)
+   private FootstepDataListMessage createFootstepDataListFromPlan(FootstepPlan plan, int maxNumberOfStepsToTake)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setSwingTime(1.0);
       footstepDataListMessage.setTransferTime(1.0);
-      int maxNumberOfStepsToTake = 3;
       int lastStepIndex = Math.min(maxNumberOfStepsToTake + 1, plan.getNumberOfSteps());
       for (int i = 1; i < lastStepIndex; i++)
       {
@@ -330,16 +355,13 @@ public class FollowFiducialBehavior extends AbstractBehavior
          tempFirstFootstepPose.getPosition(tempFootstepPosePosition);
          tempFirstFootstepPose.getOrientation(tempFirstFootstepPoseOrientation);
 
-         TextToSpeechPacket foostepTextToSpeechPacket = new TextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
-         sendPacketToUI(foostepTextToSpeechPacket);
+//         sendTextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
 
          FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(tempFootstepPosePosition), new Quat4d(tempFirstFootstepPoseOrientation));
          footstepDataListMessage.add(firstFootstepMessage);
-
-         nextSideToSwing.set(footstep.getRobotSide().getOppositeSide());
       }
 
-      footstepDataListMessage.setExecutionMode(ExecutionMode.QUEUE);
+      footstepDataListMessage.setExecutionMode(ExecutionMode.OVERRIDE);
       return footstepDataListMessage;
    }
 

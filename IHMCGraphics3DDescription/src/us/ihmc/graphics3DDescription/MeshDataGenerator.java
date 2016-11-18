@@ -17,6 +17,7 @@ import javax.vecmath.Vector3f;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.LineSegment3d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class MeshDataGenerator
 {
@@ -196,6 +197,26 @@ public class MeshDataGenerator
       {
          Point2d vertex = convexPolygon.getVertex(--reverseIndex);
          points[i] = new Point3f((float) vertex.getX(), (float) vertex.getY(), 0.0f);
+      }
+
+      return Polygon(points);
+   }
+
+   /**
+    * Create a triangle mesh for the given polygon.
+    * @param polygonTransformToWorld transform to use to obtain polygon 3D coordinates in world.
+    * @param convexPolygon the polygon to create a mesh from.
+    * @return the created triangle mesh.
+    */
+   public static MeshDataHolder Polygon(RigidBodyTransform polygonTransformToWorld, ConvexPolygon2d convexPolygon)
+   {
+      Point3f[] points = new Point3f[convexPolygon.getNumberOfVertices()];
+      int reverseIndex = convexPolygon.getNumberOfVertices();
+      for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
+      {
+         Point2d vertex = convexPolygon.getVertex(--reverseIndex);
+         points[i] = new Point3f((float) vertex.getX(), (float) vertex.getY(), 0.0f);
+         polygonTransformToWorld.transform(points[i]);
       }
 
       return Polygon(points);
