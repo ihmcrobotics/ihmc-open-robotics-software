@@ -38,11 +38,17 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
 
    @RosExportedField(documentation = "The robot side (left or right) that this footstep status correlates to.")
    public RobotSide robotSide;
+   @RosExportedField(documentation = "desiredFootPositionInWorld gives the position of the desired position sent to the controller as opposed\n"
+         + "to where the foot actually landed")
+   public Point3d desiredFootPositionInWorld;
+   @RosExportedField(documentation = "desiredFootOrientationInWorld gives the desired orientation of the foot sent to the controller as opposed to\n"
+         + "the orientation where the foot actually is")
+   public Quat4d desiredFootOrientationInWorld;
    @RosExportedField(documentation = "actualFootPositionInWorld gives the position of where the foot actually landed as opposed\n"
                                      + "to the desired position sent to the controller")
    public Point3d actualFootPositionInWorld;
-   @RosExportedField(documentation = "actualFootOrientationInWorld gives the orientation the foot is actually in as opposed to"
-                                     + "the desired orientation sent to the controller\n")
+   @RosExportedField(documentation = "actualFootOrientationInWorld gives the orientation the foot is actually in as opposed to\n"
+                                     + "the desired orientation sent to the controller")
    public Quat4d actualFootOrientationInWorld;
 
    public FootstepStatus()
@@ -53,6 +59,8 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
+      this.desiredFootPositionInWorld = null;
+      this.desiredFootOrientationInWorld = null;
       this.actualFootPositionInWorld = null;
       this.actualFootOrientationInWorld = null;
       this.robotSide = null;
@@ -62,16 +70,32 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
+      this.desiredFootPositionInWorld = null;
+      this.desiredFootOrientationInWorld = null;
       this.actualFootPositionInWorld = actualFootPositionInWorld;
       this.actualFootOrientationInWorld = actualFootOrientationInWorld;
-      
+
       this.robotSide = null;
    }
-   
-   public FootstepStatus(Status status, int footstepIndex, Point3d actualFootPositionInWorld, Quat4d actualFootOrientationInWorld,RobotSide robotSide)
+
+   public FootstepStatus(Status status, int footstepIndex, Point3d actualFootPositionInWorld, Quat4d actualFootOrientationInWorld, RobotSide robotSide)
    {
       this.status = status;
       this.footstepIndex = footstepIndex;
+      this.desiredFootPositionInWorld = null;
+      this.desiredFootOrientationInWorld = null;
+      this.actualFootPositionInWorld = actualFootPositionInWorld;
+      this.actualFootOrientationInWorld = actualFootOrientationInWorld;
+      this.robotSide = robotSide;
+   }
+
+   public FootstepStatus(Status status, int footstepIndex, Point3d desiredFootPositionInWorld, Quat4d desiredFootOrientationInWorld,
+         Point3d actualFootPositionInWorld, Quat4d actualFootOrientationInWorld, RobotSide robotSide)
+   {
+      this.status = status;
+      this.footstepIndex = footstepIndex;
+      this.desiredFootPositionInWorld = desiredFootPositionInWorld;
+      this.desiredFootOrientationInWorld = desiredFootOrientationInWorld;
       this.actualFootPositionInWorld = actualFootPositionInWorld;
       this.actualFootOrientationInWorld = actualFootOrientationInWorld;
       this.robotSide = robotSide;
@@ -83,6 +107,21 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
       status = other.status;
       footstepIndex = other.footstepIndex;
       robotSide = other.robotSide;
+
+      if (desiredFootPositionInWorld == null)
+         desiredFootPositionInWorld = new Point3d();
+      if (desiredFootOrientationInWorld == null)
+         desiredFootOrientationInWorld = new Quat4d();
+
+      if (other.desiredFootPositionInWorld == null)
+         desiredFootPositionInWorld.set(Double.NaN, Double.NaN, Double.NaN);
+      else
+         desiredFootPositionInWorld.set(other.desiredFootPositionInWorld);
+
+      if (other.desiredFootOrientationInWorld == null)
+         desiredFootOrientationInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+      else
+         desiredFootOrientationInWorld.set(other.desiredFootOrientationInWorld);
 
       if (actualFootPositionInWorld == null)
          actualFootPositionInWorld = new Point3d();
@@ -115,6 +154,20 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
       return "FootstepStatus{" + status + ", index: " + footstepIndex + "}";
    }
 
+   public Point3d getDesiredFootPositionInWorld()
+   {
+      if (desiredFootPositionInWorld != null)
+         return desiredFootPositionInWorld;
+      return null;
+   }
+
+   public Quat4d getDesiredFootOrientationInWorld()
+   {
+      if (desiredFootOrientationInWorld != null)
+         return desiredFootOrientationInWorld;
+      return null;
+   }
+
    public Point3d getActualFootPositionInWorld()
    {
       if (actualFootPositionInWorld != null)
@@ -133,7 +186,7 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
    {
          return robotSide;
    }
-   
+
    @Override
    public boolean equals(Object other)
    {

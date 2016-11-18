@@ -15,7 +15,8 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public TransformableQuat4d(Quat4d tuple)
    {
       super(tuple);
-      normalize();
+      if (!containsNaN())
+         normalize();
    }
 
    public TransformableQuat4d()
@@ -27,7 +28,8 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public TransformableQuat4d(double[] quaternion)
    {
       super(quaternion);
-      normalize();
+      if (!containsNaN())
+         normalize();
    }
 
    // Has to be public because this is sent in packets and packets' fields need to be public.
@@ -40,7 +42,8 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
          tempQuaternionForTransform = new Quat4d();
       transform3D.getRotation(tempQuaternionForTransform);
       this.mul(tempQuaternionForTransform, this);
-      normalize();
+      if (!containsNaN())
+         normalize();
    }
 
    /**
@@ -50,7 +53,8 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public void normalizeAndLimitToPiMinusPi()
    {
       // Quat4d.normalize() turns it into zero if it contains NaN. This needs to be fixed. Should stay NaN...
-      if (this.containsNaN()) return;
+      if (this.containsNaN())
+         return;
 
       if (normSquared() < 1.0e-7)
          setToZero();
@@ -77,25 +81,29 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public void set(TransformableQuat4d other)
    {
       super.set(other);
-      normalize();
+      if (!containsNaN())
+         normalize();
    }
-   
+
    public void setOrientation(Quat4d quat4d)
    {
       super.set(quat4d);
-      normalize();
+      if (!containsNaN())
+         normalize();
    }
-   
+
    public void setOrientation(Matrix3d matrix3d)
    {
       super.set(matrix3d);
-      normalize();
+      if (!containsNaN())
+         normalize();
    }
 
    public void setOrientation(AxisAngle4d axisAngle4d)
    {
       super.set(axisAngle4d);
-      normalize();
+      if (!containsNaN())
+         normalize();
    }
 
    @Override
@@ -107,10 +115,14 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    @Override
    public boolean containsNaN()
    {
-      if (Double.isNaN(getW())) return true;
-      if (Double.isNaN(getX())) return true;
-      if (Double.isNaN(getY())) return true;
-      if (Double.isNaN(getZ())) return true;
+      if (Double.isNaN(getW()))
+         return true;
+      if (Double.isNaN(getX()))
+         return true;
+      if (Double.isNaN(getY()))
+         return true;
+      if (Double.isNaN(getZ()))
+         return true;
 
       return false;
    }
@@ -119,34 +131,48 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    public boolean epsilonEquals(TransformableQuat4d other, double epsilon)
    {
       //TODO: Not sure if this is the best for epsilonEquals. Also, not sure how to handle the negative equal cases...
-      if (Double.isNaN(getW()) && !Double.isNaN(other.getW())) return false;
-      if (Double.isNaN(getX()) && !Double.isNaN(other.getX())) return false;
-      if (Double.isNaN(getY()) && !Double.isNaN(other.getY())) return false;
-      if (Double.isNaN(getZ()) && !Double.isNaN(other.getZ())) return false;
-      
-      if (!Double.isNaN(getW()) && Double.isNaN(other.getW())) return false;
-      if (!Double.isNaN(getX()) && Double.isNaN(other.getX())) return false;
-      if (!Double.isNaN(getY()) && Double.isNaN(other.getY())) return false;
-      if (!Double.isNaN(getZ()) && Double.isNaN(other.getZ())) return false;
-      
-      if (Math.abs(getW() - other.getW()) > epsilon) return false;
-      if (Math.abs(getX() - other.getX()) > epsilon) return false;
-      if (Math.abs(getY() - other.getY()) > epsilon) return false;
-      if (Math.abs(getZ() - other.getZ()) > epsilon) return false;
-      
+      if (Double.isNaN(getW()) && !Double.isNaN(other.getW()))
+         return false;
+      if (Double.isNaN(getX()) && !Double.isNaN(other.getX()))
+         return false;
+      if (Double.isNaN(getY()) && !Double.isNaN(other.getY()))
+         return false;
+      if (Double.isNaN(getZ()) && !Double.isNaN(other.getZ()))
+         return false;
+
+      if (!Double.isNaN(getW()) && Double.isNaN(other.getW()))
+         return false;
+      if (!Double.isNaN(getX()) && Double.isNaN(other.getX()))
+         return false;
+      if (!Double.isNaN(getY()) && Double.isNaN(other.getY()))
+         return false;
+      if (!Double.isNaN(getZ()) && Double.isNaN(other.getZ()))
+         return false;
+
+      if (Math.abs(getW() - other.getW()) > epsilon)
+         return false;
+      if (Math.abs(getX() - other.getX()) > epsilon)
+         return false;
+      if (Math.abs(getY() - other.getY()) > epsilon)
+         return false;
+      if (Math.abs(getZ() - other.getZ()) > epsilon)
+         return false;
+
       return true;
    }
 
    public void setYawPitchRoll(double[] yawPitchRoll)
    {
       RotationTools.convertYawPitchRollToQuaternion(yawPitchRoll, this);
-      normalize();
+      if (!containsNaN())
+         normalize();
    }
 
    public void setYawPitchRoll(double yaw, double pitch, double roll)
    {
       RotationTools.convertYawPitchRollToQuaternion(yaw, pitch, roll, this);
-      normalize();
+      if (!containsNaN())
+         normalize();
    }
 
    public void getYawPitchRoll(double[] yawPitchRollToPack)

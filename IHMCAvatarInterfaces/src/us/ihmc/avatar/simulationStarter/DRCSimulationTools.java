@@ -41,7 +41,7 @@ public abstract class DRCSimulationTools
 {
 
    @SuppressWarnings({ "hiding", "unchecked" })
-   public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(AbstractSimulationStarter simulationStarter, Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs, T... possibleStartingLocations)
+   public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(SimulationStarterInterface simulationStarter, Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs, T... possibleStartingLocations)
    {
       List<Modules> modulesToStart = new ArrayList<Modules>();
       DRCStartingLocation startingLocation = null;
@@ -69,6 +69,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.enableLocalControllerCommunicator(true);
          networkProcessorParameters.enableKinematicsToolbox(true);
          networkProcessorParameters.enableFootstepPlanningToolbox(true);
+         networkProcessorParameters.enableRobotEnvironmentAwerenessModule(modulesToStart.contains(Modules.REA_MODULE));
       }
       else
       {
@@ -95,7 +96,7 @@ public abstract class DRCSimulationTools
    private static <T extends DRCStartingLocation, Enum> DRCStartingLocation showSelectorWithStartingLocation(List<Modules> modulesToStartListToPack, T... possibleStartingLocations)
    {
       JPanel userPromptPanel = new JPanel(new BorderLayout());
-      JPanel checkBoxesPanel = new JPanel(new GridLayout(2, 4));
+      JPanel checkBoxesPanel = new JPanel(new GridLayout(3, 3));
 
       String configFile = System.getProperty("user.home") + "/.ihmc/drcSimulationDefaultOptions.config";
       Properties properties = new Properties();
@@ -139,6 +140,7 @@ public abstract class DRCSimulationTools
             moduleCheckBoxes.get(Modules.SENSOR_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
             moduleCheckBoxes.get(Modules.ZERO_POSE_PRODUCER).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
             moduleCheckBoxes.get(Modules.ROS_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
+            moduleCheckBoxes.get(Modules.REA_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
          }
       };
 
@@ -318,7 +320,7 @@ public abstract class DRCSimulationTools
 
    public enum Modules
    {
-      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER;
+      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER, REA_MODULE;
 
       public String getPropertyNameForEnable()
       {
