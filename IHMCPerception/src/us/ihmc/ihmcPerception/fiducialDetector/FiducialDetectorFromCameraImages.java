@@ -29,12 +29,10 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 
@@ -46,7 +44,6 @@ public class FiducialDetectorFromCameraImages
    private final Matrix3d fiducialRotationMatrix = new Matrix3d();
    private final Quat4d tempFiducialRotationQuat = new Quat4d();
    private final FramePose tempFiducialDetectorFrame = new FramePose();
-   private final FrameOrientation tempFudictionalDetectorOrientation = new FrameOrientation();
    private final Vector3d cameraRigidPosition = new Vector3d();
    private final double[] eulerAngles = new double[3];
    private final RigidBodyTransform cameraRigidTransform = new RigidBodyTransform();
@@ -78,11 +75,9 @@ public class FiducialDetectorFromCameraImages
    private final BooleanYoVariable targetIDHasBeenLocated = new BooleanYoVariable(prefix + "TargetIDHasBeenLocated", registry);
    private final LongYoVariable targetIDToLocate = new LongYoVariable(prefix + "TargetIDToLocate", registry);
 
-   private final YoFramePose cameraPose = new YoFramePose(prefix + "CameraPoseWorld", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePose locatedFiducialPoseInWorldFrame = new YoFramePose(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePose reportedFiducialPoseInWorldFrame = new YoFramePose(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
-
-   private final YoFrameQuaternion fiducialReportedOrientationQuaternionInWorldFrame = new YoFrameQuaternion(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoseUsingQuaternions cameraPose = new YoFramePoseUsingQuaternions(prefix + "CameraPoseWorld", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoseUsingQuaternions locatedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoseUsingQuaternions reportedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
 
    public FiducialDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -251,9 +246,6 @@ public class FiducialDetectorFromCameraImages
             tempFiducialDetectorFrame.setToZero(reportedFiducialReferenceFrame);
             tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
 
-            tempFiducialDetectorFrame.getOrientationIncludingFrame(tempFudictionalDetectorOrientation);
-            fiducialReportedOrientationQuaternionInWorldFrame.set(tempFudictionalDetectorOrientation);
-
             reportedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
 
             targetIDHasBeenLocated.set(true);
@@ -294,7 +286,7 @@ public class FiducialDetectorFromCameraImages
 
       return intrinsicParameters;
    }
-   
+
    public void setExpectedFiducialSize(double expectedFiducialSize)
    {
       this.expectedFiducialSize.set(expectedFiducialSize);
