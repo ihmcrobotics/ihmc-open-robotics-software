@@ -40,7 +40,8 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    private double valveRadius = 0;
    //   private double valveRadiusInitalOffset = 0.125;
    private double valveRadiusfinalOffset = -0.055;
-   private double valveRadiusInitalForwardOffset = 0.125;
+   private double valveInitalForwardOffset = 0.125;
+   private double valveFinalForwardOffset = 0.0225;
 
    private final double DEGREES_TO_ROTATE = 220;
    private final double ROTATION_SEGMENTS = 10;
@@ -77,7 +78,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
    private void setupPipeline()
    {
-      BehaviorAction<TurnValveBehaviorState> resetRobot = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.RESET_ROBOT, resetRobotBehavior);
+      BehaviorAction resetRobot = new BehaviorAction(resetRobotBehavior);
 
       //CLOSE_HAND
       HandDesiredConfigurationTask closeHand = new HandDesiredConfigurationTask(RobotSide.RIGHT, HandConfiguration.CLOSE,
@@ -117,7 +118,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            moveHand(0.0, valveRadius + valveRadiusfinalOffset, valveRadiusInitalForwardOffset, 1.5708, 1.5708, -3.14159, "Moving Hand In Front Of The Valve");
+            moveHand(0.0, valveRadius + valveRadiusfinalOffset, valveInitalForwardOffset, 1.5708, 1.5708, -3.14159, "Moving Hand In Front Of The Valve");
          }
       };
 
@@ -126,7 +127,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            moveHand(0.0, valveRadius + valveRadiusfinalOffset, 0.0, 1.5708, 1.5708, -3.14159, "Aligning Hand With The Valve");
+            moveHand(0.0, valveRadius + valveRadiusfinalOffset, valveFinalForwardOffset, 1.5708, 1.5708, -3.14159, "Aligning Hand With The Valve");
          }
       };
 
@@ -140,7 +141,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       };
 
       //    CLOSE_HAND,
-       pipeLine.submitSingleTaskStage(closeHand);
+      pipeLine.submitSingleTaskStage(closeHand);
 
       //    MOVE_HAND_TO_APPROACH_POINT,
       pipeLine.submitSingleTaskStage(moveHandToApproachPoint);
@@ -205,7 +206,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
       //    MOVE_HAND_AWAY_FROM_VALVE,
 
-      pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-DEGREES_TO_ROTATE), valveRadiusInitalForwardOffset));
+      pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-DEGREES_TO_ROTATE), valveInitalForwardOffset));
 
       //      if (enableCompliance)
       //      {
@@ -216,7 +217,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       //         pipeLine.submitSingleTaskStage(calibrateWristTask);
       //      }
 
-            pipeLine.submitSingleTaskStage(resetRobot);
+      pipeLine.submitSingleTaskStage(resetRobot);
 
    }
 
@@ -233,8 +234,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
             point.rotatePoseAboutAxis(valvePose, Axis.Z, degrees);
 
-            sendPacketToUI(new UIPositionCheckerPacket(new Vector3f((float) point.getFramePointCopy().getPoint().getX(),
-                  (float) point.getFramePointCopy().getPoint().getY(), (float) point.getFramePointCopy().getPoint().getZ())));
+            sendPacketToUI(new UIPositionCheckerPacket(point.getFramePointCopy().getPoint()));
 
             HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
                   point.getFrameOrientationCopy().getQuaternion());
@@ -257,7 +257,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       FramePose point = offsetPointFromValveInWorldFrame(x, y, z, yaw, pitch, roll);
       //      System.out.println("-orient.x,orient.y, orient.z " + (-orient.x) + "," + orient.y + "," + orient.z);
 
-      sendPacketToUI(new UIPositionCheckerPacket(new Vector3f((float) point.getX(), (float) point.getY(), (float) point.getZ())));
+      sendPacketToUI(new UIPositionCheckerPacket(point.getFramePointCopy().getPoint()));
 
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
             point.getFrameOrientationCopy().getQuaternion());
@@ -281,7 +281,8 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      pipeLine.doControl();
+      if (!isPaused())
+         pipeLine.doControl();
    }
 
    @Override

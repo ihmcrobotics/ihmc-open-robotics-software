@@ -12,16 +12,18 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.Ray3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.Ray3d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class JMEDataTypeUtils
 {
@@ -38,10 +40,10 @@ public class JMEDataTypeUtils
    public static float[] quaternionToEuler(Quaternion quat)
    {
       float pitch = (float) Math.atan2(2 * (quat.getW() * quat.getX() + quat.getY() * quat.getZ()),
-                                       (1 - 2 * (quat.getX() * quat.getX() + quat.getY() * quat.getY())));
+            (1 - 2 * (quat.getX() * quat.getX() + quat.getY() * quat.getY())));
       float roll = (float) Math.asin(2 * (quat.getW() * quat.getY() - quat.getZ() * quat.getX()));
       float yaw = (float) Math.atan2(2 * (quat.getW() * quat.getZ() + quat.getY() * quat.getX()),
-                                     (1 - 2 * (quat.getY() * quat.getY() + quat.getZ() * quat.getZ())));
+            (1 - 2 * (quat.getY() * quat.getY() + quat.getZ() * quat.getZ())));
 
       yaw = yaw * -1;
 
@@ -50,9 +52,9 @@ public class JMEDataTypeUtils
          yaw = (float) (Math.PI * 2 + yaw);
       }
 
-//    System.out.println("Pitch: " + pitch);
-//    System.out.println("Roll: " + roll);
-//      System.out.println("Yaw: " + Math.toDegrees(yaw));
+      //    System.out.println("Pitch: " + pitch);
+      //    System.out.println("Roll: " + roll);
+      //      System.out.println("Yaw: " + Math.toDegrees(yaw));
 
       float[] angles = new float[3];
       angles[0] = pitch;
@@ -87,7 +89,6 @@ public class JMEDataTypeUtils
       return target;
    }
 
-
    public static void packJMEVector3fInVecMathTuple3d(Vector3f original, Tuple3d target)
    {
       target.set(original.getX(), original.getY(), original.getZ());
@@ -96,11 +97,11 @@ public class JMEDataTypeUtils
    public static void packJMEQuaterionInVecMathQuat4d(Quaternion original, Quat4d target)
    {
       target.set(original.getX(), original.getY(), original.getZ(), original.getW());
-      
+
       // do not remove the normalization. 
       // The conversion from float to double generates very tiny differences which make the 
       // quaternion SLIGHTLY not normal.
-      
+
       target.normalize();
    }
 
@@ -122,6 +123,17 @@ public class JMEDataTypeUtils
    public static void packFramePoseInJMEVector(FramePose original, Vector3f target)
    {
       target.set((float) original.getX(), (float) original.getY(), (float) original.getZ());
+   }
+
+   public static void packFramePointInJMEVector(FramePoint original, Vector3f target)
+   {
+      target.set((float) original.getX(), (float) original.getY(), (float) original.getZ());
+   }
+
+   public static void packFrameOrientationInJMEQuaternion(FrameOrientation original, Quaternion target)
+   {
+      Quat4d quat4d = new Quat4d();
+      packVectMathQuat4dInJMEQuaternion(original.getQuaternion(), target);
    }
 
    public static void packFramePoseInJMEQuaternion(FramePose original, Quaternion target)
@@ -234,7 +246,7 @@ public class JMEDataTypeUtils
 
       return ret;
    }
-   
+
    public static RigidBodyTransform jmeTransformToTransform3D(Transform jmeTransform)
    {
       Quaternion jmeQuat = jmeTransform.getRotation();
