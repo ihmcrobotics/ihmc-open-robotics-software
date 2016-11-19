@@ -61,7 +61,7 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       this.qs = qs;
       this.referenceFrame = referenceFrame;
    }
-   
+
    public final FrameOrientation getFrameOrientation()
    {
       putYoValuesIntoFrameOrientation();
@@ -120,9 +120,14 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
 
    public void setAndMatchFrame(FrameOrientation frameOrientation)
    {
+      setAndMatchFrame(frameOrientation, true);
+   }
+
+   public void setAndMatchFrame(FrameOrientation frameOrientation, boolean notifyListeners)
+   {
       this.frameOrientation.setIncludingFrame(frameOrientation);
       this.frameOrientation.changeFrame(getReferenceFrame());
-      getYoValuesFromFrameOrientation();
+      getYoValuesFromFrameOrientation(notifyListeners);
    }
 
    public void set(YoFrameQuaternion yoFrameQuaternion)
@@ -130,6 +135,28 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       checkReferenceFrameMatch(yoFrameQuaternion);
       yoFrameQuaternion.getFrameOrientationIncludingFrame(frameOrientation);
       getYoValuesFromFrameOrientation();
+   }
+
+   /**
+    * Sets the orientation of this to the origin of the passed in ReferenceFrame.
+    *
+    * @param referenceFrame
+    */
+   public void setFromReferenceFrame(ReferenceFrame referenceFrame, boolean notifyListeners)
+   {
+      frameOrientation.setToZero(referenceFrame);
+      frameOrientation.changeFrame(getReferenceFrame());
+      getYoValuesFromFrameOrientation(notifyListeners);
+   }
+
+   /**
+    * Sets the orientation of this to the origin of the passed in ReferenceFrame.
+    *
+    * @param referenceFrame
+    */
+   public void setFromReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      setFromReferenceFrame(referenceFrame, true);
    }
 
    public void get(Quat4d quaternionToPack)
@@ -248,7 +275,7 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
    {
       alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
 
-      frameOrientation.interpolate(quaternion1, quaternion2, alpha); 
+      frameOrientation.interpolate(quaternion1, quaternion2, alpha);
       frameOrientation.checkQuaternionIsUnitMagnitude();
       getYoValuesFromFrameOrientation();
    }
@@ -384,4 +411,6 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       putYoValuesIntoFrameOrientation();
       return frameOrientation.epsilonEquals(other.frameOrientation, epsilon);
    }
+
+
 }
