@@ -22,7 +22,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    @Test(timeout = 300000)
    public void testOnStairCase()
    {
-      super.testOnStaircase(new Vector3d(0.1, 0.1, -0.1), true);
+      super.testOnStaircase(new Vector3d(), true);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -52,7 +52,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    {
       super.testSimpleGaps(true);
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testOverCinderBlockField()
