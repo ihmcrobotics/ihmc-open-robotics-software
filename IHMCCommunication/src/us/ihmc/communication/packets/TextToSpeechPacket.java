@@ -3,7 +3,7 @@ package us.ihmc.communication.packets;
 public class TextToSpeechPacket extends StatusPacket<TextToSpeechPacket> implements VisualizablePacket
 {
 
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    public static final String FOOTSTEP_COMPLETED = "Finished Taking Footstep";
    public static final String FINISHED_WALKING = "Finished walking";
    public static final String WALKING_ABORTED = "walking aborted";
