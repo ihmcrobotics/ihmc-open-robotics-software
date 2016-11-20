@@ -110,6 +110,10 @@ public class YoGraphicFactory
 
          return new YoArtifactPolygon(name, convexPolygon2d, appearance.getColor().get(), consts[0] > 0);
       }
+      case PLANAR_REGIONS_LIST_DGO:
+      {
+         return new YoGraphicPlanarRegionsList(name, vars, consts, appearance);
+      }
 
       default:
          throw new NotImplementedException(type.toString() + " is not implemented");
