@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.frames;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 
+import us.ihmc.robotics.Settable;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -13,7 +14,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder
+public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder implements Settable<YoFramePoseUsingQuaternions>
 {
    private final YoFramePoint position;
    private final YoFrameQuaternion orientation;
@@ -72,6 +73,13 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder
       rigidBodyTransformToPack.setTranslation(tempFramePoint.getX(), tempFramePoint.getY(), tempFramePoint.getZ());
    }
 
+   @Override
+   public void set(YoFramePoseUsingQuaternions other)
+   {
+      setPosition(other.position);
+      setOrientation(other.orientation);
+   }
+
    public void set(FramePose framePose)
    {
       set(framePose, true);
@@ -113,6 +121,24 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder
       orientation.setFromReferenceFrame(referenceFrame);
    }
 
+   public void setPose(RigidBodyTransform rigidBodyTransform)
+   {
+      setPose(rigidBodyTransform, true);
+   }
+
+   public void setPose(RigidBodyTransform rigidBodyTransform, boolean notifyListeners)
+   {
+      rigidBodyTransform.getTranslation(tempFramePoint.getGeometryObject());
+      rigidBodyTransform.getRotation(tempFrameOrientation.getGeometryObject());
+      position.set(tempFramePoint.getGeometryObject());
+      orientation.set(tempFrameOrientation.getGeometryObject());
+   }
+
+   public void setPosition(YoFramePoint yoFramePoint)
+   {
+      position.set(yoFramePoint);
+   }
+
    public void setPosition(FramePoint framePoint)
    {
       boolean notifyListeners = true;
@@ -122,6 +148,11 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder
    public void setPosition(Tuple3d position)
    {
       this.position.set(position);
+   }
+
+   public void setOrientation(YoFrameQuaternion yoFrameQuaternion)
+   {
+      orientation.set(yoFrameQuaternion);
    }
 
    public void setOrientation(FrameOrientation frameOrientation)
@@ -169,18 +200,27 @@ public class YoFramePoseUsingQuaternions extends AbstractReferenceFrameHolder
       setXYZ(pos[0], pos[1], pos[2]);
    }
 
+   @Override
    public void setToNaN()
    {
       position.setToNaN();
       orientation.setToNaN();
    }
 
+   @Override
    public void setToZero()
    {
       position.setToZero();
       orientation.setToZero();
    }
 
+   @Override
+   public boolean containsNaN()
+   {
+      return position.containsNaN() || orientation.containsNaN();
+   }
+
+   @Override
    public ReferenceFrame getReferenceFrame()
    {
       return position.getReferenceFrame();
