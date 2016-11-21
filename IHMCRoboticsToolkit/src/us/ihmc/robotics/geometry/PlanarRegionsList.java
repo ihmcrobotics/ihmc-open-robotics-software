@@ -10,6 +10,15 @@ public class PlanarRegionsList
 {
    private final List<PlanarRegion> regions;
 
+   public PlanarRegionsList(PlanarRegion... planarRegions)
+   {
+      regions = new ArrayList<>();
+      for (PlanarRegion planarRegion : planarRegions)
+      {
+         regions.add(planarRegion);
+      }
+   }
+
    public PlanarRegionsList(List<PlanarRegion> planarRegions)
    {
       regions = planarRegions;

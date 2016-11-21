@@ -28,6 +28,8 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
 public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 {
+   private static final boolean DEBUG_VELOCITY_WITH_FD = false;
+
    private final boolean runningOnRealRobot;
 
    private final double estimatorDT;
@@ -108,6 +110,11 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
+      if (DEBUG_VELOCITY_WITH_FD)
+      {
+         DoubleYoVariable dummyAlpha = new DoubleYoVariable("dummyAlpha", registry);
+         sensorProcessing.computeJointVelocityFromFiniteDifference(dummyAlpha, true);
+      }
 
       DoubleYoVariable orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", orientationFilterFrequencyHz);
       DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", angularVelocityFilterFrequencyHz);

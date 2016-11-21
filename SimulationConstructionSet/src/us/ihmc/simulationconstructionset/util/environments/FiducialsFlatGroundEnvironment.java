@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 public class FiducialsFlatGroundEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject;
-   
+
    public enum Fiducial
    {
       FIDUCIAL50,
@@ -28,12 +28,12 @@ public class FiducialsFlatGroundEnvironment implements CommonAvatarEnvironmentIn
       FIDUCIAL350,
       FIDUCIAL400,
       FIDUCIAL450;
-      
+
       public static final Fiducial[] values = values();
-      
+
       public String getPathString()
       {
-         return "fiducials/" + name().toLowerCase() + ".png";
+         return "fiducials/png/" + name().toLowerCase() + ".png";
       }
    }
 
@@ -47,9 +47,9 @@ public class FiducialsFlatGroundEnvironment implements CommonAvatarEnvironmentIn
       for (Fiducial fiducial : Fiducial.values)
       {
          CombinedTerrainObject3D fiducualTerrainObject = addFiducial(radius * Math.cos(angle), radius * Math.sin(angle), angle, fiducial);
-         
+
          combinedTerrainObject.addTerrainObject(fiducualTerrainObject);
-         
+
          angle += 2.0 * Math.PI / Fiducial.values.length;
       }
    }
@@ -60,11 +60,11 @@ public class FiducialsFlatGroundEnvironment implements CommonAvatarEnvironmentIn
       double boxSideLength = 1.0;
 
       CombinedTerrainObject3D fiducualTerrainObject = new CombinedTerrainObject3D(fiducial.name());
-      
+
       RigidBodyTransform location = new RigidBodyTransform();
       location.setRotationEulerAndZeroTranslation(Math.toRadians(90.0), 0.0, rotation - Math.toRadians(90.0));
       location.setTranslation(new Vector3d(x, y, 1.7));
-      
+
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, boxSideLength, boxSideLength, boxSideLength), fiducialTexture);
       fiducualTerrainObject.addTerrainObject(newBox);
       return fiducualTerrainObject;
