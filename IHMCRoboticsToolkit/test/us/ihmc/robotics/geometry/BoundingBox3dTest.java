@@ -490,6 +490,68 @@ public class BoundingBox3dTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testUpdateToIncludePointThatIsAlreadyInsideBoundingBox()
+   {
+      Point3d originalMinPoint = new Point3d(0.0, 0.0, 0.0);
+      Point3d originalMaxPoint = new Point3d(1.0, 1.0, 1.0);
+      BoundingBox3d boundingBox = new BoundingBox3d(originalMinPoint, originalMaxPoint);
+
+      boundingBox.updateToIncludePoint(0.5, 0.5, 0.5);
+
+      Point3d updatedMinPointToPack = new Point3d();
+      Point3d updatedMaxPointToPack = new Point3d();
+
+      boundingBox.getMinPoint(updatedMinPointToPack);
+      boundingBox.getMaxPoint(updatedMaxPointToPack);
+
+      assertEquals(originalMinPoint, updatedMinPointToPack);
+      assertEquals(originalMaxPoint, updatedMaxPointToPack);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testUpdateToIncludeNewMaxPointOutsideOfBoundingBox()
+   {
+      Point3d originalMinPoint = new Point3d(0.0, 0.0, 0.0);
+      Point3d originalMaxPoint = new Point3d(1.0, 1.0, 1.0);
+      BoundingBox3d boundingBox = new BoundingBox3d(originalMinPoint, originalMaxPoint);
+
+      Point3d newMaxPoint = new Point3d(1.5, 1.5, 1.5);
+      boundingBox.updateToIncludePoint(newMaxPoint);
+
+      Point3d updatedMinPointToPack = new Point3d();
+      Point3d updatedMaxPointToPack = new Point3d();
+
+      boundingBox.getMinPoint(updatedMinPointToPack);
+      boundingBox.getMaxPoint(updatedMaxPointToPack);
+
+      assertEquals(originalMinPoint, updatedMinPointToPack);
+      assertEquals(newMaxPoint, updatedMaxPointToPack);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testUpdateToIncludeNewMinPointOutsideOfBoundingBox()
+   {
+      Point3d originalMinPoint = new Point3d(0.0, 0.0, 0.0);
+      Point3d originalMaxPoint = new Point3d(1.0, 1.0, 1.0);
+      BoundingBox3d boundingBox = new BoundingBox3d(originalMinPoint, originalMaxPoint);
+
+      Point3d newMinPoint = new Point3d(-1.5, -1.5, -1.5);
+      boundingBox.updateToIncludePoint(newMinPoint);
+
+      Point3d updatedMinPointToPack = new Point3d();
+      Point3d updatedMaxPointToPack = new Point3d();
+
+      boundingBox.getMinPoint(updatedMinPointToPack);
+      boundingBox.getMaxPoint(updatedMaxPointToPack);
+
+      assertEquals(newMinPoint, updatedMinPointToPack);
+      assertEquals(originalMaxPoint, updatedMaxPointToPack);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testToString()
    {
       Point3d lowerLeftPoint = new Point3d(0.0, 1.0, 2.0);
