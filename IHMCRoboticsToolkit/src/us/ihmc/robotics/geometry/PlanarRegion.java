@@ -416,13 +416,7 @@ public class PlanarRegion
 
    private void updateBoundingBox()
    {
-      double xMin = Double.POSITIVE_INFINITY; //boundingBox3dInWorld.getXMin();
-      double yMin = Double.POSITIVE_INFINITY; //boundingBox3dInWorld.getYMin();
-      double zMin = Double.POSITIVE_INFINITY; //boundingBox3dInWorld.getZMin();
-      double xMax = Double.NEGATIVE_INFINITY; //boundingBox3dInWorld.getXMax();
-      double yMax = Double.NEGATIVE_INFINITY; //boundingBox3dInWorld.getYMax();
-      double zMax = Double.NEGATIVE_INFINITY; //boundingBox3dInWorld.getZMax();
-
+      boundingBox3dInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
       for (int i = 0; i < this.getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2d convexPolygon = this.getConvexPolygon(i);
@@ -433,38 +427,8 @@ public class PlanarRegion
             tempPointForConvexPolygonProjection.set(vertex.x, vertex.y, 0.0);
             fromLocalToWorldTransform.transform(tempPointForConvexPolygonProjection);
 
-            if (Double.isNaN(xMin) || (tempPointForConvexPolygonProjection.x < xMin))
-            {
-               xMin = tempPointForConvexPolygonProjection.x;
-            }
-
-            if (Double.isNaN(yMin) || (tempPointForConvexPolygonProjection.y < yMin))
-            {
-               yMin = tempPointForConvexPolygonProjection.y;
-            }
-
-            if (Double.isNaN(zMin) || (tempPointForConvexPolygonProjection.z < zMin))
-            {
-               zMin = tempPointForConvexPolygonProjection.z;
-            }
-
-            if (Double.isNaN(xMax) || (tempPointForConvexPolygonProjection.x > xMax))
-            {
-               xMax = tempPointForConvexPolygonProjection.x;
-            }
-
-            if (Double.isNaN(yMax) || (tempPointForConvexPolygonProjection.y > yMax))
-            {
-               yMax = tempPointForConvexPolygonProjection.y;
-            }
-
-            if (Double.isNaN(zMax) || (tempPointForConvexPolygonProjection.z > zMax))
-            {
-               zMax = tempPointForConvexPolygonProjection.z;
-            }
+            this.boundingBox3dInWorld.updateToIncludePoint(tempPointForConvexPolygonProjection);
          }
       }
-
-      this.boundingBox3dInWorld.set(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 }
