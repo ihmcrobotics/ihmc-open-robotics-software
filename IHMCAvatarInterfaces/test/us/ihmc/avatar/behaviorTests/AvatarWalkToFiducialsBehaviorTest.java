@@ -28,7 +28,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.tools.thread.ThreadTools;
 
-public abstract class AvatarWalkToFiducialsBehavior implements MultiRobotTestInterface
+public abstract class AvatarWalkToFiducialsBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private DRCBehaviorTestHelper drcBehaviorTestHelper;

@@ -120,6 +120,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    @Override
    public void setGoal(FootstepPlannerGoal goal)
    {
+      goalNode = null;
+
       FramePose goalPose = goal.getGoalPoseBetweenFeet();
       goalPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
