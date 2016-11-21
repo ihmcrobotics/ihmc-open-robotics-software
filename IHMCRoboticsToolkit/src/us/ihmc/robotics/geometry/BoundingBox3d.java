@@ -425,6 +425,12 @@ public class BoundingBox3d
       }
    }
 
+   public boolean containsNaN()
+   {
+      return Double.isNaN(minPoint.getX()) || Double.isNaN(maxPoint.getX()) || Double.isNaN(minPoint.getY()) || Double.isNaN(maxPoint.getY()) || Double
+            .isNaN(minPoint.getZ()) || Double.isNaN(maxPoint.getZ());
+   }
+
    @Override
    public String toString()
    {
