@@ -19,17 +19,16 @@ public class ConcurrentListeningQueue<T>
 
    private boolean printedOverflowWarning = false;
 
-//   public ConcurrentListeningQueue()
-//   {
-//      this(2000);
-//   }
-
    public ConcurrentListeningQueue(int maximumSizeToBuffer)
    {
       elementsOnCreation = Thread.currentThread().getStackTrace();
       this.maximumSizeToBuffer = maximumSizeToBuffer;
    }
 
+   /**
+    * Sets the maximum size to buffer. If items are added to the buffer after it reaches this size, it throws away old ones and keeps the new ones.
+    * @param maximumSizeToBuffer
+    */
    public void setMaximumSizeToBuffer(int maximumSizeToBuffer)
    {
       this.maximumSizeToBuffer = maximumSizeToBuffer;
