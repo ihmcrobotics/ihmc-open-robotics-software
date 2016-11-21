@@ -60,4 +60,9 @@ public class QuadProgSolver extends ConstrainedQPSolver
       CommonOps.scale(-1, this.negAin);
       return qpWrapper.solve(Q, f, negAeq, beq, negAin, bin, x, initialize);
    }
+
+   public double getCost()
+   {
+      return qpWrapper.getObjVal();
+   }
 }
