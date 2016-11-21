@@ -14,7 +14,7 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    private int scanNumber = 0;
    private int NUMBER_OF_SCANS =25;
 
-   protected final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
+   protected final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>(100);
 
    CommunicationBridge coactiveBehaviorsNetworkManager;
 

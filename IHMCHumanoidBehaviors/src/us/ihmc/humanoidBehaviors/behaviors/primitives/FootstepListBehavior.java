@@ -40,7 +40,7 @@ public class FootstepListBehavior extends AbstractBehavior
    private final BooleanYoVariable hasLastStepBeenReached = new BooleanYoVariable("hasLastStepBeenReached", registry);
    private final BooleanYoVariable isRobotDoneWalking = new BooleanYoVariable("isRobotDoneWalking", registry);
    private final BooleanYoVariable hasRobotStartedWalking = new BooleanYoVariable("hasRobotStartedWalking", registry);
-   
+
 
    private double defaultSwingTime;
    private double defaultTranferTime;
@@ -48,9 +48,9 @@ public class FootstepListBehavior extends AbstractBehavior
    public FootstepListBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
-      footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>();
+      footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(40);
       attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
-      walkingStatusQueue = new ConcurrentListeningQueue<>();
+      walkingStatusQueue = new ConcurrentListeningQueue<>(40);
       attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
       numberOfFootsteps.set(-1);
       defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
@@ -63,25 +63,25 @@ public class FootstepListBehavior extends AbstractBehavior
       numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
       packetHasBeenSent.set(false);
    }
-   
+
    public void set(ArrayList<Footstep> footsteps, double swingTime, double transferTime)
    {
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime,transferTime);
-      
+
       for (int i = 0; i < footsteps.size(); i++)
       {
          Footstep footstep = footsteps.get(i);
          Point3d location = new Point3d(footstep.getX(), footstep.getY(), footstep.getZ());
          Quat4d orientation = new Quat4d();
          footstep.getOrientation(orientation);
-         
+
          RobotSide footstepSide = footstep.getRobotSide();
          FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, location, orientation);
          footstepDataList.add(footstepData);
       }
       set(footstepDataList);
    }
-   
+
    public void set(ArrayList<Footstep> footsteps)
    {
       set(footsteps, defaultSwingTime, defaultTranferTime);
@@ -236,7 +236,7 @@ public class FootstepListBehavior extends AbstractBehavior
       return ret;
    }
 
-  
+
    public boolean hasInputBeenSet()
    {
       if (numberOfFootsteps.getIntegerValue() != -1 && hasRobotStartedWalking.getBooleanValue())
