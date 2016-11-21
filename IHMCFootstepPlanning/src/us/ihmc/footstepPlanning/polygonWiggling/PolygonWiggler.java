@@ -16,6 +16,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 public class PolygonWiggler
 {
    private static final boolean DEBUG = false;
+   private static final double epsilon = 1.0E-15;
 
    /**
     * Returns a transform that will move the given polygon into a planar region. Problematic if the planar region consists of
@@ -23,8 +24,7 @@ public class PolygonWiggler
     *
     * @param polygonToWiggleInRegionFrame
     * @param regionToWiggleInto
-    * @param maxYaw
-    * @param minYaw
+    * @param wiggleParameters
     * @return
     */
    public static RigidBodyTransform wigglePolygonIntoRegion(ConvexPolygon2d polygonToWiggleInRegionFrame, PlanarRegion regionToWiggleInto, WiggleParameters parameters)
@@ -60,8 +60,7 @@ public class PolygonWiggler
     *
     * @param polygonToWiggle
     * @param planeToWiggleInto
-    * @param maxYaw
-    * @param minYaw
+    * @param wiggleParameters
     * @return
     */
    public static ConvexPolygon2d wigglePolygon(ConvexPolygon2d polygonToWiggle, ConvexPolygon2d planeToWiggleInto, WiggleParameters parameters)
@@ -80,8 +79,7 @@ public class PolygonWiggler
     *
     * @param polygonToWiggle
     * @param planeToWiggleInto
-    * @param maxYaw
-    * @param minYaw
+    * @param wiggleParameters
     * @return
     */
    public static RigidBodyTransform findWiggleTransform(ConvexPolygon2d polygonToWiggle, ConvexPolygon2d planeToWiggleInto, WiggleParameters parameters)
@@ -163,9 +161,18 @@ public class PolygonWiggler
          return null;
       }
 
-      // assemble the transform
       double theta = result.get(2);
       Vector3d translation = new Vector3d(result.get(0), result.get(1), 0.0);
+
+      // check if was successful
+      if (theta > parameters.maxYaw + epsilon  || theta < parameters.minYaw - epsilon)
+         return null;
+      if (translation.getX() > parameters.maxX + epsilon || translation.getX() < parameters.minX - epsilon)
+         return null;
+      if (translation.getY() > parameters.maxY + epsilon || translation.getY() < parameters.minY - epsilon)
+         return null;
+
+      // assemble the transform
       Vector3d offset = new Vector3d(pointToRotateAbout.x, pointToRotateAbout.y, 0.0);
 
       RigidBodyTransform toOriginTransform = new RigidBodyTransform();

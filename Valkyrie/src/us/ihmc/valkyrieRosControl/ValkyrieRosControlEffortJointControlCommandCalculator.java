@@ -11,10 +11,14 @@ import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 
 public class ValkyrieRosControlEffortJointControlCommandCalculator
 {
+   /** This is for hardware debug purposes only. */
+   private static final boolean ENABLE_TAU_SCALE = false;
+
    private final YoEffortJointHandleHolder yoEffortJointHandleHolder;
 
    private final PIDController pidController;
    private final DoubleYoVariable tauOff;
+   private final DoubleYoVariable tauScale;
    private final DoubleYoVariable standPrepAngle;
    private final DoubleYoVariable initialAngle;
 
@@ -35,6 +39,15 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
 
       pidController = new PIDController(pdControllerBaseName + "StandPrep", registry);
       this.tauOff = new DoubleYoVariable("tau_offset_" + pdControllerBaseName, registry);
+      if (ENABLE_TAU_SCALE)
+      {
+         tauScale = new DoubleYoVariable("tau_scale_" + pdControllerBaseName, registry);
+         tauScale.set(1.0);
+      }
+      else
+      {
+         tauScale = null;
+      }
 
       pidController.setProportionalGain(gains.get("kp"));
       pidController.setDerivativeGain(gains.get("kd"));
@@ -69,6 +82,8 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
       double standPrepFactor = 1.0 - factor;
 
       factor = MathTools.clipToMinMax(factor, 0.0, 1.0);
+      if (ENABLE_TAU_SCALE)
+         factor *= tauScale.getDoubleValue();
 
       double q = yoEffortJointHandleHolder.getQ();
       double qDesired = (1.0 - ramp) * initialAngle.getDoubleValue() + ramp * standPrepAngle.getDoubleValue();
