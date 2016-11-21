@@ -26,6 +26,161 @@ public class PlanarRegionTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
+   public void testCreationOfBoundingBoxWithAllPointsGreaterThanOrigin()
+   {
+      final double zLocationOfPlanarRegion = 2.0;
+      Point3d minPoint = new Point3d(1.0, 1.0, zLocationOfPlanarRegion);
+      Point3d maxPoint = new Point3d(2.0, 2.0, zLocationOfPlanarRegion);
+
+      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2d polygon1 = new ConvexPolygon2d();
+      polygon1.addVertex(minPoint.x, minPoint.y);
+      polygon1.addVertex(maxPoint.x, minPoint.y);
+      polygon1.addVertex(minPoint.x, maxPoint.y);
+      polygon1.addVertex(maxPoint.x, maxPoint.y);
+
+      regionConvexPolygons.add(polygon1);
+
+      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+         convexPolygon.update();
+
+      RigidBodyTransform regionTransform = new RigidBodyTransform();
+      regionTransform.applyTranslation(new Vector3d(0, 0, zLocationOfPlanarRegion));
+      PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
+
+      BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transformToWorld);
+
+      assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
+
+      Point3d boundingBoxMinPoint = new Point3d();
+      Point3d boundingBoxMaxPoint = new Point3d();
+
+      boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
+      boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
+
+      assertEquals(minPoint, boundingBoxMinPoint);
+      assertEquals(maxPoint, boundingBoxMaxPoint);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCreationOfBoundingBoxWithAllPointsLessThanOrigin()
+   {
+      final double zLocationOfPlanarRegion = -2.0;
+      Point3d maxPoint = new Point3d(-1.0, -1.0, zLocationOfPlanarRegion);
+      Point3d minPoint = new Point3d(-2.0, -2.0, zLocationOfPlanarRegion);
+
+      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2d polygon1 = new ConvexPolygon2d();
+      polygon1.addVertex(minPoint.x, minPoint.y);
+      polygon1.addVertex(maxPoint.x, minPoint.y);
+      polygon1.addVertex(minPoint.x, maxPoint.y);
+      polygon1.addVertex(maxPoint.x, maxPoint.y);
+
+      regionConvexPolygons.add(polygon1);
+
+      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+         convexPolygon.update();
+
+      RigidBodyTransform regionTransform = new RigidBodyTransform();
+      regionTransform.applyTranslation(new Vector3d(0, 0, zLocationOfPlanarRegion));
+      PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
+
+      BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transformToWorld);
+
+      assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
+
+      Point3d boundingBoxMinPoint = new Point3d();
+      Point3d boundingBoxMaxPoint = new Point3d();
+
+      boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
+      boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
+
+      assertEquals(minPoint, boundingBoxMinPoint);
+      assertEquals(maxPoint, boundingBoxMaxPoint);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testCreationOfBoundingBoxWithMinimumLessThanOriginAndMaximumGreaterThanOrigin()
+   {
+      Point3d maxPoint = new Point3d(2.0, 2.0, 0.0);
+      Point3d minPoint = new Point3d(-2.0, -2.0, 0.0);
+
+      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2d polygon1 = new ConvexPolygon2d();
+      polygon1.addVertex(minPoint.x, minPoint.y);
+      polygon1.addVertex(maxPoint.x, minPoint.y);
+      polygon1.addVertex(minPoint.x, maxPoint.y);
+      polygon1.addVertex(maxPoint.x, maxPoint.y);
+
+      regionConvexPolygons.add(polygon1);
+
+      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+         convexPolygon.update();
+
+      RigidBodyTransform regionTransform = new RigidBodyTransform();
+      PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
+
+      BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transformToWorld);
+
+      assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
+
+      Point3d boundingBoxMinPoint = new Point3d();
+      Point3d boundingBoxMaxPoint = new Point3d();
+
+      boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
+      boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
+
+      assertEquals(minPoint, boundingBoxMinPoint);
+      assertEquals(maxPoint, boundingBoxMaxPoint);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testBoundingBoxForLShapedPlanarRegionWithIdentifyTransform()
+   {
+      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2d polygon1 = new ConvexPolygon2d();
+      polygon1.addVertex(1.0, 1.0);
+      polygon1.addVertex(1.0, -1.0);
+      polygon1.addVertex(-1.0, -1.0);
+      polygon1.addVertex(-1.0, 1.0);
+      ConvexPolygon2d polygon2 = new ConvexPolygon2d();
+      polygon2.addVertex(3.0, 1.0);
+      polygon2.addVertex(3.0, -1.0);
+      polygon2.addVertex(1.0, -1.0);
+      polygon2.addVertex(1.0, 1.0);
+      ConvexPolygon2d polygon3 = new ConvexPolygon2d();
+      polygon3.addVertex(1.0, 3.0);
+      polygon3.addVertex(1.0, 1.0);
+      polygon3.addVertex(-1.0, 1.0);
+      polygon3.addVertex(-1.0, 3.0);
+
+      regionConvexPolygons.add(polygon1);
+      regionConvexPolygons.add(polygon2);
+      regionConvexPolygons.add(polygon3);
+      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+         convexPolygon.update();
+
+      RigidBodyTransform regionTransform = new RigidBodyTransform();
+      PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
+
+      BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(transformToWorld);
+
+      assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testWithLShapedPlanarRegionWithIdentityTransform()
    {
       // polygons forming a L-shaped region.
@@ -410,6 +565,22 @@ public class PlanarRegionTest
          assertTrue(planarRegion.isPolygonIntersecting(transformConvexPolygon(regionTransform, translateConvexPolygon(1.09, 1.09, convexPolygon))));
          assertTrue(planarRegion.isPolygonIntersecting(transformConvexPolygon(regionTransform, translateConvexPolygon(1.21, 1.09, convexPolygon))));
          assertTrue(planarRegion.isPolygonIntersecting(transformConvexPolygon(regionTransform, translateConvexPolygon(1.09, 1.21, convexPolygon))));
+
+         BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+         RigidBodyTransform transformToWorld = new RigidBodyTransform();
+         planarRegion.getTransformToWorld(transformToWorld);
+
+         for (ConvexPolygon2d convexPolygon2d : regionConvexPolygons)
+         {
+            ConvexPolygon2d convexPolygon2dInWorld = convexPolygon2d.applyTransformAndProjectToXYPlaneCopy(transformToWorld);
+            for(int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
+            {
+               Point2d vertex = convexPolygon2dInWorld.getVertex(i);
+               double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.x, vertex.y);
+
+               assertTrue("Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: " + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.x, vertex.y, planeZGivenXY));
+            }
+         }
       }
    }
 
@@ -500,6 +671,21 @@ public class PlanarRegionTest
       ConvexPolygon2d transformedConvexPolygon = new ConvexPolygon2d(convexPolygon);
       transformedConvexPolygon.applyTransformAndProjectToXYPlane(transform);
       return transformedConvexPolygon;
+   }
+
+   private void assertThatAllPolygonVerticesAreInBoundingBox(List<ConvexPolygon2d> regionConvexPolygons, PlanarRegion planarRegion,
+         BoundingBox3d boundingBox3dInWorld)
+   {
+      for (ConvexPolygon2d convexPolygon2dInWorld : regionConvexPolygons)
+      {
+         for(int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
+         {
+            Point2d vertex = convexPolygon2dInWorld.getVertex(i);
+            double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.x, vertex.y);
+
+            assertTrue("Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: " + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.x, vertex.y, planeZGivenXY));
+         }
+      }
    }
 
    public static void main(String[] args)

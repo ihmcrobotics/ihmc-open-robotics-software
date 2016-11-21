@@ -1,18 +1,14 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.robotics.MathTools;
+
+import javax.vecmath.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
-import us.ihmc.robotics.MathTools;
-
 public class PlanarRegion
 {
+   public static final double DEFAULT_BOUNDING_BOX_EPSILON = 1e-15;
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
    /**
@@ -21,12 +17,18 @@ public class PlanarRegion
     */
    private final List<ConvexPolygon2d> convexPolygons;
 
+   private final BoundingBox3d boundingBox3dInWorld = new BoundingBox3d(new Point3d(Double.NaN, Double.NaN, Double.NaN),
+         new Point3d(Double.NaN, Double.NaN, Double.NaN));
+   private final Point3d tempPointForConvexPolygonProjection = new Point3d();
+
    /**
     * Create a new, empty planar region.
     */
    public PlanarRegion()
    {
       convexPolygons = new ArrayList<>();
+      boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
+      updateBoundingBox();
    }
 
    /**
@@ -39,6 +41,8 @@ public class PlanarRegion
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.invert(fromLocalToWorldTransform);
       convexPolygons = planarRegionConvexPolygons;
+      boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
+      updateBoundingBox();
    }
 
    /**
@@ -52,6 +56,8 @@ public class PlanarRegion
       convexPolygons.add(convexPolygon);
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.invert(fromLocalToWorldTransform);
+      boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
+      updateBoundingBox();
    }
 
    /**
@@ -107,7 +113,8 @@ public class PlanarRegion
     * @param snappingTransform RigidBodyTransform that snaps the polygon onto this region. Must have same surface normal as this region.
     * @param intersectionsToPack ArrayList of ConvexPolygon2d to pack with the intersections.
     */
-   public void getPolygonIntersectionsWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform, ArrayList<ConvexPolygon2d> intersectionsToPack)
+   public void getPolygonIntersectionsWhenSnapped(ConvexPolygon2d convexPolygon2d, RigidBodyTransform snappingTransform,
+         ArrayList<ConvexPolygon2d> intersectionsToPack)
    {
       ConvexPolygon2d projectedPolygon = snapPolygonIntoRegionAndChangeFrameToRegionFrame(convexPolygon2d, snappingTransform);
 
@@ -348,6 +355,35 @@ public class PlanarRegion
       transformToPack.set(fromLocalToWorldTransform);
    }
 
+   /**
+    * Get a reference to the PlanarRegion's axis-aligned minimal bounding box (AABB) in world.
+    * @return the axis-aligned minimal bounding box for the planar region, in world coordinates.
+    */
+   public BoundingBox3d getBoundingBox3dInWorld()
+   {
+      return this.boundingBox3dInWorld;
+   }
+
+   /**
+    * Get a deep copy of this PlanarRegion's axis-aligned minimal bounding box (AABB) in world
+    * @return a deep copy of the axis-aligned minimal bounding box for the planar region, in world coordinates.
+    */
+   public BoundingBox3d getBoundingBox3dInWorldCopy()
+   {
+      return new BoundingBox3d(this.boundingBox3dInWorld);
+   }
+
+   /**
+    * Set defining points of the passed-in BoundingBox3d to the same as
+    * those in this PlanarRegion's axis-aligned minimal bounding box (AABB) in world coordinates.
+    *
+    * @param boundingBox3dToPack the bounding box that will be updated to reflect this PlanarRegion's AABB
+    */
+   public void getBoundingBox3dInWorld(BoundingBox3d boundingBox3dToPack)
+   {
+      boundingBox3dToPack.set(this.boundingBox3dInWorld);
+   }
+
    public boolean epsilonEquals(PlanarRegion other, double epsilon)
    {
       if (!fromLocalToWorldTransform.epsilonEquals(other.fromLocalToWorldTransform, epsilon))
@@ -374,6 +410,25 @@ public class PlanarRegion
       convexPolygons.clear();
       for (int i = 0; i < other.getNumberOfConvexPolygons(); i++)
          convexPolygons.add(new ConvexPolygon2d(other.convexPolygons.get(i)));
+
+      updateBoundingBox();
    }
 
+   private void updateBoundingBox()
+   {
+      boundingBox3dInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+      for (int i = 0; i < this.getNumberOfConvexPolygons(); i++)
+      {
+         ConvexPolygon2d convexPolygon = this.getConvexPolygon(i);
+
+         for (int j = 0; j < convexPolygon.getNumberOfVertices(); j++)
+         {
+            Point2d vertex = convexPolygon.getVertex(j);
+            tempPointForConvexPolygonProjection.set(vertex.x, vertex.y, 0.0);
+            fromLocalToWorldTransform.transform(tempPointForConvexPolygonProjection);
+
+            this.boundingBox3dInWorld.updateToIncludePoint(tempPointForConvexPolygonProjection);
+         }
+      }
+   }
 }
