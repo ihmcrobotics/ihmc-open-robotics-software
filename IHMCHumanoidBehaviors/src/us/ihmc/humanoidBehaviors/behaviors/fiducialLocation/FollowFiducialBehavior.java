@@ -26,6 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -141,7 +142,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
       planner.setMinimumStepWidth(0.15);
       planner.setMinimumFootholdPercent(0.8);
 
-      double idealFootstepLength = 0.25;
+      double idealFootstepLength = 0.4;
       double idealFootstepWidth = 0.25;
       planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
@@ -438,6 +439,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
          FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(tempFootstepPosePosition),
                new Quat4d(tempFirstFootstepPoseOrientation));
+         firstFootstepMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+
          footstepDataListMessage.add(firstFootstepMessage);
       }
 
