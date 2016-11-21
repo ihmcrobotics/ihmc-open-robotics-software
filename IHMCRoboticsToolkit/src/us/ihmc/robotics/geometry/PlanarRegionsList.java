@@ -119,6 +119,12 @@ public class PlanarRegionsList
       return containers;
    }
 
+   /** Returns true if this list of planar regions is empty (contains no planar regions). */
+   public boolean isEmpty()
+   {
+      return regions.isEmpty();
+   }
+
    /** Return the number of planar regions contained in this list. */
    public int getNumberOfPlanarRegions()
    {
@@ -129,5 +135,35 @@ public class PlanarRegionsList
    public PlanarRegion getPlanarRegion(int index)
    {
       return regions.get(index);
+   }
+
+   /**
+    * Retrieves the last planar region of this list.
+    * Special case: returns null when the list is empty.
+    */
+   public PlanarRegion getLastPlanarRegion()
+   {
+      if (isEmpty())
+         return null;
+      else
+         return getPlanarRegion(getNumberOfPlanarRegions() - 1);
+   }
+   
+   /** Retrieves the i<sup>th</sup> planar region of this list and removes it from this list. */
+   public PlanarRegion pollPlanarRegion(int index)
+   {
+      return regions.remove(index);
+   }
+
+   /**
+    * Retrieves the last planar region of this list and removes it from this list.
+    * Special case: returns null when the list is empty.
+    */
+   public PlanarRegion pollLastPlanarRegion()
+   {
+      if (isEmpty())
+         return null;
+      else
+         return pollPlanarRegion(getNumberOfPlanarRegions() - 1);
    }
 }

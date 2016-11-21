@@ -279,6 +279,14 @@ public class PlanarRegion
       return z;
    }
 
+   /**
+    * Returns true only if there is no polygons in this planar region. Does not check for empty polygons.
+    */
+   public boolean isEmpty()
+   {
+      return convexPolygons.isEmpty();
+   }
+
    /** Returns the number of convex polygons representing this region. */
    public int getNumberOfConvexPolygons()
    {
@@ -292,6 +300,43 @@ public class PlanarRegion
    public ConvexPolygon2d getConvexPolygon(int i)
    {
       return convexPolygons.get(i);
+   }
+
+   /**
+    * Returns the last convex polygon representing a portion of this region.
+    * Special case: returns null when this region is empty.
+    * The polygon is expressed in the region local coordinates.
+    */
+   public ConvexPolygon2d getLastConvexPolygon()
+   {
+      if (isEmpty())
+         return null;
+      else
+         return getConvexPolygon(getNumberOfConvexPolygons() - 1);
+   }
+
+   /**
+    * Returns the i<sup>th</sup> convex polygon representing a portion of this region and removes it from this planar region.
+    * The polygon is expressed in the region local coordinates.
+    */
+   public ConvexPolygon2d pollConvexPolygon(int i)
+   {
+      ConvexPolygon2d polledPolygon = convexPolygons.remove(i);
+      updateBoundingBox();
+      return polledPolygon;
+   }
+
+   /**
+    * Returns the last convex polygon representing a portion of this region and removes it from this planar region.
+    * Special case: returns null when this region is empty.
+    * The polygon is expressed in the region local coordinates.
+    */
+   public ConvexPolygon2d pollLastConvexPolygon()
+   {
+      if (isEmpty())
+         return null;
+      else
+         return pollConvexPolygon(getNumberOfConvexPolygons() - 1);
    }
 
    /**
