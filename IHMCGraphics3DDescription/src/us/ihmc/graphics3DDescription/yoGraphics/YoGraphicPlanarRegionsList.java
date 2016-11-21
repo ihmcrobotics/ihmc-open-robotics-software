@@ -1,8 +1,9 @@
 package us.ihmc.graphics3DDescription.yoGraphics;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.vecmath.Point3f;
 import javax.vecmath.TexCoord2f;
@@ -14,8 +15,8 @@ import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.graphics3DDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.plotting.artifact.Artifact;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -33,98 +34,90 @@ import us.ihmc.tools.gui.GraphicsUpdatable;
 
 public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {
+   private enum YoGraphicJob
+   {
+      /** The YoGraphic is the one processing planar regions and updating the YoVariables. */
+      UPDATER,
+      /** The YoGraphic reads the YoVariable to create the meshes only. */
+      READER
+   };
+
+   private final YoGraphicJob yoGraphicJob;
+
    private static final AppearanceDefinition appearance = YoAppearance.Aquamarine();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final int maxNumberOfVertices;
+   private final int maxNumberOfVerticesPerPolygon;
    private final int maxNumberOfPolygons;
 
+   private final BooleanYoVariable waitForReader;
+   private final BooleanYoVariable hasReaderProcessedMesh;
+
    private final List<YoFramePoint2d> poolOfVertices;
-   private final List<IntegerYoVariable> poolOfPolygonSizes;
-   private final List<YoFramePoseUsingQuaternions> poolOfPolygonPoses;
+   private final IntegerYoVariable currentPolygonIndex;
+   private final IntegerYoVariable currentPolygonSize;
+   private final YoFramePoseUsingQuaternions currentPolygonPose;
 
    private final Graphics3DObject graphics3dObject;
    private final List<Graphics3DAddMeshDataInstruction> polygonMeshInstructions;
 
-   private final AtomicBoolean planarRegionsChanges = new AtomicBoolean(true);
-
-   public YoGraphicPlanarRegionsList(String name, int maxNumberOfVertices, int maxNumberOfPolygons, YoVariableRegistry registry)
+   public YoGraphicPlanarRegionsList(String name, int maxNumberOfVerticesPerPolygon, int maxNumberOfPolygons, YoVariableRegistry registry)
    {
       super(name);
 
-      this.maxNumberOfVertices = maxNumberOfVertices;
+      yoGraphicJob = YoGraphicJob.UPDATER;
+
+      this.maxNumberOfVerticesPerPolygon = maxNumberOfVerticesPerPolygon;
       this.maxNumberOfPolygons = maxNumberOfPolygons;
 
-      poolOfVertices = new ArrayList<>(maxNumberOfVertices);
-      poolOfPolygonSizes = new ArrayList<>(maxNumberOfPolygons);
-      poolOfPolygonPoses = new ArrayList<>(maxNumberOfPolygons);
+      waitForReader = new BooleanYoVariable(name + "WaitForReader", registry);
+      hasReaderProcessedMesh = new BooleanYoVariable(name + "HasReaderProcessedMesh", registry);
 
-      VariableChangedListener notifyRegionsChanged = new VariableChangedListener()
-      {
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            planarRegionsChanges.set(true);
-         }
-      };
+      poolOfVertices = new ArrayList<>(maxNumberOfVerticesPerPolygon);
 
-      for (int i = 0; i < maxNumberOfVertices; i++)
+      for (int i = 0; i < maxNumberOfVerticesPerPolygon; i++)
       {
          YoFramePoint2d vertex = new YoFramePoint2d(name + "Vertex" + i, worldFrame, registry);
          vertex.setToNaN();
-         vertex.attachVariableChangedListener(notifyRegionsChanged);
          poolOfVertices.add(vertex);
       }
 
-      for (int i = 0; i < maxNumberOfPolygons; i++)
-      {
-         IntegerYoVariable polygonSize = new IntegerYoVariable(name + "Polygon" + i + "Size", registry);
-         polygonSize.set(-1);
-         polygonSize.addVariableChangedListener(notifyRegionsChanged);
-         poolOfPolygonSizes.add(polygonSize);
-         YoFramePoseUsingQuaternions polygonPose = new YoFramePoseUsingQuaternions(name + "Polygon" + i + "Pose", worldFrame, registry);
-         polygonPose.setToNaN();
-         polygonPose.attachVariableChangedListener(notifyRegionsChanged);
-         poolOfPolygonPoses.add(polygonPose);
-      }
+      currentPolygonIndex = new IntegerYoVariable(name + "CurrentPolygonIndex", registry);
+      currentPolygonSize = new IntegerYoVariable(name + "CurrentPolygonSize", registry);
+      currentPolygonPose = new YoFramePoseUsingQuaternions(name + "CurrentPolygonPose", worldFrame, registry);
+
+      clearYoVariables();
 
       graphics3dObject = new Graphics3DObject();
       graphics3dObject.setChangeable(true);
       polygonMeshInstructions = new ArrayList<>(maxNumberOfPolygons);
 
       for (int polygonIndex = 0; polygonIndex < maxNumberOfPolygons; polygonIndex++)
-         polygonMeshInstructions.add(graphics3dObject.addMeshData(createPolygonMesh(polygonIndex), appearance));
+         polygonMeshInstructions.add(graphics3dObject.addMeshData(null, appearance));
    }
 
+   /**
+    * This constructor is only for remote visualizer.
+    * It is automatically handled and should not be used for creating a new YoGraphic.
+    * For the latter, use the other constructor(s).
+    */
    YoGraphicPlanarRegionsList(String name, YoVariable<?>[] yoVariables, Double[] constants, AppearanceDefinition appearance)
    {
       super(name);
 
-      maxNumberOfVertices = constants[0].intValue();
+      yoGraphicJob = YoGraphicJob.READER;
+
+      maxNumberOfVerticesPerPolygon = constants[0].intValue();
       maxNumberOfPolygons = constants[1].intValue();
 
-      poolOfVertices = new ArrayList<>(maxNumberOfVertices);
-      poolOfPolygonSizes = new ArrayList<>(maxNumberOfPolygons);
-      poolOfPolygonPoses = new ArrayList<>(maxNumberOfPolygons);
+      poolOfVertices = new ArrayList<>(maxNumberOfVerticesPerPolygon);
 
-
-      VariableChangedListener notifyRegionsChanged = new VariableChangedListener()
-      {
-         @Override
-         public void variableChanged(YoVariable<?> v)
-         {
-            planarRegionsChanges.set(true);
-         }
-      };
-
-      for (YoVariable<?> yoVariable : yoVariables)
-      {
-         yoVariable.addVariableChangedListener(notifyRegionsChanged);
-      }
-      
       int variableIndex = 0;
 
-      for (int vertexIndex = 0; vertexIndex < maxNumberOfVertices; vertexIndex++)
+      waitForReader = (BooleanYoVariable) yoVariables[variableIndex++];
+      hasReaderProcessedMesh = (BooleanYoVariable) yoVariables[variableIndex++];
+
+      for (int vertexIndex = 0; vertexIndex < maxNumberOfVerticesPerPolygon; vertexIndex++)
       {
          DoubleYoVariable x = (DoubleYoVariable) yoVariables[variableIndex++];
          DoubleYoVariable y = (DoubleYoVariable) yoVariables[variableIndex++];
@@ -132,62 +125,51 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
          poolOfVertices.add(vertex);
       }
 
-      for (int polygonIndex = 0; polygonIndex < maxNumberOfPolygons; polygonIndex++)
-      {
-         IntegerYoVariable polygonSize = (IntegerYoVariable) yoVariables[variableIndex++];
-         poolOfPolygonSizes.add(polygonSize);
-      }
+      currentPolygonIndex = (IntegerYoVariable) yoVariables[variableIndex++];
+      currentPolygonSize = (IntegerYoVariable) yoVariables[variableIndex++];
 
-      for (int polygonIndex = 0; polygonIndex < maxNumberOfPolygons; polygonIndex++)
-      {
-         DoubleYoVariable x = (DoubleYoVariable) yoVariables[variableIndex++];
-         DoubleYoVariable y = (DoubleYoVariable) yoVariables[variableIndex++];
-         DoubleYoVariable z = (DoubleYoVariable) yoVariables[variableIndex++];
-         DoubleYoVariable qx = (DoubleYoVariable) yoVariables[variableIndex++];
-         DoubleYoVariable qy = (DoubleYoVariable) yoVariables[variableIndex++];
-         DoubleYoVariable qz = (DoubleYoVariable) yoVariables[variableIndex++];
-         DoubleYoVariable qs = (DoubleYoVariable) yoVariables[variableIndex++];
-         YoFramePoint position = new YoFramePoint(x, y, z, worldFrame);
-         YoFrameQuaternion orientation = new YoFrameQuaternion(qx, qy, qz, qs, worldFrame);
-         YoFramePoseUsingQuaternions polygonPose = new YoFramePoseUsingQuaternions(position, orientation);
-         poolOfPolygonPoses.add(polygonPose);
-      }
+      DoubleYoVariable x = (DoubleYoVariable) yoVariables[variableIndex++];
+      DoubleYoVariable y = (DoubleYoVariable) yoVariables[variableIndex++];
+      DoubleYoVariable z = (DoubleYoVariable) yoVariables[variableIndex++];
+      DoubleYoVariable qx = (DoubleYoVariable) yoVariables[variableIndex++];
+      DoubleYoVariable qy = (DoubleYoVariable) yoVariables[variableIndex++];
+      DoubleYoVariable qz = (DoubleYoVariable) yoVariables[variableIndex++];
+      DoubleYoVariable qs = (DoubleYoVariable) yoVariables[variableIndex++];
+      YoFramePoint position = new YoFramePoint(x, y, z, worldFrame);
+      YoFrameQuaternion orientation = new YoFrameQuaternion(qx, qy, qz, qs, worldFrame);
+      currentPolygonPose = new YoFramePoseUsingQuaternions(position, orientation);
 
       graphics3dObject = new Graphics3DObject();
       graphics3dObject.setChangeable(true);
       polygonMeshInstructions = new ArrayList<>(maxNumberOfPolygons);
 
       for (int polygonIndex = 0; polygonIndex < maxNumberOfPolygons; polygonIndex++)
-         polygonMeshInstructions.add(graphics3dObject.addMeshData(createPolygonMesh(polygonIndex), appearance));
+         polygonMeshInstructions.add(graphics3dObject.addMeshData(null, appearance));
    }
 
-   private MeshDataHolder createPolygonMesh(int polygonIndex)
+   private MeshDataHolder createCurrentPolygonMesh()
    {
-      int numberOfVertices = poolOfPolygonSizes.get(polygonIndex).getIntegerValue();
+      int numberOfVertices = currentPolygonSize.getIntegerValue();
 
       if (numberOfVertices <= 0)
          return null;
 
-      int firstVertexIndex = findFirstVertexIndexGivenPolygonIndex(polygonIndex);
-
       int numberOfTriangles = numberOfVertices - 2;
 
-      if(numberOfTriangles <= 0)
+      if (numberOfTriangles <= 0)
          return null;
-
-      YoFramePoseUsingQuaternions pose = poolOfPolygonPoses.get(polygonIndex);
 
       Point3f[] vertices = new Point3f[numberOfVertices];
       TexCoord2f[] texturePoints = new TexCoord2f[numberOfVertices];
       Vector3f[] vertexNormals = new Vector3f[numberOfVertices];
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      pose.getPose(transform);
+      currentPolygonPose.getPose(transform);
 
       for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
       {
          Point3f vertex = new Point3f();
-         poolOfVertices.get(vertexIndex + firstVertexIndex).get(vertex);
+         poolOfVertices.get(vertexIndex).get(vertex);
          transform.transform(vertex);
          vertices[vertexIndex] = vertex;
       }
@@ -217,86 +199,196 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       return new MeshDataHolder(vertices, texturePoints, triangleIndices, vertexNormals);
    }
 
-   private int findFirstVertexIndexGivenPolygonIndex(int polygonIndex)
+   private final RigidBodyTransform regionTransform = new RigidBodyTransform();
+   private final int maxDequeSize = 2;
+   private final Deque<PlanarRegionsList> planarRegionsListsDeque = new ArrayDeque<>();
+
+   /**
+    * Submit a new list of planar regions to update.
+    * This method does NOT update any YoVariables and thus does not update any graphics.
+    * Once a list of planar regions is submitted, the method {@link #updateNextPolygon()} has to be called every update tick in the caller.
+    * @param filterEmptyRegions(planarRegionsList) the list of planar regions to be eventually rendered.
+    */
+   public void submitPlanarRegionsListToRender(PlanarRegionsList planarRegionsList)
    {
-      int vertexIndex = 0;
-      for (int i = 0; i < polygonIndex; i++)
-         vertexIndex += poolOfPolygonSizes.get(i).getIntegerValue();
-      return vertexIndex;
+      if (planarRegionsListsDeque.size() > maxDequeSize)
+         return;
+
+      PlanarRegionsList filteredPlanarRegionsList = filterEmptyRegionsAndEmptyPolygons(planarRegionsList);
+      if (filteredPlanarRegionsList != null)
+         planarRegionsListsDeque.addLast(filteredPlanarRegionsList);
    }
 
-   private final RigidBodyTransform regionTransform = new RigidBodyTransform();
-
-   public void update(PlanarRegionsList planarRegionsList)
+   /**
+    * Filter all the polygons and regions such that only polygon and regions with data remain.
+    * Simplyfies the algorithm for updating the YoVariables in {@link #updateNextPolygon()}.
+    * @param planarRegionsList the list of planar regions with non-empty regions and non-empty polygons.
+    * @return
+    */
+   private PlanarRegionsList filterEmptyRegionsAndEmptyPolygons(PlanarRegionsList planarRegionsList)
    {
-      int numberOfRegions = planarRegionsList.getNumberOfPlanarRegions();
-      int numberOfPolygons = 0;
-      int numberOfVertices = 0;
-
-      boolean bufferFull = false;
-
-      for (int regionIndex = 0; regionIndex < numberOfRegions; regionIndex++)
+      for (int regionIndex = planarRegionsList.getNumberOfPlanarRegions() - 1; regionIndex >= 0; regionIndex--)
       {
-         PlanarRegion region = planarRegionsList.getPlanarRegion(regionIndex);
-         region.getTransformToWorld(regionTransform);
-
-         for (int i = 0; i < region.getNumberOfConvexPolygons(); i++)
+         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
+         for (int polygonIndex = planarRegion.getNumberOfConvexPolygons() - 1; polygonIndex >= 0; polygonIndex--)
          {
-            ConvexPolygon2d convexPolygon = region.getConvexPolygon(i);
+            if (planarRegion.getConvexPolygon(polygonIndex).isEmpty())
+               planarRegion.pollConvexPolygon(polygonIndex);
+         }
 
-            int polygonSize = convexPolygon.getNumberOfVertices();
-            if (numberOfVertices + polygonSize > maxNumberOfVertices)
+         if (planarRegion.isEmpty())
+            planarRegionsList.pollPlanarRegion(regionIndex);
+      }
+
+      if (planarRegionsList.isEmpty())
+         return null;
+
+      return planarRegionsList;
+   }
+
+   /**
+    * @return the number of lists of planar regions to process.
+    */
+   public int getDequeSize()
+   {
+      return planarRegionsListsDeque.size();
+   }
+
+   /**
+    * @return true is all the lists of planar regions has been processed.
+    */
+   public boolean isDequeEmpty()
+   {
+      return planarRegionsListsDeque.isEmpty();
+   }
+
+   /**
+    * Update one polygon mesh that belong to a planar region.
+    * This method only reads the YoVariables to update the mesh.
+    */
+   @Override
+   public void update()
+   {
+      if (yoGraphicJob == YoGraphicJob.READER)
+      {
+         waitForReader.set(true);
+         hasReaderProcessedMesh.set(true);
+      }
+
+      if (currentPolygonIndex.getIntegerValue() == -1)
+         return;
+      MeshDataHolder polygonMesh = createCurrentPolygonMesh();
+      polygonMeshInstructions.get(currentPolygonIndex.getIntegerValue()).setMesh(polygonMesh);
+   }
+
+   /**
+    * Processes the queue of lists of planar regions to render and updates the graphics.
+    * This method need to called every update tick in the caller.
+    */
+   public void updateNextPolygon()
+   {
+      if (waitForReader.getBooleanValue() && !hasReaderProcessedMesh.getBooleanValue())
+         return;
+
+      if (planarRegionsListsDeque.isEmpty())
+      {
+         clearYoVariables();
+         return;
+      }
+
+      int currentIndex = currentPolygonIndex.getIntegerValue();
+
+      if (currentIndex >= maxNumberOfPolygons)
+      {
+         // Won't be able to process any additional polygons.
+         // Clear the current list of planar regions to update and reset the index.
+         currentIndex = -1;
+         planarRegionsListsDeque.removeFirst();
+      }
+
+      PlanarRegionsList planarRegionsListToProcess = planarRegionsListsDeque.peekFirst();
+      PlanarRegion planarRegionToProcess = null;
+      ConvexPolygon2d polygonToProcess = null;
+
+      // Find the next polygon to update
+      while (polygonToProcess == null)
+      {
+         if (planarRegionsListToProcess.isEmpty())
+         {
+            // Done processing the list of planar regions.
+            // Reset the index as we start over the update.
+            currentIndex = -1;
+            planarRegionsListsDeque.removeFirst();
+
+            if (planarRegionsListsDeque.isEmpty())
             {
-               bufferFull = true;
-               break;
+               clearYoVariables();
+               return;
             }
-
-            poolOfPolygonSizes.get(numberOfPolygons).set(polygonSize);
-            poolOfPolygonPoses.get(numberOfPolygons).setPose(regionTransform);
-
-            for (int vertexIndex = 0; vertexIndex < polygonSize; vertexIndex++)
+            else
             {
-               poolOfVertices.get(vertexIndex + numberOfVertices).set(convexPolygon.getVertex(vertexIndex));
-            }
-
-            numberOfVertices += polygonSize;
-            numberOfPolygons ++;
-
-            if (numberOfPolygons == maxNumberOfPolygons)
-            {
-               bufferFull = true;
-               break;
+               planarRegionsListToProcess = planarRegionsListsDeque.peekFirst();
             }
          }
 
-         if (bufferFull)
-            break;
+         planarRegionToProcess = planarRegionsListToProcess.getLastPlanarRegion();
+
+         if (planarRegionToProcess.isEmpty())
+         {
+            // This region has been fully processed.
+            planarRegionsListToProcess.pollLastPlanarRegion();
+            // Get rid of the reference to this empty region.
+            planarRegionToProcess = null;
+            // Continue to make sure there is still something in the list of planar regions.
+            continue;
+         }
+
+         polygonToProcess = planarRegionToProcess.pollLastConvexPolygon();
+
+         if (polygonToProcess.getNumberOfVertices() > maxNumberOfVerticesPerPolygon)
+         {
+            // The polygon has too many vertices, skip it.
+            polygonToProcess = null;
+            // Continue to make sure there is still something in the list of planar regions.
+            continue;
+         }
       }
 
-      for (int vertexIndex = numberOfVertices; vertexIndex < maxNumberOfVertices; vertexIndex++)
+      currentIndex++;
+
+      int numberOfVertices = polygonToProcess.getNumberOfVertices();
+      for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
+      {
+         poolOfVertices.get(vertexIndex).set(polygonToProcess.getVertex(vertexIndex));
+      }
+
+      for (int vertexIndex = numberOfVertices; vertexIndex < maxNumberOfVerticesPerPolygon; vertexIndex++)
       {
          poolOfVertices.get(vertexIndex).setToNaN();
       }
 
-      for (int polygonIndex = numberOfPolygons; polygonIndex < maxNumberOfPolygons; polygonIndex++)
-      {
-         poolOfPolygonSizes.get(polygonIndex).set(-1);
-         poolOfPolygonPoses.get(polygonIndex).setToNaN();
-      }
+      currentPolygonIndex.set(currentIndex);
+      currentPolygonSize.set(numberOfVertices);
 
+      planarRegionToProcess.getTransformToWorld(regionTransform);
+      currentPolygonPose.setPose(regionTransform);
+
+      hasReaderProcessedMesh.set(false);
+
+      // Update the polygon mesh
       update();
    }
 
-   @Override
-   public void update()
+   /**
+    * Nothing is to be updated, the YoVariables have to be cleared so calling {@link #update()} does not do anything.
+    */
+   private void clearYoVariables()
    {
-      if (!planarRegionsChanges.getAndSet(false))
-         return;
-      for (int polygonIndex = 0; polygonIndex < maxNumberOfPolygons; polygonIndex++)
-      {
-         MeshDataHolder polygonMesh = createPolygonMesh(polygonIndex);
-         polygonMeshInstructions.get(polygonIndex).setMesh(polygonMesh);
-      }
+      for (int vertexIndex = 0; vertexIndex < maxNumberOfVerticesPerPolygon; vertexIndex++)
+         poolOfVertices.get(vertexIndex).setToNaN();
+      currentPolygonIndex.set(-1);
+      currentPolygonSize.set(-1);
+      currentPolygonPose.setToNaN();
    }
 
    @Override
@@ -310,31 +402,33 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
    {
       List<YoVariable<?>> allVariables = new ArrayList<>();
 
-      for (int i = 0; i < maxNumberOfVertices; i++)
+      allVariables.add(waitForReader);
+      allVariables.add(hasReaderProcessedMesh);
+
+      for (int i = 0; i < maxNumberOfVerticesPerPolygon; i++)
       {
          allVariables.add(poolOfVertices.get(i).getYoX());
          allVariables.add(poolOfVertices.get(i).getYoY());
       }
 
-      allVariables.addAll(poolOfPolygonSizes);
+      allVariables.add(currentPolygonIndex);
+      allVariables.add(currentPolygonSize);
 
-      for (int i = 0; i < maxNumberOfPolygons; i++)
-      {
-         allVariables.add(poolOfPolygonPoses.get(i).getYoX());
-         allVariables.add(poolOfPolygonPoses.get(i).getYoY());
-         allVariables.add(poolOfPolygonPoses.get(i).getYoZ());
-         allVariables.add(poolOfPolygonPoses.get(i).getYoQx());
-         allVariables.add(poolOfPolygonPoses.get(i).getYoQy());
-         allVariables.add(poolOfPolygonPoses.get(i).getYoQz());
-         allVariables.add(poolOfPolygonPoses.get(i).getYoQs());
-      }
+      allVariables.add(currentPolygonPose.getYoX());
+      allVariables.add(currentPolygonPose.getYoY());
+      allVariables.add(currentPolygonPose.getYoZ());
+      allVariables.add(currentPolygonPose.getYoQx());
+      allVariables.add(currentPolygonPose.getYoQy());
+      allVariables.add(currentPolygonPose.getYoQz());
+      allVariables.add(currentPolygonPose.getYoQs());
+
       return allVariables.toArray(new YoVariable[0]);
    }
 
    @Override
    public double[] getConstants()
    {
-      return new double[]{maxNumberOfVertices, maxNumberOfPolygons};
+      return new double[] {maxNumberOfVerticesPerPolygon, maxNumberOfPolygons};
    }
 
    @Override
@@ -358,7 +452,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
    @Override
    protected boolean containsNaN()
    { // Only used to determine if the graphics from this object is valid, and whether to display or hide.
-      return false; 
+      return false;
    }
 
    @Override
