@@ -104,11 +104,21 @@ public class BoundingBox3d
       verifyBounds();
    }
 
-   public void set(BoundingBox3d otherBoundingBox3d)
+   public void set(BoundingBox3d otherBoundingBox3d, boolean shouldSetEpsilon)
    {
       this.set(otherBoundingBox3d.getXMin(), otherBoundingBox3d.getYMin(), otherBoundingBox3d
                   .getZMin(), otherBoundingBox3d.getXMax(),
             otherBoundingBox3d.getYMax(), otherBoundingBox3d.getZMax());
+
+      if(shouldSetEpsilon)
+      {
+         this.epsilon = otherBoundingBox3d.epsilon;
+      }
+   }
+
+   public void set(BoundingBox3d otherBoundingBox3d)
+   {
+      this.set(otherBoundingBox3d, true);
    }
 
    public void set(double[] min, double[] max)
