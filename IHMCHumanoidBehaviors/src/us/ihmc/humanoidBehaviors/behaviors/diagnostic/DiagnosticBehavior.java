@@ -105,7 +105,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final PipeLine<AbstractBehavior> pipeLine = new PipeLine<>();
 
    /** FIXME Should have a packet from the controller to let know when it is ready to execute commands. */
-   private final ConcurrentListeningQueue<CapturabilityBasedStatus> inputListeningQueue = new ConcurrentListeningQueue<CapturabilityBasedStatus>();
+   private final ConcurrentListeningQueue<CapturabilityBasedStatus> inputListeningQueue = new ConcurrentListeningQueue<CapturabilityBasedStatus>(40);
    private final BooleanYoVariable diagnosticBehaviorEnabled;
    private final BooleanYoVariable hasControllerWakenUp;
    private final BooleanYoVariable automaticDiagnosticRoutineRequested;
@@ -127,7 +127,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final PelvisHeightTrajectoryBehavior pelvisHeightTrajectoryBehavior;
    private final TurnInPlaceBehavior turnInPlaceBehavior;
-   
+
    private final SleepBehavior sleepBehavior;
 
    private final DoubleYoVariable yoTime;
@@ -409,7 +409,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
 
       this.attachNetworkListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
-      
+
       sleepBehavior = new SleepBehavior(outgoingCommunicationBridge, yoTime);
    }
 
@@ -1826,12 +1826,12 @@ public class DiagnosticBehavior extends AbstractBehavior
 
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),
                new ArmTrajectoryTask(flyingMessage, armTrajectoryBehaviors.get(flyingSide)));
-         
+
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
-         
-         
-         
-         
+
+
+
+
 
       }
 
@@ -2336,7 +2336,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       else
       {
          pipeLine.submitSingleTaskStage(footPoseTask);
-         pipeLine.submitSingleTaskStage(createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));         
+         pipeLine.submitSingleTaskStage(createSleepTask( sleepTimeBetweenPoses.getDoubleValue()));
       }
    }
 
@@ -2752,7 +2752,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
    }
 
-  
+
 
 
    @Override
@@ -2795,7 +2795,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       SleepTask sleepTask = new SleepTask(sleepBehavior,sleepTime);
       return sleepTask;
    }
-   
+
    @Override
    public boolean isDone()
    {
@@ -2807,5 +2807,5 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
    }
 
-   
+
 }
