@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -62,7 +63,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
+ 
    @ContinuousIntegrationTest(estimatedDuration = 27.0)
    @Test(timeout = 160000)
    public void testSolvingForAHandPose() throws SimulationExceededMaximumTimeException, IOException
@@ -90,7 +91,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
       
-      ReferenceFrame chestControlFrame = drcBehaviorTestHelper.getReferenceFrames().getChestFrame();
+      ReferenceFrame chestControlFrame = getRobotModel().createFullRobotModel().getChest().getBodyFixedFrame();
       FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);   
       initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       
@@ -127,11 +128,12 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       
       FrameOrientation finalPelvisOrientation = new FrameOrientation(pelvisControlFrame);   
       finalPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      assertTrue(initialChestOrientation.epsilonEquals(finalChestOrientation, 1.0e-2));
+      assertTrue(initialPelvisOrientation.epsilonEquals(finalPelvisOrientation, 1.0e-2));
 
       assertTrue("Expect: " + desiredHandPose + "\nActual: " + currentHandPose, currentHandPose.epsilonEquals(desiredHandPose, 1.0e-2));
-      
-      //assertEquals(initialChestOrientation, finalChestOrientation);
-      //assertEquals(initialPelvisOrientation, finalPelvisOrientation);
+
    }
 
    private void setupKinematicsToolboxModule() throws IOException
