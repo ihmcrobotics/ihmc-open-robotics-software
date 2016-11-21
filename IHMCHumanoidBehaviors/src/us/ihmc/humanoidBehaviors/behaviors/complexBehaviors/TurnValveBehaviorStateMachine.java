@@ -59,6 +59,8 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private final UserValidationExampleBehavior userValidationExampleBehavior;
 
+   RobotSide side = RobotSide.RIGHT;
+
    public TurnValveBehaviorStateMachine(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
          AtlasPrimitiveActions atlasPrimitiveActions)
@@ -88,8 +90,6 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    @Override
    public void initialize()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Turn Valve Behavior State Machine");
-      sendPacket(p1);
       statemachine.setCurrentState(TurnValveBehaviorState.SETUP_ROBOT);
    }
 
@@ -219,7 +219,6 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
 
       statemachine.addState(doneState);
 
-      statemachine.setCurrentState(TurnValveBehaviorState.SETUP_ROBOT);
    }
 
    private FramePoint offsetPointFromValve(Vector3f point)

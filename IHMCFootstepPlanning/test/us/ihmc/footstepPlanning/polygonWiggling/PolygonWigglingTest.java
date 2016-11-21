@@ -99,7 +99,7 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+      assertTrue(foot == null);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -242,7 +242,7 @@ public class PolygonWigglingTest
          showPlotterAndSleep(artifacts);
       }
 
-      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+      assertTrue(foot == null);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -255,6 +255,7 @@ public class PolygonWigglingTest
       plane.addVertex(0.5, 1.5);
       plane.addVertex(0.75, 0.5);
       plane.update();
+      addPolygonToArtifacts("Plane", plane, Color.BLACK);
 
       double yawLimit = Math.toRadians(15.0);
       WiggleParameters wiggleParameters = new WiggleParameters();
@@ -290,7 +291,6 @@ public class PolygonWigglingTest
 
          if (visualize)
          {
-            addPolygonToArtifacts("Plane" + i, plane, Color.BLACK);
             addPolygonToArtifacts("InitialFoot" + i, initialFoot, Color.RED);
             addPolygonToArtifacts("Foot" + i, foot, Color.BLUE);
          }
