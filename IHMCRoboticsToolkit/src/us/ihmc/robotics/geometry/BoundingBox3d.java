@@ -387,6 +387,44 @@ public class BoundingBox3d
       this.epsilon = epsilon;
    }
 
+   public void updateToIncludePoint(Tuple3d point)
+   {
+      this.updateToIncludePoint(point.x, point.y, point.z);
+   }
+
+   public void updateToIncludePoint(double x, double y, double z)
+   {
+      if (Double.isNaN(this.minPoint.x) || (x < this.minPoint.x))
+      {
+         this.minPoint.x = x;
+      }
+
+      if (Double.isNaN(this.minPoint.y) || (y < this.minPoint.y))
+      {
+         this.minPoint.y = y;
+      }
+
+      if (Double.isNaN(this.minPoint.z) || (z < this.minPoint.z))
+      {
+         this.minPoint.z = z;
+      }
+
+      if (Double.isNaN(this.maxPoint.x) || (x > this.maxPoint.x))
+      {
+         this.maxPoint.x = x;
+      }
+
+      if (Double.isNaN(this.maxPoint.y) || (y > this.maxPoint.y))
+      {
+         this.maxPoint.y = y;
+      }
+
+      if (Double.isNaN(this.maxPoint.z) || (z > this.maxPoint.z))
+      {
+         this.maxPoint.z = z;
+      }
+   }
+
    @Override
    public String toString()
    {
