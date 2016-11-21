@@ -47,7 +47,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    private final KinematicsToolboxOutputConverter outputConverter;
 
-   private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>();
+   private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>(40);
    private KinematicsToolboxOutputStatus solutionSentToController = null;
 
    private final DoubleYoVariable yoTime;
@@ -160,7 +160,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    @Override
    public void initialize()
    {
-      
+
       System.out.println("init whole body behavior");
       isPaused.set(false);
       isStopped.set(false);
@@ -247,7 +247,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       return hasSolverFailed.getBooleanValue();
    }
 
-   
+
 
    @Override
    public boolean isDone()
@@ -274,5 +274,5 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       sendPacket(message);
    }
 
-   
+
 }

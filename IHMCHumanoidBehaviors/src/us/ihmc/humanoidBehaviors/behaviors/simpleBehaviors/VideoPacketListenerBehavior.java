@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 
 public abstract class VideoPacketListenerBehavior extends AbstractBehavior implements VideoStreamer
 {
-   private final ConcurrentListeningQueue<VideoPacket> cameraData = new ConcurrentListeningQueue<>();
+   private final ConcurrentListeningQueue<VideoPacket> cameraData = new ConcurrentListeningQueue<>(20);
 
    private final CompressedVideoDataClient videoDataClient;
 

@@ -19,10 +19,10 @@ public class ConcurrentListeningQueue<T>
 
    private boolean printedOverflowWarning = false;
 
-   public ConcurrentListeningQueue()
-   {
-      this(2000);
-   }
+//   public ConcurrentListeningQueue()
+//   {
+//      this(2000);
+//   }
 
    public ConcurrentListeningQueue(int maximumSizeToBuffer)
    {

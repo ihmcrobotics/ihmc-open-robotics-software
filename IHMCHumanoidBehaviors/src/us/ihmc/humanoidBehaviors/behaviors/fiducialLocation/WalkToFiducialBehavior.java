@@ -19,7 +19,7 @@ public class WalkToFiducialBehavior extends AbstractBehavior
    private final BooleanYoVariable planValid = new BooleanYoVariable("PlanValid", registry);
 
    private final FramePose goalPose = new FramePose();
-   private final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footstepPlanQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>();
+   private final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footstepPlanQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(40);
 
    public WalkToFiducialBehavior(CommunicationBridgeInterface communicationBridge)
    {
