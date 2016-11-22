@@ -8,7 +8,7 @@ public class SimpleFootstep
    private RobotSide robotSide;
    private final FramePose soleFramePose = new FramePose();
 
-   SimpleFootstep(RobotSide robotSide, FramePose soleFramePose)
+   public SimpleFootstep(RobotSide robotSide, FramePose soleFramePose)
    {
       this.robotSide = robotSide;
       this.soleFramePose.setIncludingFrame(soleFramePose);
