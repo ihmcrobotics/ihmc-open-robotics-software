@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning;
 
+import javax.vecmath.Point2d;
+
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -10,6 +12,8 @@ public class FootstepPlannerGoal
    private FramePoint goalPositionBetweenFeet;
    private SimpleFootstep singleFootstepGoal;
    private SideDependentList<SimpleFootstep> doubleFootstepGoal;
+   private Point2d xyGoal;
+   private double distanceFromXYGoal;
 
    private FootstepPlannerGoalType footstepPlannerGoalType;
 
@@ -51,6 +55,22 @@ public class FootstepPlannerGoal
    public void setDoubleFootstepGoal(SideDependentList<SimpleFootstep> doubleFootstepGoal)
    {
       this.doubleFootstepGoal = doubleFootstepGoal;
+   }
+
+   public void setXYGoal(Point2d xyGoal, double distanceFromXYGoal)
+   {
+      this.xyGoal = new Point2d(xyGoal);
+      this.distanceFromXYGoal = distanceFromXYGoal;
+   }
+
+   public Point2d getXYGoal()
+   {
+      return xyGoal;
+   }
+
+   public double getDistanceFromXYGoal()
+   {
+      return distanceFromXYGoal;
    }
 
    public FootstepPlannerGoalType getFootstepPlannerGoalType()

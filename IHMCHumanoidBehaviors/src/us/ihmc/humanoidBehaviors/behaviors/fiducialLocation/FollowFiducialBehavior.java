@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
 import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -15,6 +16,7 @@ import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -340,8 +342,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
    private void setGoalAndInitialStanceFootToBeClosestToGoal(FramePose goalPose)
    {
+//      sendPacketToUI(new UIPositionCheckerPacket(goalPose.getFramePointCopy().getPoint(), goalPose.getFrameOrientationCopy().getQuaternion()));
 
-      sendPacketToUI(new UIPositionCheckerPacket(goalPose.getFramePointCopy().getPoint(), goalPose.getFrameOrientationCopy().getQuaternion()));
       leftFootPose.setToZero(referenceFrames.getFootFrame(RobotSide.LEFT));
       rightFootPose.setToZero(referenceFrames.getFootFrame(RobotSide.RIGHT));
       leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -362,7 +364,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
       goalPose.getPosition(goalPosition);
       vectorFromFeetToGoal.sub(goalPosition, pointBetweenFeet);
 
-      double shorterGoalLength = 1.0;
+      double shorterGoalLength = 2.0;
 
       if (vectorFromFeetToGoal.length() > shorterGoalLength)
       {
@@ -404,6 +406,18 @@ public class FollowFiducialBehavior extends AbstractBehavior
       //      sendTextToSpeechPacket("Planning footsteps from " + tempStanceFootPose + " to " + goalPose);
       sendTextToSpeechPacket("Planning footsteps to the fiducial");
       footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
+
+      // For now, just get close to the Fiducial, don't need to get exactly on it.
+      Point2d xyGoal = new Point2d();
+      xyGoal.setX(goalPose.getX());
+      xyGoal.setY(goalPose.getY());
+      double distanceFromXYGoal = 1.0;
+      footstepPlannerGoal.setXYGoal(xyGoal, distanceFromXYGoal);
+//      footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
+      footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.CLOSE_TO_XY_POSITION);
+
+    sendPacketToUI(new UIPositionCheckerPacket(new Point3d(xyGoal.getX(), xyGoal.getY(), leftFootPose.getZ()), new Quat4d()));
+
       footstepPlanner.setGoal(footstepPlannerGoal);
 
       footstepPlanner.setInitialStanceFoot(tempStanceFootPose, stanceSide);
