@@ -40,9 +40,7 @@ public class KinematicsToolboxModule extends ToolboxModule
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
-      commands.add(ArmTrajectoryCommand.class);
       commands.add(HandTrajectoryCommand.class);
-      commands.add(FootTrajectoryCommand.class);
       commands.add(ChestTrajectoryCommand.class);
       commands.add(PelvisOrientationTrajectoryCommand.class);
       commands.add(WholeBodyTrajectoryCommand.class);
