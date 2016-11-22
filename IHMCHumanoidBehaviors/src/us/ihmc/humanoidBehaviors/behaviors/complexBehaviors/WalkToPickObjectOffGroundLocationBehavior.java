@@ -38,8 +38,8 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
    public WalkToPickObjectOffGroundLocationBehavior(DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames,
-         CommunicationBridge outgoingCommunicationBridge, WholeBodyControllerParameters wholeBodyControllerParameters,
-         FullHumanoidRobotModel fullRobotModel, AtlasPrimitiveActions atlasPrimitiveActions)
+         CommunicationBridge outgoingCommunicationBridge, WholeBodyControllerParameters wholeBodyControllerParameters, FullHumanoidRobotModel fullRobotModel,
+         AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("WalkState", WalkState.class, yoTime, outgoingCommunicationBridge);
 
@@ -76,7 +76,7 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
 
       statemachine.addStateWithDoneTransition(rightArmHomeTask, WalkState.WALK);
       statemachine.addState(walkToBallTask);
-      statemachine.setCurrentState(WalkState.GET_READY_TO_WALK);
+      statemachine.setStartState(WalkState.GET_READY_TO_WALK);
    }
 
    private FramePose2d getoffsetPoint()
@@ -108,8 +108,6 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
    {
       this.pickUpLocation = grabLocation;
    }
-
-  
 
    @Override
    public void doPostBehaviorCleanup()

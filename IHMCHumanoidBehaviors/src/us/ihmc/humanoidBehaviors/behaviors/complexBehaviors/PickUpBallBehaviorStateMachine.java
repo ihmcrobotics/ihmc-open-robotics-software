@@ -172,7 +172,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
       statemachine.addStateWithDoneTransition(pickUpBall, PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET);
       statemachine.addStateWithDoneTransition(putBallInBucket, PickUpBallBehaviorState.RESET_ROBOT);
       statemachine.addState(resetRobot);
-      statemachine.setCurrentState(PickUpBallBehaviorState.SETUP_ROBOT);
+      statemachine.setStartState(PickUpBallBehaviorState.SETUP_ROBOT);
    }
 
    @Override
