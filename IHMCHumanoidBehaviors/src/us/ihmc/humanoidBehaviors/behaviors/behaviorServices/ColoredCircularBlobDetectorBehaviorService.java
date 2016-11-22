@@ -44,17 +44,10 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    public ColoredCircularBlobDetectorBehaviorService(CommunicationBridgeInterface communicationBridge)
    {
       super(ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), communicationBridge);
-<<<<<<< Upstream, based on branch 'develop' of https://jcarff@stash.ihmc.us/scm/rob/ihmc-open-robotics-software.git
 
       getCommunicationBridge().attachNetworkListeningQueue(videoPacketQueue, VideoPacket.class);
       getCommunicationBridge().attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
 
-=======
-      
-     communicationBridge.attachNetworkListeningQueue(videoPacketQueue, VideoPacket.class);
-     communicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
-      
->>>>>>> 64b8fa3 making it so concurrent listeners do not get added until a behavior starts.
       OpenCVColoredCircularBlobDetectorFactory factory = new OpenCVColoredCircularBlobDetectorFactory();
       factory.setCaptureSource(OpenCVColoredCircularBlobDetector.CaptureSource.JAVA_BUFFERED_IMAGES);
       openCVColoredCircularBlobDetector = factory.buildBlobDetector();

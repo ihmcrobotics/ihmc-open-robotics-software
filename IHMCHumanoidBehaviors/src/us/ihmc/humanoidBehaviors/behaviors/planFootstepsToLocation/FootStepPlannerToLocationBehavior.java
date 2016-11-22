@@ -114,23 +114,14 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       YoFramePose rightFootstepStatusPose = new YoFramePose(prefix + "RightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
       actualFootStatusPoses = new SideDependentList<>(leftFootstepStatusPose, rightFootstepStatusPose);
 
-<<<<<<< Upstream, based on branch 'develop' of https://jcarff@stash.ihmc.us/scm/rob/ihmc-open-robotics-software.git
+
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(40);
       robotConfigurationDataQueue = new ConcurrentListeningQueue<RobotConfigurationData>(40);
       walkingStatusQueue = new ConcurrentListeningQueue<WalkingStatusMessage>(10);
-      communicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
-      communicationBridge.attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
-      communicationBridge.attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
-      communicationBridge.attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
-=======
-      footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>();
-      robotConfigurationDataQueue = new ConcurrentListeningQueue<RobotConfigurationData>();
-      walkingStatusQueue = new ConcurrentListeningQueue<WalkingStatusMessage>();
       attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
       attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
       attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
       attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
->>>>>>> 64b8fa3 making it so concurrent listeners do not get added until a behavior starts.
 
    }
 
