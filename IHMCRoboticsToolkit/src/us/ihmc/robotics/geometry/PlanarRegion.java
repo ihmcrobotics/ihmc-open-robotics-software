@@ -8,7 +8,10 @@ import java.util.List;
 
 public class PlanarRegion
 {
+   public static final int NO_REGION_ID = -1;
    public static final double DEFAULT_BOUNDING_BOX_EPSILON = 1e-15;
+
+   private int regionId = NO_REGION_ID;
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
    /**
@@ -277,6 +280,31 @@ public class PlanarRegion
       // Given the plane equation: a*x + b*y + c*z + d = 0, with d = -(a*x0 + b*y0 + c*z0), we find z:
       double z = a / c * (x0 - xWorld) + b / c * (y0 - yWorld) + z0;
       return z;
+   }
+
+   /**
+    * Every can be given a unique. The default value is {@value #NO_REGION_ID} which corresponds to no id.
+    * @param regionId set the unique id of this region.
+    */
+   public void setRegionId(int regionId)
+   {
+      this.regionId = regionId;
+   }
+
+   /**
+    * @return the unique id of this regions. It is equal to {@value #NO_REGION_ID} when no id has been attributed.
+    */
+   public int getRegionId()
+   {
+      return regionId;
+   }
+
+   /**
+    * @return whether a unique id has been attributed to this region or not.
+    */
+   public boolean hasARegionId()
+   {
+      return regionId != NO_REGION_ID;
    }
 
    /**
