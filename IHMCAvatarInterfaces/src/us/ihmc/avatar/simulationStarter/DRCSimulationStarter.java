@@ -177,6 +177,15 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
+    * Returns the SRCSCSInitialSetup. Can use that object to directly change things in the sim. But need to make those changes before calling createSimulationFactory().
+    * @return SRCSCSInitialSetup
+    */
+   public DRCSCSInitialSetup getSCSInitialSetup()
+   {
+      return scsInitialSetup;
+   }
+
+   /**
     * Sets whether the estimator and the controller are running on the same thread or multiThreaded. Defaults to multiThreaded.
     * Need to set to false if you want the simulation to be rewindable.
     * @param runMultiThreaded
