@@ -166,4 +166,17 @@ public class PlanarRegionsList
       else
          return pollPlanarRegion(getNumberOfPlanarRegions() - 1);
    }
+
+   /**
+    * @return a full depth copy of this list of planar regions. The copy can be entirely modified without interfering with this.
+    */
+   public PlanarRegionsList copy()
+   {
+      List<PlanarRegion> planarRegionsCopy = new ArrayList<>();
+
+      for (int i = 0; i < getNumberOfPlanarRegions(); i++)
+         planarRegionsCopy.add(regions.get(i).copy());
+
+      return new PlanarRegionsList(planarRegionsCopy);
+   }
 }
