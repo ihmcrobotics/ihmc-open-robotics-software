@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -19,6 +20,9 @@ public class BipedalFootstepPlannerNode
    private double costFromParent;
    private double costToHereFromStart;
    private double estimatedCostToGoal;
+
+   private static final double DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.2;
+   private static final double ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.2;
 
    private boolean isAtGoal = false;
 
@@ -143,4 +147,73 @@ public class BipedalFootstepPlannerNode
       this.estimatedCostToGoal = estimatedCostToGoal;
    }
 
+   private final Vector3d tempPointA = new Vector3d();
+   private final Vector3d tempPointB = new Vector3d();
+   private final Vector3d tempRotationVectorA = new Vector3d();
+   private final Vector3d tempRotationVectorB = new Vector3d();
+
+   @Override
+   public boolean equals(Object o)
+   {
+      if(!(o instanceof BipedalFootstepPlannerNode))
+      {
+         return false;
+      }
+      else
+      {
+         BipedalFootstepPlannerNode otherNode = (BipedalFootstepPlannerNode) o;
+
+         if(getRobotSide() != otherNode.getRobotSide())
+         {
+            return false;
+         }
+
+         this.soleTransform.getTranslation(tempPointA);
+         MathTools.roundToGivenPrecision(tempPointA, DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+         otherNode.soleTransform.getTranslation(tempPointB);
+         MathTools.roundToGivenPrecision(tempPointB, DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+         this.soleTransform.getRotationEuler(tempRotationVectorA);
+         MathTools.roundToGivenPrecisionForAngles(tempRotationVectorA, ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+         otherNode.soleTransform.getRotationEuler(tempRotationVectorB);
+         MathTools.roundToGivenPrecisionForAngles(tempRotationVectorB, ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+         tempPointA.sub(tempPointB);
+         tempRotationVectorA.sub(tempRotationVectorB);
+
+         return Math.abs(tempPointA.length()) < 1e-10 && Math.abs(tempRotationVectorA.length()) < 1e-10;
+      }
+   }
+
+   @Override
+   public int hashCode()
+   {
+      this.soleTransform.getTranslation(tempPointA);
+      MathTools.roundToGivenPrecision(tempPointA, DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+      this.soleTransform.getRotationEuler(tempRotationVectorA);
+      MathTools.roundToGivenPrecisionForAngles(tempRotationVectorA, ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+      int result = getRobotSide().hashCode();
+      result = 3 * result + (int) Math.round(tempPointA.getX() / DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+      result = 3 * result + (int) Math.round(tempPointA.getY() / DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+      result = 3 * result + (int) Math.round(tempPointA.getZ() / DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+      result = 3 * result + (int) Math.round(tempRotationVectorA.getX() / ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+      result = 3 * result + (int) Math.round(tempRotationVectorA.getY() / ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+      result = 3 * result + (int) Math.round(tempRotationVectorA.getZ() / ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+      return result;
+   }
+
+   public static double getDistanceThresholdToConsiderNodesEqual()
+   {
+      return DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL;
+   }
+
+   public static double getRotationThresholdToConsiderNodesEqual()
+   {
+      return ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL;
+   }
 }

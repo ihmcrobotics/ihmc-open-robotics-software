@@ -847,19 +847,19 @@ public class MathToolsTest
    {
       double longDouble = 0.12345678910111213;
 
-      double roundedNumber = MathTools.roundToGivenPrecision(longDouble, 1e-7);
+      double roundedNumber = MathTools.floorToGivenPrecision(longDouble, 1e-7);
       assertEquals(roundedNumber, 0.1234567, 1e-14);
 
-      roundedNumber = MathTools.roundToGivenPrecision(longDouble, 1e-3);
+      roundedNumber = MathTools.floorToGivenPrecision(longDouble, 1e-3);
       assertEquals(roundedNumber, 0.123, 1e-14);
 
       Vector3d preciseVector = new Vector3d(0.12345678910111213, 100.12345678910111213, 1000.12345678910111213);
       Vector3d roundedVector = new Vector3d(preciseVector);
 
-      MathTools.roundToGivenPrecision(roundedVector, 1e-7);
+      MathTools.floorToGivenPrecision(roundedVector, 1e-7);
       JUnitTools.assertTuple3dEquals(new Vector3d(0.1234567, 100.1234567, 1000.1234567), roundedVector, 1e-12);
 
-      MathTools.roundToGivenPrecision(roundedVector, 1e-3);
+      MathTools.floorToGivenPrecision(roundedVector, 1e-3);
       JUnitTools.assertTuple3dEquals(new Vector3d(0.123, 100.123, 1000.123), roundedVector, 1e-14);
    }
 

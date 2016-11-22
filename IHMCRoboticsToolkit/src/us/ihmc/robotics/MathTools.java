@@ -9,6 +9,7 @@ import javax.vecmath.Tuple3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
@@ -717,9 +718,25 @@ public class MathTools
       return lcm(a[0], lcm(b));
    }
 
-   public static double roundToGivenPrecision(double value, double precisionFactor)
+   public static double floorToGivenPrecision(double value, double precisionFactor)
    {
       long longValue = (long) (value / precisionFactor); 
+      double roundedValue = ((double) longValue) * precisionFactor;
+      return roundedValue;
+   }
+
+   public static void floorToGivenPrecision(Tuple3d tuple3d, double precision)
+   {
+      tuple3d.setX(floorToGivenPrecision(tuple3d.getX(), precision));
+      tuple3d.setY(floorToGivenPrecision(tuple3d.getY(), precision));
+      tuple3d.setZ(floorToGivenPrecision(tuple3d.getZ(), precision));
+      
+   }
+
+   public static double roundToGivenPrecision(double value, double precisionFactor)
+   {
+      double adjustmentFactor = (value > 0.0) ? 0.5 * precisionFactor : -0.5 * precisionFactor;
+      long longValue = (long) ((value + adjustmentFactor) / precisionFactor);
       double roundedValue = ((double) longValue) * precisionFactor;
       return roundedValue;
    }
@@ -729,7 +746,21 @@ public class MathTools
       tuple3d.setX(roundToGivenPrecision(tuple3d.getX(), precision));
       tuple3d.setY(roundToGivenPrecision(tuple3d.getY(), precision));
       tuple3d.setZ(roundToGivenPrecision(tuple3d.getZ(), precision));
-      
+   }
+
+   public static double roundToGivenPrecisionForAngle(double angleValue, double precisionFactor)
+   {
+      double centeredAngleValue = AngleTools.trimAngleMinusPiToPi(angleValue + 0.5 * precisionFactor);
+      long longValue = (long) (centeredAngleValue / precisionFactor);
+      double roundedValue = ((double) longValue) * precisionFactor;
+      return AngleTools.trimAngleMinusPiToPi(roundedValue);
+   }
+
+   public static void roundToGivenPrecisionForAngles(Tuple3d tuple3d, double precision)
+   {
+      tuple3d.setX(roundToGivenPrecisionForAngle(tuple3d.getX(), precision));
+      tuple3d.setY(roundToGivenPrecisionForAngle(tuple3d.getY(), precision));
+      tuple3d.setZ(roundToGivenPrecisionForAngle(tuple3d.getZ(), precision));
    }
    
    public static int orderOfMagnitude(double number)
