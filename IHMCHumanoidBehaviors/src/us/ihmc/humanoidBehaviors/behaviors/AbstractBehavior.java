@@ -1,10 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
-<<<<<<< Upstream, based on branch 'develop' of https://jcarff@stash.ihmc.us/scm/rob/ihmc-open-robotics-software.git
-=======
 import java.util.HashMap;
->>>>>>> fe5a932 merging
 import java.util.List;
 
 import us.ihmc.communication.packets.Packet;
@@ -72,10 +69,6 @@ public abstract class AbstractBehavior implements RobotController
       percentCompleted = new DoubleYoVariable("percentCompleted", registry);
       
       behaviorsServices = new ArrayList<>();
-<<<<<<< Upstream, based on branch 'develop' of https://jcarff@stash.ihmc.us/scm/rob/ihmc-open-robotics-software.git
-=======
-
->>>>>>> fe5a932 merging
    }
 
    public CoactiveElement getCoactiveElement()
@@ -169,11 +162,8 @@ public abstract class AbstractBehavior implements RobotController
    {
       TextToSpeechPacket p1 = new TextToSpeechPacket("Resuming Behavior");
       sendPacket(p1);
-<<<<<<< Upstream, based on branch 'develop' of https://jcarff@stash.ihmc.us/scm/rob/ihmc-open-robotics-software.git
       isPaused.set(false);
-=======
  isPaused.set(false);
->>>>>>> fe5a932 merging
       
       for (BehaviorService behaviorService : behaviorsServices)
       {
@@ -220,19 +210,12 @@ public abstract class AbstractBehavior implements RobotController
    {
       isPaused.set(false);
       isAborted.set(false);
-<<<<<<< Upstream, based on branch 'develop' of https://jcarff@stash.ihmc.us/scm/rob/ihmc-open-robotics-software.git
       
       for (BehaviorService behaviorService : behaviorsServices)
       {
          behaviorService.run();
       }
 
-=======
-      for (BehaviorService behaviorService : behaviorsServices)
-      {
-         behaviorService.run();
-      }
->>>>>>> fe5a932 merging
       addAllLocalListenersToCommunicationBridge();
 
    }
