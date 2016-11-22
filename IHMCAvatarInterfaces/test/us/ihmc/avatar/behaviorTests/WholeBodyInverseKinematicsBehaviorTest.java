@@ -21,6 +21,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -91,11 +92,11 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
       
-      ReferenceFrame chestControlFrame = getRobotModel().createFullRobotModel().getChest().getBodyFixedFrame();
+      ReferenceFrame chestControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getChest().getBodyFixedFrame();
       FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);   
       initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       
-      ReferenceFrame pelvisControlFrame = drcBehaviorTestHelper.getReferenceFrames().getPelvisFrame();
+      ReferenceFrame pelvisControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
       FrameOrientation initialPelvisOrientation = new FrameOrientation(pelvisControlFrame);   
       initialPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -129,7 +130,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       FrameOrientation finalPelvisOrientation = new FrameOrientation(pelvisControlFrame);   
       finalPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       
-      assertTrue(initialChestOrientation.epsilonEquals(finalChestOrientation, 1.0e-2));
+      assertTrue(initialChestOrientation.epsilonEquals(finalChestOrientation, 1.0e-1));
       assertTrue(initialPelvisOrientation.epsilonEquals(finalPelvisOrientation, 1.0e-2));
 
       assertTrue("Expect: " + desiredHandPose + "\nActual: " + currentHandPose, currentHandPose.epsilonEquals(desiredHandPose, 1.0e-2));
