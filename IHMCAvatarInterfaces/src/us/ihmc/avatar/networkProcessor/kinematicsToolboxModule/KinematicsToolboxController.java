@@ -233,20 +233,6 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
          desiredPelvisOrientationReference.set(desiredPelvisOrientation);
       }
 
-      if (commandInputManager.isNewCommandAvailable(FootTrajectoryCommand.class))
-      {
-         List<FootTrajectoryCommand> commands = commandInputManager.pollNewCommands(FootTrajectoryCommand.class);
-         for (int i = 0; i < commands.size(); i++)
-         {
-            FootTrajectoryCommand command = commands.get(i);
-            RobotSide robotSide = command.getRobotSide();
-            FramePose desiredPose = new FramePose();
-            command.getLastTrajectoryPoint().getPoseIncludingFrame(desiredPose);
-            desiredFootPoses.put(robotSide, desiredPose);
-            DenseMatrix64F selectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
-            footSelectionMatrices.put(robotSide, selectionMatrix);
-         }
-      }
    }
 
    public void updateTools()
