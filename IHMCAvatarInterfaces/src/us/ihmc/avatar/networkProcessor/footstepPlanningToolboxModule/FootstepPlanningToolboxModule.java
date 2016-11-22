@@ -33,7 +33,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ToolboxController<? extends StatusPacket<?>> getToolboxController()
+   public ToolboxController getToolboxController()
    {
       return footstepPlanningToolboxController;
    }
