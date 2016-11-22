@@ -219,32 +219,27 @@ public class JointPrivilegedConfigurationHandler
             if (command.hasNewPrivilegedConfiguration(j))
             {
                OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
+               double qPrivileged = command.getPrivilegedConfiguration(j);
+               privilegedConfigurations.set(jointIndex, 0, qPrivileged);
+               yoJointPrivilegedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);
+
                if (!jointsWithConfiguration.contains(configuredJoint))
-               {
-                  double qPrivileged = command.getPrivilegedConfiguration(j);
-                  privilegedConfigurations.set(jointIndex, 0, qPrivileged);
-                  yoJointPrivilegedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);
                   jointsWithConfiguration.add(configuredJoint);
-               }
                else
-               {
-                  PrintTools.warn(this, "Privileged configuration already received for joint " + configuredJoint.getName() + ".");
-               }
+                  PrintTools.warn(this, "Overwriting privileged configuration for joint " + configuredJoint.getName() + ".");
             }
 
             if (command.hasNewPrivilegedConfigurationOption(j))
             {
                OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
+               PrivilegedConfigurationOption option = command.getPrivilegedConfigurationOption(j);
+               setPrivilegedConfigurationFromOption(option, jointIndex);
+               jointsWithConfiguration.add(configuredJoint);
+
                if (!jointsWithConfiguration.contains(configuredJoint))
-               {
-                  PrivilegedConfigurationOption option = command.getPrivilegedConfigurationOption(j);
-                  setPrivilegedConfigurationFromOption(option, jointIndex);
                   jointsWithConfiguration.add(configuredJoint);
-               }
                else
-               {
-                  PrintTools.warn(this, "Privileged configuration already received for joint " + configuredJoint.getName() + ".");
-               }
+                  PrintTools.warn(this, "Overwriting privileged configuration for joint " + configuredJoint.getName() + ".");
             }
          }
 
