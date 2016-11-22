@@ -8,7 +8,10 @@ import java.util.List;
 
 public class PlanarRegion
 {
+   public static final int NO_REGION_ID = -1;
    public static final double DEFAULT_BOUNDING_BOX_EPSILON = 1e-15;
+
+   private int regionId = NO_REGION_ID;
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
    /**
@@ -279,6 +282,39 @@ public class PlanarRegion
       return z;
    }
 
+   /**
+    * Every can be given a unique. The default value is {@value #NO_REGION_ID} which corresponds to no id.
+    * @param regionId set the unique id of this region.
+    */
+   public void setRegionId(int regionId)
+   {
+      this.regionId = regionId;
+   }
+
+   /**
+    * @return the unique id of this regions. It is equal to {@value #NO_REGION_ID} when no id has been attributed.
+    */
+   public int getRegionId()
+   {
+      return regionId;
+   }
+
+   /**
+    * @return whether a unique id has been attributed to this region or not.
+    */
+   public boolean hasARegionId()
+   {
+      return regionId != NO_REGION_ID;
+   }
+
+   /**
+    * Returns true only if there is no polygons in this planar region. Does not check for empty polygons.
+    */
+   public boolean isEmpty()
+   {
+      return convexPolygons.isEmpty();
+   }
+
    /** Returns the number of convex polygons representing this region. */
    public int getNumberOfConvexPolygons()
    {
@@ -292,6 +328,43 @@ public class PlanarRegion
    public ConvexPolygon2d getConvexPolygon(int i)
    {
       return convexPolygons.get(i);
+   }
+
+   /**
+    * Returns the last convex polygon representing a portion of this region.
+    * Special case: returns null when this region is empty.
+    * The polygon is expressed in the region local coordinates.
+    */
+   public ConvexPolygon2d getLastConvexPolygon()
+   {
+      if (isEmpty())
+         return null;
+      else
+         return getConvexPolygon(getNumberOfConvexPolygons() - 1);
+   }
+
+   /**
+    * Returns the i<sup>th</sup> convex polygon representing a portion of this region and removes it from this planar region.
+    * The polygon is expressed in the region local coordinates.
+    */
+   public ConvexPolygon2d pollConvexPolygon(int i)
+   {
+      ConvexPolygon2d polledPolygon = convexPolygons.remove(i);
+      updateBoundingBox();
+      return polledPolygon;
+   }
+
+   /**
+    * Returns the last convex polygon representing a portion of this region and removes it from this planar region.
+    * Special case: returns null when this region is empty.
+    * The polygon is expressed in the region local coordinates.
+    */
+   public ConvexPolygon2d pollLastConvexPolygon()
+   {
+      if (isEmpty())
+         return null;
+      else
+         return pollConvexPolygon(getNumberOfConvexPolygons() - 1);
    }
 
    /**
@@ -430,5 +503,21 @@ public class PlanarRegion
             this.boundingBox3dInWorld.updateToIncludePoint(tempPointForConvexPolygonProjection);
          }
       }
+   }
+
+   /**
+    * @return a full depth copy of this region. The copy can be entirely modified without interfering with this region.
+    */
+   public PlanarRegion copy()
+   {
+      RigidBodyTransform transformToWorldCopy = new RigidBodyTransform(fromLocalToWorldTransform);
+      List<ConvexPolygon2d> convexPolygonsCopy = new ArrayList<>();
+
+      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
+         convexPolygonsCopy.add(new ConvexPolygon2d(convexPolygons.get(i)));
+
+      PlanarRegion planarRegion = new PlanarRegion(transformToWorldCopy, convexPolygonsCopy);
+      planarRegion.setRegionId(regionId);
+      return planarRegion;
    }
 }
