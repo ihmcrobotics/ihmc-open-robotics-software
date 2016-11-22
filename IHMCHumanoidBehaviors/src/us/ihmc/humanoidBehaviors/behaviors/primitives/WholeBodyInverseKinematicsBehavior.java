@@ -54,7 +54,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage;
    private SideDependentList<HandTrajectoryMessage> handTrajectoryMessage = new SideDependentList<>();
 
-   private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>();
+   private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>(40);
    private KinematicsToolboxOutputStatus solutionSentToController = null;
 
    private final DoubleYoVariable yoTime;
@@ -326,5 +326,4 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       sendPacket(message);
    }
-
 }

@@ -21,8 +21,6 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private static final int maxTimeIterations = 1;
    private static final int numberWaypoints = 2;
    private static final double[] waypointProportions = new double[] {0.15, 0.85};
-   private static final double defaultSwingHeight = 0.1;
-   private static final double minSwingHeight = 0.1;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -34,6 +32,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final EnumYoVariable<TrajectoryType> trajectoryType;
    private final DoubleYoVariable swingHeight;
    private final DoubleYoVariable maxSwingHeight;
+   private final DoubleYoVariable minSwingHeight;
 
    private final Position2dOptimizedSwingTrajectoryGenerator trajectory;
 
@@ -46,7 +45,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
 
    private final BagOfBalls waypointViz;
 
-   public TwoWaypointSwingGenerator(String namePrefix, double maxSwingHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -56,10 +55,13 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       isDone = new BooleanYoVariable(namePrefix + "IsDone", registry);
       trajectoryType = new EnumYoVariable<>(namePrefix + "TrajectoryType", registry, TrajectoryType.class);
       swingHeight = new DoubleYoVariable(namePrefix + "SwingHeight", registry);
-      swingHeight.set(defaultSwingHeight);
+      swingHeight.set(minSwingHeight);
 
       this.maxSwingHeight = new DoubleYoVariable(namePrefix + "MaxSwingHeight", registry);
       this.maxSwingHeight.set(maxSwingHeight);
+      
+      this.minSwingHeight = new DoubleYoVariable(namePrefix + "MinSwingHeight", registry);
+      this.minSwingHeight.set(minSwingHeight);
 
       trajectory = new Position2dOptimizedSwingTrajectoryGenerator(namePrefix, registry, yoGraphicsListRegistry, maxTimeIterations);
 
@@ -75,6 +77,11 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    public void setStepTime(double stepTime)
    {
       this.stepTime.set(stepTime);
+   }
+   
+   public void setMinimumSwingHeight(double minSwingHeight)
+   {
+//      this.minSwingHeight = minSwingHeight;
    }
 
    public void setInitialConditions(FramePoint initialPosition, FrameVector initialVelocity)
@@ -97,9 +104,9 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    public void setSwingHeight(double swingHeight)
    {
       if (Double.isNaN(swingHeight))
-         this.swingHeight.set(defaultSwingHeight);
-      else if (swingHeight < minSwingHeight)
-         this.swingHeight.set(minSwingHeight);
+         this.swingHeight.set(minSwingHeight.getDoubleValue());
+      else if (swingHeight < minSwingHeight.getDoubleValue())
+         this.swingHeight.set(minSwingHeight.getDoubleValue());
       else if (swingHeight > maxSwingHeight.getDoubleValue())
          this.swingHeight.set(maxSwingHeight.getDoubleValue());
       else
@@ -149,7 +156,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       }
 
       stanceFootPosition.changeFrame(worldFrame);
-      double maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + defaultSwingHeight);
+      double maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
       for (int i = 0; i < numberWaypoints; i++)
       {
          waypointPositions.get(i).setZ(Math.min(waypointPositions.get(i).getZ(), maxWaypointZ));

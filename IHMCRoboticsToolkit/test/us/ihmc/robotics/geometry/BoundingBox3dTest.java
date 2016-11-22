@@ -1,9 +1,5 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Random;
 
 import javax.vecmath.Point3d;
@@ -11,8 +7,11 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
+
+import static org.junit.Assert.*;
 
 public class BoundingBox3dTest
 {
@@ -301,9 +300,9 @@ public class BoundingBox3dTest
          BoundingBox3d.getCenterPoint(actualCenterPoint);
 
          Point3d inPoint = new Point3d(centerX + (randomX * 0.9), centerY + (randomY * 0.9), centerZ + (randomZ * 0.9));
-         assertTrue(BoundingBox3d.isInside(inPoint));
+         assertTrue("In Point not inside of bounding box: " + inPoint + "\nBox: " + BoundingBox3d, BoundingBox3d.isInside(inPoint));
          Point3d onPoint = new Point3d(centerX + randomX, centerY + randomY, centerZ + randomZ);
-         assertTrue(BoundingBox3d.isInside(onPoint));
+         assertTrue("On Point not on bounding box: " + onPoint + "\nBox: " + BoundingBox3d, BoundingBox3d.isInside(onPoint));
 
          int randomInt = random.nextInt(6);
          double xOffset = 0.0;
@@ -487,6 +486,147 @@ public class BoundingBox3dTest
       JUnitTools.assertTuple3dEquals(lowerLeftPointA, minPoint, epsilon);
       JUnitTools.assertTuple3dEquals(upperRightPointB, maxPoint, epsilon);
    }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testUpdateToIncludePointThatIsAlreadyInsideBoundingBox()
+   {
+      Point3d originalMinPoint = new Point3d(0.0, 0.0, 0.0);
+      Point3d originalMaxPoint = new Point3d(1.0, 1.0, 1.0);
+      BoundingBox3d boundingBox = new BoundingBox3d(originalMinPoint, originalMaxPoint);
+
+      boundingBox.updateToIncludePoint(0.5, 0.5, 0.5);
+
+      Point3d updatedMinPointToPack = new Point3d();
+      Point3d updatedMaxPointToPack = new Point3d();
+
+      boundingBox.getMinPoint(updatedMinPointToPack);
+      boundingBox.getMaxPoint(updatedMaxPointToPack);
+
+      assertEquals(originalMinPoint, updatedMinPointToPack);
+      assertEquals(originalMaxPoint, updatedMaxPointToPack);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testUpdateToIncludeNewMaxPointOutsideOfBoundingBox()
+   {
+      Point3d originalMinPoint = new Point3d(0.0, 0.0, 0.0);
+      Point3d originalMaxPoint = new Point3d(1.0, 1.0, 1.0);
+      BoundingBox3d boundingBox = new BoundingBox3d(originalMinPoint, originalMaxPoint);
+
+      Point3d newMaxPoint = new Point3d(1.5, 1.5, 1.5);
+      boundingBox.updateToIncludePoint(newMaxPoint);
+
+      Point3d updatedMinPointToPack = new Point3d();
+      Point3d updatedMaxPointToPack = new Point3d();
+
+      boundingBox.getMinPoint(updatedMinPointToPack);
+      boundingBox.getMaxPoint(updatedMaxPointToPack);
+
+      assertEquals(originalMinPoint, updatedMinPointToPack);
+      assertEquals(newMaxPoint, updatedMaxPointToPack);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testUpdateToIncludeNewMinPointOutsideOfBoundingBox()
+   {
+      Point3d originalMinPoint = new Point3d(0.0, 0.0, 0.0);
+      Point3d originalMaxPoint = new Point3d(1.0, 1.0, 1.0);
+      BoundingBox3d boundingBox = new BoundingBox3d(originalMinPoint, originalMaxPoint);
+
+      Point3d newMinPoint = new Point3d(-1.5, -1.5, -1.5);
+      boundingBox.updateToIncludePoint(newMinPoint);
+
+      Point3d updatedMinPointToPack = new Point3d();
+      Point3d updatedMaxPointToPack = new Point3d();
+
+      boundingBox.getMinPoint(updatedMinPointToPack);
+      boundingBox.getMaxPoint(updatedMaxPointToPack);
+
+      assertEquals(newMinPoint, updatedMinPointToPack);
+      assertEquals(originalMaxPoint, updatedMaxPointToPack);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetEpsilonToGrowWithNegativeArgument()
+   {
+      Point3d originalMinPoint = new Point3d(0.0, 0.0, 0.0);
+      Point3d originalMaxPoint = new Point3d(1.0, 1.0, 1.0);
+      BoundingBox3d boundingBox = new BoundingBox3d(originalMinPoint, originalMaxPoint);
+
+      try
+      {
+         boundingBox.setEpsilonToGrow(-1.0);
+      }
+      catch (Throwable e)
+      {
+         return;
+      }
+
+      fail("Setting epsilonToGrow with negative argument did not result in a runtime exception!");
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetEpsilonToShrinkWithPositiveArgument()
+   {
+      Point3d originalMinPoint = new Point3d(0.0, 0.0, 0.0);
+      Point3d originalMaxPoint = new Point3d(1.0, 1.0, 1.0);
+      BoundingBox3d boundingBox = new BoundingBox3d(originalMinPoint, originalMaxPoint);
+
+      try
+      {
+         boundingBox.setEpsilonToShrink(1.0);
+      }
+      catch (Throwable e)
+      {
+         return;
+      }
+
+      fail("Setting epsilonToShrink with positive argument did not result in a runtime exception!");
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetEpsilonToShrink()
+   {
+      Random random = new Random(1976L);
+
+      Point3d originalMinPoint = new Point3d(0.0, 0.0, 0.0);
+      Point3d originalMaxPoint = new Point3d(1.0, 1.0, 1.0);
+      BoundingBox3d boundingBox = new BoundingBox3d(originalMinPoint, originalMaxPoint);
+
+      for(int i = 0; i < 100000; i++)
+      {
+         double epsilonToShrink = RandomTools.generateRandomDoubleInRange(random, -1e-16, -1e-4);
+         boundingBox.setEpsilonToShrink(epsilonToShrink);
+         assertFalse(boundingBox.isInside(originalMaxPoint));
+         assertFalse(boundingBox.isInside(originalMinPoint));
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSetEpsilonToGrow()
+   {
+      Random random = new Random(1976L);
+
+      Point3d originalMinPoint = new Point3d(0.0, 0.0, 0.0);
+      Point3d originalMaxPoint = new Point3d(1.0, 1.0, 1.0);
+      BoundingBox3d boundingBox = new BoundingBox3d(originalMinPoint, originalMaxPoint);
+
+      for(int i = 0; i < 100000; i++)
+      {
+         double epsilonToShrink = RandomTools.generateRandomDoubleInRange(random, 1e4, 1e16);
+         boundingBox.setEpsilonToGrow(epsilonToShrink);
+         assertTrue(boundingBox.isInside(originalMaxPoint));
+         assertTrue(boundingBox.isInside(originalMinPoint));
+      }
+   }
+
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

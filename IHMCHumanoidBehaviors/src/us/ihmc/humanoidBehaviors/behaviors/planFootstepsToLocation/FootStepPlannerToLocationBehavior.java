@@ -49,7 +49,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
    private final ConcurrentListeningQueue<RobotConfigurationData> robotConfigurationDataQueue;
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue;
-   private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>();
+   private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
 
    private final SideDependentList<FootstepStatus> latestFootstepStatus;
    private final SideDependentList<EnumYoVariable<FootstepStatus.Status>> latestFootstepStatusEnum;
@@ -115,9 +115,9 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       YoFramePose rightFootstepStatusPose = new YoFramePose(prefix + "RightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
       actualFootStatusPoses = new SideDependentList<>(leftFootstepStatusPose, rightFootstepStatusPose);
 
-      footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>();
-      robotConfigurationDataQueue = new ConcurrentListeningQueue<RobotConfigurationData>();
-      walkingStatusQueue = new ConcurrentListeningQueue<WalkingStatusMessage>();
+      footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(40);
+      robotConfigurationDataQueue = new ConcurrentListeningQueue<RobotConfigurationData>(40);
+      walkingStatusQueue = new ConcurrentListeningQueue<WalkingStatusMessage>(10);
       communicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
       communicationBridge.attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
       communicationBridge.attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);

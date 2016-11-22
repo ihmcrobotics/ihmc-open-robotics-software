@@ -12,7 +12,7 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
    private int frameNumber = 0;
    private int NUMBER_OF_FRAMES = 25;
 
-   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>();
+   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>(20);
 
    CommunicationBridge coactiveBehaviorsNetworkManager;
 

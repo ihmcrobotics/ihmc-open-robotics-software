@@ -13,6 +13,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
@@ -37,6 +38,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    private RigidBodyTransform initialFootPose = new RigidBodyTransform();
 
    private SideDependentList<RigidBodyTransform> goalFootstepPoses;
+
+   private FootstepPlannerGoalType footstepPlannerGoalType;
+   private Point2d xyGoal;
+   private double distanceFromXYGoal;
+
    private SideDependentList<Point3d> goalPositions;
    private SideDependentList<Double> goalYaws;
 
@@ -120,8 +126,22 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    @Override
    public void setGoal(FootstepPlannerGoal goal)
    {
+      footstepPlannerGoalType = goal.getFootstepPlannerGoalType();
+
+      setGoalXYAndRadius(goal);
+      setGoalPositionsAndYaws(goal);
+   }
+
+   private void setGoalXYAndRadius(FootstepPlannerGoal goal)
+   {
       goalNode = null;
 
+      xyGoal = new Point2d(goal.getXYGoal());
+      distanceFromXYGoal = goal.getDistanceFromXYGoal();
+   }
+
+   private void setGoalPositionsAndYaws(FootstepPlannerGoal goal)
+   {
       FramePose goalPose = goal.getGoalPoseBetweenFeet();
       goalPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
@@ -213,14 +233,17 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          BipedalFootstepPlannerNode nodeToExpand = stack.pop();
          notifyListenerNodeSelectedForExpansion(nodeToExpand);
 
-         // Make sure popped node is a good one and can be expanded...
-         boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(nodeToExpand);
-         if (!snapSucceded)
-            continue;
+         if (nodeToExpand != startNode) // StartNode is from an actual footstep, so we don't need to snap it...
+         {
+            // Make sure popped node is a good one and can be expanded...
+            boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(nodeToExpand);
+            if (!snapSucceded)
+               continue;
 
-         boolean goodFootstep = checkIfGoodFootstep(nodeToExpand);
-         if (!goodFootstep)
-            continue;
+            boolean goodFootstep = checkIfGoodFootstep(nodeToExpand);
+            if (!goodFootstep)
+               continue;
+         }
 
          notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
          numberOfNodesExpanded++;
@@ -229,6 +252,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
          if (nodeToExpand.isAtGoal())
          {
+//            System.out.println("Expanding is at goal!!!");
             if ((nodeToExpand.getParentNode() != null) && (nodeToExpand.getParentNode().isAtGoal()))
             {
                goalNode = nodeToExpand;
@@ -254,6 +278,33 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    }
 
    private boolean addGoalNodeIfGoalIsReachable(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform, Deque<BipedalFootstepPlannerNode> stack)
+   {
+      BipedalFootstepPlannerNode goalNode = null;
+
+      if (footstepPlannerGoalType == FootstepPlannerGoalType.CLOSE_TO_XY_POSITION)
+      {
+         goalNode = findGoalNodeUsingCloseToXY(nodeToExpand, soleZUpTransform, stack);
+      }
+      else
+      {
+         goalNode = findGoalNodeUsingSolePositions(nodeToExpand, soleZUpTransform);
+      }
+
+      if (goalNode != null)
+      {
+         stack.push(goalNode);
+         return true;
+      }
+
+      return false;
+   }
+
+   private BipedalFootstepPlannerNode findGoalNodeUsingCloseToXY(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform, Deque<BipedalFootstepPlannerNode> stack)
+   {
+      return null;
+   }
+
+   private BipedalFootstepPlannerNode findGoalNodeUsingSolePositions(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform)
    {
       Point3d currentSolePosition = nodeToExpand.getSolePosition();
 
@@ -282,12 +333,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             BipedalFootstepPlannerNode goalNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, finishStep, stepYaw);
             goalNode.setIsAtGoal();
 
-            stack.push(goalNode);
-            return true;
+            return goalNode;
          }
       }
 
-      return false;
+      return null;
    }
 
    private boolean checkIfGoodFootstep(BipedalFootstepPlannerNode nodeToExpand)
@@ -451,6 +501,25 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
                double nextStepYaw = idealStepYaw;
                Vector3d nextStepVector = new Vector3d(xStep, currentSide.negateIfLeftSide(yStep), 0.0);
                childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector, nextStepYaw);
+
+               if (footstepPlannerGoalType == FootstepPlannerGoalType.CLOSE_TO_XY_POSITION)
+               {
+                  Point3d solePosition = childNode.getSolePosition();
+
+                  double deltaX = solePosition.getX() - xyGoal.getX();
+                  double deltaY = solePosition.getY() - xyGoal.getY();
+                  double distanceSquared = deltaX * deltaX + deltaY * deltaY;
+                  double distanceFromXYGoalSquared = distanceFromXYGoal * distanceFromXYGoal;
+
+//                  System.out.println("distanceSquared = " + distanceSquared);
+//                  System.out.println("distanceFromXYGoalSquared = " + distanceFromXYGoalSquared);
+                  if (distanceSquared < distanceFromXYGoalSquared)
+                  {
+//                     System.out.println("Setting at goal for child node!");
+                     childNode.setIsAtGoal();
+                  }
+               }
+
                nodesToAdd.add(childNode);
             }
          }
@@ -463,7 +532,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       {
          stack.push(node);
       }
-
    }
 
    private BipedalFootstepPlannerNode createAndAddNextNodeGivenStep(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand, Vector3d stepVectorInSoleFrame, double stepYaw)

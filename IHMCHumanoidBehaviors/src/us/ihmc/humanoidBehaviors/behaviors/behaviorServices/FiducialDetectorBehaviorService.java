@@ -14,7 +14,7 @@ public class FiducialDetectorBehaviorService extends ThreadedBehaviorService
    private static final double DEFAULT_FIDUCIAL_SIZE = 1.0;
    private static final double DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS = Math.toRadians(80.0);
    private static final double DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS = Math.toRadians(45.0);
-   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>();
+   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>(20);
 
    private final FiducialDetectorFromCameraImages fiducialDetectorFromCameraImages;
    private RigidBodyTransform transformFromReportedToFiducialFrame;

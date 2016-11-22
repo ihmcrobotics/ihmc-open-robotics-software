@@ -267,4 +267,9 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return 0.0;
    }
+   
+   public double getMinSwingHeightFromStanceFoot()
+   {
+      return 0.1;
+   }
 }

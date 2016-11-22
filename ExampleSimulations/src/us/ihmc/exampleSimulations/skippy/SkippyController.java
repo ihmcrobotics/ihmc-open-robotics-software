@@ -802,7 +802,7 @@ public class SkippyController implements RobotController
    }
 
    /*
-    * Compute CPM according to book chapter page 26 (notebook page 65)
+    * Compute CPM according to book chapter page 26 (notebook pags 58 e 65)
     */
    public void cmpFromParametrizedReaction()
    {
