@@ -23,6 +23,7 @@ import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.environments.FiducialsFlatGroundEnvironment.Fiducial;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
@@ -35,6 +36,7 @@ import us.ihmc.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
 public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D;
+   private final ArrayList<Robot> environmentRobots = new ArrayList<>();
 
    private final Random random = new Random(1989L);
 
@@ -77,6 +79,8 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
    private static final boolean ADD_SOCCER_BALL = false;
    public static final double SOCCER_BALL_RADIUS = 0.0762;
 
+   private static final boolean ADD_FIDUCIAL_BOX_ROBOT = false;
+
    // private static final double FLOOR_THICKNESS = 0.001;
 
    public enum BLOCKTYPE
@@ -90,23 +94,23 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
       addCalibrationCube();
       combinedTerrainObject3D.addTerrainObject(setUpPath1Rocks3D("Path1 Rocks"));
-  
+
       // setUpPath2SmallCones(combinedTerrainObject);
       combinedTerrainObject3D.addTerrainObject(setUpPath3RampsWithLargeBlocks3D("Path3 Ramps With Large Blocks"));
       combinedTerrainObject3D.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourse("Path 4 Walking Course"));
-  
+
       // combinedTerrainObject.addTerrainObject(setUpPath4DRCTrialsTrainingWalkingCourseDifficult());
       combinedTerrainObject3D.addTerrainObject(setUpPathDRCTrialsSteps("Ladder"));
       combinedTerrainObject3D.addTerrainObject(setUpTrialsQuals("Quals"));
-  
+
       combinedTerrainObject3D.addTerrainObject(setUpPath5NarrowDoor("Path5 Narrow Door"));
       combinedTerrainObject3D.addTerrainObject(setUpPath6Barriers("Path6 Barriers"));
       combinedTerrainObject3D.addTerrainObject(setUpPath7Stairs("Path7 Stairs"));
       combinedTerrainObject3D.addTerrainObject(setUpPath8RampsWithSteppingStones("Path8 Ramps with Stepping Stones"));
-  
+
 
       combinedTerrainObject3D.addTerrainObject(setUpGround("Ground"));
-      
+
       //Soccer Ball
       if (ADD_SOCCER_BALL)
       {
@@ -114,6 +118,15 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
          combinedTerrainObject3D.addSphere(1.5, 0.0, SOCCER_BALL_RADIUS, SOCCER_BALL_RADIUS, YoAppearance.RGBColorFromHex(ballColor));
       }
 
+      if (ADD_FIDUCIAL_BOX_ROBOT)
+      {
+         FloatingFiducialBoxRobot robot = new FloatingFiducialBoxRobot(Fiducial.FIDUCIAL50);
+
+         robot.setPosition(6.0, 0.0, 2.0);
+         robot.setYawPitchRoll(0.0, -Math.PI / 2.0, 0.0);
+
+         environmentRobots.add(robot);
+      }
 //      if (ADD_LIMBO_BAR)
 //      {
 //         addLimboBar(combinedTerrainObject3D);
@@ -836,7 +849,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
                   z = 0.0;
                   cinderBlockNormal.set(0.0, 0.0, 1.0);
                }
-               
+
                Matrix3d pitchRollMatrix = new Matrix3d();
                Matrix3d cinderBlockOrientation = new Matrix3d();
 
@@ -1629,7 +1642,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
    @Override
    public ArrayList<Robot> getEnvironmentRobots()
    {
-      return new ArrayList<Robot>();
+      return environmentRobots;
    }
 
    @Override

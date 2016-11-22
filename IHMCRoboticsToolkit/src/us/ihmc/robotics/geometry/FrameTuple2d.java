@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.vecmath.Point2d;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
+import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
@@ -166,6 +167,15 @@ public abstract class FrameTuple2d<S extends FrameTuple2d<S, T>, T extends Tuple
    public final void get(Tuple3d tuple3dToPack)
    {
       tuple3dToPack.set(tuple.getX(), tuple.getY(), 0.0);
+   }
+
+   /**
+    * Pack this tuple2d in tuple3fToPack and tuple3fToPack.z = 0.0.
+    * @param tuple3fToPack {@code Tuple3f}
+    */
+   public final void get(Tuple3f tuple3fToPack)
+   {
+      tuple3fToPack.set((float) tuple.getX(), (float) tuple.getY(), 0.0f);
    }
 
    public final void setToZero()

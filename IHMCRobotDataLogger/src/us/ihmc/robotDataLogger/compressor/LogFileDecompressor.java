@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.tukaani.xz.XZInputStream;
 
@@ -18,13 +20,17 @@ import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
+import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
+import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.compression.SnappyUtils;
 
 public class LogFileDecompressor extends YoVariableLogReader
 {
-   public static final String out = "/home/jesper/scratch/decompressed/";
+   private final File targetFile;
    private int bufferedElements;
+   
+   private final PrintStream out;
 
    private FileChannel outputChannel;
    private FileChannel indexChannel;
@@ -32,11 +38,16 @@ public class LogFileDecompressor extends YoVariableLogReader
    private final ByteBuffer indexLine = ByteBuffer.allocateDirect(16);
 
    private int totalElements = 0;
+   
+   private final ProgressMonitorInterface progressMonitor;
+   private final AtomicInteger progress = new AtomicInteger();
 
-   public LogFileDecompressor(File compressedDirectory, LogProperties logProperties) throws IOException
+   public LogFileDecompressor(File compressedDirectory, File targetFile, LogProperties logProperties, ProgressMonitorInterface progressMonitor) throws IOException
    {
       super(compressedDirectory, logProperties);
-
+      this.targetFile = targetFile;
+      
+      
       long startTime = System.nanoTime();
       DataInputStream handshakeStream = new DataInputStream(new FileInputStream(handshake));
       byte[] handshakeData = new byte[(int) handshake.length()];
@@ -49,21 +60,24 @@ public class LogFileDecompressor extends YoVariableLogReader
       properties.load(propertiesFile);
       propertiesFile.close();
 
+      this.progressMonitor = progressMonitor;
+      progressMonitor.initialize("Decompressing data", null, 0, properties.getCompressedDataFiles() + 1);
+      this.out = progressMonitor.getPrintStream();
+
       bufferedElements = properties.getNumberOfBufferedElements();
 
-      System.out.println("Found " + numberOfVariables + " variables.");
-      System.out.println("Reading " + bufferedElements + " data points at a time");
+      out.println("Found " + numberOfVariables + " variables.");
+      out.println("Reading " + bufferedElements + " data points at a time");
 
-      FileOutputStream outputStream = new FileOutputStream(new File(out, logProperties.getVariableDataFile()));
+      FileOutputStream outputStream = new FileOutputStream(new File(targetFile, logProperties.getVariableDataFile()));
       outputChannel = outputStream.getChannel();
 
-      FileOutputStream indexStream = new FileOutputStream(new File(out, logProperties.getVariablesIndexFile()));
+      FileOutputStream indexStream = new FileOutputStream(new File(targetFile, logProperties.getVariablesIndexFile()));
       indexChannel = indexStream.getChannel();
 
       byte[] data = new byte[bufferedElements * numberOfVariables * 8];
       for (int i = 0; i < properties.getCompressedDataFiles(); i++)
       {
-
          FileInputStream logInputStream = new FileInputStream(new File(compressedDirectory, "robotData." + i + ".xz"));
          XZInputStream xzInputStream = new XZInputStream(logInputStream);
 
@@ -71,14 +85,16 @@ public class LogFileDecompressor extends YoVariableLogReader
 
          int elements = read / (numberOfVariables * 8);
 
-         System.out.println("Read " + read + " bytes, " + elements + " elements for " + i);
+         out.println("Read " + read + " bytes, " + elements + " elements for " + i);
          totalElements += elements;
          writeDataToStream(data, elements, numberOfVariables);
 
          xzInputStream.close();
+         
+         incrementProgress();
       }
 
-      System.out.println("Read " + totalElements + " total");
+      out.println("Read " + totalElements + " total");
 
       outputChannel.close();
       outputStream.close();
@@ -86,29 +102,35 @@ public class LogFileDecompressor extends YoVariableLogReader
       indexChannel.close();
       indexStream.close();
 
-      copyMetaData(new File(out));
+      copyMetaData(targetFile);
       
-      System.out.println("Decompression took " + TimeTools.nanoSecondstoSeconds(System.nanoTime() - startTime));
+      out.println("Decompression took " + TimeTools.nanoSecondstoSeconds(System.nanoTime() - startTime));
       checkChecksums(properties);
+      incrementProgress();
       
+      progressMonitor.close();
+   }
+   
+   private void incrementProgress()
+   {
+      progressMonitor.setProgress(progress.incrementAndGet());
    }
 
    private void checkChecksums(CompressionProperties properties) throws IOException
    {
-      System.out.println("Validating checksums.");
-      File logdata = new File(out, logProperties.getVariableDataFile());
+      out.println("Validating checksums.");
+      File logdata = new File(targetFile, logProperties.getVariableDataFile());
       if (!properties.getDataChecksum().equals(Files.hash(logdata, Hashing.sha1()).toString()))
       {
-         System.err.println("Variable data does not match with pre-compression data. Expect an unloadable data file.");
-         return;
+         throw new IOException("Variable data does not match with pre-compression data. Expect an unloadable data file.");
       }
 
-      File index = new File(out, logProperties.getVariablesIndexFile());
+      File index = new File(targetFile, logProperties.getVariablesIndexFile());
       if (!properties.getTimestampChecksum().equals(Files.hash(index, Hashing.sha1()).toString()))
       {
-         System.err.println("Timestamp data does not match with pre-compression data. A bug has been found in the LogFileDecompressor and fixing it will make this data file readable again.");
+         throw new IOException("Timestamp data does not match with pre-compression data. A bug has been found in the LogFileDecompressor and fixing it will make this data file readable again.");
       }
-      System.out.println("Checksums validated.");
+      out.println("Checksums validated.");
    }
 
    private void writeDataToStream(byte[] data, int elements, int numberOfVariables) throws IOException
@@ -137,14 +159,7 @@ public class LogFileDecompressor extends YoVariableLogReader
 
          timeElement.flip();
          long timestamp = timeElement.getLong(0);
-         try
-         {
-            SnappyUtils.compress(timeElement, compressed);
-         }
-         catch (IOException e1)
-         {
-            throw new RuntimeException(e1);
-         }
+         SnappyUtils.compress(timeElement, compressed);
          compressed.flip();
 
          long offset = outputChannel.position();
@@ -163,13 +178,13 @@ public class LogFileDecompressor extends YoVariableLogReader
 
    public static void main(String[] args) throws IOException
    {
-      //      File logDirectory = FileSelectionDialog.loadDirectoryWithFileNamed(YoVariableLoggerListener.propertyFile);
       File logDirectory = new File("/home/jesper/scratch/compressed/");
+      File target = new File("/home/jesper/scratch/decompressed/");
       if (logDirectory != null)
       {
          LogPropertiesReader logProperties = new LogPropertiesReader(new File(logDirectory, YoVariableLoggerListener.propertyFile));
-
-         new LogFileDecompressor(logDirectory, logProperties);
+         CustomProgressMonitor customProgressMonitor = new CustomProgressMonitor();
+         new LogFileDecompressor(logDirectory, target, logProperties, customProgressMonitor);
       }
    }
 }

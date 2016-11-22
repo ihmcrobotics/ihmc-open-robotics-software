@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.frames;
 import javax.vecmath.Point2d;
 import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
+import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector2d;
 
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -56,6 +57,16 @@ public abstract class YoFrameTuple2d<S, T extends FrameTuple2d<?, ?>> extends Ab
    {
       putYoValuesIntoFrameTuple2d();
       frameTuple2d.get(tuple3dToPack);
+   }
+   
+   /**
+    * Pack this tuple2d in tuple3fToPack and tuple3fToPack.z = 0.0.
+    * @param tuple3fToPack {@code Tuple3f}
+    */
+   public final void get(Tuple3f tuple3fToPack)
+   {
+      putYoValuesIntoFrameTuple2d();
+      frameTuple2d.get(tuple3fToPack);
    }
 
    public final Vector2d getVector2dCopy()

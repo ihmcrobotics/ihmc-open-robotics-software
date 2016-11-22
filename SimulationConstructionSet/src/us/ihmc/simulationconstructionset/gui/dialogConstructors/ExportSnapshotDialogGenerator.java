@@ -9,8 +9,8 @@ import javax.swing.JFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.commands.ExportSnapshotCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.ActiveCanvas3DHolder;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.SwingWorker;
+import us.ihmc.tools.gui.MyFileFilter;
 
 public class ExportSnapshotDialogGenerator implements ExportSnapshotDialogConstructor
 {

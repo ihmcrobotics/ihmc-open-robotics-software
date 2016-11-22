@@ -42,7 +42,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       RobotSide initialStanceSide = RobotSide.LEFT;
 
       FramePose goalPose = new FramePose(worldFrame);
-      goalPose.setPosition(2.0, -0.2, 0.35);
+      goalPose.setPosition(2.0, -0.2, 0.53);
 
       // run the test
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, stairCase, assertPlannerReturnedResult);
@@ -50,25 +50,25 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
          PlanningTestTools.visualizeAndSleep(stairCase, footstepPlan, goalPose);
       assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
    }
-   
+
    public void testOverCinderBlockField(boolean assertPlannerReturnedResult)
    {
       PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField();
-      
+
       FramePose goalPose = new FramePose(worldFrame);
       goalPose.setPosition(9.0, 0.7, 0.0);
-      
+
       FramePose initialStanceFootPose = new FramePose(worldFrame);
       initialStanceFootPose.setPosition(0.0, -0.7, 0.0);
       RobotSide initialStanceSide = RobotSide.RIGHT;
-      
+
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, cinderBlockField, assertPlannerReturnedResult);
-      
+
       if (visualize())
       {
          PlanningTestTools.visualizeAndSleep(cinderBlockField, footstepPlan, goalPose);
       }
-      
+
       assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
    }
 

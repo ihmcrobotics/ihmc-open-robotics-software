@@ -139,7 +139,6 @@ public class InverseDynamicsOptimizationControlModule
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
-      qpSolver.addRegularization();
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
       qpSolver.setMinRho(rhoMin.getDoubleValue());
@@ -162,7 +161,6 @@ public class InverseDynamicsOptimizationControlModule
       }
       catch (NoConvergenceException e)
       {
-
          if (!hasNotConvergedInPast.getBooleanValue())
          {
             e.printStackTrace();
