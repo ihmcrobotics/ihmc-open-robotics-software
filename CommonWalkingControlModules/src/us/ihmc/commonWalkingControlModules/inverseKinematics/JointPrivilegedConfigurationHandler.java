@@ -18,6 +18,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * This class computes the input for the optimization based on the desired privileged configuration commands.
@@ -33,9 +34,9 @@ public class JointPrivilegedConfigurationHandler
    private final DoubleYoVariable maxVelocity = new DoubleYoVariable("jointPrivilegedConfigurationMaxVelocity", registry);
    private final DoubleYoVariable maxAcceleration = new DoubleYoVariable("jointPrivilegedConfigurationMaxAcceleration", registry);
 
-   private final Map<OneDoFJoint, DoubleYoVariable> yoJointPriviligedConfigurations = new HashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> yoJointPriviligedVelocities = new HashMap<>();
-   private final Map<OneDoFJoint, DoubleYoVariable> yoJointPriviligedAccelerations = new HashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> yoJointPrivilegedConfigurations = new HashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> yoJointPrivilegedVelocities = new HashMap<>();
+   private final Map<OneDoFJoint, DoubleYoVariable> yoJointPrivilegedAccelerations = new HashMap<>();
 
    private final DenseMatrix64F privilegedConfigurations;
    private final DenseMatrix64F privilegedVelocities;
@@ -52,6 +53,9 @@ public class JointPrivilegedConfigurationHandler
    private final List<RigidBody> chainEndEffectors = new ArrayList<>();
 
    private final int numberOfDoFs;
+
+   private final ArrayList<PrivilegedConfigurationCommand> commandList = new ArrayList<>();
+   private final ArrayList<OneDoFJoint> jointsWithConfiguration = new ArrayList<>();
 
    // TODO During toe off, this guy behaves differently and tends to corrupt the CMP. Worst part is that the achieved CMP appears to not show that. (Sylvain)
    public JointPrivilegedConfigurationHandler(OneDoFJoint[] oneDoFJoints, YoVariableRegistry parentRegistry)
@@ -84,9 +88,9 @@ public class JointPrivilegedConfigurationHandler
          positionsAtMidRangeOfMotion.set(i, 0, 0.5 * (jointLimitUpper + jointLimitLower));
 
          String jointName = joint.getName();
-         yoJointPriviligedConfigurations.put(joint, new DoubleYoVariable("q_priv_" + jointName, registry));
-         yoJointPriviligedVelocities.put(joint, new DoubleYoVariable("qd_priv_" + jointName, registry));
-         yoJointPriviligedAccelerations.put(joint, new DoubleYoVariable("qdd_priv_" + jointName, registry));
+         yoJointPrivilegedConfigurations.put(joint, new DoubleYoVariable("q_priv_" + jointName, registry));
+         yoJointPrivilegedVelocities.put(joint, new DoubleYoVariable("qd_priv_" + jointName, registry));
+         yoJointPrivilegedAccelerations.put(joint, new DoubleYoVariable("qdd_priv_" + jointName, registry));
       }
 
       configurationGain.set(20.0);
@@ -116,13 +120,15 @@ public class JointPrivilegedConfigurationHandler
     */
    public void computePrivilegedJointVelocities()
    {
+      processPrivilegedConfigurationCommands();
+
       for (int i = 0; i < numberOfDoFs; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
          double qd = 2.0 * configurationGain.getDoubleValue() * (privilegedConfigurations.get(i, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(i, 0);
          qd = MathTools.clipToMinMax(qd, maxVelocity.getDoubleValue());
          privilegedVelocities.set(i, 0, qd);
-         yoJointPriviligedVelocities.get(joint).set(qd);
+         yoJointPrivilegedVelocities.get(joint).set(qd);
       }
    }
 
@@ -132,6 +138,8 @@ public class JointPrivilegedConfigurationHandler
     */
    public void computePrivilegedJointAccelerations()
    {
+      processPrivilegedConfigurationCommands();
+
       for (int i = 0; i < numberOfDoFs; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
@@ -139,19 +147,25 @@ public class JointPrivilegedConfigurationHandler
          qdd -= velocityGain.getDoubleValue() * joint.getQd();
          qdd = MathTools.clipToMinMax(qdd, maxAcceleration.getDoubleValue());
          privilegedAccelerations.set(i, 0, qdd);
-         yoJointPriviligedAccelerations.get(joint).set(qdd);
+         yoJointPrivilegedAccelerations.get(joint).set(qdd);
       }
    }
 
+   /**
+    * Adds a privileged configuration command to be processed later.
+    * Note that any weight, configuration gain, velocity gain, max velocity, and max acceleration, will be overwritten by the last one added.
+    * Additionally, the last default configuration will be the one used.
+    * The same is applicable for different requested privileged configurations.
+    * @param command command to add to list
+    */
    public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
    {
+      commandList.add(command);
+
       isJointPrivilegedConfigurationEnabled.set(command.isEnabled());
 
       if (command.hasNewWeight())
-      {
          weight.set(command.getWeight());
-      }
-
       if (command.hasNewConfigurationGain())
          configurationGain.set(command.getConfigurationGain());
       if (command.hasNewVelocityGain())
@@ -161,40 +175,94 @@ public class JointPrivilegedConfigurationHandler
       if (command.hasNewMaxAcceleration())
          maxAcceleration.set(command.getMaxAcceleration());
 
-      if (command.hasNewPrivilegedConfigurationDefaultOption())
+   }
+
+   private void processPrivilegedConfigurationCommands()
+   {
+      processDefaultPrivilegedConfigurationOptions();
+      processPrivilegedConfigurations();
+
+      commandList.clear();
+      jointsWithConfiguration.clear();
+   }
+
+   private void processDefaultPrivilegedConfigurationOptions()
+   {
+      for (int i = 0; i < commandList.size(); i++)
       {
-         PrivilegedConfigurationOption defaultOption = command.getPrivilegedConfigurationDefaultOption();
-         for (int i = 0; i < numberOfDoFs; i++)
-            setPrivilegedConfigurationFromOption(defaultOption, i);
-      }
+         PrivilegedConfigurationCommand command = commandList.get(i);
 
-      for (int i = 0; i < command.getNumberOfJoints(); i++)
-      {
-         OneDoFJoint joint = command.getJoint(i);
-         MutableInt mutableIndex = jointIndices.get(joint);
-         if (mutableIndex == null)
-        	 continue;
-
-         int jointIndex = mutableIndex.intValue();
-
-         if (command.hasNewPrivilegedConfiguration(i))
+         if (command.hasNewPrivilegedConfigurationDefaultOption())
          {
-            double qPrivileged = command.getPrivilegedConfiguration(i);
-            privilegedConfigurations.set(jointIndex, 0, qPrivileged);
-            yoJointPriviligedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);;
-         }
-
-         if (command.hasNewPrivilegedConfigurationOption(i))
-         {
-            PrivilegedConfigurationOption option = command.getPrivilegedConfigurationOption(i);
-            setPrivilegedConfigurationFromOption(option, jointIndex);
+            PrivilegedConfigurationOption defaultOption = command.getPrivilegedConfigurationDefaultOption();
+            for (int j = 0; j < numberOfDoFs; j++)
+               setPrivilegedConfigurationFromOption(defaultOption, j);
          }
       }
+   }
 
-      for (int chainIndex = 0; chainIndex < command.getNumberOfChains(); chainIndex++)
+   private void processPrivilegedConfigurations()
+   {
+      for (int i = 0; i < commandList.size(); i++)
       {
-         chainBases.add(command.getChainBase(chainIndex));
-         chainEndEffectors.add(command.getChainEndEffector(chainIndex));
+         PrivilegedConfigurationCommand command = commandList.get(i);
+
+         for (int j = 0; j < command.getNumberOfJoints(); j++)
+         {
+            OneDoFJoint joint = command.getJoint(j);
+            MutableInt mutableIndex = jointIndices.get(joint);
+            if (mutableIndex == null)
+               continue;
+
+            int jointIndex = mutableIndex.intValue();
+
+            if (command.hasNewPrivilegedConfiguration(j))
+            {
+               OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
+               if (!jointsWithConfiguration.contains(configuredJoint))
+               {
+                  double qPrivileged = command.getPrivilegedConfiguration(j);
+                  privilegedConfigurations.set(jointIndex, 0, qPrivileged);
+                  yoJointPrivilegedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);
+                  jointsWithConfiguration.add(configuredJoint);
+               }
+               else
+               {
+                  PrintTools.warn(this, "Privileged configuration already received for joint " + configuredJoint.getName() + ".");
+               }
+            }
+
+            if (command.hasNewPrivilegedConfigurationOption(j))
+            {
+               OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
+               if (!jointsWithConfiguration.contains(configuredJoint))
+               {
+                  PrivilegedConfigurationOption option = command.getPrivilegedConfigurationOption(j);
+                  setPrivilegedConfigurationFromOption(option, jointIndex);
+                  jointsWithConfiguration.add(configuredJoint);
+               }
+               else
+               {
+                  PrintTools.warn(this, "Privileged configuration already received for joint " + configuredJoint.getName() + ".");
+               }
+            }
+         }
+
+         for (int chainIndex = 0; chainIndex < command.getNumberOfChains(); chainIndex++)
+         {
+            RigidBody base = command.getChainBase(chainIndex);
+            RigidBody endEffector = command.getChainEndEffector(chainIndex);
+
+            if (!chainBases.contains(base) && !chainEndEffectors.contains(endEffector))
+            {
+               chainBases.add(command.getChainBase(chainIndex));
+               chainEndEffectors.add(command.getChainEndEffector(chainIndex));
+            }
+            else
+            {
+               PrintTools.warn(this, "Privileged configuration already received for chain " + base.getName() + " to " + endEffector.getName() + ".");
+            }
+         }
       }
    }
 
@@ -218,7 +286,7 @@ public class JointPrivilegedConfigurationHandler
       }
 
       privilegedConfigurations.set(jointIndex, 0, qPrivileged);
-      yoJointPriviligedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);;
+      yoJointPrivilegedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);;
    }
 
    public boolean isEnabled()
