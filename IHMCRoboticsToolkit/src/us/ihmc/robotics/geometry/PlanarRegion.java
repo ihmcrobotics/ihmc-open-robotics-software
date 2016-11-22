@@ -504,4 +504,20 @@ public class PlanarRegion
          }
       }
    }
+
+   /**
+    * @return a full depth copy of this region. The copy can be entirely modified without interfering with this region.
+    */
+   public PlanarRegion copy()
+   {
+      RigidBodyTransform transformToWorldCopy = new RigidBodyTransform(fromLocalToWorldTransform);
+      List<ConvexPolygon2d> convexPolygonsCopy = new ArrayList<>();
+
+      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
+         convexPolygonsCopy.add(new ConvexPolygon2d(convexPolygons.get(i)));
+
+      PlanarRegion planarRegion = new PlanarRegion(transformToWorldCopy, convexPolygonsCopy);
+      planarRegion.setRegionId(regionId);
+      return planarRegion;
+   }
 }
