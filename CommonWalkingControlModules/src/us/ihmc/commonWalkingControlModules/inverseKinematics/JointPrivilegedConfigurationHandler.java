@@ -247,7 +247,7 @@ public class JointPrivilegedConfigurationHandler
             RigidBody base = command.getChainBase(chainIndex);
             RigidBody endEffector = command.getChainEndEffector(chainIndex);
 
-            if (!chainBases.contains(base) && !chainEndEffectors.contains(endEffector))
+            if (!chainBases.contains(base) || !chainEndEffectors.contains(endEffector))
             {
                chainBases.add(command.getChainBase(chainIndex));
                chainEndEffectors.add(command.getChainEndEffector(chainIndex));
