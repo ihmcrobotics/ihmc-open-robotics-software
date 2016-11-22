@@ -17,13 +17,11 @@ import javax.vecmath.Vector3d;
 public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
    private final PlanarRegion planarRegion;
-   private final BoundingBox3d boundingBox3d;
    private final Graphics3DObject linkGraphics;
 
    public PlanarRegionTerrainObject(PlanarRegion planarRegion)
    {
       this.planarRegion = planarRegion;
-      this.boundingBox3d = setupBoundingBox3d();
       this.linkGraphics = setupLinkGraphics();
    }
 
@@ -51,7 +49,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    @Override
    public BoundingBox3d getBoundingBox()
    {
-      return boundingBox3d;
+      return planarRegion.getBoundingBox3dInWorld();
    }
 
    @Override
@@ -63,7 +61,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      return boundingBox3d.isInside(x, y, z);
+      return planarRegion.getBoundingBox3dInWorld().isInside(x, y, z);
    }
 
    @Override
@@ -114,61 +112,5 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       graphics3DObject.addPlanarRegion(planarRegion);
       return graphics3DObject;
-   }
-
-   private BoundingBox3d setupBoundingBox3d()
-   {
-      double xMin, xMax, yMin, yMax, zMin, zMax;
-      xMin = xMax = yMin = yMax = zMin = zMax = 0.0;
-
-      RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(planarRegionTransformToWorld);
-
-      for (int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
-      {
-         ConvexPolygon2d convexPolygonInWorld = planarRegion.getConvexPolygon(i).applyTransformCopy(planarRegionTransformToWorld);
-
-         for (int j = 0; j < convexPolygonInWorld.getNumberOfVertices(); j++)
-         {
-            Point2d vertex = convexPolygonInWorld.getVertex(j);
-            double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.x, vertex.y);
-
-            if (planeZGivenXY > zMax)
-            {
-               zMax = planeZGivenXY;
-            }
-
-            if (planeZGivenXY < zMin)
-            {
-               zMin = planeZGivenXY;
-            }
-         }
-
-         Point2d maxPoint2d = convexPolygonInWorld.getBoundingBox().getMaxPoint();
-         Point2d minPoint2d = convexPolygonInWorld.getBoundingBox().getMinPoint();
-
-         if (minPoint2d.x < xMin)
-         {
-            xMin = minPoint2d.x;
-         }
-
-         if (minPoint2d.y < yMin)
-         {
-            yMin = minPoint2d.y;
-         }
-
-         if (maxPoint2d.x > xMax)
-         {
-            xMax = maxPoint2d.x;
-         }
-
-         if (maxPoint2d.y > yMax)
-         {
-            yMax = maxPoint2d.y;
-         }
-
-      }
-
-      return new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 }
