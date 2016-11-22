@@ -13,7 +13,7 @@ public class SearchForValveBehavior extends AbstractBehavior
    private double valveRadius;
    private boolean recievedNewValveLocation = false;
 
-   protected final ConcurrentListeningQueue<ValveLocationPacket> valveLocationQueue = new ConcurrentListeningQueue<ValveLocationPacket>();
+   protected final ConcurrentListeningQueue<ValveLocationPacket> valveLocationQueue = new ConcurrentListeningQueue<ValveLocationPacket>(10);
 
    public SearchForValveBehavior(CommunicationBridge behaviorCommunicationBridge)
    {

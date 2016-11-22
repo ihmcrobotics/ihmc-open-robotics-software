@@ -504,8 +504,12 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          if (vectorLength > 0.0)
          {
             tempVector.normalize();
+            tempAxisAngle.set(tempVector.getX(), tempVector.getY(), tempVector.getZ(), vectorLength);
          }
-         tempAxisAngle.set(tempVector.getX(), tempVector.getY(), tempVector.getZ(), vectorLength);
+         else
+         {
+            tempAxisAngle.set(1.0, 0.0, 0.0, 0.0);
+         }
          tempCurrentOrientation.setIncludingFrame(interpolationFrame, tempAxisAngle);
 
          tempCurrentOrientation.changeFrame(trajectoryFrame);
@@ -524,8 +528,12 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          if (vectorLength > 0.0)
          {
             tempVector.normalize();
+            tempAxisAngle.set(tempVector.getX(), tempVector.getY(), tempVector.getZ(), vectorLength);
          }
-         tempAxisAngle.set(tempVector.getX(), tempVector.getY(), tempVector.getZ(), vectorLength);
+         else
+         {
+            tempAxisAngle.set(1.0, 0.0, 0.0, 0.0);
+         }
          tempCurrentOrientation.setIncludingFrame(interpolationFrame, tempAxisAngle);
          tempCurrentOrientation.changeFrame(worldFrame);
          tempCurrentOrientation.getQuaternion(quatFD3);

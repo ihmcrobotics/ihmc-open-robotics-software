@@ -300,14 +300,20 @@ public class WalkingMessageHandler
       updateVisualization();
    }
 
+   private final Point3d desiredFootPositionInWorld = new Point3d();
+   private final Quat4d desiredFootOrientationInWorld = new Quat4d();
    private final Point3d actualFootPositionInWorld = new Point3d();
    private final Quat4d actualFootOrientationInWorld = new Quat4d();
    private final TextToSpeechPacket reusableSpeechPacket = new TextToSpeechPacket();
    private final WalkingControllerFailureStatusMessage failureStatusMessage = new WalkingControllerFailureStatusMessage();
 
-   public void reportFootstepStarted(RobotSide robotSide)
+   public void reportFootstepStarted(RobotSide robotSide, FramePose desiredFootPoseInWorld, FramePose actualFootPoseInWorld)
    {
-      statusOutputManager.reportStatusMessage(new FootstepStatus(FootstepStatus.Status.STARTED, currentFootstepIndex.getIntegerValue()));
+      desiredFootPoseInWorld.getPose(desiredFootPositionInWorld, desiredFootOrientationInWorld);
+      actualFootPoseInWorld.getPose(actualFootPositionInWorld, actualFootOrientationInWorld);
+      statusOutputManager.reportStatusMessage(new FootstepStatus(FootstepStatus.Status.STARTED, currentFootstepIndex.getIntegerValue(),
+            desiredFootPositionInWorld, desiredFootOrientationInWorld,
+            actualFootPositionInWorld, actualFootOrientationInWorld, robotSide));
    }
 
    public void reportFootstepCompleted(RobotSide robotSide, FramePose actualFootPoseInWorld)

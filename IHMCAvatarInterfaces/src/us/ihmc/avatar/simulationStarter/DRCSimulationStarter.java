@@ -59,7 +59,7 @@ import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-public class DRCSimulationStarter implements AbstractSimulationStarter
+public class DRCSimulationStarter implements SimulationStarterInterface
 {
    private static final boolean DEBUG = false;
 
@@ -135,7 +135,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       this.contactPointParameters = robotModel.getContactPointParameters();
    }
 
-   @Override
    public CommonAvatarEnvironmentInterface getEnvironment()
    {
       return environment;
@@ -145,7 +144,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
     * Deativate the controller failure detector.
     * If called the walking controller will running even if the robot falls.
     */
-   @Override
    public void deactivateWalkingFallDetector()
    {
       deactivateWalkingFallDetector = true;
@@ -157,7 +155,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
     * The active controller can then be switched by either changing the variable {@code requestedHighLevelState} from SCS or by sending a {@link HighLevelStateMessage} to the controller.
     * @param controllerFactory a factory to create an additional controller.
     */
-   @Override
    public void registerHighLevelController(HighLevelBehaviorFactory controllerFactory)
    {
       this.highLevelBehaviorFactories.add(controllerFactory);
@@ -166,13 +163,11 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    /**
     * Call this method to disable simulated sensors such as LIDAR and camera.
     */
-   @Override
    public void disableSCSSimulatedSensors()
    {
       this.createSCSSimulatedSensors = false;
    }
 
-   @Override
    public void attachControllerFailureListener(ControllerFailureListener listener)
    {
       if (controllerFactory == null)
@@ -186,7 +181,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
     * Need to set to false if you want the simulation to be rewindable.
     * @param runMultiThreaded
     */
-   @Override
    public void setRunMultiThreaded(boolean runMultiThreaded)
    {
       scsInitialSetup.setRunMultiThreaded(runMultiThreaded);
@@ -202,7 +196,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
     * By default the state estimator is used.
     * @param usePerfectSensors
     */
-   @Override
    public void setUsePerfectSensors(boolean usePerfectSensors)
    {
       scsInitialSetup.setUsePerfectSensors(usePerfectSensors);
@@ -212,7 +205,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
     * Indicates if the state estimator should be aware of the robot starting location.
     * It is set to false by default, meaning that independently from the robot starting location, the state estimator will think that the robot started at (0, 0) in world but will be aware of the initial yaw.
     */
-   @Override
    public void setInitializeEstimatorToActual(boolean initializeEstimatorToActual)
    {
       scsInitialSetup.setInitializeEstimatorToActual(initializeEstimatorToActual);
@@ -222,7 +214,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
     * Provide a subscriber for receiving pelvis poses (for instance from the iterative closest point module) to be accounted for in the state estimator.
     * @param externalPelvisCorrectorSubscriber
     */
-   @Override
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
    {
       if (avatarSimulation != null)
@@ -234,7 +225,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    /**
     * Set a GUI initial setup. If not called, a default GUI initial setup is used.
     */
-   @Override
    public void setGuiInitialSetup(DRCGuiInitialSetup guiInitialSetup)
    {
       this.guiInitialSetup = guiInitialSetup;
@@ -244,7 +234,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
     * Set a robot initial setup to use instead of the one in DRCRobotModel.
     * @param robotInitialSetup
     */
-   @Override
    public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       this.robotInitialSetup = robotInitialSetup;
@@ -253,7 +242,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    /**
     * Set a specific starting location. By default, the robot will start at (0, 0) in world with no yaw.
     */
-   @Override
    public void setStartingLocation(DRCStartingLocation startingLocation)
    {
       setStartingLocationOffset(startingLocation.getStartingLocationOffset());
@@ -262,7 +250,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    /**
     * Set a specific starting location offset. By default, the robot will start at (0, 0) in world with no yaw.
     */
-   @Override
    public void setStartingLocationOffset(OffsetAndYawRobotInitialSetup startingLocationOffset)
    {
       robotInitialSetup.setInitialYaw(startingLocationOffset.getYaw());
@@ -273,7 +260,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
    /**
     * Set a specific starting location offset. By default, the robot will start at (0, 0) in world with no yaw.
     */
-   @Override
    public void setStartingLocationOffset(Vector3d robotInitialPosition, double yaw)
    {
       setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(robotInitialPosition, yaw));
@@ -285,7 +271,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
     * @param positionY
     * @param positionZ
     */
-   @Override
    public void setSCSCameraPosition(double positionX, double positionY, double positionZ)
    {
       scsCameraPosition.set(positionX, positionY, positionZ);
@@ -297,7 +282,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
     * @param fixY
     * @param fixZ
     */
-   @Override
    public void setSCSCameraFix(double fixX, double fixY, double fixZ)
    {
       scsCameraFix.set(fixX, fixY, fixZ);
@@ -445,7 +429,6 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       return controllerCommands;
    }
 
-   @Override
    public LocalObjectCommunicator createSimulatedSensorsPacketCommunicator()
    {
       scsSensorOutputPacketCommunicator = new LocalObjectCommunicator();
@@ -505,31 +488,26 @@ public class DRCSimulationStarter implements AbstractSimulationStarter
       networkProcessor = new DRCNetworkProcessor(robotModel, networkModuleParams);
    }
 
-   @Override
    public AvatarSimulation getAvatarSimulation()
    {
       return avatarSimulation;
    }
 
-   @Override
    public SimulationConstructionSet getSimulationConstructionSet()
    {
       return simulationConstructionSet;
    }
 
-   @Override
    public HumanoidFloatingRootJointRobot getSDFRobot()
    {
       return sdfRobot;
    }
 
-   @Override
    public PacketRouter<PacketDestination> getPacketRouter()
    {
       return networkProcessor.getPacketRouter();
    }
 
-   @Override
    public LocalObjectCommunicator getSimulatedSensorsPacketCommunicator()
    {
       if(scsSensorOutputPacketCommunicator == null)

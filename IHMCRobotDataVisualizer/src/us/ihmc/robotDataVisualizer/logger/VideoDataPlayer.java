@@ -21,7 +21,7 @@ import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotDataLogger.logger.converters.VideoConverter;
-import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
+import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
 
 public class VideoDataPlayer
 {
@@ -211,7 +211,7 @@ public class VideoDataPlayer
       }
    }
 
-   public void exportVideo(File selectedFile, long startTimestamp, long endTimestamp, CustomProgressMonitor monitor)
+   public void exportVideo(File selectedFile, long startTimestamp, long endTimestamp, ProgressMonitorInterface monitor)
    {
 
       long startVideoTimestamp = getVideoTimestamp(startTimestamp);
@@ -229,7 +229,7 @@ public class VideoDataPlayer
       
    }
 
-   public void cropVideo(File outputFile, File timestampFile, long startTimestamp, long endTimestamp, CustomProgressMonitor monitor) throws IOException
+   public void cropVideo(File outputFile, File timestampFile, long startTimestamp, long endTimestamp, ProgressMonitorInterface monitor) throws IOException
    {
 
 

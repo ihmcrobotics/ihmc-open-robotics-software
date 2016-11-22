@@ -1,14 +1,17 @@
 package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 
-import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 public abstract class BehaviorService
 {
-   private final AbstractBehavior behaviorInterface;
+   private final CommunicationBridgeInterface communicationBridge;
+   private final YoVariableRegistry registry;
    
-   public BehaviorService(AbstractBehavior behaviorInterface)
+   public BehaviorService(String name, CommunicationBridgeInterface communicationBridge)
    {
-      this.behaviorInterface = behaviorInterface;
+      this.communicationBridge = communicationBridge;
+      registry = new YoVariableRegistry(name);
    }
    
    public abstract void initialize();
@@ -19,8 +22,13 @@ public abstract class BehaviorService
    
    public abstract void resume();
    
-   protected AbstractBehavior getBehaviorInterface()
+   protected CommunicationBridgeInterface getCommunicationBridge()
    {
-      return behaviorInterface;
+      return communicationBridge;
+   }
+   
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
    }
 }

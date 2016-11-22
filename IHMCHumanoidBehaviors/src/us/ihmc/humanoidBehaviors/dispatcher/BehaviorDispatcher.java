@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -133,6 +134,11 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
                   behaviorStateToAdd);
          }
       }
+   }
+   
+   public void addBehaviorService(BehaviorService behaviorService)
+   {
+      registry.addChild(behaviorService.getYoVariableRegistry());
    }
 
    private void initialize()

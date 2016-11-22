@@ -50,7 +50,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
 
    private final float BALL_RADIUS = 0.0762f;
 
-   protected final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>();
+   protected final ConcurrentListeningQueue<PointCloudWorldPacket> pointCloudQueue = new ConcurrentListeningQueue<PointCloudWorldPacket>(100);
 
    private final HumanoidReferenceFrames humanoidReferenceFrames;
 
@@ -127,7 +127,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
          ballY.set(0);
          ballZ.set(0);
       }
-      
+
       PointCloudWorldPacket pointCloudWorldPacket = new PointCloudWorldPacket();
       pointCloudWorldPacket.setDestination(PacketDestination.UI);
       pointCloudWorldPacket.setTimestamp(System.nanoTime());
@@ -140,7 +140,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       Point3d[] groundQuadTree = new Point3d[1];
       groundQuadTree[0] = new Point3d();
       pointCloudWorldPacket.setGroundQuadTreeSupport(groundQuadTree);
-      
+
       sendPacket(pointCloudWorldPacket);
    }
 
@@ -252,7 +252,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       ballFound.set(false);
    }
 
-  
+
 
    @Override
    public void initialize()

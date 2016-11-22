@@ -16,6 +16,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 public class PolygonWiggler
 {
    private static final boolean DEBUG = false;
+   private static final boolean coldStart = false;
 
    /**
     * Returns a transform that will move the given polygon into a planar region. Problematic if the planar region consists of
@@ -23,8 +24,7 @@ public class PolygonWiggler
     *
     * @param polygonToWiggleInRegionFrame
     * @param regionToWiggleInto
-    * @param maxYaw
-    * @param minYaw
+    * @param wiggleParameters
     * @return
     */
    public static RigidBodyTransform wigglePolygonIntoRegion(ConvexPolygon2d polygonToWiggleInRegionFrame, PlanarRegion regionToWiggleInto, WiggleParameters parameters)
@@ -46,11 +46,7 @@ public class PolygonWiggler
       if (bestMatch == null)
          return null;
 
-      RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggleInRegionFrame, bestMatch, parameters);
-      if (wiggleTransform == null || wiggleTransform.containsNaN())
-         return null;
-
-      return wiggleTransform;
+      return findWiggleTransform(polygonToWiggleInRegionFrame, bestMatch, parameters);
    }
 
    /**
@@ -60,15 +56,14 @@ public class PolygonWiggler
     *
     * @param polygonToWiggle
     * @param planeToWiggleInto
-    * @param maxYaw
-    * @param minYaw
+    * @param wiggleParameters
     * @return
     */
    public static ConvexPolygon2d wigglePolygon(ConvexPolygon2d polygonToWiggle, ConvexPolygon2d planeToWiggleInto, WiggleParameters parameters)
    {
       ConvexPolygon2d wiggledPolygon = new ConvexPolygon2d(polygonToWiggle);
       RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters);
-      if (wiggleTransform == null || wiggleTransform.containsNaN())
+      if (wiggleTransform == null)
          return null;
       wiggledPolygon.applyTransformAndProjectToXYPlane(wiggleTransform);
       return wiggledPolygon;
@@ -80,8 +75,7 @@ public class PolygonWiggler
     *
     * @param polygonToWiggle
     * @param planeToWiggleInto
-    * @param maxYaw
-    * @param minYaw
+    * @param wiggleParameters
     * @return
     */
    public static RigidBodyTransform findWiggleTransform(ConvexPolygon2d polygonToWiggle, ConvexPolygon2d planeToWiggleInto, WiggleParameters parameters)
@@ -120,13 +114,7 @@ public class PolygonWiggler
          // inequality constraint becomes A*V * x <= b - A*p
          Point2d point = new Point2d(polygonToWiggle.getVertex(i));
          point.sub(pointToRotateAbout);
-         DenseMatrix64F V = new DenseMatrix64F(2, 3);
-         V.set(0, 0, 1.0);
-         V.set(0, 1, 0.0);
-         V.set(0, 2, -point.y);
-         V.set(1, 0, 0.0);
-         V.set(1, 1, 1.0);
-         V.set(1, 2, point.x);
+         DenseMatrix64F V = new DenseMatrix64F(new double[][] {{1.0, 0.0, -point.y}, {0.0, 1.0, point.x}});
 
          DenseMatrix64F A_new = new DenseMatrix64F(constraintsPerPoint, 3);
          DenseMatrix64F b_new = new DenseMatrix64F(constraintsPerPoint, 1);
@@ -151,7 +139,7 @@ public class PolygonWiggler
       DenseMatrix64F result = new DenseMatrix64F(3, 1);
       try
       {
-         int iterations = solver.solve(costMatrix, costVector, Aeq, beq, A_full, b_full, result, false);
+         int iterations = solver.solve(costMatrix, costVector, Aeq, beq, A_full, b_full, result, coldStart);
          if (DEBUG)
          {
             PrintTools.info("Iterations: " + iterations);
@@ -159,6 +147,11 @@ public class PolygonWiggler
          }
       }
       catch (Exception e)
+      {
+         return null;
+      }
+
+      if (Double.isInfinite(solver.getCost()))
       {
          return null;
       }

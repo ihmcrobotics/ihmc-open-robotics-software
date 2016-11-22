@@ -12,9 +12,9 @@ import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.MyFileFilter;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
+import us.ihmc.tools.gui.MyFileFilter;
 import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class LoadRobotConfigurationDialogGenerator implements LoadRobotConfigurationDialogConstructor
