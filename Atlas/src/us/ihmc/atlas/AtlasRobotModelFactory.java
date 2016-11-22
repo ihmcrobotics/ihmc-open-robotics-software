@@ -25,10 +25,15 @@ public class AtlasRobotModelFactory
          AVAILABLE_ROBOT_MODELS[version.ordinal()] = version.toString();
       }
    }
-   
+
    public static AtlasRobotModel createDefaultRobotModel()
    {
       return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ.toString(), DRCRobotModel.RobotTarget.SCS, false);
+   }
+
+   public static AtlasRobotModel createDefaultRobotModel(AtlasRobotVersion robotVersion)
+   {
+      return createDRCRobotModel(robotVersion.toString(), DRCRobotModel.RobotTarget.SCS, false);
    }
 
    public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, DRCRobotModel.RobotTarget runningOnRealRobot, boolean headless)
@@ -71,7 +76,7 @@ public class AtlasRobotModelFactory
       }
       return -1;
    }
-   
+
    public static AtlasRobotModel selectModelFromGraphicSelector()
    {
       return selectModelFromGraphicSelector(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, DRCRobotModel.RobotTarget.SCS, false));

@@ -6,8 +6,11 @@ import javax.vecmath.Point2f;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
 
+import us.ihmc.robotics.geometry.PlanarRegion;
+
 public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
 {
+   public int regionId = PlanarRegion.NO_REGION_ID;
    public Point3f regionOrigin;
    public Vector3f regionNormal;
    public List<Point2f[]> convexPolygonsVertices;
@@ -21,6 +24,16 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
       this.regionOrigin = regionOrigin;
       this.regionNormal = regionNormal;
       this.convexPolygonsVertices = convexPolygonsVertices;
+   }
+
+   public void setRegionId(int regionId)
+   {
+      this.regionId = regionId;
+   }
+
+   public int getRegionId()
+   {
+      return regionId;
    }
 
    public Point3f getRegionOrigin()
@@ -41,6 +54,8 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
    @Override
    public boolean epsilonEquals(PlanarRegionMessage other, double epsilon)
    {
+      if (regionId != other.regionId)
+         return false;
       if (!regionOrigin.epsilonEquals(other.regionOrigin, (float) epsilon))
          return false;
       if (!regionNormal.epsilonEquals(other.regionNormal, (float) epsilon))
