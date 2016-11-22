@@ -26,7 +26,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class FootstepListBehavior extends AbstractBehavior
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private FootstepDataListMessage outgoingFootstepDataList;
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
