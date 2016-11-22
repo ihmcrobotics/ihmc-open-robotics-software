@@ -95,8 +95,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
       this.referenceFrames = referenceFrames;
 
       this.fiducialDetectorBehaviorService = fiducialDetectorBehaviorService;
-      fiducialDetectorBehaviorService.setLocationEnabled(true);
       fiducialDetectorBehaviorService.setTargetIDToLocate(this.fiducialToTrack);
+      addBehaviorService(fiducialDetectorBehaviorService);
 
       headPitchToFindFucdicial.set(1.0);
 
@@ -460,34 +460,6 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
       footstepDataListMessage.setExecutionMode(ExecutionMode.OVERRIDE);
       return footstepDataListMessage;
-   }
-
-   @Override
-   public void initialize()
-   {
-      super.initialize();
-      fiducialDetectorBehaviorService.initialize();
-   }
-
-   @Override
-   public void pause()
-   {
-      super.pause();
-      fiducialDetectorBehaviorService.pause();
-   }
-
-   @Override
-   public void abort()
-   {
-      super.abort();
-      fiducialDetectorBehaviorService.stop();
-   }
-
-   @Override
-   public void resume()
-   {
-      super.resume();
-      fiducialDetectorBehaviorService.resume();
    }
 
    @Override

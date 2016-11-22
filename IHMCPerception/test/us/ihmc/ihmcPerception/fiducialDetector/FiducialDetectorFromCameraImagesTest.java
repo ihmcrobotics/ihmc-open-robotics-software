@@ -104,7 +104,7 @@ public class FiducialDetectorFromCameraImagesTest
             //            System.out.println("intrinsicParameters.radial[0] = " + intrinsicParameters.radial[0]);
             //            System.out.println("intrinsicParameters.radial[1] = " + intrinsicParameters.radial[1]);
 
-            detector.setNewVideoPacket(bufferedImage, cameraPositionInWorld, cameraOrientationInWorldXForward);
+            detector.detect(bufferedImage, cameraPositionInWorld, cameraOrientationInWorldXForward);
          }
 
          @Override
