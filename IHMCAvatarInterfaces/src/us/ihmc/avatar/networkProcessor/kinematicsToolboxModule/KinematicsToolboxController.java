@@ -471,6 +471,10 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
          handSelectionMatrices.put(robotSide, CommonOps.identity(6));
       }
 
+      desiredChestOrientationReference.set(null);
+
+      desiredPelvisOrientationReference.set(null);
+
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.getAndSet(null);
       if (robotConfigurationData == null)
          return false;
@@ -494,10 +498,6 @@ public class KinematicsToolboxController extends ToolboxController<KinematicsToo
       FramePoint2d initialCoMXY = new FramePoint2d(referenceFrames.getCenterOfMassFrame());
       initialCoMXY.changeFrameAndProjectToXYPlane(referenceFrames.getMidFeetZUpFrame());
       desiredCenterOfMassXYReference.set(initialCoMXY);
-
-      desiredChestOrientationReference.set(null);
-
-      desiredPelvisOrientationReference.set(null);
 
       for (RobotSide robotSide : RobotSide.values)
       {
