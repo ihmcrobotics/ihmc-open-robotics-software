@@ -141,11 +141,13 @@ public class SwingState extends AbstractUnconstrainedState
             finalConfigurationProvider, touchdownVelocityProvider, touchdownAccelerationProvider, swingTimeProvider, registry);
 
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
-      double maxSwingHeightFromStanceFoot;
+      double maxSwingHeightFromStanceFoot = 0.0;
+      double minSwingHeightFromStanceFoot = 0.0;
       if (walkingControllerParameters != null)
+      {
          maxSwingHeightFromStanceFoot = walkingControllerParameters.getMaxSwingHeightFromStanceFoot();
-      else
-         maxSwingHeightFromStanceFoot = 0.0;
+         minSwingHeightFromStanceFoot = walkingControllerParameters.getMinSwingHeightFromStanceFoot();
+      }
 
       this.touchdownVelocityProvider = touchdownVelocityProvider;
 
@@ -155,7 +157,7 @@ public class SwingState extends AbstractUnconstrainedState
       useNewSwingTrajectoyOptimization = walkingControllerParameters.useSwingTrajectoryOptimizer();
       if (useNewSwingTrajectoyOptimization)
       {
-         swingTrajectoryGeneratorNew = new TwoWaypointSwingGenerator(namePrefix + "SwingNew", maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
+         swingTrajectoryGeneratorNew = new TwoWaypointSwingGenerator(namePrefix + "SwingNew", minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
          swingTrajectoryGenerator = null;
 
          positionTrajectoryGenerators.add(swingTrajectoryGeneratorNew);
