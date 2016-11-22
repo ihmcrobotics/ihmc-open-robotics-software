@@ -450,7 +450,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          FramePoint tempPoint = new FramePoint(hand.getParentJoint().getFrameAfterJoint());
          tempPoint.changeFrame(armJoints[1].getFrameAfterJoint());
          FrameVector tempVector = new FrameVector(tempPoint);
-         MathTools.roundToGivenPrecision(tempVector.getVector(), 1.0e-2);
+         MathTools.floorToGivenPrecision(tempVector.getVector(), 1.0e-2);
          tempVector.normalize();
 
          Vector3d expectedArmZeroConfiguration = new Vector3d(0.0, robotSide.negateIfRightSide(1.0), 0.0);

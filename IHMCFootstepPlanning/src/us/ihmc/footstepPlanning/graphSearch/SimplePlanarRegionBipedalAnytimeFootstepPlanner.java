@@ -7,14 +7,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.*;
 
 public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegionBipedalFootstepPlanner implements AnytimeFootstepPlanner
 {
    private final Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
    private BipedalFootstepPlannerNode closestNodeToGoal = null;
    private boolean stopRequested = false;
+   private final HashMap<Integer, List<BipedalFootstepPlannerNode>> mapToAllExploredNodes = new HashMap<>();
 
    /**
     * @return The FootstepPlan that ends the closest to the goal of all explored yet
@@ -59,7 +59,11 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          if (!goodFootstep)
             continue;
 
-         setNodesCostToGoalAndRememberIfClosestYet(nodeToExpand);
+         boolean nearbyNodeAlreadyExists = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
+         if (nearbyNodeAlreadyExists)
+            continue;
+
+         setNodesCostsAndRememberIfClosestYet(nodeToExpand);
          notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
 
          if (nodeToExpand.isAtGoal())
@@ -88,12 +92,25 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       return FootstepPlanningResult.NO_PATH_EXISTS;
    }
 
-   private synchronized void setNodesCostToGoalAndRememberIfClosestYet(BipedalFootstepPlannerNode nodeToSetCostOf)
+   private synchronized void setNodesCostsAndRememberIfClosestYet(BipedalFootstepPlannerNode nodeToSetCostOf)
    {
       Point3d currentPosition = nodeToSetCostOf.getSolePosition();
       Point3d goalPosition = goalPositions.get(nodeToSetCostOf.getRobotSide());
       Vector3d currentToGoalVector = new Vector3d();
       currentToGoalVector.sub(goalPosition, currentPosition);
+
+      double costFromParent = 1.0;
+      double costToHereFromStart;
+      if(nodeToSetCostOf.getParentNode() == null)
+      {
+         costToHereFromStart = 0.0;
+      }
+      else
+      {
+         costToHereFromStart = nodeToSetCostOf.getParentNode().getCostToHereFromStart() + costFromParent;
+      }
+      nodeToSetCostOf.setCostFromParent(costFromParent);
+      nodeToSetCostOf.setCostToHereFromStart(costToHereFromStart);
 
       double euclideanDistanceToGoal = currentToGoalVector.length();
       nodeToSetCostOf.setEstimatedCostToGoal(euclideanDistanceToGoal);
@@ -101,6 +118,36 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       if(closestNodeToGoal == null || euclideanDistanceToGoal < closestNodeToGoal.getEstimatedCostToGoal())
       {
          closestNodeToGoal = nodeToSetCostOf;
+      }
+   }
+
+   private boolean checkIfNearbyNodeAlreadyExistsAndStoreIfNot(BipedalFootstepPlannerNode nodeToExpand)
+   {
+      int hashCode = nodeToExpand.hashCode();
+      boolean containsHashCode = mapToAllExploredNodes.containsKey(hashCode);
+      if(!containsHashCode)
+      {
+         List<BipedalFootstepPlannerNode> nodesWithThisHash = new ArrayList<>();
+         nodesWithThisHash.add(nodeToExpand);
+         mapToAllExploredNodes.put(hashCode, nodesWithThisHash);
+
+         return false;
+      }
+      else
+      {
+         List<BipedalFootstepPlannerNode> nodesWithThisHash = mapToAllExploredNodes.get(hashCode);
+
+         for(int i = 0; i < nodesWithThisHash.size(); i++)
+         {
+            BipedalFootstepPlannerNode nodeWithSameHash = nodesWithThisHash.get(i);
+
+            if(nodeToExpand.equals(nodeWithSameHash))
+            {
+               return true;
+            }
+         }
+
+         return false;
       }
    }
 
