@@ -88,7 +88,6 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       this.planner = createFootstepPlanner();
       this.fiducialDetectorBehaviorService = fiducialDetectorBehaviorService;
       this.fiducialToTrack = fiducialToTrack;
-      fiducialDetectorBehaviorService.setLocationEnabled(true);
       fiducialDetectorBehaviorService.setTargetIDToLocate(this.fiducialToTrack);
 
       footstepPlannerGoal = new FootstepPlannerGoal();

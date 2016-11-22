@@ -1,16 +1,15 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
-import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.GlobalObjectConsumer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -31,13 +30,9 @@ public abstract class AbstractBehavior implements RobotController
       INITIALIZED, PAUSED, ABORTED, DONE, FINALIZED
    }
    
-
    protected final CommunicationBridge communicationBridge;
-   
-  
-
    protected final String behaviorName;
-   
+
    /**
     * Every variable that can be a {@link YoVariable} should be a {@link YoVariable}, so they can be visualized in SCS.
     */
@@ -48,6 +43,8 @@ public abstract class AbstractBehavior implements RobotController
    protected final BooleanYoVariable isPaused;
    protected final BooleanYoVariable isAborted;
    protected final DoubleYoVariable percentCompleted;
+   
+   private final List<BehaviorService> behaviorsServices;
 
    public AbstractBehavior(CommunicationBridgeInterface communicationBridge)
    {
@@ -66,6 +63,8 @@ public abstract class AbstractBehavior implements RobotController
       isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
       isAborted = new BooleanYoVariable("isAborted" + behaviorName, registry);
       percentCompleted = new DoubleYoVariable("percentCompleted", registry);
+      
+      behaviorsServices = new ArrayList<>();
    }
 
    public CoactiveElement getCoactiveElement()
@@ -99,14 +98,16 @@ public abstract class AbstractBehavior implements RobotController
    {
       communicationBridge.sendPacket(obj);
    }
+   
    public void sendPacketToUI(Packet<?> obj)
    {
       communicationBridge.sendPacketToUI(obj);
    }
    
-   
-   
-   
+   public void addBehaviorService(BehaviorService behaviorService)
+   {
+      behaviorsServices.add(behaviorService);
+   }
 
    @Override
    public YoVariableRegistry getYoVariableRegistry()
@@ -135,6 +136,11 @@ public abstract class AbstractBehavior implements RobotController
       isPaused.set(false);
       TextToSpeechPacket p1 = new TextToSpeechPacket("Aborting Behavior");
       sendPacket(p1);
+      
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.pause();
+      }
    }
 
 
@@ -147,6 +153,11 @@ public abstract class AbstractBehavior implements RobotController
       TextToSpeechPacket p1 = new TextToSpeechPacket("Pausing Behavior");
       sendPacket(p1);
       isPaused.set(true);
+      
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.pause();
+      }
    }
 
    /**
@@ -157,7 +168,12 @@ public abstract class AbstractBehavior implements RobotController
    {
       TextToSpeechPacket p1 = new TextToSpeechPacket("Resuming Behavior");
       sendPacket(p1);
-      isPaused.set(false);      
+      isPaused.set(false);
+      
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.run();
+      }
    }
 
    
@@ -194,13 +210,14 @@ public abstract class AbstractBehavior implements RobotController
    {
       isPaused.set(false);
       isAborted.set(false);
+      
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.run();
+      }
    }
    public CommunicationBridge getCommunicationBridge()
    {
       return communicationBridge;
    }
-   
-   
-   
- 
 }
