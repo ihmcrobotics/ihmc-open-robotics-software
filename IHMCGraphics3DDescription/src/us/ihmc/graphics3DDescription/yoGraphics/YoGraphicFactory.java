@@ -112,7 +112,7 @@ public class YoGraphicFactory
       }
       case PLANAR_REGIONS_LIST_DGO:
       {
-         return new YoGraphicPlanarRegionsList(name, vars, consts, appearance);
+         return YoGraphicPlanarRegionsList.createAsRemoteYoGraphic(name, vars, consts);
       }
 
       default:
