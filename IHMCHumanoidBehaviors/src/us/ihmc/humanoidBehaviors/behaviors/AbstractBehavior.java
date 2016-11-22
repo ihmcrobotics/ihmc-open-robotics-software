@@ -29,15 +29,18 @@ public abstract class AbstractBehavior implements RobotController
    {
       INITIALIZED, PAUSED, ABORTED, DONE, FINALIZED
    }
-   
+
    protected final CommunicationBridge communicationBridge;
+
+   protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
+
    protected final String behaviorName;
 
    /**
     * Every variable that can be a {@link YoVariable} should be a {@link YoVariable}, so they can be visualized in SCS.
     */
    protected final YoVariableRegistry registry;
-   
+
    protected final EnumYoVariable<BehaviorStatus> yoBehaviorStatus;
    protected final BooleanYoVariable hasBeenInitialized;
    protected final BooleanYoVariable isPaused;
@@ -53,11 +56,11 @@ public abstract class AbstractBehavior implements RobotController
 
    public AbstractBehavior(String namePrefix, CommunicationBridgeInterface communicationBridge)
    {
-      this.communicationBridge = (CommunicationBridge)communicationBridge;
-      
+      this.communicationBridge = (CommunicationBridge) communicationBridge;
+
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
       registry = new YoVariableRegistry(behaviorName);
-      
+
       yoBehaviorStatus = new EnumYoVariable<AbstractBehavior.BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
       hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
       isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
@@ -72,11 +75,6 @@ public abstract class AbstractBehavior implements RobotController
       return null;
    }
 
-   public void attachNetworkListeningQueue(ConcurrentListeningQueue<?> queue, Class<?> key)
-   {
-      communicationBridge.attachNetworkListeningQueue(queue, key);
-   }
-   
    public void sendPacketToController(Packet<?> obj)
    {
       communicationBridge.sendPacketToController(obj);
@@ -86,7 +84,6 @@ public abstract class AbstractBehavior implements RobotController
    {
       communicationBridge.sendPacket(obj);
    }
-   
    public void sendPacketToUI(Packet<?> obj)
    {
       communicationBridge.sendPacketToUI(obj);
@@ -131,7 +128,6 @@ public abstract class AbstractBehavior implements RobotController
       }
    }
 
-
    /**
     * The implementation of this method should result in pausing the behavior (pause current action and no more actions sent to the controller, the robot remains still).
     * The behavior should be resumable.
@@ -164,12 +160,11 @@ public abstract class AbstractBehavior implements RobotController
       }
    }
 
-   
    public BehaviorStatus getBehaviorStatus()
    {
       return yoBehaviorStatus.getEnumValue();
    }
-   
+
    /**
     * Only method to check if the behavior is done.
     * @return
@@ -188,8 +183,9 @@ public abstract class AbstractBehavior implements RobotController
       {
          behaviorService.pause();
       }
+      removeAllLocalListenersFromCommunicationBridge();
    }
-   
+
    protected boolean isPaused()
    {
       return isPaused.getBooleanValue() || isAborted.getBooleanValue();
@@ -208,7 +204,42 @@ public abstract class AbstractBehavior implements RobotController
       {
          behaviorService.run();
       }
+
+      addAllLocalListenersToCommunicationBridge();
+
    }
+
+   private void addAllLocalListenersToCommunicationBridge()
+   {
+      for (Class<?> key : localListeningNetworkQueues.keySet())
+      {
+         for (ConcurrentListeningQueue queue : localListeningNetworkQueues.get(key))
+         {
+            communicationBridge.attachNetworkListeningQueue(queue, key);
+         }
+      }
+   }
+
+   private void removeAllLocalListenersFromCommunicationBridge()
+   {
+      for (Class<?> key : localListeningNetworkQueues.keySet())
+      {
+         for (ConcurrentListeningQueue queue : localListeningNetworkQueues.get(key))
+         {
+            communicationBridge.detachNetworkListeningQueue(queue, key);
+         }
+      }
+   }
+
+   public void attachNetworkListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
+   {
+      if (!localListeningNetworkQueues.containsKey(key))
+      {
+         localListeningNetworkQueues.put(key, new ArrayList<ConcurrentListeningQueue>());
+      }
+      localListeningNetworkQueues.get(key).add(queue);
+   }
+
    public CommunicationBridge getCommunicationBridge()
    {
       return communicationBridge;

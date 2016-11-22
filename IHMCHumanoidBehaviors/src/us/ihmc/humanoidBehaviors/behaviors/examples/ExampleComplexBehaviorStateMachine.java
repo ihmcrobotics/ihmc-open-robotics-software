@@ -86,7 +86,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    {
       TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Example Behavior");
       sendPacket(p1);
-      statemachine.setCurrentState(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE);
+      super.initialize();
    }
 
    private void setupStateMachine()
@@ -211,10 +211,15 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       statemachine.addStateWithDoneTransition(getVideo, ExampleStates.WHOLEBODY_EXAMPLE);
       statemachine.addStateWithDoneTransition(wholeBodyExample, ExampleStates.GET_USER_VALIDATION);
       statemachine.addState(getUserValidation);
-
-      //this state has no transitions
-
+      
+      
       //set the starting state
+
+      statemachine.setStartState(ExampleStates.SETUP_ROBOT_PARALLEL_STATEMACHINE_EXAMPLE);
+
+
+
+
    }
 
    @Override
