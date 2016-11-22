@@ -226,7 +226,7 @@ public class JointPrivilegedConfigurationHandler
                if (!jointsWithConfiguration.contains(configuredJoint))
                   jointsWithConfiguration.add(configuredJoint);
                else
-                  PrintTools.warn(this, "Overwriting privileged configuration for joint " + configuredJoint.getName() + ".");
+                  PrintTools.warn(this, "Overwriting privileged configuration angle for joint " + configuredJoint.getName() + ".");
             }
 
             if (command.hasNewPrivilegedConfigurationOption(j))
@@ -234,12 +234,11 @@ public class JointPrivilegedConfigurationHandler
                OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
                PrivilegedConfigurationOption option = command.getPrivilegedConfigurationOption(j);
                setPrivilegedConfigurationFromOption(option, jointIndex);
-               jointsWithConfiguration.add(configuredJoint);
 
                if (!jointsWithConfiguration.contains(configuredJoint))
                   jointsWithConfiguration.add(configuredJoint);
                else
-                  PrintTools.warn(this, "Overwriting privileged configuration for joint " + configuredJoint.getName() + ".");
+                  PrintTools.warn(this, "Overwriting privileged configuration option for joint " + configuredJoint.getName() + ".");
             }
          }
 
