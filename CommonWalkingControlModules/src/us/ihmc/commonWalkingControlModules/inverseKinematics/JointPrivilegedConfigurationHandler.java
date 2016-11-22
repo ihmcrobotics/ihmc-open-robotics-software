@@ -19,6 +19,9 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
+/**
+ * This class computes the input for the optimization based on the desired privileged configuration commands.
+ */
 public class JointPrivilegedConfigurationHandler
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -98,12 +101,19 @@ public class JointPrivilegedConfigurationHandler
       parentRegistry.addChild(registry);
    }
 
+   /**
+    * Clears the information on the kinematic chains. These are used to compute the necessary Jacobians to project into the null space.
+    */
    public void reset()
    {
       chainBases.clear();
       chainEndEffectors.clear();
    }
 
+   /**
+    * Computes the desired joint velocity to be submitted to the inverse kinematics control core to achieve the desired privileged configuration.
+    * Uses a simple proportional controller with saturation limits based on the position error.
+    */
    public void computePrivilegedJointVelocities()
    {
       for (int i = 0; i < numberOfDoFs; i++)
@@ -116,6 +126,10 @@ public class JointPrivilegedConfigurationHandler
       }
    }
 
+   /**
+    * Computes the desired joint accelerations to be submitted to the inverse dynamics control core to achieve the desired privileged configuration.
+    * Uses a simple PD controller with saturation limits based on the position error.
+    */
    public void computePrivilegedJointAccelerations()
    {
       for (int i = 0; i < numberOfDoFs; i++)
@@ -212,16 +226,26 @@ public class JointPrivilegedConfigurationHandler
       return isJointPrivilegedConfigurationEnabled.getBooleanValue();
    }
 
+   /**
+    * @return matrix of privileged joint velocities to be submitted to the inverse kinematics controller core.
+    */
    public DenseMatrix64F getPrivilegedJointVelocities()
    {
       return privilegedVelocities;
    }
 
+   /**
+    * @return matrix of privileged joint accelerations to be submitted ot the inverse dynamics controller core.
+    */
    public DenseMatrix64F getPrivilegedJointAccelerations()
    {
       return privilegedAccelerations;
    }
 
+   /**
+    * @param joint one DoF joint in question
+    * @return desired privileged joint acceleration
+    */
    public double getPrivilegedJointAcceleration(OneDoFJoint joint)
    {
       return privilegedAccelerations.get(jointIndices.get(joint).intValue(), 0);
@@ -232,26 +256,47 @@ public class JointPrivilegedConfigurationHandler
       return selectionMatrix;
    }
 
+   /**
+    * @return one DoF joints to be considered by for the privileged configuration command.
+    */
    public OneDoFJoint[] getJoints()
    {
       return oneDoFJoints;
    }
 
+   /**
+    * This weight is the respective priority placed on the privileged command in the optimization.
+    * @return weight for the privileged command in the optimization.
+    */
    public double getWeight()
    {
       return weight.getDoubleValue();
    }
 
+   /**
+    * Returns the number of kinematic chains that contain privileged configurations.
+    * @return number of kinematic chains
+    */
    public int getNumberOfChains()
    {
       return chainBases.size();
    }
 
+   /**
+    * Returns the base of the current kinematic chain to compute the Jacobian.
+    * @param chainIndex the current chain number
+    * @return base body of the current kinematic chain.
+    */
    public RigidBody getChainBase(int chainIndex)
    {
       return chainBases.get(chainIndex);
    }
 
+   /**
+    * Returns the end effectors of the current kinematic chain to compute the Jacobian.
+    * @param chainIndex the current chain number.
+    * @return end effector body of the current kinematic chain.
+    */
    public RigidBody getChainEndEffector(int chainIndex)
    {
       return chainEndEffectors.get(chainIndex);
