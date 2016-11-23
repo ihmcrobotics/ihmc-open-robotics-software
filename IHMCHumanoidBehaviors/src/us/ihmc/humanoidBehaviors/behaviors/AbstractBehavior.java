@@ -26,11 +26,14 @@ import us.ihmc.tools.FormattingTools;
  */
 public abstract class AbstractBehavior implements RobotController
 {
+
+   private final boolean DEBUG = false;
+
    public static enum BehaviorStatus
    {
       INITIALIZED, PAUSED, ABORTED, DONE, FINALIZED
    }
-   private final List<BehaviorService> behaviorsServices;
+
    protected final CommunicationBridge communicationBridge;
 
    protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
@@ -47,7 +50,7 @@ public abstract class AbstractBehavior implements RobotController
    protected final BooleanYoVariable isPaused;
    protected final BooleanYoVariable isAborted;
    protected final DoubleYoVariable percentCompleted;
-   
+
    private final List<BehaviorService> behaviorsServices;
 
    public AbstractBehavior(CommunicationBridgeInterface communicationBridge)
@@ -67,7 +70,7 @@ public abstract class AbstractBehavior implements RobotController
       isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
       isAborted = new BooleanYoVariable("isAborted" + behaviorName, registry);
       percentCompleted = new DoubleYoVariable("percentCompleted", registry);
-      
+
       behaviorsServices = new ArrayList<>();
    }
 
@@ -85,17 +88,12 @@ public abstract class AbstractBehavior implements RobotController
    {
       communicationBridge.sendPacket(obj);
    }
+
    public void sendPacketToUI(Packet<?> obj)
    {
       communicationBridge.sendPacketToUI(obj);
    }
-   
-   public void addBehaviorService(BehaviorService behaviorService)
-   {
-      behaviorsServices.add(behaviorService);
-   }
 
-   
    public void addBehaviorService(BehaviorService behaviorService)
    {
       behaviorsServices.add(behaviorService);
@@ -128,7 +126,7 @@ public abstract class AbstractBehavior implements RobotController
       isPaused.set(false);
       TextToSpeechPacket p1 = new TextToSpeechPacket("Aborting Behavior");
       sendPacket(p1);
-      
+
       for (BehaviorService behaviorService : behaviorsServices)
       {
          behaviorService.pause();
@@ -159,8 +157,8 @@ public abstract class AbstractBehavior implements RobotController
       TextToSpeechPacket p1 = new TextToSpeechPacket("Resuming Behavior");
       sendPacket(p1);
       isPaused.set(false);
- isPaused.set(false);
-      
+      isPaused.set(false);
+
       for (BehaviorService behaviorService : behaviorsServices)
       {
          behaviorService.run();
@@ -185,7 +183,7 @@ public abstract class AbstractBehavior implements RobotController
    {
       isPaused.set(false);
       isAborted.set(false);
-      
+
       for (BehaviorService behaviorService : behaviorsServices)
       {
          behaviorService.pause();
@@ -206,7 +204,7 @@ public abstract class AbstractBehavior implements RobotController
    {
       isPaused.set(false);
       isAborted.set(false);
-      
+
       for (BehaviorService behaviorService : behaviorsServices)
       {
          behaviorService.run();
@@ -218,10 +216,17 @@ public abstract class AbstractBehavior implements RobotController
 
    private void addAllLocalListenersToCommunicationBridge()
    {
+      if (DEBUG)
+      {
+         System.out.println("***************************************************************************");
+         System.out.println("AbstractBehavior " + behaviorName + " addAllLocalListenersToCommunicationBridge");
+      }
       for (Class<?> key : localListeningNetworkQueues.keySet())
       {
          for (ConcurrentListeningQueue queue : localListeningNetworkQueues.get(key))
          {
+            if (DEBUG)
+               System.out.println("-- adding listener for " + key);
             communicationBridge.attachNetworkListeningQueue(queue, key);
          }
       }
@@ -229,6 +234,9 @@ public abstract class AbstractBehavior implements RobotController
 
    private void removeAllLocalListenersFromCommunicationBridge()
    {
+      if (DEBUG)
+         System.out.println("--------------------------------------------------------------------------------");
+      System.out.println("AbstractBehavior " + behaviorName + " removeAllLocalListenersFromCommunicationBridge");
       for (Class<?> key : localListeningNetworkQueues.keySet())
       {
          for (ConcurrentListeningQueue queue : localListeningNetworkQueues.get(key))
@@ -252,6 +260,3 @@ public abstract class AbstractBehavior implements RobotController
       return communicationBridge;
    }
 }
-
-   
-
