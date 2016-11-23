@@ -166,15 +166,15 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       Vector3d toTheLeft;
       Vector3d toTheRight;
 
-      if(idealFootstepWidth == 0.0)
+      if(idealFootstepWidth.getDoubleValue() == 0.0)
       {
          toTheLeft = new Vector3d(0.0, 0.15, 0.0);
          toTheRight = new Vector3d(0.0, -0.15, 0.0);
       }
       else
       {
-         toTheLeft = new Vector3d(0.0, idealFootstepWidth, 0.0);
-         toTheRight = new Vector3d(0.0, - idealFootstepWidth, 0.0);
+         toTheLeft = new Vector3d(0.0, idealFootstepWidth.getDoubleValue(), 0.0);
+         toTheRight = new Vector3d(0.0, - idealFootstepWidth.getDoubleValue(), 0.0);
       }
 
       goalLeftFootPose.applyTranslation(toTheLeft);
