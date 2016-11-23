@@ -14,11 +14,11 @@ import us.ihmc.robotics.random.RandomTools;
 
 public class PlanarRegionsListExamples
 {
-   public static PlanarRegionsList generateFlatGround()
+   public static PlanarRegionsList generateFlatGround(double lengthX, double widthY)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
-      generator.addCubeReferencedAtBottomMiddle(100.0, 100.0, 0.001);
+      generator.addCubeReferencedAtBottomMiddle(lengthX, widthY, 0.001);
       PlanarRegionsList flatGround = generator.getPlanarRegionsList();
       return flatGround;
    }

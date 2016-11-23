@@ -54,6 +54,7 @@ public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
       statemachine.addStateWithDoneTransition(enableLidarTask, BasicStates.CLEAR_LIDAR);
       statemachine.addStateWithDoneTransition(clearLidarTask, BasicStates.WALK_TO_LOCATION_AND_HOME_ARM);
       statemachine.addState(walkToBallTaskAndHomeArm);
+      statemachine.setStartState(BasicStates.ENABLE_LIDAR);
 
    }
 

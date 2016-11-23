@@ -58,7 +58,7 @@ public class KinematicsToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ToolboxController<KinematicsToolboxOutputStatus> getToolboxController()
+   public ToolboxController getToolboxController()
    {
       return kinematicsToolBoxController;
    }

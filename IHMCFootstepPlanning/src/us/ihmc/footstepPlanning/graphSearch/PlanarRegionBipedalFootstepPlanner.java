@@ -34,47 +34,47 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
-   private PlanarRegionsList planarRegionsList;
-   private SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
+   protected PlanarRegionsList planarRegionsList;
+   protected SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
 
-   private RobotSide initialSide;
-   private RigidBodyTransform initialFootPose = new RigidBodyTransform();
+   protected RobotSide initialSide;
+   protected RigidBodyTransform initialFootPose = new RigidBodyTransform();
 
-   private SideDependentList<RigidBodyTransform> goalFootstepPoses;
+   protected SideDependentList<RigidBodyTransform> goalFootstepPoses;
 
    private FootstepPlannerGoalType footstepPlannerGoalType;
    private Point2d xyGoal;
    private double distanceFromXYGoal;
 
-   private SideDependentList<Point3d> goalPositions;
-   private SideDependentList<Double> goalYaws;
+   protected SideDependentList<Point3d> goalPositions;
+   protected SideDependentList<Double> goalYaws;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleYoVariable maximumStepReach = new DoubleYoVariable("maximumStepReach", registry);
-   private final DoubleYoVariable minimumFootholdPercent = new DoubleYoVariable("minimumFootholdPercent", registry);
+   protected final DoubleYoVariable maximumStepReach = new DoubleYoVariable("maximumStepReach", registry);
+   protected final DoubleYoVariable minimumFootholdPercent = new DoubleYoVariable("minimumFootholdPercent", registry);
 
-   private final DoubleYoVariable idealFootstepLength = new DoubleYoVariable("idealFootstepLength", registry);
-   private final DoubleYoVariable idealFootstepWidth = new DoubleYoVariable("idealFootstepWidth", registry);
+   protected final DoubleYoVariable idealFootstepLength = new DoubleYoVariable("idealFootstepLength", registry);
+   protected final DoubleYoVariable idealFootstepWidth = new DoubleYoVariable("idealFootstepWidth", registry);
 
-   private final DoubleYoVariable maximumStepZ = new DoubleYoVariable("maximumStepZ", registry);
-   private final DoubleYoVariable maximumStepYaw = new DoubleYoVariable("maximumStepYaw", registry);
-   private final DoubleYoVariable minimumStepWidth = new DoubleYoVariable("minimumStepWidth", registry);
+   protected final DoubleYoVariable maximumStepZ = new DoubleYoVariable("maximumStepZ", registry);
+   protected final DoubleYoVariable maximumStepYaw = new DoubleYoVariable("maximumStepYaw", registry);
+   protected final DoubleYoVariable minimumStepWidth = new DoubleYoVariable("minimumStepWidth", registry);
 
-   private final IntegerYoVariable numberOfNodesExpanded = new IntegerYoVariable("numberOfNodesExpanded", registry);
+   protected final IntegerYoVariable numberOfNodesExpanded = new IntegerYoVariable("numberOfNodesExpanded", registry);
 
-   private double maximumXYWiggleDistance = 0.1;
-   private double maximumYawWiggle = 0.1;
+   protected double maximumXYWiggleDistance = 0.1;
+   protected double maximumYawWiggle = 0.1;
 
-   private double minimumSurfaceNormalZ = 0.7;
-   private double maximumZPenetrationOnVRegions = 0.008;
+   protected double minimumSurfaceNormalZ = 0.7;
+   protected double maximumZPenetrationOnVRegions = 0.008;
 
    private int maximumNumberOfNodesToExpand;
    //   private FootstepPlan footstepPlan;
 
-   private BipedalFootstepPlannerNode startNode, goalNode;
+   protected BipedalFootstepPlannerNode startNode, goalNode;
 
-   private BipedalFootstepPlannerListener listener;
+   protected BipedalFootstepPlannerListener listener;
 
    public PlanarRegionBipedalFootstepPlanner(YoVariableRegistry parentRegistry)
    {
@@ -163,8 +163,19 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       goalPose.getPose(goalLeftFootPose);
       goalPose.getPose(goalRightFootPose);
 
-      Vector3d toTheLeft = new Vector3d(0.0, 0.15, 0.0);
-      Vector3d toTheRight = new Vector3d(0.0, -0.15, 0.0);
+      Vector3d toTheLeft;
+      Vector3d toTheRight;
+
+      if(idealFootstepWidth == 0.0)
+      {
+         toTheLeft = new Vector3d(0.0, 0.15, 0.0);
+         toTheRight = new Vector3d(0.0, -0.15, 0.0);
+      }
+      else
+      {
+         toTheLeft = new Vector3d(0.0, idealFootstepWidth, 0.0);
+         toTheRight = new Vector3d(0.0, - idealFootstepWidth, 0.0);
+      }
 
       goalLeftFootPose.applyTranslation(toTheLeft);
       goalRightFootPose.applyTranslation(toTheRight);
@@ -211,22 +222,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          return null;
       }
 
-      FootstepPlan result = new FootstepPlan();
-
-      BipedalFootstepPlannerNode node = goalNode;
-
-      while (node != null)
-      {
-         RigidBodyTransform soleTransform = new RigidBodyTransform();
-         node.getSoleTransform(soleTransform);
-
-         FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransform);
-         result.addFootstep(node.getRobotSide(), framePose);
-
-         node = node.getParentNode();
-      }
-
-      result.reverse();
+      FootstepPlan result = new FootstepPlan(goalNode);
       return result;
    }
 
@@ -289,7 +285,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return FootstepPlanningResult.NO_PATH_EXISTS;
    }
 
-   private boolean addGoalNodeIfGoalIsReachable(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform, Deque<BipedalFootstepPlannerNode> stack)
+   protected boolean addGoalNodeIfGoalIsReachable(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform, Deque<BipedalFootstepPlannerNode> stack)
    {
       BipedalFootstepPlannerNode goalNode = null;
 
@@ -352,7 +348,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return null;
    }
 
-   private boolean checkIfGoodFootstep(BipedalFootstepPlannerNode nodeToExpand)
+   protected boolean checkIfGoodFootstep(BipedalFootstepPlannerNode nodeToExpand)
    {
       RobotSide robotSide = nodeToExpand.getRobotSide();
 
@@ -391,7 +387,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return true;
    }
 
-   private boolean snapToPlanarRegionAndCheckIfGoodSnap(BipedalFootstepPlannerNode nodeToExpand)
+   protected boolean snapToPlanarRegionAndCheckIfGoodSnap(BipedalFootstepPlannerNode nodeToExpand)
    {
       if (planarRegionsList != null)
       {
@@ -435,7 +431,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return true;
    }
 
-   private void expandChildrenAndAddToQueue(Deque<BipedalFootstepPlannerNode> stack, RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand)
+   protected void expandChildrenAndAddToQueue(Deque<BipedalFootstepPlannerNode> stack, RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand)
    {
       ArrayList<BipedalFootstepPlannerNode> nodesToAdd = new ArrayList<>();
 
@@ -551,7 +547,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private BipedalFootstepPlannerNode createAndAddNextNodeGivenStep(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand, Vector3d stepVectorInSoleFrame, double stepYaw)
+   protected BipedalFootstepPlannerNode createAndAddNextNodeGivenStep(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand, Vector3d stepVectorInSoleFrame, double stepYaw)
    {
       Point3d stepLocationInWorld = new Point3d(stepVectorInSoleFrame);
       soleZUpTransform.transform(stepLocationInWorld);
@@ -573,7 +569,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return childNode;
    }
 
-   private RigidBodyTransform getSnapAndWiggleTransform(BipedalFootstepPlannerNode bipedalFootstepPlannerNode, PlanarRegion planarRegionToPack)
+   protected RigidBodyTransform getSnapAndWiggleTransform(BipedalFootstepPlannerNode bipedalFootstepPlannerNode, PlanarRegion planarRegionToPack)
    {
       if (planarRegionsList == null)
       {
@@ -706,7 +702,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return snapAndWiggleTransform;
    }
 
-   private void notifyListenerNodeSnappedAndStillSelectedForExpansion(BipedalFootstepPlannerNode nodeAfterSnap)
+   protected void notifyListenerNodeSnappedAndStillSelectedForExpansion(BipedalFootstepPlannerNode nodeAfterSnap)
    {
       if (listener != null)
       {
@@ -714,7 +710,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private void notifyListenerNodeSelectedForExpansion(BipedalFootstepPlannerNode nodeToExpand)
+   protected void notifyListenerNodeSelectedForExpansion(BipedalFootstepPlannerNode nodeToExpand)
    {
       if (listener != null)
       {
@@ -722,7 +718,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private void notifyListenerNodeForExpansionWasAccepted(BipedalFootstepPlannerNode nodeToExpand)
+   protected void notifyListenerNodeForExpansionWasAccepted(BipedalFootstepPlannerNode nodeToExpand)
    {
       if (listener != null)
       {
@@ -730,7 +726,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private void notifyListenerNodeForExpansionWasRejected(BipedalFootstepPlannerNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
+   protected void notifyListenerNodeForExpansionWasRejected(BipedalFootstepPlannerNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       if (listener != null)
       {
@@ -738,7 +734,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private void notifyListenerSolutionWasFound(BipedalFootstepPlannerNode goalNode)
+   protected void notifyListenerSolutionWasFound(BipedalFootstepPlannerNode goalNode)
    {
       if (listener != null)
       {
@@ -746,7 +742,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private void notifyListenerSolutionWasNotFound()
+   protected void notifyListenerSolutionWasNotFound()
    {
       if (listener != null)
       {
@@ -754,11 +750,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private final Vector3d xAxis = new Vector3d();
-   private final Vector3d yAxis = new Vector3d();
-   private final Vector3d zAxis = new Vector3d();
+   protected final Vector3d xAxis = new Vector3d();
+   protected final Vector3d yAxis = new Vector3d();
+   protected final Vector3d zAxis = new Vector3d();
 
-   private void setTransformZUpPreserveX(RigidBodyTransform transform)
+   protected void setTransformZUpPreserveX(RigidBodyTransform transform)
    {
       xAxis.set(transform.getM00(), transform.getM10(), 0.0);
       xAxis.normalize();

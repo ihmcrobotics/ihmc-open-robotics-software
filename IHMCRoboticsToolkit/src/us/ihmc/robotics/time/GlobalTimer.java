@@ -5,21 +5,11 @@ import java.util.ArrayList;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 
 /**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
+ * @deprecated Use us.ihmc.tools.time.Timer or us.ihmc.simulationconstructionset.util.time.YoTimer
  */
 public class GlobalTimer
 {

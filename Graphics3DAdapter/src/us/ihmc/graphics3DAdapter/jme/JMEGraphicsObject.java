@@ -418,8 +418,6 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 
          public void meshChanged(final MeshDataHolder newMesh)
          {
-            if (newMesh == null) return;
-
             checkIfNotImmutable();
 
             application.enqueue(new Callable<Object>()
@@ -427,6 +425,9 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
                public Object call() throws Exception
                {
                   meshHolder.detachAllChildren();
+                  if (newMesh == null)
+                     return null;
+
                   Mesh mesh = JMEMeshDataInterpreter.interpretMeshData(newMesh);
                   Geometry geometry = new Geometry("MeshData", mesh);
                   setGeometryMaterialBasedOnAppearance(geometry, graphics3dObjectAddMeshData.getAppearance());
@@ -434,7 +435,6 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
                   return null;
                }
             });
-
          }
       });
    }

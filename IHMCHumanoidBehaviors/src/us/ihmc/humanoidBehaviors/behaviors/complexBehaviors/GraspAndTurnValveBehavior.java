@@ -52,8 +52,6 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    private final ResetRobotBehavior resetRobotBehavior;
    //   private final PassPacketBehavior passPacketBehavior;
 
-   //compliance does not currently work
-   private boolean enableCompliance = false;
 
    public GraspAndTurnValveBehavior(DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge,
          AtlasPrimitiveActions atlasPrimitiveActions)
@@ -145,47 +143,12 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
       //    MOVE_HAND_TO_APPROACH_POINT,
       pipeLine.submitSingleTaskStage(moveHandToApproachPoint);
+      pipeLine.submitSingleTaskStage(openFingersOnly);
       pipeLine.submitSingleTaskStage(moveHandInFrontOfValve);
       //    MOVE_HAND_ABOVE_VALVE,
       pipeLine.submitSingleTaskStage(moveHandCloseToValve);
 
-      //    OPEN_HAND,
-      pipeLine.submitSingleTaskStage(openFingersOnly);
-
-      //      if (enableCompliance)
-      //      {
-      //         RequestWristForceSensorCalibrationPacket requestWristForceSensorCalibrationPacket = new RequestWristForceSensorCalibrationPacket();
-      //         requestWristForceSensorCalibrationPacket.setDestination(PacketDestination.CONTROLLER);
-      //
-      //         PassMessageTask calibrateWristTask = new PassMessageTask(requestWristForceSensorCalibrationPacket, passPacketBehavior);
-      //         pipeLine.submitSingleTaskStage(calibrateWristTask);
-      //      }
-      //
-      //      if (enableCompliance)
-      //      {
-      //
-      //         HandComplianceControlParametersMessage handComplianceControlParametersPacket = new HandComplianceControlParametersMessage(RobotSide.RIGHT);
-      //         handComplianceControlParametersPacket.setDestination(PacketDestination.CONTROLLER);
-      //
-      //         boolean[] enableLinearCompliance = new boolean[] {true, true, true};
-      //         boolean[] enableAngularCompliance = new boolean[] {false, false, false};
-      //
-      //         float forceDeadzone = 10.0f;
-      //         float torqueDeadzone = 10.0f;
-      //
-      //         Vector3f desiredForce = new Vector3f();
-      //         Vector3f desiredTorque = new Vector3f();
-      //
-      //         handComplianceControlParametersPacket.setEnableLinearCompliance(enableLinearCompliance);
-      //         handComplianceControlParametersPacket.setEnableAngularCompliance(enableAngularCompliance);
-      //         handComplianceControlParametersPacket.setWrenchDeadzone(forceDeadzone, torqueDeadzone);
-      //         handComplianceControlParametersPacket.setDesiredForce(desiredForce);
-      //         handComplianceControlParametersPacket.setDesiredTorque(desiredTorque);
-      //
-      //         PassMessageTask enableComplianceTask = new PassMessageTask(handComplianceControlParametersPacket, passPacketBehavior);
-      //         pipeLine.submitSingleTaskStage(enableComplianceTask);
-      //
-      //      }
+     
 
       //    MOVE_HAND_DOWN_TO_VALVE,
       pipeLine.submitSingleTaskStage(moveHandToValveGraspLocation);
@@ -207,15 +170,6 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       //    MOVE_HAND_AWAY_FROM_VALVE,
 
       pipeLine.submitSingleTaskStage(rotateAroundValve(Math.toRadians(-DEGREES_TO_ROTATE), valveInitalForwardOffset));
-
-      //      if (enableCompliance)
-      //      {
-      //         HandComplianceControlParametersMessage handComplianceControlParametersPacket = new HandComplianceControlParametersMessage(RobotSide.RIGHT);
-      //         handComplianceControlParametersPacket.setDestination(PacketDestination.CONTROLLER);
-      //
-      //         PassMessageTask calibrateWristTask = new PassMessageTask(handComplianceControlParametersPacket, passPacketBehavior);
-      //         pipeLine.submitSingleTaskStage(calibrateWristTask);
-      //      }
 
       pipeLine.submitSingleTaskStage(resetRobot);
 

@@ -18,7 +18,7 @@ public class SearchForValveBehavior extends AbstractBehavior
    public SearchForValveBehavior(CommunicationBridge behaviorCommunicationBridge)
    {
       super("SearchForSpehereFar", behaviorCommunicationBridge);
-      communicationBridge.attachNetworkListeningQueue(valveLocationQueue, ValveLocationPacket.class);
+      attachNetworkListeningQueue(valveLocationQueue, ValveLocationPacket.class);
    }
 
    @Override

@@ -87,12 +87,6 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       super.doControl();
    }
 
-   @Override
-   public void initialize()
-   {
-      statemachine.setCurrentState(TurnValveBehaviorState.SETUP_ROBOT);
-   }
-
    private void setupStateMachine()
    {
       BehaviorAction<TurnValveBehaviorState> resetRobot = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.RESET_ROBOT, resetRobotBehavior);
@@ -218,6 +212,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       getUserValidation.addStateTransition(TurnValveBehaviorState.BACK_AWAY_FROM_VALVE, validatedCondition);
 
       statemachine.addState(doneState);
+      statemachine.setStartState(TurnValveBehaviorState.SETUP_ROBOT);
 
    }
 
