@@ -83,6 +83,12 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
       this.tuple.set(tuple);
    }
 
+   public final void set(Tuple3f tuple)
+   {
+      this.tuple.set(tuple);
+   }
+
+   @Override
    public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple3d tuple)
    {
       this.referenceFrame = referenceFrame;
