@@ -144,10 +144,6 @@ public abstract class AbstractBehavior implements RobotController
       TextToSpeechPacket p1 = new TextToSpeechPacket("Pausing Behavior");
       sendPacket(p1);
       isPaused.set(true);
-<<<<<<< Upstream, based on branch 'develop' of https://jcarff@stash.ihmc.us/scm/rob/ihmc-open-robotics-software.git
-      
-=======
->>>>>>> fe5a932 merging
       for (BehaviorService behaviorService : behaviorsServices)
       {
          behaviorService.pause();
