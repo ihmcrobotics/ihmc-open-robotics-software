@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.swing.AbstractAction;
@@ -39,7 +40,8 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCSimulationTools
 {
-
+   private static final String STARTING_LOCATION_PROPERTY_NAME = "startingLocation";
+   
    @SuppressWarnings({ "hiding", "unchecked" })
    public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(SimulationStarterInterface simulationStarter, Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs, T... possibleStartingLocations)
    {
@@ -174,7 +176,15 @@ public abstract class DRCSimulationTools
          obstacleCourseLocationPanel.setVisible(true);
          obstacleCourseStartingLocationComboBox = new JComboBox(possibleStartingLocations);
 
-         obstacleCourseStartingLocationComboBox.setSelectedItem(possibleStartingLocations[0]);
+         Map<String, T> possibleStartingLocationMap = new HashMap<>();
+         for (T possibleStartingLocation : possibleStartingLocations)
+         {
+            possibleStartingLocationMap.put(possibleStartingLocation.toString(), possibleStartingLocation);
+         }
+         
+         T selectedStartingLocation = possibleStartingLocationMap.get(properties.getProperty(STARTING_LOCATION_PROPERTY_NAME, possibleStartingLocations[0].toString()));
+         
+         obstacleCourseStartingLocationComboBox.setSelectedItem(selectedStartingLocation == null ? possibleStartingLocations[0] : selectedStartingLocation);
          comboBoxPanelsMap.put(obstacleCourseLocationPanel, obstacleCourseStartingLocationComboBox);
 
          obstacleCourseLocationPanel.add(selectObstacleCourseLocationLabel, BorderLayout.WEST);
@@ -263,6 +273,11 @@ public abstract class DRCSimulationTools
 
          properties.setProperty(module.getPropertyNameForEnable(), String.valueOf(enabled));
          properties.setProperty(module.getPropertyNameForSelected(), String.valueOf(selected));
+      }
+      
+      if (obstacleCourseStartingLocationComboBox != null && obstacleCourseStartingLocationComboBox.getSelectedItem() != null)
+      {
+         properties.setProperty(STARTING_LOCATION_PROPERTY_NAME, obstacleCourseStartingLocationComboBox.getSelectedItem().toString());
       }
 
       FileOutputStream newConfigOutputStream;
@@ -357,5 +372,5 @@ public abstract class DRCSimulationTools
       {
          return FormattingTools.underscoredToCamelCase(toString(), true);
       }
-   };
+   }
 }
