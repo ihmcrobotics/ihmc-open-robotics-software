@@ -2,12 +2,10 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
 import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
@@ -61,7 +59,15 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      return planarRegion.getBoundingBox3dInWorld().isInside(x, y, z);
+      if(planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
+      {
+         double planeZGivenXY = planarRegion.getPlaneZGivenXY(x, y);
+         return planeZGivenXY > z - 1e-12;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    @Override
@@ -110,7 +116,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    private Graphics3DObject setupLinkGraphics()
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
-      graphics3DObject.addPlanarRegion(planarRegion);
+      graphics3DObject.addPlanarRegion(planarRegion, YoAppearance.Gray());
       return graphics3DObject;
    }
 }
