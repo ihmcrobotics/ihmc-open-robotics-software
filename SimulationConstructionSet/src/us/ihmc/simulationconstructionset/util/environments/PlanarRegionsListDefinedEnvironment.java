@@ -22,18 +22,33 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
    private final String environmentName;
    private final PlanarRegionsList planarRegionsList;
 
-   public PlanarRegionsListDefinedEnvironment(String environmentName, PlanarRegionsList planarRegionsList)
+   public PlanarRegionsListDefinedEnvironment(String environmentName, PlanarRegionsList planarRegionsList, boolean generateGroundPlane)
    {
       this.environmentName = environmentName;
       this.planarRegionsList = planarRegionsList;
 
       combinedTerrainObject = createCombinedTerrainObjectFromPlanarRegionsList(this.environmentName, this.planarRegionsList);
-      combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
+
+      if (generateGroundPlane)
+      {
+         combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
+
+      }
+   }
+
+   public PlanarRegionsListDefinedEnvironment(PlanarRegionsList planarRegionsList, boolean generateGroundPlane)
+   {
+      this(PlanarRegionsListDefinedEnvironment.class.getSimpleName(), planarRegionsList, generateGroundPlane);
+   }
+
+   public PlanarRegionsListDefinedEnvironment(String environmentName, PlanarRegionsList planarRegionsList)
+   {
+      this(environmentName, planarRegionsList, true);
    }
 
    public PlanarRegionsListDefinedEnvironment(PlanarRegionsList planarRegionsList)
    {
-      this(PlanarRegionsListDefinedEnvironment.class.getSimpleName(), planarRegionsList);
+      this(planarRegionsList, true);
    }
 
    private CombinedTerrainObject3D createCombinedTerrainObjectFromPlanarRegionsList(String environmentName, PlanarRegionsList planarRegionsList)
