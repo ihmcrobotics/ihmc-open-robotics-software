@@ -19,13 +19,14 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.time.Timer;
+import us.ihmc.simulationconstructionset.util.time.YoTimer;
 
 public class TakeSomeStepsBehavior extends AbstractBehavior
 {
@@ -57,9 +58,9 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
    private final FramePose tempFirstFootstepPose = new FramePose();
    private final Point3d tempFootstepPosePosition = new Point3d();
    private final Quat4d tempFirstFootstepPoseOrientation = new Quat4d();
-   private final Timer footstepSentTimer = new Timer();
+   private final YoTimer footstepSentTimer;
 
-   public TakeSomeStepsBehavior(CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
+   public TakeSomeStepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super(TakeSomeStepsBehavior.class.getSimpleName(), behaviorCommunicationBridge);
 
@@ -73,6 +74,7 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
 
       currentlySwingingFoot = new EnumYoVariable<>("currentlySwingingFoot", registry, RobotSide.class, true);
 
+      footstepSentTimer = new YoTimer(yoTime);
       footstepSentTimer.start();
 
       footstepPlannerGoalPose = new YoFramePose(prefix + "FootstepGoalPose", ReferenceFrame.getWorldFrame(), registry);
@@ -238,30 +240,6 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
 
       footstepDataListMessage.setExecutionMode(ExecutionMode.OVERRIDE);
       return footstepDataListMessage;
-   }
-
-   @Override
-   public void initialize()
-   {
-      super.initialize();
-   }
-
-   @Override
-   public void pause()
-   {
-      super.pause();
-   }
-
-   @Override
-   public void abort()
-   {
-      super.abort();
-   }
-
-   @Override
-   public void resume()
-   {
-      super.resume();
    }
 
    @Override

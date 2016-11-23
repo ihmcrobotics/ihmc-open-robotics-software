@@ -17,7 +17,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.time.Timer;
+import us.ihmc.simulationconstructionset.util.time.YoTimer;
 
 public class FindFiducialBehavior extends AbstractBehavior
 {
@@ -28,7 +28,7 @@ public class FindFiducialBehavior extends AbstractBehavior
    private final FullHumanoidRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
 
-   private final Timer headTrajectorySentTimer = new Timer();
+   private final YoTimer headTrajectorySentTimer;
 
    private final BooleanYoVariable foundFiducial = new BooleanYoVariable(prefix + "FoundFiducial", registry);
    private final DoubleYoVariable headPitchToFindFucdicial = new DoubleYoVariable(prefix + "HeadPitchToFindFucdicial", registry);
@@ -37,7 +37,7 @@ public class FindFiducialBehavior extends AbstractBehavior
    private final YoFramePoseUsingQuaternions foundFiducialYoFramePose;
    private final FramePose foundFiducialPose = new FramePose();
 
-   public FindFiducialBehavior(CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+   public FindFiducialBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
          FiducialDetectorBehaviorService fiducialDetectorBehaviorService, long fiducialToTrack)
    {
       super(FollowFiducialBehavior.class.getSimpleName(), behaviorCommunicationBridge);
@@ -54,6 +54,7 @@ public class FindFiducialBehavior extends AbstractBehavior
 
       headPitchToFindFucdicial.set(0.6);
 
+      headTrajectorySentTimer = new YoTimer(yoTime);
       headTrajectorySentTimer.start();
       //      behaviorCommunicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
       //      behaviorCommunicationBridge.attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
