@@ -271,7 +271,6 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       {
          return pipeLine.isDone();
       }
-
    }
 
 }
