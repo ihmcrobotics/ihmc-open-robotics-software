@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -33,6 +34,8 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
    protected final SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
 
    protected final HighLevelHumanoidControllerToolbox momentumBasedController;
+
+   protected boolean attemptToStraightenLegs;
 
    public AbstractFootControlState(ConstraintType stateEnum, FootControlHelper footControlHelper)
    {
@@ -74,5 +77,15 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
    public boolean isDone()
    {
       return true;
+   }
+
+   /**
+    * Determines whether or not the privileged configuration command that is utilized is at the mid range or at zero
+    * Linked to {@link WalkingControllerParameters#attemptToStraightenLegs()}
+    * @param attemptToStraightenLegs boolean (true = at zero, false = at mid range)
+    */
+   public void setAttemptToStraightenLegs(boolean attemptToStraightenLegs)
+   {
+      this.attemptToStraightenLegs = attemptToStraightenLegs;
    }
 }

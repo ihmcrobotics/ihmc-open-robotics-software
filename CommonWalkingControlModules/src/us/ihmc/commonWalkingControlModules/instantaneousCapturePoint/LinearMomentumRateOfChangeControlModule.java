@@ -52,6 +52,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    protected final SpatialForceVector desiredMomentumRate = new SpatialForceVector();
    protected final DenseMatrix64F linearAndAngularZSelectionMatrix = CommonOps.identity(6);
+   protected final DenseMatrix64F linearXYSelectionMatrix = CommonOps.identity(6);
 
    protected double omega0 = 0.0;
    protected double totalMass;
@@ -76,6 +77,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
    protected final BooleanYoVariable desiredCMPinSafeArea;
+
+   private boolean controlHeightWithMomentum;
 
    protected final YoFramePoint2d yoUnprojectedDesiredCMP;
    protected final YoFrameConvexPolygon2d yoSafeAreaPolygon;
@@ -124,6 +127,10 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       MatrixTools.removeRow(linearAndAngularZSelectionMatrix, 0);
       MatrixTools.removeRow(linearAndAngularZSelectionMatrix, 0);
+
+      MatrixTools.removeRow(linearXYSelectionMatrix, 5); // remove height
+      MatrixTools.removeRow(linearXYSelectionMatrix, 0);
+      MatrixTools.removeRow(linearXYSelectionMatrix, 0);
 
       angularMomentumRateWeight.set(defaultAngularMomentumRateWeight);
       linearMomentumRateWeight.set(defaultLinearMomentumRateWeight);
@@ -302,6 +309,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
       else
       {
          momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
+         if (!controlHeightWithMomentum)
+            momentumRateCommand.setSelectionMatrix(linearXYSelectionMatrix);
       }
 
       momentumRateCommand.setWeights(angularMomentumRateWeight.getX(), angularMomentumRateWeight.getY(), angularMomentumRateWeight.getZ(),
@@ -332,6 +341,16 @@ public abstract class LinearMomentumRateOfChangeControlModule
    public void setPerfectCMP(FramePoint2d perfectCMP)
    {
       this.perfectCMP.setIncludingFrame(perfectCMP);
+   }
+
+   /**
+    * Sets whether or not to include the momentum rate of change in the vertical direction in the whole body optimization.
+    * If false, it will be controlled by attempting to drive the legs to a certain position in the null space
+    * @param controlHeightWithMomentum boolean variable on whether or not to control the height with momentum.
+    */
+   public void setControlHeightWithMomentum(boolean controlHeightWithMomentum)
+   {
+      this.controlHeightWithMomentum = controlHeightWithMomentum;
    }
 
    public abstract void setDoubleSupportDuration(double doubleSupportDuration);
