@@ -4,10 +4,15 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverW
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -16,8 +21,10 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.FormattingTools;
 
@@ -32,6 +39,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
 
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
+   private final PrivilegedConfigurationCommand straightLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   private final PrivilegedConfigurationCommand bentLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    protected boolean trajectoryWasReplanned;
 
@@ -78,6 +87,16 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       ankleFrame = contactableFoot.getFrameAfterParentJoint();
       controlFrame = new PoseReferenceFrame("controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
+
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+
+      straightLegsPrivilegedConfigurationCommand.addJoint(kneeJoint, PrivilegedConfigurationOption.AT_ZERO);
+      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
+
+      bentLegsPrivilegedConfigurationCommand.addJoint(kneeJoint, PrivilegedConfigurationOption.AT_MID_RANGE);
+      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
 
       spatialFeedbackControlCommand.set(rootBody, foot);
       spatialFeedbackControlCommand.setPrimaryBase(footControlHelper.getMomentumBasedController().getFullRobotModel().getPelvis());
@@ -200,9 +219,9 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    }
 
    @Override
-   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return null;
+      return bentLegsPrivilegedConfigurationCommand;
    }
 
    @Override

@@ -9,11 +9,14 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -29,7 +32,10 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 public class HoldPositionState extends AbstractFootControlState
@@ -37,6 +43,8 @@ public class HoldPositionState extends AbstractFootControlState
    // During the partial foothold walking this command was split up to control the roll and pitch of
    // the foot separately using only the ankle joints.
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
+   private final PrivilegedConfigurationCommand straightLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   private final PrivilegedConfigurationCommand bentLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
 
    private static final boolean VISUALIZE = false;
    private static final double EPSILON = 0.010;
@@ -121,9 +129,20 @@ public class HoldPositionState extends AbstractFootControlState
       doSmartHoldPosition.set(true);
       doHoldFootFlatOrientation.set(false);
 
-      spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody foot = contactableFoot.getRigidBody();
+      OneDoFJoint kneePitch = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+
+      straightLegsPrivilegedConfigurationCommand.addJoint(kneePitch, PrivilegedConfigurationOption.AT_ZERO);
+      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
+
+      bentLegsPrivilegedConfigurationCommand.addJoint(kneePitch, PrivilegedConfigurationOption.AT_MID_RANGE);
+      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
+
+      spatialFeedbackControlCommand.set(rootBody, foot);
       bodyFixedControlledPose.setToZero(soleFrame);
-      bodyFixedControlledPose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
+      bodyFixedControlledPose.changeFrame(foot.getBodyFixedFrame());
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
 
       desiredSoleFrame = new ReferenceFrame(namePrefix + "DesiredSoleFrame", worldFrame)
@@ -330,9 +349,12 @@ public class HoldPositionState extends AbstractFootControlState
    }
 
    @Override
-   public SpatialAccelerationCommand getInverseDynamicsCommand()
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return null;
+      if (attemptToStraightenLegs)
+         return straightLegsPrivilegedConfigurationCommand;
+      else
+         return bentLegsPrivilegedConfigurationCommand;
    }
 
    @Override

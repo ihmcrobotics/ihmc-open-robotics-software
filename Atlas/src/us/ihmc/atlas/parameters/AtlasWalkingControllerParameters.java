@@ -133,6 +133,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return realRobot ? 0.3 : 0.0; // 0.3 seems to be a good starting point
    }
 
+   /** {@inheritDoc} */
    @Override
    public boolean doToeOffIfPossible()
    {
@@ -151,15 +152,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return true;
    }
 
+   /** {@inheritDoc} */
    @Override
    public double getMinStepLengthForToeOff()
    {
       return getFootLength();
    }
 
-   /**
-    * To enable that feature, doToeOffIfPossible() return true is required. John parameter
-    */
+   /** {@inheritDoc} */
    @Override
    public boolean doToeOffWhenHittingAnkleLimit()
    {
@@ -204,6 +204,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
     return false; // Does more bad than good
    }
 
+   /** @inheritDoc */
    @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
    {
@@ -460,7 +461,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
 
-//      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 //      if (runningOnRealRobot) gains.setFeedbackPartMaxRate(1.0);
       return gains;
    }
@@ -1097,5 +1097,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
    {
       return jointPrivilegedConfigurationParameters;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean controlHeightWithMomentum()
+   {
+      return false;
    }
 }

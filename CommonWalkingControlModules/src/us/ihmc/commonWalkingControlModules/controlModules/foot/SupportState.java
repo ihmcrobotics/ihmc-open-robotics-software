@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -13,8 +14,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -25,8 +29,11 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
@@ -57,8 +64,12 @@ public class SupportState extends AbstractFootControlState
    private final PoseReferenceFrame desiredSoleFrame;
    private final YoGraphicReferenceFrame frameViz;
 
+   private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
+   private final PrivilegedConfigurationCommand straightLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   private final PrivilegedConfigurationCommand bentLegsPrivilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+
    private final DenseMatrix64F accelerationSelectionMatrix = new DenseMatrix64F(dofs, dofs);
    private final DenseMatrix64F feedbackSelectionMatrix = new DenseMatrix64F(dofs, dofs);
 
@@ -88,7 +99,6 @@ public class SupportState extends AbstractFootControlState
    private final BooleanYoVariable requestFootholdExploration;
    private final DoubleYoVariable recoverTime;
    private final DoubleYoVariable timeBeforeExploring;
-   private final InverseDynamicsCommandList inverseDymamicsCommandsList = new InverseDynamicsCommandList();
 
    public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
    {
@@ -137,6 +147,17 @@ public class SupportState extends AbstractFootControlState
          recoverTime = new DoubleYoVariable(prefix + "RecoverTime", registry);
          timeBeforeExploring = new DoubleYoVariable(prefix + "TimeBeforeExploring", registry);
       }
+
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      RigidBody foot = fullRobotModel.getFoot(robotSide);
+      OneDoFJoint kneePitch = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+
+      straightLegsPrivilegedConfigurationCommand.addJoint(kneePitch, PrivilegedConfigurationOption.AT_ZERO);
+      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
+
+      bentLegsPrivilegedConfigurationCommand.addJoint(kneePitch, PrivilegedConfigurationOption.AT_MID_RANGE);
+      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
 
       YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
@@ -323,8 +344,15 @@ public class SupportState extends AbstractFootControlState
       inverseDymamicsCommandsList.clear();
       inverseDymamicsCommandsList.addCommand(spatialAccelerationCommand);
       inverseDymamicsCommandsList.addCommand(explorationHelper.getCommand());
+
+      if (attemptToStraightenLegs)
+         inverseDymamicsCommandsList.addCommand(straightLegsPrivilegedConfigurationCommand);
+      else
+         inverseDymamicsCommandsList.addCommand(bentLegsPrivilegedConfigurationCommand);
+
       return inverseDymamicsCommandsList;
    }
+
 
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
