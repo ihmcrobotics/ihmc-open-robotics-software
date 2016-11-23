@@ -1,7 +1,9 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -155,9 +157,28 @@ public abstract class ToolboxModule
    {
       return new MessageFilter()
       {
+         private final Set<Class<? extends Packet<?>>> exceptions = filterExceptions();
+         {
+            System.out.println(exceptions);
+         }
+
          @Override
          public boolean isMessageValid(Packet<?> message)
          {
+            if (exceptions.contains(message.getClass()))
+            {
+               if (toolboxTaskScheduled == null)
+               {
+                  if (DEBUG)
+                     PrintTools.info(ToolboxModule.this, name + " is sleeping: " + message.getClass().getSimpleName() + " is ignored.");
+                  return false;
+               }
+               else
+               {
+                  return true;
+               }
+            }
+
             if (message.getDestination() != thisDesitination)
             {
                if (DEBUG)
@@ -323,4 +344,9 @@ public abstract class ToolboxModule
    abstract public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands();
 
    abstract public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus();
+
+   public Set<Class<? extends Packet<?>>> filterExceptions()
+   {
+      return Collections.emptySet();
+   }
 }
