@@ -176,6 +176,7 @@ public class FootstepListBehavior extends AbstractBehavior
       isStopped.set(false);
       hasBeenInitialized.set(true);
       hasRobotStartedWalking.set(false);
+      super.initialize();
    }
 
    @Override
@@ -194,6 +195,7 @@ public class FootstepListBehavior extends AbstractBehavior
       hasLastStepBeenReached.set(false);
       isRobotDoneWalking.set(false);
       hasRobotStartedWalking.set(false);
+      super.doPostBehaviorCleanup();
    }
 
    @Override

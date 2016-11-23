@@ -44,7 +44,7 @@ public class MultiColorMeshBuilderVisualizer extends Application
 
       Color[] colors = {Color.YELLOW, Color.BEIGE, Color.CHOCOLATE, Color.ANTIQUEWHITE};
 
-      MultiColorMeshBuilder meshBuilder = new MultiColorMeshBuilder();
+      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder();
 
       switch (MESH_TO_DISPLAY)
       {
@@ -67,7 +67,7 @@ public class MultiColorMeshBuilderVisualizer extends Application
       primaryStage.show();
    }
 
-   private void addMultiLine(MultiColorMeshBuilder meshBuilder)
+   private void addMultiLine(JavaFXMultiColorMeshBuilder meshBuilder)
    {
       List<Point3d> points = new ArrayList<>();
       double radius = 0.4;
@@ -83,7 +83,7 @@ public class MultiColorMeshBuilderVisualizer extends Application
       meshBuilder.addMultiLine(points, 0.01, Color.YELLOWGREEN, true);
    }
 
-   private void addLine(MultiColorMeshBuilder meshBuilder)
+   private void addLine(JavaFXMultiColorMeshBuilder meshBuilder)
    {
       Point3d start = new Point3d(0.3, 0.0, -0.);
       Point3d end = new Point3d(0.0, 0.3, 0.0);
@@ -92,7 +92,7 @@ public class MultiColorMeshBuilderVisualizer extends Application
       meshBuilder.addLine(start, end, lineWidth, color);
    }
 
-   public void addRandomBoxes(Color[] colors, MultiColorMeshBuilder meshBuilder)
+   public void addRandomBoxes(Color[] colors, JavaFXMultiColorMeshBuilder meshBuilder)
    {
       int count = 0;
       for (float x = -1.0f; x <= 1.0f; x += 0.055f)

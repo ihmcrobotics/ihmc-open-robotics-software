@@ -1,7 +1,5 @@
 package us.ihmc.javaFXToolkit.shapes;
 
-import static us.ihmc.javaFXToolkit.shapes.MeshBuilder.DEFAULT_RES;
-
 import java.util.List;
 
 import javax.vecmath.AxisAngle4d;
@@ -19,17 +17,19 @@ import javafx.scene.shape.Mesh;
 import us.ihmc.graphics3DDescription.MeshDataGenerator;
 import us.ihmc.graphics3DDescription.MeshDataHolder;
 
-public class MultiColorMeshBuilder
+public class JavaFXMultiColorMeshBuilder
 {
-   private final MeshBuilder meshBuilder = new MeshBuilder();
+   private static final int DEFAULT_RES = 32;
+
+   private final JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
    private TextureColorPalette colorPalette;
 
-   public MultiColorMeshBuilder()
+   public JavaFXMultiColorMeshBuilder()
    {
       colorPalette = new TextureColorPalette2D();
    }
 
-   public MultiColorMeshBuilder(TextureColorPalette colorPalette)
+   public JavaFXMultiColorMeshBuilder(TextureColorPalette colorPalette)
    {
       this.colorPalette = colorPalette;
    }
