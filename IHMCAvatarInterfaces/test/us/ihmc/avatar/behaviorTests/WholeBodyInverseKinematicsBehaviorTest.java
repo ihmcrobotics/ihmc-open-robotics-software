@@ -64,7 +64,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       }
 
       GlobalTimer.clearTimers();
-
+      
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    @Ignore
@@ -132,9 +132,11 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       FrameOrientation finalPelvisOrientation = new FrameOrientation(pelvisControlFrame);
       finalPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      double angleEpsilon = Math.toRadians(10);
 
-      assertTrue(isOrientationEqual(initialChestOrientation.getQuaternion(), finalChestOrientation.getQuaternion()));
-      assertTrue(isOrientationEqual(initialPelvisOrientation.getQuaternion(), finalPelvisOrientation.getQuaternion()));
+      assertTrue(isOrientationEqual(initialChestOrientation.getQuaternion(), finalChestOrientation.getQuaternion(), angleEpsilon));
+      assertTrue(isOrientationEqual(initialPelvisOrientation.getQuaternion(), finalPelvisOrientation.getQuaternion(), angleEpsilon));
 
       assertTrue("Expect: " + desiredHandPose + "\nActual: " + currentHandPose, currentHandPose.epsilonEquals(desiredHandPose, 1.0e-2));
    }
@@ -194,13 +196,21 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       desiredHandPoseL.getAxisAngleRotationToOtherPose(currentHandPoseL, leftAngle);
       desiredHandPoseR.getAxisAngleRotationToOtherPose(currentHandPoseR, rightAngle);
       
-      double angleReference = Math.toRadians(2);
+      double angleEpsilon = Math.toRadians(2);
       
-      assertTrue(Math.abs(leftAngle.angle) < angleReference);
-      assertTrue(Math.abs(rightAngle.angle) < angleReference);
+      assertTrue(Math.abs(leftAngle.angle) < angleEpsilon);
+      assertTrue(Math.abs(rightAngle.angle) < angleEpsilon);
+      
+//      double leftPosition = desiredHandPoseL.getPositionDistance(currentHandPoseL);
+//      double rightPosition = desiredHandPoseR.getPositionDistance(currentHandPoseR);
+//      
+//      double positionEpsilon = 1.0e-2;
+//      System.out.println(leftPosition);
+//      assertTrue(Math.abs(leftPosition) < positionEpsilon);
+//      assertTrue(Math.abs(rightPosition) < positionEpsilon);
    }
 
-   private boolean isOrientationEqual(Quat4d initialQuat, Quat4d finalQuat)
+   private boolean isOrientationEqual(Quat4d initialQuat, Quat4d finalQuat, double angleEpsilon)
    {
       Quat4d quatDifference = new Quat4d(initialQuat);
       quatDifference.mulInverse(finalQuat);
@@ -208,9 +218,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       AxisAngle4d angleDifference = new AxisAngle4d();
       angleDifference.set(quatDifference);
       AngleTools.trimAngleMinusPiToPi(angleDifference.getAngle());
-
-      double angleReference = Math.toRadians(10);
-      return Math.abs(angleDifference.getAngle()) < angleReference;
+      
+      return Math.abs(angleDifference.getAngle()) < angleEpsilon;
    }
 
    private void setupKinematicsToolboxModule() throws IOException
