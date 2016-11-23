@@ -71,10 +71,10 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
       //create your behaviors
 
-      lookForGoalBehavior = new FindFiducialBehavior(communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, fiducialToTrack);
+      lookForGoalBehavior = new FindFiducialBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, fiducialToTrack);
       lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
-      planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
-      takeSomeStepsBehavior = new TakeSomeStepsBehavior(communicationBridge, fullRobotModel, referenceFrames);
+      planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
+      takeSomeStepsBehavior = new TakeSomeStepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
       reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge);
 
       userValidationExampleBehavior = new UserValidationExampleBehavior(communicationBridge);
@@ -92,6 +92,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    @Override
    public void initialize()
    {
+      super.initialize();
       TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Walk Over Terrain Behavior");
       sendPacket(p1);
       statemachine.setCurrentState(WalkOverTerrainState.LOOK_FOR_GOAL);

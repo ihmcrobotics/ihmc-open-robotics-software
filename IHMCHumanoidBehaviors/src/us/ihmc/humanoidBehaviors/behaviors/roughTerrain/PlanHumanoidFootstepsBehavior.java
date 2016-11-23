@@ -41,7 +41,7 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.time.Timer;
+import us.ihmc.simulationconstructionset.util.time.YoTimer;
 
 public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 {
@@ -73,9 +73,9 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    private final FramePose tempFirstFootstepPose = new FramePose();
    private final Point3d tempFootstepPosePosition = new Point3d();
    private final Quat4d tempFirstFootstepPoseOrientation = new Quat4d();
-   private final Timer footstepSentTimer = new Timer();
+   private final YoTimer plannerTimer;
 
-   public PlanHumanoidFootstepsBehavior(CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+   public PlanHumanoidFootstepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
          FiducialDetectorBehaviorService fiducialDetectorBehaviorService)
    {
       super(PlanHumanoidFootstepsBehavior.class.getSimpleName(), behaviorCommunicationBridge);
@@ -90,7 +90,8 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       nextSideToSwing = new EnumYoVariable<>("nextSideToSwing", registry, RobotSide.class);
       nextSideToSwing.set(RobotSide.LEFT);
 
-      footstepSentTimer.start();
+      plannerTimer = new YoTimer(yoTime);
+      plannerTimer.start();
 
       footstepPlannerGoalPose = new YoFramePose(prefix + "FootstepGoalPose", ReferenceFrame.getWorldFrame(), registry);
       footstepPlannerInitialStepPose = new YoFramePose(prefix + "InitialStepPose", ReferenceFrame.getWorldFrame(), registry);
@@ -147,7 +148,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    public void doControl()
    {
       requestPlanarRegionsList();
-      if (footstepSentTimer.totalElapsed() < 0.5)
+      if (plannerTimer.totalElapsed() < 0.5)
          return;
 
       updatePlannerIfPlanarRegionsListIsAvailable();
@@ -160,7 +161,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       if (plan == null)
       {
          sendTextToSpeechPacket("No Plan was found!");
-         footstepSentTimer.reset();
+         plannerTimer.reset();
          return;
       }
 
@@ -304,27 +305,8 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    @Override
    public void initialize()
    {
-      footstepSentTimer.start();
-
       super.initialize();
-   }
-
-   @Override
-   public void pause()
-   {
-      super.pause();
-   }
-
-   @Override
-   public void abort()
-   {
-      super.abort();
-   }
-
-   @Override
-   public void resume()
-   {
-      super.resume();
+      plannerTimer.start();
    }
 
    @Override
