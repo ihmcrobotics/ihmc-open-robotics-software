@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class PlanarRegionDefinedEnvironment implements CommonAvatarEnvironmentInterface
+public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final List<Robot> environmentRobots = new ArrayList<>();
@@ -22,7 +22,7 @@ public class PlanarRegionDefinedEnvironment implements CommonAvatarEnvironmentIn
    private final String environmentName;
    private final PlanarRegionsList planarRegionsList;
 
-   public PlanarRegionDefinedEnvironment(String environmentName, PlanarRegionsList planarRegionsList)
+   public PlanarRegionsListDefinedEnvironment(String environmentName, PlanarRegionsList planarRegionsList)
    {
       this.environmentName = environmentName;
       this.planarRegionsList = planarRegionsList;
@@ -31,9 +31,9 @@ public class PlanarRegionDefinedEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
    }
 
-   public PlanarRegionDefinedEnvironment(PlanarRegionsList planarRegionsList)
+   public PlanarRegionsListDefinedEnvironment(PlanarRegionsList planarRegionsList)
    {
-      this(PlanarRegionDefinedEnvironment.class.getSimpleName(), planarRegionsList);
+      this(PlanarRegionsListDefinedEnvironment.class.getSimpleName(), planarRegionsList);
    }
 
    private CombinedTerrainObject3D createCombinedTerrainObjectFromPlanarRegionsList(String environmentName, PlanarRegionsList planarRegionsList)
