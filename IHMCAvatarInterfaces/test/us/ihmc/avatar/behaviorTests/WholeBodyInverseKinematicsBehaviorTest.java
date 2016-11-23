@@ -4,6 +4,9 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Quat4d;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -17,11 +20,11 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -64,7 +67,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
- 
+   @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 27.0)
    @Test(timeout = 160000)
    public void testSolvingForAHandPose() throws SimulationExceededMaximumTimeException, IOException
@@ -91,13 +94,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
                                                                                      getRobotModel().createFullRobotModel());
 
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
-      
+
       ReferenceFrame chestControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getChest().getBodyFixedFrame();
-      FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);   
+      FrameOrientation initialChestOrientation = new FrameOrientation(chestControlFrame);
       initialChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      
+
       ReferenceFrame pelvisControlFrame = drcBehaviorTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
-      FrameOrientation initialPelvisOrientation = new FrameOrientation(pelvisControlFrame);   
+      FrameOrientation initialPelvisOrientation = new FrameOrientation(pelvisControlFrame);
       initialPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose desiredHandPose = new FramePose(handControlFrame);
@@ -123,18 +126,91 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       FramePose currentHandPose = new FramePose(handControlFrame);
       currentHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      
-      FrameOrientation finalChestOrientation = new FrameOrientation(chestControlFrame);   
+
+      FrameOrientation finalChestOrientation = new FrameOrientation(chestControlFrame);
       finalChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      
-      FrameOrientation finalPelvisOrientation = new FrameOrientation(pelvisControlFrame);   
+
+      FrameOrientation finalPelvisOrientation = new FrameOrientation(pelvisControlFrame);
       finalPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      
-      assertTrue(initialChestOrientation.epsilonEquals(finalChestOrientation, 1.0e-1));
-      assertTrue(initialPelvisOrientation.epsilonEquals(finalPelvisOrientation, 1.0e-2));
+
+      assertTrue(isOrientationEqual(initialChestOrientation.getQuaternion(), finalChestOrientation.getQuaternion()));
+      assertTrue(isOrientationEqual(initialPelvisOrientation.getQuaternion(), finalPelvisOrientation.getQuaternion()));
 
       assertTrue("Expect: " + desiredHandPose + "\nActual: " + currentHandPose, currentHandPose.epsilonEquals(desiredHandPose, 1.0e-2));
+   }
+   
 
+   @ContinuousIntegrationTest(estimatedDuration = 27.0)
+   @Test(timeout = 160000)
+   public void testSolvingForBothHandPoses() throws SimulationExceededMaximumTimeException, IOException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      CommonAvatarEnvironmentInterface envrionment = new FlatGroundEnvironment();
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
+      setupKinematicsToolboxModule();
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      drcBehaviorTestHelper.updateRobotModel();
+
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
+                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                     getRobotModel().createFullRobotModel());
+
+      ReferenceFrame handControlFrameR = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(RobotSide.RIGHT);
+      ReferenceFrame handControlFrameL = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(RobotSide.LEFT);
+
+      FramePose desiredHandPoseR = new FramePose(handControlFrameR);
+      desiredHandPoseR.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredHandPoseR.translate(0.20, 0.0, 0.0);
+      ik.setTrajectoryTime(0.5);
+      ik.setDesiredHandPose(RobotSide.RIGHT, desiredHandPoseR);
+      FramePose desiredHandPoseL = new FramePose(handControlFrameL);
+      desiredHandPoseL.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredHandPoseL.translate(0.20, 0.0, 0.0);
+      ik.setTrajectoryTime(0.5);
+      ik.setDesiredHandPose(RobotSide.LEFT, desiredHandPoseL);
+      drcBehaviorTestHelper.dispatchBehavior(ik);
+
+      while (!ik.isDone())
+      {
+         ThreadTools.sleep(100);
+      }
+
+      assertFalse(ik.hasSolverFailed());
+
+      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      FramePose currentHandPoseR = new FramePose(handControlFrameR);
+      currentHandPoseR.changeFrame(ReferenceFrame.getWorldFrame());
+      FramePose currentHandPoseL = new FramePose(handControlFrameL);
+      currentHandPoseL.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      AxisAngle4d leftAngle = new AxisAngle4d();
+      AxisAngle4d rightAngle = new AxisAngle4d();
+      
+      desiredHandPoseL.getAxisAngleRotationToOtherPose(currentHandPoseL, leftAngle);
+      desiredHandPoseR.getAxisAngleRotationToOtherPose(currentHandPoseR, rightAngle);
+      
+      double angleReference = Math.toRadians(2);
+      
+      assertTrue(Math.abs(leftAngle.angle) < angleReference);
+      assertTrue(Math.abs(rightAngle.angle) < angleReference);
+   }
+
+   private boolean isOrientationEqual(Quat4d initialQuat, Quat4d finalQuat)
+   {
+      Quat4d quatDifference = new Quat4d(initialQuat);
+      quatDifference.mulInverse(finalQuat);
+
+      AxisAngle4d angleDifference = new AxisAngle4d();
+      angleDifference.set(quatDifference);
+      AngleTools.trimAngleMinusPiToPi(angleDifference.getAngle());
+
+      double angleReference = Math.toRadians(10);
+      return Math.abs(angleDifference.getAngle()) < angleReference;
    }
 
    private void setupKinematicsToolboxModule() throws IOException
