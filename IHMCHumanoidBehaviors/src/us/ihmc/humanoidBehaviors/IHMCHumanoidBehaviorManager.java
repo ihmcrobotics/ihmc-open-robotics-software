@@ -17,6 +17,7 @@ import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateM
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BlobFilteredSphereDetectionBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
@@ -181,7 +182,7 @@ public class IHMCHumanoidBehaviorManager
       // CREATE SERVICES
       FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(behaviorCommunicationBridge, yoGraphicsListRegistry);
       dispatcher.addBehaviorService(fiducialDetectorBehaviorService);
-      
+
 //      dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
 //            new PickUpBallBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters));
 
@@ -195,9 +196,8 @@ public class IHMCHumanoidBehaviorManager
             new ExampleComplexBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50, new FollowFiducialBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, 50));
+      dispatcher.addBehavior(HumanoidBehaviorType.WAlK_OVER_TERRAIN, new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, 50));
 
-//      dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateFiducialBehavior(behaviorCommunicationBridge, fiducialDetectorBehaviorService));
-      
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, new WalkToLocationBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters()));
 
