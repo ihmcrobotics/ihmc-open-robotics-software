@@ -72,23 +72,11 @@ public abstract class AbstractBehavior implements RobotController
       return null;
    }
 
-   public void attachNetworkListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
+   public void attachNetworkListeningQueue(ConcurrentListeningQueue<?> queue, Class<?> key)
    {
       communicationBridge.attachNetworkListeningQueue(queue, key);
    }
    
-//   protected void addChildBehavior(AbstractBehavior childBehavior)
-//   {
-//      childBehaviors.add(childBehavior);
-//   }
-//   
-//   protected void addChildBehaviors(ArrayList<AbstractBehavior> newChildBehaviors)
-//   {
-//      for(AbstractBehavior behavior: newChildBehaviors)
-//      {
-//         childBehaviors.add(behavior);
-//      }
-//   }
    public void sendPacketToController(Packet<?> obj)
    {
       communicationBridge.sendPacketToController(obj);
@@ -193,8 +181,13 @@ public abstract class AbstractBehavior implements RobotController
     */
    public void doPostBehaviorCleanup()
    {
-         isPaused.set(false);
-         isAborted.set(false);
+      isPaused.set(false);
+      isAborted.set(false);
+      
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.pause();
+      }
    }
    
    protected boolean isPaused()
