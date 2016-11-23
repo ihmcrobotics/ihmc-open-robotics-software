@@ -7,8 +7,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.PlanarRegionTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.tools.io.printing.PrintTools;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,8 +17,6 @@ import java.util.List;
 public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D combinedTerrainObject;
-   private final List<Robot> environmentRobots = new ArrayList<>();
-   private final List<ExternalForcePoint> contactPoints = new ArrayList<>();
    private final String environmentName;
    private final PlanarRegionsList planarRegionsList;
 
@@ -73,19 +71,20 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
    @Override
    public List<? extends Robot> getEnvironmentRobots()
    {
-      return environmentRobots;
+      PrintTools.warn(this, "Environment robots currently unimplemented for this class");
+      return null;
    }
 
    @Override
    public void createAndSetContactControllerToARobot()
    {
-
+      PrintTools.warn(this, "Contact points currently unimplemented for this class");
    }
 
    @Override
    public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
-      this.contactPoints.addAll(externalForcePoints);
+      PrintTools.warn(this, "Contact points currently unimplemented for this class");
    }
 
    @Override
