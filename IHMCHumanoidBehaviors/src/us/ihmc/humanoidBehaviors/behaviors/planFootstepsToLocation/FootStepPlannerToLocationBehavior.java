@@ -88,6 +88,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       this.planner = createFootstepPlanner();
       this.fiducialDetectorBehaviorService = fiducialDetectorBehaviorService;
       this.fiducialToTrack = fiducialToTrack;
+      fiducialDetectorBehaviorService.setLocationEnabled(true);
       fiducialDetectorBehaviorService.setTargetIDToLocate(this.fiducialToTrack);
 
       footstepPlannerGoal = new FootstepPlannerGoal();
@@ -113,7 +114,6 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       YoFramePose leftFootstepStatusPose = new YoFramePose(prefix + "LeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
       YoFramePose rightFootstepStatusPose = new YoFramePose(prefix + "RightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
       actualFootStatusPoses = new SideDependentList<>(leftFootstepStatusPose, rightFootstepStatusPose);
-
 
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(40);
       robotConfigurationDataQueue = new ConcurrentListeningQueue<RobotConfigurationData>(40);
