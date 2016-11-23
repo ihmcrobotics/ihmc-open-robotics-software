@@ -2,16 +2,28 @@ package us.ihmc.tools.time;
 
 public class Timer
 {
-   private double currentTime = 0.0;
-   private double lastTime = 0.0;
-   private double deltaTime = 0.0;
-   private double startTime = 0.0;
-   private long numLaps = 0;
-   private double deltaSum = 0.0;
+   private final TimeProvider timeProvider;
+   
+   protected double currentTime = 0.0;
+   protected double lastTime = 0.0;
+   protected double deltaTime = 0.0;
+   protected double startTime = 0.0;
+   protected long numLaps = 0;
+   protected double deltaSum = 0.0;
+   
+   public Timer()
+   {
+      timeProvider = new CpuTimeProvider();
+   }
+   
+   public Timer(TimeProvider timeProvider)
+   {
+      this.timeProvider = timeProvider;
+   }
    
    public Timer start()
    {
-      startTime = cpu();
+      startTime = timeProvider.now();
       lastTime = startTime;
       
       return this;
@@ -19,7 +31,7 @@ public class Timer
    
    public void resetLap()
    {
-      lastTime = cpu();
+      lastTime = timeProvider.now();
    }
 
    public void reset()
@@ -32,7 +44,7 @@ public class Timer
 
    public double lap()
    {
-      currentTime = cpu();
+      currentTime = timeProvider.now();
       deltaTime = currentTime - lastTime;
       lastTime = currentTime;
 
@@ -55,16 +67,11 @@ public class Timer
    
    public double totalElapsed()
    {
-      return cpu() - startTime;
+      return timeProvider.now() - startTime;
    }
    
    public double lapElapsed()
    {
-      return cpu() - lastTime;
-   }
-   
-   public static double cpu()
-   {
-      return System.nanoTime() / 1e9;
+      return timeProvider.now() - lastTime;
    }
 }
