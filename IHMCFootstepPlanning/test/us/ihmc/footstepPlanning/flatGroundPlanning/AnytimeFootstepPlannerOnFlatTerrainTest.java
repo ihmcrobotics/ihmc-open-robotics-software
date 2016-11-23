@@ -1,7 +1,9 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
-import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
+
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.SimplePlanarRegionBipedalAnytimeFootstepPlanner;
@@ -9,6 +11,7 @@ import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
 import us.ihmc.footstepPlanning.roughTerrainPlanning.SCSPlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -17,11 +20,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point3d;
-import java.util.concurrent.TimeUnit;
-
-import static org.junit.Assert.assertTrue;
 
 public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 {
@@ -92,7 +90,8 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
    @Override
    public SimplePlanarRegionBipedalAnytimeFootstepPlanner getPlanner()
    {
-      SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner();
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
 
       planner.setMaximumStepReach(0.4);
       planner.setMaximumStepZ(0.25);
