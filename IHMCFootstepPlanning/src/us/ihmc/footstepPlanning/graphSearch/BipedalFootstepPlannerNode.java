@@ -6,6 +6,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -21,8 +22,8 @@ public class BipedalFootstepPlannerNode
    private double costToHereFromStart;
    private double estimatedCostToGoal;
 
-   private static final double DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.2;
-   private static final double ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.2;
+   private static final double XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.3;
+   private static final double YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.3;
 
    private boolean isAtGoal = false;
 
@@ -169,21 +170,24 @@ public class BipedalFootstepPlannerNode
          }
 
          this.soleTransform.getTranslation(tempPointA);
-         MathTools.roundToGivenPrecision(tempPointA, DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+         MathTools.roundToGivenPrecision(tempPointA, XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
 
          otherNode.soleTransform.getTranslation(tempPointB);
-         MathTools.roundToGivenPrecision(tempPointB, DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+         MathTools.roundToGivenPrecision(tempPointB, XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
 
          this.soleTransform.getRotationEuler(tempRotationVectorA);
-         MathTools.roundToGivenPrecisionForAngles(tempRotationVectorA, ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+         double thisYaw = MathTools.roundToGivenPrecisionForAngle(tempRotationVectorA.getX(), YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
 
          otherNode.soleTransform.getRotationEuler(tempRotationVectorB);
-         MathTools.roundToGivenPrecisionForAngles(tempRotationVectorB, ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+         double otherYaw = MathTools.roundToGivenPrecisionForAngle(tempRotationVectorA.getX(), YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
 
          tempPointA.sub(tempPointB);
-         tempRotationVectorA.sub(tempRotationVectorB);
+         tempPointA.setZ(0.0);
 
-         return Math.abs(tempPointA.length()) < 1e-10 && Math.abs(tempRotationVectorA.length()) < 1e-10;
+//         tempRotationVectorA.sub(tempRotationVectorB);
+//         double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(thisYaw, otherYaw);
+
+         return (tempPointA.length() < 1e-10); //  && (Math.abs(yawDifference) < 1e-10);
       }
    }
 
@@ -191,29 +195,26 @@ public class BipedalFootstepPlannerNode
    public int hashCode()
    {
       this.soleTransform.getTranslation(tempPointA);
-      MathTools.roundToGivenPrecision(tempPointA, DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+      MathTools.roundToGivenPrecision(tempPointA, XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
 
       this.soleTransform.getRotationEuler(tempRotationVectorA);
-      MathTools.roundToGivenPrecisionForAngles(tempRotationVectorA, ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+      MathTools.roundToGivenPrecisionForAngles(tempRotationVectorA, YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
 
       int result = getRobotSide().hashCode();
-      result = 3 * result + (int) Math.round(tempPointA.getX() / DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
-      result = 3 * result + (int) Math.round(tempPointA.getY() / DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
-      result = 3 * result + (int) Math.round(tempPointA.getZ() / DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
-      result = 3 * result + (int) Math.round(tempRotationVectorA.getX() / ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
-      result = 3 * result + (int) Math.round(tempRotationVectorA.getY() / ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
-      result = 3 * result + (int) Math.round(tempRotationVectorA.getZ() / ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+      result = 3 * result + (int) Math.round(tempPointA.getX() / XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+      result = 3 * result + (int) Math.round(tempPointA.getY() / XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+//      result = 3 * result + (int) Math.round(tempRotationVectorA.getX() / YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
 
       return result;
    }
 
-   public static double getDistanceThresholdToConsiderNodesEqual()
+   public static double getXyDistanceThresholdToConsiderNodesEqual()
    {
-      return DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL;
+      return XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL;
    }
 
-   public static double getRotationThresholdToConsiderNodesEqual()
+   public static double getYawRotationThresholdToConsiderNodesEqual()
    {
-      return ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL;
+      return YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL;
    }
 }
