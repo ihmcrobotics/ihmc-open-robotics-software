@@ -132,7 +132,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
 
       else
          statemachine.addState(findBallTask);
-      statemachine.setCurrentState(SearchFarState.ENABLE_LIDAR);
+      statemachine.setStartState(SearchFarState.ENABLE_LIDAR);
 
    }
 

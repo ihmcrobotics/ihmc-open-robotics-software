@@ -13,6 +13,8 @@ import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
@@ -26,6 +28,7 @@ import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -60,6 +63,8 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private boolean showGUI;
    private boolean hideViewport;
    private boolean showOverheadView;
+
+   private YoGraphicsListRegistry yoGraphicsListRegistry;
 
    public SCSVisualizer(int bufferSize)
    {
@@ -218,6 +223,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       scs.setScrollGraphsEnabled(false);
       scs.setGroundVisible(false);
       scs.attachExitActionListener(this);
+      scs.attachPlaybackListener(createYoGraphicsUpdater());
       //scs.setFastSimulate(true, 50);
 
       scs.addButton(disconnectButton);
@@ -254,8 +260,8 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       List<JointState> jointStates = handshakeParser.getJointStates();
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = handshakeParser.getDynamicGraphicObjectsListRegistry();
-      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+      yoGraphicsListRegistry = handshakeParser.getDynamicGraphicObjectsListRegistry();
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, false);
       VisualizerUtils.createOverheadPlotter(scs, showOverheadView, yoGraphicsListRegistry);
 
       for (int i = 0; i < stateListeners.size(); i++)
@@ -345,4 +351,40 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       return recording;
    }
 
+   private PlaybackListener createYoGraphicsUpdater()
+   {
+      return new PlaybackListener()
+      {
+         @Override
+         public void indexChanged(int newIndex, double newTime)
+         {
+            updateYoGraphics();
+         }
+
+         @Override
+         public void stop()
+         {
+         }
+
+         @Override
+         public void play(double realTimeRate)
+         {
+         }
+      };
+   }
+
+   private void updateYoGraphics()
+   {
+      if (yoGraphicsListRegistry == null)
+         return;
+
+      List<YoGraphicsList> yoGraphicsLists = yoGraphicsListRegistry.getYoGraphicsLists();
+      for (YoGraphicsList yoGraphicsList : yoGraphicsLists)
+      {
+         ArrayList<YoGraphic> yoGraphics = yoGraphicsList.getYoGraphics();
+         for (YoGraphic yoGraphic : yoGraphics)
+            yoGraphic.update();
+      }
+      yoGraphicsListRegistry.update();
+   }
 }

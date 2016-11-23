@@ -144,7 +144,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    public void initialize()
    {
       super.initialize();
-      coloredCircularBlobDetectorBehaviorService.initialize();
+      coloredCircularBlobDetectorBehaviorService.run();
       
       DepthDataStateCommand depthDataStateCommand = new DepthDataStateCommand(LidarState.ENABLE_BEHAVIOR_ONLY);
       depthDataStateCommand.setDestination(PacketDestination.SENSOR_MANAGER);
@@ -173,14 +173,14 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    public void abort()
    {
       super.abort();
-      coloredCircularBlobDetectorBehaviorService.stop();
+      coloredCircularBlobDetectorBehaviorService.pause();
    }
 
    @Override
    public void resume()
    {
       super.resume();
-      coloredCircularBlobDetectorBehaviorService.resume();
+      coloredCircularBlobDetectorBehaviorService.run();
    }
 
    public Point2d getLatestBallPosition()

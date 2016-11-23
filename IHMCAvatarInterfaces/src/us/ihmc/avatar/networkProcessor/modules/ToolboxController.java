@@ -5,7 +5,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
-public abstract class ToolboxController<T extends StatusPacket<T>>
+public abstract class ToolboxController
 {
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final StatusMessageOutputManager statusOutputManager;
@@ -41,7 +41,7 @@ public abstract class ToolboxController<T extends StatusPacket<T>>
       updateInternal();
    }
 
-   protected void reportMessage(T statusMessage)
+   protected <T extends StatusPacket<T>> void reportMessage(T statusMessage)
    {
       if (packetDestination == null)
          return;

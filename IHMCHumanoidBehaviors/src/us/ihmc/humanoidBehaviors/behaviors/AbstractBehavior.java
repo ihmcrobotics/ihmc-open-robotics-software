@@ -2,15 +2,15 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidBehaviors.communication.GlobalObjectConsumer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -26,28 +26,32 @@ import us.ihmc.tools.FormattingTools;
  */
 public abstract class AbstractBehavior implements RobotController
 {
+
+   private final boolean DEBUG = false;
+
    public static enum BehaviorStatus
    {
       INITIALIZED, PAUSED, ABORTED, DONE, FINALIZED
    }
-   
 
    protected final CommunicationBridge communicationBridge;
-   
-  
+
+   protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
 
    protected final String behaviorName;
-   
+
    /**
     * Every variable that can be a {@link YoVariable} should be a {@link YoVariable}, so they can be visualized in SCS.
     */
    protected final YoVariableRegistry registry;
-   
+
    protected final EnumYoVariable<BehaviorStatus> yoBehaviorStatus;
    protected final BooleanYoVariable hasBeenInitialized;
    protected final BooleanYoVariable isPaused;
    protected final BooleanYoVariable isAborted;
    protected final DoubleYoVariable percentCompleted;
+
+   private final List<BehaviorService> behaviorsServices;
 
    public AbstractBehavior(CommunicationBridgeInterface communicationBridge)
    {
@@ -56,16 +60,18 @@ public abstract class AbstractBehavior implements RobotController
 
    public AbstractBehavior(String namePrefix, CommunicationBridgeInterface communicationBridge)
    {
-      this.communicationBridge = (CommunicationBridge)communicationBridge;
-      
+      this.communicationBridge = (CommunicationBridge) communicationBridge;
+
       behaviorName = FormattingTools.addPrefixAndKeepCamelCaseForMiddleOfExpression(namePrefix, getClass().getSimpleName());
       registry = new YoVariableRegistry(behaviorName);
-      
+
       yoBehaviorStatus = new EnumYoVariable<AbstractBehavior.BehaviorStatus>(namePrefix + "Status", registry, BehaviorStatus.class);
       hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
       isPaused = new BooleanYoVariable("isPaused" + behaviorName, registry);
       isAborted = new BooleanYoVariable("isAborted" + behaviorName, registry);
       percentCompleted = new DoubleYoVariable("percentCompleted", registry);
+
+      behaviorsServices = new ArrayList<>();
    }
 
    public CoactiveElement getCoactiveElement()
@@ -73,23 +79,6 @@ public abstract class AbstractBehavior implements RobotController
       return null;
    }
 
-   public void attachNetworkListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
-   {
-      communicationBridge.attachNetworkListeningQueue(queue, key);
-   }
-   
-//   protected void addChildBehavior(AbstractBehavior childBehavior)
-//   {
-//      childBehaviors.add(childBehavior);
-//   }
-//   
-//   protected void addChildBehaviors(ArrayList<AbstractBehavior> newChildBehaviors)
-//   {
-//      for(AbstractBehavior behavior: newChildBehaviors)
-//      {
-//         childBehaviors.add(behavior);
-//      }
-//   }
    public void sendPacketToController(Packet<?> obj)
    {
       communicationBridge.sendPacketToController(obj);
@@ -99,14 +88,16 @@ public abstract class AbstractBehavior implements RobotController
    {
       communicationBridge.sendPacket(obj);
    }
+
    public void sendPacketToUI(Packet<?> obj)
    {
       communicationBridge.sendPacketToUI(obj);
    }
-   
-   
-   
-   
+
+   public void addBehaviorService(BehaviorService behaviorService)
+   {
+      behaviorsServices.add(behaviorService);
+   }
 
    @Override
    public YoVariableRegistry getYoVariableRegistry()
@@ -135,8 +126,12 @@ public abstract class AbstractBehavior implements RobotController
       isPaused.set(false);
       TextToSpeechPacket p1 = new TextToSpeechPacket("Aborting Behavior");
       sendPacket(p1);
-   }
 
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.pause();
+      }
+   }
 
    /**
     * The implementation of this method should result in pausing the behavior (pause current action and no more actions sent to the controller, the robot remains still).
@@ -147,6 +142,10 @@ public abstract class AbstractBehavior implements RobotController
       TextToSpeechPacket p1 = new TextToSpeechPacket("Pausing Behavior");
       sendPacket(p1);
       isPaused.set(true);
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.pause();
+      }
    }
 
    /**
@@ -157,15 +156,20 @@ public abstract class AbstractBehavior implements RobotController
    {
       TextToSpeechPacket p1 = new TextToSpeechPacket("Resuming Behavior");
       sendPacket(p1);
-      isPaused.set(false);      
+      isPaused.set(false);
+      isPaused.set(false);
+
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.run();
+      }
    }
 
-   
    public BehaviorStatus getBehaviorStatus()
    {
       return yoBehaviorStatus.getEnumValue();
    }
-   
+
    /**
     * Only method to check if the behavior is done.
     * @return
@@ -177,10 +181,16 @@ public abstract class AbstractBehavior implements RobotController
     */
    public void doPostBehaviorCleanup()
    {
-         isPaused.set(false);
-         isAborted.set(false);
+      isPaused.set(false);
+      isAborted.set(false);
+
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.pause();
+      }
+      removeAllLocalListenersFromCommunicationBridge();
    }
-   
+
    protected boolean isPaused()
    {
       return isPaused.getBooleanValue() || isAborted.getBooleanValue();
@@ -194,13 +204,59 @@ public abstract class AbstractBehavior implements RobotController
    {
       isPaused.set(false);
       isAborted.set(false);
+
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.run();
+      }
+
+      addAllLocalListenersToCommunicationBridge();
+
    }
+
+   private void addAllLocalListenersToCommunicationBridge()
+   {
+      if (DEBUG)
+      {
+         System.out.println("***************************************************************************");
+         System.out.println("AbstractBehavior " + behaviorName + " addAllLocalListenersToCommunicationBridge");
+      }
+      for (Class<?> key : localListeningNetworkQueues.keySet())
+      {
+         for (ConcurrentListeningQueue queue : localListeningNetworkQueues.get(key))
+         {
+            if (DEBUG)
+               System.out.println("-- adding listener for " + key);
+            communicationBridge.attachNetworkListeningQueue(queue, key);
+         }
+      }
+   }
+
+   private void removeAllLocalListenersFromCommunicationBridge()
+   {
+      if (DEBUG)
+         System.out.println("--------------------------------------------------------------------------------");
+      System.out.println("AbstractBehavior " + behaviorName + " removeAllLocalListenersFromCommunicationBridge");
+      for (Class<?> key : localListeningNetworkQueues.keySet())
+      {
+         for (ConcurrentListeningQueue queue : localListeningNetworkQueues.get(key))
+         {
+            communicationBridge.detachNetworkListeningQueue(queue, key);
+         }
+      }
+   }
+
+   public void attachNetworkListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
+   {
+      if (!localListeningNetworkQueues.containsKey(key))
+      {
+         localListeningNetworkQueues.put(key, new ArrayList<ConcurrentListeningQueue>());
+      }
+      localListeningNetworkQueues.get(key).add(queue);
+   }
+
    public CommunicationBridge getCommunicationBridge()
    {
       return communicationBridge;
    }
-   
-   
-   
- 
 }

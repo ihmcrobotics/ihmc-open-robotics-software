@@ -64,7 +64,7 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
-public class KinematicsToolboxController extends ToolboxController<KinematicsToolboxOutputStatus>
+public class KinematicsToolboxController extends ToolboxController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double updateDT = 1.0e-3;
