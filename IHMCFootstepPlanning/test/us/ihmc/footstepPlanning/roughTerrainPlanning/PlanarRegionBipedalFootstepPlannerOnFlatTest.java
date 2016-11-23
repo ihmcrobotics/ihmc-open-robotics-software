@@ -6,6 +6,7 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepPlannerOnFlatGroundTest;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
@@ -47,7 +48,8 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    @Override
    public FootstepPlanner getPlanner()
    {
-      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner();
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
 
       planner.setMaximumStepReach(0.4);
       planner.setMaximumStepZ(0.25);
