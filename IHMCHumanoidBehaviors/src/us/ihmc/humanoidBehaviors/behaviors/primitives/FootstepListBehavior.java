@@ -26,7 +26,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class FootstepListBehavior extends AbstractBehavior
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private FootstepDataListMessage outgoingFootstepDataList;
    private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
@@ -176,6 +176,7 @@ public class FootstepListBehavior extends AbstractBehavior
       isStopped.set(false);
       hasBeenInitialized.set(true);
       hasRobotStartedWalking.set(false);
+      super.initialize();
    }
 
    @Override
@@ -194,6 +195,7 @@ public class FootstepListBehavior extends AbstractBehavior
       hasLastStepBeenReached.set(false);
       isRobotDoneWalking.set(false);
       hasRobotStartedWalking.set(false);
+      super.doPostBehaviorCleanup();
    }
 
    @Override

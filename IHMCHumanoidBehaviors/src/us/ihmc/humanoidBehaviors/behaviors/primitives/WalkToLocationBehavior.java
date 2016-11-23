@@ -202,6 +202,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
       this.targetLocation.set(robotLocation);
       this.targetOrientation.set(robotOrientation);
+      super.initialize();
    }
 
    public int getNumberOfFootSteps()
