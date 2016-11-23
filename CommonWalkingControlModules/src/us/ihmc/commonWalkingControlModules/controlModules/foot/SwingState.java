@@ -46,7 +46,7 @@ import us.ihmc.robotics.trajectories.providers.VectorProvider;
 public class SwingState extends AbstractUnconstrainedState
 {
    private final boolean useNewSwingTrajectoyOptimization;
-   private static final boolean CONTROL_TOE = false;
+   private static final boolean CONTROL_TOE = true; //false;
 
    private final BooleanYoVariable replanTrajectory;
    private final BooleanYoVariable doContinuousReplanning;
