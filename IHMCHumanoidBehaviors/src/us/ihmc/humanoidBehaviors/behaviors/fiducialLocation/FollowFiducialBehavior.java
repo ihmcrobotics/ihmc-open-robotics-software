@@ -136,7 +136,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
    private FootstepPlanner createFootstepPlanner()
    {
-      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner();
+      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
 
       planner.setMaximumStepReach(0.4);
       planner.setMaximumStepZ(0.25);
@@ -357,7 +357,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
       leftFootPose.getPosition(temp);
       pointBetweenFeet.set(temp);
-      leftFootPose.getPosition(temp);
+      rightFootPose.getPosition(temp);
       pointBetweenFeet.add(temp);
       pointBetweenFeet.scale(0.5);
 
