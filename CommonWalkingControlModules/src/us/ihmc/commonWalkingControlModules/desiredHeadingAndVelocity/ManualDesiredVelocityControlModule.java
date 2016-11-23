@@ -34,4 +34,10 @@ public class ManualDesiredVelocityControlModule implements DesiredVelocityContro
    {
 //      throw new RuntimeException("Set velocity manually, don't call this method.");
    }
+
+   @Override
+   public ReferenceFrame getReferenceFrame()
+   {
+      return desiredVelocity.getReferenceFrame();
+   }
 }

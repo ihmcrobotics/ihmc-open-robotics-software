@@ -313,7 +313,7 @@ public abstract class ToolboxModule
       toolboxRunnable = null;
    }
 
-   abstract public ToolboxController<? extends StatusPacket<?>> getToolboxController();
+   abstract public ToolboxController getToolboxController();
 
    abstract public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands();
 

@@ -5,6 +5,7 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.fiducialDetector.FiducialDetectorFromCameraImages;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.thread.ThreadTools;
@@ -14,10 +15,14 @@ public class FiducialDetectorBehaviorService extends ThreadedBehaviorService
    private static final double DEFAULT_FIDUCIAL_SIZE = 1.0;
    private static final double DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS = Math.toRadians(80.0);
    private static final double DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS = Math.toRadians(45.0);
+   
    private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>(20);
 
+   private final Object fiducialDetectorFromCameraImagesConch = new Object();
    private final FiducialDetectorFromCameraImages fiducialDetectorFromCameraImages;
    private RigidBodyTransform transformFromReportedToFiducialFrame;
+   
+   private final BooleanYoVariable locationEnabled;
 
    public FiducialDetectorBehaviorService(CommunicationBridgeInterface communicationBridge,
                                           YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -30,8 +35,12 @@ public class FiducialDetectorBehaviorService extends ThreadedBehaviorService
       fiducialDetectorFromCameraImages = new FiducialDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(), yoGraphicsListRegistry);
 
       fiducialDetectorFromCameraImages.setFieldOfView(DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS, DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS);
-      fiducialDetectorFromCameraImages.setLocationEnabled(false);
       fiducialDetectorFromCameraImages.setExpectedFiducialSize(DEFAULT_FIDUCIAL_SIZE);
+      
+      String prefix = "fiducial";
+      locationEnabled = new BooleanYoVariable(prefix + "LocationEnabled", getYoVariableRegistry());
+      
+      locationEnabled.set(false);
    }
 
    @Override
@@ -41,7 +50,10 @@ public class FiducialDetectorBehaviorService extends ThreadedBehaviorService
       {
          VideoPacket videoPacket = videoPacketQueue.getLatestPacket();
 
-         fiducialDetectorFromCameraImages.setNewVideoPacket(videoPacket);
+         synchronized (fiducialDetectorFromCameraImagesConch)
+         {
+            fiducialDetectorFromCameraImages.detectFromVideoPacket(videoPacket);
+         }
       }
       else
       {
@@ -51,21 +63,54 @@ public class FiducialDetectorBehaviorService extends ThreadedBehaviorService
 
    public void setTargetIDToLocate(long targetIDToLocate)
    {
-      fiducialDetectorFromCameraImages.setTargetIDToLocate(targetIDToLocate);
+      synchronized (fiducialDetectorFromCameraImagesConch)
+      {
+         fiducialDetectorFromCameraImages.setTargetIDToLocate(targetIDToLocate);
+      }
    }
-
-   public void setLocationEnabled(boolean locationEnabled)
+   
+   public void setExpectedFiducialSize(double expectedFiducialSize)
    {
-      fiducialDetectorFromCameraImages.setLocationEnabled(locationEnabled);
+      synchronized (fiducialDetectorFromCameraImagesConch)
+      {
+         fiducialDetectorFromCameraImages.setExpectedFiducialSize(expectedFiducialSize);
+      }
    }
 
    public boolean getTargetIDHasBeenLocated()
    {
-      return fiducialDetectorFromCameraImages.getTargetIDHasBeenLocated();
+      synchronized (fiducialDetectorFromCameraImagesConch)
+      {
+         return fiducialDetectorFromCameraImages.getTargetIDHasBeenLocated();
+      }
    }
 
    public void getReportedFiducialPoseWorldFrame(FramePose framePoseToPack)
    {
-      fiducialDetectorFromCameraImages.getReportedFiducialPoseWorldFrame(framePoseToPack);
+      synchronized (fiducialDetectorFromCameraImagesConch)
+      {
+         fiducialDetectorFromCameraImages.getReportedFiducialPoseWorldFrame(framePoseToPack);
+      }
+   }
+   
+   @Override
+   public void run()
+   {
+      super.run();
+      locationEnabled.set(true);
+   }
+   
+   @Override
+   public void pause()
+   {
+      super.pause();
+      locationEnabled.set(false);
+   }
+   
+   @Override
+   public void destroy()
+   {
+      super.destroy();
+      locationEnabled.set(false);
    }
 }

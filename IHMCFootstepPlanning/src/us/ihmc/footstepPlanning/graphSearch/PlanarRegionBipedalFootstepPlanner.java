@@ -31,43 +31,43 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
-   private PlanarRegionsList planarRegionsList;
-   private SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
+   protected PlanarRegionsList planarRegionsList;
+   protected SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
 
-   private RobotSide initialSide;
-   private RigidBodyTransform initialFootPose = new RigidBodyTransform();
+   protected RobotSide initialSide;
+   protected RigidBodyTransform initialFootPose = new RigidBodyTransform();
 
-   private SideDependentList<RigidBodyTransform> goalFootstepPoses;
+   protected SideDependentList<RigidBodyTransform> goalFootstepPoses;
 
    private FootstepPlannerGoalType footstepPlannerGoalType;
    private Point2d xyGoal;
    private double distanceFromXYGoal;
 
-   private SideDependentList<Point3d> goalPositions;
-   private SideDependentList<Double> goalYaws;
+   protected SideDependentList<Point3d> goalPositions;
+   protected SideDependentList<Double> goalYaws;
 
-   private double idealFootstepLength;
-   private double idealFootstepWidth;
+   protected double idealFootstepLength;
+   protected double idealFootstepWidth;
 
-   private double maximumStepReach;
-   private double maximumStepZ;
-   private double maximumStepYaw;
-   private double minimumStepWidth;
+   protected double maximumStepReach;
+   protected double maximumStepZ;
+   protected double maximumStepYaw;
+   protected double minimumStepWidth;
 
-   private double minimumFootholdPercent;
+   protected double minimumFootholdPercent;
 
-   private double maximumXYWiggleDistance = 0.1;
-   private double maximumYawWiggle = 0.1;
+   protected double maximumXYWiggleDistance = 0.1;
+   protected double maximumYawWiggle = 0.1;
 
-   private double minimumSurfaceNormalZ = 0.7;
-   private double maximumZPenetrationOnVRegions = 0.008;
+   protected double minimumSurfaceNormalZ = 0.7;
+   protected double maximumZPenetrationOnVRegions = 0.008;
 
    private int maximumNumberOfNodesToExpand;
    //   private FootstepPlan footstepPlan;
 
-   private BipedalFootstepPlannerNode startNode, goalNode;
+   protected BipedalFootstepPlannerNode startNode, goalNode;
 
-   private BipedalFootstepPlannerListener listener;
+   protected BipedalFootstepPlannerListener listener;
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
    {
@@ -128,8 +128,18 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       footstepPlannerGoalType = goal.getFootstepPlannerGoalType();
 
-      setGoalXYAndRadius(goal);
-      setGoalPositionsAndYaws(goal);
+      switch(footstepPlannerGoalType)
+      {
+      case CLOSE_TO_XY_POSITION:
+         setGoalXYAndRadius(goal);
+         setGoalPositionsAndYaws(goal);
+         break;
+      case POSE_BETWEEN_FEET:
+         setGoalPositionsAndYaws(goal);
+         break;
+      default:
+         throw new RuntimeException("Method for setting for from goal type " + footstepPlannerGoalType + " is not implemented");
+      }
    }
 
    private void setGoalXYAndRadius(FootstepPlannerGoal goal)
@@ -151,8 +161,19 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       goalPose.getPose(goalLeftFootPose);
       goalPose.getPose(goalRightFootPose);
 
-      Vector3d toTheLeft = new Vector3d(0.0, 0.15, 0.0);
-      Vector3d toTheRight = new Vector3d(0.0, -0.15, 0.0);
+      Vector3d toTheLeft;
+      Vector3d toTheRight;
+
+      if(idealFootstepWidth == 0.0)
+      {
+         toTheLeft = new Vector3d(0.0, 0.15, 0.0);
+         toTheRight = new Vector3d(0.0, -0.15, 0.0);
+      }
+      else
+      {
+         toTheLeft = new Vector3d(0.0, idealFootstepWidth, 0.0);
+         toTheRight = new Vector3d(0.0, - idealFootstepWidth, 0.0);
+      }
 
       goalLeftFootPose.applyTranslation(toTheLeft);
       goalRightFootPose.applyTranslation(toTheRight);
@@ -199,22 +220,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          return null;
       }
 
-      FootstepPlan result = new FootstepPlan();
-
-      BipedalFootstepPlannerNode node = goalNode;
-
-      while (node != null)
-      {
-         RigidBodyTransform soleTransform = new RigidBodyTransform();
-         node.getSoleTransform(soleTransform);
-
-         FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransform);
-         result.addFootstep(node.getRobotSide(), framePose);
-
-         node = node.getParentNode();
-      }
-
-      result.reverse();
+      FootstepPlan result = new FootstepPlan(goalNode);
       return result;
    }
 
@@ -277,7 +283,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return FootstepPlanningResult.NO_PATH_EXISTS;
    }
 
-   private boolean addGoalNodeIfGoalIsReachable(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform, Deque<BipedalFootstepPlannerNode> stack)
+   protected boolean addGoalNodeIfGoalIsReachable(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform, Deque<BipedalFootstepPlannerNode> stack)
    {
       BipedalFootstepPlannerNode goalNode = null;
 
@@ -340,7 +346,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return null;
    }
 
-   private boolean checkIfGoodFootstep(BipedalFootstepPlannerNode nodeToExpand)
+   protected boolean checkIfGoodFootstep(BipedalFootstepPlannerNode nodeToExpand)
    {
       RobotSide robotSide = nodeToExpand.getRobotSide();
 
@@ -379,7 +385,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return true;
    }
 
-   private boolean snapToPlanarRegionAndCheckIfGoodSnap(BipedalFootstepPlannerNode nodeToExpand)
+   protected boolean snapToPlanarRegionAndCheckIfGoodSnap(BipedalFootstepPlannerNode nodeToExpand)
    {
       if (planarRegionsList != null)
       {
@@ -423,7 +429,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return true;
    }
 
-   private void expandChildrenAndAddToQueue(Deque<BipedalFootstepPlannerNode> stack, RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand)
+   protected void expandChildrenAndAddToQueue(Deque<BipedalFootstepPlannerNode> stack, RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand)
    {
       ArrayList<BipedalFootstepPlannerNode> nodesToAdd = new ArrayList<>();
 
@@ -534,7 +540,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private BipedalFootstepPlannerNode createAndAddNextNodeGivenStep(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand, Vector3d stepVectorInSoleFrame, double stepYaw)
+   protected BipedalFootstepPlannerNode createAndAddNextNodeGivenStep(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand, Vector3d stepVectorInSoleFrame, double stepYaw)
    {
       Point3d stepLocationInWorld = new Point3d(stepVectorInSoleFrame);
       soleZUpTransform.transform(stepLocationInWorld);
@@ -556,7 +562,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return childNode;
    }
 
-   private RigidBodyTransform getSnapAndWiggleTransform(BipedalFootstepPlannerNode bipedalFootstepPlannerNode, PlanarRegion planarRegionToPack)
+   protected RigidBodyTransform getSnapAndWiggleTransform(BipedalFootstepPlannerNode bipedalFootstepPlannerNode, PlanarRegion planarRegionToPack)
    {
       if (planarRegionsList == null)
       {
@@ -689,7 +695,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return snapAndWiggleTransform;
    }
 
-   private void notifyListenerNodeSnappedAndStillSelectedForExpansion(BipedalFootstepPlannerNode nodeAfterSnap)
+   protected void notifyListenerNodeSnappedAndStillSelectedForExpansion(BipedalFootstepPlannerNode nodeAfterSnap)
    {
       if (listener != null)
       {
@@ -697,7 +703,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private void notifyListenerNodeSelectedForExpansion(BipedalFootstepPlannerNode nodeToExpand)
+   protected void notifyListenerNodeSelectedForExpansion(BipedalFootstepPlannerNode nodeToExpand)
    {
       if (listener != null)
       {
@@ -705,7 +711,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private void notifyListenerNodeForExpansionWasAccepted(BipedalFootstepPlannerNode nodeToExpand)
+   protected void notifyListenerNodeForExpansionWasAccepted(BipedalFootstepPlannerNode nodeToExpand)
    {
       if (listener != null)
       {
@@ -713,7 +719,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private void notifyListenerNodeForExpansionWasRejected(BipedalFootstepPlannerNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
+   protected void notifyListenerNodeForExpansionWasRejected(BipedalFootstepPlannerNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       if (listener != null)
       {
@@ -721,7 +727,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private void notifyListenerSolutionWasFound(BipedalFootstepPlannerNode goalNode)
+   protected void notifyListenerSolutionWasFound(BipedalFootstepPlannerNode goalNode)
    {
       if (listener != null)
       {
@@ -729,7 +735,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private void notifyListenerSolutionWasNotFound()
+   protected void notifyListenerSolutionWasNotFound()
    {
       if (listener != null)
       {
@@ -737,11 +743,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private final Vector3d xAxis = new Vector3d();
-   private final Vector3d yAxis = new Vector3d();
-   private final Vector3d zAxis = new Vector3d();
+   protected final Vector3d xAxis = new Vector3d();
+   protected final Vector3d yAxis = new Vector3d();
+   protected final Vector3d zAxis = new Vector3d();
 
-   private void setTransformZUpPreserveX(RigidBodyTransform transform)
+   protected void setTransformZUpPreserveX(RigidBodyTransform transform)
    {
       xAxis.set(transform.getM00(), transform.getM10(), 0.0);
       xAxis.normalize();

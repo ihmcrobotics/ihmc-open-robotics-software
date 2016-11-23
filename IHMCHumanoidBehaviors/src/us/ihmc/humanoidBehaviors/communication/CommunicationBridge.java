@@ -63,6 +63,15 @@ public class CommunicationBridge implements CommunicationBridgeInterface
       }
       listeningNetworkQueues.get(key).add(queue);
    }
+   
+   
+   public void detachNetworkListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
+   {
+      if (listeningNetworkQueues.containsKey(key))
+      {
+         listeningNetworkQueues.get(key).remove(queue);
+      }
+   }
 
    @Override
    public void sendPacketToController(Packet packet)

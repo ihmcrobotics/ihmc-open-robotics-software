@@ -86,7 +86,11 @@ public class JointPrivilegedConfigurationHandler
          yoJointPriviligedAccelerations.put(joint, new DoubleYoVariable("qdd_priv_" + jointName, registry));
       }
 
-      configurationGain.set(20.0);
+      // FIXME: at 40.0 the robot sometimes get stuck at the end of transfer when taking one step at a time.
+      // The nullspace computed during toe-off is wrong because it does not consider the jacobian nor the proper selection matrix.
+      // That nullspace is used to project the privileged joint velocities/accelerations.
+      // Set it to 20.0 when getting stuck in transfer. Be careful because 20.0 is not enough to escape singularity at the beginning of the swing.
+      configurationGain.set(40.0);
       velocityGain.set(6.0);
       maxVelocity.set(2.0);
       maxAcceleration.set(Double.POSITIVE_INFINITY);

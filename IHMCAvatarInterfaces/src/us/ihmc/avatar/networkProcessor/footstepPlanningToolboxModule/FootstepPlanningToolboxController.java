@@ -30,7 +30,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-public class FootstepPlanningToolboxController extends ToolboxController<FootstepPlanningToolboxOutputStatus>
+public class FootstepPlanningToolboxController extends ToolboxController
 {
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<FootstepPlanningRequestPacket>(null);
    private final BooleanYoVariable isDone = new BooleanYoVariable("isDone", registry);
