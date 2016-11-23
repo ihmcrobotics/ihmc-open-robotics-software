@@ -48,7 +48,8 @@ public class FindFiducialBehavior extends AbstractBehavior
 
       foundFiducialYoFramePose = new YoFramePoseUsingQuaternions(prefix + "FoundFiducialPose", ReferenceFrame.getWorldFrame(), registry);
       this.fiducialDetectorBehaviorService = fiducialDetectorBehaviorService;
-      fiducialDetectorBehaviorService.setLocationEnabled(true);
+      addBehaviorService(fiducialDetectorBehaviorService);
+
       fiducialDetectorBehaviorService.setTargetIDToLocate(this.fiducialToTrack);
 
       headPitchToFindFucdicial.set(0.6);
@@ -129,29 +130,7 @@ public class FindFiducialBehavior extends AbstractBehavior
    public void initialize()
    {
       super.initialize();
-      fiducialDetectorBehaviorService.initialize();
       foundFiducial.set(false);
-   }
-
-   @Override
-   public void pause()
-   {
-      super.pause();
-      fiducialDetectorBehaviorService.pause();
-   }
-
-   @Override
-   public void abort()
-   {
-      super.abort();
-      fiducialDetectorBehaviorService.stop();
-   }
-
-   @Override
-   public void resume()
-   {
-      super.resume();
-      fiducialDetectorBehaviorService.resume();
    }
 
    @Override
