@@ -17,6 +17,8 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    private final PlanarRegion planarRegion;
    private final Graphics3DObject linkGraphics;
 
+   private final Point3d tempPoint3dForCheckInside = new Point3d();
+
    public PlanarRegionTerrainObject(PlanarRegion planarRegion)
    {
       this.planarRegion = planarRegion;
@@ -73,34 +75,11 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
-      // We will recycle intersectionToPack here so we don't have to make an allocation.
-      double oldX, oldY, oldZ;
+      boolean isPointInside = planarRegion.isPointInside(tempPoint3dForCheckInside, 1e-10);
 
-      // Store current values of intersectionToPack
-      oldX = intersectionToPack.x;
-      oldY = intersectionToPack.y;
-      oldZ = intersectionToPack.z;
-
-      // Set intersection to pack with the values to test so that we can use it with planarRegion's isPointInside() method call
-      intersectionToPack.x = x;
-      intersectionToPack.y = y;
-      intersectionToPack.z = z;
-
-      // Check if the point is inside, modulo some small epislon
-      boolean isPointInside = planarRegion.isPointInside(intersectionToPack, 1e-3);
-
-      if(!isPointInside)
+      if(isPointInside)
       {
-         // If the point is not inside, switch intersectionToPack back to its original values.
-         // Just in case the caller of this method was using those old values for something in
-         // event of failure
-         intersectionToPack.x = oldX;
-         intersectionToPack.y = oldY;
-         intersectionToPack.z = oldZ;
-      }
-      else
-      {
-         // If the point is inside, update the normal to pack.
+         intersectionToPack.set(tempPoint3dForCheckInside);
          planarRegion.getNormal(normalToPack);
       }
 
