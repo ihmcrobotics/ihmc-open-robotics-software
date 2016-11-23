@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -14,11 +15,17 @@ public class TimerTest
    @Test(timeout = 30000)
    public void testTimer()
    {
-      Timer timer = new Timer().start();
+      Timer timer = new Timer();
+      
+      double averageLap = timer.averageLap();
+      PrintTools.debug(this, "Lap: " + timer.lap());
+      assertEquals("averageLap incorrect", Double.NaN, averageLap, 1e-2);
+      
+      timer.start();
       
       double lapElapsed = timer.lapElapsed();
       double totalElapsed = timer.totalElapsed();
-      double averageLap = timer.averageLap();
+      averageLap = timer.averageLap();
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, 1e-2);
       assertEquals("totalElapsed incorrect", 0.0, totalElapsed, 1e-2);
       assertEquals("averageLap incorrect", Double.NaN, averageLap, 1e-2);
@@ -27,7 +34,9 @@ public class TimerTest
       ThreadTools.sleepSeconds(sleepTime1);
       
       double lap = timer.lap();
+      averageLap = timer.averageLap();
       assertEquals("lap incorrect", sleepTime1, lap, 1e-2);
+      assertEquals("averageLap incorrect", sleepTime1, averageLap, 1e-2);
       
       double sleepTime2 = 1.0;
       ThreadTools.sleepSeconds(sleepTime2);
@@ -61,6 +70,13 @@ public class TimerTest
       assertEquals("lapElapsed incorrect", 0.0, lapElapsed, 1e-2);
       assertEquals("totalElapsed incorrect", 0.0, totalElapsed, 1e-2);
       assertEquals("averageLap incorrect", Double.NaN, averageLap, 1e-2);
+      
+      double sleepTime4 = 0.3;
+      ThreadTools.sleepSeconds(sleepTime4);
+      
+      timer.resetLap();
+      lapElapsed = timer.lapElapsed();
+      assertEquals("lapElapsed incorrect", 0.0, lapElapsed, 1e-2);
    }
    
    public static void main(String[] args)

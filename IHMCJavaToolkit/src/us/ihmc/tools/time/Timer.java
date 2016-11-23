@@ -4,12 +4,12 @@ public class Timer
 {
    private final TimeProvider timeProvider;
    
-   protected double currentTime = 0.0;
-   protected double lastTime = 0.0;
-   protected double deltaTime = 0.0;
-   protected double startTime = 0.0;
-   protected long numLaps = 0;
-   protected double deltaSum = 0.0;
+   protected double currentTime;
+   protected double lastTime;
+   protected double deltaTime;
+   protected double startTime;
+   protected long numLaps;
+   protected double deltaSum;
    
    public Timer()
    {
@@ -23,8 +23,7 @@ public class Timer
    
    public Timer start()
    {
-      startTime = timeProvider.now();
-      lastTime = startTime;
+      reset();
       
       return this;
    }
@@ -36,10 +35,11 @@ public class Timer
 
    public void reset()
    {
-      start();
+      startTime = timeProvider.now();
+      lastTime = startTime;
       
-      deltaSum = 0.0;
       numLaps = 0;
+      deltaSum = 0.0;
    }
 
    public double lap()
@@ -57,12 +57,7 @@ public class Timer
    
    public double averageLap()
    {
-      double averageLap = Double.NaN;
-      
-      if (numLaps > 0)
-         averageLap = deltaSum / numLaps;
-      
-      return averageLap;
+      return deltaSum / numLaps;
    }
    
    public double totalElapsed()
