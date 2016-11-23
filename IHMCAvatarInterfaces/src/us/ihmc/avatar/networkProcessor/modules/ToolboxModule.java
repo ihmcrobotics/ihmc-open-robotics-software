@@ -156,7 +156,7 @@ public abstract class ToolboxModule
             if (message.getDestination() != thisDesitination)
             {
                if (DEBUG)
-                  PrintTools.error("ToolboxModule: isMessageValid " + message.getDestination() + "!=" + thisDesitination);
+                  PrintTools.error(ToolboxModule.this, name + ": isMessageValid " + message.getDestination() + "!=" + thisDesitination);
                return false;
             }
 
@@ -197,7 +197,7 @@ public abstract class ToolboxModule
             if (toolboxTaskScheduled != null && activeMessageSource.getOrdinal() != message.getSource())
             {
                if (DEBUG)
-                  PrintTools.error(this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: "
+                  PrintTools.error(ToolboxModule.this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: "
                         + PacketDestination.values[message.getDestination()]);
                return;
             }
@@ -228,7 +228,7 @@ public abstract class ToolboxModule
       if (toolboxTaskScheduled != null)
       {
          if (DEBUG)
-            PrintTools.error(this, "The IK controller is already running.");
+            PrintTools.error(this, "This toolbox is already running.");
          return;
       }
       createToolboxRunnable();
