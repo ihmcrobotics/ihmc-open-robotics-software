@@ -107,6 +107,11 @@ public abstract class ToolboxModule
       packetCommunicator.connect();
    }
 
+   protected void setTimeWithoutInputsBeforeGoingToSleep(double time)
+   {
+      timeWithoutInputsBeforeGoingToSleep.set(time);
+   }
+
    protected void startYoVariableServer()
    {
       if (!startYoVariableServer)
