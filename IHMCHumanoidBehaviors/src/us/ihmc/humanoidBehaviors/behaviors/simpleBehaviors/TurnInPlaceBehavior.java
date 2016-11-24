@@ -85,11 +85,10 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
-      footstepListBehavior.initialize();
    }
 
    public int getNumberOfFootSteps()
@@ -139,26 +138,23 @@ public class TurnInPlaceBehavior extends AbstractBehavior
 
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
-      footstepListBehavior.abort();
-      super.abort();
+      footstepListBehavior.onBehaviorAborted();
    }
 
   
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
-      footstepListBehavior.pause();
-      super.pause();
+      footstepListBehavior.onBehaviorPaused();
    }
 
    @Override
-   public void resume()
+   public void onBehaviorResumed()
    {
-      footstepListBehavior.resume();
-      super.resume();
+      footstepListBehavior.onBehaviorResumed();
    }
 
    @Override
@@ -172,13 +168,13 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       isPaused.set(false);
       isAborted.set(false);
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
-      footstepListBehavior.doPostBehaviorCleanup();
+      footstepListBehavior.onBehaviorExited();
    }
 
    public boolean hasInputBeenSet()

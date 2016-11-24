@@ -2350,7 +2350,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
    }
 
@@ -2756,7 +2756,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
       pipeLine.clearAll();
    }
@@ -2764,7 +2764,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
       isPaused.set(true);
       pelvisTrajectoryBehavior.pause();
@@ -2777,7 +2777,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    }
 
    @Override
-   public void resume()
+   public void onBehaviorResumed()
    {
       isPaused.set(false);
       pelvisTrajectoryBehavior.resume();
@@ -2803,7 +2803,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
    }
 

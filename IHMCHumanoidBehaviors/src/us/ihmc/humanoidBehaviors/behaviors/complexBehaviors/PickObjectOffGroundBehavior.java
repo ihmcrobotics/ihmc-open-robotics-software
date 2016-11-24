@@ -127,9 +127,8 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       grabLocation = null;
    }
 
@@ -144,5 +143,25 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
    {
       // TODO Auto-generated method stub
       return pipeLine.isDone();
+   }
+
+   @Override
+   public void onBehaviorEntered()
+   {
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

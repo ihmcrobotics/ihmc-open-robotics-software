@@ -42,18 +42,15 @@ public class ClearLidarBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       packetHasBeenSent.set(false);
-      super.initialize();
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       packetHasBeenSent.set(false);
-
-        super.doPostBehaviorCleanup();
    }
 
    @Override
@@ -69,5 +66,20 @@ public class ClearLidarBehavior extends AbstractBehavior
          return true;
       else
          return false;
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

@@ -176,9 +176,8 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
       sendPacket(p1);
 
@@ -193,17 +192,15 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    }
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
-      super.abort();
-      doPostBehaviorCleanup();
+      onBehaviorExited();
 
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
-      super.pause();
 
    }
 

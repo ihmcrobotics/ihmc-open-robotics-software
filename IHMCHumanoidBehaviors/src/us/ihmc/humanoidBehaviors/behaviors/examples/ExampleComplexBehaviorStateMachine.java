@@ -82,11 +82,10 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Example Behavior");
       sendPacket(p1);
-      super.initialize();
    }
 
    private void setupStateMachine()
@@ -223,9 +222,8 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       System.out.println("IM ALL DONE");
    }
 

@@ -42,9 +42,8 @@ public class SleepBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       sleepTime = Double.MIN_VALUE;
 
    }
@@ -63,5 +62,25 @@ public class SleepBehavior extends AbstractBehavior
    public boolean hasInputBeenSet()
    {
       return sleepTime != Double.MIN_VALUE;
+   }
+
+   @Override
+   public void onBehaviorEntered()
+   {
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }
