@@ -20,6 +20,7 @@ public class HeightQuadTreeMessageConverter
       HeightQuadTreeMessage heightQuadTreeMessage = new HeightQuadTreeMessage();
       heightQuadTreeMessage.root = rootNodeMessage;
       heightQuadTreeMessage.defaultHeight = (float) rootNode.getDefaultHeightWhenNoPoints();
+      heightQuadTreeMessage.resolution = (float) quadTreeToConvert.getQuadTreeParameters().getResolution();
       return heightQuadTreeMessage;
    }
 
