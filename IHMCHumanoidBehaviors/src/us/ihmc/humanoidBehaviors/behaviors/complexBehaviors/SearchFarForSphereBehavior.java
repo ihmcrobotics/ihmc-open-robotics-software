@@ -147,4 +147,9 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
       return initialSphereDetectionBehavior.getBallLocation();
    }
 
+   @Override
+   public void onBehaviorExited()
+   {
+   }
+
 }

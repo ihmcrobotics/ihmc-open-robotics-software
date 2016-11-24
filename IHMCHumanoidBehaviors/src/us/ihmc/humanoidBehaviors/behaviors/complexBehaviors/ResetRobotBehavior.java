@@ -89,9 +89,8 @@ public class ResetRobotBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       setupPipeline();
    }
 
@@ -99,6 +98,26 @@ public class ResetRobotBehavior extends AbstractBehavior
    public boolean isDone()
    {
       return pipeLine.isDone();
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 
 }

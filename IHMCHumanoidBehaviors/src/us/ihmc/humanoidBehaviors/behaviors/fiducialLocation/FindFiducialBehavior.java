@@ -128,9 +128,8 @@ public class FindFiducialBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       foundFiducial.set(false);
    }
 
@@ -138,5 +137,25 @@ public class FindFiducialBehavior extends AbstractBehavior
    public boolean isDone()
    {
       return foundFiducial.getBooleanValue();
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 }

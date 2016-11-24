@@ -64,7 +64,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       hasPacketBeenSent.set(false);
       
@@ -75,7 +75,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       hasPacketBeenSent.set(false);
       outgoingChestTrajectoryMessage = null;
@@ -114,5 +114,20 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
    public boolean hasInputBeenSet()
    {
       return outgoingChestTrajectoryMessage != null;
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }
