@@ -53,7 +53,7 @@ public abstract class ToolboxModule
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
    protected final DoubleYoVariable yoTime = new DoubleYoVariable("localTime", registry);
-   protected final FullHumanoidRobotModel desiredFullRobotModel;
+   protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final PacketCommunicator packetCommunicator;
    protected final CommandInputManager commandInputManager;
@@ -75,13 +75,13 @@ public abstract class ToolboxModule
    private final LogModelProvider modelProvider;
    private final boolean startYoVariableServer;
 
-   public ToolboxModule(FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer,
+   public ToolboxModule(FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
          PacketDestination toolboxDestination, NetworkPorts toolboxPort) throws IOException
    {
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
       this.thisDesitination = toolboxDestination.ordinal();
-      this.desiredFullRobotModel = desiredFullRobotModel;
+      this.fullRobotModel = fullRobotModelToLog;
       packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(toolboxPort, new IHMCCommunicationKryoNetClassList());
       commandInputManager = new CommandInputManager(createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
@@ -121,7 +121,7 @@ public abstract class ToolboxModule
 
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("WholeBodyIKScheduler");
       final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.TOOLBOX, YO_VARIABLE_SERVER_DT);
-      yoVariableServer.setMainRegistry(registry, desiredFullRobotModel, yoGraphicsListRegistry);
+      yoVariableServer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
       new Thread(new Runnable()
       {
          @Override
