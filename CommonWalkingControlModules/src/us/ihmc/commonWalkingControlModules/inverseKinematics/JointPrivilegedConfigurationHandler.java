@@ -188,38 +188,38 @@ public class JointPrivilegedConfigurationHandler
 
    private void processDefaultPrivilegedConfigurationOptions()
    {
-      for (int i = 0; i < commandList.size(); i++)
+      for (int commandIndex = 0; commandIndex < commandList.size(); commandIndex++)
       {
-         PrivilegedConfigurationCommand command = commandList.get(i);
+         PrivilegedConfigurationCommand command = commandList.get(commandIndex);
 
          if (command.hasNewPrivilegedConfigurationDefaultOption())
          {
             PrivilegedConfigurationOption defaultOption = command.getPrivilegedConfigurationDefaultOption();
-            for (int j = 0; j < numberOfDoFs; j++)
-               setPrivilegedConfigurationFromOption(defaultOption, j);
+            for (int jointIndex = 0; jointIndex < numberOfDoFs; jointIndex++)
+               setPrivilegedConfigurationFromOption(defaultOption, jointIndex);
          }
       }
    }
 
    private void processPrivilegedConfigurations()
    {
-      for (int i = 0; i < commandList.size(); i++)
+      for (int commandIndex = 0; commandIndex < commandList.size(); commandIndex++)
       {
-         PrivilegedConfigurationCommand command = commandList.get(i);
+         PrivilegedConfigurationCommand command = commandList.get(commandIndex);
 
-         for (int j = 0; j < command.getNumberOfJoints(); j++)
+         for (int jointNumber = 0; jointNumber < command.getNumberOfJoints(); jointNumber++)
          {
-            OneDoFJoint joint = command.getJoint(j);
+            OneDoFJoint joint = command.getJoint(jointNumber);
             MutableInt mutableIndex = jointIndices.get(joint);
             if (mutableIndex == null)
                continue;
 
             int jointIndex = mutableIndex.intValue();
 
-            if (command.hasNewPrivilegedConfiguration(j))
+            if (command.hasNewPrivilegedConfiguration(jointNumber))
             {
                OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
-               double qPrivileged = command.getPrivilegedConfiguration(j);
+               double qPrivileged = command.getPrivilegedConfiguration(jointNumber);
                privilegedConfigurations.set(jointIndex, 0, qPrivileged);
                yoJointPrivilegedConfigurations.get(oneDoFJoints[jointIndex]).set(qPrivileged);
 
@@ -229,10 +229,10 @@ public class JointPrivilegedConfigurationHandler
                   PrintTools.warn(this, "Overwriting privileged configuration angle for joint " + configuredJoint.getName() + ".");
             }
 
-            if (command.hasNewPrivilegedConfigurationOption(j))
+            if (command.hasNewPrivilegedConfigurationOption(jointNumber))
             {
                OneDoFJoint configuredJoint = oneDoFJoints[jointIndex];
-               PrivilegedConfigurationOption option = command.getPrivilegedConfigurationOption(j);
+               PrivilegedConfigurationOption option = command.getPrivilegedConfigurationOption(jointNumber);
                setPrivilegedConfigurationFromOption(option, jointIndex);
 
                if (!jointsWithConfiguration.contains(configuredJoint))
