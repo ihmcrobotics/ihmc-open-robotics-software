@@ -15,10 +15,12 @@ import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestCommand;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.PointCloud3DCommand;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class HeightQuadTreeToolboxModule extends ToolboxModule
 {
@@ -31,8 +33,10 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
    {
       super(desiredFullRobotModel, modelProvider, false, PACKET_DESTINATION, NETWORK_PORT);
 
-      controller = new HeightQuadTreeToolboxController(commandInputManager, statusOutputManager, registry);
+      controller = new HeightQuadTreeToolboxController(fullRobotModel, commandInputManager, statusOutputManager, registry);
       setTimeWithoutInputsBeforeGoingToSleep(3.0);
+      packetCommunicator.attachListener(RobotConfigurationData.class, controller.robotConfigurationDataConsumer());
+      packetCommunicator.attachListener(CapturabilityBasedStatus.class, controller.capturabilityBasedStatusConsumer());
    }
 
    @Override
