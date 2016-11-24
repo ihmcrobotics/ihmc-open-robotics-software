@@ -10,7 +10,6 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestCommand;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.PointCloud3DCommand;
@@ -36,6 +35,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class HeightQuadTreeToolboxController extends ToolboxController
 {
+   private static final double RESOLUTION = 0.015;
    private static final boolean DEBUG = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double QUAD_TREE_EXTENT = 200;
@@ -71,7 +71,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       expectedRobotConfigurationDataHash = RobotConfigurationData.calculateJointNameHash(oneDoFJoints, forceSensorDefinitions, imuDefinitions);
 
       Box bounds = new Box(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT);
-      QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(DepthDataFilterParameters.GRID_RESOLUTION, quadtreeHeightThreshold,
+      QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(RESOLUTION, quadtreeHeightThreshold,
             quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose, maximumNumberOfPoints);
 
       quadTree = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
