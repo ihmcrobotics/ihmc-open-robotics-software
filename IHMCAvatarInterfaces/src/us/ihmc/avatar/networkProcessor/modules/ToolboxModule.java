@@ -158,9 +158,6 @@ public abstract class ToolboxModule
       return new MessageFilter()
       {
          private final Set<Class<? extends Packet<?>>> exceptions = filterExceptions();
-         {
-            System.out.println(exceptions);
-         }
 
          @Override
          public boolean isMessageValid(Packet<?> message)
