@@ -6,6 +6,7 @@ public class HeightQuadTreeMessage extends StatusPacket<HeightQuadTreeMessage>
 {
    public HeightQuadTreeNodeMessage root;
    public float defaultHeight = Float.NaN;
+   public float resolution = Float.NaN;
 
    public HeightQuadTreeMessage()
    {
@@ -17,12 +18,15 @@ public class HeightQuadTreeMessage extends StatusPacket<HeightQuadTreeMessage>
       root = new HeightQuadTreeNodeMessage();
       root.set(other.root);
       defaultHeight = other.defaultHeight;
+      resolution = other.resolution;
    }
 
    @Override
    public boolean epsilonEquals(HeightQuadTreeMessage other, double epsilon)
    {
       if (Float.compare(defaultHeight, other.defaultHeight) != 0)
+         return false;
+      if (Float.compare(resolution, other.resolution) != 0)
          return false;
       return root.epsilonEquals(other.root, epsilon);
    }
