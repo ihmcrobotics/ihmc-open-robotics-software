@@ -38,6 +38,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    }
 
    private final CommunicationBridge coactiveBehaviorsNetworkManager;
+
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
    private final FindFiducialBehavior lookForGoalBehavior;
