@@ -70,7 +70,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       hasPacketBeenSent.set(false);
       
@@ -81,7 +81,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       hasPacketBeenSent.set(false);
       outgoingFootTrajectoryMessage = null;
@@ -104,6 +104,21 @@ public class FootTrajectoryBehavior extends AbstractBehavior
          trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
 
       return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 
    

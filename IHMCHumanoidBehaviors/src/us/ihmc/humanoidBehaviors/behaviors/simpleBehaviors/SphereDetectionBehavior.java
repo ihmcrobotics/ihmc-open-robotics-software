@@ -246,17 +246,29 @@ public class SphereDetectionBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       ballFound.set(false);
    }
 
-
+   @Override
+   public void onBehaviorEntered()
+   {
+      onBehaviorExited();
+   }
 
    @Override
-   public void initialize()
+   public void onBehaviorAborted()
    {
-      doPostBehaviorCleanup();
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

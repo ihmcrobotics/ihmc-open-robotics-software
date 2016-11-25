@@ -220,17 +220,15 @@ public class KickBallBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       setupPipelineForKick();
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
 
-      super.doPostBehaviorCleanup();
       pipelineSetUp = false;
       if (CREATE_COACTIVE_ELEMENT)
       {
@@ -241,28 +239,26 @@ public class KickBallBehavior extends AbstractBehavior
       }
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.doPostBehaviorCleanup();
+         behavior.onBehaviorExited();
       }
    }
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
-      super.abort();
-      doPostBehaviorCleanup();
+      onBehaviorExited();
       this.pipeLine.clearAll();
 
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.abort();
+         behavior.onBehaviorAborted();
       }
       
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
-      super.pause();
       for (AbstractBehavior behavior : behaviors)
       {
          behavior.pause();
@@ -304,5 +300,10 @@ public class KickBallBehavior extends AbstractBehavior
       {
          return 0;
       }
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

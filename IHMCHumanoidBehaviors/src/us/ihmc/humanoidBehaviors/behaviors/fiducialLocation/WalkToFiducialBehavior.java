@@ -60,9 +60,8 @@ public class WalkToFiducialBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       footstepPlanQueue.clear();
       sentPlanningRequest.set(false);
       recievedPlan.set(false);
@@ -72,5 +71,25 @@ public class WalkToFiducialBehavior extends AbstractBehavior
    public void setGoalPose(FramePose goalPose)
    {
       goalPose.setIncludingFrame(goalPose);
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 }

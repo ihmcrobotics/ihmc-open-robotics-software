@@ -247,4 +247,29 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
    {
       return doneTakingSteps.getBooleanValue();
    }
+
+   @Override
+   public void onBehaviorEntered()
+   {
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
+   }
 }

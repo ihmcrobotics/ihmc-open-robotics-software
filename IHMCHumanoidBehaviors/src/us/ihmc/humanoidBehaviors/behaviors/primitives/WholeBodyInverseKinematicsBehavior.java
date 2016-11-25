@@ -158,7 +158,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
 
       System.out.println("init whole body behavior");
@@ -256,7 +256,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       isPaused.set(false);
       isStopped.set(false);
@@ -272,6 +272,21 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.SLEEP);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       sendPacket(message);
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 
 

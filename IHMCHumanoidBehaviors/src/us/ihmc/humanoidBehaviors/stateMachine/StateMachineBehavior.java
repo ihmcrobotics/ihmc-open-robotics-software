@@ -20,23 +20,24 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
       return statemachine;
    }
 
-   public void initialize()
+   @Override
+   public void onBehaviorEntered()
    {
-      super.initialize();
       statemachine.initialize();
    }
 
-   public void pause()
+   @Override
+   public void onBehaviorPaused()
    {
       statemachine.pause();
    }
 
-   public void resume()
+   public void onBehaviorResumed()
    {
       statemachine.resume();
    }
 
-   public void abort()
+   public void onBehaviorAborted()
    {
       statemachine.stop();
    }
