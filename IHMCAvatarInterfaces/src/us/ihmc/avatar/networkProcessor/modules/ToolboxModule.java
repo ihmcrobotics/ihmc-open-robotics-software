@@ -1,7 +1,9 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -51,7 +53,7 @@ public abstract class ToolboxModule
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    protected final YoVariableRegistry registry = new YoVariableRegistry(name);
    protected final DoubleYoVariable yoTime = new DoubleYoVariable("localTime", registry);
-   protected final FullHumanoidRobotModel desiredFullRobotModel;
+   protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final PacketCommunicator packetCommunicator;
    protected final CommandInputManager commandInputManager;
@@ -73,13 +75,13 @@ public abstract class ToolboxModule
    private final LogModelProvider modelProvider;
    private final boolean startYoVariableServer;
 
-   public ToolboxModule(FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider, boolean startYoVariableServer,
+   public ToolboxModule(FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
          PacketDestination toolboxDestination, NetworkPorts toolboxPort) throws IOException
    {
       this.modelProvider = modelProvider;
       this.startYoVariableServer = startYoVariableServer;
       this.thisDesitination = toolboxDestination.ordinal();
-      this.desiredFullRobotModel = desiredFullRobotModel;
+      this.fullRobotModel = fullRobotModelToLog;
       packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(toolboxPort, new IHMCCommunicationKryoNetClassList());
       commandInputManager = new CommandInputManager(createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
@@ -107,6 +109,11 @@ public abstract class ToolboxModule
       packetCommunicator.connect();
    }
 
+   protected void setTimeWithoutInputsBeforeGoingToSleep(double time)
+   {
+      timeWithoutInputsBeforeGoingToSleep.set(time);
+   }
+
    protected void startYoVariableServer()
    {
       if (!startYoVariableServer)
@@ -114,7 +121,7 @@ public abstract class ToolboxModule
 
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("WholeBodyIKScheduler");
       final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.TOOLBOX, YO_VARIABLE_SERVER_DT);
-      yoVariableServer.setMainRegistry(registry, desiredFullRobotModel, yoGraphicsListRegistry);
+      yoVariableServer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
       new Thread(new Runnable()
       {
          @Override
@@ -150,13 +157,29 @@ public abstract class ToolboxModule
    {
       return new MessageFilter()
       {
+         private final Set<Class<? extends Packet<?>>> exceptions = filterExceptions();
+
          @Override
          public boolean isMessageValid(Packet<?> message)
          {
+            if (exceptions.contains(message.getClass()))
+            {
+               if (toolboxTaskScheduled == null)
+               {
+                  if (DEBUG)
+                     PrintTools.info(ToolboxModule.this, name + " is sleeping: " + message.getClass().getSimpleName() + " is ignored.");
+                  return false;
+               }
+               else
+               {
+                  return true;
+               }
+            }
+
             if (message.getDestination() != thisDesitination)
             {
                if (DEBUG)
-                  PrintTools.error("ToolboxModule: isMessageValid " + message.getDestination() + "!=" + thisDesitination);
+                  PrintTools.error(ToolboxModule.this, name + ": isMessageValid " + message.getDestination() + "!=" + thisDesitination);
                return false;
             }
 
@@ -197,7 +220,7 @@ public abstract class ToolboxModule
             if (toolboxTaskScheduled != null && activeMessageSource.getOrdinal() != message.getSource())
             {
                if (DEBUG)
-                  PrintTools.error(this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: "
+                  PrintTools.error(ToolboxModule.this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: "
                         + PacketDestination.values[message.getDestination()]);
                return;
             }
@@ -228,7 +251,7 @@ public abstract class ToolboxModule
       if (toolboxTaskScheduled != null)
       {
          if (DEBUG)
-            PrintTools.error(this, "The IK controller is already running.");
+            PrintTools.error(this, "This toolbox is already running.");
          return;
       }
       createToolboxRunnable();
@@ -318,4 +341,9 @@ public abstract class ToolboxModule
    abstract public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands();
 
    abstract public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus();
+
+   public Set<Class<? extends Packet<?>>> filterExceptions()
+   {
+      return Collections.emptySet();
+   }
 }
