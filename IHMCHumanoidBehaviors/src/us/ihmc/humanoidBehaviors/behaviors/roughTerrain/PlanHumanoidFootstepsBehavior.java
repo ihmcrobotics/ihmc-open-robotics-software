@@ -19,7 +19,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
-import us.ihmc.footstepPlanning.roughTerrainPlanning.SCSPlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -123,9 +122,9 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       planner.setMaximumNumberOfNodesToExpand(500);
 
       //TODO: Can't have this here since it uses SCS I think. Problems with Gradle?
-      SCSPlanarRegionBipedalFootstepPlannerVisualizer listener = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
-      listener.setCropBufferWhenSolutionIsFound(false);
-      planner.setBipedalFootstepPlannerListener(listener);
+//      SCSPlanarRegionBipedalFootstepPlannerVisualizer listener = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
+//      listener.setCropBufferWhenSolutionIsFound(false);
+//      planner.setBipedalFootstepPlannerListener(listener);
 
       return planner;
    }
