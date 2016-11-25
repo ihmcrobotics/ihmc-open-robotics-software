@@ -4276,7 +4276,10 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
                   continue;
                }
 
-               DynamicGraphicCheckBoxMenuItem checkBox = new DynamicGraphicCheckBoxMenuItem(yoGraphicsList.getLabel(), yoGraphicsList.getYoGraphics());
+               String label = yoGraphicsList.getLabel();
+               ArrayList<YoGraphic> yoGraphics = yoGraphicsList.getYoGraphics();
+               boolean selectedState = yoGraphicsList.checkAllYoGraphicsAreShowing();
+               DynamicGraphicCheckBoxMenuItem checkBox = new DynamicGraphicCheckBoxMenuItem(label, yoGraphics, selectedState);
                dynamicGraphicMenuManager.addCheckBox(checkBox);
             }
          }
