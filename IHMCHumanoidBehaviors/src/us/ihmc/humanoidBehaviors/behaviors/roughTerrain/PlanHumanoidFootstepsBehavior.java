@@ -303,9 +303,8 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       plannerTimer.start();
    }
 
@@ -337,5 +336,25 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       for (RobotSide side : RobotSide.values)
          footPolygons.put(side, createDefaultFootPolygon());
       return footPolygons;
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 }

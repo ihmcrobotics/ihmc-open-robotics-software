@@ -380,7 +380,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 	}
 
 	@Override
-	public void initialize()
+	public void onBehaviorEntered()
 	{
 		stepCompleted.set(true);
 		hasNewPlan.set(false);
@@ -395,7 +395,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 
 
 	@Override
-	public void abort()
+	public void onBehaviorAborted()
 	{
 		requestSearchStop();
       sendPacketToController(new PauseWalkingMessage(true));
@@ -405,7 +405,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 
 
 	@Override
-	public void pause()
+	public void onBehaviorPaused()
 	{
 
       isPaused.set(true);
@@ -413,7 +413,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 	}
 
 	@Override
-	public void resume()
+	public void onBehaviorResumed()
 	{
 		isPaused.set(false);
       sendPacketToController(new PauseWalkingMessage(false));
@@ -426,7 +426,7 @@ public class WalkToGoalBehavior extends AbstractBehavior {
 	}
 
 	@Override
-	public void doPostBehaviorCleanup()
+	public void onBehaviorExited()
 	{
 		isPaused.set(false);
 		isAborted.set(false);

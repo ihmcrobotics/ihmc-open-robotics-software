@@ -35,12 +35,32 @@ public class SimpleVideoForwardingBehavior extends ImageProcessingBehavior
 
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       for(ConcurrentListeningQueue<VideoPacket> queue : communicationBridge.getListeningNetworkQueues().get(VideoPacket.class))
       {
          queue.clear();
       }
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 
   

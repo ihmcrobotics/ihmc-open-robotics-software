@@ -56,9 +56,8 @@ public class AdditionBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       numbersSet = false;
       mathComplete = false;
    }
@@ -66,5 +65,25 @@ public class AdditionBehavior extends AbstractBehavior
    public boolean hasInputBeenSet()
    {
       return numbersSet;
+   }
+
+   @Override
+   public void onBehaviorEntered()
+   {
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

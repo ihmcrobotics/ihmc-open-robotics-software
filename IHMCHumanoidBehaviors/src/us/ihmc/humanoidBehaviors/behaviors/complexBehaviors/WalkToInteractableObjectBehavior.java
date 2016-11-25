@@ -119,8 +119,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
    }
 }

@@ -39,9 +39,8 @@ public class UserValidationExampleBehavior extends AbstractBehavior implements C
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       //reset necessary values so this behavior can run again properly
       TextToSpeechPacket p1 = new TextToSpeechPacket("Waiting For User Validation");
       sendPacket(p1);
@@ -54,9 +53,8 @@ public class UserValidationExampleBehavior extends AbstractBehavior implements C
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       TextToSpeechPacket p1 = new TextToSpeechPacket("Got User Validation");
       sendPacket(p1);
       //let the UI know this specific behavior has ended
@@ -81,5 +79,20 @@ public class UserValidationExampleBehavior extends AbstractBehavior implements C
          }
          recievedMessage = true;
       }
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

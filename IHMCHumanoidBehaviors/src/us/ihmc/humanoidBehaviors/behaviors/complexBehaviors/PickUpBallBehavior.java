@@ -635,17 +635,15 @@ public class PickUpBallBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       setupPipelineForKick();
 
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
       sendPacket(p1);
 
@@ -664,11 +662,9 @@ public class PickUpBallBehavior extends AbstractBehavior
    }
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
-      super.abort();
-
-      doPostBehaviorCleanup();
+      onBehaviorExited();
       this.pipeLine.clearAll();
 
       for (AbstractBehavior behavior : behaviors)
@@ -678,12 +674,11 @@ public class PickUpBallBehavior extends AbstractBehavior
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
-      super.pause();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.pause();
+         behavior.onBehaviorPaused();
       }
    }
 
@@ -691,6 +686,11 @@ public class PickUpBallBehavior extends AbstractBehavior
    public boolean isDone()
    {
       return pipeLine.isDone();
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 
   

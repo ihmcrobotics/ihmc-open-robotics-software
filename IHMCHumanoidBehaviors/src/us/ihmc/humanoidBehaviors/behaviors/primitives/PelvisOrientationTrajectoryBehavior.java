@@ -61,7 +61,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       hasPacketBeenSent.set(false);
 
@@ -72,7 +72,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       hasPacketBeenSent.set(false);
       outgoingPelvisOrientationTrajectoryMessage = null;
@@ -87,7 +87,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
 
 
    @Override //TODO: Not currently implemented for this behavior
-   public void resume()
+   public void onBehaviorResumed()
    {
       isPaused.set(false);
       startTime.set(yoTime.getDoubleValue());
@@ -108,5 +108,15 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
    public boolean hasInputBeenSet()
    {
       return outgoingPelvisOrientationTrajectoryMessage != null;
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
    }
 }

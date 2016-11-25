@@ -110,9 +110,8 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       pickUpLocation = null;
    }
 }

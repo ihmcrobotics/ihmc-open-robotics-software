@@ -90,9 +90,8 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Walk Over Terrain Behavior");
       sendPacket(p1);
       statemachine.setCurrentState(WalkOverTerrainState.LOOK_FOR_GOAL);
@@ -272,6 +271,36 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       {
          return pipeLine.isDone();
       }
+
+      @Override
+      public void onBehaviorEntered()
+      {
+      }
+
+      @Override
+      public void onBehaviorAborted()
+      {
+      }
+
+      @Override
+      public void onBehaviorPaused()
+      {
+      }
+
+      @Override
+      public void onBehaviorResumed()
+      {
+      }
+
+      @Override
+      public void onBehaviorExited()
+      {
+      }
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 
 }
