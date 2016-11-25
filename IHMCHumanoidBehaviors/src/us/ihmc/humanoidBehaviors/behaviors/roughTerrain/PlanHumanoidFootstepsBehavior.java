@@ -104,13 +104,17 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
 
       planner.setMaximumStepReach(0.55); //(0.4);
-      planner.setMaximumStepZ(0.4); //0.25);
-      planner.setMaximumStepYaw(0.25);
+      planner.setMaximumStepZ(0.25); //0.4); //0.25);
+      planner.setMaximumStepYaw(0.15); //0.25);
       planner.setMinimumStepWidth(0.15);
-      planner.setMinimumFootholdPercent(0.9);
+      planner.setMinimumFootholdPercent(0.95);
 
-      double idealFootstepLength = 0.4;
-      double idealFootstepWidth = 0.25;
+      planner.setWiggleInsideDelta(0.08);
+      planner.setMaximumXYWiggleDistance(1.0);
+      planner.setMaximumYawWiggle(0.1);
+
+      double idealFootstepLength = 0.3; //0.4;
+      double idealFootstepWidth = 0.2; //0.25;
       planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = createDefaultFootPolygons();
