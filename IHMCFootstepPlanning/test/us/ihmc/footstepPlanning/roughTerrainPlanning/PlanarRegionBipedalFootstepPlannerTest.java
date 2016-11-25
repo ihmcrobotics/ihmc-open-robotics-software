@@ -67,11 +67,15 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       YoVariableRegistry registry = new YoVariableRegistry("test");
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
 
-      planner.setMaximumStepReach(0.45);
+      planner.setMaximumStepReach(0.55); //0.45);
       planner.setMaximumStepZ(0.25);
       planner.setMaximumStepYaw(0.15);
       planner.setMinimumStepWidth(0.15);
       planner.setMinimumFootholdPercent(0.8);
+
+      planner.setWiggleInsideDelta(0.08);
+      planner.setMaximumXYWiggleDistance(1.0);
+      planner.setMaximumYawWiggle(0.1);
 
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;
@@ -84,6 +88,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       {
          SCSPlanarRegionBipedalFootstepPlannerVisualizer visualizer = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
          planner.setBipedalFootstepPlannerListener(visualizer);
+         visualizer.getYoVariableRegistry().addChild(registry);
       }
 
       planner.setMaximumNumberOfNodesToExpand(100);

@@ -126,4 +126,9 @@ public class SCSPlanarRegionBipedalFootstepPlannerVisualizer implements BipedalF
       scs.setTime(scs.getTime() + 1.0);
       scs.tickAndUpdate();
    }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return scs.getRootRegistry();
+   }
 }
