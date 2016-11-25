@@ -92,16 +92,16 @@ public class YoGraphicsList
 
    public boolean checkAllYoGraphicsAreShowing()
    {
-      boolean ret = true;
       int numberOfElements = yoGraphics.size();
 
       for (int i = 0; i < numberOfElements; i++)
       {
          YoGraphic yoGraphic = yoGraphics.get(i);
-         ret = ret && yoGraphic.isGraphicObjectShowing();
+         if (!yoGraphic.isGraphicObjectShowing())
+            return false;
       }
 
-      return ret;
+      return true;
    }
 
    public void setVisible(boolean visible)
