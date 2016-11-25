@@ -57,7 +57,8 @@ public class PolygonWigglingTest
       initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
       initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
 
-      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, new WiggleParameters());
+      WiggleParameters wiggleParameters = new WiggleParameters();
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
 
       if (visualize)
       {
@@ -68,6 +69,58 @@ public class PolygonWigglingTest
       }
 
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testSimpleProjectionWithDeltaInside()
+   {
+      ConvexPolygon2d plane = new ConvexPolygon2d();
+      plane.addVertex(0.0, 0.0);
+      plane.addVertex(0.5, 0.0);
+      plane.addVertex(0.0, 0.5);
+      plane.addVertex(0.5, 0.5);
+      plane.update();
+
+      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      RigidBodyTransform initialFootTransform = new RigidBodyTransform();
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
+      initialFootTransform.setTranslation(-0.1, -0.3, 0.0);
+      initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
+
+      WiggleParameters wiggleParameters = new WiggleParameters();
+      wiggleParameters.deltaInside = 0.06;
+      ConvexPolygon2d foot = PolygonWiggler.wigglePolygon(initialFoot, plane, wiggleParameters);
+
+      if (visualize)
+      {
+         addPolygonToArtifacts("Plane", plane, Color.BLACK);
+         addPolygonToArtifacts("InitialFoot", initialFoot, Color.RED);
+         addPolygonToArtifacts("Foot", foot, Color.BLUE);
+         showPlotterAndSleep(artifacts);
+      }
+
+      checkThatWiggledInsideJustTheRightAmount(plane, wiggleParameters, foot);
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
+
+   }
+
+   private void checkThatWiggledInsideJustTheRightAmount(ConvexPolygon2d plane, WiggleParameters wiggleParameters, ConvexPolygon2d foot)
+   {
+      double largestDistance = Double.NEGATIVE_INFINITY;
+
+      for (int i=0; i<foot.getNumberOfVertices(); i++)
+      {
+         Point2d vertex = foot.getVertex(i);
+         double signedDistance = ConvexPolygon2dCalculator.getSignedDistance(vertex, plane);
+
+         if (signedDistance > largestDistance)
+         {
+            largestDistance = signedDistance;
+         }
+      }
+      assertTrue(largestDistance < -wiggleParameters.deltaInside);
+      assertFalse(largestDistance < -wiggleParameters.deltaInside - 0.003);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

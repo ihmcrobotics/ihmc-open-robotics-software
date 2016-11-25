@@ -37,4 +37,9 @@ public class WiggleParameters
     * Minimum rotation that the wiggler is allowed to use.
     */
    public double minYaw = -Math.toRadians(15.0);
+
+   /**
+    * Amount that the polygon to wiggle needs to be inside the polygon to wiggle into. Negative means it can be outside.
+    */
+   public double deltaInside = 0.0;
 }
