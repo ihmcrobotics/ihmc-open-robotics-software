@@ -11,6 +11,7 @@ import us.ihmc.avatar.networkProcessor.modules.MultisenseMocapManualCalibrationT
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
+import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
@@ -55,12 +56,13 @@ public class DRCNetworkProcessor
          addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts());
          addTextToSpeechEngine(params);
          setupRobotEnvironmentAwarenessModule(params);
+         setupHeightQuadTreeToolboxModule(robotModel, params);
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
- }
+   }
 
    private void addTextToSpeechEngine(DRCNetworkModuleParameters params)
    {
@@ -353,6 +355,21 @@ public class DRCNetworkProcessor
          PacketCommunicator reaCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.REA_MODULE_PORT, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.REA_MODULE, reaCommunicator);
          reaCommunicator.connect();
+      }
+   }
+
+   private void setupHeightQuadTreeToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   {
+      if (params.isHeightQuadTreeToolboxEnabled())
+      {
+         new HeightQuadTreeToolboxModule(robotModel.createFullRobotModel(), robotModel.getLogModelProvider());
+
+         PacketCommunicator heightQuadTreeToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.HEIGHT_QUADTREE_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
+         packetRouter.attachPacketCommunicator(PacketDestination.HEIGHT_QUADTREE_TOOLBOX_MODULE, heightQuadTreeToolboxCommunicator);
+         heightQuadTreeToolboxCommunicator.connect();
+
+         String methodName = "setupHeightQuadTreeToolboxModule";
+         printModuleConnectedDebugStatement(PacketDestination.HEIGHT_QUADTREE_TOOLBOX_MODULE, methodName);
       }
    }
 
