@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.polygonWiggling;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
+import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -86,7 +87,7 @@ public class PolygonWiggler
 
       DenseMatrix64F A = new DenseMatrix64F(0);
       DenseMatrix64F b = new DenseMatrix64F(0);
-      convertToInequalityConstraints(planeToWiggleInto, A, b);
+      convertToInequalityConstraints(planeToWiggleInto, A, b, parameters.deltaInside);
 
       int boundConstraints = 6;
       DenseMatrix64F A_full = new DenseMatrix64F(constraintsPerPoint * numberOfPoints + boundConstraints, 3);
@@ -190,20 +191,31 @@ public class PolygonWiggler
     * @param A
     * @param b
     */
-   public static void convertToInequalityConstraints(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b)
+   public static void convertToInequalityConstraints(ConvexPolygon2d polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       int constraints = polygon.getNumberOfVertices();
       A.reshape(constraints, 2);
       b.reshape(constraints, 1);
+
+      Vector2d tempVector = new Vector2d();
 
       for (int i = 0; i < constraints; i++)
       {
          Point2d firstPoint = polygon.getVertex(i);
          Point2d secondPoint = polygon.getNextVertex(i);
 
-         A.set(i, 0, firstPoint.y - secondPoint.y);
-         A.set(i, 1, -firstPoint.x + secondPoint.x);
-         b.set(i, firstPoint.y * (secondPoint.x - firstPoint.x) - firstPoint.x * (secondPoint.y - firstPoint.y));
+         tempVector.set(secondPoint);
+         tempVector.sub(firstPoint);
+
+         tempVector.normalize();
+
+         A.set(i, 0, -tempVector.getY());
+         A.set(i, 1, tempVector.getX());
+         b.set(i, -deltaInside + firstPoint.y * (tempVector.getX()) - firstPoint.x * (tempVector.getY()));
+
+//         A.set(i, 0, firstPoint.y - secondPoint.y);
+//         A.set(i, 1, -firstPoint.x + secondPoint.x);
+//         b.set(i, firstPoint.y * (secondPoint.x - firstPoint.x) - firstPoint.x * (secondPoint.y - firstPoint.y));
       }
    }
 
