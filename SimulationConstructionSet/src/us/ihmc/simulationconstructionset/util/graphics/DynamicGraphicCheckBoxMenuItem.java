@@ -15,7 +15,12 @@ public class DynamicGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements
 
    public DynamicGraphicCheckBoxMenuItem(String label, ArrayList<YoGraphic> yoGraphics)
    {
-      super(label, true);
+      this(label, yoGraphics, true);
+   }
+
+   public DynamicGraphicCheckBoxMenuItem(String label, ArrayList<YoGraphic> yoGraphics, boolean selectedState)
+   {
+      super(label, selectedState);
       this.yoGraphics = yoGraphics;
       this.addItemListener(this);
    }
