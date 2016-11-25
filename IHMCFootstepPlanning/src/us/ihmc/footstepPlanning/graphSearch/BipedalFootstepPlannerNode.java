@@ -217,4 +217,12 @@ public class BipedalFootstepPlannerNode
    {
       return YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL;
    }
+
+   public boolean epsilonEquals(BipedalFootstepPlannerNode nodeToCheck, double epsilon)
+   {
+      if (nodeToCheck.footstepSide != this.footstepSide) return false;
+      if (!nodeToCheck.soleTransform.epsilonEquals(this.soleTransform, epsilon)) return false;
+
+      return true;
+   }
 }
