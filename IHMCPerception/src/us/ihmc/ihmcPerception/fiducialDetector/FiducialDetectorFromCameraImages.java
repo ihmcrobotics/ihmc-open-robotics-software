@@ -70,7 +70,7 @@ public class FiducialDetectorFromCameraImages
    private final DoubleYoVariable detectorEulerRotX = new DoubleYoVariable(prefix + "DetectorEulerRotX", registry);
    private final DoubleYoVariable detectorEulerRotY = new DoubleYoVariable(prefix + "DetectorEulerRotY", registry);
    private final DoubleYoVariable detectorEulerRotZ = new DoubleYoVariable(prefix + "DetectorEulerRotZ", registry);
-   
+
    private final BooleanYoVariable targetIDHasBeenLocated = new BooleanYoVariable(prefix + "TargetIDHasBeenLocated", registry);
    private final LongYoVariable targetIDToLocate = new LongYoVariable(prefix + "TargetIDToLocate", registry);
 
@@ -169,6 +169,11 @@ public class FiducialDetectorFromCameraImages
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void reset()
+   {
+      this.targetIDHasBeenLocated.set(false);
    }
 
    public FiducialDetector<GrayF32> getFiducialDetector()
@@ -272,12 +277,13 @@ public class FiducialDetectorFromCameraImages
 
       intrinsicParameters.width = width;
       intrinsicParameters.height = height;
-      intrinsicParameters.cx = width / 2;
-      intrinsicParameters.cy = height / 2;
+      intrinsicParameters.cx = width / 2.0;
+      intrinsicParameters.cy = height / 2.0;
       intrinsicParameters.fx = fx;
       intrinsicParameters.fy = fy;
 
       detector.setIntrinsic(intrinsicParameters);
+      this.targetIDHasBeenLocated.set(false);
 
       return intrinsicParameters;
    }
@@ -285,11 +291,13 @@ public class FiducialDetectorFromCameraImages
    public void setExpectedFiducialSize(double expectedFiducialSize)
    {
       this.expectedFiducialSize.set(expectedFiducialSize);
+      this.targetIDHasBeenLocated.set(false);
    }
 
    public void setTargetIDToLocate(long targetIDToLocate)
    {
       this.targetIDToLocate.set(targetIDToLocate);
+      this.targetIDHasBeenLocated.set(false);
    }
 
    public boolean getTargetIDHasBeenLocated()
@@ -306,6 +314,7 @@ public class FiducialDetectorFromCameraImages
    {
       this.fieldOfViewXinRadians.set(fieldOfViewXinRadians);
       this.fieldOfViewYinRadians.set(fieldOfViewYinRadians);
+      this.targetIDHasBeenLocated.set(false);
    }
 
 }

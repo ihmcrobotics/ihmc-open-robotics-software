@@ -5,7 +5,10 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Tuple3d;
 
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.examples.UserValidationExampleBehavior;
@@ -16,6 +19,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
@@ -29,12 +33,13 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
+import us.ihmc.tools.taskExecutor.Task;
 
 public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<WalkOverTerrainState>
 {
    public enum WalkOverTerrainState
    {
-      LOOK_FOR_GOAL, LOOK_DOWN_AT_TERRAIN, PLAN_TO_GOAL, TAKE_SOME_STEPS, REACHED_GOAL
+      LOOK_FOR_GOAL, LOOK_DOWN_AT_TERRAIN, PLAN_TO_GOAL, CLEAR_PLANAR_REGIONS_LIST, TAKE_SOME_STEPS, REACHED_GOAL
    }
 
    private final CommunicationBridge coactiveBehaviorsNetworkManager;
@@ -45,6 +50,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    private final LookDownBehavior lookDownAtTerrainBehavior;
    private final PlanHumanoidFootstepsBehavior planHumanoidFootstepsBehavior;
    private final TakeSomeStepsBehavior takeSomeStepsBehavior;
+   private final ClearPlanarRegionsListBehavior clearPlanarRegionsListBehavior;
    private final SimpleDoNothingBehavior reachedGoalBehavior;
 
    private final UserValidationExampleBehavior userValidationExampleBehavior;
@@ -74,6 +80,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       lookForGoalBehavior = new FindFiducialBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, fiducialToTrack);
       lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
       planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
+      clearPlanarRegionsListBehavior = new ClearPlanarRegionsListBehavior(communicationBridge);
       takeSomeStepsBehavior = new TakeSomeStepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
       reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge);
 
@@ -95,6 +102,11 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Walk Over Terrain Behavior");
       sendPacket(p1);
       statemachine.setCurrentState(WalkOverTerrainState.LOOK_FOR_GOAL);
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 
    private void setupStateMachine()
@@ -157,6 +169,16 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
          }
       };
 
+      BehaviorAction<WalkOverTerrainState> clearPlanarRegionsListAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.CLEAR_PLANAR_REGIONS_LIST, clearPlanarRegionsListBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Clearing Planar Regions List.");
+            sendPacket(p1);
+         }
+      };
+
       BehaviorAction<WalkOverTerrainState> reachedGoalAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.REACHED_GOAL, reachedGoalBehavior)
       {
          @Override
@@ -171,10 +193,58 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
       statemachine.addStateWithDoneTransition(lookForGoalAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN);
       statemachine.addStateWithDoneTransition(lookDownAtTerrainAction, WalkOverTerrainState.PLAN_TO_GOAL);
-      statemachine.addStateWithDoneTransition(planHumanoidFootstepsAction, WalkOverTerrainState.TAKE_SOME_STEPS);
+      statemachine.addStateWithDoneTransition(planHumanoidFootstepsAction, WalkOverTerrainState.CLEAR_PLANAR_REGIONS_LIST);
+      statemachine.addStateWithDoneTransition(clearPlanarRegionsListAction, WalkOverTerrainState.TAKE_SOME_STEPS);
       statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN); //REACHED_GOAL);
       //      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_FOR_GOAL);
       statemachine.addStateWithDoneTransition(reachedGoalAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN);
+   }
+
+   private class ClearPlanarRegionsListBehavior extends AbstractBehavior
+   {
+
+      public ClearPlanarRegionsListBehavior(CommunicationBridgeInterface communicationBridge)
+      {
+         super(communicationBridge);
+      }
+
+      @Override
+      public void doControl()
+      {
+      }
+
+      @Override
+      public void onBehaviorEntered()
+      {
+         clearPlanarRegionsList();
+      }
+
+      @Override
+      public void onBehaviorAborted()
+      {
+      }
+
+      @Override
+      public void onBehaviorPaused()
+      {
+      }
+
+      @Override
+      public void onBehaviorResumed()
+      {
+      }
+
+      @Override
+      public void onBehaviorExited()
+      {
+      }
+
+      @Override
+      public boolean isDone()
+      {
+         return true;
+      }
+
    }
 
    private class LookDownBehavior extends AbstractBehavior
@@ -247,16 +317,17 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
             @Override
             protected void setBehaviorInput()
             {
-               sleepBehavior.setSleepTime(2.0);
+               sleepBehavior.setSleepTime(1.5);
             }
          };
 
          pipeLine.clearAll();
          //         pipeLine.submitSingleTaskStage(lookUpAction);
-         pipeLine.submitSingleTaskStage(lookDownAction);
          pipeLine.submitSingleTaskStage(enableLidarTask);
          pipeLine.submitSingleTaskStage(setLidarMediumRangeTask);
          pipeLine.submitSingleTaskStage(clearLidarTask);
+//         pipeLine.submitSingleTaskStage(clearPlanarRegionsListTask);
+         pipeLine.submitSingleTaskStage(lookDownAction);
          pipeLine.submitSingleTaskStage(sleepTask);
       }
 
@@ -298,9 +369,13 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       }
    }
 
-   @Override
-   public void onBehaviorExited()
+
+   private void clearPlanarRegionsList()
    {
+      RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = new RequestPlanarRegionsListMessage(RequestType.CLEAR);
+      requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
+      sendPacket(requestPlanarRegionsListMessage);
    }
+
 
 }
