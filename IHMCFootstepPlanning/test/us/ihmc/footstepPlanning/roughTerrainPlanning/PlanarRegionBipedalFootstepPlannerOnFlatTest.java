@@ -17,6 +17,7 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
 {
    private static final boolean visualize = false;
 
+   @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testJustStraightLine()
@@ -24,6 +25,7 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
       super.testJustStraightLine(true);
    }
 
+   @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testStraightLineWithInitialTurn()
@@ -31,6 +33,7 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
       super.testStraightLineWithInitialTurn(true);
    }
 
+   @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testJustTurnInPlace()
@@ -38,7 +41,8 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
       super.testJustTurnInPlace(true);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Override
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.FAST)
    @Test(timeout = 300000)
    public void testRandomPoses()
    {
