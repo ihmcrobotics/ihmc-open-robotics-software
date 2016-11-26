@@ -11,6 +11,7 @@ public enum IntegrationCategory
    VIDEO("Video", true, false),
    UI("UI", true, false),
    CODE_QUALITY("CodeQuality", false, false),
+   COMPILE("Compile", false, false),
    FLAKY("Flaky", true, false),
    IN_DEVELOPMENT("InDevelopment", true, false),
    HEALTH("RepoHealth", false, false);

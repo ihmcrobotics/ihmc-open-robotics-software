@@ -10,11 +10,11 @@ import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
-@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRoughTerrainTest
 {
    private static final boolean visualize = false;
@@ -26,6 +26,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       super.testOnStaircase(new Vector3d(), true);
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testSimpleStepOnBox()
@@ -40,6 +41,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       super.testSimpleStepOnBoxTwo(true);
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testRandomEnvironment()
@@ -47,6 +49,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       super.testRandomEnvironment(true);
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testSimpleGaps()
@@ -101,5 +104,4 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    {
       return visualize;
    }
-
 }
