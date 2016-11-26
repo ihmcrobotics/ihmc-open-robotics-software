@@ -20,6 +20,7 @@ import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -65,6 +66,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    protected final IntegerYoVariable numberOfNodesExpanded = new IntegerYoVariable("numberOfNodesExpanded", registry);
 
+   protected final BooleanYoVariable rejectIfCannotFullyWiggleInside = new BooleanYoVariable("rejectIfCannotFullyWiggleInside", registry);
+
    protected final DoubleYoVariable maximumXYWiggleDistance = new DoubleYoVariable("maximumXYWiggleDistance", registry);
    protected final DoubleYoVariable maximumYawWiggle = new DoubleYoVariable("maximumYawWiggle", registry);
 
@@ -87,6 +90,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
       maximumXYWiggleDistance.set(0.1);
       maximumYawWiggle.set(0.1);
+      rejectIfCannotFullyWiggleInside.set(false);
    }
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
@@ -563,6 +567,16 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          }
       }
 
+      // Add a side step.
+      double xStep = 0.0;
+      double yStep = idealFootstepWidth.getDoubleValue();
+      Vector3d nextStepVector = new Vector3d(xStep, currentSide.negateIfLeftSide(yStep), 0.0);
+      double nextStepYaw = idealStepYaw;
+      childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector, nextStepYaw);
+
+      seeIfNodeIsAtGoal(childNode);
+      nodesToAdd.add(childNode);
+
       //      Collections.shuffle(nodesToAdd);
       Collections.reverse(nodesToAdd);
 
@@ -665,11 +679,17 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       if (wiggleTransformLocalToLocal == null)
       {
          notifyListenerNodeForExpansionWasRejected(nodeAfterSnap, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
-         return null;
 
-         //TODO: Make a parameter of whether to fail if cannot wiggle fully inside.
          //TODO: Possibly have different node scores depending on how firm on ground they are.
-//         return snapTransform;
+         if (rejectIfCannotFullyWiggleInside.getBooleanValue())
+         {
+            return null;
+         }
+
+         else
+         {
+            return snapTransform;
+         }
       }
 
 //      System.out.println("wiggleTransformLocalToLocal = \n" + wiggleTransformLocalToLocal);

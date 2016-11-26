@@ -309,6 +309,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    public void onBehaviorEntered()
    {
       plannerTimer.start();
+      plannerTimer.reset();
    }
 
    @Override
