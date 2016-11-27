@@ -28,7 +28,7 @@ public class PrincipalComponentAnalysis3DTest
    private static final double EPSILON_LOW_PRECISION = 2.0e-3;
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testWith1DData()
    {
       Random random = new Random(5516315L);

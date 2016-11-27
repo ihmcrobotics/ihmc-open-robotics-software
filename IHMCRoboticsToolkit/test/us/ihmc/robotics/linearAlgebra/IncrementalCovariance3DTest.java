@@ -16,13 +16,15 @@ import org.junit.Test;
 
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.testing.JUnitTools;
 
 public class IncrementalCovariance3DTest
 {
    private static final double EPSILON = 1.0e-12;
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testEasyCase()
    {
       Random random = new Random(51651L);
@@ -47,7 +49,8 @@ public class IncrementalCovariance3DTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testNonZeroMean()
    {
       Random random = new Random(51651L);
