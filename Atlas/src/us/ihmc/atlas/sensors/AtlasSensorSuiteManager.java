@@ -50,10 +50,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
       this.modelFactory = modelFactory;
 
-      lidarScanPublisher = new LidarScanPublisher(modelFactory, sensorSuitePacketCommunicator);
-
       DRCRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);
-      lidarScanPublisher.setLidarBaseFrame(multisenseLidarParameters.getSensorNameInSdf());
+      String sensorName = multisenseLidarParameters.getSensorNameInSdf();
+      lidarScanPublisher = new LidarScanPublisher(sensorName, modelFactory, sensorSuitePacketCommunicator);
       lidarScanPublisher.setPPSTimestampOffsetProvider(ppsTimestampOffsetProvider);
       lidarScanPublisher.setCollisionBoxProvider(collisionBoxProvider);
    }
