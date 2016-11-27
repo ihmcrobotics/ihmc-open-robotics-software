@@ -118,6 +118,12 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
       normalize();
    }
 
+   public void set(Quat4f quaternion)
+   {
+      this.quaternion.set(quaternion);
+      normalize();
+   }
+
    public void set(double qx, double qy, double qz, double qs)
    {
       quaternion.set(qx, qy, qz, qs);
@@ -154,6 +160,12 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Tran
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, Quat4d quaternion)
+   {
+      this.referenceFrame = referenceFrame;
+      set(quaternion);
+   }
+
+   public void setIncludingFrame(ReferenceFrame referenceFrame, Quat4f quaternion)
    {
       this.referenceFrame = referenceFrame;
       set(quaternion);

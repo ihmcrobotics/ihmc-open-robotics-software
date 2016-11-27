@@ -5,8 +5,11 @@ import java.util.Random;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Quat4f;
 import javax.vecmath.Tuple3d;
+import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.robotics.Axis;
@@ -114,8 +117,13 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       setPosition(position);
       setOrientation(orientation);
    }
-   
+
    public void setPose(Tuple3d position, Quat4d orientation)
+   {
+      pose.setPose(position, orientation);
+   }
+
+   public void setPose(Tuple3f position, Quat4f orientation)
    {
       pose.setPose(position, orientation);
    }
@@ -144,6 +152,12 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    }
 
    public void setPoseIncludingFrame(ReferenceFrame referenceFrame, Point3d position, Quat4d orientation)
+   {
+      setPose(position, orientation);
+      this.referenceFrame = referenceFrame;
+   }
+
+   public void setPoseIncludingFrame(ReferenceFrame referenceFrame, Point3f position, Quat4f orientation)
    {
       setPose(position, orientation);
       this.referenceFrame = referenceFrame;
