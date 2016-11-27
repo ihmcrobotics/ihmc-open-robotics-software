@@ -24,7 +24,7 @@ import us.ihmc.utilities.ros.RosMainNode;
 public class MultiSenseSensorManager
 {
    public static boolean LOG_PRIMARY_CAMERA_IMAGES = false;
-   
+
    private CameraDataReceiver cameraReceiver;
 
    private final FullHumanoidRobotModelFactory fullRobotModelFactory;
@@ -57,7 +57,7 @@ public class MultiSenseSensorManager
       this.sensorURI = sensorURI;
       registerCameraReceivers();
       registerLidarReceivers(sdfFullRobotModelFactory);
-      if(setROSParameters)
+      if (setROSParameters)
       {
          multiSenseParameterSetter = new MultiSenseParamaterSetter(rosMainNode, sensorSuitePacketCommunicator);
          setMultiseSenseParams(lidarParameters.getLidarSpindleVelocity());
@@ -70,30 +70,24 @@ public class MultiSenseSensorManager
 
    public void initializeParameterListeners()
    {
-
       System.out.println("initialise parameteres--------------------------------------------------------------------------------");
-      if(multiSenseParameterSetter != null)
+      if (multiSenseParameterSetter != null)
       {
          multiSenseParameterSetter.initializeParameterListeners();
-//         multiSenseParameterSetter.setLidarSpindleSpeed(lidarParameters.getLidarSpindleVelocity());
       }
    }
 
    private void setMultiseSenseParams(double lidarSpindleVelocity)
    {
-      if(multiSenseParameterSetter != null)
+      if (multiSenseParameterSetter != null)
       {
          multiSenseParameterSetter.setMultisenseResolution(rosMainNode);
-
          multiSenseParameterSetter.setupNativeROSCommunicator(lidarSpindleVelocity);
       }
    }
 
    private void registerLidarReceivers(FullHumanoidRobotModelFactory sdfFullRobotModelFactory)
    {
-//      new RosPointCloudReceiver(lidarParameters.getSensorNameInSdf(), lidarParameters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.NEARSCAN);
-//      new RosPointCloudReceiver(lidarParameters.getSensorNameInSdf(), lidarParameters.getGroundCloudTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.QUADTREE);
-
       FullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
 
       new RosPointCloudReceiver(lidarParameters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), fullRobotModel.getLidarBaseFrame(lidarParameters.getSensorNameInSdf()),
