@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.testing.JUnitTools;
 
 public class IncrementalCovariance3DTest
 {
@@ -34,19 +35,14 @@ public class IncrementalCovariance3DTest
       for (int i = 0; i < 100; i++)
       {
          List<Point3d> dataset = createRandomDataset(random, average, length, maxAmplitude);
-         
+
          incrementalCovariance3D.clear();
          incrementalCovariance3D.addAllDataPoints(dataset);
          assertCovarianceIsCorrect(incrementalCovariance3D, dataset);
-         
+
          incrementalCovariance3D.clear();
          for (Point3d dataPoint : dataset)
             incrementalCovariance3D.addDataPoint(dataPoint);
-         assertCovarianceIsCorrect(incrementalCovariance3D, dataset);
-         
-         int index = random.nextInt(length);
-         incrementalCovariance3D.removeDataPoint(dataset.get(index));
-         dataset.remove(index);
          assertCovarianceIsCorrect(incrementalCovariance3D, dataset);
       }
    }
@@ -68,34 +64,40 @@ public class IncrementalCovariance3DTest
          incrementalCovariance3D.clear();
          incrementalCovariance3D.addAllDataPoints(dataset);
          assertCovarianceIsCorrect(incrementalCovariance3D, dataset);
-         
+
          incrementalCovariance3D.clear();
          for (Point3d dataPoint : dataset)
             incrementalCovariance3D.addDataPoint(dataPoint);
-         assertCovarianceIsCorrect(incrementalCovariance3D, dataset);
-         
-         int index = random.nextInt(length);
-         incrementalCovariance3D.removeDataPoint(dataset.get(index));
-         dataset.remove(index);
-         assertCovarianceIsCorrect(incrementalCovariance3D, dataset);
-
-         incrementalCovariance3D.clearAndSetPredictedMean(average);
-         incrementalCovariance3D.addAllDataPoints(dataset);
          assertCovarianceIsCorrect(incrementalCovariance3D, dataset);
       }
    }
 
    private void assertCovarianceIsCorrect(IncrementalCovariance3D incrementalCovariance3D, List<Point3d> dataset)
    {
+      Point3d expectedMean = GeometryTools.averagePoint3ds(dataset);
+      Point3d actualMean = new Point3d();
+      incrementalCovariance3D.getMean(actualMean);
+      JUnitTools.assertTuple3dEquals(expectedMean, actualMean, EPSILON);
+
       DenseMatrix64F expectedCovariance;
       DenseMatrix64F actualCovariance = new DenseMatrix64F(0, 0);
       incrementalCovariance3D.getCovariance(actualCovariance);
       expectedCovariance = computeCovarianceMatrix(dataset, false);
-      assertTrue(MatrixFeatures.isEquals(actualCovariance, expectedCovariance, EPSILON));
+      assertEquals(expectedCovariance, actualCovariance, EPSILON);
 
       incrementalCovariance3D.getCovarianceCorrected(actualCovariance);
       expectedCovariance = computeCovarianceMatrix(dataset, true);
-      assertTrue(MatrixFeatures.isEquals(actualCovariance, expectedCovariance, EPSILON));
+      assertEquals(expectedCovariance, actualCovariance, EPSILON);
+   }
+
+   private void assertEquals(DenseMatrix64F expectedCovariance, DenseMatrix64F actualCovariance, double epsilon)
+   {
+      assertTrue(assertErrorMessage(expectedCovariance, actualCovariance), MatrixFeatures.isEquals(expectedCovariance, actualCovariance, epsilon));
+   }
+
+   private static String assertErrorMessage(DenseMatrix64F expectedCovariance, DenseMatrix64F actualCovariance)
+   {
+      return "Expected:\n" + expectedCovariance + "\nActual:\n" + actualCovariance;
    }
 
    private static List<Point3d> createRandomDataset(Random random, Point3d average, int length, Vector3d maxAmplitude)
