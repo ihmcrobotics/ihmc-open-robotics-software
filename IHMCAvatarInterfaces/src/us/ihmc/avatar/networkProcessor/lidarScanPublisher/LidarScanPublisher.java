@@ -57,18 +57,23 @@ public class LidarScanPublisher
 
    private final String robotName;
    private final FullHumanoidRobotModel fullRobotModel;
-   private ReferenceFrame lidarFrame = null;
+   private final ReferenceFrame lidarBaseFrame;
+   private final ReferenceFrame lidarSensorFrame;
    private ReferenceFrame scanPointsFrame = worldFrame;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
    private CollisionShapeTester collisionBoxNode = null;
    private PPSTimestampOffsetProvider ppsTimestampOffsetProvider = null;
 
-   public LidarScanPublisher(FullHumanoidRobotModelFactory modelFactory, PacketCommunicator packetCommunicator)
+   public LidarScanPublisher(String lidarName, FullHumanoidRobotModelFactory modelFactory, PacketCommunicator packetCommunicator)
    {
       this.packetCommunicator = packetCommunicator;
       robotName = modelFactory.getRobotDescription().getName();
       fullRobotModel = modelFactory.createFullRobotModel();
+
+      lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarName);
+      RigidBodyTransform transformToLidarBaseFrame = fullRobotModel.getLidarBaseToSensorTransform(lidarName);
+      lidarSensorFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, transformToLidarBaseFrame);
 
       packetCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
       packetCommunicator.attachListener(RequestLidarScanMessage.class, createRequestLidarScanMessageConsumer());
@@ -101,14 +106,6 @@ public class LidarScanPublisher
       scsSensorsCommunicator.attachListener(SimulatedLidarScanPacket.class, createSimulatedLidarScanPacketConsumer());
    }
 
-   private String lidarName;
-
-   public void setLidarBaseFrame(String lidarName)
-   {
-      this.lidarName = lidarName;
-      lidarFrame = fullRobotModel.getLidarBaseFrame(lidarName);
-   }
-
    public void setScanFrameToWorldFrame()
    {
       scanPointsFrame = worldFrame;
@@ -116,10 +113,8 @@ public class LidarScanPublisher
 
    public void setScanFrameToLidarSensorFrame()
    {
-      if (lidarFrame == null)
-         throw new RuntimeException("The lidar frame has to be set first.");
-      RigidBodyTransform transformToLidarBaseFrame = fullRobotModel.getLidarBaseToSensorTransform(lidarName);
-      scanPointsFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("lidarScanFrame", lidarFrame, transformToLidarBaseFrame);
+      if (lidarBaseFrame == null)
+      scanPointsFrame = lidarSensorFrame;
    }
 
    public void setCollisionBoxProvider(CollisionBoxProvider collisionBoxProvider)
@@ -235,11 +230,11 @@ public class LidarScanPublisher
             Point3f lidarPosition;
             Quat4f lidarOrientation;
 
-            if (lidarFrame != null)
+            if (lidarSensorFrame != null)
             {
                lidarPosition = new Point3f();
                lidarOrientation = new Quat4f();
-               lidarFrame.getTransformToDesiredFrame(transformToWorld, worldFrame);
+               lidarSensorFrame.getTransformToDesiredFrame(transformToWorld, worldFrame);
                transformToWorld.get(lidarOrientation, lidarPosition);
             }
             else
