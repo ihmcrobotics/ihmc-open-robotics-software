@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
@@ -10,9 +11,11 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestLidarScanMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestCommand;
-import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.PointCloud3DCommand;
+import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.LidarScanCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -35,7 +38,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class HeightQuadTreeToolboxController extends ToolboxController
 {
-   private static final double RESOLUTION = 0.015;
+   private static final double RESOLUTION = 0.02;
    private static final boolean DEBUG = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double QUAD_TREE_EXTENT = 200;
@@ -48,6 +51,10 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    private double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
    private int maximumNumberOfPoints = maxSameHeightPointsPerNode * 75000;
 
+   private double minRange = 0.2;
+   private double maxRange = 5.0;
+   private double maxZ = 0.5;
+
    private final CommandInputManager commandInputManager;
    private final AtomicReference<RobotConfigurationData> robotConfigurationDataToProcess = new AtomicReference<>(null);
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatusToProcess = new AtomicReference<>(null);
@@ -56,12 +63,14 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    private final FullHumanoidRobotModel fullRobotModel;
    private final FloatingInverseDynamicsJoint rootJoint;
    private final OneDoFJoint[] oneDoFJoints;
+   private final PacketCommunicator packetCommunicator;
 
-   public HeightQuadTreeToolboxController(FullHumanoidRobotModel fullRobotModel, CommandInputManager commandInputManager,
+   public HeightQuadTreeToolboxController(FullHumanoidRobotModel fullRobotModel, PacketCommunicator packetCommunicator, CommandInputManager commandInputManager,
          StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
       this.fullRobotModel = fullRobotModel;
+      this.packetCommunicator = packetCommunicator;
       rootJoint = fullRobotModel.getRootJoint();
       this.commandInputManager = commandInputManager;
 
@@ -88,6 +97,8 @@ public class HeightQuadTreeToolboxController extends ToolboxController
    @Override
    protected void updateInternal()
    {
+      packetCommunicator.send(new RequestLidarScanMessage());
+
       updateRobotContactPoints();
 
       // Wait until we receive some contact points.
@@ -115,26 +126,34 @@ public class HeightQuadTreeToolboxController extends ToolboxController
          }
       }
 
-      if (!commandInputManager.isNewCommandAvailable(PointCloud3DCommand.class))
+      if (!commandInputManager.isNewCommandAvailable(LidarScanCommand.class))
       {
          return;
       }
 
       boolean hasQuadTreeChanged = false;
 
-      List<PointCloud3DCommand> newPointClouds = commandInputManager.pollNewCommands(PointCloud3DCommand.class);
+      List<LidarScanCommand> newPointClouds = commandInputManager.pollNewCommands(LidarScanCommand.class);
 
       if (DEBUG)
          PrintTools.debug("Received new point cloud. Number of points: " + newPointClouds.get(0).getNumberOfPoints());
 
+      Point3d lidarPosition = new Point3d();
+
       for (int pointCloudIndex = 0; pointCloudIndex < newPointClouds.size(); pointCloudIndex++)
       {
-         PointCloud3DCommand pointCloud3D = newPointClouds.get(pointCloudIndex);
+         LidarScanCommand scan = newPointClouds.get(pointCloudIndex);
+         scan.getLidarPosition(lidarPosition);
 
-         for (int pointIndex = 0; pointIndex < pointCloud3D.getNumberOfPoints(); pointIndex++)
+         for (int pointIndex = 0; pointIndex < scan.getNumberOfPoints(); pointIndex++)
          {
-            pointCloud3D.getFramePoint(pointIndex, scanPoint);
+            scan.getFramePoint(pointIndex, scanPoint);
             scanPoint.changeFrame(worldFrame);
+
+            double distanceFromSensor = scanPoint.distance(lidarPosition);
+            if (distanceFromSensor > maxRange || distanceFromSensor < minRange || scanPoint.getZ() > lidarPosition.getZ() + maxZ)
+               continue;
+
             double x = scanPoint.getX();
             double y = scanPoint.getY();
             double z = scanPoint.getZ();
