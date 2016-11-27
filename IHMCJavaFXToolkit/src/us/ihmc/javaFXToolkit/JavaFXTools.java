@@ -3,7 +3,9 @@ package us.ihmc.javaFXToolkit;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Quat4f;
 import javax.vecmath.Tuple3d;
+import javax.vecmath.Tuple3f;
 import javax.vecmath.Vector3d;
 
 import javafx.geometry.Point3D;
@@ -72,6 +74,14 @@ public abstract class JavaFXTools
    }
 
    public static Affine createAffineFromQuaternionAndTuple(Quat4d quaternion, Tuple3d translation)
+   {
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.setRotation(quaternion);
+      transform.setTranslation(translation.getX(), translation.getY(), translation.getZ());
+      return convertRigidBodyTransformToAffine(transform);
+   }
+
+   public static Affine createAffineFromQuaternionAndTuple(Quat4f quaternion, Tuple3f translation)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotation(quaternion);
