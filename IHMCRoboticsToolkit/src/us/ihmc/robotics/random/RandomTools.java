@@ -71,6 +71,15 @@ public class RandomTools
       return new Point3d(x, y, z);
    }
 
+   public static Point3d generateRandomPoint3d(Random random, Point3d min, Point3d max)
+   {
+      double x = generateRandomDoubleInRange(random, min.getX(), max.getX());
+      double y = generateRandomDoubleInRange(random, min.getY(), max.getY());
+      double z = generateRandomDoubleInRange(random, min.getZ(), max.getZ());
+
+      return new Point3d(x, y, z);
+   }
+
    public static Point3f generateRandomPoint3f(Random random, Point3f min, Point3f max)
    {
       float x = generateRandomFloatInRange(random, min.getX(), max.getX());
