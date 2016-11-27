@@ -113,7 +113,6 @@ public class LidarScanPublisher
 
    public void setScanFrameToLidarSensorFrame()
    {
-      if (lidarBaseFrame == null)
       scanPointsFrame = lidarSensorFrame;
    }
 
