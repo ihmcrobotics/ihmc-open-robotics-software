@@ -36,21 +36,21 @@ public class MultiSenseSensorManager
 
    private final URI sensorURI;
 
-   private final DRCRobotCameraParameters cameraParamaters;
-   private final DRCRobotLidarParameters lidarParamaters;
+   private final DRCRobotCameraParameters cameraParameters;
+   private final DRCRobotLidarParameters lidarParameters;
 
    private final PointCloudDataReceiver pointCloudDataReceiver;
-   private MultiSenseParamaterSetter multiSenseParamaterSetter;
+   private MultiSenseParamaterSetter multiSenseParameterSetter;
 
    public MultiSenseSensorManager(FullHumanoidRobotModelFactory sdfFullRobotModelFactory, PointCloudDataReceiver pointCloudDataReceiver, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-         RosMainNode rosMainNode, PacketCommunicator sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParamaters,
-         DRCRobotLidarParameters lidarParamaters, DRCRobotPointCloudParameters stereoParamaters, boolean setROSParameters)
+         RosMainNode rosMainNode, PacketCommunicator sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParameters,
+         DRCRobotLidarParameters lidarParameters, DRCRobotPointCloudParameters stereoParameters, boolean setROSParameters)
    {
       this.fullRobotModelFactory = sdfFullRobotModelFactory;
       this.pointCloudDataReceiver = pointCloudDataReceiver;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
-      this.lidarParamaters = lidarParamaters;
-      this.cameraParamaters = cameraParamaters;
+      this.lidarParameters = lidarParameters;
+      this.cameraParameters = cameraParameters;
       this.rosMainNode = rosMainNode;
       this.packetCommunicator = sensorSuitePacketCommunicator;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
@@ -59,12 +59,12 @@ public class MultiSenseSensorManager
       registerLidarReceivers(sdfFullRobotModelFactory);
       if(setROSParameters)
       {
-         multiSenseParamaterSetter = new MultiSenseParamaterSetter(rosMainNode, sensorSuitePacketCommunicator);
-         setMultiseSenseParams(lidarParamaters.getLidarSpindleVelocity());
+         multiSenseParameterSetter = new MultiSenseParamaterSetter(rosMainNode, sensorSuitePacketCommunicator);
+         setMultiseSenseParams(lidarParameters.getLidarSpindleVelocity());
       }
       else
       {
-         multiSenseParamaterSetter = null;
+         multiSenseParameterSetter = null;
       }
    }
 
@@ -72,44 +72,44 @@ public class MultiSenseSensorManager
    {
 
       System.out.println("initialise parameteres--------------------------------------------------------------------------------");
-      if(multiSenseParamaterSetter != null)
+      if(multiSenseParameterSetter != null)
       {
-         multiSenseParamaterSetter.initializeParameterListeners();
-//         multiSenseParamaterSetter.setLidarSpindleSpeed(lidarParamaters.getLidarSpindleVelocity());
+         multiSenseParameterSetter.initializeParameterListeners();
+//         multiSenseParameterSetter.setLidarSpindleSpeed(lidarParameters.getLidarSpindleVelocity());
       }
    }
 
    private void setMultiseSenseParams(double lidarSpindleVelocity)
    {
-      if(multiSenseParamaterSetter != null)
+      if(multiSenseParameterSetter != null)
       {
-         multiSenseParamaterSetter.setMultisenseResolution(rosMainNode);
+         multiSenseParameterSetter.setMultisenseResolution(rosMainNode);
 
-         multiSenseParamaterSetter.setupNativeROSCommunicator(lidarSpindleVelocity);
+         multiSenseParameterSetter.setupNativeROSCommunicator(lidarSpindleVelocity);
       }
    }
 
    private void registerLidarReceivers(FullHumanoidRobotModelFactory sdfFullRobotModelFactory)
    {
-//      new RosPointCloudReceiver(lidarParamaters.getSensorNameInSdf(), lidarParamaters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.NEARSCAN);
-//      new RosPointCloudReceiver(lidarParamaters.getSensorNameInSdf(), lidarParamaters.getGroundCloudTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.QUADTREE);
+//      new RosPointCloudReceiver(lidarParameters.getSensorNameInSdf(), lidarParameters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.NEARSCAN);
+//      new RosPointCloudReceiver(lidarParameters.getSensorNameInSdf(), lidarParameters.getGroundCloudTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.QUADTREE);
 
       FullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
 
-      new RosPointCloudReceiver(lidarParamaters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), fullRobotModel.getLidarBaseFrame(lidarParamaters.getSensorNameInSdf()),
+      new RosPointCloudReceiver(lidarParameters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), fullRobotModel.getLidarBaseFrame(lidarParameters.getSensorNameInSdf()),
             pointCloudDataReceiver, PointCloudSource.NEARSCAN);
 
-      new RosPointCloudReceiver(lidarParamaters.getGroundCloudTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), fullRobotModel.getLidarBaseFrame(lidarParamaters.getSensorNameInSdf()),
+      new RosPointCloudReceiver(lidarParameters.getGroundCloudTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), fullRobotModel.getLidarBaseFrame(lidarParameters.getSensorNameInSdf()),
             pointCloudDataReceiver, PointCloudSource.QUADTREE);
    }
 
    private void registerCameraReceivers()
    {
       CameraLogger logger = LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
-      cameraReceiver = new CameraDataReceiver(fullRobotModelFactory, cameraParamaters.getPoseFrameForSdf(), robotConfigurationDataBuffer, new VideoPacketHandler(packetCommunicator),
+      cameraReceiver = new CameraDataReceiver(fullRobotModelFactory, cameraParameters.getPoseFrameForSdf(), robotConfigurationDataBuffer, new VideoPacketHandler(packetCommunicator),
             ppsTimestampOffsetProvider);
 
-      new RosCameraCompressedImageReceiver(cameraParamaters, rosMainNode, logger, cameraReceiver);
+      new RosCameraCompressedImageReceiver(cameraParameters, rosMainNode, logger, cameraReceiver);
 
       cameraReceiver.start();
    }
