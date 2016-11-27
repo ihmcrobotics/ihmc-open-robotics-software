@@ -7,6 +7,7 @@ import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple3f;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 /**
  * This class provides a storeless computation for a 3D covariance matrix.
@@ -35,9 +36,8 @@ import org.ejml.data.DenseMatrix64F;
 public class IncrementalCovariance3D
 {
    private int sampleSize = 0;
-   private final Point3d predictedMean = new Point3d();
-   private final Point3d sum = new Point3d();
-   private final DenseMatrix64F sumOfOuterProducts = new DenseMatrix64F(3, 3);
+   private final Point3d mean = new Point3d();
+   private final DenseMatrix64F secondMoment = new DenseMatrix64F(3, 3);
 
    public IncrementalCovariance3D()
    {
@@ -49,45 +49,9 @@ public class IncrementalCovariance3D
     */
    public void clear()
    {
-      clearAndSetPredictedMean(0.0, 0.0, 0.0);
-   }
-
-   /**
-    * Clear the current data and set the predicted mean to use afterwards.
-    * @param predictedMean an estimate of the mean of the data points that will be added.
-    * It is not required but improves the accuracy of the covariance matrix to be calculated.
-    * It also does not have to be exact or even precise, as the covariance does not depend on it theoretically.
-    * It should be within the dataset range and as close to the actual mean as possible.
-    */
-   public void clearAndSetPredictedMean(Tuple3d predictedMean)
-   {
-      clearAndSetPredictedMean(predictedMean.getX(), predictedMean.getY(), predictedMean.getZ());
-   }
-
-   /**
-    * Clear the current data and set the predicted mean to use afterwards.
-    * @param predictedMean an estimate of the mean of the data points that will be added.
-    * It is not required but improves the accuracy of the covariance matrix to be calculated.
-    */
-   public void clearAndSetPredictedMean(Tuple3f predictedMean)
-   {
-      clearAndSetPredictedMean(predictedMean.getX(), predictedMean.getY(), predictedMean.getZ());
-   }
-
-   /**
-    * Clear the current data and set the predicted mean to use afterwards.
-    * The tuple (x, y, z) represents an estimate of the mean of the data points that will be added.
-    * It is not required but improves the accuracy of the covariance matrix to be calculated.
-    * @param x the x-coordinate of the predicted mean.
-    * @param y the y-coordinate of the predicted mean.
-    * @param z the z-coordinate of the predicted mean.
-    */
-   public void clearAndSetPredictedMean(double x, double y, double z)
-   {
-      predictedMean.set(x, y, z);
-      sum.set(0.0, 0.0, 0.0);
       sampleSize = 0;
-      sumOfOuterProducts.zero();
+      mean.set(0.0, 0., 0.0);
+      secondMoment.zero();
    }
 
    /**
@@ -155,77 +119,41 @@ public class IncrementalCovariance3D
    public void addDataPoint(double x, double y, double z)
    {
       sampleSize++;
-      x -= predictedMean.getX();
-      y -= predictedMean.getY();
-      z -= predictedMean.getZ();
-      addToTuple(sum, x, y, z);
+      double devX = x - mean.getX();
+      double devY = y - mean.getY();
+      double devZ = z - mean.getZ();
+      double nInv = 1.0 / sampleSize;
 
-      double xx = x * x;
-      double xy = x * y;
-      double xz = x * z;
-      double yy = y * y;
-      double yz = y * z;
-      double zz = z * z;
+      mean.setX(mean.getX() + devX * nInv);
+      mean.setY(mean.getY() + devY * nInv);
+      mean.setZ(mean.getZ() + devZ * nInv);
 
-      sumOfOuterProducts.add(0, 0, xx);
-      sumOfOuterProducts.add(0, 1, xy);
-      sumOfOuterProducts.add(0, 2, xz);
-      sumOfOuterProducts.add(1, 0, xy);
-      sumOfOuterProducts.add(1, 1, yy);
-      sumOfOuterProducts.add(1, 2, yz);
-      sumOfOuterProducts.add(2, 0, xz);
-      sumOfOuterProducts.add(2, 1, yz);
-      sumOfOuterProducts.add(2, 2, zz);
+      // Using the known symmetricity of the covariance matrix.
+      double m00 = devX * (x - mean.getX());
+      double m11 = devY * (y - mean.getY());
+      double m22 = devZ * (z - mean.getZ());
+      double m01 = devX * (y - mean.getY());
+      double m02 = devX * (z - mean.getZ());
+      double m12 = devY * (z - mean.getZ());
+
+      secondMoment.add(0, 0, m00);
+      secondMoment.add(0, 1, m01);
+      secondMoment.add(0, 2, m02);
+      secondMoment.add(1, 0, m01);
+      secondMoment.add(1, 1, m11);
+      secondMoment.add(1, 2, m12);
+      secondMoment.add(2, 0, m02);
+      secondMoment.add(2, 1, m12);
+      secondMoment.add(2, 2, m22);
    }
 
    /**
-    * Removes a data point and updates the covariance matrix.
-    * @param tuple the data point to remove.
+    * Get the the average of the current dataset.
+    * @param meanToPack
     */
-   public void removeDataPoint(Tuple3d tuple)
+   public void getMean(Tuple3d meanToPack)
    {
-      removeDataPoint(tuple.getX(), tuple.getY(), tuple.getZ());
-   }
-
-   /**
-    * Removes a data point and updates the covariance matrix.
-    * @param tuple the data point to remove.
-    */
-   public void removeDataPoint(Tuple3f tuple)
-   {
-      removeDataPoint(tuple.getX(), tuple.getY(), tuple.getZ());
-   }
-
-   /**
-    * Removes a data point (x, y, z) and updates the covariance matrix.
-    * @param x the x-coordinate of the data point to remove.
-    * @param y the y-coordinate of the data point to remove.
-    * @param z the z-coordinate of the data point to remove.
-    */
-   public void removeDataPoint(double x, double y, double z)
-   {
-      sampleSize--;
-      x -= predictedMean.getX();
-      y -= predictedMean.getY();
-      z -= predictedMean.getZ();
-      addToTuple(sum, -x, -y, -z);
-
-      double xx = x * x;
-      double xy = x * y;
-      double xz = x * z;
-      double yy = y * y;
-      double yz = y * z;
-      double zz = z * z;
-
-      sumOfOuterProducts.add(0, 0, -xx);
-      sumOfOuterProducts.add(0, 1, -xy);
-      sumOfOuterProducts.add(0, 2, -xz);
-      sumOfOuterProducts.add(1, 0, -xy);
-      sumOfOuterProducts.add(1, 1, -yy);
-      sumOfOuterProducts.add(1, 2, -yz);
-      sumOfOuterProducts.add(2, 0, -xz);
-      sumOfOuterProducts.add(2, 1, -yz);
-      sumOfOuterProducts.add(2, 2, -zz);
+      meanToPack.set(mean);
    }
 
    /**
@@ -234,8 +162,9 @@ public class IncrementalCovariance3D
     */
    public void getCovariance(DenseMatrix64F covarianceToPack)
    {
-      double div = 1.0 / (double) (sampleSize * sampleSize);
-      computeCovariance(covarianceToPack, div);
+      double div = 1.0 / (double) (sampleSize);
+      covarianceToPack.set(secondMoment);
+      CommonOps.scale(div, covarianceToPack);
    }
 
    /**
@@ -244,50 +173,16 @@ public class IncrementalCovariance3D
     */
    public void getCovarianceCorrected(DenseMatrix64F covarianceToPack)
    {
-      double div = 1.0 / (double) (sampleSize * (sampleSize - 1.0));
-      computeCovariance(covarianceToPack, div);
+      double div = 1.0 / (double) (sampleSize - 1.0);
+      covarianceToPack.set(secondMoment);
+      CommonOps.scale(div, covarianceToPack);
    }
 
-   private void computeCovariance(DenseMatrix64F covarianceToPack, double div)
+   /**
+    * @return the current number of data points.
+    */
+   public int getSampleSize()
    {
-      covarianceToPack.reshape(3, 3);
-
-      double xx = - sum.getX() * sum.getX();
-      double xy = - sum.getX() * sum.getY();
-      double xz = - sum.getX() * sum.getZ();
-      double yy = - sum.getY() * sum.getY();
-      double yz = - sum.getY() * sum.getZ();
-      double zz = - sum.getZ() * sum.getZ();
-
-      xx += sampleSize * sumOfOuterProducts.get(0, 0);
-      xy += sampleSize * sumOfOuterProducts.get(0, 1);
-      xz += sampleSize * sumOfOuterProducts.get(0, 2);
-      yy += sampleSize * sumOfOuterProducts.get(1, 1);
-      yz += sampleSize * sumOfOuterProducts.get(1, 2);
-      zz += sampleSize * sumOfOuterProducts.get(2, 2);
-
-      xx *= div;
-      xy *= div;
-      xz *= div;
-      yy *= div;
-      yz *= div;
-      zz *= div;
-
-      covarianceToPack.set(0, 0, xx);
-      covarianceToPack.set(0, 1, xy);
-      covarianceToPack.set(0, 2, xz);
-      covarianceToPack.set(1, 0, xy);
-      covarianceToPack.set(1, 1, yy);
-      covarianceToPack.set(1, 2, yz);
-      covarianceToPack.set(2, 0, xz);
-      covarianceToPack.set(2, 1, yz);
-      covarianceToPack.set(2, 2, zz);
-   }
-
-   private void addToTuple(Tuple3d tupleToModify, double x, double y, double z)
-   {
-      tupleToModify.setX(tupleToModify.getX() + x);
-      tupleToModify.setY(tupleToModify.getY() + y);
-      tupleToModify.setZ(tupleToModify.getZ() + z);
+      return sampleSize;
    }
 }
