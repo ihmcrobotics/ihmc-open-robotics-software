@@ -28,7 +28,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -57,7 +59,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
    private final EnumYoVariable<RobotSide> nextSideToSwing;
 
-   private final FootstepPlanner footstepPlanner;
+   private final PlanarRegionBipedalFootstepPlanner footstepPlanner;
    private FootstepPlan plan = null;
 
    private final YoFramePose footstepPlannerInitialStepPose;
@@ -74,8 +76,9 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    private final Quat4d tempFirstFootstepPoseOrientation = new Quat4d();
    private final YoTimer plannerTimer;
 
-   public PlanHumanoidFootstepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-         FiducialDetectorBehaviorService fiducialDetectorBehaviorService)
+   public PlanHumanoidFootstepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge,
+                                        FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                                        FiducialDetectorBehaviorService fiducialDetectorBehaviorService)
    {
       super(PlanHumanoidFootstepsBehavior.class.getSimpleName(), behaviorCommunicationBridge);
 
@@ -98,7 +101,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       behaviorCommunicationBridge.attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
    }
 
-   private FootstepPlanner createFootstepPlanner()
+   private PlanarRegionBipedalFootstepPlanner createFootstepPlanner()
    {
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
 
@@ -120,13 +123,30 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       planner.setMaximumNumberOfNodesToExpand(500);
-
-      //TODO: Can't have this here since it uses SCS I think. Problems with Gradle?
-//      SCSPlanarRegionBipedalFootstepPlannerVisualizer listener = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
-//      listener.setCropBufferWhenSolutionIsFound(false);
-//      planner.setBipedalFootstepPlannerListener(listener);
-
       return planner;
+   }
+
+   public void createAndAttachSCSListenerToPlanner()
+   {
+      //TODO: Can't have this here since it uses SCS I think. Problems with Gradle?
+      //      SCSPlanarRegionBipedalFootstepPlannerVisualizer listener = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
+
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
+      YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer listener = YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(footPolygonsInSoleFrame);
+
+      listener.setCropBufferWhenSolutionIsFound(false);
+      footstepPlanner.setBipedalFootstepPlannerListener(listener);
+   }
+
+   public void createAndAttachYoVariableServerListenerToPlanner(LogModelProvider logModelProvider, FullRobotModel fullRobotModel)
+   {
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
+      YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer listener = YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer.createWithYoVariableServer(fullRobotModel,
+                                                                                                                                                                      logModelProvider,
+                                                                                                                                                                      footPolygonsInSoleFrame);
+
+      listener.setCropBufferWhenSolutionIsFound(false);
+      footstepPlanner.setBipedalFootstepPlannerListener(listener);
    }
 
    public void setGoalPoseAndFirstSwingSide(FramePose goalPose, RobotSide swingSide)
@@ -295,7 +315,8 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
          tempFirstFootstepPose.getPosition(tempFootstepPosePosition);
          tempFirstFootstepPose.getOrientation(tempFirstFootstepPoseOrientation);
 
-         FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(tempFootstepPosePosition), new Quat4d(tempFirstFootstepPoseOrientation));
+         FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(tempFootstepPosePosition),
+                                                                            new Quat4d(tempFirstFootstepPoseOrientation));
          firstFootstepMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          footstepDataListMessage.add(firstFootstepMessage);
