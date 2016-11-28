@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -19,6 +21,9 @@ public class BipedalFootstepPlannerNode
    private double costFromParent;
    private double costToHereFromStart;
    private double estimatedCostToGoal;
+
+   private static final double XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.3;
+   private static final double YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.3;
 
    private boolean isAtGoal = false;
 
@@ -143,4 +148,81 @@ public class BipedalFootstepPlannerNode
       this.estimatedCostToGoal = estimatedCostToGoal;
    }
 
+   private final Vector3d tempPointA = new Vector3d();
+   private final Vector3d tempPointB = new Vector3d();
+   private final Vector3d tempRotationVectorA = new Vector3d();
+   private final Vector3d tempRotationVectorB = new Vector3d();
+
+   @Override
+   public boolean equals(Object o)
+   {
+      if(!(o instanceof BipedalFootstepPlannerNode))
+      {
+         return false;
+      }
+      else
+      {
+         BipedalFootstepPlannerNode otherNode = (BipedalFootstepPlannerNode) o;
+
+         if(getRobotSide() != otherNode.getRobotSide())
+         {
+            return false;
+         }
+
+         this.soleTransform.getTranslation(tempPointA);
+         MathTools.roundToGivenPrecision(tempPointA, XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+         otherNode.soleTransform.getTranslation(tempPointB);
+         MathTools.roundToGivenPrecision(tempPointB, XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+         this.soleTransform.getRotationEuler(tempRotationVectorA);
+         double thisYaw = MathTools.roundToGivenPrecisionForAngle(tempRotationVectorA.getX(), YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+         otherNode.soleTransform.getRotationEuler(tempRotationVectorB);
+         double otherYaw = MathTools.roundToGivenPrecisionForAngle(tempRotationVectorA.getX(), YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+         tempPointA.sub(tempPointB);
+         tempPointA.setZ(0.0);
+
+//         tempRotationVectorA.sub(tempRotationVectorB);
+//         double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(thisYaw, otherYaw);
+
+         return (tempPointA.length() < 1e-10); //  && (Math.abs(yawDifference) < 1e-10);
+      }
+   }
+
+   @Override
+   public int hashCode()
+   {
+      this.soleTransform.getTranslation(tempPointA);
+      MathTools.roundToGivenPrecision(tempPointA, XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+      this.soleTransform.getRotationEuler(tempRotationVectorA);
+      MathTools.roundToGivenPrecisionForAngles(tempRotationVectorA, YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+      int result = getRobotSide().hashCode();
+      result = 3 * result + (int) Math.round(tempPointA.getX() / XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+      result = 3 * result + (int) Math.round(tempPointA.getY() / XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+//      result = 3 * result + (int) Math.round(tempRotationVectorA.getX() / YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+      return result;
+   }
+
+   public static double getXyDistanceThresholdToConsiderNodesEqual()
+   {
+      return XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL;
+   }
+
+   public static double getYawRotationThresholdToConsiderNodesEqual()
+   {
+      return YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL;
+   }
+
+   public boolean epsilonEquals(BipedalFootstepPlannerNode nodeToCheck, double epsilon)
+   {
+      if (nodeToCheck.footstepSide != this.footstepSide) return false;
+      if (!nodeToCheck.soleTransform.epsilonEquals(this.soleTransform, epsilon)) return false;
+
+      return true;
+   }
 }

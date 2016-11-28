@@ -62,8 +62,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
 
    public BehaviorDispatcher(DoubleYoVariable yoTime, RobotDataReceiver robotDataReceiver, BehaviorControlModeSubscriber desiredBehaviorControlSubscriber,
-         BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, CommunicationBridge communicationBridge, YoVariableServer yoVaribleServer,
-         Class<E> behaviourEnum, E stopBehavior, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         BehaviorTypeSubscriber<E> desiredBehaviorSubscriber, CommunicationBridge communicationBridge, YoVariableServer yoVaribleServer, Class<E> behaviourEnum,
+         E stopBehavior, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.behaviorEnum = behaviourEnum;
       this.yoTime = yoTime;
@@ -135,7 +135,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
          }
       }
    }
-   
+
    public void addBehaviorService(BehaviorService behaviorService)
    {
       registry.addChild(behaviorService.getYoVariableRegistry());
@@ -143,7 +143,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
    private void initialize()
    {
-      stateMachine.initialize();
+      BehaviorAction<E> currentState = stateMachine.getCurrentState();
+      currentState.doTransitionIntoAction();
    }
 
    private void doControl()
@@ -261,11 +262,9 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       @Override
       public void doTransitionAction()
       {
-        
+
       }
    }
-
-
 
    public void start()
    {

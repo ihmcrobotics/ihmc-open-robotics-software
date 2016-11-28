@@ -1,9 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.MathTools;
-
 import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
 import javax.vecmath.Tuple3d;
+
+import us.ihmc.robotics.MathTools;
 
 public class BoundingBox3d
 {
@@ -257,6 +258,11 @@ public class BoundingBox3d
    public boolean isInside(Point3d point3d)
    {
       return isInside(point3d.getX(), point3d.getY(), point3d.getZ());
+   }
+
+   public boolean isInside(Point3f point3f)
+   {
+      return isInside(point3f.getX(), point3f.getY(), point3f.getZ());
    }
 
    // TODO isInside is not consistent with the other methods (> vs. >=)

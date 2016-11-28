@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry.transformables;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Tuple3d;
+import javax.vecmath.Tuple3f;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
@@ -12,6 +13,11 @@ public class TransformablePoint3d extends Point3d implements GeometryObject<Tran
    private static final long serialVersionUID = 3215925974643446454L;
 
    public TransformablePoint3d(Tuple3d tuple)
+   {
+      super(tuple);
+   }
+
+   public TransformablePoint3d(Tuple3f tuple)
    {
       super(tuple);
    }

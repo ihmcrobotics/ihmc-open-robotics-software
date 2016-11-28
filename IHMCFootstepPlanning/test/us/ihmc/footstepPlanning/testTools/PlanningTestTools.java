@@ -2,6 +2,9 @@ package us.ihmc.footstepPlanning.testTools;
 
 import static org.junit.Assert.assertTrue;
 
+import javax.vecmath.Point2d;
+
+import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -141,6 +144,7 @@ public class PlanningTestTools
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       goal.setGoalPoseBetweenFeet(goalPose);
+      goal.setXYGoal(new Point2d(goalPose.getX(), goalPose.getY()), 0.5);
 
       return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList, assertPlannerReturnedResult);
    }
@@ -155,6 +159,28 @@ public class PlanningTestTools
       FootstepPlan footstepPlan = planner.getPlan();
       if (assertPlannerReturnedResult) assertTrue("Planner was not able to provide valid result.", result.validForExecution());
       return footstepPlan;
+   }
+
+   public static Runnable createAnytimePlannerRunnable(final AnytimeFootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList)
+   {
+      FootstepPlannerGoal goal = new FootstepPlannerGoal();
+      goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
+      goal.setGoalPoseBetweenFeet(goalPose);
+
+      planner.setInitialStanceFoot(initialStanceFootPose, initialStanceSide);
+      planner.setGoal(goal);
+      planner.setPlanarRegions(planarRegionsList);
+
+      Runnable anytimePlannerRunnable = new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            planner.plan();
+         }
+      };
+
+      return anytimePlannerRunnable;
    }
 
    public static boolean isGoalWithinFeet(FramePose goalPose, FootstepPlan footstepPlan)

@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -21,40 +20,40 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
       return statemachine;
    }
 
-   public void initialize()
+   @Override
+   public void onBehaviorEntered()
    {
       statemachine.initialize();
    }
 
-   public void pause()
+   @Override
+   public void onBehaviorPaused()
    {
       statemachine.pause();
    }
 
-   public void resume()
+   public void onBehaviorResumed()
    {
       statemachine.resume();
    }
 
-   public void abort()
+   public void onBehaviorAborted()
    {
       statemachine.stop();
    }
 
-   @Override 
+   @Override
    public void doControl()
    {
       statemachine.doAction();
       statemachine.checkTransitionConditions();
    }
 
-  
-
    @Override
    public boolean isDone()
    {
       //if your current state has finished and there is no transition out of that state... the entire state machine is finished
-      
+
       if (statemachine.getCurrentState().isDone() && statemachine.getCurrentState().getStateTransitions().size() == 0)
       {
          return true;

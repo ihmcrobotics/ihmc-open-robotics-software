@@ -151,43 +151,39 @@ public class KickBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.initialize();
+         behavior.onBehaviorEntered();
       }
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       hasInputBeenSet.set(false);
-      super.doPostBehaviorCleanup();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.doPostBehaviorCleanup();
+         behavior.onBehaviorExited();
       }
    }
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
-      super.abort();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.abort();
+         behavior.onBehaviorAborted();
       }
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
-      super.pause();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.pause();
+         behavior.onBehaviorPaused();
       }
    }
 
@@ -198,12 +194,11 @@ public class KickBehavior extends AbstractBehavior
    }
 
    @Override
-   public void resume()
+   public void onBehaviorResumed()
    {
-      super.resume();
       for (AbstractBehavior behavior : behaviors)
       {
-         behavior.resume();
+         behavior.onBehaviorResumed();
       }
    }
 

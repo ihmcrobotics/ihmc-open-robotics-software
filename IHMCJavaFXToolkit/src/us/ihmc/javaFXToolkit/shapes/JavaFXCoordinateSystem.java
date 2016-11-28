@@ -13,7 +13,7 @@ public class JavaFXCoordinateSystem extends Group
    {
       TextureColorPalette1D colorPalette = new TextureColorPalette1D();
       colorPalette.setHueBased(1.0, 1.0);
-      MultiColorMeshBuilder meshBuilder = new MultiColorMeshBuilder(colorPalette);
+      JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
       double radius = 0.02 * length;
       double coneHeight = 0.10 * length;
       double coneRadius = 0.05 * length;

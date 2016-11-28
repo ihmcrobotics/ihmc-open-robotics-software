@@ -43,12 +43,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
       setupStateMachine();
    }
 
-   @Override
-   public void initialize()
-   {
-      statemachine.setCurrentState(WalkToObjectState.GET_READY_TO_WALK);
-   }
-
+   
    private void setupStateMachine()
    {
 
@@ -114,7 +109,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
       statemachine.addStateWithDoneTransition(walkToPoint1Task, WalkToObjectState.WALK_TO_POINT_2);
       statemachine.addState(walkToPoint2Task);
 
-      statemachine.setCurrentState(WalkToObjectState.GET_READY_TO_WALK);
+      statemachine.setStartState(WalkToObjectState.GET_READY_TO_WALK);
    }
 
    public void setWalkPoints(FramePoint walkToPoint1, FramePoint walkToPoint2)
@@ -124,8 +119,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
    }
 }

@@ -6,8 +6,10 @@ import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeRejectionR
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -19,21 +21,34 @@ public class SCSPlanarRegionBipedalFootstepPlannerVisualizer implements BipedalF
 {
    private final SimulationConstructionSet scs;
    private final PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer;
+   private boolean cropBufferWhenSolutionIsFound = true;
+
+   private final IntegerYoVariable planarRegionsListIndex;
 
    public SCSPlanarRegionBipedalFootstepPlannerVisualizer(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
    {
       scs = new SimulationConstructionSet(new Robot("Test"));
+      scs.changeBufferSize(32000);
+
       YoVariableRegistry parentRegistry = scs.getRootRegistry();
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame, parentRegistry, graphicsListRegistry);
+
+      planarRegionsListIndex = new IntegerYoVariable("planarRegionsListIndex", footstepPlannerVisualizer.getYoVariableRegistry());
 
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.setDT(0.1, 1);
 
       scs.setCameraFix(-6.0, 0.0, 0.0);
       scs.setCameraPosition(-11.0, 0.0, 8.0);
+      scs.setGroundVisible(false);
       scs.startOnAThread();
+   }
+
+   public void setCropBufferWhenSolutionIsFound(boolean cropBufferWhenSolutionIsFound)
+   {
+      this.cropBufferWhenSolutionIsFound = cropBufferWhenSolutionIsFound;
    }
 
    @Override
@@ -67,25 +82,41 @@ public class SCSPlanarRegionBipedalFootstepPlannerVisualizer implements BipedalF
    @Override
    public void notifyListenerSolutionWasFound()
    {
-      scs.cropBuffer();
+      if (cropBufferWhenSolutionIsFound)
+      {
+         scs.cropBuffer();
+      }
+      scs.setTime(0.0);
       tickAndUpdateSCS();
    }
 
    @Override
    public void notifyListenerSolutionWasNotFound()
    {
-      scs.cropBuffer();
+      if (cropBufferWhenSolutionIsFound)
+      {
+         scs.cropBuffer();
+      }
+      scs.setTime(0.0);
       tickAndUpdateSCS();
    }
+
+   private Graphics3DNode node;
 
    @Override
    public void planarRegionsListSet(PlanarRegionsList planarRegionsList)
    {
-      if (planarRegionsList == null) return;
+      if (node != null)
+      {
+         scs.removeGraphics3dNode(node);
+      }
+      if (planarRegionsList == null)
+         return;
 
+      planarRegionsListIndex.increment();
       Graphics3DObject graphics3dObject = new Graphics3DObject();
       graphics3dObject.addPlanarRegionsList(planarRegionsList, YoAppearance.Blue(), YoAppearance.Purple(), YoAppearance.Pink(), YoAppearance.Orange(), YoAppearance.Brown());
-      scs.addStaticLinkGraphics(graphics3dObject);
+      node = scs.addStaticLinkGraphics(graphics3dObject);
 
       tickAndUpdateSCS();
    }
@@ -94,5 +125,10 @@ public class SCSPlanarRegionBipedalFootstepPlannerVisualizer implements BipedalF
    {
       scs.setTime(scs.getTime() + 1.0);
       scs.tickAndUpdate();
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return scs.getRootRegistry();
    }
 }

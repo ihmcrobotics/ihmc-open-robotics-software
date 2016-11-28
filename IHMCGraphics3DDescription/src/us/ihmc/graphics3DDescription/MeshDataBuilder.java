@@ -1,4 +1,4 @@
-package us.ihmc.javaFXToolkit.shapes;
+package us.ihmc.graphics3DDescription;
 
 import java.util.List;
 
@@ -8,19 +8,13 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple3f;
 
-import javafx.scene.shape.Mesh;
-import us.ihmc.graphics3DDescription.MeshDataGenerator;
-import us.ihmc.graphics3DDescription.MeshDataHolder;
-import us.ihmc.graphics3DDescription.ModifiableMeshDataHolder;
-import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
-
-public class MeshBuilder
+public class MeshDataBuilder
 {
-   static final int DEFAULT_RES = 32;
+   private static final int DEFAULT_RES = 32;
 
    private final ModifiableMeshDataHolder meshDataHolder = new ModifiableMeshDataHolder();
 
-   public MeshBuilder()
+   public MeshDataBuilder()
    {
       clear();
    }
@@ -30,7 +24,7 @@ public class MeshBuilder
       meshDataHolder.clear();
    }
 
-   public void addMesh(MeshBuilder other)
+   public void addMesh(MeshDataBuilder other)
    {
       meshDataHolder.add(other.meshDataHolder, true);
    }
@@ -70,6 +64,10 @@ public class MeshBuilder
    {
       addMesh(MeshDataGenerator.Sphere(radius, DEFAULT_RES, DEFAULT_RES), offset);
    }
+
+   public void addTetrahedron(float edgeLength, Tuple3f offset){addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset);}
+
+   public void addTetrahedron(double edgeLength, Tuple3d offset){addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset);}
 
    public void addPolygon(List<Point3d> polygon)
    {
@@ -194,10 +192,5 @@ public class MeshBuilder
    public MeshDataHolder generateMeshDataHolder()
    {
       return meshDataHolder.createMeshDataHolder();
-   }
-
-   public Mesh generateMesh()
-   {
-      return JavaFXMeshDataInterpreter.interpretMeshData(meshDataHolder.createMeshDataHolder());
    }
 }

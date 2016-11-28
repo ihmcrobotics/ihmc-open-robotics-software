@@ -50,7 +50,27 @@ public class WaitForUserValidationBehavior extends AbstractBehavior
   
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
+   {
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+   @Override
+   public void onBehaviorExited()
    {
    }
 }

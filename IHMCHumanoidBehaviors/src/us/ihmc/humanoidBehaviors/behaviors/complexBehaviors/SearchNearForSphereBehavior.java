@@ -56,7 +56,7 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
       this.requireUserValidation = requireUserValidation;
 
       initialSphereDetectionBehavior = new SphereDetectionBehavior(outgoingCommunicationBridge, referenceFrames);
-            waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
+      waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
             coactiveElement.validAcknowledged);
       setupStateMachine();
    }
@@ -176,11 +176,9 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
 
       else
          statemachine.addState(findBallTask);
-      statemachine.setCurrentState(SearchNearState.LOOK_DOWN);
+      statemachine.setStartState(SearchNearState.LOOK_DOWN);
 
    }
-
- 
 
    public boolean foundBall()
    {
@@ -195,6 +193,11 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
    public double getSphereRadius()
    {
       return initialSphereDetectionBehavior.getSpehereRadius();
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 
 }

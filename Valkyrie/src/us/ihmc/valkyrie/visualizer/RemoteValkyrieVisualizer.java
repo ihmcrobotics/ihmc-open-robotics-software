@@ -40,6 +40,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       valkyrieRobotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.REAL_ROBOT, false);
 
       SCSVisualizer scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
+      scsVisualizer.setDisplayOneInNPackets(3);
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.setShowOverheadView(false);
 

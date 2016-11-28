@@ -88,7 +88,6 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       this.planner = createFootstepPlanner();
       this.fiducialDetectorBehaviorService = fiducialDetectorBehaviorService;
       this.fiducialToTrack = fiducialToTrack;
-      fiducialDetectorBehaviorService.setLocationEnabled(true);
       fiducialDetectorBehaviorService.setTargetIDToLocate(this.fiducialToTrack);
 
       footstepPlannerGoal = new FootstepPlannerGoal();
@@ -118,10 +117,10 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(40);
       robotConfigurationDataQueue = new ConcurrentListeningQueue<RobotConfigurationData>(40);
       walkingStatusQueue = new ConcurrentListeningQueue<WalkingStatusMessage>(10);
-      communicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
-      communicationBridge.attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
-      communicationBridge.attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
-      communicationBridge.attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
+      attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
+      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
+      attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
+      attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
 
    }
 
@@ -341,8 +340,27 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 }

@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry.transformables;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Quat4f;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -13,6 +14,13 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
    private static final long serialVersionUID = -3751421971526302255L;
 
    public TransformableQuat4d(Quat4d tuple)
+   {
+      super(tuple);
+      if (!containsNaN())
+         normalize();
+   }
+
+   public TransformableQuat4d(Quat4f tuple)
    {
       super(tuple);
       if (!containsNaN())
@@ -85,9 +93,16 @@ public class TransformableQuat4d extends Quat4d implements GeometryObject<Transf
          normalize();
    }
 
-   public void setOrientation(Quat4d quat4d)
+   public void setOrientation(Quat4d quaternion)
    {
-      super.set(quat4d);
+      super.set(quaternion);
+      if (!containsNaN())
+         normalize();
+   }
+
+   public void setOrientation(Quat4f quaternion)
+   {
+      super.set(quaternion);
       if (!containsNaN())
          normalize();
    }

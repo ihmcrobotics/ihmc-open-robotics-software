@@ -1,7 +1,5 @@
 package us.ihmc.javaFXToolkit.shapes;
 
-import static us.ihmc.javaFXToolkit.shapes.MeshBuilder.DEFAULT_RES;
-
 import java.util.List;
 
 import javax.vecmath.AxisAngle4d;
@@ -18,18 +16,22 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import us.ihmc.graphics3DDescription.MeshDataGenerator;
 import us.ihmc.graphics3DDescription.MeshDataHolder;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
-public class MultiColorMeshBuilder
+public class JavaFXMultiColorMeshBuilder
 {
-   private final MeshBuilder meshBuilder = new MeshBuilder();
+   private static final int DEFAULT_RES = 32;
+
+   private final JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
    private TextureColorPalette colorPalette;
 
-   public MultiColorMeshBuilder()
+   public JavaFXMultiColorMeshBuilder()
    {
       colorPalette = new TextureColorPalette2D();
    }
 
-   public MultiColorMeshBuilder(TextureColorPalette colorPalette)
+   public JavaFXMultiColorMeshBuilder(TextureColorPalette colorPalette)
    {
       this.colorPalette = colorPalette;
    }
@@ -67,6 +69,11 @@ public class MultiColorMeshBuilder
    public void addPolyon(List<Point3d> polygon, Color color)
    {
       addMesh(MeshDataGenerator.Polygon(polygon), color);
+   }
+
+   public void addPolygon( RigidBodyTransform rigidBodyTransform, ConvexPolygon2d polygon, Color color)
+   {
+      addMesh(MeshDataGenerator.Polygon(rigidBodyTransform, polygon), color);
    }
 
    public void addBox(float lx, float ly, float lz, Color color)
