@@ -30,31 +30,27 @@ public enum IntegrationCategory
    
    static
    {
-      includedCategories = new IntegrationCategory[values.length - 1];
-      int i = 0;
-      for (IntegrationCategory category : values)
-      {
-         if (category.isExcluded())
-            continue;
-
-         includedCategories[i++] = category;
-      }
-      
+      ArrayList<IntegrationCategory> notExcludedCategories = new ArrayList<>();
       ArrayList<IntegrationCategory> balancedCategories = new ArrayList<>();
       ArrayList<IntegrationCategory> notBalancedCategories = new ArrayList<>();
       for (IntegrationCategory category : values)
       {
+         if (!category.isExcluded())
+         {
+            notExcludedCategories.add(category);
+         }
          if (category.isLoadBalanced())
          {
             balancedCategories.add(category);
          }
-         else if (category.isIncludedAndNotLoadBalanced())
+         if (category.isIncludedAndNotLoadBalanced())
          {
             notBalancedCategories.add(category);
          }
       }
       loadBalancedCategories = balancedCategories.toArray(new IntegrationCategory[0]);
       unbalancedCategories = notBalancedCategories.toArray(new IntegrationCategory[0]);
+      includedCategories = notExcludedCategories.toArray(new IntegrationCategory[0]);
    }
    
    private final String name;
