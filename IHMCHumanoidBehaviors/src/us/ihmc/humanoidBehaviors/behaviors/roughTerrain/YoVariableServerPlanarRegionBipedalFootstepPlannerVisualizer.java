@@ -4,7 +4,6 @@ import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNode;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPlanarRegionsList;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -19,75 +18,76 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 public class YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFootstepPlannerListener
 {
-   private static final double FOOTSTEP_PLANNER_YO_VARIABLE_SERVER_DT = 0.001;
+   private static final double FOOTSTEP_PLANNER_YO_VARIABLE_SERVER_DT = 0.01;
    private SimulationConstructionSet scs;
    private YoVariableServer yoVariableServer;
 
-   private final DoubleYoVariable plannerTime;
-   private final IntegerYoVariable plannerUpdateIndex;
-   private final IntegerYoVariable planarRegionUpdateIndex;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+
+   private final DoubleYoVariable plannerTime = new DoubleYoVariable("plannerTime", registry);
+   private final IntegerYoVariable plannerUpdateIndex = new IntegerYoVariable("plannerUpdateIndex", registry);
+   private final IntegerYoVariable planarRegionUpdateIndex = new IntegerYoVariable("planarRegionUpdateIndex", registry);
 
    private final PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer;
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
    private boolean cropBufferWhenSolutionIsFound = true;
 
-   private final IntegerYoVariable planarRegionsListIndex;
-   private final YoVariableRegistry registry;
-
-
-   public static YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer createWithYoVariableServer(FullRobotModel fullRobotModel, LogModelProvider logModelProvider, SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
+   public static YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer createWithYoVariableServer(FullRobotModel fullRobotModel,
+                                                                                                         LogModelProvider logModelProvider,
+                                                                                                         SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
    {
-      YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer visualizer = new YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer(fullRobotModel, logModelProvider, footPolygonsInSoleFrame);
+      YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer visualizer = new YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
+
+      PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("PlannerScheduler");
+      YoVariableServer yoVariableServer = new YoVariableServer(visualizer.getClass(), scheduler, logModelProvider, LogSettings.FOOTSTEP_PLANNER,
+                                                               FOOTSTEP_PLANNER_YO_VARIABLE_SERVER_DT);
+      visualizer.setYoVariableServer(yoVariableServer);
+
+      yoVariableServer.setMainRegistry(visualizer.getYoVariableRegistry(), fullRobotModel, visualizer.getYoGraphicsListRegistry());
+      yoVariableServer.start();
+
       return visualizer;
    }
 
-   public YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer(FullRobotModel fullRobotModel, LogModelProvider logModelProvider, SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
+   public static YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer createWithSimulationConstructionSet(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
    {
-      PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("PlannerScheduler");
-      yoVariableServer = new YoVariableServer(getClass(), scheduler, logModelProvider, LogSettings.FOOTSTEP_PLANNER, FOOTSTEP_PLANNER_YO_VARIABLE_SERVER_DT);
+      YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer visualizer = new YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
 
-     registry = new YoVariableRegistry(getClass().getSimpleName());
-     YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Test"));
+      visualizer.setSimulationConstructionSet(scs);
 
-     plannerTime = new DoubleYoVariable("plannerTime", registry);
-     plannerUpdateIndex = new IntegerYoVariable("plannerUpdateIndex", registry);
-     planarRegionUpdateIndex = new IntegerYoVariable("planarRegionUpdateIndex", registry);
+      scs.changeBufferSize(32000);
 
+      scs.addYoVariableRegistry(visualizer.getYoVariableRegistry());
+      scs.addYoGraphicsListRegistry(visualizer.getYoGraphicsListRegistry());
 
-//      scs = new SimulationConstructionSet(new Robot("Test"));
-//      scs.changeBufferSize(32000);
+      scs.setDT(FOOTSTEP_PLANNER_YO_VARIABLE_SERVER_DT, 1);
 
-//      registry = scs.getRootRegistry();
-//      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+      scs.setCameraFix(-6.0, 0.0, 0.0);
+      scs.setCameraPosition(-11.0, 0.0, 8.0);
+      scs.setGroundVisible(false);
+      scs.startOnAThread();
 
-     int vertexBufferSize = 100;
-     int meshBufferSize = 100;
-     yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("planarRegionsList", vertexBufferSize, meshBufferSize, registry);
-     graphicsListRegistry.registerYoGraphic("PlanarRegionsList", yoGraphicPlanarRegionsList);
+      return visualizer;
+   }
 
-     footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame, registry, graphicsListRegistry);
+   public YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
+   {
+      int vertexBufferSize = 100;
+      int meshBufferSize = 100;
+      yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("planarRegionsList", vertexBufferSize, meshBufferSize, registry);
+      graphicsListRegistry.registerYoGraphic("PlanarRegionsList", yoGraphicPlanarRegionsList);
 
-     planarRegionsListIndex = new IntegerYoVariable("planarRegionsListIndex", footstepPlannerVisualizer.getYoVariableRegistry());
-
-//      scs.addYoGraphicsListRegistry(graphicsListRegistry);
-//      scs.setDT(0.1, 1);
-//
-//      scs.setCameraFix(-6.0, 0.0, 0.0);
-//      scs.setCameraPosition(-11.0, 0.0, 8.0);
-//      scs.setGroundVisible(false);
-//      scs.startOnAThread();
-
-
-      yoVariableServer.setMainRegistry(registry, fullRobotModel, graphicsListRegistry);
-      yoVariableServer.start();
+      footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame, registry, graphicsListRegistry);
    }
 
    public void setYoVariableServer(YoVariableServer yoVariableServer)
@@ -110,7 +110,7 @@ public class YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer implem
    {
       footstepPlannerVisualizer.goalWasSet(goalLeftFootPose, goalRightFootPose);
       plannerUpdateIndex.increment();
-      tickAndUpdateSCS();
+      tickAndUpdateSCSOrYoVariableServer();
    }
 
    @Override
@@ -118,7 +118,7 @@ public class YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer implem
    {
       footstepPlannerVisualizer.nodeSelectedForExpansion(nodeToExpand);
       plannerUpdateIndex.increment();
-      tickAndUpdateSCS();
+      tickAndUpdateSCSOrYoVariableServer();
    }
 
    @Override
@@ -126,7 +126,7 @@ public class YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer implem
    {
       footstepPlannerVisualizer.nodeForExpansionWasAccepted(acceptedNode);
       plannerUpdateIndex.increment();
-      tickAndUpdateSCS();
+      tickAndUpdateSCSOrYoVariableServer();
    }
 
    @Override
@@ -134,78 +134,88 @@ public class YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer implem
    {
       footstepPlannerVisualizer.nodeForExpansionWasRejected(rejectedNode, reason);
       plannerUpdateIndex.increment();
-      tickAndUpdateSCS();
+      tickAndUpdateSCSOrYoVariableServer();
    }
 
    @Override
    public void notifyListenerSolutionWasFound()
    {
-//      if (cropBufferWhenSolutionIsFound)
-//      {
-//         scs.cropBuffer();
-//      }
-//      scs.setTime(0.0);
+      if ((scs != null) && (cropBufferWhenSolutionIsFound))
+      {
+         scs.cropBuffer();
+      }
 
       plannerUpdateIndex.set(0);
-      tickAndUpdateSCS();
+      tickAndUpdateSCSOrYoVariableServer();
    }
 
    @Override
    public void notifyListenerSolutionWasNotFound()
    {
-//      if (cropBufferWhenSolutionIsFound)
-//      {
-//         scs.cropBuffer();
-//      }
-//      scs.setTime(0.0);
+      if ((scs != null) && (cropBufferWhenSolutionIsFound))
+      {
+         scs.cropBuffer();
+      }
 
       plannerUpdateIndex.set(0);
-      tickAndUpdateSCS();
+      tickAndUpdateSCSOrYoVariableServer();
    }
 
-   private Graphics3DNode node;
+   //   private Graphics3DNode node;
 
    @Override
    public void planarRegionsListSet(PlanarRegionsList planarRegionsList)
    {
-//      if (node != null)
-//      {
-//         scs.removeGraphics3dNode(node);
-//      }
-//      if (planarRegionsList == null)
-//         return;
-//
-//      planarRegionsListIndex.increment();
-//      Graphics3DObject graphics3dObject = new Graphics3DObject();
-//      graphics3dObject.addPlanarRegionsList(planarRegionsList, YoAppearance.Blue(), YoAppearance.Purple(), YoAppearance.Pink(), YoAppearance.Orange(), YoAppearance.Brown());
-//      node = scs.addStaticLinkGraphics(graphics3dObject);
-//
+      //      if (node != null)
+      //      {
+      //         scs.removeGraphics3dNode(node);
+      //      }
+      //      if (planarRegionsList == null)
+      //         return;
+      //
+      //      planarRegionsListIndex.increment();
+      //      Graphics3DObject graphics3dObject = new Graphics3DObject();
+      //      graphics3dObject.addPlanarRegionsList(planarRegionsList, YoAppearance.Blue(), YoAppearance.Purple(), YoAppearance.Pink(), YoAppearance.Orange(), YoAppearance.Brown());
+      //      node = scs.addStaticLinkGraphics(graphics3dObject);
+      //
 
       planarRegionUpdateIndex.set(0);
 
       yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList);
-      while(!yoGraphicPlanarRegionsList.isQueueEmpty())
+      while (!yoGraphicPlanarRegionsList.isQueueEmpty())
       {
          yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
          planarRegionUpdateIndex.increment();
-         tickAndUpdateSCS();
+         tickAndUpdateSCSOrYoVariableServer();
       }
 
-      tickAndUpdateSCS();
+      tickAndUpdateSCSOrYoVariableServer();
    }
 
-   private void tickAndUpdateSCS()
+   private void tickAndUpdateSCSOrYoVariableServer()
    {
       plannerTime.add(FOOTSTEP_PLANNER_YO_VARIABLE_SERVER_DT);
-      yoVariableServer.update(TimeTools.secondsToNanoSeconds(plannerTime.getDoubleValue()));
-      ThreadTools.sleep(2L);
-//      scs.setTime(scs.getTime() + 1.0);
-//      scs.tickAndUpdate();
+
+      if (yoVariableServer != null)
+      {
+         yoVariableServer.update(TimeTools.secondsToNanoSeconds(plannerTime.getDoubleValue()));
+         //         ThreadTools.sleep(2L);
+      }
+
+      if (scs != null)
+      {
+         scs.setTime(scs.getTime() + FOOTSTEP_PLANNER_YO_VARIABLE_SERVER_DT);
+         scs.tickAndUpdate();
+      }
    }
 
    public YoVariableRegistry getYoVariableRegistry()
    {
-//      return scs.getRootRegistry();
       return registry;
+   }
+
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
+   {
+      return graphicsListRegistry;
    }
 }
