@@ -47,16 +47,14 @@ public class ObjectWeightBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       hasInputBeenSet.set(false);
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       hasInputBeenSet.set(false);
       packetAvailable.set(false);
    }
@@ -64,6 +62,21 @@ public class ObjectWeightBehavior extends AbstractBehavior
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 
 }

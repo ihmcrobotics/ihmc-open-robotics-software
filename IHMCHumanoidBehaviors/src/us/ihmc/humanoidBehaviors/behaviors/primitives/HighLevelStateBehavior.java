@@ -39,7 +39,7 @@ public class HighLevelStateBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       packetHasBeenSent.set(false);
       
@@ -48,7 +48,7 @@ public class HighLevelStateBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       packetHasBeenSent.set(false);
       outgoingHighLevelStatePacket = null;
@@ -71,5 +71,20 @@ public class HighLevelStateBehavior extends AbstractBehavior
          return true;
       else
          return false;
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

@@ -61,9 +61,8 @@ public class CountByNumberBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       numbersSet = false;
       mathComplete = false;
       timesCounted = 0;
@@ -73,5 +72,25 @@ public class CountByNumberBehavior extends AbstractBehavior
    public boolean hasInputBeenSet()
    {
       return numbersSet;
+   }
+
+   @Override
+   public void onBehaviorEntered()
+   {
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

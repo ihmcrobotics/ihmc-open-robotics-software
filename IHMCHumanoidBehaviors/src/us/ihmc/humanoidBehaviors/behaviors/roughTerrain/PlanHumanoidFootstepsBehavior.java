@@ -19,7 +19,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
-import us.ihmc.footstepPlanning.roughTerrainPlanning.SCSPlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -104,13 +103,17 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
 
       planner.setMaximumStepReach(0.55); //(0.4);
-      planner.setMaximumStepZ(0.4); //0.25);
-      planner.setMaximumStepYaw(0.25);
+      planner.setMaximumStepZ(0.25); //0.4); //0.25);
+      planner.setMaximumStepYaw(0.15); //0.25);
       planner.setMinimumStepWidth(0.15);
-      planner.setMinimumFootholdPercent(0.9);
+      planner.setMinimumFootholdPercent(0.95);
 
-      double idealFootstepLength = 0.4;
-      double idealFootstepWidth = 0.25;
+      planner.setWiggleInsideDelta(0.08);
+      planner.setMaximumXYWiggleDistance(1.0);
+      planner.setMaximumYawWiggle(0.1);
+
+      double idealFootstepLength = 0.3; //0.4;
+      double idealFootstepWidth = 0.2; //0.25;
       planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = createDefaultFootPolygons();
@@ -119,9 +122,9 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       planner.setMaximumNumberOfNodesToExpand(500);
 
       //TODO: Can't have this here since it uses SCS I think. Problems with Gradle?
-      SCSPlanarRegionBipedalFootstepPlannerVisualizer listener = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
-      listener.setCropBufferWhenSolutionIsFound(false);
-      planner.setBipedalFootstepPlannerListener(listener);
+//      SCSPlanarRegionBipedalFootstepPlannerVisualizer listener = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
+//      listener.setCropBufferWhenSolutionIsFound(false);
+//      planner.setBipedalFootstepPlannerListener(listener);
 
       return planner;
    }
@@ -303,10 +306,10 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       plannerTimer.start();
+      plannerTimer.reset();
    }
 
    @Override
@@ -337,5 +340,25 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       for (RobotSide side : RobotSide.values)
          footPolygons.put(side, createDefaultFootPolygon());
       return footPolygons;
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 }

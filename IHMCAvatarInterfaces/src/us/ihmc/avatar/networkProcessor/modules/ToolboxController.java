@@ -11,6 +11,7 @@ public abstract class ToolboxController
    private final StatusMessageOutputManager statusOutputManager;
 
    private boolean initialize = true;
+   // TODO Figure out to do multiple destination. Would be useful for modules like the quad-tree.
    private PacketDestination packetDestination = null;
 
    public ToolboxController(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)

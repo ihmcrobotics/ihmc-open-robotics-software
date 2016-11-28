@@ -2,7 +2,15 @@ package us.ihmc.footstepPlanning.testTools;
 
 import static org.junit.Assert.assertTrue;
 
-import us.ihmc.footstepPlanning.*;
+import javax.vecmath.Point2d;
+
+import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
@@ -136,6 +144,7 @@ public class PlanningTestTools
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       goal.setGoalPoseBetweenFeet(goalPose);
+      goal.setXYGoal(new Point2d(goalPose.getX(), goalPose.getY()), 0.5);
 
       return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList, assertPlannerReturnedResult);
    }

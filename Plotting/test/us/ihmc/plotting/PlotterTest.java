@@ -15,15 +15,17 @@ import us.ihmc.plotting.frames.PlotterSpaceConverter;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.UI)
 public class PlotterTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test(timeout = 300000)
    public void testPlotter()
    {
       Plotter plotter = new Plotter();
@@ -33,6 +35,11 @@ public class PlotterTest
       plotter.addArtifact(new LineArtifact("03", new Point2d(2, 0), new Point2d(3, 1)));
 
       plotter.showInNewWindow();
+      
+      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      {
+         ThreadTools.sleepForever();
+      }
    }
 
    @SuppressWarnings("serial")

@@ -58,7 +58,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       packetHasBeenSent.set(false);
 
@@ -72,7 +72,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       packetHasBeenSent.set(false);
       hasInputBeenSet.set(false);
@@ -104,5 +104,20 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    public boolean hasInputBeenSet()
    {
       return hasInputBeenSet.getBooleanValue();
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

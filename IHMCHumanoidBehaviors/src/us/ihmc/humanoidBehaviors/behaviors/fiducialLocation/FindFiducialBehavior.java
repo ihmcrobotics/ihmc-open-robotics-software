@@ -14,6 +14,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -31,6 +32,7 @@ public class FindFiducialBehavior extends AbstractBehavior
    private final YoTimer headTrajectorySentTimer;
 
    private final BooleanYoVariable foundFiducial = new BooleanYoVariable(prefix + "FoundFiducial", registry);
+   private final IntegerYoVariable behaviorEnteredCount = new IntegerYoVariable(prefix + "BehaviorEnteredCount", registry);
    private final DoubleYoVariable headPitchToFindFucdicial = new DoubleYoVariable(prefix + "HeadPitchToFindFucdicial", registry);
    private final DoubleYoVariable headPitchToCenterFucdicial = new DoubleYoVariable(prefix + "HeadPitchToCenterFucdicial", registry);
 
@@ -128,15 +130,36 @@ public class FindFiducialBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
+      behaviorEnteredCount.increment();
       foundFiducial.set(false);
+      fiducialDetectorBehaviorService.setTargetIDToLocate(this.fiducialToTrack);
    }
 
    @Override
    public boolean isDone()
    {
       return foundFiducial.getBooleanValue();
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
+   }
+
+   @Override
+   public void onBehaviorExited()
+   {
    }
 }

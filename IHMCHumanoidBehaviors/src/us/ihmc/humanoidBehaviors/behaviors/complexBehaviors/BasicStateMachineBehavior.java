@@ -58,4 +58,9 @@ public class BasicStateMachineBehavior extends StateMachineBehavior<BasicStates>
 
    }
 
+   @Override
+   public void onBehaviorExited()
+   {
+   }
+
 }

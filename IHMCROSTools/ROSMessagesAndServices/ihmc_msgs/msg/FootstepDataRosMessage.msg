@@ -39,6 +39,12 @@ int64 unique_id
 
 # This message utilizes "enums". Enum value information for this message follows.
 
+# "trajectory_type" enum values:
+uint8 DEFAULT=0 # is a default trajectory
+uint8 BASIC=1 # will do a basic swing with the specified swing height
+uint8 PUSH_RECOVERY=2 # uses a low swing height for fast steps
+uint8 OBSTACLE_CLEARANCE=3 # will attempt to step over an obstacle
+
 # "footstep_origin" enum values:
 uint8 AT_ANKLE_FRAME=0 # The location of the footstep refers to the location of the ankle frame. The ankle frame is fixed in the foot, centered at the last ankle joint. The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward. This option is for backward compatibility only and will be gone in an upcoming release. This origin is deprecated as it directly depends on the robot structure and is not directly related to the actual foot sole.
 uint8 AT_SOLE_FRAME=1 # The location of the footstep refers to the location of the sole frame. The sole frame is fixed in the foot, centered at the center of the sole. The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward. This origin is preferred as it directly depends on the actual foot sole and is less dependent on the robot structure.
@@ -46,10 +52,4 @@ uint8 AT_SOLE_FRAME=1 # The location of the footstep refers to the location of t
 # "robot_side" enum values:
 uint8 LEFT=0 # refers to the LEFT side of a robot
 uint8 RIGHT=1 # refers to the RIGHT side of a robot
-
-# "trajectory_type" enum values:
-uint8 DEFAULT=0 # is a default trajectory
-uint8 BASIC=1 # will do a basic swing with the specified swing height
-uint8 PUSH_RECOVERY=2 # uses a low swing height for fast steps
-uint8 OBSTACLE_CLEARANCE=3 # will attempt to step over an obstacle
 

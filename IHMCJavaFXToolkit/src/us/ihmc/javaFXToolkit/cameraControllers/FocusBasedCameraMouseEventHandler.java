@@ -182,10 +182,15 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
             double modifier = event.isShiftDown() ? rotateFastModifier : rotateSlowModifier;
 
             double angleShift = newMouseLocation.distance(oldMouseLocation) / modifier;
+            if (Math.abs(angleShift) < 1.0e-5)
+               return;
 
             Vector2d dragDirection = new Vector2d();
             dragDirection.sub(newMouseLocation, oldMouseLocation);
-            dragDirection.normalize();
+            double dragMagnitude = dragDirection.length();
+            if (dragMagnitude < 1.0e-3)
+               return;
+            dragDirection.scale(1.0 / dragMagnitude);
 
             Vector3d deltaAxis = new Vector3d();
             deltaAxis.set(-dragDirection.getY(), dragDirection.getX(), 0.0);

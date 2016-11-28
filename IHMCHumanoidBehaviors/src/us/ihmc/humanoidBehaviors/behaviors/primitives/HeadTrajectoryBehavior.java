@@ -65,7 +65,7 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       packetHasBeenSent.set(false);
       
@@ -76,7 +76,7 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       packetHasBeenSent.set(false);
       outgoingHeadTrajectoryMessage = null;
@@ -104,5 +104,20 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
 		   return true;
 	   else
 		   return false;
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

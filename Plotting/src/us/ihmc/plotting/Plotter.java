@@ -70,7 +70,7 @@ public class Plotter
    private final Vector2d metersToPixels = new Vector2d(50.0, 50.0);
    private final Rectangle visibleRectangle = new Rectangle();
    private final Dimension preferredSize = new Dimension(500, 500);
-   private final Vector2d gridSizePixels = new Vector2d();
+   private final PlotterVector2d gridSize;
    private BufferedImage backgroundImage = null;
    
    private final PlotterSpaceConverter spaceConverter;
@@ -173,6 +173,7 @@ public class Plotter
          }
       };
       
+      gridSize = new PlotterVector2d(pixelsFrame);
       screenPosition = new PlotterPoint2d(pixelsFrame);
       upperLeftCorner = new PlotterPoint2d(screenFrame);
       lowerRightCorner = new PlotterPoint2d(screenFrame);
@@ -276,22 +277,30 @@ public class Plotter
       else
       {
          // change grid line scale from 1m to 10cm ehn below 10m
-         gridSizePixels.set(calculateGridSizePixels(metersToPixels.getX()), calculateGridSizePixels(metersToPixels.getY()));
+         gridSize.set(calculateGridSizePixels(metersToPixels.getX()), calculateGridSizePixels(metersToPixels.getY()));
          
          upperLeftCorner.changeFrame(pixelsFrame);
          lowerRightCorner.changeFrame(pixelsFrame);
          
          focusPoint.changeFrame(pixelsFrame);
-         double gridStart = (Math.round(focusPoint.getX() / gridSizePixels.getX()) - 20.0) * gridSizePixels.getX();
-         double gridEnd = (Math.round(focusPoint.getX() / gridSizePixels.getX()) + 20.0) * gridSizePixels.getX();
+         double gridStart = (Math.round(focusPoint.getX() / gridSize.getX()) - 20.0) * gridSize.getX();
+         double gridEnd = (Math.round(focusPoint.getX() / gridSize.getX()) + 20.0) * gridSize.getX();
          
-         for (double gridX = gridStart; gridX < gridEnd; gridX += gridSizePixels.getX())
+         for (double gridX = gridStart; gridX < gridEnd; gridX += gridSize.getX())
          {
             gridLinePencil.setIncludingFrame(pixelsFrame, gridX, 0.0);
             
-            int nthGridLineFromOrigin = (int) (Math.abs(gridX) / gridSizePixels.getX());
+            gridLinePencil.changeFrame(metersFrame);
+            gridSize.changeFrame(metersFrame);
+            int nthGridLineFromOrigin = (int) (Math.abs(gridLinePencil.getX()) / gridSize.getX());
+            if (MathTools.epsilonEquals(Math.abs(gridLinePencil.getX()) % gridSize.getX(), gridSize.getX(), 1e-7))
+            {
+               nthGridLineFromOrigin++;
+            }
             applyColorForGridline(graphics2d, nthGridLineFromOrigin);
    
+            gridLinePencil.changeFrame(pixelsFrame);
+            gridSize.changeFrame(pixelsFrame);
             tempGridLine.set(gridLinePencil.getX(), gridLinePencil.getY(), 0.0, 1.0);
             graphics2d.drawLine(pixelsFrame, tempGridLine);
             
@@ -320,16 +329,24 @@ public class Plotter
             }
          }
          
-         gridStart = (Math.round(focusPoint.getY() / gridSizePixels.getY()) - 20.0) * gridSizePixels.getY();
-         gridEnd = (Math.round(focusPoint.getY() / gridSizePixels.getY()) + 20.0) * gridSizePixels.getY();
+         gridStart = (Math.round(focusPoint.getY() / gridSize.getY()) - 20.0) * gridSize.getY();
+         gridEnd = (Math.round(focusPoint.getY() / gridSize.getY()) + 20.0) * gridSize.getY();
          
-         for (double gridY = gridStart; gridY < gridEnd; gridY += gridSizePixels.getY())
+         for (double gridY = gridStart; gridY < gridEnd; gridY += gridSize.getY())
          {
             gridLinePencil.setIncludingFrame(pixelsFrame, 0.0, gridY);
             
-            int nthGridLineFromOrigin = (int) (Math.abs(gridY) / gridSizePixels.getY());
+            gridLinePencil.changeFrame(metersFrame);
+            gridSize.changeFrame(metersFrame);
+            int nthGridLineFromOrigin = (int) (Math.abs(gridLinePencil.getY()) / gridSize.getY());
+            if (MathTools.epsilonEquals(Math.abs(gridLinePencil.getY()) % gridSize.getY(), gridSize.getY(), 1e-5))
+            {
+               nthGridLineFromOrigin++;
+            }
             applyColorForGridline(graphics2d, nthGridLineFromOrigin);
    
+            gridLinePencil.changeFrame(pixelsFrame);
+            gridSize.changeFrame(pixelsFrame);
             tempGridLine.set(gridLinePencil.getX(), gridLinePencil.getY(), 1.0, 0.0);
             graphics2d.drawLine(pixelsFrame, tempGridLine);
             

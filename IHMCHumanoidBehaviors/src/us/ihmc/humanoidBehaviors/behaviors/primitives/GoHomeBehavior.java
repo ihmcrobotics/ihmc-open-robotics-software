@@ -110,7 +110,7 @@ public class GoHomeBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       hasInputBeenSet.set(false);
       hasPacketBeenSent.set(false);
@@ -126,7 +126,7 @@ public class GoHomeBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       hasPacketBeenSent.set(false);
       outgoingMessage = null;
@@ -143,14 +143,14 @@ public class GoHomeBehavior extends AbstractBehavior
    }
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
       stopArmMotion();
       isAborted.set(true);
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
       if (isPaused.getBooleanValue())
       {
@@ -164,7 +164,7 @@ public class GoHomeBehavior extends AbstractBehavior
    }
 
    @Override
-   public void resume()
+   public void onBehaviorResumed()
    {
       if (!isPaused.getBooleanValue())
       {

@@ -222,7 +222,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    {
       FramePoint framePointToPack = new FramePoint(worldFrame);
       footstepToExpandViz.getPosition(framePointToPack);
-      framePointToPack.setZ(framePointToPack.getZ() + 0.0001);
+      framePointToPack.setZ(framePointToPack.getZ() + 0.0025);
       footstepToExpandViz.setPosition(framePointToPack);
    }
 
