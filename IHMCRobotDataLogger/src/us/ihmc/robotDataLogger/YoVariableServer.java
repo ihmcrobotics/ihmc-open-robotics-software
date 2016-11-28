@@ -9,8 +9,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -21,14 +19,18 @@ import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
+import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 
-public class YoVariableServer implements RobotVisualizer
+public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
 {
    private static final int VARIABLE_BUFFER_CAPACITY = 128;
    private static final int CHANGED_BUFFER_CAPACITY = 128;
@@ -144,6 +146,18 @@ public class YoVariableServer implements RobotVisualizer
       }
    }
 
+   @Override
+   public void tickAndUpdate()
+   {
+      this.tickAndUpdate(0.0);
+   }
+
+   @Override
+   public void tickAndUpdate(double timeToSetInSeconds)
+   {
+      this.update(TimeTools.secondsToNanoSeconds(timeToSetInSeconds));   
+   }
+
    /**
     * Update main buffer data.
     * 
@@ -254,4 +268,5 @@ public class YoVariableServer implements RobotVisualizer
       mainDynamicGraphicObjectsListRegistry = yoGraphicsListRegistry;
       
    }
+
 }

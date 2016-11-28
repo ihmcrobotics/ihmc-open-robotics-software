@@ -7,8 +7,8 @@ import javax.vecmath.Tuple3d;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.examples.UserValidationExampleBehavior;
@@ -26,6 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateComm
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -33,7 +34,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
-import us.ihmc.tools.taskExecutor.Task;
 
 public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<WalkOverTerrainState>
 {
@@ -60,7 +60,8 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
    private final EnumYoVariable<RobotSide> nextSideToSwing;
 
-   public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions, FullHumanoidRobotModel fullRobotModel,
+   public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions,
+         LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
          HumanoidReferenceFrames referenceFrames, FiducialDetectorBehaviorService fiducialDetectorBehaviorService, int fiducialToTrack)
    {
       super("WalkOverTerrain", WalkOverTerrainState.class, yoTime, communicationBridge);
@@ -79,7 +80,11 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
       lookForGoalBehavior = new FindFiducialBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, fiducialToTrack);
       lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
+
       planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
+//      planHumanoidFootstepsBehavior.createAndAttachSCSListenerToPlanner();
+      planHumanoidFootstepsBehavior.createAndAttachYoVariableServerListenerToPlanner(logModelProvider, fullRobotModel);
+
       clearPlanarRegionsListBehavior = new ClearPlanarRegionsListBehavior(communicationBridge);
       takeSomeStepsBehavior = new TakeSomeStepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
       reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge);

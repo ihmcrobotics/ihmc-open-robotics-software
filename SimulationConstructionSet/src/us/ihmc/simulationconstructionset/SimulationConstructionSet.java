@@ -48,6 +48,7 @@ import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.listener.YoVariableRegistryChangedListener;
@@ -229,7 +230,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       GotoInPointCommandExecutor, GotoOutPointCommandExecutor, NextCameraKeyCommandExecutor, PackBufferCommandExecutor, PreviousCameraKeyCommandExecutor,
       RemoveCameraKeyCommandExecutor, SetInPointCommandExecutor, SetOutPointCommandExecutor, StepBackwardCommandExecutor, StepForwardCommandExecutor,
       ToggleCameraKeyModeCommandExecutor, ToggleKeyPointModeCommandExecutor, GUIEnablerAndDisabler, WriteDataCommandExecutor, TimeHolder,
-      DataBufferCommandsExecutor
+      DataBufferCommandsExecutor, TickAndUpdatable
 {
    private static final boolean TESTING_LOAD_STUFF = false;
 
@@ -1347,8 +1348,19 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    }
 
    /**
+    * Sets time and then increments the data buffer index and updates all of the entries min & max values.  If a GUI exists, its graphs are updated.
+    */
+   @Override
+   public void tickAndUpdate(double timeToSetInSeconds)
+   {
+      this.setTime(timeToSetInSeconds);
+      this.tickAndUpdate();
+   }
+   
+   /**
     * Increments the data buffer index and updates all of the entries min & max values.  If a GUI exists, its graphs are updated.
     */
+   @Override
    public void tickAndUpdate()
    {
       mySimulation.tickAndUpdate();
@@ -4435,5 +4447,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       mySimulation.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
    }
+
 
 }
