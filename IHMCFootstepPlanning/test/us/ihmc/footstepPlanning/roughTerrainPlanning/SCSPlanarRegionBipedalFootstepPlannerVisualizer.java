@@ -10,9 +10,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class SCSPlanarRegionBipedalFootstepPlannerVisualizer
 {
-   public static PlanarRegionBipedalFootstepPlannerVisualizer createWithSimulationConstructionSet(String registryName, double dtForViz, SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
+   public static PlanarRegionBipedalFootstepPlannerVisualizer createWithSimulationConstructionSet(double dtForViz, SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(registryName);
+      YoVariableRegistry registry = new YoVariableRegistry(SCSPlanarRegionBipedalFootstepPlannerVisualizer.class.getSimpleName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame, registry, graphicsListRegistry);
