@@ -26,7 +26,6 @@ import us.ihmc.tools.FormattingTools;
  */
 public abstract class AbstractBehavior implements RobotController
 {
-
    private final boolean DEBUG = false;
 
    public static enum BehaviorStatus
@@ -36,7 +35,7 @@ public abstract class AbstractBehavior implements RobotController
 
    protected final CommunicationBridge communicationBridge;
 
-   protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue>>();
+   protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>>();
 
    protected final String behaviorName;
 
@@ -74,11 +73,6 @@ public abstract class AbstractBehavior implements RobotController
       behaviorsServices = new ArrayList<>();
    }
 
-   public CoactiveElement getCoactiveElement()
-   {
-      return null;
-   }
-
    public void sendPacketToController(Packet<?> obj)
    {
       communicationBridge.sendPacketToController(obj);
@@ -94,9 +88,178 @@ public abstract class AbstractBehavior implements RobotController
       communicationBridge.sendPacketToUI(obj);
    }
 
+   public void attachNetworkListeningQueue(ConcurrentListeningQueue<?> queue, Class<?> key)
+   {
+      if (!localListeningNetworkQueues.containsKey(key))
+      {
+         localListeningNetworkQueues.put(key, new ArrayList<ConcurrentListeningQueue<?>>());
+      }
+      localListeningNetworkQueues.get(key).add(queue);
+   }
+
    public void addBehaviorService(BehaviorService behaviorService)
    {
       behaviorsServices.add(behaviorService);
+   }
+
+   /**
+    * Initialization method called when switching to this behavior.
+    */
+   @Override
+   public final void initialize()
+   {
+      isPaused.set(false);
+      isAborted.set(false);
+
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.run();
+      }
+
+      addAllLocalListenersToCommunicationBridge();
+      
+      onBehaviorEntered();
+   }
+   
+   public abstract void onBehaviorEntered();
+
+   /**
+    * The implementation of this method should result in a clean shut down of the behavior.
+    */
+   public final void abort()
+   {
+      isAborted.set(true);
+      isPaused.set(false);
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Aborting Behavior");
+      sendPacket(p1);
+
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.pause();
+      }
+      
+      onBehaviorAborted();
+   }
+   
+   public abstract void onBehaviorAborted();
+
+   /**
+    * The implementation of this method should result in pausing the behavior (pause current action and no more actions sent to the controller, the robot remains still).
+    * The behavior should be resumable.
+    */
+   public final void pause()
+   {
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Pausing Behavior");
+      sendPacket(p1);
+      isPaused.set(true);
+      
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.pause();
+      }
+      
+      onBehaviorPaused();
+   }
+   
+   public abstract void onBehaviorPaused();
+
+   /**
+    * The implementation of this method should result in resuming the behavior after being paused.
+    * Should not do anything if the behavior has not been paused.
+    */
+   public final void resume()
+   {
+      TextToSpeechPacket p1 = new TextToSpeechPacket("Resuming Behavior");
+      sendPacket(p1);
+      isPaused.set(false);
+      isPaused.set(false);
+
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.run();
+      }
+      
+      onBehaviorResumed();
+   }
+   
+   public abstract void onBehaviorResumed();
+
+   /**
+    * Clean up method that is called when leaving the behavior for another one.
+    */
+   public final void doPostBehaviorCleanup()
+   {
+      isPaused.set(false);
+      isAborted.set(false);
+
+      for (BehaviorService behaviorService : behaviorsServices)
+      {
+         behaviorService.pause();
+      }
+      
+      removeAllLocalListenersFromCommunicationBridge();
+      
+      onBehaviorExited();
+   }
+   
+   public abstract void onBehaviorExited();
+
+   /**
+    * Only method to check if the behavior is done.
+    * @return
+    */
+   public abstract boolean isDone();
+
+   protected boolean isPaused()
+   {
+      return isPaused.getBooleanValue() || isAborted.getBooleanValue();
+   }
+
+   private void addAllLocalListenersToCommunicationBridge()
+   {
+      if (DEBUG)
+      {
+         System.out.println("***************************************************************************");
+         System.out.println("AbstractBehavior " + behaviorName + " addAllLocalListenersToCommunicationBridge");
+      }
+      for (Class<?> key : localListeningNetworkQueues.keySet())
+      {
+         for (ConcurrentListeningQueue<?> queue : localListeningNetworkQueues.get(key))
+         {
+            if (DEBUG)
+               System.out.println("-- adding listener for " + key);
+            communicationBridge.attachNetworkListeningQueue(queue, key);
+         }
+      }
+   }
+
+   private void removeAllLocalListenersFromCommunicationBridge()
+   {
+      if (DEBUG)
+         System.out.println("--------------------------------------------------------------------------------");
+      System.out.println("AbstractBehavior " + behaviorName + " removeAllLocalListenersFromCommunicationBridge");
+      for (Class<?> key : localListeningNetworkQueues.keySet())
+      {
+         for (ConcurrentListeningQueue<?> queue : localListeningNetworkQueues.get(key))
+         {
+            communicationBridge.detachNetworkListeningQueue(queue, key);
+         }
+      }
+   }
+
+   public BehaviorStatus getBehaviorStatus()
+   {
+      return yoBehaviorStatus.getEnumValue();
+   }
+
+   public CommunicationBridge getCommunicationBridge()
+   {
+      return communicationBridge;
+   }
+
+   public CoactiveElement getCoactiveElement()
+   {
+      return null;
    }
 
    @Override
@@ -115,148 +278,5 @@ public abstract class AbstractBehavior implements RobotController
    public String getDescription()
    {
       return this.getClass().getCanonicalName();
-   }
-
-   /**
-    * The implementation of this method should result in a clean shut down of the behavior.
-    */
-   public void abort()
-   {
-      isAborted.set(true);
-      isPaused.set(false);
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Aborting Behavior");
-      sendPacket(p1);
-
-      for (BehaviorService behaviorService : behaviorsServices)
-      {
-         behaviorService.pause();
-      }
-   }
-
-   /**
-    * The implementation of this method should result in pausing the behavior (pause current action and no more actions sent to the controller, the robot remains still).
-    * The behavior should be resumable.
-    */
-   public void pause()
-   {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Pausing Behavior");
-      sendPacket(p1);
-      isPaused.set(true);
-      for (BehaviorService behaviorService : behaviorsServices)
-      {
-         behaviorService.pause();
-      }
-   }
-
-   /**
-    * The implementation of this method should result in resuming the behavior after being paused.
-    * Should not do anything if the behavior has not been paused.
-    */
-   public void resume()
-   {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Resuming Behavior");
-      sendPacket(p1);
-      isPaused.set(false);
-      isPaused.set(false);
-
-      for (BehaviorService behaviorService : behaviorsServices)
-      {
-         behaviorService.run();
-      }
-   }
-
-   public BehaviorStatus getBehaviorStatus()
-   {
-      return yoBehaviorStatus.getEnumValue();
-   }
-
-   /**
-    * Only method to check if the behavior is done.
-    * @return
-    */
-   public abstract boolean isDone();
-
-   /**
-    * Clean up method that is called when leaving the behavior for another one.
-    */
-   public void doPostBehaviorCleanup()
-   {
-      isPaused.set(false);
-      isAborted.set(false);
-
-      for (BehaviorService behaviorService : behaviorsServices)
-      {
-         behaviorService.pause();
-      }
-      removeAllLocalListenersFromCommunicationBridge();
-   }
-
-   protected boolean isPaused()
-   {
-      return isPaused.getBooleanValue() || isAborted.getBooleanValue();
-   }
-
-   /**
-    * Initialization method called when switching to this behavior.
-    */
-   @Override
-   public void initialize()
-   {
-      isPaused.set(false);
-      isAborted.set(false);
-
-      for (BehaviorService behaviorService : behaviorsServices)
-      {
-         behaviorService.run();
-      }
-
-      addAllLocalListenersToCommunicationBridge();
-
-   }
-
-   private void addAllLocalListenersToCommunicationBridge()
-   {
-      if (DEBUG)
-      {
-         System.out.println("***************************************************************************");
-         System.out.println("AbstractBehavior " + behaviorName + " addAllLocalListenersToCommunicationBridge");
-      }
-      for (Class<?> key : localListeningNetworkQueues.keySet())
-      {
-         for (ConcurrentListeningQueue queue : localListeningNetworkQueues.get(key))
-         {
-            if (DEBUG)
-               System.out.println("-- adding listener for " + key);
-            communicationBridge.attachNetworkListeningQueue(queue, key);
-         }
-      }
-   }
-
-   private void removeAllLocalListenersFromCommunicationBridge()
-   {
-      if (DEBUG)
-         System.out.println("--------------------------------------------------------------------------------");
-      System.out.println("AbstractBehavior " + behaviorName + " removeAllLocalListenersFromCommunicationBridge");
-      for (Class<?> key : localListeningNetworkQueues.keySet())
-      {
-         for (ConcurrentListeningQueue queue : localListeningNetworkQueues.get(key))
-         {
-            communicationBridge.detachNetworkListeningQueue(queue, key);
-         }
-      }
-   }
-
-   public void attachNetworkListeningQueue(ConcurrentListeningQueue queue, Class<?> key)
-   {
-      if (!localListeningNetworkQueues.containsKey(key))
-      {
-         localListeningNetworkQueues.put(key, new ArrayList<ConcurrentListeningQueue>());
-      }
-      localListeningNetworkQueues.get(key).add(queue);
-   }
-
-   public CommunicationBridge getCommunicationBridge()
-   {
-      return communicationBridge;
    }
 }

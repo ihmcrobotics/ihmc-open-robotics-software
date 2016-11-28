@@ -65,6 +65,10 @@ public class MeshDataBuilder
       addMesh(MeshDataGenerator.Sphere(radius, DEFAULT_RES, DEFAULT_RES), offset);
    }
 
+   public void addTetrahedron(float edgeLength, Tuple3f offset){addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset);}
+
+   public void addTetrahedron(double edgeLength, Tuple3d offset){addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset);}
+
    public void addPolygon(List<Point3d> polygon)
    {
       addMesh(MeshDataGenerator.Polygon(polygon));

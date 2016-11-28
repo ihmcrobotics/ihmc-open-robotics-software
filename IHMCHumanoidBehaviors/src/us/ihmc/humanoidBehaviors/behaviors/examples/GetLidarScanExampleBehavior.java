@@ -48,9 +48,8 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      super.initialize();
       //reset necessary values so this behavior can run again properly
       scanNumber = 0;
       TextToSpeechPacket p1 = new TextToSpeechPacket("Getting Lidar");
@@ -60,11 +59,24 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
-
       //let the UI know this specific behavior has ended
       coactiveBehaviorsNetworkManager.sendToUI("GetLidarScanExampleBehavior", 0);
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

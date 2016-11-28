@@ -44,7 +44,7 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
 
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       packetHasBeenSent.set(false);
       outgoingEndEffectorLoadBearingMessage = null;
@@ -67,5 +67,21 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
 		   return true;
 	   else
 		   return false;
+   }
+   @Override
+   public void onBehaviorEntered()
+   {
+   }
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 }

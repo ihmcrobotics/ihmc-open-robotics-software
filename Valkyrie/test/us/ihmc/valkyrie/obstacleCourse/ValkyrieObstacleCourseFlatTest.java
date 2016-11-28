@@ -73,7 +73,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 41.4, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
+   @ContinuousIntegrationTest(estimatedDuration = 41.4)
    @Test(timeout = 210000)
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {

@@ -47,12 +47,9 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
-      // TODO Auto-generated method stub
-      super.initialize();
       setupPipeline();
-
    }
 
    private void setupPipeline()
@@ -112,9 +109,8 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
    }
 
    @Override
@@ -139,6 +135,21 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
       FramePose pose = new FramePose(point1, orient);
 
       return pose;
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 
 }

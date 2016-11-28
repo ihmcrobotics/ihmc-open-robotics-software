@@ -195,4 +195,9 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
       return initialSphereDetectionBehavior.getSpehereRadius();
    }
 
+   @Override
+   public void onBehaviorExited()
+   {
+   }
+
 }

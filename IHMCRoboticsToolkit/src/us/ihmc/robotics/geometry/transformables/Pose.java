@@ -4,8 +4,11 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Quat4f;
 import javax.vecmath.Tuple3d;
+import javax.vecmath.Tuple3f;
 
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.interfaces.GeometryObject;
@@ -22,6 +25,12 @@ public class Pose implements GeometryObject<Pose>
    }
    
    public Pose(Point3d position, Quat4d orientation)
+   {
+      this.position = new TransformablePoint3d(position);
+      this.orientation = new TransformableQuat4d(orientation);
+   }
+   
+   public Pose(Point3f position, Quat4f orientation)
    {
       this.position = new TransformablePoint3d(position);
       this.orientation = new TransformableQuat4d(orientation);
@@ -169,6 +178,12 @@ public class Pose implements GeometryObject<Pose>
       setOrientation(orientation);
    }
 
+   public void setPose(Tuple3f position, Quat4f orientation)
+   {
+      setPosition(position);
+      setOrientation(orientation);
+   }
+
    public void setPose(Tuple3d position, AxisAngle4d orientation)
    {
       setPosition(position);
@@ -176,6 +191,11 @@ public class Pose implements GeometryObject<Pose>
    }
 
    public void setPosition(Tuple3d position)
+   {
+      this.position.set(position);
+   }
+
+   public void setPosition(Tuple3f position)
    {
       this.position.set(position);
    }
@@ -206,9 +226,14 @@ public class Pose implements GeometryObject<Pose>
       this.orientation.set(qx, qy, qz, qs);
    }
 
-   public void setOrientation(Quat4d quat4d)
+   public void setOrientation(Quat4d quaternion)
    {
-      this.orientation.setOrientation(quat4d);
+      this.orientation.setOrientation(quaternion);
+   }
+
+   public void setOrientation(Quat4f quaternion)
+   {
+      this.orientation.setOrientation(quaternion);
    }
    
    public void setOrientation(Matrix3d matrix3d)
