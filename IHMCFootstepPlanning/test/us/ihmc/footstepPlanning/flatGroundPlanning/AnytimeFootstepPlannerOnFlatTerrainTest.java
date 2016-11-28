@@ -20,8 +20,10 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 {
    private static final boolean visualize = true;
