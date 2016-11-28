@@ -17,6 +17,7 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Quat4f;
 
 import gnu.trove.list.array.TFloatArrayList;
+import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
@@ -29,6 +30,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestLidarScanMe
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
+import us.ihmc.ihmcPerception.depthData.RosPointCloudReceiver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
@@ -39,7 +41,10 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
+import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 public class LidarScanPublisher
 {
@@ -98,7 +103,15 @@ public class LidarScanPublisher
 
    public void receiveLidarFromROS(String lidarScanROSTopic, RosMainNode rosMainNode)
    {
-      rosMainNode.attachSubscriber(lidarScanROSTopic, createROSTopicSubscriber());
+      rosMainNode.attachSubscriber(lidarScanROSTopic, createROSPointCloud2Subscriber());
+   }
+
+   /**
+    * This is to subscribe to non-standard topic's message: PointCloud2WithSource.
+    */
+   public void receiveLidarFromROSAsPointCloud2WithSource(String lidarScanROSTopic, RosMainNode rosMainNode)
+   {
+      rosMainNode.attachSubscriber(lidarScanROSTopic, createROSPointCloud2WithSourceSubscriber());
    }
 
    public void receiveLidarFromSCS(ObjectCommunicator scsSensorsCommunicator)
@@ -126,7 +139,7 @@ public class LidarScanPublisher
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
    }
 
-   private RosPointCloudSubscriber createROSTopicSubscriber()
+   private RosPointCloudSubscriber createROSPointCloud2Subscriber()
    {
       return new RosPointCloudSubscriber()
       {
@@ -136,6 +149,23 @@ public class LidarScanPublisher
             UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
             Point3d[] scanPoints = pointCloudData.getPoints();
             long timestamp = pointCloud.getHeader().getStamp().totalNsecs();
+
+            scanDataToPublish.set(new ScanData(timestamp, scanPoints));
+         }
+      };
+   }
+
+   private RosTopicSubscriberInterface<PointCloud2WithSource> createROSPointCloud2WithSourceSubscriber()
+   {
+      return new AbstractRosTopicSubscriber<PointCloud2WithSource>(PointCloud2WithSource._TYPE)
+      {
+         @Override
+         public void onNewMessage(PointCloud2WithSource pointCloud)
+         {
+            PointCloud2 cloud = pointCloud.getCloud();
+            UnpackedPointCloud pointCloudData = RosPointCloudReceiver.unpackPointsAndIntensities(cloud);
+            Point3d[] scanPoints = pointCloudData.getPoints();
+            long timestamp = cloud.getHeader().getStamp().totalNsecs();
 
             scanDataToPublish.set(new ScanData(timestamp, scanPoints));
          }
