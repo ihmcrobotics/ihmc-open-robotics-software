@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
@@ -75,7 +76,7 @@ public class MotionQPInputCalculator
    private final int numberOfDoFs;
 
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
-         JointIndexHandler jointIndexHandler, YoVariableRegistry parentRegistry)
+         JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, YoVariableRegistry parentRegistry)
    {
       this.geometricJacobianHolder = geometricJacobianHolder;
       this.jointIndexHandler = jointIndexHandler;
@@ -83,7 +84,7 @@ public class MotionQPInputCalculator
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       pointJacobianConvectiveTermCalculator = new PointJacobianConvectiveTermCalculator(twistCalculator);
       centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), centerOfMassFrame, registry);
-      privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, registry);
+      privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, jointPrivilegedConfigurationParameters, registry);
 
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
       allTaskJacobian = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);

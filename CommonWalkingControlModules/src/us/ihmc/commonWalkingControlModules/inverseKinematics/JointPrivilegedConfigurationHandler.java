@@ -9,6 +9,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.robotics.MathTools;
@@ -58,7 +59,8 @@ public class JointPrivilegedConfigurationHandler
    private final ArrayList<OneDoFJoint> jointsWithConfiguration = new ArrayList<>();
 
    // TODO During toe off, this guy behaves differently and tends to corrupt the CMP. Worst part is that the achieved CMP appears to not show that. (Sylvain)
-   public JointPrivilegedConfigurationHandler(OneDoFJoint[] oneDoFJoints, YoVariableRegistry parentRegistry)
+   public JointPrivilegedConfigurationHandler(OneDoFJoint[] oneDoFJoints, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
+         YoVariableRegistry parentRegistry)
    {
       this.oneDoFJoints = oneDoFJoints;
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(oneDoFJoints);
@@ -71,6 +73,16 @@ public class JointPrivilegedConfigurationHandler
       jointSquaredRangeOfMotions = new DenseMatrix64F(numberOfDoFs, 1);
       positionsAtMidRangeOfMotion = new DenseMatrix64F(numberOfDoFs, 1);
       jointIndices = new HashMap<>(numberOfDoFs);
+
+      // FIXME: at 40.0 the robot sometimes get stuck at the end of transfer when taking one step at a time.
+      // The nullspace computed during toe-off is wrong because it does not consider the jacobian nor the proper selection matrix.
+      // That nullspace is used to project the privileged joint velocities/accelerations.
+      // Set it to 20.0 when getting stuck in transfer. Be careful because 20.0 is not enough to escape singularity at the beginning of the swing.
+      configurationGain.set(jointPrivilegedConfigurationParameters.getConfigurationGain());
+      velocityGain.set(jointPrivilegedConfigurationParameters.getVelocityGain());
+      maxVelocity.set(jointPrivilegedConfigurationParameters.getMaxVelocity());
+      maxAcceleration.set(jointPrivilegedConfigurationParameters.getMaxAcceleration());
+      weight.set(jointPrivilegedConfigurationParameters.getWeight());
 
       for (int i = 0; i < numberOfDoFs; i++)
       {
