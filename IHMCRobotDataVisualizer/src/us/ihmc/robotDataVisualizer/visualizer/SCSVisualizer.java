@@ -39,6 +39,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    protected YoVariableRegistry registry;
    protected SimulationConstructionSet scs;
 
+   
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<>();
    private volatile boolean recording = true;
    private YoVariableClient yoVariableClient;
