@@ -172,8 +172,18 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       footstepPlannerGoalType = goal.getFootstepPlannerGoalType();
 
-      setGoalXYAndRadius(goal);
-      setGoalPositionsAndYaws(goal);
+      switch(footstepPlannerGoalType)
+      {
+      case CLOSE_TO_XY_POSITION:
+         setGoalXYAndRadius(goal);
+         setGoalPositionsAndYaws(goal);
+         break;
+      case POSE_BETWEEN_FEET:
+         setGoalPositionsAndYaws(goal);
+         break;
+      default:
+         throw new RuntimeException("Method for setting for from goal type " + footstepPlannerGoalType + " is not implemented");
+      }
    }
 
    private void setGoalXYAndRadius(FootstepPlannerGoal goal)
