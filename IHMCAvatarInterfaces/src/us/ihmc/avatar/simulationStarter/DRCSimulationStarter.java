@@ -1,14 +1,6 @@
 package us.ihmc.avatar.simulationStarter;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import javax.vecmath.Vector3d;
-
 import com.github.quickhull3d.Point3d;
-
 import us.ihmc.avatar.DRCLidar;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -58,6 +50,12 @@ import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+
+import javax.vecmath.Vector3d;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
 {
@@ -348,27 +346,31 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     * @return
     */
    @Override
-   public void startSimulation(DRCNetworkModuleParameters networkParameters, boolean automaticallyStartSimulation)
+   public void startSimulation(DRCNetworkModuleParameters networkParameters, boolean automaticallySimulate)
    {
-      if ((networkParameters != null)) // && (networkParameters.useController()))
+      createSimulation(networkParameters, true, automaticallySimulate);
+   }
+
+   public void createSimulation(DRCNetworkModuleParameters networkParameters, boolean automaticallySpawnSimulation, boolean automaticallySimulate)
+   {
+      if ((networkParameters != null))
       {
          createControllerCommunicator(networkParameters);
       }
 
       this.avatarSimulation = createAvatarSimulation();
 
-      if (automaticallyStartSimulation)
-      {
+      if (automaticallySpawnSimulation)
          avatarSimulation.start();
+
+      if (automaticallySpawnSimulation && automaticallySimulate)
          avatarSimulation.simulate();
-      }
 
       if ((networkParameters != null) && networkParameters.isNetworkProcessorEnabled()) //&& (networkParameters.useController()))
       {
          startNetworkProcessor(networkParameters);
       }
    }
-
 
    public ScriptBasedControllerCommandGenerator getScriptBasedControllerCommandGenerator()
    {
