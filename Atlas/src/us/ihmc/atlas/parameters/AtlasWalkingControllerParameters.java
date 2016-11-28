@@ -7,6 +7,9 @@ import javax.vecmath.Vector3d;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -35,6 +38,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 public class AtlasWalkingControllerParameters extends WalkingControllerParameters
 {
    private final DRCRobotModel.RobotTarget target;
+   private final boolean runningOnRealRobot;
    private final SideDependentList<RigidBodyTransform> handPosesWithRespectToChestFrame = new SideDependentList<RigidBodyTransform>();
 
    // Limits
@@ -60,6 +64,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private ExplorationParameters explorationParameters = null;
 
+   private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+
    public AtlasWalkingControllerParameters(AtlasJointMap jointMap)
    {
       this(DRCRobotModel.RobotTarget.SCS, jointMap);
@@ -79,6 +85,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 );        
       maximumHeightAboveGround = jointMap.getModelScale() * ( 0.765 + 0.08 ); 
       
+      runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
+      jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
+
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
@@ -156,6 +166,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return true;
    }
 
+   /** {@inheritDoc} */
    @Override
    public double getMaximumToeOffAngle()
    {
@@ -1080,5 +1091,11 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public boolean controlToeDuringSwing()
    {
       return true;
+   }
+
+   /** {@inheritDoc} */
+   public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
+   {
+      return jointPrivilegedConfigurationParameters;
    }
 }

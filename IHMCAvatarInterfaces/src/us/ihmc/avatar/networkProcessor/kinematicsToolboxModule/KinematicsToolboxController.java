@@ -17,6 +17,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseKinematicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
@@ -130,7 +131,9 @@ public class KinematicsToolboxController extends ToolboxController
       elevatorFrame = elevator.getBodyFixedFrame();
 
       geometricJacobianHolder = new GeometricJacobianHolder();
-      toolbox = createForInverseKinematicsOnly(desiredFullRobotModel, controlledJoints, referenceFrames, updateDT, geometricJacobianHolder, twistCalculator);
+      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
+      toolbox = createForInverseKinematicsOnly(desiredFullRobotModel, controlledJoints, jointPrivilegedConfigurationParameters, referenceFrames, updateDT,
+            geometricJacobianHolder, twistCalculator);
       oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
       desiredRootJoint = desiredFullRobotModel.getRootJoint();
 
