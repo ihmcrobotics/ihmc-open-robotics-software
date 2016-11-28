@@ -154,6 +154,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
    }
 
+   public SideDependentList<ConvexPolygon2d> getFootPolygonsInSoleFrame()
+   {
+      return footPolygonsInSoleFrame;
+   }
+
    @Override
    public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide initialSide)
    {
@@ -848,5 +853,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       transform.setM12(zAxis.getY());
       transform.setM22(zAxis.getZ());
    }
+
 
 }
