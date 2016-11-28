@@ -14,7 +14,6 @@ import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.SimpleFootstep;
@@ -43,6 +42,7 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.time.YoTimer;
 
 public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
@@ -129,8 +129,13 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    public void createAndAttachSCSListenerToPlanner()
    {
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
-      PlanarRegionBipedalFootstepPlannerVisualizer listener = YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01,
+      PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithSimulationConstructionSet(0.01,
                                                                                                                                                                footPolygonsInSoleFrame);
+
+      
+      SimulationConstructionSet scs = (SimulationConstructionSet) listener.getTickAndUpdatable();
+//      scs.setCameraFix(-6.0, 0.0, 0.0);
+//      scs.setCameraPosition(-11.0, 0.0, 8.0);
 
       footstepPlanner.setBipedalFootstepPlannerListener(listener);
    }
@@ -138,7 +143,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    public void createAndAttachYoVariableServerListenerToPlanner(LogModelProvider logModelProvider, FullRobotModel fullRobotModel)
    {
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
-      PlanarRegionBipedalFootstepPlannerVisualizer listener = YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer.createWithYoVariableServer(0.01,
+      PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01,
                                                                                                                                                       fullRobotModel,
                                                                                                                                                       logModelProvider,
                                                                                                                                                       footPolygonsInSoleFrame);

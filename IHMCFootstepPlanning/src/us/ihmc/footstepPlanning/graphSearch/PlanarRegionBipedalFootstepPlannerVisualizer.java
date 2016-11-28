@@ -146,6 +146,11 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       this.tickAndUpdatable = tickAndUpdatable;
    }
 
+   public TickAndUpdatable getTickAndUpdatable()
+   {
+      return tickAndUpdatable;
+   }
+
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
