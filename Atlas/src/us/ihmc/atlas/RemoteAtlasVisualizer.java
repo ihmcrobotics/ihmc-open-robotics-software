@@ -29,6 +29,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       this.drcRobotModel = drcRobotModel;
 
       SCSVisualizer scsVisualizer = new SCSVisualizer(bufferSize);
+      scsVisualizer.setDisplayOneInNPackets(6);
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.addButton("requestStop", 1.0);
       scsVisualizer.addButton("calibrateWristForceSensors", 1.0);
