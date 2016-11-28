@@ -116,6 +116,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.FilteredPointCloud
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarScanMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationStatusPacket;
@@ -126,6 +127,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseTest.Mul
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestLidarScanMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedClientPacket;
@@ -484,7 +486,10 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(HeightQuadTreeMessage.class);
       registerPacketField(HeightQuadTreeNodeMessage.class);
       registerPacketField(HeightQuadTreeNodeMessage[].class);
-      
+
+      // Lidar messages
+      registerPacketClass(LidarScanMessage.class);
+      registerPacketClass(RequestLidarScanMessage.class);
 
       registerPacketClass(ControllerCrashNotificationPacket.class);
       registerPacketField(ControllerCrashNotificationPacket.CrashLocation.class);
