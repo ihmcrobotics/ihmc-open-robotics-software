@@ -164,7 +164,7 @@ public class FootstepListBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       if (DEBUG)
          PrintTools.debug(this, "Initialize");
@@ -179,7 +179,7 @@ public class FootstepListBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       if (DEBUG)
          PrintTools.debug(this, "Finalize");
@@ -197,7 +197,7 @@ public class FootstepListBehavior extends AbstractBehavior
    }
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
       sendPacketToController(new PauseWalkingMessage(true));
       isPaused.set(true);
@@ -205,7 +205,7 @@ public class FootstepListBehavior extends AbstractBehavior
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
       sendPacketToController(new PauseWalkingMessage(true));
       isPaused.set(true);
@@ -214,7 +214,7 @@ public class FootstepListBehavior extends AbstractBehavior
    }
 
    @Override
-   public void resume()
+   public void onBehaviorResumed()
    {
       sendPacketToController(new PauseWalkingMessage(false));
       isPaused.set(false);

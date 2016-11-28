@@ -52,7 +52,7 @@ public class FiducialDetectorFromCameraImages
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private FiducialDetector<GrayF32> detector;
-   private Object detectorConch = new Object();
+   private Object expectedFiducialSizeChangedConch = new Object();
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
 
@@ -71,7 +71,6 @@ public class FiducialDetectorFromCameraImages
    private final DoubleYoVariable detectorEulerRotY = new DoubleYoVariable(prefix + "DetectorEulerRotY", registry);
    private final DoubleYoVariable detectorEulerRotZ = new DoubleYoVariable(prefix + "DetectorEulerRotZ", registry);
 
-   private final BooleanYoVariable locationEnabled = new BooleanYoVariable(prefix + "LocationEnabled", registry);
    private final BooleanYoVariable targetIDHasBeenLocated = new BooleanYoVariable(prefix + "TargetIDHasBeenLocated", registry);
    private final LongYoVariable targetIDToLocate = new LongYoVariable(prefix + "TargetIDToLocate", registry);
 
@@ -81,7 +80,6 @@ public class FiducialDetectorFromCameraImages
 
    public FiducialDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.locationEnabled.set(true);
       this.expectedFiducialSize.set(1.0);
 
       detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()), ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
@@ -91,7 +89,7 @@ public class FiducialDetectorFromCameraImages
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            synchronized (detectorConch)
+            synchronized (expectedFiducialSizeChangedConch)
             {
                detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()), ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
             }
@@ -173,24 +171,26 @@ public class FiducialDetectorFromCameraImages
       parentRegistry.addChild(registry);
    }
 
+   public void reset()
+   {
+      this.targetIDHasBeenLocated.set(false);
+   }
+
    public FiducialDetector<GrayF32> getFiducialDetector()
    {
       return detector;
    }
 
-   public void setNewVideoPacket(VideoPacket videoPacket)
+   public void detectFromVideoPacket(VideoPacket videoPacket)
    {
       BufferedImage latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData());
-      setNewVideoPacket(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
+      detect(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
    }
 
-   public void setNewVideoPacket(BufferedImage bufferedImage, Point3d cameraPositionInWorld, Quat4d cameraOrientationInWorldXForward)
+   public void detect(BufferedImage bufferedImage, Point3d cameraPositionInWorld, Quat4d cameraOrientationInWorldXForward)
    {
-      synchronized (detectorConch)
+      synchronized (expectedFiducialSizeChangedConch)
       {
-         if (!locationEnabled.getBooleanValue())
-            return;
-
          setIntrinsicParameters(bufferedImage);
 
          cameraRigidTransform.setRotation(cameraOrientationInWorldXForward);
@@ -277,12 +277,13 @@ public class FiducialDetectorFromCameraImages
 
       intrinsicParameters.width = width;
       intrinsicParameters.height = height;
-      intrinsicParameters.cx = width / 2;
-      intrinsicParameters.cy = height / 2;
+      intrinsicParameters.cx = width / 2.0;
+      intrinsicParameters.cy = height / 2.0;
       intrinsicParameters.fx = fx;
       intrinsicParameters.fy = fy;
 
       detector.setIntrinsic(intrinsicParameters);
+      this.targetIDHasBeenLocated.set(false);
 
       return intrinsicParameters;
    }
@@ -290,16 +291,13 @@ public class FiducialDetectorFromCameraImages
    public void setExpectedFiducialSize(double expectedFiducialSize)
    {
       this.expectedFiducialSize.set(expectedFiducialSize);
+      this.targetIDHasBeenLocated.set(false);
    }
 
    public void setTargetIDToLocate(long targetIDToLocate)
    {
       this.targetIDToLocate.set(targetIDToLocate);
-   }
-
-   public void setLocationEnabled(boolean locationEnabled)
-   {
-      this.locationEnabled.set(locationEnabled);
+      this.targetIDHasBeenLocated.set(false);
    }
 
    public boolean getTargetIDHasBeenLocated()
@@ -316,6 +314,7 @@ public class FiducialDetectorFromCameraImages
    {
       this.fieldOfViewXinRadians.set(fieldOfViewXinRadians);
       this.fieldOfViewYinRadians.set(fieldOfViewYinRadians);
+      this.targetIDHasBeenLocated.set(false);
    }
 
 }

@@ -14,13 +14,11 @@ public abstract class BehaviorService
       registry = new YoVariableRegistry(name);
    }
    
-   public abstract void initialize();
+   public abstract void run();
    
    public abstract void pause();
    
-   public abstract void stop();
-   
-   public abstract void resume();
+   public abstract void destroy();
    
    protected CommunicationBridgeInterface getCommunicationBridge()
    {

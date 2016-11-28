@@ -75,7 +75,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
 
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -90,7 +90,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
   
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -106,7 +106,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    }
 
    @Override
-   public void resume()
+   public void onBehaviorResumed()
    {
       isPaused.set(false);
       hasPacketBeenSet.set(false);
@@ -130,7 +130,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       if (hasInputBeenSet())
       {
@@ -147,7 +147,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
       hasInputBeenSet.set(false);
       hasPacketBeenSet.set(false);

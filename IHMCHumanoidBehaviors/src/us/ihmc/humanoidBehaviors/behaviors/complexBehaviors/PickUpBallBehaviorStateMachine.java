@@ -172,13 +172,12 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
       statemachine.addStateWithDoneTransition(pickUpBall, PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET);
       statemachine.addStateWithDoneTransition(putBallInBucket, PickUpBallBehaviorState.RESET_ROBOT);
       statemachine.addState(resetRobot);
-      statemachine.setCurrentState(PickUpBallBehaviorState.SETUP_ROBOT);
+      statemachine.setStartState(PickUpBallBehaviorState.SETUP_ROBOT);
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
       sendPacket(p1);
 
@@ -193,17 +192,15 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    }
 
    @Override
-   public void abort()
+   public void onBehaviorAborted()
    {
-      super.abort();
-      doPostBehaviorCleanup();
+      onBehaviorExited();
 
    }
 
    @Override
-   public void pause()
+   public void onBehaviorPaused()
    {
-      super.pause();
 
    }
 

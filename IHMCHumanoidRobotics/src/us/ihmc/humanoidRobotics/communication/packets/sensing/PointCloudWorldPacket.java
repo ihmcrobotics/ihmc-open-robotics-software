@@ -23,6 +23,7 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
    
    public PointCloudWorldPacket(Random random)
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       timestamp = random.nextLong();
       
       int size = Math.abs(random.nextInt(100000));
@@ -42,6 +43,7 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
    
    public PointCloudWorldPacket()
    {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       setDestination(PacketDestination.BROADCAST);
    }
    

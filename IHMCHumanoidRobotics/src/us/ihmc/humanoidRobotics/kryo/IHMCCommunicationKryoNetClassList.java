@@ -74,6 +74,8 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
+import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeNodeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
@@ -114,6 +116,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.FilteredPointCloud
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarScanMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationStatusPacket;
@@ -124,6 +127,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseTest.Mul
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestLidarScanMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.TestbedClientPacket;
@@ -170,6 +174,7 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAngleP
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.remote.serialization.JointConfigurationData;
+import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestMessage;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
 import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
@@ -475,6 +480,16 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketClass(PointCloudWorldPacket.class);
       registerPacketClass(LidarPosePacket.class);
+
+      // New quadTree
+      registerPacketClass(HeightQuadTreeToolboxRequestMessage.class);
+      registerPacketClass(HeightQuadTreeMessage.class);
+      registerPacketField(HeightQuadTreeNodeMessage.class);
+      registerPacketField(HeightQuadTreeNodeMessage[].class);
+
+      // Lidar messages
+      registerPacketClass(LidarScanMessage.class);
+      registerPacketClass(RequestLidarScanMessage.class);
 
       registerPacketClass(ControllerCrashNotificationPacket.class);
       registerPacketField(ControllerCrashNotificationPacket.CrashLocation.class);

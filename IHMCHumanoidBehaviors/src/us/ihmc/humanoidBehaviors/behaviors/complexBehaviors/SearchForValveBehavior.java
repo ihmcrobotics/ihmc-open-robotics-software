@@ -18,15 +18,14 @@ public class SearchForValveBehavior extends AbstractBehavior
    public SearchForValveBehavior(CommunicationBridge behaviorCommunicationBridge)
    {
       super("SearchForSpehereFar", behaviorCommunicationBridge);
-      communicationBridge.attachNetworkListeningQueue(valveLocationQueue, ValveLocationPacket.class);
+      attachNetworkListeningQueue(valveLocationQueue, ValveLocationPacket.class);
    }
 
    @Override
-   public void initialize()
+   public void onBehaviorEntered()
    {
       TextToSpeechPacket p1 = new TextToSpeechPacket("Searching For The Valve");
       sendPacket(p1);
-      super.initialize();
    }
 
    @Override
@@ -45,9 +44,8 @@ public class SearchForValveBehavior extends AbstractBehavior
    }
 
    @Override
-   public void doPostBehaviorCleanup()
+   public void onBehaviorExited()
    {
-      super.doPostBehaviorCleanup();
       recievedNewValveLocation = false;
    }
 
@@ -70,6 +68,21 @@ public class SearchForValveBehavior extends AbstractBehavior
       valveRadius = valveLocationPacket.getValveRadius();
       recievedNewValveLocation = true;
 
+   }
+
+   @Override
+   public void onBehaviorAborted()
+   {
+   }
+
+   @Override
+   public void onBehaviorPaused()
+   {
+   }
+
+   @Override
+   public void onBehaviorResumed()
+   {
    }
 
 }
