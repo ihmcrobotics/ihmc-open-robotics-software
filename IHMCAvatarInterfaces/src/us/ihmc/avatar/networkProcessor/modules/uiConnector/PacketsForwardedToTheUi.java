@@ -25,6 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearComm
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarScanMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseMocapExperimentPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
@@ -94,7 +95,8 @@ public class PacketsForwardedToTheUi
       TextToSpeechPacket.class,
       UIPositionCheckerPacket.class,
       PlanarRegionsListMessage.class,
-      HeightQuadTreeMessage.class
+      HeightQuadTreeMessage.class,
+      LidarScanMessage.class
    };
 
    public static final HashMap<Class<?>, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class<?>, Long>();
