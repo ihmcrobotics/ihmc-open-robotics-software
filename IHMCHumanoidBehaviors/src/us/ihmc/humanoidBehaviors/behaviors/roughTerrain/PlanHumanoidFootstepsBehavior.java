@@ -19,6 +19,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -76,9 +77,8 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    private final Quat4d tempFirstFootstepPoseOrientation = new Quat4d();
    private final YoTimer plannerTimer;
 
-   public PlanHumanoidFootstepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge,
-                                        FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                        FiducialDetectorBehaviorService fiducialDetectorBehaviorService)
+   public PlanHumanoidFootstepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
+                                        HumanoidReferenceFrames referenceFrames, FiducialDetectorBehaviorService fiducialDetectorBehaviorService)
    {
       super(PlanHumanoidFootstepsBehavior.class.getSimpleName(), behaviorCommunicationBridge);
 
@@ -128,24 +128,21 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
    public void createAndAttachSCSListenerToPlanner()
    {
-      //TODO: Can't have this here since it uses SCS I think. Problems with Gradle?
-      //      SCSPlanarRegionBipedalFootstepPlannerVisualizer listener = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
-
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
-      YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer listener = YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(footPolygonsInSoleFrame);
+      PlanarRegionBipedalFootstepPlannerVisualizer listener = YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01,
+                                                                                                                                                               footPolygonsInSoleFrame);
 
-      listener.setCropBufferWhenSolutionIsFound(false);
       footstepPlanner.setBipedalFootstepPlannerListener(listener);
    }
 
    public void createAndAttachYoVariableServerListenerToPlanner(LogModelProvider logModelProvider, FullRobotModel fullRobotModel)
    {
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
-      YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer listener = YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer.createWithYoVariableServer(fullRobotModel,
-                                                                                                                                                                      logModelProvider,
-                                                                                                                                                                      footPolygonsInSoleFrame);
+      PlanarRegionBipedalFootstepPlannerVisualizer listener = YoVariableServerPlanarRegionBipedalFootstepPlannerVisualizer.createWithYoVariableServer(0.01,
+                                                                                                                                                      fullRobotModel,
+                                                                                                                                                      logModelProvider,
+                                                                                                                                                      footPolygonsInSoleFrame);
 
-      listener.setCropBufferWhenSolutionIsFound(false);
       footstepPlanner.setBipedalFootstepPlannerListener(listener);
    }
 
