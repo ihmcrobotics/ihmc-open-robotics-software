@@ -65,23 +65,22 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
       return this.linkGraphics;
    }
 
+   /**
+    * {@inheritDoc}
+    */
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      if(planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
-      {
-         double planeZGivenXY = planarRegion.getPlaneZGivenXY(x, y);
-         return planeZGivenXY > z - 1e-12;
-      }
-      else
-      {
-         return false;
-      }
+      return planarRegion.getBoundingBox3dInWorld().isXYInside(x, y);
    }
 
    @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
+//      tempPoint3dForCheckInside.x = x;
+//      tempPoint3dForCheckInside.y = y;
+//      tempPoint3dForCheckInside.z = z;
+
       boolean isPointInside = planarRegion.isPointInside(tempPoint3dForCheckInside, 1e-10);
 
       if(isPointInside)
