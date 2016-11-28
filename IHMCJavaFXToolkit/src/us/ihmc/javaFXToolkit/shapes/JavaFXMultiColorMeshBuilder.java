@@ -16,6 +16,8 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import us.ihmc.graphics3DDescription.MeshDataGenerator;
 import us.ihmc.graphics3DDescription.MeshDataHolder;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class JavaFXMultiColorMeshBuilder
 {
@@ -67,6 +69,11 @@ public class JavaFXMultiColorMeshBuilder
    public void addPolyon(List<Point3d> polygon, Color color)
    {
       addMesh(MeshDataGenerator.Polygon(polygon), color);
+   }
+
+   public void addPolygon( RigidBodyTransform rigidBodyTransform, ConvexPolygon2d polygon, Color color)
+   {
+      addMesh(MeshDataGenerator.Polygon(rigidBodyTransform, polygon), color);
    }
 
    public void addBox(float lx, float ly, float lz, Color color)
