@@ -1,14 +1,5 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
@@ -23,14 +14,15 @@ import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.environments.FiducialsFlatGroundEnvironment.Fiducial;
-import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObject;
-import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
-import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
-import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.simulationconstructionset.util.ground.TrussWithSimpleCollisions;
+import us.ihmc.simulationconstructionset.util.ground.*;
+
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point2d;
+import javax.vecmath.Vector3d;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 @SuppressWarnings("unused")
 public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentInterface
@@ -1631,6 +1623,22 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject.addTerrainObject(newBox2);
 
       return combinedTerrainObject;
+   }
+
+   public static CombinedTerrainObject3D addFiducial(Vector3d position, double yaw, Fiducial fiducial)
+   {
+      YoAppearanceTexture fiducialTexture = new YoAppearanceTexture(fiducial.getPathString());
+      double boxSideLength = 1.0;
+
+      CombinedTerrainObject3D fiducualTerrainObject = new CombinedTerrainObject3D(fiducial.name());
+
+      RigidBodyTransform location = new RigidBodyTransform();
+      location.setRotationEulerAndZeroTranslation(Math.toRadians(90.0), 0.0, yaw - Math.toRadians(90.0));
+      location.setTranslation(position);
+
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, boxSideLength, boxSideLength, boxSideLength), fiducialTexture);
+      fiducualTerrainObject.addTerrainObject(newBox);
+      return fiducualTerrainObject;
    }
 
    @Override

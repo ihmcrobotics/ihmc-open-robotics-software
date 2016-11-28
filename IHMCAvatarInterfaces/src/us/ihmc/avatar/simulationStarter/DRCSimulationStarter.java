@@ -177,7 +177,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    }
 
    /**
-    * Returns the SRCSCSInitialSetup. Can use that object to directly change things in the sim. But need to make those changes before calling createSimulationFactory().
+    * Returns the SRCSCSInitialSetup. Can use that object to directly change things in the sim. But need to make those changes before calling createAvatarSimulation().
     * @return SRCSCSInitialSetup
     */
    public DRCSCSInitialSetup getSCSInitialSetup()
@@ -355,10 +355,13 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          createControllerCommunicator(networkParameters);
       }
 
-      createSimulationFactory();
+      this.avatarSimulation = createAvatarSimulation();
 
       if (automaticallyStartSimulation)
+      {
+         avatarSimulation.start();
          avatarSimulation.simulate();
+      }
 
       if ((networkParameters != null) && networkParameters.isNetworkProcessorEnabled()) //&& (networkParameters.useController()))
       {
@@ -372,7 +375,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       return scriptBasedControllerCommandGenerator;
    }
 
-   private void createSimulationFactory()
+   private AvatarSimulation createAvatarSimulation()
    {
       HumanoidGlobalDataProducer dataProducer = null;
       if (controllerPacketCommunicator != null)
@@ -416,7 +419,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(dataProducer);
-      avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
+      AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
@@ -430,7 +433,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       PlaybackListener playbackListener = new SCSPlaybackListener(dataProducer);
       simulationConstructionSet.attachPlaybackListener(playbackListener);
 
-      avatarSimulation.start();
+      return avatarSimulation;
    }
 
    public ConcurrentLinkedQueue<Command<?, ?>> getQueuedControllerCommands()
