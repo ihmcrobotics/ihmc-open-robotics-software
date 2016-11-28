@@ -36,6 +36,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureException;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.random.RandomTools;
@@ -168,7 +169,6 @@ public class DRCSimulationTestHelper
       avatarSimulation = simulationStarter.getAvatarSimulation();
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
       simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
-
 
 
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())
@@ -330,6 +330,11 @@ public class DRCSimulationTestHelper
          PrintTools.error(this, e.getMessage());
          return false;
       }
+   }
+
+   public void addChildRegistry(YoVariableRegistry childRegistry)
+   {
+      scs.getRootRegistry().addChild(childRegistry);
    }
 
    public void createVideo(String simplifiedRobotModelName, int callStackHeight)
