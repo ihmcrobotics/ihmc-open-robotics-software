@@ -36,8 +36,6 @@ import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
 
 public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionListener, SCSVisualizerStateListener
 {
-   private static final int DISPLAY_ONE_IN_N_PACKETS = 6;
-
    protected YoVariableRegistry registry;
    protected SimulationConstructionSet scs;
 
@@ -46,19 +44,19 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private YoVariableClient yoVariableClient;
    private ArrayList<SCSVisualizerStateListener> stateListeners = new ArrayList<>();
 
-   private int displayOneInNPackets = DISPLAY_ONE_IN_N_PACKETS;
+   private int displayOneInNPackets = 1;
 
    private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<>();
 
    private final JButton disconnectButton = new JButton("Disconnect");
    private final JButton clearLogButton = new JButton("Clear log");
-   
+
    private final DecimalFormat delayFormat = new DecimalFormat("0000");
    private final JLabel delayValue = new JLabel();
 
-   
+
    private volatile long lastTimestamp;
-   
+
    private int bufferSize;
    private boolean showGUI;
    private boolean hideViewport;
@@ -89,7 +87,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    {
       long delay = TimeTools.nanoSecondsToMillis(lastTimestamp - timestamp);
       delayValue.setText(delayFormat.format(delay));
-      
+
       if (recording)
       {
          for (int i = 0; i < jointUpdaters.size(); i++)
@@ -249,11 +247,11 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             }
          }
       });
-      
+
       scs.addJLabel(new JLabel("Delay: "));
       scs.addJLabel(delayValue);
       scs.addJLabel(new JLabel("ms"));
-      
+
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
 
@@ -273,7 +271,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       final JToggleButton record = new JToggleButton("Pause recording");
       scs.addButton(record);
       record.addActionListener(new ActionListener()
-      {   
+      {
          @Override
          public void actionPerformed(ActionEvent e)
          {
@@ -284,7 +282,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                   yoVariableClient.setSendingVariableChanges(false);
                   recording = false;
                   record.setText("Resume recording");
-                  scs.setScrollGraphsEnabled(true);                  
+                  scs.setScrollGraphsEnabled(true);
                }
             }
             else
@@ -300,7 +298,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             }
          }
       });
-      
+
       for (String yoVariableName : buttons.keySet())
       {
          final YoVariable<?> var = registry.getVariable(yoVariableName);
