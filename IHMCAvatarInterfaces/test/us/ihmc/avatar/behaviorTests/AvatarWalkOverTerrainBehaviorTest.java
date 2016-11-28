@@ -13,6 +13,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -95,7 +96,10 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
 
       AtlasPrimitiveActions primitiveActions = new AtlasPrimitiveActions(communicationBridge, fullRobotModel, referenceFrames, drcRobotModel.getWalkingControllerParameters(), yoTime, drcRobotModel, scsRootRegistry);
 
-      WalkOverTerrainStateMachineBehavior walkOverTerrainBehavior = new WalkOverTerrainStateMachineBehavior(communicationBridge, yoTime, primitiveActions, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, fiducialToTrack);
+      LogModelProvider logModelProvider = drcRobotModel.getLogModelProvider();
+      
+      WalkOverTerrainStateMachineBehavior walkOverTerrainBehavior = new WalkOverTerrainStateMachineBehavior(communicationBridge, yoTime, primitiveActions, 
+            logModelProvider, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, fiducialToTrack);
       walkOverTerrainBehavior.initialize();
       drcBehaviorTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
