@@ -23,7 +23,8 @@ public enum PacketDestination
    KINEMATICS_TOOLBOX_MODULE,
    FOOTSTEP_PLANNING_TOOLBOX_MODULE,
    REA_MODULE, // Destination for the robot environment awareness module. Not yet available in the open source repo.
-   HEIGHT_QUADTREE_TOOLBOX_MODULE;
+   HEIGHT_QUADTREE_TOOLBOX_MODULE,
+   LIDAR_SCAN_LOGGER;
 
    public static final PacketDestination[] values = values();
 
