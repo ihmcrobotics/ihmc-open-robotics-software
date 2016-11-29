@@ -102,7 +102,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      //setupKinematicsToolboxModule();
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -164,7 +163,9 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       assertTrue(isOrientationEqual(initialChestOrientation.getQuaternion(), finalChestOrientation.getQuaternion(), angleEpsilon));
       assertTrue(isOrientationEqual(initialPelvisOrientation.getQuaternion(), finalPelvisOrientation.getQuaternion(), angleEpsilon));
 
-      assertTrue("Expect: " + desiredHandPose + "\nActual: " + currentHandPose, currentHandPose.epsilonEquals(desiredHandPose, 1.0e-2));
+      double handPosition = desiredHandPose.getPositionDistance(currentHandPose);
+      double positionEpsilon = 1.0e-2;
+      assertTrue(Math.abs(handPosition) < positionEpsilon);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -175,7 +176,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      //setupKinematicsToolboxModule();
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
