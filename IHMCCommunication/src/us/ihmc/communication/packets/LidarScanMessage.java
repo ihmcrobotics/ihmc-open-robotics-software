@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics.communication.packets.sensing;
+package us.ihmc.communication.packets;
 
 import java.util.List;
 
@@ -7,7 +7,6 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
