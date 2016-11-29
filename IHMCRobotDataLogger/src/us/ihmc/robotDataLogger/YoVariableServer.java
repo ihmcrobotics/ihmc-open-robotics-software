@@ -71,6 +71,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    
    private long uid = 0; 
    
+   private boolean sendKeepAlive = false;
    
    public YoVariableServer(Class<?> mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
@@ -102,7 +103,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
       InetSocketAddress controlAddress = new InetSocketAddress(bindAddress, controlServer.getPort());
       sessionBroadcaster = new LogSessionBroadcaster(controlAddress, bindAddress, mainClazz, logSettings);
       producer = new YoVariableProducer(scheduler, sessionBroadcaster, handshakeBuilder, logModelProvider, mainBuffer,
-            buffers.values());
+            buffers.values(), sendKeepAlive);
             
       sessionBroadcaster.requestPort();
       producer.start();
@@ -111,6 +112,11 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
       started = true;
    }
 
+   public void setSendKeepAlive(boolean sendKeepAlive)
+   {
+      this.sendKeepAlive = sendKeepAlive;
+   }
+   
    private List<JointHolder> startControlServer()
    {
       

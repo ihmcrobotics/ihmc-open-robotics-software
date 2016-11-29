@@ -335,4 +335,10 @@ public class YoVariableClient implements LogPacketHandler
 
       }
    }
+
+
+   @Override
+   public void keepAlive()
+   {
+   }
 }
