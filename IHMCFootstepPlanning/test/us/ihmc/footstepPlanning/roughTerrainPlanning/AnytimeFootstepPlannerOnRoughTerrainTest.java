@@ -163,6 +163,8 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
 
       planner.setMaximumStepReach(0.45);
       planner.setMaximumStepZ(0.25);
+      planner.setMaximumStepXWhenForwardAndDown(0.25);
+      planner.setMaximumStepZWhenForwardAndDown(0.25);
       planner.setMaximumStepYaw(0.15);
       planner.setMinimumStepWidth(0.15);
       planner.setMinimumFootholdPercent(0.8);
