@@ -53,7 +53,12 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
    public void testOverCinderBlockField(boolean assertPlannerReturnedResult)
    {
-      PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField();
+      double startX = 0.0;
+      double startY = 0.0;
+      double cinderBlockSize = 0.4;
+      int courseWidthXInNumberOfBlocks = 21;
+      int courseLengthYInNumberOfBlocks = 6;
+      PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks);
 
       FramePose goalPose = new FramePose(worldFrame);
       goalPose.setPosition(9.0, 0.7, 0.0);
