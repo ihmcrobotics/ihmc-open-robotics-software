@@ -20,6 +20,7 @@ import us.ihmc.util.PeriodicThreadScheduler;
 
 public class YoVariableProducer implements Runnable
 {
+   public static final int KEEP_ALIVE_RATE = 1000;
    public static final int TIMESTAMP_HEADER  = 0xAFAF;
    private static final int SEND_BUFFER_LENGTH = 1024;
    
@@ -36,6 +37,8 @@ public class YoVariableProducer implements Runnable
 
    private final int jointStateOffset;
 
+   private int keepAliveCounter = 0;
+   
    private final LogSessionBroadcaster session;
    private final YoVariableHandShakeBuilder handshakeBuilder;
    private final LogModelProvider logModelProvider;
@@ -48,15 +51,18 @@ public class YoVariableProducer implements Runnable
    private final DatagramChannel channel;
    private final ByteBuffer timestampBuffer = ByteBuffer.allocateDirect(12);
    
+   private final boolean sendKeepAlive;
+   
    @SuppressWarnings("unchecked")
    public YoVariableProducer(PeriodicThreadScheduler scheduler, LogSessionBroadcaster session, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider,
-         ConcurrentRingBuffer<FullStateBuffer> mainBuffer, Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers)
+         ConcurrentRingBuffer<FullStateBuffer> mainBuffer, Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers, boolean sendKeepAlive)
    {
       this.scheduler = scheduler;
       this.mainBuffer = mainBuffer;
       this.handshakeBuilder = handshakeBuilder;
       this.logModelProvider = logModelProvider;
       this.buffers = buffers.toArray(new ConcurrentRingBuffer[buffers.size()]);
+      this.sendKeepAlive = sendKeepAlive;
 
       this.jointStateOffset = handshakeBuilder.getNumberOfVariables();
       int numberOfJointStates = handshakeBuilder.getNumberOfJointStates();
@@ -84,6 +90,7 @@ public class YoVariableProducer implements Runnable
       }
 
    }
+   
    
    public void publishTimestampRealtime(long timestamp)
    {
@@ -173,6 +180,7 @@ public class YoVariableProducer implements Runnable
             crc32.update(compressedBackingArray, LogDataHeader.length() + compressedBuffer.arrayOffset(), dataSize);
             logDataHeader.setUid(fullStateBuffer.getUid());
             logDataHeader.setTimestamp(fullStateBuffer.getTimestamp());
+            logDataHeader.setType(LogDataHeader.DATA_PACKET);
             logDataHeader.setDataSize(dataSize);
             logDataHeader.setCrc32((int) crc32.getValue());
             logDataHeader.writeBuffer(0, compressedBuffer);
@@ -180,8 +188,29 @@ public class YoVariableProducer implements Runnable
             compressedBufferDirect.put(compressedBuffer);
             compressedBufferDirect.flip();
             server.send(compressedBufferDirect);
+            
+            keepAliveCounter = 0;
          }
          mainBuffer.flush();
+      }
+      
+      if(sendKeepAlive)
+      {
+         if(++keepAliveCounter > KEEP_ALIVE_RATE)
+         {
+            logDataHeader.setUid(-1);
+            logDataHeader.setTimestamp(-1);
+            logDataHeader.setType(LogDataHeader.KEEP_ALIVE_PACKET);
+            logDataHeader.setDataSize(0);
+            logDataHeader.setCrc32(0);
+            keepAliveCounter = 0;
+            
+            compressedBufferDirect.clear();
+            logDataHeader.writeBuffer(0, compressedBufferDirect);
+            compressedBufferDirect.limit(LogDataHeader.length());
+            server.send(compressedBufferDirect);
+            
+         }
       }
 
    }
