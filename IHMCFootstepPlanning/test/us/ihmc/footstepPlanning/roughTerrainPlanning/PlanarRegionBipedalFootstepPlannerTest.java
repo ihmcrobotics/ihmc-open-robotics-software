@@ -73,11 +73,13 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
 
       planner.setMaximumStepReach(0.55); //0.45);
       planner.setMaximumStepZ(0.25);
+      planner.setMaximumStepXWhenForwardAndDown(0.25);
+      planner.setMaximumStepZWhenForwardAndDown(0.25);
       planner.setMaximumStepYaw(0.15);
       planner.setMinimumStepWidth(0.15);
       planner.setMinimumFootholdPercent(0.8);
 
-      planner.setWiggleInsideDelta(0.08);
+      planner.setWiggleInsideDelta(0.05);
       planner.setMaximumXYWiggleDistance(1.0);
       planner.setMaximumYawWiggle(0.1);
 
