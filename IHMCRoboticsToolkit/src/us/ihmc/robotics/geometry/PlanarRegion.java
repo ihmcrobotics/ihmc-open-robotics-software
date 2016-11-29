@@ -1,10 +1,15 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.MathTools;
-
-import javax.vecmath.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
+import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
+
+import us.ihmc.robotics.MathTools;
 
 public class PlanarRegion
 {
@@ -24,6 +29,8 @@ public class PlanarRegion
          new Point3d(Double.NaN, Double.NaN, Double.NaN));
    private final Point3d tempPointForConvexPolygonProjection = new Point3d();
 
+   private final ConvexPolygon2d convexHull = new ConvexPolygon2d();
+
    /**
     * Create a new, empty planar region.
     */
@@ -32,6 +39,7 @@ public class PlanarRegion
       convexPolygons = new ArrayList<>();
       boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
       updateBoundingBox();
+      updateConvexHull();
    }
 
    /**
@@ -46,6 +54,7 @@ public class PlanarRegion
       convexPolygons = planarRegionConvexPolygons;
       boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
       updateBoundingBox();
+      updateConvexHull();
    }
 
    /**
@@ -61,6 +70,7 @@ public class PlanarRegion
       fromWorldToLocalTransform.invert(fromLocalToWorldTransform);
       boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
       updateBoundingBox();
+      updateConvexHull();
    }
 
    /**
@@ -351,6 +361,7 @@ public class PlanarRegion
    {
       ConvexPolygon2d polledPolygon = convexPolygons.remove(i);
       updateBoundingBox();
+      updateConvexHull();
       return polledPolygon;
    }
 
@@ -485,6 +496,7 @@ public class PlanarRegion
          convexPolygons.add(new ConvexPolygon2d(other.convexPolygons.get(i)));
 
       updateBoundingBox();
+      convexHull.setAndUpdate(other.convexHull);
    }
 
    private void updateBoundingBox()
@@ -505,6 +517,18 @@ public class PlanarRegion
       }
    }
 
+   private void updateConvexHull()
+   {
+      convexHull.clear();
+      for (int i = 0; i < this.getNumberOfConvexPolygons(); i++)
+      {
+         ConvexPolygon2d convexPolygon = this.getConvexPolygon(i);
+         for (int j = 0; j < convexPolygon.getNumberOfVertices(); j++)
+            convexHull.addVertex(convexPolygon.getVertex(j));
+      }
+      convexHull.update();
+   }
+
    /**
     * @return a full depth copy of this region. The copy can be entirely modified without interfering with this region.
     */
@@ -519,5 +543,13 @@ public class PlanarRegion
       PlanarRegion planarRegion = new PlanarRegion(transformToWorldCopy, convexPolygonsCopy);
       planarRegion.setRegionId(regionId);
       return planarRegion;
+   }
+
+   /**
+    * @return the convex hull of the region.
+    */
+   public ConvexPolygon2d getConvexHull()
+   {
+      return convexHull;
    }
 }
