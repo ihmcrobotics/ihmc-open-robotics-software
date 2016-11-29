@@ -92,6 +92,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<>();
    private final SideDependentList<DenseMatrix64F> footSelectionMatrices = new SideDependentList<>();
    private final SideDependentList<FramePose> desiredFootPoses = new SideDependentList<>();
+   private DenseMatrix64F chestSelectionMatrix = new DenseMatrix64F();
 
    private final SideDependentList<YoGraphicCoordinateSystem> desiredHandPosesViz = new SideDependentList<>();
    private final SideDependentList<YoGraphicCoordinateSystem> desiredFootPosesViz = new SideDependentList<>();
@@ -214,6 +215,7 @@ public class KinematicsToolboxController extends ToolboxController
             desiredHandPoses.put(robotSide, desiredPose);
             DenseMatrix64F selectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
             handSelectionMatrices.put(robotSide, selectionMatrix);
+            
          }
       }
       
@@ -223,6 +225,8 @@ public class KinematicsToolboxController extends ToolboxController
          FrameOrientation desiredChestOrientation = new FrameOrientation(worldFrame);
          command.getLastTrajectoryPoint().getOrientation(desiredChestOrientation);
          desiredChestOrientationReference.set(desiredChestOrientation);
+         DenseMatrix64F selectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
+         chestSelectionMatrix = selectionMatrix;
       }
       
       if (commandInputManager.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
@@ -308,12 +312,15 @@ public class KinematicsToolboxController extends ToolboxController
 
       FrameOrientation desiredChestOrientation = desiredChestOrientationReference.get();
       if (desiredChestOrientation != null)
-      {
+      {         
          RigidBody chest = desiredFullRobotModel.getChest();
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
+         Twist desiredChestTwist = computeDesiredTwist(desiredChestOrientation, chest, chestSelectionMatrix, tempErrorMagnitude);
+         newSolutionQuality += tempErrorMagnitude.doubleValue();
          FrameVector desiredChestAngularVelocity = computeDesiredAngularVelocity(desiredChestOrientation, chestFrame);
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, chest);
+         spatialVelocityCommand.set(desiredChestTwist, chestSelectionMatrix);
          spatialVelocityCommand.setAngularVelocity(chestFrame, elevatorFrame, desiredChestAngularVelocity);
          spatialVelocityCommand.setWeight(chestWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);
@@ -370,6 +377,32 @@ public class KinematicsToolboxController extends ToolboxController
       errorFramePose.changeFrame(controlFrame);
       errorFramePose.getPosition(errorPosition);
       errorFramePose.getOrientation(errorAxisAngle);
+
+      errorRotation.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
+      errorRotation.scale(AngleTools.trimAngleMinusPiToPi(errorAxisAngle.getAngle()));
+
+      ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
+      Twist desiredTwist = new Twist();
+      desiredTwist.set(endEffectorFrame, elevatorFrame, controlFrame, errorPosition, errorRotation);
+      desiredTwist.getMatrix(spatialError, 0);
+      subspaceError.reshape(selectionMatrix.getNumRows(), 1);
+      CommonOps.mult(selectionMatrix, spatialError, subspaceError);
+      errorMagnitude.setValue(NormOps.normP2(subspaceError));
+      desiredTwist.scale(1.0 / updateDT);
+
+      return desiredTwist;
+   }
+   
+   public Twist computeDesiredTwist(FrameOrientation desiredOrientation, RigidBody endEffector, DenseMatrix64F selectionMatrix, MutableDouble errorMagnitude)
+   {
+      return computeDesiredTwist(desiredOrientation, endEffector, endEffector.getBodyFixedFrame(), selectionMatrix, errorMagnitude);
+   }
+
+   public Twist computeDesiredTwist(FrameOrientation desiredOrientation, RigidBody endEffector, ReferenceFrame controlFrame, DenseMatrix64F selectionMatrix, MutableDouble errorMagnitude)
+   {
+      errorFrameOrientation.setIncludingFrame(desiredOrientation);
+      errorFrameOrientation.changeFrame(controlFrame);
+      errorFrameOrientation.getAxisAngle(errorAxisAngle);
 
       errorRotation.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorRotation.scale(AngleTools.trimAngleMinusPiToPi(errorAxisAngle.getAngle()));
@@ -458,6 +491,7 @@ public class KinematicsToolboxController extends ToolboxController
       }
 
       desiredChestOrientationReference.set(null);
+      chestSelectionMatrix = CommonOps.identity(3);
 
       desiredPelvisOrientationReference.set(null);
 
