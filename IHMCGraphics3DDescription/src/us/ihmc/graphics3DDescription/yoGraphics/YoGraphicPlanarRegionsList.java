@@ -470,6 +470,11 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
          // Clear the current list of planar regions to update and reset the index.
          currentIndex = -1;
          planarRegionsListsDeque.removeFirst();
+         if (planarRegionsListsDeque.isEmpty())
+         {
+            clearYoVariables();
+            return;
+         }
       }
 
       PlanarRegionsList planarRegionsListToProcess = planarRegionsListsDeque.peekFirst();
@@ -485,7 +490,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
             // Reset the index as we start over the update.
             currentIndex = -1;
             planarRegionsListsDeque.removeFirst();
-
+  
             if (planarRegionsListsDeque.isEmpty())
             {
                clearYoVariables();
