@@ -23,8 +23,8 @@ import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionDisplay;
 import us.ihmc.multicastLogDataProtocol.control.LogControlClient;
 import us.ihmc.multicastLogDataProtocol.control.LogControlClient.LogControlVariableChangeListener;
-import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
+import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.tools.compression.SnappyUtils;
@@ -35,6 +35,7 @@ public class YoVariableClient implements LogPacketHandler
    private static final int TIMEOUT = 1000;
 
    private final CRC32 crc32 = new CRC32();
+   private final String serverName;
    private final StreamingDataTCPClient streamingDataTCPClient;
    private final ThreadedLogPacketHandler threadedLogPacketHandler;
    private final YoVariablesUpdatedListener yoVariablesUpdatedListener;
@@ -66,6 +67,7 @@ public class YoVariableClient implements LogPacketHandler
 
    public YoVariableClient(AnnounceRequest request, final YoVariablesUpdatedListener yoVariablesUpdatedListener, String registryPrefix)
    {      
+      this.serverName = request.getName();
       this.yoVariablesUpdatedListener = yoVariablesUpdatedListener;
       displayOneInNPackets = this.yoVariablesUpdatedListener.getDisplayOneInNPackets();
 
@@ -159,6 +161,11 @@ public class YoVariableClient implements LogPacketHandler
       }
 
       yoVariablesUpdatedListener.receivedTimestampAndData(timestamp, decompressed);
+   }
+   
+   public String getServerName()
+   {
+      return serverName;
    }
 
    @Override
