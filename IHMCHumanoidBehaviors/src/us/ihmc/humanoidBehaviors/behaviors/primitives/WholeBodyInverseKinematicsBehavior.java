@@ -165,6 +165,11 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       }
    }
 
+   public double getSolutionQuality()
+   {
+      return currentSolutionQuality.getDoubleValue();
+   }
+
    @Override
    public void onBehaviorEntered()
    {
@@ -246,7 +251,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       {
          KinematicsToolboxOutputStatus newestSolution = kinematicsToolboxOutputQueue.poll();
 
-         boolean isSolutionStable = currentSolutionQuality.getDoubleValue() - newestSolution.getSolutionQuality() < 1.0e-6;
+         double deltaSolutionQuality = currentSolutionQuality.getDoubleValue() - newestSolution.getSolutionQuality();
+         boolean isSolutionStable = deltaSolutionQuality > 0.0 && deltaSolutionQuality < 1.0e-6;
          boolean isSolutionGoodEnough = newestSolution.getSolutionQuality() < solutionQualityThreshold.getDoubleValue();
          boolean sendSolutionToController = isSolutionStable && isSolutionGoodEnough;
          if (!isPaused())
