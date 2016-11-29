@@ -44,8 +44,10 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final BooleanYoVariable hasSentMessageToController;
 
    private final SideDependentList<DenseMatrix64F> handSelectionMatrices = new SideDependentList<>(CommonOps.identity(6), CommonOps.identity(6));
+   private final DenseMatrix64F chestSelectionMatrix = new DenseMatrix64F(CommonOps.identity(3));
    private final SideDependentList<YoFramePoint> yoDesiredHandPositions = new SideDependentList<>();
    private final SideDependentList<YoFrameQuaternion> yoDesiredHandOrientations = new SideDependentList<>();
+   private final YoFrameQuaternion yoDesiredChestOrientation;
    private final DoubleYoVariable trajectoryTime;
 
    private final KinematicsToolboxOutputConverter outputConverter;
@@ -93,7 +95,9 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          YoFrameQuaternion desiredHandOrientation = new YoFrameQuaternion(behaviorName + "Desired" + side + "Hand", worldFrame, registry);
          yoDesiredHandOrientations.put(robotSide, desiredHandOrientation);
       }
-
+      
+      yoDesiredChestOrientation = new YoFrameQuaternion(behaviorName + "DesiredChest", worldFrame, registry);
+      
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
       attachNetworkListeningQueue(kinematicsToolboxOutputQueue, KinematicsToolboxOutputStatus.class);
@@ -162,6 +166,29 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       {
          selectionMatrix.set(i, i, controlledOrientationAxes[i]);
          selectionMatrix.set(i + 3, i, controlledPositionAxes[i]);
+      }
+   }
+
+   public void setDesiredChestOrientaion(FrameOrientation desiredChestOrientation)
+   {
+      yoDesiredChestOrientation.setAndMatchFrame(desiredChestOrientation);
+   }
+
+   public void setChestControlYawPitchOnly()
+   {
+      boolean[] controlledOrientationAxes = new boolean[] {false, true, true};
+      setChestControlledAxes(controlledOrientationAxes);
+   }
+
+   public void setChestControlledAxes(boolean[] controlledOrientationAxes)
+   {
+      DenseMatrix64F selectionMatrix = chestSelectionMatrix;
+      selectionMatrix.reshape(3, 3);
+      selectionMatrix.zero();
+
+      for (int i = 0; i < 3; i++)
+      {
+         selectionMatrix.set(i, i, controlledOrientationAxes[i]);
       }
    }
 
@@ -237,6 +264,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
          if (chestTrajectoryMessage != null)
          {
+            chestTrajectoryMessage.setSelectionMatrix(chestSelectionMatrix);
             chestTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(chestTrajectoryMessage);
          }
