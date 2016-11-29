@@ -35,8 +35,10 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -214,21 +216,23 @@ public class KinematicsToolboxController extends ToolboxController
             handSelectionMatrices.put(robotSide, selectionMatrix);
          }
       }
-
-      if (commandInputManager.isNewCommandAvailable(FootTrajectoryCommand.class))
+      
+      if (commandInputManager.isNewCommandAvailable(ChestTrajectoryCommand.class))
       {
-         List<FootTrajectoryCommand> commands = commandInputManager.pollNewCommands(FootTrajectoryCommand.class);
-         for (int i = 0; i < commands.size(); i++)
-         {
-            FootTrajectoryCommand command = commands.get(i);
-            RobotSide robotSide = command.getRobotSide();
-            FramePose desiredPose = new FramePose();
-            command.getLastTrajectoryPoint().getPoseIncludingFrame(desiredPose);
-            desiredFootPoses.put(robotSide, desiredPose);
-            DenseMatrix64F selectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
-            footSelectionMatrices.put(robotSide, selectionMatrix);
-         }
+         ChestTrajectoryCommand command = commandInputManager.pollNewestCommand(ChestTrajectoryCommand.class);  
+         FrameOrientation desiredChestOrientation = new FrameOrientation(worldFrame);
+         command.getLastTrajectoryPoint().getOrientation(desiredChestOrientation);
+         desiredChestOrientationReference.set(desiredChestOrientation);
       }
+      
+      if (commandInputManager.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
+      {
+         PelvisOrientationTrajectoryCommand command = commandInputManager.pollNewestCommand(PelvisOrientationTrajectoryCommand.class);  
+         FrameOrientation desiredPelvisOrientation = new FrameOrientation(worldFrame);
+         command.getLastTrajectoryPoint().getOrientation(desiredPelvisOrientation);
+         desiredPelvisOrientationReference.set(desiredPelvisOrientation);
+      }
+
    }
 
    public void updateTools()
@@ -453,6 +457,10 @@ public class KinematicsToolboxController extends ToolboxController
          handSelectionMatrices.put(robotSide, CommonOps.identity(6));
       }
 
+      desiredChestOrientationReference.set(null);
+
+      desiredPelvisOrientationReference.set(null);
+
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.getAndSet(null);
       if (robotConfigurationData == null)
          return false;
@@ -476,14 +484,6 @@ public class KinematicsToolboxController extends ToolboxController
       FramePoint2d initialCoMXY = new FramePoint2d(referenceFrames.getCenterOfMassFrame());
       initialCoMXY.changeFrameAndProjectToXYPlane(referenceFrames.getMidFeetZUpFrame());
       desiredCenterOfMassXYReference.set(initialCoMXY);
-
-      FrameOrientation initialChestOrientation = new FrameOrientation(desiredFullRobotModel.getChest().getBodyFixedFrame());
-      initialChestOrientation.changeFrame(worldFrame);
-      desiredChestOrientationReference.set(initialChestOrientation);
-
-      FrameOrientation initialPelvisOrientation = new FrameOrientation(desiredFullRobotModel.getPelvis().getBodyFixedFrame());
-      initialPelvisOrientation.changeFrame(worldFrame);
-      desiredPelvisOrientationReference.set(initialPelvisOrientation);
 
       for (RobotSide robotSide : RobotSide.values)
       {
