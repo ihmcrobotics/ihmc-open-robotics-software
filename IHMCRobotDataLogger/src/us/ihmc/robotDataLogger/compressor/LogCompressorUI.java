@@ -4,10 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Properties;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -31,8 +28,6 @@ import us.ihmc.tools.gui.SwingFilePicker.Mode;
 public class LogCompressorUI extends JFrame
 {
    private static final long serialVersionUID = -7569157904587962418L;
-   public static final File defaultParameterFile = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "IHMCLogCompressorSettings.ini");
-   private final Properties logCompressorProperties = new Properties();
 
    private final SwingFilePicker compressionSource = new SwingFilePicker(Mode.MODE_OPEN, 70);
    private final SwingFilePicker compressionTarget = new SwingFilePicker(Mode.MODE_SAVE, 70);
@@ -45,6 +40,7 @@ public class LogCompressorUI extends JFrame
    private final JTextField videoDeCompressOptions = new JTextField("", 80);
 
    private final JTabbedPane converterPane = new JTabbedPane();
+   private final VideoCompressor videoCompressor;
 
    public LogCompressorUI() throws FileNotFoundException, IOException
    {
@@ -52,15 +48,10 @@ public class LogCompressorUI extends JFrame
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setLocationByPlatform(true);
       setLocationRelativeTo(null);
+      
+      this.videoCompressor = new VideoCompressor();
 
-      if (defaultParameterFile.exists())
-      {
-         logCompressorProperties.load(new FileReader(defaultParameterFile));
-      }
-
-      videoConverterCmd.setSelectedFilePath(logCompressorProperties.getProperty("videoConverterCmd", VideoCompessor.defaultVideoConverterCmd));
-      videoCompressOptions.setText(logCompressorProperties.getProperty("videoCompressOptions", VideoCompessor.defaultVideoCompressOptions));
-      videoDeCompressOptions.setText(logCompressorProperties.getProperty("videoDecompressOptions", VideoCompessor.defaultVideoDeCompressOptions));
+      setOptionsFieldsFromVideoCompressor();
 
       JPanel compress = createCompressPanel();
       converterPane.addTab("Compress", compress);
@@ -76,6 +67,13 @@ public class LogCompressorUI extends JFrame
       pack();
       setVisible(true);
 
+   }
+
+   private void setOptionsFieldsFromVideoCompressor()
+   {
+      videoConverterCmd.setSelectedFilePath(videoCompressor.getVideoCompressorPath());
+      videoCompressOptions.setText(videoCompressor.getVideoCompressionOptions());
+      videoDeCompressOptions.setText(videoCompressor.getVideoDecompressionOptions());
    }
 
    private JPanel createCompressPanel()
@@ -230,6 +228,7 @@ public class LogCompressorUI extends JFrame
          {
             try
             {
+               updateSettings();
                new LogFileCompressor(logDirectory, targetFile, logProperties, progressMonitor);
             }
             catch (IOException e)
@@ -299,6 +298,7 @@ public class LogCompressorUI extends JFrame
          {
             try
             {
+               updateSettings();
                new LogFileDecompressor(logDirectory, targetFile, logProperties, progressMonitor);
             }
             catch (IOException e)
@@ -312,28 +312,22 @@ public class LogCompressorUI extends JFrame
 
    private void loadDefaults()
    {
-      videoConverterCmd.setSelectedFilePath(VideoCompessor.defaultVideoConverterCmd);
-      videoCompressOptions.setText(VideoCompessor.defaultVideoCompressOptions);
-      videoDeCompressOptions.setText(VideoCompessor.defaultVideoDeCompressOptions);
+      videoCompressor.setDefaults();
+      setOptionsFieldsFromVideoCompressor();
+
    }
 
+   private void updateSettings()
+   {
+      videoCompressor.setVideoCompressorPath(videoConverterCmd.getSelectedFilePath());
+      videoCompressor.setVideoCompressionOptions(videoCompressOptions.getText());
+      videoCompressor.setVideoDecompressionOptions(videoDeCompressOptions.getText());      
+   }
+   
    private void saveSettings()
    {
-      logCompressorProperties.setProperty("videoConverterCmd", videoConverterCmd.getSelectedFilePath());
-      logCompressorProperties.setProperty("videoCompressOptions", videoCompressOptions.getText());
-      logCompressorProperties.setProperty("videoDecompressOptions", videoDeCompressOptions.getText());
-
-      try
-      {
-         defaultParameterFile.getParentFile().mkdirs();
-         FileWriter fileWriter = new FileWriter(defaultParameterFile);
-         logCompressorProperties.store(fileWriter, "Saved by LogCompressorUI");
-         fileWriter.close();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+      updateSettings();
+      videoCompressor.saveSettings();
    }
 
    private JPanel createSettingsPanel()
