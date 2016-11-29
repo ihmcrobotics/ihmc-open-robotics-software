@@ -57,6 +57,7 @@ public class DRCNetworkProcessor
          addTextToSpeechEngine(params);
          setupRobotEnvironmentAwarenessModule(params);
          setupHeightQuadTreeToolboxModule(robotModel, params);
+         setupLidarScanLogger();
       }
       catch (IOException e)
       {
@@ -371,6 +372,16 @@ public class DRCNetworkProcessor
          String methodName = "setupHeightQuadTreeToolboxModule";
          printModuleConnectedDebugStatement(PacketDestination.HEIGHT_QUADTREE_TOOLBOX_MODULE, methodName);
       }
+   }
+
+   private void setupLidarScanLogger() throws IOException
+   {
+      PacketCommunicator lidarScanLoggerCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.LIDAR_SCAN_LOGGER_PORT, NET_CLASS_LIST);
+      packetRouter.attachPacketCommunicator(PacketDestination.LIDAR_SCAN_LOGGER, lidarScanLoggerCommunicator);
+      lidarScanLoggerCommunicator.connect();
+
+      String methodName = "setupLidarScanLogger";
+      printModuleConnectedDebugStatement(PacketDestination.LIDAR_SCAN_LOGGER, methodName);
    }
 
    protected void connect(PacketCommunicator communicator)
