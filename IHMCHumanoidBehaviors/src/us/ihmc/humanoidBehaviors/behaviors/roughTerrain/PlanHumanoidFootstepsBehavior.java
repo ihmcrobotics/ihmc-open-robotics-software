@@ -42,8 +42,7 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.time.YoTimer;
+import us.ihmc.robotics.time.YoTimer;
 
 public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 {
