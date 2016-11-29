@@ -340,6 +340,5 @@ public class YoVariableClient implements LogPacketHandler
    @Override
    public void keepAlive()
    {
-      System.out.println("Received Keep alive");
    }
 }
