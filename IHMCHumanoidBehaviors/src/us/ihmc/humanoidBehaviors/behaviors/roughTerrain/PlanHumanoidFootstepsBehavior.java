@@ -43,6 +43,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.YoTimer;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 {
