@@ -107,6 +107,13 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
       planner.setMaximumStepReach(0.55); //(0.4);
       planner.setMaximumStepZ(0.25); //0.4); //0.25);
+      
+      // Atlas has ankle pitch range of motion limits, which hit when taking steps forward and down. Similar to a human.
+      // Whereas a human gets on its toes nicely to avoid the limits, this is challenging with a robot. 
+      // So for now, have reall conservative forward and down limits on height.
+      planner.setMaximumStepXWhenForwardAndDown(0.2);
+      planner.setMaximumStepZWhenForwardAndDown(0.10);
+      
       planner.setMaximumStepYaw(0.15); //0.25);
       planner.setMinimumStepWidth(0.15);
       planner.setMinimumFootholdPercent(0.95);
