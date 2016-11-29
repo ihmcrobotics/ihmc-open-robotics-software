@@ -154,6 +154,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
    }
 
+   public SideDependentList<ConvexPolygon2d> getFootPolygonsInSoleFrame()
+   {
+      return footPolygonsInSoleFrame;
+   }
+
    @Override
    public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide initialSide)
    {
@@ -167,8 +172,18 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       footstepPlannerGoalType = goal.getFootstepPlannerGoalType();
 
-      setGoalXYAndRadius(goal);
-      setGoalPositionsAndYaws(goal);
+      switch(footstepPlannerGoalType)
+      {
+      case CLOSE_TO_XY_POSITION:
+         setGoalXYAndRadius(goal);
+         setGoalPositionsAndYaws(goal);
+         break;
+      case POSE_BETWEEN_FEET:
+         setGoalPositionsAndYaws(goal);
+         break;
+      default:
+         throw new RuntimeException("Method for setting for from goal type " + footstepPlannerGoalType + " is not implemented");
+      }
    }
 
    private void setGoalXYAndRadius(FootstepPlannerGoal goal)
@@ -848,5 +863,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       transform.setM12(zAxis.getY());
       transform.setM22(zAxis.getZ());
    }
+
 
 }

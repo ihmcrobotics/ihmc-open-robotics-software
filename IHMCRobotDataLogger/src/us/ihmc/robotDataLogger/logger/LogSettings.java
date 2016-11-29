@@ -22,7 +22,8 @@ public enum LogSettings
    MINI_BEAST(false),
    BABY_BEAST(true),
    V2EXO(true),
-   MEGABOTS(true, "239.255.25.5");
+   MEGABOTS(true, "239.255.25.5"),
+   FOOTSTEP_PLANNER(false);
 
    private final boolean log;
    private final InetAddress videoStream;
