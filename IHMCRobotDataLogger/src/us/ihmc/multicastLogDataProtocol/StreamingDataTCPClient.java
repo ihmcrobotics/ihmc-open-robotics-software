@@ -115,22 +115,30 @@ public class StreamingDataTCPClient extends Thread
                System.err.println("Expected header, got data. Scanning till new header found.");
                continue DATALOOP; // Cannot read buffer, continue with data loop hopefully latching on to the data stream again
             }
-            updateHandler.timestampReceived(header.getTimestamp());
-
-            ByteBuffer dataBuffer = ByteBuffer.allocate(header.getDataSize());
-
-            while (dataBuffer.hasRemaining())
-            {
-               int read = selectAndRead(key, dataBuffer, TIMEOUT);
-               if (read == -1)
-               {
-                  break DATALOOP;
-               }
-            }
-
-            dataBuffer.flip();
             
-            updateHandler.newDataAvailable(header, dataBuffer);
+            if(header.getType() == LogDataHeader.KEEP_ALIVE_PACKET)
+            {
+               updateHandler.keepAlive();
+            }
+            else
+            {
+               updateHandler.timestampReceived(header.getTimestamp());
+   
+               ByteBuffer dataBuffer = ByteBuffer.allocate(header.getDataSize());
+   
+               while (dataBuffer.hasRemaining())
+               {
+                  int read = selectAndRead(key, dataBuffer, TIMEOUT);
+                  if (read == -1)
+                  {
+                     break DATALOOP;
+                  }
+               }
+   
+               dataBuffer.flip();
+               
+               updateHandler.newDataAvailable(header, dataBuffer);
+            }
          }
          catch (ClosedByInterruptException e)
          {
