@@ -67,6 +67,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    protected final IntegerYoVariable numberOfNodesExpanded = new IntegerYoVariable("numberOfNodesExpanded", registry);
 
    protected final BooleanYoVariable rejectIfCannotFullyWiggleInside = new BooleanYoVariable("rejectIfCannotFullyWiggleInside", registry);
+   private final BooleanYoVariable wiggleIntoConvexHullOfPlanarRegions = new BooleanYoVariable("WiggleIntoConvexHullOfPlanarRegions", registry);
 
    protected final DoubleYoVariable maximumXYWiggleDistance = new DoubleYoVariable("maximumXYWiggleDistance", registry);
    protected final DoubleYoVariable maximumYawWiggle = new DoubleYoVariable("maximumYawWiggle", registry);
@@ -91,6 +92,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       maximumXYWiggleDistance.set(0.1);
       maximumYawWiggle.set(0.1);
       rejectIfCannotFullyWiggleInside.set(false);
+      wiggleIntoConvexHullOfPlanarRegions.set(true);
    }
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
@@ -690,7 +692,12 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 //      System.out.println("polygonToWiggleInRegionFrame = \n" + polygonToWiggleInRegionFrame);
 //      System.out.println("planarRegionToPack = \n" + planarRegionToPack);
 
-      RigidBodyTransform wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoRegion(polygonToWiggleInRegionFrame, planarRegionToPack, parameters);
+      RigidBodyTransform wiggleTransformLocalToLocal = null;
+      if (wiggleIntoConvexHullOfPlanarRegions.getBooleanValue())
+         wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(polygonToWiggleInRegionFrame, planarRegionToPack, parameters);
+      else
+         wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoRegion(polygonToWiggleInRegionFrame, planarRegionToPack, parameters);
+
       if (wiggleTransformLocalToLocal == null)
       {
          notifyListenerNodeForExpansionWasRejected(nodeAfterSnap, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
