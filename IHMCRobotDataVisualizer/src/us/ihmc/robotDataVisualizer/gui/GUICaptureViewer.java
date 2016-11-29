@@ -198,5 +198,11 @@ public class GUICaptureViewer
       public void connected(InetSocketAddress localAddress)
       {
       }
+
+      @Override
+      public void keepAlive()
+      {
+         
+      }
    }
 }

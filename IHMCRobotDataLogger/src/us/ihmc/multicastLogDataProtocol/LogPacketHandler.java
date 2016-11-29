@@ -25,4 +25,12 @@ public interface LogPacketHandler
 
 
    public void connected(InetSocketAddress localAddress);
+
+
+   /**
+    * Gets called when a keep alive packet got received. 
+    * 
+    * This method can be a no-op as the client handles the keep alives
+    */
+   public void keepAlive();
 }
