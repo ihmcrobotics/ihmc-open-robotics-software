@@ -53,6 +53,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    protected final DoubleYoVariable maximumStepReach = new DoubleYoVariable("maximumStepReach", registry);
+   protected final DoubleYoVariable stepReach = new DoubleYoVariable("stepReach", registry);
+
    protected final DoubleYoVariable minimumFootholdPercent = new DoubleYoVariable("minimumFootholdPercent", registry);
 
    protected final DoubleYoVariable idealFootstepLength = new DoubleYoVariable("idealFootstepLength", registry);
@@ -61,6 +63,9 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    protected final DoubleYoVariable maximumStepZ = new DoubleYoVariable("maximumStepZ", registry);
    protected final DoubleYoVariable maximumStepYaw = new DoubleYoVariable("maximumStepYaw", registry);
    protected final DoubleYoVariable minimumStepWidth = new DoubleYoVariable("minimumStepWidth", registry);
+
+   protected final DoubleYoVariable maximumStepXWhenForwardAndDown = new DoubleYoVariable("maximumStepXWhenForwardAndDown", registry);
+   protected final DoubleYoVariable maximumStepZWhenForwardAndDown = new DoubleYoVariable("maximumStepZWhenForwardAndDown", registry);
 
    protected final DoubleYoVariable wiggleInsideDelta = new DoubleYoVariable("wiggleInsideDelta", registry);
 
@@ -111,6 +116,16 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    public void setMaximumStepZ(double maximumStepZ)
    {
       this.maximumStepZ.set(maximumStepZ);
+   }
+
+   public void setMaximumStepXWhenForwardAndDown(double maximumStepXWhenForwardAndDown)
+   {
+      this.maximumStepXWhenForwardAndDown.set(maximumStepXWhenForwardAndDown);
+   }
+
+   public void setMaximumStepZWhenForwardAndDown(double maximumStepZWhenForwardAndDown)
+   {
+      this.maximumStepZWhenForwardAndDown.set(maximumStepZWhenForwardAndDown);
    }
 
    public void setMaximumStepYaw(double maximumStepYaw)
@@ -369,7 +384,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
       Point3d goalSolePosition = goalPositions.get(nextSide);
 
-      if (goalSolePosition.distance(currentSolePosition) < maximumStepReach.getDoubleValue())
+      stepReach.set(goalSolePosition.distance(currentSolePosition));
+      if (stepReach.getDoubleValue() < maximumStepReach.getDoubleValue())
       {
          double currentSoleYaw = nodeToExpand.getSoleYaw();
          double goalSoleYaw = goalYaws.get(nextSide);
@@ -441,8 +457,15 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
             return false;
          }
+         
+         if ((stepFromParentInWorld.getX() > maximumStepXWhenForwardAndDown.getDoubleValue()) && (Math.abs(stepFromParentInWorld.getZ()) < -Math.abs(maximumStepZWhenForwardAndDown.getDoubleValue())))
+         {
+            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
+            return false;
+         }
 
-         if (stepFromParentInWorld.length() > maximumStepReach.getDoubleValue())
+         stepReach.set(stepFromParentInWorld.length());
+         if (stepReach.getDoubleValue() > maximumStepReach.getDoubleValue())
          {
             notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
             return false;
