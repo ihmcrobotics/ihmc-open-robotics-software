@@ -73,4 +73,10 @@ public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
    {
       handler.connected(localAddress);
    }
+
+   @Override
+   public void keepAlive()
+   {
+      handler.keepAlive(); 
+   }
 }

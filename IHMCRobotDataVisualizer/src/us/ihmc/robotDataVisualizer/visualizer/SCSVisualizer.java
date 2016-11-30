@@ -223,6 +223,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       scs.setGroundVisible(false);
       scs.attachExitActionListener(this);
       scs.attachPlaybackListener(createYoGraphicsUpdater());
+      scs.setRunName(yoVariableClient.getServerName());
       //scs.setFastSimulate(true, 50);
 
       scs.addButton(disconnectButton);
