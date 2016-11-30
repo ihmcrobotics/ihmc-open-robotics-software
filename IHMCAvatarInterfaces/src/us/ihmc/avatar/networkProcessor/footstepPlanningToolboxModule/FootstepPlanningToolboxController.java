@@ -32,6 +32,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -56,14 +57,18 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private final BooleanYoVariable isDone = new BooleanYoVariable("isDone", registry);
    private final BooleanYoVariable requestedPlanarRegions = new BooleanYoVariable("RequestedPlanarRegions", registry);
+   private final DoubleYoVariable time = new DoubleYoVariable("ToolboxTime", registry);
 
    private final PacketCommunicator packetCommunicator;
    private long plannerCount = 0;
+   private double dt;
 
-   public FootstepPlanningToolboxController(RobotContactPointParameters contactPointParameters, StatusMessageOutputManager statusOutputManager, PacketCommunicator packetCommunicator, YoVariableRegistry parentRegistry)
+   public FootstepPlanningToolboxController(RobotContactPointParameters contactPointParameters, StatusMessageOutputManager statusOutputManager, PacketCommunicator packetCommunicator, YoVariableRegistry parentRegistry,
+         double dt)
    {
       super(statusOutputManager, parentRegistry);
       this.packetCommunicator = packetCommunicator;
+      this.dt = dt;
       packetCommunicator.attachListener(PlanarRegionsListMessage.class, createPlanarRegionsConsumer());
 
       SideDependentList<ConvexPolygon2d> footPolygons = new SideDependentList<>();
@@ -108,18 +113,25 @@ public class FootstepPlanningToolboxController extends ToolboxController
    @Override
    protected void updateInternal()
    {
+      time.add(dt);
+
       if (!requestedPlanarRegions.getBooleanValue())
          requestPlanarRegions();
 
       PlanarRegionsListMessage planarRegionsMessage = latestPlanarRegionsReference.getAndSet(null);
-      if (planarRegionsMessage == null)
+      if (time.getDoubleValue() < 1.0 && planarRegionsMessage == null)
          return;
 
       sendMessageToUI("Starting To Plan: " + plannerCount + ", " + activePlanner.getEnumValue().toString());
-
       FootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
-      PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
-      planner.setPlanarRegions(planarRegions);
+
+      if (planarRegionsMessage != null)
+      {
+         PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
+         planner.setPlanarRegions(planarRegions);
+      }
+      else
+         planner.setPlanarRegions(null);
 
       FootstepPlanningResult status = planner.plan();
       FootstepPlan footstepPlan = planner.getPlan();
@@ -145,6 +157,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    {
       isDone.set(false);
       requestedPlanarRegions.set(false);
+      time.set(0.0);
 
       FootstepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
