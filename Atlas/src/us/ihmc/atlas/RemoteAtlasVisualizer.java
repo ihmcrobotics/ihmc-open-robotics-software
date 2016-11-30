@@ -4,6 +4,8 @@ import com.martiansoftware.jsap.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.visualization.GainControllerSliderBoard;
 import us.ihmc.avatar.visualization.WalkControllerSliderBoard;
+import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
+import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionDisplay;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
@@ -24,7 +26,6 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
    {
       this.drcRobotModel = drcRobotModel;
 
-
       SCSVisualizer scsVisualizer = new SCSVisualizer(bufferSize);
       scsVisualizer.setDisplayOneInNPackets(displayOneInNPacketsFactor);
       scsVisualizer.addSCSVisualizerStateListener(this);
@@ -32,7 +33,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       scsVisualizer.addButton("calibrateWristForceSensors", 1.0);
       scsVisualizer.setShowOverheadView(true);
 
-      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote");
+      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote", null, new RemoteAtlasVisualizerLogFilter());
       client.start();
    }
 
@@ -100,6 +101,21 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
          System.err.println("                " + jsap.getUsage());
          System.err.println();
          System.exit(1);
+      }
+   }
+
+   private class RemoteAtlasVisualizerLogFilter implements LogSessionDisplay.LogSessionFilter
+   {
+      @Override
+      public boolean shouldAddToDisplay(AnnounceRequest description)
+      {
+         String ipAsString = ipToString(description.controlIP);
+         return ipAsString.startsWith("10.7.4.") || ipAsString.startsWith("10.7.1.");
+      }
+
+      private String ipToString(byte[] address)
+      {
+         return (address[0] & 0xFF) + "." + (address[1] & 0xFF) + "." + (address[2] & 0xFF) + "." + (address[3] & 0xFF);
       }
    }
 }
