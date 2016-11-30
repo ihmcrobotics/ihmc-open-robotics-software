@@ -12,8 +12,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -28,7 +26,6 @@ public class LidarScanLogWriter
 {
    private static final boolean DEBUG = false;
 
-   private static final String host = NetworkParameters.getHost(NetworkParameterKeys.networkManager);
    private static final NetworkPorts port = NetworkPorts.LIDAR_SCAN_LOGGER_PORT;
    private static final NetClassList netClassList = new IHMCCommunicationKryoNetClassList();
 
@@ -49,7 +46,7 @@ public class LidarScanLogWriter
    {
    }
 
-   public void connectToNetworkProcessor() throws IOException
+   public void connectToNetworkProcessor(String host) throws IOException
    {
       if (packetCommunicator != null)
       {
