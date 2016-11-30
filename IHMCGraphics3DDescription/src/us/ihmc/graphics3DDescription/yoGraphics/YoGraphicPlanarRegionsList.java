@@ -263,6 +263,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       if (currentMeshIndex.getIntegerValue() == -1)
          return;
       MeshDataHolder polygonMesh = createCurrentMesh();
+      polygonMesh.setName("PlanarRegion");
       AppearanceDefinition appearance = getCurrentAppearance();
 
       Graphics3DAddMeshDataInstruction instructionToUpdate = meshBuffer.get(currentMeshIndex.getIntegerValue());
