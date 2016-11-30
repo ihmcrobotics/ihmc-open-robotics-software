@@ -36,6 +36,10 @@ repositories {
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
+configurations {
+    all*.exclude group: 'org.bytedeco', module: 'javacpp-presets'
+}
+
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
@@ -62,6 +66,8 @@ dependencies {
     compile group: 'org.boofcv', name: 'io', version: '0.24.1'
     compile group: 'org.boofcv', name: 'recognition', version: '0.24.1'
     compile group: 'org.boofcv', name: 'calibration', version: '0.24.1'
+    compile group: 'org.bytedeco.javacpp-presets', name: 'caffe', version: 'master-1.2'
+    compile group: 'org.bytedeco.javacpp-presets', name: 'caffe', version: 'master-1.2', classifier: 'linux-x86_64'
     compile "org.ddogleg:ddogleg:0.7"
 
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
