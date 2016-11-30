@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.graphSearch.SimplePlanarRegionBipedalAnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
@@ -177,18 +178,19 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
-
-      planner.setMaximumStepReach(0.45);
-      planner.setMaximumStepZ(0.25);
-      planner.setMaximumStepXWhenForwardAndDown(0.25);
-      planner.setMaximumStepZWhenForwardAndDown(0.25);
-      planner.setMaximumStepYaw(0.15);
-      planner.setMinimumStepWidth(0.15);
-      planner.setMinimumFootholdPercent(0.8);
+      BipedalFootstepPlannerParameters parameters = planner.getParameters();
+      
+      parameters.setMaximumStepReach(0.45);
+      parameters.setMaximumStepZ(0.25);
+      parameters.setMaximumStepXWhenForwardAndDown(0.25);
+      parameters.setMaximumStepZWhenForwardAndDown(0.25);
+      parameters.setMaximumStepYaw(0.15);
+      parameters.setMinimumStepWidth(0.15);
+      parameters.setMinimumFootholdPercent(0.8);
 
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;
-      planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
+      parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);

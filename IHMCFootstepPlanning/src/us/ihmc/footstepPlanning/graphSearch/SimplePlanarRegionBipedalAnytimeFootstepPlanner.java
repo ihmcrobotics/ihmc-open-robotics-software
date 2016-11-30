@@ -82,7 +82,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
             notifyListenerNodeSelectedForExpansion(nodeToExpand);
 
             // Make sure popped node is a good one and can be expanded...
-            boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(wiggleInsideDelta.getDoubleValue(), nodeToExpand);
+            boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(nodeToExpand);
             if (!snapSucceded)
                continue;
 
