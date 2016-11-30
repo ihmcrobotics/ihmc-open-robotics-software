@@ -26,7 +26,7 @@ import us.ihmc.tools.thread.ThreadTools;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 {
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -52,10 +52,10 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
       }
 
       SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlanner = getPlanner();
-      Runnable runnable = PlanningTestTools.createAnytimePlannerRunnable(anytimePlanner, initialStanceFootPose, initialStanceSide, goalPose, flatTerrain);
+      PlanningTestTools.configureAnytimePlannerRunnable(anytimePlanner, initialStanceFootPose, initialStanceSide, goalPose, flatTerrain);
 
-      new Thread(runnable).start();
-
+      new Thread(anytimePlanner).start();
+      
       double closestFootstepToGoal = Double.MAX_VALUE;
       int numIterations = 100;
       FootstepPlan bestPlanYet = anytimePlanner.getBestPlanYet();
@@ -125,6 +125,6 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
    @Override
    public boolean visualize()
    {
-      return true;
+      return visualize;
    }
 }
