@@ -2,9 +2,6 @@ package us.ihmc.graphics3DAdapter.graphics;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.graphics3DDescription.instructions.Graphics3DAddExtrusionInstruction;
 import us.ihmc.graphics3DDescription.instructions.Graphics3DAddHeightMapInstruction;
 import us.ihmc.graphics3DDescription.instructions.Graphics3DAddMeshDataInstruction;
@@ -24,9 +21,8 @@ public abstract class Graphics3DInstructionExecutor
       super();
    }
 
-   protected void setUpGraphicsFromDefinition(Graphics3DObject graphics3DObject)
+   protected void setUpGraphicsFromDefinition(ArrayList<Graphics3DPrimitiveInstruction> instructions)
    {
-      ArrayList<Graphics3DPrimitiveInstruction> instructions = graphics3DObject.getGraphics3DInstructions();
       for (Graphics3DPrimitiveInstruction instruction : instructions)
       {
          if (instruction instanceof Graphics3DAddModelFileInstruction)
@@ -78,7 +74,7 @@ public abstract class Graphics3DInstructionExecutor
       }
 
    }
-   
+
    protected abstract void doAddMeshDataInstruction(Graphics3DAddMeshDataInstruction graphics3DAddMeshData);
 
    protected abstract void doAddHeightMapInstruction(Graphics3DAddHeightMapInstruction graphics3DAddHeightMap);
