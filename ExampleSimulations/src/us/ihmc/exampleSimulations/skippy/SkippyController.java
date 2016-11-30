@@ -218,7 +218,7 @@ public class SkippyController implements RobotController
     */
    boolean setUpFiles = false; //true;//
    boolean trace = false;//true;// 
-   boolean traceCrossProduct = false;// true; //
+   boolean crossProductAndPointsDistance = false;// true; //
    boolean traceCom = true; //false;// 
    boolean traceCmpToCom = false; //true; // 
    double tol = 0.1; //threshold for debug distances
@@ -246,7 +246,7 @@ public class SkippyController implements RobotController
        */
       z0.set(1.216); // got from averaged CoM_Z during simulation
       averagedZ0.set(0.0);
-      kCapture.set(4.0);//1.5);// 2.0);//0.9);
+      kCapture.set(1.5);//4.0);// 2.0);//0.9);
       robotMass.set(robot.getMass());
       robotWeight.set(robotMass.getDoubleValue() * Math.abs(robot.getGravityZ()));
       setUpOutputFiles(setUpFiles);
@@ -625,17 +625,16 @@ public class SkippyController implements RobotController
    {
       FrameVector hipToFootInWorld = new FrameVector(ReferenceFrame.getWorldFrame());
       FrameVector shoulderToFootInWorld = new FrameVector(ReferenceFrame.getWorldFrame());
-      Point3d footLocationInWorld = new Point3d();
       /*
        * Foot location in world
        */
-      footLocationInWorld.set(robot.computeFootLocation());
+      footLocation.set(robot.computeFootLocation());
       /*
        * Foot to hip position vector
        */
       robot.getHipJoint().getTranslationToWorld(hipToFootInWorld.getVector());
       hipJointPosition.set(hipToFootInWorld);
-      hipToFootPositionVector.sub(footLocationInWorld, hipToFootInWorld.getVector());
+      hipToFootPositionVector.sub(footLocation.getVector3dCopy(), hipToFootInWorld.getVector());
       hipToFootUnitVector.set(hipToFootPositionVector);
       hipToFootUnitVector.normalize();
       /*
@@ -643,9 +642,26 @@ public class SkippyController implements RobotController
        */
       robot.getShoulderJoint().getTranslationToWorld(shoulderToFootInWorld.getVector());
       shoulderJointPosition.set(shoulderToFootInWorld);
-      shoulderToFootPositionVector.sub(footLocationInWorld, shoulderToFootInWorld.getVector());
+      shoulderToFootPositionVector.sub(footLocation.getVector3dCopy(), shoulderToFootInWorld.getVector());
       shoulderToFootUnitVector.set(shoulderToFootPositionVector);
       shoulderToFootUnitVector.normalize();
+      /*
+       * ONLY FOR DEBUG OF GRAPHICS Cross product between actual and previous
+       * position vectors and distance between points
+       */
+      if (crossProductAndPointsDistance && setUpFiles)
+         computePositionVectorsCrossProductAndPointDistances(footLocation);
+      /*
+       * leg to torso angle
+       */
+      legToTorsoAngle.set(Math.acos(hipToFootUnitVector.dot(shoulderToFootUnitVector)));
+   }
+
+   /**
+    * @param footLocationInWorld
+    */
+   public void computePositionVectorsCrossProductAndPointDistances(YoFramePoint footLocationInWorld)
+   {
       /*
        * ONLY FOR DEBUG Cross product between actual and previous position
        * vectors
@@ -656,8 +672,8 @@ public class SkippyController implements RobotController
       crossHipLength.set(crossHipPositionVector.length());
       //		if(crossShoulderLength.getDoubleValue()>1.0E-3 || crossHipLength.getDoubleValue()>1.0E-3)
       //			System.out.println(crossShoulderLength.toString()+"\t"+crossHipLength.toString());
-      if (traceCrossProduct && setUpFiles)
-         writer.println(crossHipLength.toString() + crossShoulderLength.toString());
+      //      if (traceCrossProduct && setUpFiles)
+      writer.println(robot.getTime() + "\t" + crossHipLength.toString() + "\t" + crossShoulderLength.toString());
       /*
        * Distance between consecutive points
        */
@@ -666,8 +682,8 @@ public class SkippyController implements RobotController
       double footDistance = footLocation.distance(previousFootLocation);
       //		if(hipJointDistance>1.0E-3 || shoulderJointDistance>1.0E-3)
       //			System.out.println(robot.getTime()+"\t"+hipJointDistance+"\t"+shoulderJointDistance);
-      if (traceCrossProduct && setUpFiles)
-         writer1.println(robot.getTime() + "\t" + footDistance + "\t" + hipJointDistance + "\t" + shoulderJointDistance);
+      //      if (traceCrossProduct && setUpFiles)
+      writer1.println(robot.getTime() + "\t" + footDistance + "\t" + hipJointDistance + "\t" + shoulderJointDistance);
       //		if(footDistance>1.0E-3 || hipJointDistance>1.0E-3  || shoulderJointDistance>1.0E-3)
       //			System.out.println(robot.getTime()+"\t"+footDistance+"\t"+hipJointDistance+"\t"+shoulderJointDistance);
       /*
@@ -678,10 +694,6 @@ public class SkippyController implements RobotController
       previousShoulderJointPosition.set(shoulderJointPosition);
       previousHipToFootUnitVector.set(hipToFootUnitVector);
       previousShoulderToFootUnitVector.set(shoulderToFootUnitVector);
-      /*
-       * leg to torso angle
-       */
-      legToTorsoAngle.set(Math.acos(hipToFootUnitVector.dot(shoulderToFootUnitVector)));
    }
 
    /**
@@ -1520,7 +1532,7 @@ public class SkippyController implements RobotController
             /*
              * Torque on hip for hip angle control
              */
-            hipAngleController.setProportionalGain(0.0);//50.0);//31.25); //(179.53125);//(2500.0);//
+            hipAngleController.setProportionalGain(1.0);//50.0);//31.25); //(179.53125);//(2500.0);//
             hipAngleController.setDerivativeGain(0.0);//20.0);//0.00602454);//1000.0);//
             hipAngleController.setIntegralGain(0.0);//0.116299896953656563); //100.00);//
             tauHipForAngleControl.set(hipAngleController.compute(/* legToTorsoAngle */robot.getQ_hip().getDoubleValue(),
@@ -1549,11 +1561,9 @@ public class SkippyController implements RobotController
             icpToFootErrorController.setIntegralGain(0.0);
             tauHipForIcpToFootErrorControl.set(icpToFootErrorController.compute(icpToFootError.getX(), 0.0, icpVelocity.getVector3dCopy().getX(), 0.0, deltaT));
             tauHipForIcpToFootErrorControl.add(icpToFootErrorController.compute(icpToFootError.getY(), 0.0, icpVelocity.getVector3dCopy().getY(), 0.0, deltaT));
-            
-            double totalTauHip = tauOnHipAxisFromReaction.getDoubleValue() + tauHipForAngleControl.getDoubleValue()
-                  + tauHipForComVelocityControl.getDoubleValue() + tauHipForComToFootErrorControl.getDoubleValue()
-                  + tauHipForIcpToFootErrorControl.getDoubleValue();
 
+            double totalTauHip = tauOnHipAxisFromReaction.getDoubleValue()/2 - tauHipForAngleControl.getDoubleValue()
+                  + tauHipForComVelocityControl.getDoubleValue()+tauHipForComToFootErrorControl.getDoubleValue()+tauHipForIcpToFootErrorControl.getDoubleValue();
             /*
              * Apply torque to the joints
              */
@@ -1571,7 +1581,7 @@ public class SkippyController implements RobotController
          if (firstEnterBalanceState)
          {
             firstEnterBalanceState = false;
-            desiredLegToTorsoAngle.set(7 * Math.PI / 16);//desiredLegToTorsoAngle.getDoubleValue());//robot.getQ_hip().getDoubleValue());
+            desiredLegToTorsoAngle.set(robot.getQ_hip().getDoubleValue()); //7 * Math.PI / 16);//desiredLegToTorsoAngle.getDoubleValue());//
          }
       }
 
