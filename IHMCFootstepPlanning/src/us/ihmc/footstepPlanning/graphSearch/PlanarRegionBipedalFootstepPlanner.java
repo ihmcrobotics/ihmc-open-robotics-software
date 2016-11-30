@@ -74,6 +74,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       parameters = new BipedalFootstepPlannerParameters(parentRegistry);
    }
 
+   public BipedalFootstepPlannerParameters getParameters()
+   {
+      return parameters;
+   }
+
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
    {
       this.listener = listener;
