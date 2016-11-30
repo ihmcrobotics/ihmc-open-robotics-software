@@ -67,7 +67,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
       immutable = !graphics3dObject.isChangeable();
 
       currentNode = this.rootNode;
-      setUpGraphicsFromDefinition(graphics3dObject.getGraphics3DInstructions());
+      setUpGraphicsFromDefinition(graphics3dObject);
 
       // Optimize geometries. Cannot change geometries on an optimized node.
       if (optimizeGraphicsObject && immutable)
@@ -477,5 +477,11 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
       {
          System.out.println(string);
       }
+   }
+
+   @Override
+   protected void doPreScale(Vector3d scale)
+   {
+      rootNode.setLocalScale((float)scale.getX(), (float)scale.getY(), (float)scale.getZ());
    }
 }

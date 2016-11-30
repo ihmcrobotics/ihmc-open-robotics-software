@@ -47,6 +47,8 @@ public class Graphics3DObject
 
    private static final int RESOLUTION = 25;
    private static final int CAPSULE_RESOLUTION = 24;
+   
+   private Vector3d preScale = new Vector3d(1.0, 1.0, 1.0);
 
    private ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions;
    private ArrayList<SelectedListener> selectedListeners;
@@ -252,7 +254,7 @@ public class Graphics3DObject
    }
 
    /**
-    * Scales the coordinate system by the specified scale factor. This does not scale existing
+    * Scales the coordinate system by the specified preScale factor. This does not preScale existing
     * graphics, instead it scales the "current" coordinate system.  When another object is added
     * it will be uniformly scaled by the specified factor.
     *
@@ -266,10 +268,10 @@ public class Graphics3DObject
    }
 
    /**
-    * Scales the coordinate system by the specified scale factor. This does not scale existing
+    * Scales the coordinate system by the specified preScale factor. This does not preScale existing
     * graphics, instead it scales the "current" coordinate system.  When another object is added
     * it will be uniformly scaled by the specified factor.  The components of the vector indicate
-    * scale factors in each dimension.
+    * preScale factors in each dimension.
     *
     * @param scaleFactors Vector3d describing the scaling factors in each dimension.
     * @return
@@ -281,10 +283,41 @@ public class Graphics3DObject
 
       return graphics3DScale;
    }
+   
+   
+   /**
+    * Scales the origin coordinate system by the specified preScale factor. This will preScale existing
+    * graphics and all graphics added after calling this function. The components of the vector indicate
+    * preScale factors in each dimension.
+    * 
+    * @param scaleFactors scaleFactor Factor by which the graphics object system is scaled.  For example, 0.5 would
+    * reduce future objects size by 50% whereas 2 would double it.
+    * @return
+    */
+   public void preScale(double scaleFactor)
+   {
+      preScale(new Vector3d(scaleFactor, scaleFactor, scaleFactor));
+   }
+   
+   /**
+    * Scales the origin coordinate system by the specified preScale factor. This will preScale existing
+    * graphics and all graphics added after calling this function. The components of the vector indicate
+    * preScale factors in each dimension.
+    * 
+    * @param scaleFactors Vector3d describing the scaling factors in each dimension
+    * @return
+    */
+   public void preScale(Vector3d scaleFactors)
+   {
+      preScale.setX(preScale.getX() * scaleFactors.getX());
+      preScale.setY(preScale.getY() * scaleFactors.getY());
+      preScale.setZ(preScale.getZ() * scaleFactors.getZ());
+
+   }
 
    /**
     * Resets the coordinate system to the joint origin.  This clears all rotations, translations,
-    * and scale factors.
+    * and preScale factors.
     */
    public void identity()
    {
@@ -1195,5 +1228,10 @@ public class Graphics3DObject
    public void setChangeable(boolean changeable)
    {
       this.changeable = changeable;
+   }
+
+   public Vector3d getPreScale()
+   {
+      return preScale;
    }
 }

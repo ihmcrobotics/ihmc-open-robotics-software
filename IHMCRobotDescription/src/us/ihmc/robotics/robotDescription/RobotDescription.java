@@ -88,4 +88,9 @@ public class RobotDescription implements RobotDescriptionNode, GraphicsObjectsHo
       return jointDescription.getLink().getLinkGraphics();
    }
 
+   @Override
+   public void scale(double factor, double massScalePower)
+   {
+      JointDescription.scaleChildrenJoint(getChildrenJoints(), factor, massScalePower);
+   }
 }
