@@ -1562,7 +1562,7 @@ public class SkippyController implements RobotController
             tauHipForIcpToFootErrorControl.set(icpToFootErrorController.compute(icpToFootError.getX(), 0.0, icpVelocity.getVector3dCopy().getX(), 0.0, deltaT));
             tauHipForIcpToFootErrorControl.add(icpToFootErrorController.compute(icpToFootError.getY(), 0.0, icpVelocity.getVector3dCopy().getY(), 0.0, deltaT));
 
-            double totalTauHip = tauOnHipAxisFromReaction.getDoubleValue()/2 - tauHipForAngleControl.getDoubleValue()
+            double totalTauHip = tauOnHipAxisFromReaction.getDoubleValue() + tauHipForAngleControl.getDoubleValue()
                   + tauHipForComVelocityControl.getDoubleValue()+tauHipForComToFootErrorControl.getDoubleValue()+tauHipForIcpToFootErrorControl.getDoubleValue();
             /*
              * Apply torque to the joints
