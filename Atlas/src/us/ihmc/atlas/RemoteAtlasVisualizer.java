@@ -1,11 +1,6 @@
 package us.ihmc.atlas;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-import com.martiansoftware.jsap.Switch;
-
+import com.martiansoftware.jsap.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.visualization.GainControllerSliderBoard;
 import us.ihmc.avatar.visualization.WalkControllerSliderBoard;
@@ -24,13 +19,13 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 
    private final DRCRobotModel drcRobotModel;
 
-   public RemoteAtlasVisualizer(int bufferSize, DRCRobotModel drcRobotModel)
+   public RemoteAtlasVisualizer(int bufferSize, DRCRobotModel drcRobotModel, int displayOneInNPacketsFactor)
    {
       this.drcRobotModel = drcRobotModel;
 
 
       SCSVisualizer scsVisualizer = new SCSVisualizer(bufferSize);
-      scsVisualizer.setDisplayOneInNPackets(6);
+      scsVisualizer.setDisplayOneInNPackets(displayOneInNPacketsFactor);
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.addButton("requestStop", 1.0);
       scsVisualizer.addButton("calibrateWristForceSensors", 1.0);
@@ -70,11 +65,16 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
       robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
 
+      FlaggedOption oneInNPacketsFactor = new FlaggedOption("displayOneInNPackets").setLongFlag("display-one-in-n-packets").setShortFlag('p').setStringParser(JSAP.INTEGER_PARSER).setRequired(false);
+      oneInNPacketsFactor.setHelp("Visualize one in ever N packets, where N is the argument passed in. Default value is 6 (displays one in every 6 packets)");
+      oneInNPacketsFactor.setDefault("6");
+
       Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
 
 
       jsap.registerParameter(robotModel);
       jsap.registerParameter(runningOnRealRobot);
+      jsap.registerParameter(oneInNPacketsFactor);
 
       JSAPResult config = jsap.parse(args);
 
@@ -83,7 +83,14 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
         DRCRobotModel.RobotTarget target = config.getBoolean(runningOnRealRobot.getID()) ? DRCRobotModel.RobotTarget.REAL_ROBOT : DRCRobotModel.RobotTarget.SCS;
         DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, false);
 
-         new RemoteAtlasVisualizer(bufferSize, model);
+        int oneInNPacketsValue = 6;
+
+         if (config.contains("displayOneInNPackets"))
+         {
+            oneInNPacketsValue = config.getInt("displayOneInNPackets");
+         }
+
+         new RemoteAtlasVisualizer(bufferSize, model, oneInNPacketsValue);
       }
       catch(IllegalArgumentException e)
       {
