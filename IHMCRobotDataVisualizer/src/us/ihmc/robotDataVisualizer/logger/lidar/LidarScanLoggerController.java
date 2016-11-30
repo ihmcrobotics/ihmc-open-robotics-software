@@ -10,16 +10,22 @@ import java.util.Date;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.util.NetworkPorts;
 
 public class LidarScanLoggerController
 {
+   private static final String DEFAULT_HOST = NetworkParameters.getHost(NetworkParameterKeys.networkManager);
+
    private final LidarScanLogWriter logWriter = new LidarScanLogWriter();
    private final LidarScanLogReader logReader = new LidarScanLogReader();
 
@@ -83,6 +89,17 @@ public class LidarScanLoggerController
       }
 
       return readingProperty;
+   }
+
+   private StringProperty networkProcessorAddressProperty;
+
+   public StringProperty networkProcessorAddressProperty()
+   {
+      if (networkProcessorAddressProperty == null)
+      {
+         networkProcessorAddressProperty = new SimpleStringProperty(this, "networkProcessorAddressProperty", DEFAULT_HOST);
+      }
+      return networkProcessorAddressProperty;
    }
 
    private BooleanProperty enableNetworkProcessorClientProperty;
@@ -213,7 +230,7 @@ public class LidarScanLoggerController
       {
          try
          {
-            logWriter.connectToNetworkProcessor();
+            logWriter.connectToNetworkProcessor(networkProcessorAddressProperty().get());
          }
          catch (IOException e)
          {
