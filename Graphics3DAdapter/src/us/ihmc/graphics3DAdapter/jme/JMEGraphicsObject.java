@@ -479,9 +479,4 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
       }
    }
 
-   @Override
-   protected void doPreScale(Vector3d scale)
-   {
-      rootNode.setLocalScale((float)scale.getX(), (float)scale.getY(), (float)scale.getZ());
-   }
 }
