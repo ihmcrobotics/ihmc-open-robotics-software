@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
+import java.util.EnumMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point3d;
@@ -22,6 +23,8 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
+import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
+import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
@@ -29,6 +32,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -39,6 +43,14 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class FootstepPlanningToolboxController extends ToolboxController
 {
+   private enum Planners
+   {
+      PLANAR_REGION_BIPEDAL,
+      PLAN_THEN_SNAP
+   }
+   private final EnumYoVariable<Planners> activePlanner = new EnumYoVariable<>("activePlanner", registry, Planners.class);
+   private final EnumMap<Planners, FootstepPlanner> plannerMap = new EnumMap<>(Planners.class);
+
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<FootstepPlanningRequestPacket>(null);
    private final AtomicReference<PlanarRegionsListMessage> latestPlanarRegionsReference = new AtomicReference<PlanarRegionsListMessage>(null);
 
@@ -46,7 +58,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final BooleanYoVariable requestedPlanarRegions = new BooleanYoVariable("RequestedPlanarRegions", registry);
 
    private final PacketCommunicator packetCommunicator;
-   private final FootstepPlanner planner;
+   private long plannerCount = 0;
 
    public FootstepPlanningToolboxController(RobotContactPointParameters contactPointParameters, StatusMessageOutputManager statusOutputManager, PacketCommunicator packetCommunicator, YoVariableRegistry parentRegistry)
    {
@@ -58,10 +70,12 @@ public class FootstepPlanningToolboxController extends ToolboxController
       for (RobotSide side : RobotSide.values)
          footPolygons.set(side, new ConvexPolygon2d(contactPointParameters.getFootContactPoints().get(side)));
 
-      planner = createFootstepPlanner(footPolygons);
+      plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(footPolygons));
+      plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), footPolygons));
+      activePlanner.set(Planners.PLANAR_REGION_BIPEDAL);
    }
 
-   private PlanarRegionBipedalFootstepPlanner createFootstepPlanner(SideDependentList<ConvexPolygon2d> footPolygons)
+   private PlanarRegionBipedalFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2d> footPolygons)
    {
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
 
@@ -98,15 +112,17 @@ public class FootstepPlanningToolboxController extends ToolboxController
       if (latestPlanarRegionsReference.get() == null)
          return;
 
-      sendMessageToUI("Starting To Plan.");
+      sendMessageToUI("Starting To Plan: " + plannerCount + ", " + activePlanner.getEnumValue().toString());
 
+      FootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
       PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(latestPlanarRegionsReference.getAndSet(null));
       planner.setPlanarRegions(planarRegions);
 
       FootstepPlanningResult status = planner.plan();
       FootstepPlan footstepPlan = planner.getPlan();
 
-      sendMessageToUI("Result: " + status.toString());
+      sendMessageToUI("Result: " + plannerCount + ", " + status.toString());
+      plannerCount++;
 
       reportMessage(packResult(footstepPlan, status));
       isDone.set(true);
@@ -139,6 +155,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       goalPose.setPosition(new Point3d(request.goalPositionInWorld));
       goalPose.setOrientation(new Quat4d(request.goalOrientationInWorld));
 
+      FootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
       planner.setInitialStanceFoot(initialStancePose, request.initialStanceSide);
 
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
