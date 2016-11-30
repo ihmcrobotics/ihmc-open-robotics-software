@@ -1,8 +1,11 @@
 package us.ihmc.robotics.robotDescription;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Vector3d;
+
+import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class JointDescription implements RobotDescriptionNode
 {
@@ -14,10 +17,12 @@ public class JointDescription implements RobotDescriptionNode
 
    private LinkDescription link;
 
+   // Lists of kinematic points on the robot. When adding types of kinematic points, make sure to update the getAllKinematicPoints(List<KinematicPointDescription>) function
    private final ArrayList<KinematicPointDescription> kinematicPoints = new ArrayList<>();
    private final ArrayList<ExternalForcePointDescription> externalForcePoints = new ArrayList<>();
    private final ArrayList<GroundContactPointDescription> groundContactPoints = new ArrayList<>();
 
+   // Lists of sensors. When adding sensors, make sure to update the getSensors(List<SensorDescription>) function.
    private final ArrayList<JointWrenchSensorDescription> wrenchSensors = new ArrayList<>();
    private final ArrayList<CameraSensorDescription> cameraSensors = new ArrayList<>();
    private final ArrayList<IMUSensorDescription> imuSensors = new ArrayList<>();
@@ -181,6 +186,22 @@ public class JointDescription implements RobotDescriptionNode
       return isDynamic;
    }
    
+   public void getSensors(List<SensorDescription> sensors)
+   {
+      sensors.addAll(wrenchSensors);
+      sensors.addAll(cameraSensors);
+      sensors.addAll(imuSensors);
+      sensors.addAll(lidarSensors);
+      sensors.addAll(forceSensors);
+   }
+   
+   public void getAllKinematicPoints(List<KinematicPointDescription> allKinematicPoints)
+   {
+      allKinematicPoints.addAll(this.kinematicPoints);
+      allKinematicPoints.addAll(this.externalForcePoints);
+      allKinematicPoints.addAll(this.groundContactPoints);
+   }
+   
    
    public static void scaleChildrenJoint(ArrayList<JointDescription> childrenJoints, double factor, double massScalePower)
    {
@@ -202,8 +223,43 @@ public class JointDescription implements RobotDescriptionNode
    @Override
    public void scale(double factor, double massScalePower)
    {
-      link.scale(factor, massScalePower);
+      scaleSensorsOffsets(factor);
+      scaleAllKinematicsPointOffsets(factor);
       
+      link.scale(factor, massScalePower);
       JointDescription.scaleChildrenJoint(getChildrenJoints(), factor, massScalePower);
+   }
+
+   private void scaleSensorsOffsets(double factor)
+   {
+      ArrayList<SensorDescription> sensors = new ArrayList<>();
+      getSensors(sensors);
+      
+      for(int i = 0; i < sensors.size(); i++)
+      {
+         SensorDescription sensor = sensors.get(i);
+         RigidBodyTransform transformToJoint = sensor.getTransformToJoint();
+         Vector3d translation = new Vector3d();
+         transformToJoint.getTranslation(translation);
+         translation.scale(factor);
+         transformToJoint.setTranslation(translation);
+         sensor.setTransformToJoint(transformToJoint);
+         
+      }
+   }
+   
+   private void scaleAllKinematicsPointOffsets(double factor)
+   {
+      ArrayList<KinematicPointDescription> allKinematicPoints = new ArrayList<>();
+      getAllKinematicPoints(allKinematicPoints);
+      for(int i = 0; i < allKinematicPoints.size(); i++)
+      {
+         KinematicPointDescription kinematicPoint = allKinematicPoints.get(i);
+         
+         Vector3d offset = kinematicPoint.getOffsetFromJoint();
+         offset.scale(factor);
+         kinematicPoint.setOffsetFromJoint(offset);
+      }
+            
    }
 }

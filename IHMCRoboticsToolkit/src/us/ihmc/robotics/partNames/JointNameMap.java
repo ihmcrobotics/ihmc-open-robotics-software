@@ -16,6 +16,16 @@ public interface JointNameMap extends RobotSpecificJointNames
 {
 
    String getModelName();
+   
+   default double getModelScale()
+   {
+      return 1.0;
+   }
+   
+   default double getMassScalePower()
+   {
+      return 3.0;
+   }
 
    JointRole getJointRole(String jointName);
 
