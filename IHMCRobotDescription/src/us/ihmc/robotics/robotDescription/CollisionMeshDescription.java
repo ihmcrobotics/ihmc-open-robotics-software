@@ -140,4 +140,9 @@ public class CollisionMeshDescription
    {
       transformGenerator.rotate(rotation);
    }
+
+   public void scale(double factor)
+   {
+      throw new RuntimeException("TODO: Implement me");
+   }
 }

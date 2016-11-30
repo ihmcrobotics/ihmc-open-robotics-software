@@ -24,6 +24,7 @@ import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DInstructionExecutor;
+import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.graphics3DDescription.MeshDataHolder;
 import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphics3DDescription.instructions.Graphics3DAddExtrusionInstruction;
@@ -44,8 +45,8 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
     private Transform outputRotation = new Affine(), outputScale = new Affine(), outputTranslation = new Affine();
     private Material outputMaterial = new PhongMaterial(Color.GRAY);
 
-    public JavaFX3DInstructionExecutor(ArrayList<Graphics3DPrimitiveInstruction> instructions) {
-        setUpGraphicsFromDefinition(instructions);
+    public JavaFX3DInstructionExecutor(Graphics3DObject graphics3DObject) {
+        setUpGraphicsFromDefinition(graphics3DObject);
     }
 
     @Override
@@ -137,4 +138,10 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
 
         return mesh;
     }
+
+   @Override
+   protected void doPreScale(Vector3d scale)
+   {
+      outputScale = new Scale(scale.x, scale.y, scale.z);
+   }
 }

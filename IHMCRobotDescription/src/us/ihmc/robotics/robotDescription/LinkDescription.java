@@ -356,4 +356,16 @@ public class LinkDescription
       InertiaTools.computePrincipalMomentsOfInertia(momentOfInertia, principalAxesRotation, principalMomentsOfInertia);
    }
 
+   public void scale(double factor, double massScalePower)
+   {
+      if(linkGraphics != null)
+      {
+         linkGraphics.preScale(factor);
+      }
+      if(collisionMesh != null)
+      {
+         collisionMesh.scale(factor);
+      }
+   }
+
 }

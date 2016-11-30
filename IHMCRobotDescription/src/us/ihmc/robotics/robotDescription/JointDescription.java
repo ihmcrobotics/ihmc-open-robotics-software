@@ -180,4 +180,30 @@ public class JointDescription implements RobotDescriptionNode
    {
       return isDynamic;
    }
+   
+   
+   public static void scaleChildrenJoint(ArrayList<JointDescription> childrenJoints, double factor, double massScalePower)
+   {
+      Vector3d offsetFromParentJoint = new Vector3d();
+      for(int i = 0; i < childrenJoints.size(); i++)
+      {
+         JointDescription description = childrenJoints.get(i);
+
+         description.getOffsetFromParentJoint(offsetFromParentJoint);
+         offsetFromParentJoint.scale(factor);
+         description.setOffsetFromParentJoint(offsetFromParentJoint);
+         
+         description.scale(factor, massScalePower);
+      }
+
+   }
+   
+
+   @Override
+   public void scale(double factor, double massScalePower)
+   {
+      link.scale(factor, massScalePower);
+      
+      JointDescription.scaleChildrenJoint(getChildrenJoints(), factor, massScalePower);
+   }
 }

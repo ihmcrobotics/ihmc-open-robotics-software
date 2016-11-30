@@ -132,7 +132,7 @@ public class MainWindow extends Application {
                 graphics.setMaterial(redMaterial);
                 jointGroup.getChildren().add(graphics);
 
-                JavaFX3DInstructionExecutor executor = new JavaFX3DInstructionExecutor(node.getValue().getLink().getLinkGraphics().getGraphics3DInstructions());
+                JavaFX3DInstructionExecutor executor = new JavaFX3DInstructionExecutor(node.getValue().getLink().getLinkGraphics());
                 jointGroup.getChildren().add(executor.getResult());
 
                 jointGroup.getChildren().addAll(children);
