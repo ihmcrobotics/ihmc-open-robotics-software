@@ -161,7 +161,7 @@ public class PlanningTestTools
       return footstepPlan;
    }
 
-   public static Runnable createAnytimePlannerRunnable(final AnytimeFootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList)
+   public static void configureAnytimePlannerRunnable(final AnytimeFootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList)
    {
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
@@ -170,17 +170,6 @@ public class PlanningTestTools
       planner.setInitialStanceFoot(initialStanceFootPose, initialStanceSide);
       planner.setGoal(goal);
       planner.setPlanarRegions(planarRegionsList);
-
-      Runnable anytimePlannerRunnable = new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            planner.plan();
-         }
-      };
-
-      return anytimePlannerRunnable;
    }
 
    public static boolean isGoalWithinFeet(FramePose goalPose, FootstepPlan footstepPlan)
