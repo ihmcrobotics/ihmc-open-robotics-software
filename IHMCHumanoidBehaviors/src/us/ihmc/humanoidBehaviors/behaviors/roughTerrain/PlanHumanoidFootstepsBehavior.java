@@ -56,8 +56,9 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
    private final IntegerYoVariable planarRegionsListCount = new IntegerYoVariable(prefix + "PlanarRegionsListCount", registry);
    private final BooleanYoVariable foundPlan = new BooleanYoVariable(prefix + "FoundPlan", registry);
+   private final BooleanYoVariable requestedPlanarRegion = new BooleanYoVariable(prefix + "RequestedPlanarRegion", registry);
    private final DoubleYoVariable shorterGoalLength = new DoubleYoVariable(prefix + "ShorterGoalLength", registry);
-
+   
    private final EnumYoVariable<RobotSide> nextSideToSwing;
 
    private final PlanarRegionBipedalFootstepPlanner footstepPlanner;
@@ -99,13 +100,15 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       footstepPlannerInitialStepPose = new YoFramePose(prefix + "InitialStepPose", ReferenceFrame.getWorldFrame(), registry);
 
       behaviorCommunicationBridge.attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
+      
+      requestedPlanarRegion.set(false);
    }
 
    private PlanarRegionBipedalFootstepPlanner createFootstepPlanner()
    {
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
 
-      planner.setMaximumStepReach(0.55); //(0.4);
+      planner.setMaximumStepReach(0.65); //0.55); //(0.4);
       planner.setMaximumStepZ(0.25); //0.4); //0.25);
       
       // Atlas has ankle pitch range of motion limits, which hit when taking steps forward and down. Similar to a human.
@@ -118,12 +121,14 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       planner.setMinimumStepWidth(0.15);
       planner.setMinimumFootholdPercent(0.95);
 
-      planner.setWiggleInsideDelta(0.08);
+      planner.setWiggleInsideDelta(0.02); //0.08);
       planner.setMaximumXYWiggleDistance(1.0);
       planner.setMaximumYawWiggle(0.1);
 
-      double idealFootstepLength = 0.3; //0.4;
-      double idealFootstepWidth = 0.2; //0.25;
+      planner.setRejectIfCannotFullyWiggleInside(true);
+
+      double idealFootstepLength = 0.45; //0.3; //0.4;
+      double idealFootstepWidth = 0.26; //0.2; //0.25;
       planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = createDefaultFootPolygons();
@@ -176,26 +181,42 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       return footstepDataListMessage;
    }
 
+   private int failIndex = 0;
+   
    @Override
    public void doControl()
    {
-      requestPlanarRegionsList();
       if (plannerTimer.totalElapsed() < 0.5)
          return;
 
-      updatePlannerIfPlanarRegionsListIsAvailable();
+      if (!requestedPlanarRegion.getBooleanValue() || (plannerTimer.totalElapsed() > 5.0))
+      {
+         clearAndRequestPlanarRegionsList();
+         requestedPlanarRegion.set(true);
+      }
+
+      boolean planarRegionsListIsAvailable = updatePlannerIfPlanarRegionsListIsAvailable();
+      if (!planarRegionsListIsAvailable)
+      {
+         return;
+      }
 
       setGoalAndInitialStanceFootToBeClosestToGoal(goalPose);
 
       footstepPlanner.plan();
       plan = footstepPlanner.getPlan();
 
+      plannerTimer.reset();
+      requestedPlanarRegion.set(false);
+
       if (plan == null)
       {
-         sendTextToSpeechPacket("No Plan was found!");
-         plannerTimer.reset();
+         sendTextToSpeechPacket("No Plan was found! " + failIndex++);
+         this.nextSideToSwing.set(this.nextSideToSwing.getEnumValue().getOppositeSide());
          return;
       }
+
+      failIndex = 0;
 
       sendTextToSpeechPacket("Found plan!");
       foundPlan.set(true);
@@ -208,14 +229,16 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       sendPacketToUI(textToSpeechPacket);
    }
 
-   private void requestPlanarRegionsList()
+   private void clearAndRequestPlanarRegionsList()
    {
+      planarRegionsListQueue.getLatestPacket();
+
       RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = new RequestPlanarRegionsListMessage(RequestType.SINGLE_UPDATE);
       requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
       sendPacket(requestPlanarRegionsListMessage);
    }
 
-   private void updatePlannerIfPlanarRegionsListIsAvailable()
+   private boolean updatePlannerIfPlanarRegionsListIsAvailable()
    {
       if (planarRegionsListQueue.isNewPacketAvailable())
       {
@@ -224,15 +247,18 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
          PlanarRegionsListMessage planarRegionsListMessage = planarRegionsListQueue.getLatestPacket();
          PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
          footstepPlanner.setPlanarRegions(planarRegionsList);
+         return true;
       }
+
+      return false;
    }
 
    private void setGoalAndInitialStanceFootToBeClosestToGoal(FramePose goalPose)
    {
       //      sendPacketToUI(new UIPositionCheckerPacket(goalPose.getFramePointCopy().getPoint(), goalPose.getFrameOrientationCopy().getQuaternion()));
 
-      leftFootPose.setToZero(referenceFrames.getFootFrame(RobotSide.LEFT));
-      rightFootPose.setToZero(referenceFrames.getFootFrame(RobotSide.RIGHT));
+      leftFootPose.setToZero(referenceFrames.getSoleFrame(RobotSide.LEFT));
+      rightFootPose.setToZero(referenceFrames.getSoleFrame(RobotSide.RIGHT));
       leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -351,8 +377,8 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    private static ConvexPolygon2d createDefaultFootPolygon()
    {
       //TODO: Get this from the robot model itself.
-      double footLength = 0.2;
-      double footWidth = 0.1;
+      double footLength = 0.26;
+      double footWidth = 0.18;
 
       ConvexPolygon2d footPolygon = new ConvexPolygon2d();
       footPolygon.addVertex(footLength / 2.0, footWidth / 2.0);
