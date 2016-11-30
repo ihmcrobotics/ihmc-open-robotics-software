@@ -30,7 +30,7 @@ public class DRCNetworkModuleParameters
    private boolean useKinematicsToolbox = true;
    private boolean useFootstepPlanningToolbox = true;
    private boolean useKinematicsToolboxVisualizer = false;
-   private boolean useFootstepPlanningToolboxVisualizer = false;
+   private boolean useFootstepPlanningToolboxVisualizer = true;
    private boolean useTextToSpeechModule = false;
    private boolean useRobotEnvironmentAwarenessModule = false;
    private boolean useHeightQuadTreeToolbox = true;

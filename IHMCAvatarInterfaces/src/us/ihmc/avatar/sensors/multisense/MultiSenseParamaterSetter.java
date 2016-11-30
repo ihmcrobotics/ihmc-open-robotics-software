@@ -1,7 +1,10 @@
 package us.ihmc.avatar.sensors.multisense;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 import org.ros.exception.RemoteException;
 import org.ros.node.NodeConfiguration;
@@ -18,6 +21,7 @@ import dynamic_reconfigure.StrParameter;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseParameterPacket;
+import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -52,62 +56,83 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
      multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);    
    }
 
-   public void setupNativeROSCommunicator(double lidarSpindleVelocity)
+   public boolean setupNativeROSCommunicator(double lidarSpindleVelocity)
    {
       String rosPrefix = "/opt/ros";
       if (useRosHydro(rosPrefix))
       {
-         System.out.println("using hydro");
+         PrintTools.info(this, "Using ROS Hydro");
          String[] hydroSpindleSpeedShellString = {"sh", "-c",
                ". /opt/ros/hydro/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
                      + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-         shellOutSpindleSpeedCommand(hydroSpindleSpeedShellString);
+         return shellOutSpindleSpeedCommand(hydroSpindleSpeedShellString);
       }
       else if (useRosGroovy(rosPrefix))
       {
-         System.out.println("using groovy");
+         PrintTools.info(this, "Using ROS Groovy");
          String[] groovySpindleSpeedShellString = {"sh", "-c",
                ". /opt/ros/groovy/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
                + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-         shellOutSpindleSpeedCommand(groovySpindleSpeedShellString);
+         return shellOutSpindleSpeedCommand(groovySpindleSpeedShellString);
       }
       else if (useRosFuerte(rosPrefix))
       {
-         System.out.println("using fuerte");
+         PrintTools.info(this, "Using ROS Fuerte");
          String[] fuerteSpindleSpeedShellString = {"sh", "-c",
                ". /opt/ros/fuerte/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
                + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-         shellOutSpindleSpeedCommand(fuerteSpindleSpeedShellString);
+         return shellOutSpindleSpeedCommand(fuerteSpindleSpeedShellString);
       }
       else if (useRosIndigo(rosPrefix))
       {
-         System.out.println("using indigo");
+         PrintTools.info(this, "Using ROS Indigo");
          String[] indigoSpindleSpeedShellString = {"sh", "-c",
                ". /opt/ros/indigo/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
                + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-         shellOutSpindleSpeedCommand(indigoSpindleSpeedShellString);
+         return shellOutSpindleSpeedCommand(indigoSpindleSpeedShellString);
       }
+      
+      throw new RuntimeException();
    }
    
-   private void shellOutSpindleSpeedCommand(String[] shellCommandString)
+   private boolean shellOutSpindleSpeedCommand(String[] shellCommandString)
    {
       ProcessBuilder builder = new ProcessBuilder(shellCommandString);
       try
       {
-         Process p = builder.start();
-         System.out.println("Process started.");
-         new ProcessStreamGobbler("ROS Shellout", p.getErrorStream(), System.err).start();
-         new ProcessStreamGobbler("ROS Shellout", p.getInputStream(), System.out).start();
-         p.waitFor();
-         System.out.println("Process done.");
+         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+         PrintStream printStream = new PrintStream(byteArrayOutputStream);
+
+         Process process = builder.start();
+         PrintTools.info(this, "Spindle speed shellout process started");
+         new ProcessStreamGobbler("ROS spindle speed shellout err", process.getErrorStream(), System.err).start();
+         new ProcessStreamGobbler("ROS spindle speed shellout out", process.getInputStream(), printStream).start();
+         process.waitFor();
+         PrintTools.info(this, "Spindle speed shellout process finished");
+
+         String errorString = new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
+         System.out.println(errorString);
+
+         if (!errorString.contains("Unable to register"))
+         {
+            PrintTools.info("ROS appears to be running and spindle is started");
+            return true;
+         }
+         else
+         {
+            PrintTools.info("Unable to register to ROS master. Trying again...");
+            return false;
+         }
       }
       catch (IOException e)
       {
          e.printStackTrace();
+         return false;
       }
       catch (InterruptedException e)
       {
          e.printStackTrace();
+         return false;
       }
    }
 

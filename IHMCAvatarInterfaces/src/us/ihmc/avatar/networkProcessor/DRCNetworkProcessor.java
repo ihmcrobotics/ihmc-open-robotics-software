@@ -168,7 +168,7 @@ public class DRCNetworkProcessor
 
       RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      new FootstepPlanningToolboxModule(fullRobotModel, contactPointParameters, robotModel.getLogModelProvider(), params.isFootstepPlanningToolboxVisualizerEnabled());
+      new FootstepPlanningToolboxModule(fullRobotModel, contactPointParameters, null, params.isFootstepPlanningToolboxVisualizerEnabled());
 
       PacketCommunicator footstepPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, footstepPlanningToolboxCommunicator);
