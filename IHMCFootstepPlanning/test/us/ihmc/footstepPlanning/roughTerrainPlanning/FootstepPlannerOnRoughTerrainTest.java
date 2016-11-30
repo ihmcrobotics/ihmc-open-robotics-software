@@ -210,6 +210,41 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
    }
 
+   public void testPartialGaps()
+   {
+      testPartialGaps(true);
+   }
+
+   public void testPartialGaps(boolean assertPlannerReturnedResult)
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(0.3, 0.0, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(0.6, 1.0, 0.5);
+      generator.translate(0.55, 0.0, 0.0);
+      for (int i = 0; i < 10; i++)
+      {
+         generator.addCubeReferencedAtBottomMiddle(0.1, 1.0, 0.5);
+         generator.translate(0.3, 0.0, 0.0);
+      }
+      generator.addCubeReferencedAtBottomMiddle(0.1, 1.0, 0.5);
+      generator.translate(0.55, 0.0, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(0.6, 1.0, 0.5);
+
+      // define start and goal conditions
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      initialStanceFootPose.setPosition(0.3, 0.0, 0.0);
+      RobotSide initialStanceSide = RobotSide.LEFT;
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(4.4, 0.0, 0.5);
+
+      // run the test
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, assertPlannerReturnedResult);
+      if (visualize())
+         PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
+      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+   }
+
    private PlanarRegionsList generateRandomTerrain(Random random)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
