@@ -115,13 +115,7 @@ public class PlanThenSnapPlanner implements FootstepPlanner
             soleToRegion = soleFrameAfterWiggle.getTransformToDesiredFrame(regionFrame);
             footPolygonInRegion.setAndUpdate(footPolygons.get(footstep.getRobotSide()));
             footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
-            ConvexPolygon2d foothold = new ConvexPolygon2d();
-            for (int polygonIdx = 0; polygonIdx < regionToMoveTo.getNumberOfConvexPolygons(); polygonIdx++)
-            {
-               ConvexPolygon2d intersectionWith = footPolygonInRegion.intersectionWith(regionToMoveTo.getConvexPolygon(polygonIdx));
-               foothold.addVertices(intersectionWith);
-            }
-            foothold.update();
+            ConvexPolygon2d foothold = regionToMoveTo.getConvexHull().intersectionWith(footPolygonInRegion);
             soleToRegion.invert();
             foothold.applyTransformAndProjectToXYPlane(soleToRegion);
             footstep.setFoothold(foothold);
