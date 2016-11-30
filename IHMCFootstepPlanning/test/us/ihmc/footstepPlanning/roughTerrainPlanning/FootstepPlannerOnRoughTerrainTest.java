@@ -61,7 +61,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks);
 
       FramePose goalPose = new FramePose(worldFrame);
-      goalPose.setPosition(9.0, 0.7, 0.0);
+      goalPose.setPosition(9.0, 0.0, 0.0);
 
       FramePose initialStanceFootPose = new FramePose(worldFrame);
       initialStanceFootPose.setPosition(0.0, -0.7, 0.0);

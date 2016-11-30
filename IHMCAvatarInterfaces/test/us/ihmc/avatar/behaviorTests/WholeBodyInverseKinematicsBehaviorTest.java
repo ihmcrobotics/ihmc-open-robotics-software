@@ -77,7 +77,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
          toolboxCommunicator.closeConnection();
          toolboxCommunicator = null;
       }
-      ThreadTools.sleep(1000);
 
       GlobalTimer.clearTimers();
 

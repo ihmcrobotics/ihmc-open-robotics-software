@@ -20,6 +20,19 @@ public class PolygonWiggler
    private static final boolean coldStart = false;
 
    /**
+    * Returns a transform that will move the given polygon into the convex hull of a planar region.
+    *
+    * @param polygonToWiggleInRegionFrame
+    * @param regionToWiggleInto
+    * @param wiggleParameters
+    * @return
+    */
+   public static RigidBodyTransform wigglePolygonIntoConvexHullOfRegion(ConvexPolygon2d polygonToWiggleInRegionFrame, PlanarRegion regionToWiggleInto, WiggleParameters parameters)
+   {
+      return findWiggleTransform(polygonToWiggleInRegionFrame, regionToWiggleInto.getConvexHull(), parameters);
+   }
+
+   /**
     * Returns a transform that will move the given polygon into a planar region. Problematic if the planar region consists of
     * multiple sub convex polygons. The polygon to wiggle must have the same transform to world as the planar region.
     *

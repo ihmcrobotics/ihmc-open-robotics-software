@@ -27,6 +27,8 @@ public class TestYoVariableConnection
    private final IntegerYoVariable echoIn = new IntegerYoVariable("echoIn", registry);
    private final IntegerYoVariable echoOut = new IntegerYoVariable("echoOut", registry);
    
+   private final IntegerYoVariable timeout = new IntegerYoVariable("timeout", registry);
+   
    private final YoVariableServer server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("TestYoVariableConnection"), null, LogSettings.SIMULATION, 0.001);
    
    
@@ -34,10 +36,13 @@ public class TestYoVariableConnection
    
    public TestYoVariableConnection()
    {
+      server.setSendKeepAlive(true);
       server.setMainRegistry(registry, null, null);
       new ThreadTester(server).start();
       server.start();
       var4.set(5000);
+      
+      timeout.set(1);
       
       int i = 0;
       TestEnum[] values = { TestEnum.A, TestEnum.B, TestEnum.C, TestEnum.D };
@@ -57,7 +62,7 @@ public class TestYoVariableConnection
          
          timestamp += TimeTools.milliSecondsToNanoSeconds(1);
          server.update(timestamp);
-         ThreadTools.sleep(1);
+         ThreadTools.sleep(timeout.getIntegerValue());
       }
    }
    
