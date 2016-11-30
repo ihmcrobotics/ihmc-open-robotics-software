@@ -138,10 +138,4 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
 
         return mesh;
     }
-
-   @Override
-   protected void doPreScale(Vector3d scale)
-   {
-      outputScale = new Scale(scale.x, scale.y, scale.z);
-   }
 }

@@ -26,7 +26,6 @@ public abstract class Graphics3DInstructionExecutor
 
    protected void setUpGraphicsFromDefinition(Graphics3DObject graphics3DObject)
    {
-      doPreScale(graphics3DObject.getPreScale());
       ArrayList<Graphics3DPrimitiveInstruction> instructions = graphics3DObject.getGraphics3DInstructions();
       for (Graphics3DPrimitiveInstruction instruction : instructions)
       {
@@ -79,8 +78,6 @@ public abstract class Graphics3DInstructionExecutor
       }
 
    }
-
-   protected abstract void doPreScale(Vector3d scale);
    
    protected abstract void doAddMeshDataInstruction(Graphics3DAddMeshDataInstruction graphics3DAddMeshData);
 

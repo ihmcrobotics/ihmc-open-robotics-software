@@ -82,14 +82,13 @@ public class RobotDescriptionFromSDFLoader
 
       RobotDescription robotDescription = loadModelFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
       
-      // Ground Contact Points from joint name map
-      addGroundContactPoints(jointNameMap);
-
-      
       // Scale the robotDescription before adding points from the jointMap
-      robotDescription.scale(jointNameMap.getModelScale(), 3.0);
+      robotDescription.scale(jointNameMap.getModelScale(), jointNameMap.getMassScalePower());
       // Everything from here on will be done in "scaled robot coordinates"
       
+      
+      // Ground Contact Points from joint name map
+      addGroundContactPoints(jointNameMap);
 
       return robotDescription;
    }
@@ -111,8 +110,6 @@ public class RobotDescriptionFromSDFLoader
                count = counters.get(jointName);
 
             Vector3d gcOffset = jointContactPoint.getRight();
-            // Undo scaling from jointnamemap to rescale the whole model later on
-            gcOffset.scale(1.0/jointNameMap.getModelScale());
 
             GroundContactPointDescription groundContactPoint = new GroundContactPointDescription("gc_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset);
             ExternalForcePointDescription externalForcePoint = new ExternalForcePointDescription("ef_" + SDFConversionsHelper.sanitizeJointName(jointName) + "_" + count++, gcOffset);
@@ -250,13 +247,16 @@ public class RobotDescriptionFromSDFLoader
       scsLink.setMass(mass);
       scsLink.setMomentOfInertia(inertia);
 
-      if (SHOW_COM_REFERENCE_FRAMES)
+      if (link.getVisuals() != null)
       {
-         scsLink.addCoordinateSystemToCOM(0.1);
-      }
-      if (SHOW_INERTIA_ELLIPSOIDS)
-      {
-         scsLink.addEllipsoidFromMassProperties(YoAppearance.Orange());
+         if (SHOW_COM_REFERENCE_FRAMES)
+         {
+            scsLink.addCoordinateSystemToCOM(0.1);
+         }
+         if (SHOW_INERTIA_ELLIPSOIDS)
+         {
+            scsLink.addEllipsoidFromMassProperties(YoAppearance.Orange());
+         }
       }
 
       return scsLink;

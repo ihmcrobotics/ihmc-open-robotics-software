@@ -48,8 +48,6 @@ public class Graphics3DObject
    private static final int RESOLUTION = 25;
    private static final int CAPSULE_RESOLUTION = 24;
    
-   private Vector3d preScale = new Vector3d(1.0, 1.0, 1.0);
-
    private ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions;
    private ArrayList<SelectedListener> selectedListeners;
 
@@ -309,10 +307,23 @@ public class Graphics3DObject
     */
    public void preScale(Vector3d scaleFactors)
    {
-      preScale.setX(preScale.getX() * scaleFactors.getX());
-      preScale.setY(preScale.getY() * scaleFactors.getY());
-      preScale.setZ(preScale.getZ() * scaleFactors.getZ());
+      
+      
+      ArrayList<Graphics3DPrimitiveInstruction> newInstructions = new ArrayList<>();
+      newInstructions.add(new Graphics3DScaleInstruction(scaleFactors));
+      
+      for(int i = 0; i < graphics3DInstructions.size(); i++)
+      {
+         Graphics3DPrimitiveInstruction instruction = graphics3DInstructions.get(i);
+         newInstructions.add(instruction);
+         if(instruction instanceof Graphics3DIdentityInstruction)
+         {
+            newInstructions.add(new Graphics3DScaleInstruction(scaleFactors));
 
+         }
+      }
+      
+      graphics3DInstructions = newInstructions;
    }
 
    /**
@@ -1228,10 +1239,5 @@ public class Graphics3DObject
    public void setChangeable(boolean changeable)
    {
       this.changeable = changeable;
-   }
-
-   public Vector3d getPreScale()
-   {
-      return preScale;
    }
 }
