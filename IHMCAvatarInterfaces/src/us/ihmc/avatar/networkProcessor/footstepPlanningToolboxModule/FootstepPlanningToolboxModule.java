@@ -27,7 +27,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
          throws IOException
    {
       super(desiredFullRobotModel, modelProvider, startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
-      footstepPlanningToolboxController = new FootstepPlanningToolboxController(contactPointParameters, statusOutputManager, registry);
+      footstepPlanningToolboxController = new FootstepPlanningToolboxController(contactPointParameters, statusOutputManager, packetCommunicator, registry);
       packetCommunicator.attachListener(FootstepPlanningRequestPacket.class, footstepPlanningToolboxController.createRequestConsumer());
       startYoVariableServer();
    }
