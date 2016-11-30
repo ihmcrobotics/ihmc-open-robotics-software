@@ -87,6 +87,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    //   private FootstepPlan footstepPlan;
 
    protected BipedalFootstepPlannerNode startNode, goalNode;
+   protected FootstepPlan footstepPlan = null;
 
    protected BipedalFootstepPlannerListener listener;
 
@@ -98,6 +99,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       maximumYawWiggle.set(0.1);
       rejectIfCannotFullyWiggleInside.set(false);
       wiggleIntoConvexHullOfPlanarRegions.set(true);
+   }
+
+   public void setRejectIfCannotFullyWiggleInside(boolean rejectIfCannotFullyWiggleInside)
+   {
+      this.rejectIfCannotFullyWiggleInside.set(rejectIfCannotFullyWiggleInside);
    }
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
@@ -281,14 +287,19 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          return null;
       }
 
-      FootstepPlan result = new FootstepPlan(goalNode);
-      return result;
+      if (footstepPlan == null)
+      {
+         footstepPlan = new FootstepPlan(goalNode);
+      }
+
+      return footstepPlan;
    }
 
    @Override
    public FootstepPlanningResult plan()
    {
       goalNode = null;
+      footstepPlan = null;
 
       startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
@@ -329,7 +340,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             if ((nodeToExpand.getParentNode() != null) && (nodeToExpand.getParentNode().isAtGoal()))
             {
                goalNode = nodeToExpand;
-               notifyListenerSolutionWasFound(goalNode);
+
+               notifyListenerSolutionWasFound(getPlan());
                return FootstepPlanningResult.OPTIMAL_SOLUTION;
             }
          }
@@ -438,16 +450,16 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       RigidBodyTransform transformToParent = nodeToExpand.getTransformToParent();
       if (transformToParent != null)
       {
-         Point3d stepFromParent = new Point3d();
-         transformToParent.transform(stepFromParent);
+         Point3d stepFromParentInSoleFrame = new Point3d();
+         transformToParent.transform(stepFromParentInSoleFrame);
 
-         if (((robotSide == RobotSide.LEFT) && (stepFromParent.getY() < minimumStepWidth.getDoubleValue())) || ((robotSide == RobotSide.RIGHT) && (stepFromParent.getY() > -minimumStepWidth.getDoubleValue())))
+         if (((robotSide == RobotSide.LEFT) && (stepFromParentInSoleFrame.getY() < minimumStepWidth.getDoubleValue())) || ((robotSide == RobotSide.RIGHT) && (stepFromParentInSoleFrame.getY() > -minimumStepWidth.getDoubleValue())))
          {
             notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
             return false;
          }
 
-         Vector3d stepFromParentInWorld = new Vector3d(stepFromParent);
+         Vector3d stepFromParentInWorld = new Vector3d(stepFromParentInSoleFrame);
 
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
@@ -460,7 +472,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             return false;
          }
          
-         if ((stepFromParentInWorld.getX() > maximumStepXWhenForwardAndDown.getDoubleValue()) && (Math.abs(stepFromParentInWorld.getZ()) < -Math.abs(maximumStepZWhenForwardAndDown.getDoubleValue())))
+         if ((stepFromParentInSoleFrame.getX() > maximumStepXWhenForwardAndDown.getDoubleValue()) && (stepFromParentInWorld.getZ() < -Math.abs(maximumStepZWhenForwardAndDown.getDoubleValue())))
          {
             notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
             return false;
@@ -854,11 +866,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   protected void notifyListenerSolutionWasFound(BipedalFootstepPlannerNode goalNode)
+   protected void notifyListenerSolutionWasFound(FootstepPlan footstepPlan)
    {
       if (listener != null)
       {
-         listener.notifyListenerSolutionWasFound();
+         listener.notifyListenerSolutionWasFound(footstepPlan);
       }
    }
 

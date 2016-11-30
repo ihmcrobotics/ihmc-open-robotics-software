@@ -78,7 +78,8 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
    private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
 
-
+   private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
+   private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
 
    public FootStepPlannerToLocationBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames, FiducialDetectorBehaviorService fiducialDetectorBehaviorService, long fiducialToTrack)
    {
@@ -121,7 +122,9 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
       attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
       attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
-
+      
+      swingTime.set(1.0);
+      transferTime.set(0.3);
    }
 
    private void sendFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
@@ -271,8 +274,8 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
    private FootstepDataListMessage createFootstepDataListFromPlan(FootstepPlan plan, int maxNumberOfStepsToTake)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setSwingTime(0.5);
-      footstepDataListMessage.setTransferTime(0.1);
+      footstepDataListMessage.setSwingTime(swingTime.getDoubleValue());
+      footstepDataListMessage.setTransferTime(transferTime.getDoubleValue());
       int lastStepIndex = Math.min(maxNumberOfStepsToTake + 1, plan.getNumberOfSteps());
       for (int i = 1; i < lastStepIndex; i++)
       {
