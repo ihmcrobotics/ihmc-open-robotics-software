@@ -33,4 +33,9 @@ public class SimpleFootstep
    {
       this.soleFramePose.setIncludingFrame(soleFramePose);
    }
+
+   public boolean epsilonEquals(SimpleFootstep otherFootstep, double epsilon)
+   {
+      return this.robotSide.equals(otherFootstep.robotSide) && this.soleFramePose.epsilonEquals(otherFootstep.soleFramePose, epsilon);
+   }
 }

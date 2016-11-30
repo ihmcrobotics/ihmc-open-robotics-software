@@ -39,12 +39,12 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    {
       super.setPlanarRegions(planarRegionsList);
 
-      stack.clear();
       initialize();
    }
 
    private void initialize()
    {
+      stack.clear();
       startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       stack.push(startNode);
       closestNodeToGoal = null;
@@ -54,12 +54,12 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    @Override
    public void executingFootstep(SimpleFootstep footstep)
    {
-      stack.clear();
       FramePose newStartPose = new FramePose();
       footstep.getSoleFramePose(newStartPose);
       RobotSide newInitialSide = footstep.getRobotSide();
 
       super.setInitialStanceFoot(newStartPose, newInitialSide);
+      initialize();
    }
 
    @Override
