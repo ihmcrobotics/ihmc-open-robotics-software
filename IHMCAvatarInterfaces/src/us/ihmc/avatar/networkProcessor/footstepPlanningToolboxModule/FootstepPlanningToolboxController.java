@@ -73,6 +73,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
       plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(footPolygons));
       plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), footPolygons));
       activePlanner.set(Planners.PLANAR_REGION_BIPEDAL);
+
+      isDone.set(true);
    }
 
    private PlanarRegionBipedalFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2d> footPolygons)
@@ -109,13 +111,14 @@ public class FootstepPlanningToolboxController extends ToolboxController
       if (!requestedPlanarRegions.getBooleanValue())
          requestPlanarRegions();
 
-      if (latestPlanarRegionsReference.get() == null)
+      PlanarRegionsListMessage planarRegionsMessage = latestPlanarRegionsReference.getAndSet(null);
+      if (planarRegionsMessage == null)
          return;
 
       sendMessageToUI("Starting To Plan: " + plannerCount + ", " + activePlanner.getEnumValue().toString());
 
       FootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
-      PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(latestPlanarRegionsReference.getAndSet(null));
+      PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
       planner.setPlanarRegions(planarRegions);
 
       FootstepPlanningResult status = planner.plan();
