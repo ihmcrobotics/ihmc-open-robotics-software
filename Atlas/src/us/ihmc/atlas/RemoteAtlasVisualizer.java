@@ -13,6 +13,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 {
+   private static final int DEFAULT_ONE_IN_N_PACKETS_FOR_VIZ = 6;
    private static final AtlasSliderBoardType defaultSliderBoardType = AtlasSliderBoardType.WALK_CONTROLLER;
 
    public enum AtlasSliderBoardType {GAIN_CONTROLLER, JOINT_ANGLE_OFFSET, WALK_CONTROLLER}
@@ -67,7 +68,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 
       FlaggedOption oneInNPacketsFactor = new FlaggedOption("displayOneInNPackets").setLongFlag("display-one-in-n-packets").setShortFlag('p').setStringParser(JSAP.INTEGER_PARSER).setRequired(false);
       oneInNPacketsFactor.setHelp("Visualize one in ever N packets, where N is the argument passed in. Default value is 6 (displays one in every 6 packets)");
-      oneInNPacketsFactor.setDefault("6");
+      oneInNPacketsFactor.setDefault("" + DEFAULT_ONE_IN_N_PACKETS_FOR_VIZ);
 
       Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
 
@@ -83,7 +84,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
         DRCRobotModel.RobotTarget target = config.getBoolean(runningOnRealRobot.getID()) ? DRCRobotModel.RobotTarget.REAL_ROBOT : DRCRobotModel.RobotTarget.SCS;
         DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, false);
 
-        int oneInNPacketsValue = 6;
+        int oneInNPacketsValue = DEFAULT_ONE_IN_N_PACKETS_FOR_VIZ;
 
          if (config.contains("displayOneInNPackets"))
          {
