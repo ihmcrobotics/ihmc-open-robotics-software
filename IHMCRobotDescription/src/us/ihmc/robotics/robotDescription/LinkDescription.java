@@ -374,9 +374,6 @@ public class LinkDescription
       if(linkGraphics != null)
       {
          linkGraphics.preScale(factor);
-         addEllipsoidFromMassProperties(YoAppearance.AliceBlue());
-         
-         addCoordinateSystemToCOM(0.2);
       }
       if(collisionMesh != null)
       {
