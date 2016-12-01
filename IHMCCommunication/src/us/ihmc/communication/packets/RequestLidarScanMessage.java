@@ -1,6 +1,4 @@
-package us.ihmc.humanoidRobotics.communication.packets.sensing;
-
-import us.ihmc.communication.packets.TrackablePacket;
+package us.ihmc.communication.packets;
 
 public class RequestLidarScanMessage extends TrackablePacket<RequestLidarScanMessage>
 {

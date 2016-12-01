@@ -96,7 +96,7 @@ public class AtlasPrimitiveActions
       addPrimitive(setLidarParametersBehavior);
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
       addPrimitive(walkToLocationBehavior);
-      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior("atlas", wholeBodyControllerParameters, yoTime, outgoingCommunicationBridge);
+      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior("atlas", wholeBodyControllerParameters, yoTime, outgoingCommunicationBridge, fullRobotModel);
       addPrimitive(wholeBodyBehavior);
 
    }

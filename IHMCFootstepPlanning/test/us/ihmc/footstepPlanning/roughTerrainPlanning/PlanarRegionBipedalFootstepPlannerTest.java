@@ -5,7 +5,9 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -69,27 +71,31 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
+      BipedalFootstepPlannerParameters parameters = planner.getParameters();
 
-      planner.setMaximumStepReach(0.55); //0.45);
-      planner.setMaximumStepZ(0.25);
-      planner.setMaximumStepYaw(0.15);
-      planner.setMinimumStepWidth(0.15);
-      planner.setMinimumFootholdPercent(0.8);
+      parameters.setMaximumStepReach(0.55); //0.45);
+      parameters.setMaximumStepZ(0.25);
+      parameters.setMaximumStepXWhenForwardAndDown(0.25);
+      parameters.setMaximumStepZWhenForwardAndDown(0.25);
+      parameters.setMaximumStepYaw(0.15);
+      parameters.setMinimumStepWidth(0.15);
+      parameters.setMinimumFootholdPercent(0.8);
 
-      planner.setWiggleInsideDelta(0.08);
-      planner.setMaximumXYWiggleDistance(1.0);
-      planner.setMaximumYawWiggle(0.1);
+      parameters.setWiggleInsideDelta(0.05);
+      parameters.setMaximumXYWiggleDistance(1.0);
+      parameters.setMaximumYawWiggle(0.1);
 
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;
-      planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
+      parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       if (visualize)
       {
-         SCSPlanarRegionBipedalFootstepPlannerVisualizer visualizer = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
+         PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0,
+                                                                                                                                                       footPolygonsInSoleFrame);
          planner.setBipedalFootstepPlannerListener(visualizer);
          visualizer.getYoVariableRegistry().addChild(registry);
       }

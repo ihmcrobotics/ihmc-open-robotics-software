@@ -28,6 +28,7 @@ public class LogSessionDisplay extends JFrame
    private final ArrayList<LogSessionBroadcastClient> clients = new ArrayList<>();
 
    private static RobotIPToNameRemapHandler remapHandler;
+   private static LogSessionFilter[] filters;
 
    public LogSessionDisplay() throws IOException
    {
@@ -105,11 +106,12 @@ public class LogSessionDisplay extends JFrame
       return getAnnounceRequest(null);
    }
 
-   public static AnnounceRequest getAnnounceRequest(RobotIPToNameRemapHandler remapHandler)
+   public static AnnounceRequest getAnnounceRequest(RobotIPToNameRemapHandler remapHandler, LogSessionFilter... filters)
    {
       if(remapHandler != null)
       {
          LogSessionDisplay.remapHandler = remapHandler;
+         LogSessionDisplay.filters = filters;
       }
       try
       {
@@ -260,6 +262,16 @@ public class LogSessionDisplay extends JFrame
       @Override
       public void logSessionCameOnline(final AnnounceRequest description)
       {
+         if(filters != null)
+         {
+            for (LogSessionFilter filter : filters)
+            {
+               if(!filter.shouldAddToDisplay(description))
+               {
+                  return;
+               }
+            }
+         }
 
          final String name = description.getName();
          final long sessionId = description.getSessionID();
@@ -316,6 +328,11 @@ public class LogSessionDisplay extends JFrame
    public interface RobotIPToNameRemapHandler
    {
       String getRemap(String ipAddress);
+   }
+
+   public interface LogSessionFilter
+   {
+      boolean shouldAddToDisplay(AnnounceRequest description);
    }
 
    public static void main(String[] args)

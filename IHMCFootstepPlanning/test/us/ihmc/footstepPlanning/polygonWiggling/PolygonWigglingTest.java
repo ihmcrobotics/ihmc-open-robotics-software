@@ -713,6 +713,54 @@ public class PolygonWigglingTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testProjectionIntoPlanarRegionHull()
+   {
+      ArrayList<ConvexPolygon2d> planes = new ArrayList<>();
+      ConvexPolygon2d plane1 = new ConvexPolygon2d();
+      plane1.addVertex(0.0, 0.0);
+      plane1.addVertex(0.5, 0.0);
+      plane1.addVertex(0.0, 0.5);
+      plane1.addVertex(0.5, 0.5);
+      plane1.update();
+      planes.add(plane1);
+      ConvexPolygon2d plane2 = new ConvexPolygon2d();
+      plane2.addVertex(-0.6, 0.0);
+      plane2.addVertex(-0.1, 0.0);
+      plane2.addVertex(-0.6, 0.5);
+      plane2.addVertex(-0.1, 0.5);
+      plane2.update();
+      planes.add(plane2);
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      PlanarRegion region = new PlanarRegion(transformToWorld, planes);
+
+      ConvexPolygon2d initialFoot = PlanningTestTools.createDefaultFootPolygon();
+      RigidBodyTransform initialFootTransform = new RigidBodyTransform();
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(-30.0));
+      initialFootTransform.setTranslation(-0.05, 0.05, 0.0);
+      initialFoot.applyTransformAndProjectToXYPlane(initialFootTransform);
+
+      RigidBodyTransform wiggleTransfrom = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(initialFoot, region, new WiggleParameters());
+      assertFalse(wiggleTransfrom == null);
+
+      ConvexPolygon2d foot = new ConvexPolygon2d(initialFoot);
+      foot.applyTransformAndProjectToXYPlane(wiggleTransfrom);
+
+      if (visualize)
+      {
+         for (int i = 0; i < region.getNumberOfConvexPolygons(); i++)
+            addPolygonToArtifacts("Plane" + i, region.getConvexPolygon(i), Color.BLACK);
+         addPolygonToArtifacts("InitialFoot", initialFoot, Color.RED);
+         addPolygonToArtifacts("Foot", foot, Color.BLUE);
+         showPlotterAndSleep(artifacts);
+      }
+
+      ConvexPolygon2d hullOfRegion = new ConvexPolygon2d(plane1, plane2);
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, hullOfRegion));
+   }
+
    private void addPolygonToArtifacts(String name, ConvexPolygon2d polygon, Color color)
    {
       YoFrameConvexPolygon2d yoPlanePolygon = new YoFrameConvexPolygon2d(name + "Polygon", worldFrame, 10, registry);
