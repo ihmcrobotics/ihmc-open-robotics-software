@@ -34,6 +34,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
+   protected PlanarRegionPotentialNextStepCalculator planarRegionPotentialNextStepCalculator;
+   
    protected PlanarRegionsList planarRegionsList;
    protected SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
 
@@ -72,6 +74,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       parentRegistry.addChild(registry);
       parameters = new BipedalFootstepPlannerParameters(parentRegistry);
+      
+      planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parentRegistry, parameters);
    }
 
    public BipedalFootstepPlannerParameters getParameters()
@@ -82,6 +86,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
    {
       this.listener = listener;
+      planarRegionPotentialNextStepCalculator.setBipedalFootstepPlannerListener(listener);
    }
 
    public void setMaximumNumberOfNodesToExpand(int maximumNumberOfNodesToExpand)
@@ -92,6 +97,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
+      planarRegionPotentialNextStepCalculator.setFeetPolygons(footPolygonsInSoleFrame);
    }
 
    public SideDependentList<ConvexPolygon2d> getFootPolygonsInSoleFrame()
@@ -110,6 +116,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    @Override
    public void setGoal(FootstepPlannerGoal goal)
    {
+      planarRegionPotentialNextStepCalculator.setGoal(goal);
+ 
       footstepPlannerGoalType = goal.getFootstepPlannerGoalType();
 
       switch(footstepPlannerGoalType)
@@ -283,17 +291,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    protected boolean addGoalNodeIfGoalIsReachable(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform, Deque<BipedalFootstepPlannerNode> stack)
    {
-      BipedalFootstepPlannerNode goalNode = null;
-
-      if (footstepPlannerGoalType == FootstepPlannerGoalType.CLOSE_TO_XY_POSITION)
-      {
-         goalNode = findGoalNodeUsingCloseToXY(nodeToExpand, soleZUpTransform, stack);
-      }
-      else
-      {
-         goalNode = findGoalNodeUsingSolePositions(nodeToExpand, soleZUpTransform);
-      }
-
+      BipedalFootstepPlannerNode goalNode = this.planarRegionPotentialNextStepCalculator.computeGoalNodeIfGoalIsReachable(nodeToExpand, soleZUpTransform);
+      
       if (goalNode != null)
       {
          stack.push(goalNode);
@@ -301,48 +300,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
 
       return false;
-   }
-
-   private BipedalFootstepPlannerNode findGoalNodeUsingCloseToXY(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform, Deque<BipedalFootstepPlannerNode> stack)
-   {
-      return null;
-   }
-
-   private BipedalFootstepPlannerNode findGoalNodeUsingSolePositions(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform)
-   {
-      Point3d currentSolePosition = nodeToExpand.getSolePosition();
-
-      RobotSide currentSide = nodeToExpand.getRobotSide();
-      RobotSide nextSide = currentSide.getOppositeSide();
-
-      Point3d goalSolePosition = goalPositions.get(nextSide);
-
-      stepReach.set(goalSolePosition.distance(currentSolePosition));
-      if (stepReach.getDoubleValue() < parameters.getMaximumStepReach())
-      {
-         double currentSoleYaw = nodeToExpand.getSoleYaw();
-         double goalSoleYaw = goalYaws.get(nextSide);
-
-         double stepYaw = AngleTools.computeAngleDifferenceMinusPiToPi(goalSoleYaw, currentSoleYaw);
-
-         if (Math.abs(stepYaw) < parameters.getMaximumStepYaw())
-         {
-            Vector3d finishStep = new Vector3d();
-            finishStep.sub(goalSolePosition, currentSolePosition);
-
-            RigidBodyTransform inverseTransform = new RigidBodyTransform();
-            nodeToExpand.getSoleTransform(inverseTransform);
-            inverseTransform.invert();
-            inverseTransform.transform(finishStep);
-
-            BipedalFootstepPlannerNode goalNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, finishStep, stepYaw);
-            goalNode.setIsAtGoal();
-
-            return goalNode;
-         }
-      }
-
-      return null;
    }
 
    protected boolean checkIfDifferentFromGrandParent(BipedalFootstepPlannerNode nodeToExpand)
@@ -456,105 +413,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    protected void expandChildrenAndAddToQueue(Deque<BipedalFootstepPlannerNode> stack, RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand)
    {
-      ArrayList<BipedalFootstepPlannerNode> nodesToAdd = new ArrayList<>();
-
-      RobotSide currentSide = nodeToExpand.getRobotSide();
-      RobotSide nextSide = currentSide.getOppositeSide();
-
-      Point3d goalPosition = goalPositions.get(nextSide);
-      Point3d currentPosition = nodeToExpand.getSolePosition();
-      Vector3d currentToGoalVector = new Vector3d();
-      currentToGoalVector.sub(goalPosition, currentPosition);
-
-      double distance = currentToGoalVector.length();
-
-      Vector3d idealStepVector;
-
-
-      double idealFootstepLength = parameters.getIdealFootstepLength();
-      double idealFootstepWidth = parameters.getIdealFootstepWidth();
-      
-      if (distance > 2.0 * parameters.getMaximumStepReach())
-      {
-         idealStepVector = new Vector3d(idealFootstepLength, currentSide.negateIfLeftSide(idealFootstepWidth), 0.0);
-      }
-      else
-      {
-         idealStepVector = new Vector3d(currentToGoalVector);
-         RigidBodyTransform inverseTransform = new RigidBodyTransform(soleZUpTransform);
-         inverseTransform.invert();
-         inverseTransform.transform(idealStepVector);
-      }
-
-      if (idealStepVector.length() > parameters.getMaximumStepReach())
-      {
-         idealStepVector.scale(parameters.getMaximumStepReach() / idealStepVector.length());
-      }
-
-      double minimumStepWidth = parameters.getMinimumStepWidth();
-      
-      if ((nextSide == RobotSide.LEFT) && (idealStepVector.getY() < minimumStepWidth))
-      {
-         idealStepVector.setY(minimumStepWidth);
-      }
-      else if ((nextSide == RobotSide.RIGHT) && (idealStepVector.getY() > -minimumStepWidth))
-      {
-         idealStepVector.setY(-minimumStepWidth);
-      }
-
-      Point3d idealStepLocationInWorld = new Point3d(idealStepVector);
-      soleZUpTransform.transform(idealStepLocationInWorld);
-
-      Vector3d vectorToGoal = new Vector3d();
-      vectorToGoal.sub(goalPosition, idealStepLocationInWorld);
-
-      Vector3d currentRotationEulerInWorld = new Vector3d();
-      soleZUpTransform.getRotationEuler(currentRotationEulerInWorld);
-      double currentYaw = currentRotationEulerInWorld.getZ();
-
-      double idealYawInWorld;
-
-      if (distance > 2.0 * parameters.getMaximumStepReach())
-      {
-         idealYawInWorld = Math.atan2(vectorToGoal.getY(), vectorToGoal.getX());
-      }
-      else
-      {
-         idealYawInWorld = goalYaws.get(nextSide);
-      }
-
-      double idealStepYaw = AngleTools.computeAngleDifferenceMinusPiToPi(idealYawInWorld, currentYaw);
-      idealStepYaw = MathTools.clipToMinMax(idealStepYaw, parameters.getMaximumStepYaw());
-
-      BipedalFootstepPlannerNode childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, idealStepVector, idealStepYaw);
-      seeIfNodeIsAtGoal(childNode);
-      nodesToAdd.add(childNode);
-      
-      for (double xStep = idealFootstepLength/2.0; xStep < 1.6 * idealFootstepLength; xStep = xStep + idealFootstepLength / 4.0)
-      {
-         for (double yStep = idealFootstepWidth; yStep < 1.6 * idealFootstepWidth; yStep = yStep + idealFootstepWidth / 4.0)
-         {
-            //for (double thetaStep = -0.1; thetaStep < 0.1; thetaStep = thetaStep + 0.1 / 2.0)
-            {
-               double nextStepYaw = idealStepYaw;
-               Vector3d nextStepVector = new Vector3d(xStep, currentSide.negateIfLeftSide(yStep), 0.0);
-               childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector, nextStepYaw);
-
-               seeIfNodeIsAtGoal(childNode);
-               nodesToAdd.add(childNode);
-            }
-         }
-      }
-
-      // Add a side step.
-      double xStep = 0.0;
-      double yStep = parameters.getIdealFootstepWidth();
-      Vector3d nextStepVector = new Vector3d(xStep, currentSide.negateIfLeftSide(yStep), 0.0);
-      double nextStepYaw = idealStepYaw;
-      childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector, nextStepYaw);
-
-      seeIfNodeIsAtGoal(childNode);
-      nodesToAdd.add(childNode);
+      ArrayList<BipedalFootstepPlannerNode> nodesToAdd = planarRegionPotentialNextStepCalculator.computeChildrenNodes(soleZUpTransform, nodeToExpand);
 
       //      Collections.shuffle(nodesToAdd);
       Collections.reverse(nodesToAdd);
@@ -565,26 +424,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   private void seeIfNodeIsAtGoal(BipedalFootstepPlannerNode childNode)
-   {
-      if (footstepPlannerGoalType == FootstepPlannerGoalType.CLOSE_TO_XY_POSITION)
-      {
-         Point3d solePosition = childNode.getSolePosition();
-
-         double deltaX = solePosition.getX() - xyGoal.getX();
-         double deltaY = solePosition.getY() - xyGoal.getY();
-         double distanceSquared = deltaX * deltaX + deltaY * deltaY;
-         double distanceFromXYGoalSquared = distanceFromXYGoal * distanceFromXYGoal;
-
-//                  System.out.println("distanceSquared = " + distanceSquared);
-//                  System.out.println("distanceFromXYGoalSquared = " + distanceFromXYGoalSquared);
-         if (distanceSquared < distanceFromXYGoalSquared)
-         {
-//                     System.out.println("Setting at goal for child node!");
-            childNode.setIsAtGoal();
-         }
-      }
-   }
 
    protected BipedalFootstepPlannerNode createAndAddNextNodeGivenStep(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand, Vector3d stepVectorInSoleFrame, double stepYaw)
    {
