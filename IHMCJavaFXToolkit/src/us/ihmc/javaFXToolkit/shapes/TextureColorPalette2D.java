@@ -68,7 +68,7 @@ public class TextureColorPalette2D implements TextureColorPalette
       this.hueResolution = hueResolution;
       this.saturationResolution = -1;
       this.brightnessResolution = brightnessResolution;
-      
+
       this.hueConstant = Double.NaN;
       this.saturationConstant = saturationConstant;
       this.brightnessConstant = Double.NaN;
@@ -90,7 +90,7 @@ public class TextureColorPalette2D implements TextureColorPalette
       this.hueResolution = -1;
       this.saturationResolution = saturationResolution;
       this.brightnessResolution = brightnessResolution;
-      
+
       this.hueConstant = hueConstant;
       this.saturationConstant = Double.NaN;
       this.brightnessConstant = Double.NaN;
@@ -160,25 +160,7 @@ public class TextureColorPalette2D implements TextureColorPalette
    {
       float x = (float) (hueResolution != -1 ? color.getHue() / 360.0 : color.getSaturation());
       float y = (float) (brightnessResolution != -1 ? color.getBrightness() : color.getSaturation());
-      
-      return new float[] {x, y};
-   }
 
-   @Override
-   public float[] getTextureLocation(double red, double green, double blue)
-   {
-      return getTextureLocation((int) (255 * red), (int) (255 * green), (int) (255 * blue));
-   }
-
-   @Override
-   public float[] getTextureLocation(int red, int green, int blue)
-   {
-      float[] hsb = new float[3];
-      java.awt.Color.RGBtoHSB(red, green, blue, hsb);
-      
-      float x = hueResolution != -1 ? hsb[0] : hsb[1];
-      float y = brightnessResolution != -1 ? hsb[2] : hsb[1];
-      
       return new float[] {x, y};
    }
 
