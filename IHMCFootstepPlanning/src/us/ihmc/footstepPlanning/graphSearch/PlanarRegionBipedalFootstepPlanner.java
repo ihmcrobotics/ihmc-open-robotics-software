@@ -133,10 +133,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       goalNode = null;
       footstepPlan = null;
 
-      startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
-      Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
-      stack.push(startNode);
-
       planarRegionPotentialNextStepCalculator.setStartNode(startNode);
 
       numberOfNodesExpanded.set(0);
