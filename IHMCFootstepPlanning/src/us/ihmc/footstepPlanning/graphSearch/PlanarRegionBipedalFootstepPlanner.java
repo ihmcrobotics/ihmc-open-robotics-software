@@ -4,6 +4,8 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -21,7 +23,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
-   protected PlanarRegionPotentialNextStepCalculator planarRegionPotentialNextStepCalculator;
+   protected final PlanarRegionPotentialNextStepCalculator planarRegionPotentialNextStepCalculator;
 
    protected SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
 
@@ -121,14 +123,12 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
       stack.push(startNode);
 
+      planarRegionPotentialNextStepCalculator.setStartNode(startNode);
+
       numberOfNodesExpanded.set(0);
       while ((!stack.isEmpty()) && (numberOfNodesExpanded.getIntegerValue() < maximumNumberOfNodesToExpand.getIntegerValue()))
       {
          BipedalFootstepPlannerNode nodeToExpand = stack.pop();
-         boolean nodeIsAcceptableToExpand = planarRegionPotentialNextStepCalculator.checkNodeAcceptableToExpand(nodeToExpand);
-
-         if (!nodeIsAcceptableToExpand)
-            continue;
 
          numberOfNodesExpanded.increment();
          notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
@@ -150,7 +150,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       notifyListenerSolutionWasNotFound();
       return FootstepPlanningResult.NO_PATH_EXISTS;
    }
-
+   
    protected void expandChildrenAndAddNodes(Deque<BipedalFootstepPlannerNode> stack, BipedalFootstepPlannerNode nodeToExpand)
    {
       ArrayList<BipedalFootstepPlannerNode> nodesToAdd = planarRegionPotentialNextStepCalculator.computeChildrenNodes(nodeToExpand);
