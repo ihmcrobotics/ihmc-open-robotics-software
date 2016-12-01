@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
@@ -72,11 +73,13 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
 
       planner.setMaximumStepReach(0.55); //0.45);
       planner.setMaximumStepZ(0.25);
+      planner.setMaximumStepXWhenForwardAndDown(0.25);
+      planner.setMaximumStepZWhenForwardAndDown(0.25);
       planner.setMaximumStepYaw(0.15);
       planner.setMinimumStepWidth(0.15);
       planner.setMinimumFootholdPercent(0.8);
 
-      planner.setWiggleInsideDelta(0.08);
+      planner.setWiggleInsideDelta(0.05);
       planner.setMaximumXYWiggleDistance(1.0);
       planner.setMaximumYawWiggle(0.1);
 
@@ -89,7 +92,8 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
 
       if (visualize)
       {
-         SCSPlanarRegionBipedalFootstepPlannerVisualizer visualizer = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
+         PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0,
+                                                                                                                                                       footPolygonsInSoleFrame);
          planner.setBipedalFootstepPlannerListener(visualizer);
          visualizer.getYoVariableRegistry().addChild(registry);
       }

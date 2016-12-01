@@ -14,11 +14,11 @@ import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -28,7 +28,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -40,7 +42,8 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.util.time.YoTimer;
+import us.ihmc.robotics.time.YoTimer;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 {
@@ -57,7 +60,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
    private final EnumYoVariable<RobotSide> nextSideToSwing;
 
-   private final FootstepPlanner footstepPlanner;
+   private final PlanarRegionBipedalFootstepPlanner footstepPlanner;
    private FootstepPlan plan = null;
 
    private final YoFramePose footstepPlannerInitialStepPose;
@@ -98,12 +101,19 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       behaviorCommunicationBridge.attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
    }
 
-   private FootstepPlanner createFootstepPlanner()
+   private PlanarRegionBipedalFootstepPlanner createFootstepPlanner()
    {
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
 
       planner.setMaximumStepReach(0.55); //(0.4);
       planner.setMaximumStepZ(0.25); //0.4); //0.25);
+
+      // Atlas has ankle pitch range of motion limits, which hit when taking steps forward and down. Similar to a human.
+      // Whereas a human gets on its toes nicely to avoid the limits, this is challenging with a robot.
+      // So for now, have reall conservative forward and down limits on height.
+      planner.setMaximumStepXWhenForwardAndDown(0.2);
+      planner.setMaximumStepZWhenForwardAndDown(0.10);
+
       planner.setMaximumStepYaw(0.15); //0.25);
       planner.setMinimumStepWidth(0.15);
       planner.setMinimumFootholdPercent(0.95);
@@ -120,13 +130,32 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       planner.setMaximumNumberOfNodesToExpand(500);
-
-      //TODO: Can't have this here since it uses SCS I think. Problems with Gradle?
-//      SCSPlanarRegionBipedalFootstepPlannerVisualizer listener = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
-//      listener.setCropBufferWhenSolutionIsFound(false);
-//      planner.setBipedalFootstepPlannerListener(listener);
-
       return planner;
+   }
+
+   public void createAndAttachSCSListenerToPlanner()
+   {
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
+      PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithSimulationConstructionSet(0.01,
+                                                                                                                                                               footPolygonsInSoleFrame);
+
+
+      SimulationConstructionSet scs = (SimulationConstructionSet) listener.getTickAndUpdatable();
+//      scs.setCameraFix(-6.0, 0.0, 0.0);
+//      scs.setCameraPosition(-11.0, 0.0, 8.0);
+
+      footstepPlanner.setBipedalFootstepPlannerListener(listener);
+   }
+
+   public void createAndAttachYoVariableServerListenerToPlanner(LogModelProvider logModelProvider, FullRobotModel fullRobotModel)
+   {
+      SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = footstepPlanner.getFootPolygonsInSoleFrame();
+      PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01,
+                                                                                                                                                      fullRobotModel,
+                                                                                                                                                      logModelProvider,
+                                                                                                                                                      footPolygonsInSoleFrame);
+
+      footstepPlanner.setBipedalFootstepPlannerListener(listener);
    }
 
    public void setGoalPoseAndFirstSwingSide(FramePose goalPose, RobotSide swingSide)
@@ -295,7 +324,8 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
          tempFirstFootstepPose.getPosition(tempFootstepPosePosition);
          tempFirstFootstepPose.getOrientation(tempFirstFootstepPoseOrientation);
 
-         FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(tempFootstepPosePosition), new Quat4d(tempFirstFootstepPoseOrientation));
+         FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(tempFootstepPosePosition),
+                                                                            new Quat4d(tempFirstFootstepPoseOrientation));
          firstFootstepMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          footstepDataListMessage.add(firstFootstepMessage);

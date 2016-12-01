@@ -118,7 +118,7 @@ public class IHMCHumanoidBehaviorManager
       SideDependentList<WristForceSensorFilteredUpdatable> wristSensorUpdatables = null;
       if (sensorInfo.getWristForceSensorNames() != null && !sensorInfo.getWristForceSensorNames().containsValue(null))
       {
-         wristSensorUpdatables = new SideDependentList<WristForceSensorFilteredUpdatable>();
+         wristSensorUpdatables = new SideDependentList<>();
          for (RobotSide robotSide : RobotSide.values)
          {
             WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel, sensorInfo,
@@ -135,7 +135,7 @@ public class IHMCHumanoidBehaviorManager
       }
       else
       {
-         createAndRegisterBehaviors(dispatcher, fullRobotModel, wristSensorUpdatables, referenceFrames, yoTime, communicationBridge, yoGraphicsListRegistry,
+         createAndRegisterBehaviors(dispatcher, modelProvider, fullRobotModel, wristSensorUpdatables, referenceFrames, yoTime, communicationBridge, yoGraphicsListRegistry,
                capturePointUpdatable, wholeBodyControllerParameters);
       }
 
@@ -164,7 +164,8 @@ public class IHMCHumanoidBehaviorManager
     * @param wholeBodyControllerParameters
     * @param forceSensorDataHolder Holds the force sensor data
     */
-   private void createAndRegisterBehaviors(BehaviorDispatcher<HumanoidBehaviorType> dispatcher, FullHumanoidRobotModel fullRobotModel,
+   private void createAndRegisterBehaviors(BehaviorDispatcher<HumanoidBehaviorType> dispatcher,
+         LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
          SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          CommunicationBridge behaviorCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, CapturePointUpdatable capturePointUpdatable,
          WholeBodyControllerParameters wholeBodyControllerParameters)
@@ -206,7 +207,7 @@ public class IHMCHumanoidBehaviorManager
 
       dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateFiducialBehavior(behaviorCommunicationBridge, fiducialDetectorBehaviorService));
       dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50, new FollowFiducialBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService));
-      dispatcher.addBehavior(HumanoidBehaviorType.WAlK_OVER_TERRAIN, new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, fullRobotModel, referenceFrames,
+      dispatcher.addBehavior(HumanoidBehaviorType.WAlK_OVER_TERRAIN, new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider, fullRobotModel, referenceFrames,
                                                                                                              fiducialDetectorBehaviorService));
 
       if (objectDetectorBehaviorService != null)

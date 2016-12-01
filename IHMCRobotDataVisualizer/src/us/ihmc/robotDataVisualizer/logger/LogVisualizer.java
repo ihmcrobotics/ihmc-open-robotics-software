@@ -15,9 +15,10 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.plotting.Plotter;
@@ -33,6 +34,8 @@ import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
@@ -170,7 +173,8 @@ public class LogVisualizer
       scs.setPlaybackDesiredFrameRate(0.04);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
-      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, false);
+      scs.attachPlaybackListener(createYoGraphicsUpdater(yoGraphicsListRegistry));
       plotter = VisualizerUtils.createOverheadPlotter(scs, showOverheadView, yoGraphicsListRegistry);
       scs.getRootRegistry().addChild(parser.getRootRegistry());
       scs.setGroundVisible(false);
@@ -276,6 +280,44 @@ public class LogVisualizer
    {
       listener.setYoVariableRegistry(scs.getRootRegistry());
       robot.addLogPlaybackListener(listener);
+   }
+   
+   
+   private PlaybackListener createYoGraphicsUpdater(final YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      return new PlaybackListener()
+      {
+         @Override
+         public void indexChanged(int newIndex, double newTime)
+         {
+            updateYoGraphics(yoGraphicsListRegistry);
+         }
+
+         @Override
+         public void stop()
+         {
+         }
+
+         @Override
+         public void play(double realTimeRate)
+         {
+         }
+      };
+   }
+
+   private void updateYoGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      if (yoGraphicsListRegistry == null)
+         return;
+
+      List<YoGraphicsList> yoGraphicsLists = yoGraphicsListRegistry.getYoGraphicsLists();
+      for (YoGraphicsList yoGraphicsList : yoGraphicsLists)
+      {
+         ArrayList<YoGraphic> yoGraphics = yoGraphicsList.getYoGraphics();
+         for (YoGraphic yoGraphic : yoGraphics)
+            yoGraphic.update();
+      }
+      yoGraphicsListRegistry.update();
    }
 
    public static void main(String[] args) throws IOException

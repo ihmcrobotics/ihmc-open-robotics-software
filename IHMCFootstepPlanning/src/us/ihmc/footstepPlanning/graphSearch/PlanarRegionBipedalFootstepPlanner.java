@@ -53,6 +53,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    protected final DoubleYoVariable maximumStepReach = new DoubleYoVariable("maximumStepReach", registry);
+   protected final DoubleYoVariable stepReach = new DoubleYoVariable("stepReach", registry);
+
    protected final DoubleYoVariable minimumFootholdPercent = new DoubleYoVariable("minimumFootholdPercent", registry);
 
    protected final DoubleYoVariable idealFootstepLength = new DoubleYoVariable("idealFootstepLength", registry);
@@ -62,11 +64,15 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    protected final DoubleYoVariable maximumStepYaw = new DoubleYoVariable("maximumStepYaw", registry);
    protected final DoubleYoVariable minimumStepWidth = new DoubleYoVariable("minimumStepWidth", registry);
 
+   protected final DoubleYoVariable maximumStepXWhenForwardAndDown = new DoubleYoVariable("maximumStepXWhenForwardAndDown", registry);
+   protected final DoubleYoVariable maximumStepZWhenForwardAndDown = new DoubleYoVariable("maximumStepZWhenForwardAndDown", registry);
+
    protected final DoubleYoVariable wiggleInsideDelta = new DoubleYoVariable("wiggleInsideDelta", registry);
 
    protected final IntegerYoVariable numberOfNodesExpanded = new IntegerYoVariable("numberOfNodesExpanded", registry);
 
    protected final BooleanYoVariable rejectIfCannotFullyWiggleInside = new BooleanYoVariable("rejectIfCannotFullyWiggleInside", registry);
+   private final BooleanYoVariable wiggleIntoConvexHullOfPlanarRegions = new BooleanYoVariable("WiggleIntoConvexHullOfPlanarRegions", registry);
 
    protected final DoubleYoVariable maximumXYWiggleDistance = new DoubleYoVariable("maximumXYWiggleDistance", registry);
    protected final DoubleYoVariable maximumYawWiggle = new DoubleYoVariable("maximumYawWiggle", registry);
@@ -91,6 +97,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       maximumXYWiggleDistance.set(0.1);
       maximumYawWiggle.set(0.1);
       rejectIfCannotFullyWiggleInside.set(false);
+      wiggleIntoConvexHullOfPlanarRegions.set(true);
    }
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
@@ -111,6 +118,16 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    public void setMaximumStepZ(double maximumStepZ)
    {
       this.maximumStepZ.set(maximumStepZ);
+   }
+
+   public void setMaximumStepXWhenForwardAndDown(double maximumStepXWhenForwardAndDown)
+   {
+      this.maximumStepXWhenForwardAndDown.set(maximumStepXWhenForwardAndDown);
+   }
+
+   public void setMaximumStepZWhenForwardAndDown(double maximumStepZWhenForwardAndDown)
+   {
+      this.maximumStepZWhenForwardAndDown.set(maximumStepZWhenForwardAndDown);
    }
 
    public void setMaximumStepYaw(double maximumStepYaw)
@@ -154,6 +171,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
    }
 
+   public SideDependentList<ConvexPolygon2d> getFootPolygonsInSoleFrame()
+   {
+      return footPolygonsInSoleFrame;
+   }
+
    @Override
    public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide initialSide)
    {
@@ -167,8 +189,18 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       footstepPlannerGoalType = goal.getFootstepPlannerGoalType();
 
-      setGoalXYAndRadius(goal);
-      setGoalPositionsAndYaws(goal);
+      switch(footstepPlannerGoalType)
+      {
+      case CLOSE_TO_XY_POSITION:
+         setGoalXYAndRadius(goal);
+         setGoalPositionsAndYaws(goal);
+         break;
+      case POSE_BETWEEN_FEET:
+         setGoalPositionsAndYaws(goal);
+         break;
+      default:
+         throw new RuntimeException("Method for setting for from goal type " + footstepPlannerGoalType + " is not implemented");
+      }
    }
 
    private void setGoalXYAndRadius(FootstepPlannerGoal goal)
@@ -354,7 +386,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
       Point3d goalSolePosition = goalPositions.get(nextSide);
 
-      if (goalSolePosition.distance(currentSolePosition) < maximumStepReach.getDoubleValue())
+      stepReach.set(goalSolePosition.distance(currentSolePosition));
+      if (stepReach.getDoubleValue() < maximumStepReach.getDoubleValue())
       {
          double currentSoleYaw = nodeToExpand.getSoleYaw();
          double goalSoleYaw = goalYaws.get(nextSide);
@@ -426,8 +459,15 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
             return false;
          }
+         
+         if ((stepFromParentInWorld.getX() > maximumStepXWhenForwardAndDown.getDoubleValue()) && (Math.abs(stepFromParentInWorld.getZ()) < -Math.abs(maximumStepZWhenForwardAndDown.getDoubleValue())))
+         {
+            notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
+            return false;
+         }
 
-         if (stepFromParentInWorld.length() > maximumStepReach.getDoubleValue())
+         stepReach.set(stepFromParentInWorld.length());
+         if (stepReach.getDoubleValue() > maximumStepReach.getDoubleValue())
          {
             notifyListenerNodeForExpansionWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
             return false;
@@ -675,7 +715,12 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 //      System.out.println("polygonToWiggleInRegionFrame = \n" + polygonToWiggleInRegionFrame);
 //      System.out.println("planarRegionToPack = \n" + planarRegionToPack);
 
-      RigidBodyTransform wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoRegion(polygonToWiggleInRegionFrame, planarRegionToPack, parameters);
+      RigidBodyTransform wiggleTransformLocalToLocal = null;
+      if (wiggleIntoConvexHullOfPlanarRegions.getBooleanValue())
+         wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(polygonToWiggleInRegionFrame, planarRegionToPack, parameters);
+      else
+         wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoRegion(polygonToWiggleInRegionFrame, planarRegionToPack, parameters);
+
       if (wiggleTransformLocalToLocal == null)
       {
          notifyListenerNodeForExpansionWasRejected(nodeAfterSnap, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
@@ -848,5 +893,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       transform.setM12(zAxis.getY());
       transform.setM22(zAxis.getZ());
    }
+
 
 }

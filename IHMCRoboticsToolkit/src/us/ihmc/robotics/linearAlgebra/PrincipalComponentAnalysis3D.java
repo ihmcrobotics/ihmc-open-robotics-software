@@ -20,6 +20,8 @@ import org.ejml.ops.SingularOps;
  * <p>
  * These three axes are provided as unit vectors forming a direct coordinate system. Methods are provided to also obtain the variance and/or the standard variation along each of these axes.
  * </p>
+ * <p>
+ * The algorithm is inspired from <a href="https://en.wikipedia.org/wiki/Principal_component_analysis"> Principal Component Analysis</a>.
  *
  */
 public class PrincipalComponentAnalysis3D

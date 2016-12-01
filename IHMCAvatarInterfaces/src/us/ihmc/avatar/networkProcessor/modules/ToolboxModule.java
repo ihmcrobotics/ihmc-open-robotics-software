@@ -74,6 +74,7 @@ public abstract class ToolboxModule
    protected final AtomicBoolean receivedInput = new AtomicBoolean();
    private final LogModelProvider modelProvider;
    private final boolean startYoVariableServer;
+   private YoVariableServer yoVariableServer;
 
    public ToolboxModule(FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
          PacketDestination toolboxDestination, NetworkPorts toolboxPort) throws IOException
@@ -120,8 +121,16 @@ public abstract class ToolboxModule
          return;
 
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("WholeBodyIKScheduler");
-      final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.TOOLBOX, YO_VARIABLE_SERVER_DT);
+      yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.TOOLBOX, YO_VARIABLE_SERVER_DT);
       yoVariableServer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
+      startYoVariableServerOnAThread(yoVariableServer);
+
+      yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer), 0, UPDATE_PERIOD_MILLISECONDS,
+            TimeUnit.MILLISECONDS);
+   }
+
+   private void startYoVariableServerOnAThread(final YoVariableServer yoVariableServer)
+   {
       new Thread(new Runnable()
       {
          @Override
@@ -130,9 +139,6 @@ public abstract class ToolboxModule
             yoVariableServer.start();
          }
       }).start();
-
-      yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer), 0, UPDATE_PERIOD_MILLISECONDS,
-            TimeUnit.MILLISECONDS);
    }
 
    private Runnable createYoVariableServerRunnable(final YoVariableServer yoVariableServer)
@@ -254,6 +260,10 @@ public abstract class ToolboxModule
             PrintTools.error(this, "This toolbox is already running.");
          return;
       }
+      
+      if (DEBUG)
+         PrintTools.debug(this, "Waking up");
+
       createToolboxRunnable();
       toolboxTaskScheduled = executorService.scheduleAtFixedRate(toolboxRunnable, 0, UPDATE_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       reinitialize();
@@ -269,6 +279,10 @@ public abstract class ToolboxModule
 
    public void sleep()
    {
+
+      if (DEBUG)
+         PrintTools.debug(this, "Going to sleep");
+
       destroyToolboxRunnable();
       activeMessageSource.set(null);
 
@@ -286,9 +300,25 @@ public abstract class ToolboxModule
    public void destroy()
    {
       sleep();
-      yoVariableServerScheduled.cancel(true);
-      yoVariableServerScheduled = null;
+      
+      if (yoVariableServerScheduled != null)
+      {
+         yoVariableServerScheduled.cancel(true);
+         yoVariableServerScheduled = null;
+      }
       executorService.shutdownNow();
+      packetCommunicator.closeConnection();
+      packetCommunicator.close();
+
+      if (yoVariableServer != null)
+      {
+         yoVariableServer.close();
+         yoVariableServer = null;
+      }
+      controllerNetworkSubscriber.closeAndDispose();
+
+      if (DEBUG)
+         PrintTools.debug(this, "Destroyed");
    }
 
    private void createToolboxRunnable()

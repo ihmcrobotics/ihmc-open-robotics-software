@@ -129,6 +129,7 @@ public class GUICaptureStreamer
                header.setUid(0);
                header.setDataSize(dataLength);
                header.setTimestamp(System.nanoTime());
+               header.setType(LogDataHeader.VIDEO_PACKET);
                header.setCrc32(0);
                header.writeBuffer(0, sendBuffer);
                sendBuffer.position(LogDataHeader.length());
