@@ -2,14 +2,12 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
+import javax.vecmath.*;
 
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.random.RandomTools;
 
 public class PlanarRegion
 {
@@ -580,5 +578,25 @@ public class PlanarRegion
    public ConvexPolygon2d getConvexHull()
    {
       return convexHull;
+   }
+
+   public static PlanarRegion generatePlanarRegionFromRandomPolygonsWithRandomTransform(Random random, int numberOfRandomlyGeneratedPolygons, double maxAbsoluteXYForPolygons, int numberOfPossiblePointsForPolygons)
+   {
+      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
+
+      for(int i = 0; i < numberOfRandomlyGeneratedPolygons; i++)
+      {
+         ConvexPolygon2d randomPolygon = ConvexPolygon2d.generateRandomConvexPolygon2d(random, maxAbsoluteXYForPolygons, numberOfPossiblePointsForPolygons);
+         regionConvexPolygons.add(randomPolygon);
+      }
+
+      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+         convexPolygon.update();
+
+      Vector3d randomTranslation = RandomTools.generateRandomVector(random, 10.0);
+      Quat4d randomOrientation = RandomTools.generateRandomQuaternion(random, Math.toRadians(45.0));
+      RigidBodyTransform regionTransform = new RigidBodyTransform(randomOrientation, randomTranslation);
+
+      return new PlanarRegion(regionTransform, regionConvexPolygons);
    }
 }
