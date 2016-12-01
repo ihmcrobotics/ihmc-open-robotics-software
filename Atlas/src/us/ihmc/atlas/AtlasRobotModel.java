@@ -87,6 +87,7 @@ import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
+   private final static double MODEL_SCALE = 0.35;
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
 
    private final AtlasRobotVersion selectedVersion;
@@ -104,6 +105,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private final JaxbSDFLoader loader;
 
+   private final AtlasPhysicalProperties atlasPhysicalProperties;
    private final AtlasJointMap jointMap;
    private final AtlasSensorInformation sensorInformation;
    private final AtlasArmControllerParameters armControllerParameters;
@@ -122,8 +124,9 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
    {
+      atlasPhysicalProperties  = new AtlasPhysicalProperties(MODEL_SCALE);
       selectedVersion = atlasVersion;
-      jointMap = new AtlasJointMap(selectedVersion);
+      jointMap = new AtlasJointMap(selectedVersion, atlasPhysicalProperties);
       this.target = target;
 
       this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), this);
@@ -134,7 +137,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
 
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
-      capturePointPlannerParameters = new AtlasCapturePointPlannerParameters();
+      capturePointPlannerParameters = new AtlasCapturePointPlannerParameters(atlasPhysicalProperties);
       icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
       sensorInformation = new AtlasSensorInformation(target);
       armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot, jointMap);
@@ -187,7 +190,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public AtlasPhysicalProperties getPhysicalProperties()
    {
-      return new AtlasPhysicalProperties();
+      return atlasPhysicalProperties;
    }
 
    @Override
@@ -331,12 +334,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
    {
-      boolean useCollisionMeshes = false;
-      boolean enableTorqueVelocityLimits = false;
-      AtlasJointMap jointMap = getJointMap();
-      boolean enableJointDamping = getEnableJointDamping();
-
-      RobotDescription robotDescription = loader.createRobotDescription(jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+//      boolean useCollisionMeshes = false;
+//      boolean enableTorqueVelocityLimits = false;
+//      AtlasJointMap jointMap = getJointMap();
+//      boolean enableJointDamping = getEnableJointDamping();
+//
+//      RobotDescription robotDescription = loader.createRobotDescription(jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
       return new HumanoidFloatingRootJointRobot(robotDescription, jointMap);
    }

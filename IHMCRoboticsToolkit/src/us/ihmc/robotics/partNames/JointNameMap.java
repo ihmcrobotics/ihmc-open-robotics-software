@@ -26,6 +26,14 @@ public interface JointNameMap extends RobotSpecificJointNames
    {
       return 3.0;
    }
+   
+   /**
+    * @return list of joints that will not be inertia scaled for simulation stability
+    */
+   default String[] getHighInertiaForStableSimulationJoints()
+   {
+      return new String[0];
+   }
 
    JointRole getJointRole(String jointName);
 

@@ -6,9 +6,11 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParameters
 {
    private final boolean useTwoCMPsPerSupport;
-
-   public AtlasCapturePointPlannerParameters()
+   private final AtlasPhysicalProperties atlasPhysicalProperties;
+   
+   public AtlasCapturePointPlannerParameters(AtlasPhysicalProperties atlasPhysicalProperties)
    {
+      this.atlasPhysicalProperties = atlasPhysicalProperties;
       useTwoCMPsPerSupport = true;
    }
 
@@ -107,7 +109,7 @@ public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParam
    @Override
    public double getStepLengthThresholdForExitCMPOnToesWhenSteppingDown()
    {
-      return AtlasPhysicalProperties.footLengthForControl;
+      return atlasPhysicalProperties.getFootLengthForControl();
    }
 
    /** {@inheritDoc} */

@@ -3,6 +3,7 @@ package us.ihmc.SdfLoader;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -83,7 +84,7 @@ public class RobotDescriptionFromSDFLoader
       RobotDescription robotDescription = loadModelFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
 
       // Scale the robotDescription before adding points from the jointMap
-      robotDescription.scale(jointNameMap.getModelScale(), jointNameMap.getMassScalePower());
+      robotDescription.scale(jointNameMap.getModelScale(), jointNameMap.getMassScalePower(), Arrays.asList(jointNameMap.getHighInertiaForStableSimulationJoints()));
       // Everything from here on will be done in "scaled robot coordinates"
       
       

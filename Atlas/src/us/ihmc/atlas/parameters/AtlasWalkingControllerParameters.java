@@ -47,10 +47,16 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final double spinePitchLowerLimit = -0.1;    // -math.pi / 6.0;
    private final double spineRollLimit = Math.PI / 4.0;
 
-   private final double min_leg_length_before_collapsing_single_support = 0.53;    // corresponds to q_kny = 1.70 rad
-   private final double min_mechanical_leg_length = 0.420;    // corresponds to a q_kny that is close to knee limit
+   private final double min_leg_length_before_collapsing_single_support;// = 0.53;    // corresponds to q_kny = 1.70 rad
+   private final double min_mechanical_leg_length;// = 0.420;    // corresponds to a q_kny that is close to knee limit
 
+// USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
+   private final double minimumHeightAboveGround;// = 0.625;
+   private double       nominalHeightAboveGround;// = 0.705;
+   private final double maximumHeightAboveGround;// = 0.765 + 0.08;
+   
    private final AtlasJointMap jointMap;
+   private final double massScale;
 
    private ExplorationParameters explorationParameters = null;
 
@@ -63,7 +69,16 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       this.target = target;
       this.jointMap = jointMap;
+      this.massScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
+      
+      min_leg_length_before_collapsing_single_support = jointMap.getModelScale() * 0.53;
+      min_mechanical_leg_length = jointMap.getModelScale() * 0.420;
+      
+      minimumHeightAboveGround = jointMap.getModelScale() * ( 0.625 );        
+      nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 );        
+      maximumHeightAboveGround = jointMap.getModelScale() * ( 0.765 + 0.08 ); 
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
@@ -71,7 +86,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          double x = 0.20;
          double y = robotSide.negateIfRightSide(0.35);    // 0.30);
          double z = -0.40;
-         transform.setTranslation(new Vector3d(x, y, z));
+         Vector3d translation = new Vector3d(x, y, z);
+         translation.scale(jointMap.getModelScale());
+         transform.setTranslation(translation);
 
          Matrix3d rotation = new Matrix3d();
          double yaw = 0.0;    // robotSide.negateIfRightSide(-1.7);
@@ -89,10 +106,16 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       // TODO probably need to be tuned.
       boolean realRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
-      return realRobot ? 3.4 : 3.0; // 3.0 seems more appropriate.
+      return (realRobot ? 3.4 : 3.0) / Math.sqrt(jointMap.getModelScale()); // 3.0 seems more appropriate.
 //      return 3.0;
    }
 
+   @Override
+   public double getMinSwingHeightFromStanceFoot()
+   {
+      return 0.1 * jointMap.getModelScale();
+   }
+   
    @Override
    public double getTimeToGetPreparedForLocomotion()
    {
@@ -185,7 +208,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
-      return 0.05;
+      return jointMap.getModelScale() * 0.05;
    }
 
    @Override
@@ -220,10 +243,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return defaultChestOrientationControlJointNames;
    }
 
-// USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
-   private final double minimumHeightAboveGround = 0.625;
-   private double nominalHeightAboveGround = 0.705;
-   private final double maximumHeightAboveGround = 0.765 + 0.08;
+
 
 // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
 //   private final double minimumHeightAboveGround = 0.785;
@@ -262,7 +282,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double defaultOffsetHeightAboveAnkle()
    {
       double defaultOffset = target == DRCRobotModel.RobotTarget.REAL_ROBOT ? 0.035 : 0.0;
-      return defaultOffset;
+      return defaultOffset * jointMap.getModelScale();
    }
 
    public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
@@ -297,25 +317,25 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getFootForwardOffset()
    {
-      return AtlasPhysicalProperties.footForward;
+      return jointMap.getPhysicalProperties().getFootForward();
    }
 
    @Override
    public double getFootBackwardOffset()
    {
-      return AtlasPhysicalProperties.footBackForControl;
+      return jointMap.getPhysicalProperties().getFootBackForControl();
    }
 
    @Override
    public double getAnkleHeight()
    {
-      return AtlasPhysicalProperties.ankleHeight;
+      return jointMap.getPhysicalProperties().getAnkleHeight();
    }
 
    @Override
    public double getLegLength()
    {
-      return AtlasPhysicalProperties.shinLength + AtlasPhysicalProperties.thighLength;
+      return jointMap.getPhysicalProperties().getShinLength()  + jointMap.getPhysicalProperties().getThighLength();
    }
 
    @Override
@@ -333,31 +353,31 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getInPlaceWidth()
    {
-      return 0.25;
+      return 0.25 * jointMap.getModelScale();
    }
 
    @Override
    public double getDesiredStepForward()
    {
-      return 0.5;    // 0.35;
+      return 0.5 * jointMap.getModelScale();    // 0.35;
    }
 
    @Override
    public double getMaxStepLength()
    {
-      return 0.6;    // 0.5; //0.35;
+      return 0.6 * jointMap.getModelScale();    // 0.5; //0.35;
    }
 
    @Override
    public double getMinStepWidth()
    {
-      return 0.15;
+      return 0.15 * jointMap.getModelScale();
    }
 
    @Override
    public double getMaxStepWidth()
    {
-      return 0.6;    // 0.4;
+      return 0.6 * jointMap.getModelScale();    // 0.4;
    }
 
    @Override
@@ -369,25 +389,25 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getDefaultStepLength()
    {
-      return 0.6;
+      return 0.6 * jointMap.getModelScale();
    }
 
    @Override
    public double getMaxStepUp()
    {
-      return 0.25;
+      return 0.25 * jointMap.getModelScale();
    }
 
    @Override
    public double getMaxStepDown()
    {
-      return 0.2;
+      return 0.2 * jointMap.getModelScale();
    }
 
    @Override
    public double getMaxSwingHeightFromStanceFoot()
    {
-      return 0.30;
+      return 0.30 * jointMap.getModelScale();
    }
 
    @Override
@@ -716,12 +736,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getSwingHeightMaxForPushRecoveryTrajectory()
    {
-      return 0.12;
+      return 0.12 * jointMap.getModelScale();
    }
 
    public double getSwingMaxHeightForPushRecoveryTrajectory()
    {
-      return 0.15;
+      return 0.15 * jointMap.getModelScale();
    }
 
    @Override
@@ -734,7 +754,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getDefaultTransferTime()
    {
-      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 0.8 : 0.25;
+      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 0.8 : 3;
    }
 
    @Override
@@ -781,31 +801,31 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getFootWidth()
    {
-      return AtlasPhysicalProperties.footWidthForControl;
+      return jointMap.getPhysicalProperties().getFootWidthForControl();
    }
 
    @Override
    public double getToeWidth()
    {
-      return AtlasPhysicalProperties.toeWidthForControl;
+      return jointMap.getPhysicalProperties().getToeWidthForControl();
    }
 
    @Override
    public double getFootLength()
    {
-      return AtlasPhysicalProperties.footLengthForControl;
+      return jointMap.getPhysicalProperties().getFootLengthForControl();
    }
 
    @Override
    public double getActualFootWidth()
    {
-      return AtlasPhysicalProperties.actualFootWidth;
+      return jointMap.getPhysicalProperties().getActualFootWidth();
    }
 
    @Override
    public double getActualFootLength()
    {
-      return AtlasPhysicalProperties.actualFootLength;
+      return jointMap.getPhysicalProperties().getActualFootLength();
    }
 
    @Override
@@ -817,7 +837,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getFoot_start_toetaper_from_back()
    {
-      return AtlasPhysicalProperties.footStartToetaperFromBack;
+      return jointMap.getPhysicalProperties().getFootStartToetaperFromBack();
    }
 
    @Override
@@ -863,13 +883,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       switch (target)
       {
          case REAL_ROBOT :
-            return 80.0;
+            return massScale * 80.0;
 
          case GAZEBO :
-            return 50.0;
+            return massScale * 50.0;
 
          case SCS:
-            return 5.0;
+            return massScale * 5.0;
 
          default :
             throw new RuntimeException();
@@ -879,7 +899,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getSecondContactThresholdForceIgnoringCoP()
    {
-      return 220.0;
+      return massScale * 220.0;
    }
 
    @Override
@@ -910,7 +930,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getContactThresholdHeight()
    {
-      return 0.05;
+      return jointMap.getModelScale() * 0.05;
    }
 
    @Override
@@ -922,13 +942,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxICPErrorBeforeSingleSupportX()
    {
-      return 0.035;
+      return 0.035 * jointMap.getModelScale();
    }
 
    @Override
    public double getMaxICPErrorBeforeSingleSupportY()
    {
-      return 0.015;
+      return 0.015 * jointMap.getModelScale();
    }
 
    @Override
@@ -988,7 +1008,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getMaxAllowedDistanceCMPSupport()
    {
-      return 0.06;
+      return 0.06 * jointMap.getModelScale();
    }
 
    @Override
