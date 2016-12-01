@@ -53,7 +53,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    }
 
-   private final boolean setUpArms = false;
+   private final boolean setUpArms = true;
 
    private Vector3f doorOffsetPoint1 = new Vector3f(0.5f, 0.8f, 0f);
    private Vector3f doorOffsetPoint2 = new Vector3f(0.5f, 0.7f, 0f);
