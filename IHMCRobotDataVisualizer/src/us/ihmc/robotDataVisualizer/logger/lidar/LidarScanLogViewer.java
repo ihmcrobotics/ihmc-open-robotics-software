@@ -3,6 +3,7 @@ package us.ihmc.robotDataVisualizer.logger.lidar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point3f;
@@ -38,6 +39,7 @@ public class LidarScanLogViewer extends AnimationTimer
 
    private final AtomicBoolean enabled = new AtomicBoolean(false);
    private final AtomicBoolean clearScan = new AtomicBoolean(false);
+   private final AtomicInteger currentScanIndex = new AtomicInteger(0);
 
    private final AtomicReference<LidarScanMessage> newMessageToRender = new AtomicReference<>(null);
    private final AtomicReference<Affine> lastAffine = new AtomicReference<>();
@@ -65,7 +67,10 @@ public class LidarScanLogViewer extends AnimationTimer
       MeshView newScanMeshView = scanMeshToRender.getAndSet(null);
 
       if (clearScan.getAndSet(false))
+      {
          scans.getChildren().clear();
+         currentScanIndex.set(0);
+      }
 
       if (!enabled.get())
          return;
@@ -77,18 +82,15 @@ public class LidarScanLogViewer extends AnimationTimer
       {
          ObservableList<Node> children = scans.getChildren();
 
-         int currentScanIndex = children.size() % NUMBER_OF_SCANS;
-
-         if (children.size() <= currentScanIndex)
+         if (children.size() <= currentScanIndex.get())
             children.add(newScanMeshView);
          else
-            children.set(currentScanIndex, newScanMeshView);
+            children.set(currentScanIndex.get(), newScanMeshView);
 
-         for (int i = currentScanIndex + 1; i < currentScanIndex + children.size(); i++)
+         for (int i = currentScanIndex.get() + 1; i < currentScanIndex.get() + children.size(); i++)
             ((MeshView) children.get(i % children.size())).setMaterial(defaultMaterial);
 
-         currentScanIndex++;
-         currentScanIndex %= NUMBER_OF_SCANS;
+         currentScanIndex.set((currentScanIndex.get() + 1) % NUMBER_OF_SCANS);
       }
    }
 
