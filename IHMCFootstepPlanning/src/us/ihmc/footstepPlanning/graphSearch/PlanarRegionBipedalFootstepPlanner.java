@@ -237,23 +237,10 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          BipedalFootstepPlannerNode nodeToExpand = stack.pop();
          notifyListenerNodeSelectedForExpansion(nodeToExpand);
 
-         if (nodeToExpand != startNode) // StartNode is from an actual footstep, so we don't need to snap it...
-         {
-            // Make sure popped node is a good one and can be expanded...
-            boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(nodeToExpand);
-            if (!snapSucceded)
-               continue;
-
-            boolean goodFootstep = checkIfGoodFootstep(nodeToExpand);
-            if (!goodFootstep)
-               continue;
-
-            boolean differentFromParent = checkIfDifferentFromGrandParent(nodeToExpand);
-            {
-               if (!differentFromParent)
-                  continue;
-            }
-         }
+         
+         boolean nodeIsAcceptableToExpand = checkNodeAcceptableToExpand(nodeToExpand);
+         
+         if (!nodeIsAcceptableToExpand) continue;
 
          notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
          numberOfNodesExpanded.increment();
@@ -281,6 +268,30 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
       notifyListenerSolutionWasNotFound();
       return FootstepPlanningResult.NO_PATH_EXISTS;
+   }
+
+   private boolean checkNodeAcceptableToExpand(BipedalFootstepPlannerNode nodeToExpand)
+   {
+      if (nodeToExpand != startNode) // StartNode is from an actual footstep, so we don't need to snap it...
+      {
+         // Make sure popped node is a good one and can be expanded...
+         boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(nodeToExpand);
+         if (!snapSucceded)
+            return false;;
+
+         boolean goodFootstep = checkIfGoodFootstep(nodeToExpand);
+         if (!goodFootstep)
+            return false;
+
+         boolean differentFromParent = checkIfDifferentFromGrandParent(nodeToExpand);
+         {
+            if (!differentFromParent)
+               return false;
+         }
+         
+      }
+      
+      return true;
    }
 
    protected void expandChildrenAndAddNodes(Deque<BipedalFootstepPlannerNode> stack, RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand)
