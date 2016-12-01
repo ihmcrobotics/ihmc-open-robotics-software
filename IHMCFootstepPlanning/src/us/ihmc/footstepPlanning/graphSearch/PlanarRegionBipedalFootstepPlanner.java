@@ -50,7 +50,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       parentRegistry.addChild(registry);
       parameters = new BipedalFootstepPlannerParameters(parentRegistry);
 
-      planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parentRegistry, parameters);
+      BipedalStepScorer bipedalStepScorer = new OrderInWhichConstructedStepScorer();
+      planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, bipedalStepScorer, parentRegistry);
    }
 
    public BipedalFootstepPlannerParameters getParameters()
@@ -167,15 +168,12 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       notifyListenerSolutionWasNotFound();
       return FootstepPlanningResult.NO_PATH_EXISTS;
    }
-   
+
    protected void expandChildrenAndAddNodes(Deque<BipedalFootstepPlannerNode> stack, BipedalFootstepPlannerNode nodeToExpand)
    {
-      ArrayList<BipedalFootstepPlannerNode> nodesToAdd = planarRegionPotentialNextStepCalculator.computeChildrenNodes(nodeToExpand);
+      ArrayList<BipedalFootstepPlannerNode> nodesToAddFromWorstToBest = planarRegionPotentialNextStepCalculator.computeChildrenNodes(nodeToExpand);
 
-      //      Collections.shuffle(nodesToAdd);
-      Collections.reverse(nodesToAdd);
-
-      for (BipedalFootstepPlannerNode node : nodesToAdd)
+      for (BipedalFootstepPlannerNode node : nodesToAddFromWorstToBest)
       {
          stack.push(node);
       }

@@ -27,6 +27,8 @@ public class BipedalFootstepPlannerNode
 
    private boolean isAtGoal = false;
 
+   private double singleStepScore;
+
    public BipedalFootstepPlannerNode(RobotSide footstepSide, RigidBodyTransform soleTransform)
    {
       this.footstepSide = footstepSide;
@@ -36,6 +38,16 @@ public class BipedalFootstepPlannerNode
    public BipedalFootstepPlannerNode(BipedalFootstepPlannerNode nodeToCopy)
    {
       this(nodeToCopy.footstepSide, nodeToCopy.soleTransform);
+   }
+
+   public double getSingleStepScore()
+   {
+      return singleStepScore;
+   }
+
+   public void setSingleStepScore(double singleStepScore)
+   {
+      this.singleStepScore = singleStepScore;
    }
 
    public RigidBodyTransform getTransformToParent()
@@ -235,4 +247,5 @@ public class BipedalFootstepPlannerNode
    {
       return soleTransform.toString();
    }
+
 }
