@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
@@ -16,7 +15,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    private long commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    private long previousCommandId = Packet.INVALID_MESSAGE_ID;
-   private final DenseMatrix64F selectionMatrix = CommonOps.identity(3);
+   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(6,6);
 
    public SO3TrajectoryControllerCommand()
    {
@@ -29,8 +28,10 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
       executionMode = ExecutionMode.OVERRIDE;
       previousCommandId = Packet.INVALID_MESSAGE_ID;
-      selectionMatrix.reshape(3, 3);
-      CommonOps.setIdentity(selectionMatrix);
+      selectionMatrix.reshape(6, 6);
+      selectionMatrix.set(0, 0, 1.0);
+      selectionMatrix.set(1, 1, 1.0);
+      selectionMatrix.set(2, 2, 1.0);
    }
 
    @Override
@@ -40,8 +41,10 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
       executionMode = ExecutionMode.OVERRIDE;
       previousCommandId = Packet.INVALID_MESSAGE_ID;
-      selectionMatrix.reshape(3, 3);
-      CommonOps.setIdentity(selectionMatrix);
+      selectionMatrix.reshape(6, 6);
+      selectionMatrix.set(0, 0, 1.0);
+      selectionMatrix.set(1, 1, 1.0);
+      selectionMatrix.set(2, 2, 1.0);
    }
 
    @Override
@@ -105,6 +108,9 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    
    public DenseMatrix64F getSelectionMatrix()
    {
+      selectionMatrix.set(0, 0, 1.0);
+      selectionMatrix.set(1, 1, 1.0);
+      selectionMatrix.set(2, 2, 1.0);
       return selectionMatrix;
    }
 
