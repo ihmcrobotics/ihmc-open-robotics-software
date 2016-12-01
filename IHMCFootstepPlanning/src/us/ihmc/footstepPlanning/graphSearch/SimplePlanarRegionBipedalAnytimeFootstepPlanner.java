@@ -115,10 +115,6 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          }
          
          BipedalFootstepPlannerNode nodeToExpand = stack.pop();
-         boolean nodeIsAcceptableToExpand = planarRegionPotentialNextStepCalculator.checkNodeAcceptableToExpand(nodeToExpand);
-
-         if (!nodeIsAcceptableToExpand)
-            continue;
 
          boolean nearbyNodeAlreadyExists = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
          if (nearbyNodeAlreadyExists)

@@ -7,7 +7,6 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
@@ -47,7 +46,7 @@ public class PlanarRegionPotentialNextStepCalculator
    private SideDependentList<Double> goalYaws;
    private SideDependentList<RigidBodyTransform> goalFootstepPoses;
 
-   private BipedalFootstepPlannerNode startNode, goalNode;
+   private BipedalFootstepPlannerNode startNode;
 
    private BipedalFootstepPlannerListener listener;
 
@@ -77,6 +76,11 @@ public class PlanarRegionPotentialNextStepCalculator
       this.listener = listener;
    }
 
+   public void setStartNode(BipedalFootstepPlannerNode startNode)
+   {
+      this.startNode = startNode;
+   }
+
    public void setGoal(FootstepPlannerGoal goal)
    {
       footstepPlannerGoalType = goal.getFootstepPlannerGoalType();
@@ -97,8 +101,6 @@ public class PlanarRegionPotentialNextStepCalculator
 
    private void setGoalXYAndRadius(FootstepPlannerGoal goal)
    {
-      goalNode = null;
-
       xyGoal = new Point2d(goal.getXYGoal());
       distanceFromXYGoal = goal.getDistanceFromXYGoal();
    }
@@ -225,29 +227,6 @@ public class PlanarRegionPotentialNextStepCalculator
       return null;
    }
 
-   private BipedalFootstepPlannerNode createAndAddNextNodeGivenStep(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand,
-                                                                      Vector3d stepVectorInSoleFrame, double stepYaw)
-   {
-      Point3d stepLocationInWorld = new Point3d(stepVectorInSoleFrame);
-      soleZUpTransform.transform(stepLocationInWorld);
-
-      Vector3d stepRotationEulerInWorld = new Vector3d();
-      soleZUpTransform.getRotationEuler(stepRotationEulerInWorld);
-      //      stepRotationEulerInWorld.setZ((stepRotationEulerInWorld.getZ() + stepYaw + 2.0 * Math.PI) % Math.PI);
-      stepRotationEulerInWorld.setZ(stepRotationEulerInWorld.getZ() + stepYaw);
-
-      RigidBodyTransform nextTransform = new RigidBodyTransform();
-      nextTransform.setRotationEulerAndZeroTranslation(stepRotationEulerInWorld);
-      nextTransform.setTranslation(stepLocationInWorld.getX(), stepLocationInWorld.getY(), stepLocationInWorld.getZ());
-
-      RobotSide nextSide = nodeToExpand.getRobotSide().getOppositeSide();
-
-      BipedalFootstepPlannerNode childNode = new BipedalFootstepPlannerNode(nextSide, nextTransform);
-      childNode.setParentNode(nodeToExpand);
-      nodeToExpand.addChild(childNode);
-      return childNode;
-   }
-
    public ArrayList<BipedalFootstepPlannerNode> computeChildrenNodes(BipedalFootstepPlannerNode nodeToExpand)
    {
       ArrayList<BipedalFootstepPlannerNode> nodesToAdd = new ArrayList<>();
@@ -255,8 +234,8 @@ public class PlanarRegionPotentialNextStepCalculator
       BipedalFootstepPlannerNode goalNode = computeGoalNodeIfGoalIsReachable(nodeToExpand);
       if (goalNode != null)
       {
-         nodesToAdd.add(goalNode);
-         return nodesToAdd;
+         boolean acceptable = checkIfNodeAcceptableScoreAndAddToList(goalNode, nodesToAdd);
+         if (acceptable) return nodesToAdd;
       }
 
       RigidBodyTransform soleZUpTransform = computeSoleZUpTransform(nodeToExpand);
@@ -330,7 +309,8 @@ public class PlanarRegionPotentialNextStepCalculator
 
       BipedalFootstepPlannerNode childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, idealStepVector, idealStepYaw);
       seeIfNodeIsAtGoal(childNode);
-      nodesToAdd.add(childNode);
+
+      checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd);
 
       for (double xStep = idealFootstepLength / 2.0; xStep < 1.6 * idealFootstepLength; xStep = xStep + idealFootstepLength / 4.0)
       {
@@ -343,7 +323,8 @@ public class PlanarRegionPotentialNextStepCalculator
                childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector, nextStepYaw);
 
                seeIfNodeIsAtGoal(childNode);
-               nodesToAdd.add(childNode);
+               
+               checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd);
             }
          }
       }
@@ -356,8 +337,45 @@ public class PlanarRegionPotentialNextStepCalculator
       childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector, nextStepYaw);
 
       seeIfNodeIsAtGoal(childNode);
-      nodesToAdd.add(childNode);
+      checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd);
+
       return nodesToAdd;
+   }
+
+   
+   private boolean checkIfNodeAcceptableScoreAndAddToList(BipedalFootstepPlannerNode node, ArrayList<BipedalFootstepPlannerNode> nodesToAdd)
+   {
+      boolean acceptable = checkNodeAcceptableToExpand(node);
+      
+      if (acceptable)
+      {
+         nodesToAdd.add(node);
+      }
+      
+      return acceptable;
+   }
+   
+   private BipedalFootstepPlannerNode createAndAddNextNodeGivenStep(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand,
+                                                                      Vector3d stepVectorInSoleFrame, double stepYaw)
+   {
+      Point3d stepLocationInWorld = new Point3d(stepVectorInSoleFrame);
+      soleZUpTransform.transform(stepLocationInWorld);
+
+      Vector3d stepRotationEulerInWorld = new Vector3d();
+      soleZUpTransform.getRotationEuler(stepRotationEulerInWorld);
+      //      stepRotationEulerInWorld.setZ((stepRotationEulerInWorld.getZ() + stepYaw + 2.0 * Math.PI) % Math.PI);
+      stepRotationEulerInWorld.setZ(stepRotationEulerInWorld.getZ() + stepYaw);
+
+      RigidBodyTransform nextTransform = new RigidBodyTransform();
+      nextTransform.setRotationEulerAndZeroTranslation(stepRotationEulerInWorld);
+      nextTransform.setTranslation(stepLocationInWorld.getX(), stepLocationInWorld.getY(), stepLocationInWorld.getZ());
+
+      RobotSide nextSide = nodeToExpand.getRobotSide().getOppositeSide();
+
+      BipedalFootstepPlannerNode childNode = new BipedalFootstepPlannerNode(nextSide, nextTransform);
+      childNode.setParentNode(nodeToExpand);
+      nodeToExpand.addChild(childNode);
+      return childNode;
    }
 
    private void seeIfNodeIsAtGoal(BipedalFootstepPlannerNode childNode)
@@ -405,7 +423,7 @@ public class PlanarRegionPotentialNextStepCalculator
       transform.setM22(zAxis.getZ());
    }
 
-   public boolean checkNodeAcceptableToExpand(BipedalFootstepPlannerNode nodeToExpand)
+   private boolean checkNodeAcceptableToExpand(BipedalFootstepPlannerNode nodeToExpand)
    {
       notifyListenerNodeSelectedForExpansion(nodeToExpand);
 
@@ -720,22 +738,6 @@ public class PlanarRegionPotentialNextStepCalculator
       if (listener != null)
       {
          listener.nodeForExpansionWasRejected(nodeToExpand, reason);
-      }
-   }
-
-   private void notifyListenerSolutionWasFound(FootstepPlan footstepPlan)
-   {
-      if (listener != null)
-      {
-         listener.notifyListenerSolutionWasFound(footstepPlan);
-      }
-   }
-
-   private void notifyListenerSolutionWasNotFound()
-   {
-      if (listener != null)
-      {
-         listener.notifyListenerSolutionWasNotFound();
       }
    }
 
