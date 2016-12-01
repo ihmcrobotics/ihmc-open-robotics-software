@@ -1,6 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.vecmath.Point2d;
@@ -50,10 +52,13 @@ public class PlanarRegionPotentialNextStepCalculator
 
    private BipedalFootstepPlannerListener listener;
 
-   PlanarRegionPotentialNextStepCalculator(YoVariableRegistry parentRegistry, BipedalFootstepPlannerParameters parameters)
+   private final BipedalStepScorer bipedalStepScorer;
+         
+   PlanarRegionPotentialNextStepCalculator(BipedalFootstepPlannerParameters parameters, BipedalStepScorer bipedalStepScorer, YoVariableRegistry parentRegistry)
    {
       this.parameters = parameters;
       parentRegistry.addChild(registry);
+      this.bipedalStepScorer = bipedalStepScorer;
    }
 
    public void setFeetPolygons(SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame)
@@ -339,14 +344,42 @@ public class PlanarRegionPotentialNextStepCalculator
       seeIfNodeIsAtGoal(childNode);
       checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd);
 
+      
+      NodeScoreComparator nodeScoreComparator = new NodeScoreComparator();
+      
+      Collections.sort(nodesToAdd, nodeScoreComparator);
       return nodesToAdd;
    }
 
    
+   private final RigidBodyTransform leftSoleTransform = new RigidBodyTransform();
+   private final RigidBodyTransform rightSoleTransform = new RigidBodyTransform();
+   private final SideDependentList<RigidBodyTransform> soleTransforms = new SideDependentList<>(leftSoleTransform, rightSoleTransform);
+   
+   double spoofScore = 0.0;
    private boolean checkIfNodeAcceptableScoreAndAddToList(BipedalFootstepPlannerNode node, ArrayList<BipedalFootstepPlannerNode> nodesToAdd)
    {
       boolean acceptable = checkNodeAcceptableToExpand(node);
       
+      node.setSingleStepScore(spoofScore);
+      spoofScore = spoofScore - 1.0;
+      
+      BipedalFootstepPlannerNode parentNode = node.getParentNode();
+      
+      if (parentNode == null)
+      {
+         node.setSingleStepScore(0.0);
+      }
+      else
+      {         
+         node.getSoleTransform(soleTransforms.get(node.getRobotSide()));
+         parentNode.getSoleTransform(soleTransforms.get(parentNode.getRobotSide()));
+         
+         
+         double score = bipedalStepScorer.scoreStep(node.getRobotSide(), soleTransforms);
+         node.setSingleStepScore(score);
+      }
+
       if (acceptable)
       {
          nodesToAdd.add(node);
@@ -746,4 +779,16 @@ public class PlanarRegionPotentialNextStepCalculator
       return goalPositions.get(robotSide);
    }
 
+   private class NodeScoreComparator implements Comparator<BipedalFootstepPlannerNode>
+   {
+      @Override
+      public int compare(BipedalFootstepPlannerNode nodeOne, BipedalFootstepPlannerNode nodeTwo)
+      {
+         boolean greaterThan = nodeOne.getSingleStepScore() > nodeTwo.getSingleStepScore();
+         if (greaterThan) return 1;
+
+         else return -1;
+      }
+      
+   }
 }
