@@ -3,9 +3,9 @@ package us.ihmc.simulationconstructionset.util.ground;
 import org.junit.Test;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -21,13 +21,13 @@ import static org.junit.Assert.*;
  */
 public class PlanarRegionTerrainObjectTest
 {
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testHeightAt() throws Exception
    {
       Random random = new Random(1776L);
-      final double zLocationOfPlanarRegion = 2.0;
-      Point3d minPoint = new Point3d(-1.0, -1.0, zLocationOfPlanarRegion);
-      Point3d maxPoint = new Point3d(1.0, 1.0, zLocationOfPlanarRegion);
+      Point3d minPoint = new Point3d(-1.0, -1.0, 0.0);
+      Point3d maxPoint = new Point3d(1.0, 1.0, 0.0);
 
       List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
       ConvexPolygon2d polygon1 = new ConvexPolygon2d();
@@ -41,7 +41,7 @@ public class PlanarRegionTerrainObjectTest
       for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
          convexPolygon.update();
 
-      Vector3d randomTranslation = new Vector3d(0, 0, zLocationOfPlanarRegion);
+      Vector3d randomTranslation = RandomTools.generateRandomVector(random, 10.0);
       Quat4d randomOrientation = RandomTools.generateRandomQuaternion(random, Math.toRadians(45.0));
       RigidBodyTransform regionTransform = new RigidBodyTransform(randomOrientation, randomTranslation);
 
@@ -54,7 +54,7 @@ public class PlanarRegionTerrainObjectTest
       double yMin = planarRegion.getBoundingBox3dInWorld().getYMin();
       double yMax = planarRegion.getBoundingBox3dInWorld().getYMax();
 
-      for(int i = 0; i < 1000000; i ++)
+      for (int i = 0; i < 1000000; i++)
       {
          double randomXCoord = RandomTools.generateRandomDoubleInRange(random, xMin, xMax);
          double randomYCoord = RandomTools.generateRandomDoubleInRange(random, yMin, yMax);
@@ -62,7 +62,7 @@ public class PlanarRegionTerrainObjectTest
 
          double planarRegionZAtXY = planarRegion.getPlaneZGivenXY(randomXCoord, randomYCoord);
 
-         if(planarRegion.isPointInsideByProjectionOntoXYPlane(randomXCoord, randomYCoord))
+         if (planarRegion.isPointInsideByProjectionOntoXYPlane(randomXCoord, randomYCoord))
          {
 
             assertEquals(planarRegionZAtXY, terrainObject.heightAt(randomXCoord, randomYCoord, randomZCoord), 1e-8);
@@ -74,13 +74,13 @@ public class PlanarRegionTerrainObjectTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testHeightAndNormalAt() throws Exception
    {
       Random random = new Random(1776L);
-      final double zLocationOfPlanarRegion = 2.0;
-      Point3d minPoint = new Point3d(-1.0, -1.0, zLocationOfPlanarRegion);
-      Point3d maxPoint = new Point3d(1.0, 1.0, zLocationOfPlanarRegion);
+      Point3d minPoint = new Point3d(-1.0, -1.0, 0.0);
+      Point3d maxPoint = new Point3d(1.0, 1.0, 0.0);
 
       List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
       ConvexPolygon2d polygon1 = new ConvexPolygon2d();
@@ -94,7 +94,7 @@ public class PlanarRegionTerrainObjectTest
       for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
          convexPolygon.update();
 
-      Vector3d randomTranslation = new Vector3d(0, 0, zLocationOfPlanarRegion);
+      Vector3d randomTranslation = RandomTools.generateRandomVector(random, 10.0);
       Quat4d randomOrientation = RandomTools.generateRandomQuaternion(random, Math.toRadians(45.0));
       RigidBodyTransform regionTransform = new RigidBodyTransform(randomOrientation, randomTranslation);
 
@@ -111,7 +111,7 @@ public class PlanarRegionTerrainObjectTest
       double yMin = planarRegion.getBoundingBox3dInWorld().getYMin();
       double yMax = planarRegion.getBoundingBox3dInWorld().getYMax();
 
-      for(int i = 0; i < 1000000; i ++)
+      for (int i = 0; i < 1000000; i++)
       {
          double randomXCoord = RandomTools.generateRandomDoubleInRange(random, xMin, xMax);
          double randomYCoord = RandomTools.generateRandomDoubleInRange(random, yMin, yMax);
@@ -121,7 +121,7 @@ public class PlanarRegionTerrainObjectTest
          double heightAt = terrainObject.heightAndNormalAt(randomXCoord, randomYCoord, randomZCoord, terrainObjectNormalToPack);
          planarRegion.getNormal(planarRegionNormalToPack);
 
-         if(planarRegion.isPointInsideByProjectionOntoXYPlane(randomXCoord, randomYCoord))
+         if (planarRegion.isPointInsideByProjectionOntoXYPlane(randomXCoord, randomYCoord))
          {
             assertEquals(planarRegionZAtXY, heightAt, 1e-8);
             assertEquals(terrainObjectNormalToPack, planarRegionNormalToPack);
@@ -134,34 +134,62 @@ public class PlanarRegionTerrainObjectTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testGetBoundingBox() throws Exception
    {
-      fail();
+      Random random = new Random(1776L);
+      Point3d minPoint = new Point3d(-1.0, -1.0, 0.0);
+      Point3d maxPoint = new Point3d(1.0, 1.0, 0.0);
+
+      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2d polygon1 = new ConvexPolygon2d();
+      polygon1.addVertex(minPoint.x, minPoint.y);
+      polygon1.addVertex(maxPoint.x, minPoint.y);
+      polygon1.addVertex(minPoint.x, maxPoint.y);
+      polygon1.addVertex(maxPoint.x, maxPoint.y);
+
+      regionConvexPolygons.add(polygon1);
+
+      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+         convexPolygon.update();
+
+      Point3d planarRegionBoundingBoxMinPoint = new Point3d();
+      Point3d planarRegionBoundingBoxMaxPoint = new Point3d();
+      Point3d terrainObjectBoundingBoxMinPoint = new Point3d();
+      Point3d terrainObjectBoundingBoxMaxPoint = new Point3d();
+
+      for(int i = 0; i < 100000; i++)
+      {
+         Vector3d randomTranslation = RandomTools.generateRandomVector(random, 10.0);
+         Quat4d randomOrientation = RandomTools.generateRandomQuaternion(random, Math.toRadians(45.0));
+         RigidBodyTransform regionTransform = new RigidBodyTransform(randomOrientation, randomTranslation);
+
+         PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
+
+         PlanarRegionTerrainObject terrainObject = new PlanarRegionTerrainObject(planarRegion);
+
+         planarRegion.getBoundingBox3dInWorld().getMinPoint(planarRegionBoundingBoxMinPoint);
+         planarRegion.getBoundingBox3dInWorld().getMaxPoint(planarRegionBoundingBoxMaxPoint);
+         terrainObject.getBoundingBox().getMinPoint(terrainObjectBoundingBoxMinPoint);
+         terrainObject.getBoundingBox().getMaxPoint(terrainObjectBoundingBoxMaxPoint);
+
+         assertEquals(planarRegionBoundingBoxMinPoint, terrainObjectBoundingBoxMinPoint);
+         assertEquals(planarRegionBoundingBoxMaxPoint, terrainObjectBoundingBoxMaxPoint);
+      }
    }
 
-   @Test
-   public void testGetLinkGraphics() throws Exception
-   {
-      fail();
-   }
-
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testIsClose() throws Exception
    {
       fail();
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testCheckIfInside() throws Exception
    {
       fail();
    }
-
-   @Test
-   public void testGetHeightMapIfAvailable() throws Exception
-   {
-      fail();
-   }
-
 }
