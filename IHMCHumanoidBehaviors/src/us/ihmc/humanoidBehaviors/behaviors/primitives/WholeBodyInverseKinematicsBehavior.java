@@ -174,21 +174,23 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       yoDesiredChestOrientation.setAndMatchFrame(desiredChestOrientation);
    }
 
-   public void setChestControlYawPitchOnly()
+   public void setChestAngularControlOnly()
    {
-      boolean[] controlledOrientationAxes = new boolean[] {false, true, true};
-      setChestControlledAxes(controlledOrientationAxes);
+      boolean[] controlledPositionAxes = new boolean[] {false, false, false};
+      boolean[] controlledOrientationAxes = new boolean[] {true, true, true};
+      setChestControlledAxes(controlledPositionAxes, controlledOrientationAxes);
    }
 
-   public void setChestControlledAxes(boolean[] controlledOrientationAxes)
+   public void setChestControlledAxes(boolean[] controlledPositionAxes, boolean[] controlledOrientationAxes)
    {
       DenseMatrix64F selectionMatrix = chestSelectionMatrix;
-      selectionMatrix.reshape(3, 3);
+      selectionMatrix.reshape(6, 6);
       selectionMatrix.zero();
 
       for (int i = 0; i < 3; i++)
       {
          selectionMatrix.set(i, i, controlledOrientationAxes[i]);
+         selectionMatrix.set(i + 3, i, controlledPositionAxes[i]);
       }
    }
 
