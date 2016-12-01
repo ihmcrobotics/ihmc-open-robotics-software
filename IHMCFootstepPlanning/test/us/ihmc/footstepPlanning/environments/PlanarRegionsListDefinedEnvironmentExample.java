@@ -107,9 +107,14 @@ public class PlanarRegionsListDefinedEnvironmentExample
 
    public static void main(String[] args)
    {
+      double startX = 0.0;
+      double startY = 0.0;
+      double cinderBlockSize = 0.4;
+      int courseWidthXInNumberOfBlocks = 21;
+      int courseLengthYInNumberOfBlocks = 6;
 //      Random random = new Random(1776L);
 
-      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples.generateCinderBlockField();
+      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks);
 
       startEnvironmentVisualizationForPlanarRegionsList(planarRegionsList, true, true, true, true);
    }
