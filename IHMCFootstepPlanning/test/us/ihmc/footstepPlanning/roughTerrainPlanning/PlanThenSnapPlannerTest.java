@@ -40,6 +40,13 @@ public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
       super.testRandomEnvironment();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testPartialGaps()
+   {
+      super.testPartialGaps();
+   }
+
    @Override
    public FootstepPlanner getPlanner()
    {
