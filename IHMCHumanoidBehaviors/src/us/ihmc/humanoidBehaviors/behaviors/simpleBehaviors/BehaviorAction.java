@@ -75,8 +75,8 @@ public class BehaviorAction<E extends Enum<E>> extends FinishableState<E> implem
          {
 
             //TODO merge abstract behavior and behavior task, add transitioninto behavior here 
+            //TODO: Should the setBehaviorInput be called before initialize?
             behaviors.get(i).initialize();
-
             setBehaviorInput();
 
             CoactiveElement coactiveElement = behaviors.get(i).getCoactiveElement();
