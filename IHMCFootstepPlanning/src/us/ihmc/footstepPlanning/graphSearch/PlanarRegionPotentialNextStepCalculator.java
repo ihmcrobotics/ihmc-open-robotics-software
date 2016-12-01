@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayList;
-import java.util.Deque;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -137,10 +136,12 @@ public class PlanarRegionPotentialNextStepCalculator
       }
    }
 
-   public BipedalFootstepPlannerNode computeGoalNodeIfGoalIsReachable(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform)
+   public BipedalFootstepPlannerNode computeGoalNodeIfGoalIsReachable(BipedalFootstepPlannerNode nodeToExpand)
    {
       BipedalFootstepPlannerNode goalNode = null;
 
+      RigidBodyTransform soleZUpTransform = computeSoleZUpTransform(nodeToExpand);
+      
       if (footstepPlannerGoalType == FootstepPlannerGoalType.CLOSE_TO_XY_POSITION)
       {
          goalNode = findGoalNodeUsingCloseToXY(nodeToExpand, soleZUpTransform);
@@ -151,6 +152,14 @@ public class PlanarRegionPotentialNextStepCalculator
       }
       
       return goalNode;
+   }
+
+   private RigidBodyTransform computeSoleZUpTransform(BipedalFootstepPlannerNode nodeToExpand)
+   {
+      RigidBodyTransform soleZUpTransform = new RigidBodyTransform();
+      nodeToExpand.getSoleTransform(soleZUpTransform);
+      setTransformZUpPreserveX(soleZUpTransform);
+      return soleZUpTransform;
    }
    
    private BipedalFootstepPlannerNode findGoalNodeUsingCloseToXY(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform)
@@ -218,9 +227,11 @@ public class PlanarRegionPotentialNextStepCalculator
       return childNode;
    }
 
-   public ArrayList<BipedalFootstepPlannerNode> computeChildrenNodes(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand)
+   public ArrayList<BipedalFootstepPlannerNode> computeChildrenNodes(BipedalFootstepPlannerNode nodeToExpand)
    {
       ArrayList<BipedalFootstepPlannerNode> nodesToAdd = new ArrayList<>();
+
+      RigidBodyTransform soleZUpTransform = computeSoleZUpTransform(nodeToExpand);
 
       RobotSide currentSide = nodeToExpand.getRobotSide();
       RobotSide nextSide = currentSide.getOppositeSide();
@@ -237,6 +248,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
       double idealFootstepLength = parameters.getIdealFootstepLength();
       double idealFootstepWidth = parameters.getIdealFootstepWidth();
+      
       
       if (distance > 2.0 * parameters.getMaximumStepReach())
       {
@@ -343,4 +355,27 @@ public class PlanarRegionPotentialNextStepCalculator
       }
    }
 
+   private final Vector3d xAxis = new Vector3d();
+   private final Vector3d yAxis = new Vector3d();
+   private final Vector3d zAxis = new Vector3d();
+
+   private void setTransformZUpPreserveX(RigidBodyTransform transform)
+   {
+      xAxis.set(transform.getM00(), transform.getM10(), 0.0);
+      xAxis.normalize();
+      zAxis.set(0.0, 0.0, 1.0);
+      yAxis.cross(zAxis, xAxis);
+
+      transform.setM00(xAxis.getX());
+      transform.setM10(xAxis.getY());
+      transform.setM20(xAxis.getZ());
+
+      transform.setM01(yAxis.getX());
+      transform.setM11(yAxis.getY());
+      transform.setM21(yAxis.getZ());
+
+      transform.setM02(zAxis.getX());
+      transform.setM12(zAxis.getY());
+      transform.setM22(zAxis.getZ());
+   }
 }
