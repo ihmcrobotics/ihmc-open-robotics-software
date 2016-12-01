@@ -216,7 +216,7 @@ public class IHMCHumanoidBehaviorManager
          dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_VALVE,
                                 new FollowFiducialBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, objectDetectorBehaviorService));
          dispatcher.addBehavior(HumanoidBehaviorType.WALK_OVER_TERRAIN_TO_VALVE,
-                                new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, fullRobotModel,
+                                new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider, fullRobotModel,
                                                                         referenceFrames, objectDetectorBehaviorService));
       }
 
