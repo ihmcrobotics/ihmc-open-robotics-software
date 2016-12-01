@@ -12,4 +12,6 @@ public interface AnytimeFootstepPlanner extends FootstepPlanner
     * @param footstep step to be executed
     */
    public void executingFootstep(SimpleFootstep footstep);
+
+   public boolean isBestPlanYetOptimal();
 }
