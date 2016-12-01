@@ -11,6 +11,7 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavio
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
@@ -194,6 +195,10 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.TURN_VALVE,
             new TurnValveBehaviorStateMachine(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
 
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR,
+            new WalkThroughDoorBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
+
+      
       dispatcher.addBehavior(HumanoidBehaviorType.EXAMPLE_BEHAVIOR,
             new ExampleComplexBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
 

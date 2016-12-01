@@ -190,7 +190,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
       hasInputBeenSet.set(false);
-      footstepListBehavior.onBehaviorEntered();
+      footstepListBehavior.initialize();
 
       robotPose.setToZero(fullRobotModel.getRootJoint().getFrameAfterJoint());
       robotPose.changeFrame(worldFrame);
