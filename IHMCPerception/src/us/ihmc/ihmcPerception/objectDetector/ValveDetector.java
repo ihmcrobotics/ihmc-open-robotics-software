@@ -8,18 +8,15 @@ import org.bytedeco.javacpp.caffe.FloatBlob;
 import org.bytedeco.javacpp.caffe.FloatBlobVector;
 import org.bytedeco.javacpp.caffe.FloatNet;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static org.bytedeco.javacpp.caffe.TEST;
 
@@ -29,20 +26,26 @@ import static org.bytedeco.javacpp.caffe.TEST;
 public class ValveDetector {
     private static final Logger logger = Logger.getLogger(caffe.class.getSimpleName());
 
-    private static final String model = "/home/ubuntu/test-caffejava/src/main/resources/deploy.prototxt";
-    private static final String weights = "/home/ubuntu/test-caffejava/src/main/resources/snapshot_iter_1761.caffemodel";
-
     private final FloatNet caffe_net;
 
-    public ValveDetector()
+    public ValveDetector() throws Exception
     {
         int gpu = -1;
 
+        String model, weights;
+        try {
+            model = exportResource("/valvenet/deploy.prototxt");
+            weights = exportResource("/valvenet/snapshot_iter_1761.caffemodel");
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "Could not load weights: " + ex.getMessage());
+            throw ex;
+        }
+
         if (model.length() == 0) {
-            throw new RuntimeException("Need a model definition to score.");
+            throw new Exception("Need a model definition to score.");
         }
         if (weights.length() == 0) {
-            throw new RuntimeException("Need model weights to score.");
+            throw new Exception("Need model weights to score.");
         }
 
         // Set device id and mode
@@ -59,6 +62,41 @@ public class ValveDetector {
         caffe_net.CopyTrainedLayersFrom(weights);
     }
 
+    /**
+     * Export a resource embedded into a Jar file to the local file path.
+     *
+     * @param resourceName ie.: "/SmartLibrary.dll"
+     * @return The path to the exported resource
+     * @throws Exception if extraction fails
+     */
+    private static String exportResource(String resourceName) throws Exception {
+        InputStream stream = null;
+        OutputStream resStreamOut = null;
+        try {
+            stream = ValveDetector.class.getResourceAsStream(resourceName);//note that each / is a directory down in the "jar tree" been the jar the root of the tree
+            if(stream == null) {
+                throw new Exception("Cannot get resource \"" + resourceName + "\" from Jar file.");
+            }
+
+            int readBytes;
+            byte[] buffer = new byte[4096];
+            String tempDir = System.getProperty("java.io.tmpdir");
+            String resourceFileName = new File(resourceName).getName();
+            File outFile = new File(tempDir + "/" + resourceFileName);
+
+            resStreamOut = new FileOutputStream(outFile.getAbsoluteFile());
+            while ((readBytes = stream.read(buffer)) > 0) {
+                resStreamOut.write(buffer, 0, readBytes);
+            }
+            return outFile.getAbsolutePath();
+        } finally {
+            if (stream != null)
+                stream.close();
+            if (resStreamOut != null)
+                resStreamOut.close();
+        }
+    }
+
     public List<Rectangle> detect(BufferedImage image)
     {
         IntPointer shape = caffe_net.blob_by_name("data").shape();
@@ -72,9 +110,11 @@ public class ValveDetector {
         data.get(networkOutput);
 
         List<Component> components = findComponents(binarize(networkOutput, 64, 32));
-        return components.stream()
-                .map(component -> componentBound(component, processed, 64.0f / 1024, 32.0f / 512))
-                .collect(Collectors.toList());
+        List<Rectangle> result = new ArrayList<>();
+        for (Component component : components) {
+            result.add(componentBound(component, processed, 64.0f / 1024, 32.0f / 512));
+        }
+        return result;
     }
 
     private static BufferedImage imageFromArray(float[] data, int w, int h)
@@ -261,7 +301,7 @@ public class ValveDetector {
                 }
             }
 
-            if (currentComponent.size() < 16)
+            if (currentComponent.size() < 9)
                 continue;
 
             result.add(new Component(currentComponent));
@@ -285,18 +325,22 @@ public class ValveDetector {
 
     private static class Component
     {
-        final int minX, minY, maxX, maxY;
+        int minX, minY, maxX, maxY;
         final List<int[]> pixels;
 
         Component(List<int[]> pixels)
         {
+            minY = minX = Integer.MAX_VALUE;
+            maxY = maxX = Integer.MIN_VALUE;
+            for (int[] pixel : pixels) {
+                int x = pixel[0], y = pixel[1];
+                minX = Math.min(x, minX);
+                maxX = Math.max(x, maxX);
+                minY = Math.min(y, minY);
+                maxY = Math.max(y, maxY);
+            }
+
             this.pixels = pixels;
-            IntSummaryStatistics xstats = pixels.stream().mapToInt(px -> px[0]).summaryStatistics();
-            IntSummaryStatistics ystats = pixels.stream().mapToInt(px -> px[1]).summaryStatistics();
-            minX = xstats.getMin();
-            maxX = xstats.getMax();
-            minY = ystats.getMin();
-            maxY = ystats.getMax();
         }
     }
 }
