@@ -81,7 +81,7 @@ public class RobotDescriptionFromSDFLoader
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
 
       RobotDescription robotDescription = loadModelFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
-      
+
       // Scale the robotDescription before adding points from the jointMap
       robotDescription.scale(jointNameMap.getModelScale(), jointNameMap.getMassScalePower());
       // Everything from here on will be done in "scaled robot coordinates"
