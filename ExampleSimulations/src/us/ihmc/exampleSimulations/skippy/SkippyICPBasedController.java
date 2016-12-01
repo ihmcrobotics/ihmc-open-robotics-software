@@ -114,8 +114,10 @@ public class SkippyICPBasedController extends SimpleRobotController
       skippy.getHipJointAxis(hipAxis);
       double balanceTorque = computeJointTorque(desiredGroundReaction, hipToFootDirection, hipAxis);
       double setpointTorque = hipController.compute(skippy.getQ_hip().getDoubleValue(), hipSetpoint.getDoubleValue(), skippy.getQd_hip().getDoubleValue(), 0.0, dt);
-      skippy.getHipJoint().setTau(balanceTorque + setpointTorque);
-
+      double weightAboveTorque = torqueOnHipFromTheWeightAboveIt();
+      
+      skippy.getHipJoint().setTau(balanceTorque + setpointTorque + weightAboveTorque);
+      
       skippy.computeFootContactForce(groundReaction.getVector());
       updateViz();
    }
@@ -150,6 +152,39 @@ public class SkippyICPBasedController extends SimpleRobotController
       hipLocationViz.set(worldToHip);
       hipToFootDirectionViz.set(hipToFootDirection);
       hipAxisViz.set(hipAxis);
+   }
+   private double torqueOnHipFromTheWeightAboveIt(){
+      
+      FrameVector torqueFromHip = new FrameVector(worldFrame);
+      FrameVector torqueFromShoulder = new FrameVector(worldFrame);
+      FrameVector torqueFromHipAndShoulder = new FrameVector(worldFrame);
+      FrameVector shoulderWeightVector = new FrameVector(worldFrame);
+      FrameVector hipWeightVector = new FrameVector(worldFrame);
+      FrameVector worldToHipCom = new FrameVector(worldFrame);
+      FrameVector hipCom = new FrameVector(worldFrame);
+      FrameVector worldToShoulder = new FrameVector(worldFrame);
+      /*
+       * Shoulder
+       */
+      shoulderWeightVector.set(0.0,0.0,9.81*skippy.getShoulderMass());
+      skippy.getShoulderJoint().getTranslationToWorld(worldToShoulder .getVector());
+      worldToShoulder.sub(footLocation);
+      torqueFromShoulder.cross(worldToShoulder,shoulderWeightVector);
+      /*
+       * Hip
+       */
+      hipWeightVector.set(0.0,0.0,9.81*skippy.getHipMass());
+      hipCom.set(worldToShoulder);
+      hipCom.sub(worldToHipCom);
+      hipCom.scale(1.0/2.0);
+      skippy.getHipJoint().getTranslationToWorld(worldToHipCom.getVector());
+      worldToHipCom.add(hipCom);
+      worldToHipCom.sub(footLocation);
+      torqueFromHip.cross(worldToHipCom,hipWeightVector);
+      torqueFromHipAndShoulder.set(torqueFromShoulder);
+      torqueFromHipAndShoulder.add(torqueFromHip);
+      double torqueOnHipFromWeightAbove = torqueFromHipAndShoulder.dot(hipAxis);
+      return torqueOnHipFromWeightAbove;
    }
 
 }
