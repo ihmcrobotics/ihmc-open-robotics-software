@@ -79,7 +79,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    private final FramePose tempFirstFootstepPose = new FramePose();
    private final Point3d tempFootstepPosePosition = new Point3d();
    private final Quat4d tempFirstFootstepPoseOrientation = new Quat4d();
-   private final YoTimer plannerTimer;
+   private final YoTimer plannerTimer, timeSinceNewPlanarRegionsTimer;
    private boolean plannerThreadStarted = false;
 
    public PlanHumanoidFootstepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
@@ -100,6 +100,9 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       plannerTimer = new YoTimer(yoTime);
       plannerTimer.start();
 
+      timeSinceNewPlanarRegionsTimer = new YoTimer(yoTime);
+      timeSinceNewPlanarRegionsTimer.start();
+      
       footstepPlannerGoalPose = new YoFramePose(prefix + "FootstepGoalPose", ReferenceFrame.getWorldFrame(), registry);
       footstepPlannerInitialStepPose = new YoFramePose(prefix + "InitialStepPose", ReferenceFrame.getWorldFrame(), registry);
 
@@ -111,6 +114,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    private SimplePlanarRegionBipedalAnytimeFootstepPlanner createFootstepPlanner()
    {
       SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
+//      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
       BipedalFootstepPlannerParameters parameters = planner.getParameters();
       
       parameters.setMaximumStepReach(0.65); //0.55); //(0.4);
@@ -206,24 +210,37 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       if (plannerTimer.totalElapsed() < 0.5)
          return;
 
-      if (!requestedPlanarRegion.getBooleanValue() || (plannerTimer.totalElapsed() > 5.0))
+      if (!requestedPlanarRegion.getBooleanValue() || (timeSinceNewPlanarRegionsTimer.totalElapsed() > 5.0))
       {
          clearAndRequestPlanarRegionsList();
          requestedPlanarRegion.set(true);
       }
 
       boolean planarRegionsListIsAvailable = updatePlannerIfPlanarRegionsListIsAvailable();
-      if (!planarRegionsListIsAvailable)
+      if (planarRegionsListIsAvailable)
+      {
+         timeSinceNewPlanarRegionsTimer.reset();
+      }
+
+//      if (!planarRegionsListIsAvailable)
+//      {
+//         return;
+//      }
+
+      if (timeSinceNewPlanarRegionsTimer.totalElapsed() < 1.5)
       {
          return;
       }
 
-      plan = footstepPlanner.getBestPlanYet();
+      //TODO: Change to anytime functionality.
+//      plan = footstepPlanner.getBestPlanYet();
+      footstepPlanner.plan();
+      plan = footstepPlanner.getPlan();
 
       plannerTimer.reset();
       requestedPlanarRegion.set(false);
 
-      if (plan == null)
+      if (plan == null || (plan.getNumberOfSteps() == 0))
       {
          sendTextToSpeechPacket("No Plan was found! " + failIndex++);
          this.nextSideToSwing.set(this.nextSideToSwing.getEnumValue().getOppositeSide());
@@ -378,12 +395,13 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+      System.out.println("OnBehaviorEntered");
       plannerTimer.start();
       plannerTimer.reset();
 
       if(!plannerThreadStarted)
       {
-         new Thread(footstepPlanner).start();
+//         new Thread(footstepPlanner).start();
          plannerThreadStarted = true;
       }
    }
