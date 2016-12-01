@@ -14,11 +14,23 @@ public class CinderBlockFieldWithFiducialEnvironment implements CommonAvatarEnvi
 {
    private final CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D(getClass().getSimpleName());
 
-   public CinderBlockFieldWithFiducialEnvironment()
+   public enum FiducialType
+   {
+      FIDUCIAL_50,
+      VALVE
+   }
+
+   public CinderBlockFieldWithFiducialEnvironment(FiducialType fiducialType)
    {
       combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("FlatGround"));
       combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.setUpCinderBlockFieldActual("CinderBlockField", 0.0, 0.0, new ArrayList<List<FramePose>>()));
-      combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.addFiducial(new Vector3d(5.0, 0.0, 1.7), 0.0, Fiducial.FIDUCIAL50));
+
+      switch (fiducialType)
+      {
+      case FIDUCIAL_50: combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.addFiducial(new Vector3d(5.0, 0.0, 1.7), 0.0, Fiducial.FIDUCIAL50)); break;
+      case VALVE: combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.addValveTextureBox(new Vector3d(5.0, 0.0, 1.7), 0.0)); break;
+      }
+
    }
 
    @Override

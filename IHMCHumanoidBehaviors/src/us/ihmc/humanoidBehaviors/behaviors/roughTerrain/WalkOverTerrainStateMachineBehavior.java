@@ -72,7 +72,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions, LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
                                               HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
-      super("WalkOverTerrain", WalkOverTerrainState.class, yoTime, communicationBridge);
+      super(goalDetectorBehaviorService.getClass().getSimpleName(), "WalkOverTerrain_" + goalDetectorBehaviorService.getClass().getSimpleName(), WalkOverTerrainState.class, yoTime, communicationBridge);
 
       this.yoTime = yoTime;
 

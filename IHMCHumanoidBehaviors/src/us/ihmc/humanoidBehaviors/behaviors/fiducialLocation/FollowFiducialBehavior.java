@@ -82,7 +82,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
    public FollowFiducialBehavior(CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
                                  HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
-      super(FollowFiducialBehavior.class.getSimpleName(), behaviorCommunicationBridge);
+      super(FollowFiducialBehavior.class.getSimpleName() + "_" + goalDetectorBehaviorService.getClass().getSimpleName(), behaviorCommunicationBridge);
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
