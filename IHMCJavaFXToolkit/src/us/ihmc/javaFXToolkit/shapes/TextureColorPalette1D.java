@@ -67,7 +67,7 @@ public class TextureColorPalette1D implements TextureColorPalette
       this.hueResolution = -1;
       this.saturationResolution = saturationResolution;
       this.brightnessResolution = -1;
-      
+
       this.hueConstant = hueConstant;
       this.saturationConstant = brightnessConstant;
       this.brightnessConstant = Double.NaN;
@@ -88,7 +88,7 @@ public class TextureColorPalette1D implements TextureColorPalette
       this.hueResolution = -1;
       this.saturationResolution = -1;
       this.brightnessResolution = brightnessResolution;
-      
+
       this.hueConstant = hueConstant;
       this.saturationConstant = saturationConstant;
       this.brightnessConstant = Double.NaN;
@@ -105,7 +105,7 @@ public class TextureColorPalette1D implements TextureColorPalette
          resolution = saturationResolution;
       else
          resolution = brightnessResolution;
-            
+
       int width = resolution;
       int height = 50;
 
@@ -170,22 +170,10 @@ public class TextureColorPalette1D implements TextureColorPalette
          x = (float) color.getSaturation();
       else
          x = (float) color.getBrightness();
-         
+
       float y = 0.5f;
-      
+
       return new float[] {x, y};
-   }
-
-   @Override
-   public float[] getTextureLocation(double red, double green, double blue)
-   {
-      return getTextureLocation((int) (255 * red), (int) (255 * green), (int) (255 * blue));
-   }
-
-   @Override
-   public float[] getTextureLocation(int red, int green, int blue)
-   {
-      return getTextureLocation(Color.rgb(red, green, blue));
    }
 
    @Override

@@ -42,15 +42,21 @@ public class MultiSenseSensorManager
       this.packetCommunicator = sensorSuitePacketCommunicator;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
 
-      registerCameraReceivers();
-      if (setROSParameters)
+      boolean rosOnline = false;
+      
+      while (!rosOnline)
       {
-         multiSenseParameterSetter = new MultiSenseParamaterSetter(rosMainNode, sensorSuitePacketCommunicator);
-         setMultiseSenseParams(lidarParameters.getLidarSpindleVelocity());
-      }
-      else
-      {
-         multiSenseParameterSetter = null;
+         registerCameraReceivers();
+         if (setROSParameters)
+         {
+            multiSenseParameterSetter = new MultiSenseParamaterSetter(rosMainNode, sensorSuitePacketCommunicator);
+            rosOnline = setMultiseSenseParams(lidarParameters.getLidarSpindleVelocity());
+         }
+         else
+         {
+            multiSenseParameterSetter = null;
+            rosOnline = true;
+         }
       }
    }
 
@@ -63,13 +69,15 @@ public class MultiSenseSensorManager
       }
    }
 
-   private void setMultiseSenseParams(double lidarSpindleVelocity)
+   private boolean setMultiseSenseParams(double lidarSpindleVelocity)
    {
       if (multiSenseParameterSetter != null)
       {
          multiSenseParameterSetter.setMultisenseResolution(rosMainNode);
-         multiSenseParameterSetter.setupNativeROSCommunicator(lidarSpindleVelocity);
+         return multiSenseParameterSetter.setupNativeROSCommunicator(lidarSpindleVelocity);
       }
+      
+      return true;
    }
 
    private void registerCameraReceivers()

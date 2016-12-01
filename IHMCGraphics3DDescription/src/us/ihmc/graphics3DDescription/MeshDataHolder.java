@@ -17,6 +17,7 @@ public class MeshDataHolder
    private final TexCoord2f[] texturePoints;
    private final int[] triangleIndices;
    private final Vector3f[] vertexNormals;
+   private String name = "MeshDataHolder";
 
    public MeshDataHolder(Point3f[] vertices, TexCoord2f[] texturePoints, int[] triangleIndices, Vector3f[] vertexNormals)
    {
@@ -136,5 +137,14 @@ public class MeshDataHolder
       System.arraycopy(array1, 0, combined, 0, array1.length);
       System.arraycopy(array2, 0, combined, array1.length, array2.length);
       return combined;
+   }
+
+   public String getName()
+   {
+      return name;
+   }
+   public void setName(String name)
+   {
+//      this.name= name;
    }
 }

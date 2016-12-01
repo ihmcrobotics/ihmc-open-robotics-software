@@ -31,16 +31,18 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.taskExecutor.PipeLine;
 
 public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<WalkOverTerrainState>
 {
    public enum WalkOverTerrainState
    {
-      LOOK_FOR_GOAL, LOOK_DOWN_AT_TERRAIN, PLAN_TO_GOAL, CLEAR_PLANAR_REGIONS_LIST, TAKE_SOME_STEPS, REACHED_GOAL
+      LOOK_FOR_GOAL, SLEEP, LOOK_DOWN_AT_TERRAIN, PLAN_TO_GOAL, CLEAR_PLANAR_REGIONS_LIST, TAKE_SOME_STEPS, REACHED_GOAL
    }
 
    private final CommunicationBridge coactiveBehaviorsNetworkManager;
@@ -48,6 +50,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
    private final FindGoalBehavior lookForGoalBehavior;
+   private final SleepBehavior sleepBehavior;
    private final LookDownBehavior lookDownAtTerrainBehavior;
    private final PlanHumanoidFootstepsBehavior planHumanoidFootstepsBehavior;
    private final TakeSomeStepsBehavior takeSomeStepsBehavior;
@@ -60,6 +63,11 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    private final DoubleYoVariable yoTime;
 
    private final EnumYoVariable<RobotSide> nextSideToSwing;
+
+   private final String prefix = getClass().getSimpleName();
+   private final DoubleYoVariable swingTime = new DoubleYoVariable(prefix + "SwingTime", registry);
+   private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
+   private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
 
    public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions, LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
                                               HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
@@ -80,6 +88,8 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       this.lookForGoalBehavior = new FindGoalBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames,
                                                       goalDetectorBehaviorService);
 
+      sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
+      sleepBehavior.setSleepTime(10.0);
       lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
 
       planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
@@ -93,6 +103,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       userValidationExampleBehavior = new UserValidationExampleBehavior(communicationBridge);
 
       this.registry.addChild(lookForGoalBehavior.getYoVariableRegistry());
+      this.registry.addChild(sleepBehavior.getYoVariableRegistry());
       this.registry.addChild(lookDownAtTerrainBehavior.getYoVariableRegistry());
       this.registry.addChild(planHumanoidFootstepsBehavior.getYoVariableRegistry());
       this.registry.addChild(takeSomeStepsBehavior.getYoVariableRegistry());
@@ -100,6 +111,10 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       this.registry.addChild(userValidationExampleBehavior.getYoVariableRegistry());
 
       setupStateMachine();
+
+      swingTime.set(1.5);
+      transferTime.set(0.3);
+      maxNumberOfStepsToTake.set(3);
    }
 
    @Override
@@ -128,6 +143,16 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
          }
       };
 
+      BehaviorAction<WalkOverTerrainState> sleepAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.SLEEP, sleepBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Sleeping");
+            sendPacket(p1);
+         }
+      };
+
       BehaviorAction<WalkOverTerrainState> lookDownAtTerrainAction = new BehaviorAction<WalkOverTerrainState>(WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN, lookDownAtTerrainBehavior)
       {
          @Override
@@ -150,7 +175,10 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
             Tuple3d goalPosition = new Point3d();
             goalPose.getPosition(goalPosition);
 
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Plannning Footsteps to " + goalPosition);
+            String xString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getX(), 3);
+            String yString = FormattingTools.getFormattedToSignificantFigures(goalPosition.getY(), 3);
+
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Plannning Footsteps to (" + xString + ", " + yString + ")");
             sendPacket(p1);
 
             planHumanoidFootstepsBehavior.setGoalPoseAndFirstSwingSide(goalPose, nextSideToSwing.getEnumValue());
@@ -165,10 +193,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
             TextToSpeechPacket p1 = new TextToSpeechPacket("Taking some Footsteps");
             sendPacket(p1);
 
-            int maxNumberOfStepsToTake = 4;
-            double swingTime = 1.2;
-            double transferTime = 0.5;
-            FootstepDataListMessage footstepDataListMessageForPlan = planHumanoidFootstepsBehavior.getFootstepDataListMessageForPlan(maxNumberOfStepsToTake, swingTime, transferTime);
+            FootstepDataListMessage footstepDataListMessageForPlan = planHumanoidFootstepsBehavior.getFootstepDataListMessageForPlan(maxNumberOfStepsToTake.getIntegerValue(), swingTime.getDoubleValue(), transferTime.getDoubleValue());
             takeSomeStepsBehavior.setFootstepsToTake(footstepDataListMessageForPlan);
 
             nextSideToSwing.set(footstepDataListMessageForPlan.footstepDataList.get(footstepDataListMessageForPlan.footstepDataList.size() - 1).getRobotSide().getOppositeSide());
@@ -197,11 +222,13 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
       //setup the state machine
 
-      statemachine.addStateWithDoneTransition(lookForGoalAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN);
+      statemachine.addStateWithDoneTransition(lookForGoalAction, WalkOverTerrainState.SLEEP);
+      statemachine.addStateWithDoneTransition(sleepAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN);
       statemachine.addStateWithDoneTransition(lookDownAtTerrainAction, WalkOverTerrainState.PLAN_TO_GOAL);
       statemachine.addStateWithDoneTransition(planHumanoidFootstepsAction, WalkOverTerrainState.CLEAR_PLANAR_REGIONS_LIST);
       statemachine.addStateWithDoneTransition(clearPlanarRegionsListAction, WalkOverTerrainState.TAKE_SOME_STEPS);
-      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN); //REACHED_GOAL);
+      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.PLAN_TO_GOAL); //REACHED_GOAL);
+//      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN); //REACHED_GOAL);
       //      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_FOR_GOAL);
       statemachine.addStateWithDoneTransition(reachedGoalAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN);
    }
@@ -285,7 +312,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
                AxisAngle4d orientationAxisAngle = new AxisAngle4d(0.0, 1.0, 0.0, Math.PI / 2.0);
                Quat4d headOrientation = new Quat4d();
                headOrientation.set(orientationAxisAngle);
-               HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(1.0, headOrientation);
+               HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(2.0, headOrientation);
                atlasPrimitiveActions.headTrajectoryBehavior.setInput(headTrajectoryMessage);
             }
          };
@@ -323,7 +350,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
             @Override
             protected void setBehaviorInput()
             {
-               sleepBehavior.setSleepTime(1.5);
+               sleepBehavior.setSleepTime(4.0);
             }
          };
 
@@ -331,10 +358,10 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
          //         pipeLine.submitSingleTaskStage(lookUpAction);
          pipeLine.submitSingleTaskStage(enableLidarTask);
          pipeLine.submitSingleTaskStage(setLidarMediumRangeTask);
-         pipeLine.submitSingleTaskStage(clearLidarTask);
+//         pipeLine.submitSingleTaskStage(clearLidarTask);
 //         pipeLine.submitSingleTaskStage(clearPlanarRegionsListTask);
          pipeLine.submitSingleTaskStage(lookDownAction);
-         pipeLine.submitSingleTaskStage(sleepTask);
+//         pipeLine.submitSingleTaskStage(sleepTask);
       }
 
       @Override
