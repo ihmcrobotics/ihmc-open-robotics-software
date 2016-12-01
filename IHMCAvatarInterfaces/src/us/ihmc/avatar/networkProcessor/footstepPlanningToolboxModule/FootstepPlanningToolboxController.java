@@ -21,6 +21,7 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
@@ -83,24 +84,25 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private PlanarRegionBipedalFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2d> footPolygons)
    {
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
+      BipedalFootstepPlannerParameters parameters = planner.getParameters();
 
-      planner.setMaximumStepReach(0.55);
-      planner.setMaximumStepZ(0.25);
+      parameters.setMaximumStepReach(0.55);
+      parameters.setMaximumStepZ(0.25);
 
-      planner.setMaximumStepXWhenForwardAndDown(0.2);
-      planner.setMaximumStepZWhenForwardAndDown(0.10);
+      parameters.setMaximumStepXWhenForwardAndDown(0.2);
+      parameters.setMaximumStepZWhenForwardAndDown(0.10);
 
-      planner.setMaximumStepYaw(0.15);
-      planner.setMinimumStepWidth(0.15);
-      planner.setMinimumFootholdPercent(0.95);
+      parameters.setMaximumStepYaw(0.15);
+      parameters.setMinimumStepWidth(0.15);
+      parameters.setMinimumFootholdPercent(0.95);
 
-      planner.setWiggleInsideDelta(0.08);
-      planner.setMaximumXYWiggleDistance(1.0);
-      planner.setMaximumYawWiggle(0.1);
+      parameters.setWiggleInsideDelta(0.08);
+      parameters.setMaximumXYWiggleDistance(1.0);
+      parameters.setMaximumYawWiggle(0.1);
 
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;
-      planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
+      parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
       planner.setFeetPolygons(footPolygons);
 
