@@ -203,7 +203,7 @@ public class JointDescription implements RobotDescriptionNode
    }
    
    
-   public static void scaleChildrenJoint(ArrayList<JointDescription> childrenJoints, double factor, double massScalePower)
+   public static void scaleChildrenJoint(ArrayList<JointDescription> childrenJoints, double factor, double massScalePower, List<String>  ignoreInertiaScaleJointList)
    {
       Vector3d offsetFromParentJoint = new Vector3d();
       for(int i = 0; i < childrenJoints.size(); i++)
@@ -214,20 +214,25 @@ public class JointDescription implements RobotDescriptionNode
          offsetFromParentJoint.scale(factor);
          description.setOffsetFromParentJoint(offsetFromParentJoint);
          
-         description.scale(factor, massScalePower);
+         description.scale(factor, massScalePower, ignoreInertiaScaleJointList);
       }
 
    }
    
 
    @Override
-   public void scale(double factor, double massScalePower)
+   public void scale(double factor, double massScalePower, List<String> ignoreInertiaScaleJointList)
    {
       scaleSensorsOffsets(factor);
       scaleAllKinematicsPointOffsets(factor);
       
-      link.scale(factor, massScalePower);
-      JointDescription.scaleChildrenJoint(getChildrenJoints(), factor, massScalePower);
+      boolean scaleInertia = true;
+      if(ignoreInertiaScaleJointList.contains(getName()))
+      {
+         scaleInertia = false;
+      }
+      link.scale(factor, massScalePower, scaleInertia);
+      JointDescription.scaleChildrenJoint(getChildrenJoints(), factor, massScalePower, ignoreInertiaScaleJointList);
    }
 
    private void scaleSensorsOffsets(double factor)

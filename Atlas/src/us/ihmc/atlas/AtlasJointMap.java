@@ -102,16 +102,17 @@ public class AtlasJointMap implements DRCRobotJointMap
 
    private final AtlasContactPointParameters contactPointParameters;
    private final AtlasRobotVersion atlasVersion;
+   private final AtlasPhysicalProperties atlasPhysicalProperties;
    
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
    
    private final String[] jointNamesBeforeFeet = new String[2];
 
-   public AtlasJointMap(AtlasRobotVersion atlasVersion)
+   public AtlasJointMap(AtlasRobotVersion atlasVersion, AtlasPhysicalProperties atlasPhysicalProperties)
    {
       this.atlasVersion = atlasVersion;
-
+      this.atlasPhysicalProperties = atlasPhysicalProperties;
       for (RobotSide robotSide : RobotSide.values)
       {
          String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
@@ -346,16 +347,23 @@ public class AtlasJointMap implements DRCRobotJointMap
    @Override
    public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide)
    {
-      return AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide);
+      return atlasPhysicalProperties.getSoleToAnkleFrameTransforms().get(robotSide);
    }
 
    @Override
    public RigidBodyTransform getHandControlFrameToWristTransform(RobotSide robotSide)
    {
       RigidBodyTransform attachmentPlateToPalm = JMEDataTypeUtils.jmeTransformToTransform3D(atlasVersion.getOffsetFromAttachmentPlate(robotSide));
-      RigidBodyTransform attachmentPlateToWrist = AtlasPhysicalProperties.handAttachmentPlateToWristTransforms.get(robotSide);
+      RigidBodyTransform attachmentPlateToWrist = atlasPhysicalProperties.getHandAttachmentPlateToWristTransforms().get(robotSide);
       RigidBodyTransform handControlFrameToWristTranform = new RigidBodyTransform();
       handControlFrameToWristTranform.multiply(attachmentPlateToWrist, attachmentPlateToPalm);
+      
+      Vector3d translation = new Vector3d();
+      handControlFrameToWristTranform.getTranslation(translation);
+      translation.scale(getModelScale());
+      handControlFrameToWristTranform.setTranslation(translation);
+      
+      
       return handControlFrameToWristTranform;
 //      return AtlasPhysicalProperties.handAttachmentPlateToWristTransforms.get(robotSide);
    }
@@ -426,6 +434,28 @@ public class AtlasJointMap implements DRCRobotJointMap
          }
       }
       throw new IllegalArgumentException(joineNameBeforeEndEffector + " was not listed as an end effector in " + this.getClass().getSimpleName());
+   }
+   
+   @Override
+   public double getModelScale()
+   {
+      return atlasPhysicalProperties.getModelScale();
+   }
+   
+   @Override
+   public double getMassScalePower()
+   {
+      return 2.0;
+   }
+
+   public AtlasPhysicalProperties getPhysicalProperties()
+   {
+      return atlasPhysicalProperties;
+   }
+   
+   public String[] getHighInertiaForStableSimulationJoints()
+   {
+      return new String[] { "hokuyo_joint" };
    }
 }
 

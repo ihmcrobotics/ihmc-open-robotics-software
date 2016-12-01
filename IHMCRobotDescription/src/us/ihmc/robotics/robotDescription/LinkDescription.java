@@ -357,18 +357,21 @@ public class LinkDescription
       InertiaTools.computePrincipalMomentsOfInertia(momentOfInertia, principalAxesRotation, principalMomentsOfInertia);
    }
 
-   public void scale(double factor, double massScalePower)
+   public void scale(double factor, double massScalePower, boolean scaleInertia)
    {
       // Center of mass offset scales with the scaling factor
       centerOfMassOffset.scale(factor);
       
       // Mass scales with factor^massScalePower. massScalePower is 3 when considering constant density
-      mass = Math.pow(factor, massScalePower) * mass;
       
-      // The components of the inertia matrix are defined with int(r^2 dm). So they scale factor ^ (2 + massScalePower)
-      double inertiaScale = Math.pow(factor, massScalePower + 2);
-      CommonOps.scale(inertiaScale, momentOfInertia);
-      computePrincipalMomentsOfInertia();
+      if(scaleInertia)
+      {
+         mass = Math.pow(factor, massScalePower) * mass;
+         // The components of the inertia matrix are defined with int(r^2 dm). So they scale factor ^ (2 + massScalePower)
+         double inertiaScale = Math.pow(factor, massScalePower + 2);
+         CommonOps.scale(inertiaScale, momentOfInertia);
+         computePrincipalMomentsOfInertia();
+      }
       
       
       if(linkGraphics != null)
@@ -379,6 +382,7 @@ public class LinkDescription
       {
          collisionMesh.scale(factor);
       }
+      
       
       
    }
