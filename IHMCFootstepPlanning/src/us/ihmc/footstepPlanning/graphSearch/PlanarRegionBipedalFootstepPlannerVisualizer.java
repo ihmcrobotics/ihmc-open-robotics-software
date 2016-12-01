@@ -165,7 +165,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       nodeRejectedReason.set(null);
 
       int vertexBufferSize = 100;
-      int meshBufferSize = 100;
+      int meshBufferSize = 2000;
       yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("planarRegionsList", vertexBufferSize, meshBufferSize, registry);
       graphicsListRegistry.registerYoGraphic("PlanarRegionsList", yoGraphicPlanarRegionsList);
 
