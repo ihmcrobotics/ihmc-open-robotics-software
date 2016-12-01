@@ -27,6 +27,8 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ObjectDetectorFromCameraImages
@@ -51,7 +53,7 @@ public class ObjectDetectorFromCameraImages
 
    private final YoGraphicReferenceFrame cameraGraphic, detectorGraphic, locatedFiducialGraphic, reportedFiducialGraphic;
 
-   private final String prefix = "valve";
+   private final String prefix = "object";
 
    private final DoubleYoVariable expectedObjectSize = new DoubleYoVariable("expectedObjectSize", registry);
    private final DoubleYoVariable fieldOfViewXinRadians = new DoubleYoVariable("fovXRadians", registry);
@@ -70,9 +72,10 @@ public class ObjectDetectorFromCameraImages
    private final YoFramePoseUsingQuaternions locatedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoseUsingQuaternions reportedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
 
-   public ObjectDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ObjectDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
    {
       this.expectedObjectSize.set(1.0);
+      targetIDHasBeenLocated.set(true);
 
       detector = new ValveDetector();
 
@@ -179,7 +182,12 @@ public class ObjectDetectorFromCameraImages
          cameraPose.setPosition(cameraPositionInWorld);
 
          List<Rectangle> rectangles = detector.detect(bufferedImage);
-         rectangles.sort((r1, r2) -> -Integer.compare(r1.width * r1.height, r2.width * r2.height));
+         Collections.sort(rectangles, new Comparator<Rectangle>() {
+            @Override
+            public int compare(Rectangle r1, Rectangle r2) {
+               return -Integer.compare(r1.width * r1.height, r2.width * r2.height);
+            }
+         });
          if (rectangles.size() > 0)
          {
             Rectangle rectangle = rectangles.get(0);
@@ -193,8 +201,8 @@ public class ObjectDetectorFromCameraImages
             }
             GeometryMath_F64.mult(pixelToNorm, topLeft, topLeft);
             GeometryMath_F64.mult(pixelToNorm, bottomRight, bottomRight);
-            double distance = knownWidth / Math.abs(bottomRight.getX() - topLeft.getX());
-            fiducialToCamera.setTranslation(distance, 0, 0);
+            double distance = knownWidth * 0.66f / Math.abs(bottomRight.getX() - topLeft.getX()); // TODO: detectNet output is about 1/3 smaller than the real object, this is a quick hack for now, should re-train the network
+            fiducialToCamera.setTranslation(0, 0, distance);
             fiducialToCamera.setRotation(new DenseMatrix64F(3, 3, true, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0));
 
             detectorPositionX.set(fiducialToCamera.getX());
