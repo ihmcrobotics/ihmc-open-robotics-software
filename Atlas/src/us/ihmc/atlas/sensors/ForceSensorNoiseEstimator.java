@@ -11,6 +11,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class ForceSensorNoiseEstimator implements PacketConsumer<RobotConfigurationData>
 {
@@ -48,7 +49,7 @@ public class ForceSensorNoiseEstimator implements PacketConsumer<RobotConfigurat
 
       timer.schedule( new NoiseCalculatorTimerTask(), 1000, 1000);
       
-      System.out.println( "ForceSensorNoiseEstimator constructor ");
+      PrintTools.info(this, "Constructed");
    }
 
 

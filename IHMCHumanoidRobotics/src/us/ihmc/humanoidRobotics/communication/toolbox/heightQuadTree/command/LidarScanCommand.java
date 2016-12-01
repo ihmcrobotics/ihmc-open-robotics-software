@@ -5,7 +5,7 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarScanMessage;
+import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;

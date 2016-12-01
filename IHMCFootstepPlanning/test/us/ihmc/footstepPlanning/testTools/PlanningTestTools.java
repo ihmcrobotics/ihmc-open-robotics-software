@@ -110,8 +110,23 @@ public class PlanningTestTools
             YoFramePose yoFootstepPose = new YoFramePose("footPose" + i, worldFrame, vizRegistry);
             yoFootstepPose.set(footstepPose);
 
-            YoGraphicPolygon footstepViz = new YoGraphicPolygon("footstep" + i, yoDefaultFootPolygon, yoFootstepPose, 1.0, appearance);
-            vizGraphicsListRegistry.registerYoGraphic("viz", footstepViz);
+            if (!footstep.hasFoothold())
+            {
+               YoGraphicPolygon footstepViz = new YoGraphicPolygon("footstep" + i, yoDefaultFootPolygon, yoFootstepPose, 1.0, appearance);
+               vizGraphicsListRegistry.registerYoGraphic("viz", footstepViz);
+            }
+            else
+            {
+               YoGraphicPolygon fullFootstepViz = new YoGraphicPolygon("fullFootstep" + i, yoDefaultFootPolygon, yoFootstepPose, 1.0, YoAppearance.Glass(0.7));
+               vizGraphicsListRegistry.registerYoGraphic("viz", fullFootstepViz);
+
+               ConvexPolygon2d foothold = new ConvexPolygon2d();
+               footstep.getFoothold(foothold);
+               YoFrameConvexPolygon2d yoFoothold = new YoFrameConvexPolygon2d("Foothold" + i, worldFrame, 4, vizRegistry);
+               yoFoothold.setConvexPolygon2d(foothold);
+               YoGraphicPolygon footstepViz = new YoGraphicPolygon("footstep" + i, yoFoothold, yoFootstepPose, 1.0, appearance);
+               vizGraphicsListRegistry.registerYoGraphic("viz", footstepViz);
+            }
          }
       }
 
@@ -161,7 +176,7 @@ public class PlanningTestTools
       return footstepPlan;
    }
 
-   public static Runnable createAnytimePlannerRunnable(final AnytimeFootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList)
+   public static void configureAnytimePlannerRunnable(final AnytimeFootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, PlanarRegionsList planarRegionsList)
    {
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
@@ -170,17 +185,6 @@ public class PlanningTestTools
       planner.setInitialStanceFoot(initialStanceFootPose, initialStanceSide);
       planner.setGoal(goal);
       planner.setPlanarRegions(planarRegionsList);
-
-      Runnable anytimePlannerRunnable = new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            planner.plan();
-         }
-      };
-
-      return anytimePlannerRunnable;
    }
 
    public static boolean isGoalWithinFeet(FramePose goalPose, FootstepPlan footstepPlan)

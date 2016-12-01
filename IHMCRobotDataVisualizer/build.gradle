@@ -17,7 +17,7 @@ if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
    evaluationDependsOn(':IHMCOpenRoboticsSoftware')
 }
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
@@ -54,7 +54,9 @@ dependencies {
    compile ihmc.getProjectDependency(":SDFLoader")
    compile ihmc.getProjectDependency(":SimulationConstructionSet")
    compile ihmc.getProjectDependency(":IHMCCommunication")
+   compile ihmc.getProjectDependency(":IHMCJavaFXToolkit")
    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+   compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
     compile ihmc.getProjectDependency(":IHMCRobotDescription")
