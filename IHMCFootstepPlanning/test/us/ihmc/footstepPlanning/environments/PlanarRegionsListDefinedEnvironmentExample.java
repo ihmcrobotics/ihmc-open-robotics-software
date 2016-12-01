@@ -4,6 +4,7 @@ import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
 import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
 import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -85,7 +86,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
             boundingBoxVisualization.translate(translation);
             boundingBoxVisualization.addCube(lx, ly, lz, YoAppearance.RGBColor(1.0, 0, 0, 0.5));
 
-            scs.addStaticLinkGraphics(boundingBoxVisualization);
+            scs.addStaticLinkGraphics(boundingBoxVisualization, Graphics3DNodeType.VISUALIZATION);
          }
       }
 
