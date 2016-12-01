@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -190,7 +191,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
       hasInputBeenSet.set(false);
-      footstepListBehavior.onBehaviorEntered();
+      footstepListBehavior.initialize();
 
       robotPose.setToZero(fullRobotModel.getRootJoint().getFrameAfterJoint());
       robotPose.changeFrame(worldFrame);
@@ -258,9 +259,11 @@ public class WalkToLocationBehavior extends AbstractBehavior
             footsteps.addAll(footstepsNominalOrientation);
          }
 
+         Vector3d footlocation = new Vector3d();
+         referenceFrames.getAnkleZUpFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation(footlocation);
          for (Footstep footstep : footsteps)
          {
-            footstep.setZ(midFeetPosition.getZ());
+            footstep.setZ(footlocation.getZ());
          }
       }
 

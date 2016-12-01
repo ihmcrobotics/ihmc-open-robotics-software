@@ -153,7 +153,7 @@ public abstract class ToolboxModule
             if (Thread.interrupted())
                return;
 
-            serverTime += UPDATE_PERIOD_MILLISECONDS;
+            serverTime += TimeTools.milliSecondsToSeconds(UPDATE_PERIOD_MILLISECONDS);
             yoVariableServer.update(TimeTools.secondsToNanoSeconds(serverTime));
          }
       };
@@ -260,7 +260,7 @@ public abstract class ToolboxModule
             PrintTools.error(this, "This toolbox is already running.");
          return;
       }
-      
+
       if (DEBUG)
          PrintTools.debug(this, "Waking up");
 
@@ -300,7 +300,7 @@ public abstract class ToolboxModule
    public void destroy()
    {
       sleep();
-      
+
       if (yoVariableServerScheduled != null)
       {
          yoVariableServerScheduled.cancel(true);

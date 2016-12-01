@@ -91,7 +91,14 @@ public class PlanThenSnapPlanner implements FootstepPlanner
          ConvexPolygon2d footPolygonInRegion = new ConvexPolygon2d(footPolygons.get(footstep.getRobotSide()));
          footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
 
-         RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoRegion(footPolygonInRegion, regionToMoveTo, wiggleParameters);
+         wiggleParameters.deltaInside = 0.0;
+         RigidBodyTransform wiggleTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegion, regionToMoveTo, wiggleParameters);
+         if (wiggleTransform == null)
+         {
+            wiggleParameters.deltaInside = -0.055;
+            wiggleTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegion, regionToMoveTo, wiggleParameters);
+         }
+
          if (wiggleTransform == null)
             solePose.setToNaN();
          else
@@ -99,6 +106,19 @@ public class PlanThenSnapPlanner implements FootstepPlanner
             solePose.changeFrame(regionFrame);
             solePose.applyTransform(wiggleTransform);
             solePose.changeFrame(ReferenceFrame.getWorldFrame());
+         }
+
+         // fix the foothold
+         if (wiggleParameters.deltaInside != 0.0)
+         {
+            PoseReferenceFrame soleFrameAfterWiggle = new PoseReferenceFrame("SoleFrameAfterWiggle", solePose);
+            soleToRegion = soleFrameAfterWiggle.getTransformToDesiredFrame(regionFrame);
+            footPolygonInRegion.setAndUpdate(footPolygons.get(footstep.getRobotSide()));
+            footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
+            ConvexPolygon2d foothold = regionToMoveTo.getConvexHull().intersectionWith(footPolygonInRegion);
+            soleToRegion.invert();
+            foothold.applyTransformAndProjectToXYPlane(soleToRegion);
+            footstep.setFoothold(foothold);
          }
 
          footstep.setSoleFramePose(solePose);

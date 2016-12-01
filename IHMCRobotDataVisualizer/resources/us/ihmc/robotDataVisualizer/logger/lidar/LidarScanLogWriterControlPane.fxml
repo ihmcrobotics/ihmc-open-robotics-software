@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="lidarScanLogWriterControlPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="78.0" prefWidth="689.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotDataVisualizer.logger.lidar.LidarScanLogWriterControlPaneController">
+   <children>
+      <ToggleButton fx:id="logDataToggleButton" layoutX="14.0" layoutY="8.0" mnemonicParsing="false" prefWidth="100.0" text="Start Logging" textOverrun="CLIP" />
+      <Button layoutX="131.0" layoutY="8.0" mnemonicParsing="false" onAction="#clearScans" prefHeight="25.0" prefWidth="100.0" text="Clear Scans" />
+      <ToggleButton fx:id="connectToggleButton" layoutX="251.0" layoutY="8.0" mnemonicParsing="false" prefWidth="100.0" selected="true" text="Disconnect" textOverrun="CLIP" />
+      <TextField fx:id="networkProcessorIPAdTextField" layoutX="189.0" layoutY="39.0" />
+      <Label layoutX="25.0" layoutY="43.0" text="Network Processor IP Adress" />
+   </children>
+</AnchorPane>
