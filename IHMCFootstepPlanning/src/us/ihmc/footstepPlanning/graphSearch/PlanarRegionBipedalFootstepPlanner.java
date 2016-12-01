@@ -345,7 +345,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return null;
    }
 
-   private boolean checkIfDifferentFromGrandParent(BipedalFootstepPlannerNode nodeToExpand)
+   protected boolean checkIfDifferentFromGrandParent(BipedalFootstepPlannerNode nodeToExpand)
    {
       BipedalFootstepPlannerNode parentNode = nodeToExpand.getParentNode();
       if (parentNode == null) return true;
