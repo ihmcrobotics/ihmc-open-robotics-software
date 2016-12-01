@@ -74,8 +74,8 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    private final Quat4d tempFirstFootstepPoseOrientation = new Quat4d();
    private final YoTimer plannerTimer;
 
-   public PlanHumanoidFootstepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-         FiducialDetectorBehaviorService fiducialDetectorBehaviorService)
+   public PlanHumanoidFootstepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
+                                        HumanoidReferenceFrames referenceFrames)
    {
       super(PlanHumanoidFootstepsBehavior.class.getSimpleName(), behaviorCommunicationBridge);
 

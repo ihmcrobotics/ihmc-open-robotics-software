@@ -2,20 +2,15 @@ package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
+import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 
 public class LocateFiducialBehavior extends AbstractBehavior
 {
-   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, FiducialDetectorBehaviorService fiducialDetectorBehaviorService)
-   {
-      this(communicationBridge, fiducialDetectorBehaviorService, 50);
-   }
-
-   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, FiducialDetectorBehaviorService fiducialDetectorBehaviorService, int targetFiducial)
+   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, GoalDetectorBehaviorService fiducialDetectorBehaviorService)
    {
       super(communicationBridge);
       
-      fiducialDetectorBehaviorService.setTargetIDToLocate(targetFiducial);
       addBehaviorService(fiducialDetectorBehaviorService);
    }
 

@@ -10,9 +10,9 @@ import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.examples.UserValidationExampleBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FindFiducialBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.goalLocation.FindGoalBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior.WalkOverTerrainState;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -33,7 +33,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
-import us.ihmc.tools.taskExecutor.Task;
 
 public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<WalkOverTerrainState>
 {
@@ -46,7 +45,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
-   private final FindFiducialBehavior lookForGoalBehavior;
+   private final FindGoalBehavior lookForGoalBehavior;
    private final LookDownBehavior lookDownAtTerrainBehavior;
    private final PlanHumanoidFootstepsBehavior planHumanoidFootstepsBehavior;
    private final TakeSomeStepsBehavior takeSomeStepsBehavior;
@@ -61,7 +60,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    private final EnumYoVariable<RobotSide> nextSideToSwing;
 
    public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions, FullHumanoidRobotModel fullRobotModel,
-         HumanoidReferenceFrames referenceFrames, FiducialDetectorBehaviorService fiducialDetectorBehaviorService, int fiducialToTrack)
+         HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
       super("WalkOverTerrain", WalkOverTerrainState.class, yoTime, communicationBridge);
 
@@ -76,10 +75,11 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       //create your behaviors
+      this.lookForGoalBehavior = new FindGoalBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames,
+                                                      goalDetectorBehaviorService);
 
-      lookForGoalBehavior = new FindFiducialBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, fiducialToTrack);
       lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
-      planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
+      planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
       clearPlanarRegionsListBehavior = new ClearPlanarRegionsListBehavior(communicationBridge);
       takeSomeStepsBehavior = new TakeSomeStepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
       reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge);
@@ -140,7 +140,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
          protected void setBehaviorInput()
          {
             FramePose goalPose = new FramePose();
-            lookForGoalBehavior.getFiducialPose(goalPose);
+            lookForGoalBehavior.getGoalPose(goalPose);
             Tuple3d goalPosition = new Point3d();
             goalPose.getPosition(goalPosition);
 
