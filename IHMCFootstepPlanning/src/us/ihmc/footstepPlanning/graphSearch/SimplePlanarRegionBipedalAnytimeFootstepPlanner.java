@@ -148,11 +148,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
             }
          }
 
-         RigidBodyTransform soleZUpTransform = new RigidBodyTransform();
-         nodeToExpand.getSoleTransform(soleZUpTransform);
-         setTransformZUpPreserveX(soleZUpTransform);
-
-         expandChildrenAndAddNodes(stack, soleZUpTransform, nodeToExpand);
+         expandChildrenAndAddNodes(stack, nodeToExpand);
       }
 
       notifyListenerSolutionWasNotFound();

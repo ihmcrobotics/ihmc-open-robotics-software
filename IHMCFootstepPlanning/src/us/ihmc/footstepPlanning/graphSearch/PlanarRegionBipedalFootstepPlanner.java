@@ -259,11 +259,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             }
          }
 
-         RigidBodyTransform soleZUpTransform = new RigidBodyTransform();
-         nodeToExpand.getSoleTransform(soleZUpTransform);
-         setTransformZUpPreserveX(soleZUpTransform);
-
-         expandChildrenAndAddNodes(stack, soleZUpTransform, nodeToExpand);
+         expandChildrenAndAddNodes(stack, nodeToExpand);
       }
 
       notifyListenerSolutionWasNotFound();
@@ -294,16 +290,16 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return true;
    }
 
-   protected void expandChildrenAndAddNodes(Deque<BipedalFootstepPlannerNode> stack, RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand)
+   protected void expandChildrenAndAddNodes(Deque<BipedalFootstepPlannerNode> stack, BipedalFootstepPlannerNode nodeToExpand)
    {
-      BipedalFootstepPlannerNode goalNode = this.planarRegionPotentialNextStepCalculator.computeGoalNodeIfGoalIsReachable(nodeToExpand, soleZUpTransform);
+      BipedalFootstepPlannerNode goalNode = this.planarRegionPotentialNextStepCalculator.computeGoalNodeIfGoalIsReachable(nodeToExpand);
       if (goalNode != null)
       {
          stack.push(goalNode);
          return;
       }
       
-      ArrayList<BipedalFootstepPlannerNode> nodesToAdd = planarRegionPotentialNextStepCalculator.computeChildrenNodes(soleZUpTransform, nodeToExpand);
+      ArrayList<BipedalFootstepPlannerNode> nodesToAdd = planarRegionPotentialNextStepCalculator.computeChildrenNodes(nodeToExpand);
 
       //      Collections.shuffle(nodesToAdd);
       Collections.reverse(nodesToAdd);
@@ -622,30 +618,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       {
          listener.notifyListenerSolutionWasNotFound();
       }
-   }
-
-   protected final Vector3d xAxis = new Vector3d();
-   protected final Vector3d yAxis = new Vector3d();
-   protected final Vector3d zAxis = new Vector3d();
-
-   protected void setTransformZUpPreserveX(RigidBodyTransform transform)
-   {
-      xAxis.set(transform.getM00(), transform.getM10(), 0.0);
-      xAxis.normalize();
-      zAxis.set(0.0, 0.0, 1.0);
-      yAxis.cross(zAxis, xAxis);
-
-      transform.setM00(xAxis.getX());
-      transform.setM10(xAxis.getY());
-      transform.setM20(xAxis.getZ());
-
-      transform.setM01(yAxis.getX());
-      transform.setM11(yAxis.getY());
-      transform.setM21(yAxis.getZ());
-
-      transform.setM02(zAxis.getX());
-      transform.setM12(zAxis.getY());
-      transform.setM22(zAxis.getZ());
    }
 
 
