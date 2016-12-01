@@ -55,23 +55,22 @@ public class PlanarRegionsListExamples
       return planarRegionsList;
    }
    
-   public static PlanarRegionsList generateCinderBlockField()
+   public static PlanarRegionsList generateCinderBlockField(double startX, double startY, double cinderBlockSize, int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       
-      double cinderBlockSize = 0.4;
       double cinderBlockHeight = 0.15;
-      double courseWidth = 6 * cinderBlockSize;
+      double courseWidth = courseLengthYInNumberOfBlocks * cinderBlockSize;
       
-      generator.translate(0.0, 0.0, 0.001); // avoid graphical issue
+      generator.translate(startX, startY, 0.001); // avoid graphical issue
       generator.addRectangle(0.6, courseWidth); // standing platform
       generator.translate(0.5, 0.0, 0.0); // forward to first row
       generator.translate(0.0, -2.5 * cinderBlockSize, 0.0); // over to grid origin
       
       Random random = new Random(1231239L);
-      for (int x = 0; x < 21; x++)
+      for (int x = 0; x < courseWidthXInNumberOfBlocks; x++)
       {
-         for (int y = 0; y < 6; y++)
+         for (int y = 0; y < courseLengthYInNumberOfBlocks; y++)
          {
             int angleType = Math.abs(random.nextInt() % 3);
             double angle = 0;

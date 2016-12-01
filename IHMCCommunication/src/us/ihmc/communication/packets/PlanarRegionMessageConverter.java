@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Point2d;
 import javax.vecmath.Point2f;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
@@ -26,6 +27,10 @@ public class PlanarRegionMessageConverter
       planarRegion.getPointInRegion(regionOrigin);
       planarRegion.getNormal(regionNormal);
 
+      Point2f[] concaveHullVertices = new Point2f[planarRegion.getConcaveHull().size()];
+      for (int vertexIndex = 0; vertexIndex < planarRegion.getConcaveHull().size(); vertexIndex++)
+         concaveHullVertices[vertexIndex] = new Point2f(planarRegion.getConcaveHull().get(vertexIndex));
+
       List<Point2f[]> convexPolygonsVertices = new ArrayList<>();
 
       for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
@@ -38,7 +43,7 @@ public class PlanarRegionMessageConverter
          }
       }
 
-      PlanarRegionMessage planarRegionMessage = new PlanarRegionMessage(regionOrigin, regionNormal, convexPolygonsVertices);
+      PlanarRegionMessage planarRegionMessage = new PlanarRegionMessage(regionOrigin, regionNormal, concaveHullVertices, convexPolygonsVertices);
       planarRegionMessage.setRegionId(regionId);
       return planarRegionMessage;
    }
@@ -53,6 +58,10 @@ public class PlanarRegionMessageConverter
       AxisAngle4d regionOrientation = GeometryTools.getRotationBasedOnNormal(regionNormal);
       transformToWorld.set(regionOrientation, regionOrigin);
 
+      List<Point2d> concaveHullVertices = new ArrayList<>();
+      for (Point2f vertex : planarRegionMessage.concaveHullVertices)
+         concaveHullVertices.add(new Point2d(vertex));
+
       List<Point2f[]> convexPolygonsVertices = planarRegionMessage.getConvexPolygonsVertices();
       for (int polygonIndex = 0; polygonIndex < convexPolygonsVertices.size(); polygonIndex++)
       {
@@ -60,7 +69,7 @@ public class PlanarRegionMessageConverter
          planarRegionConvexPolygons.add(convexPolygon);
       }
 
-      PlanarRegion planarRegion = new PlanarRegion(transformToWorld, planarRegionConvexPolygons);
+      PlanarRegion planarRegion = new PlanarRegion(transformToWorld, concaveHullVertices, planarRegionConvexPolygons);
       planarRegion.setRegionId(planarRegionMessage.getRegionId());
       return planarRegion;
    }

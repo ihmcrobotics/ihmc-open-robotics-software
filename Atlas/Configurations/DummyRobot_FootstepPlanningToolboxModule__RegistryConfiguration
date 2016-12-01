@@ -1,0 +1,6 @@
+root*false*false
+root.DummyRobot*false*false
+root.remotemain*false*false
+root.remotemain.FootstepPlanningToolboxModule*false*false
+root.remotemain.FootstepPlanningToolboxModule.FootstepPlanningToolboxController*false*false
+root.remotemain.FootstepPlanningToolboxModule.FootstepPlanningToolboxController.PlanarRegionBipedalFootstepPlanner*false*false

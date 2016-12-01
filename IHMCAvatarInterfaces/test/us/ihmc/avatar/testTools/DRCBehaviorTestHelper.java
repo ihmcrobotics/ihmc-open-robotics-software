@@ -89,14 +89,21 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    public DRCBehaviorTestHelper(String name, DRCStartingLocation selectedLocation,
          SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
    {
-      this(new DefaultCommonAvatarEnvironment(), name, selectedLocation, simulationTestingParameters, robotModel);
+      this(new DefaultCommonAvatarEnvironment(), name, selectedLocation, simulationTestingParameters, robotModel, true);
+   }
+
+   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface,
+                                String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
+                                DRCRobotModel robotModel)
+   {
+      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, true);
    }
 
    public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface,
          String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
-         DRCRobotModel robotModel)
+         DRCRobotModel robotModel, boolean automaticallySimulate)
    {
-      super(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel);
+      super(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, automaticallySimulate);
 
       yoTimeRobot = getRobot().getYoTime();
       yoTimeBehaviorDispatcher = new DoubleYoVariable("yoTimeBehaviorDispatcher", registry);
@@ -206,11 +213,12 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       robotDataReceiver.updateRobotModel();
    }
 
-   public void createAndStartPacketCommunicator(NetworkPorts port, PacketDestination destination) throws IOException
+   public PacketCommunicator createAndStartPacketCommunicator(NetworkPorts port, PacketDestination destination) throws IOException
    {
       PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, NET_CLASS_LIST);
       networkProcessor.attachPacketCommunicator(destination, packetCommunicator);
       packetCommunicator.connect();
+      return packetCommunicator;
    }
 
    public void dispatchBehavior(AbstractBehavior behaviorToTest) throws SimulationExceededMaximumTimeException

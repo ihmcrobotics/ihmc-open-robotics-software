@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning;
 
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -7,11 +8,13 @@ public class SimpleFootstep
 {
    private RobotSide robotSide;
    private final FramePose soleFramePose = new FramePose();
+   private final ConvexPolygon2d foothold = new ConvexPolygon2d();
 
    public SimpleFootstep(RobotSide robotSide, FramePose soleFramePose)
    {
       this.robotSide = robotSide;
       this.soleFramePose.setIncludingFrame(soleFramePose);
+      foothold.clear();
    }
 
    public RobotSide getRobotSide()
@@ -32,5 +35,36 @@ public class SimpleFootstep
    public void setSoleFramePose(FramePose soleFramePose)
    {
       this.soleFramePose.setIncludingFrame(soleFramePose);
+   }
+
+   public void setFoothold(ConvexPolygon2d foothold)
+   {
+      this.foothold.setAndUpdate(foothold);
+   }
+
+   public boolean hasFoothold()
+   {
+      if (this.foothold.isEmpty())
+         return false;
+      return true;
+   }
+
+   public void getFoothold(ConvexPolygon2d footholdToPack)
+   {
+      if (!hasFoothold())
+         footholdToPack.setToNaN();
+      else
+         footholdToPack.setAndUpdate(foothold);
+   }
+
+   public boolean epsilonEquals(SimpleFootstep otherFootstep, double epsilon)
+   {
+      if (!this.robotSide.equals(otherFootstep.robotSide))
+         return false;
+      if (!this.soleFramePose.epsilonEquals(otherFootstep.soleFramePose, epsilon))
+         return false;
+      if (!this.foothold.epsilonEquals(otherFootstep.foothold, epsilon))
+         return false;
+      return true;
    }
 }

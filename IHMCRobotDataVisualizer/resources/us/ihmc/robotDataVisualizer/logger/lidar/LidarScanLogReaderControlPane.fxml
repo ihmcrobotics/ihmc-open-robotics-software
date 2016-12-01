@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="118.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotDataVisualizer.logger.lidar.LidarScanLogReaderControlPaneController">
+   <children>
+      <ComboBox fx:id="serverPortComboBox" layoutX="424.0" layoutY="48.0" prefWidth="150.0" />
+      <Label layoutX="458.0" layoutY="17.0" text="Log server port" />
+      <ToggleButton fx:id="startReadingToggleButton" layoutX="14.0" layoutY="10.0" mnemonicParsing="false" text="Start Reading" />
+      <ToggleButton fx:id="pauseToggleButton" layoutX="110.0" layoutY="10.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="101.0" text="Pause" />
+      <Button layoutX="14.0" layoutY="47.0" mnemonicParsing="false" onAction="#reloadLog" prefHeight="25.0" prefWidth="88.0" text="Reload Log" />
+      <ToggleButton fx:id="waitForListenerToggleButton" layoutX="110.0" layoutY="48.0" mnemonicParsing="false" prefHeight="25.0" text="Wait for listener" />
+   </children>
+</AnchorPane>

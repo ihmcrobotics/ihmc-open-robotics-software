@@ -9,7 +9,6 @@ import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.environments.FiducialsFlatGroundEnvironment.Fiducial;
 
 public class FloatingFiducialBoxRobot extends Robot
 {
