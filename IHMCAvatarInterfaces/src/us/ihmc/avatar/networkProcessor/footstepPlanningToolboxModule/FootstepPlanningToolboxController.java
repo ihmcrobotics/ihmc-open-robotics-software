@@ -21,14 +21,12 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -228,30 +226,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private FootstepPlanningToolboxOutputStatus packResult(FootstepPlan footstepPlan, FootstepPlanningResult status)
    {
       FootstepPlanningToolboxOutputStatus result = new FootstepPlanningToolboxOutputStatus();
-      result.footstepDataList = new FootstepDataListMessage();
+      result.footstepDataList = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE);
       result.planningResult = status;
-
-      if (footstepPlan == null)
-         return result;
-
-      int numberOfSteps = footstepPlan.getNumberOfSteps();
-
-      for (int i = 0; i < numberOfSteps; i++)
-      {
-         SimpleFootstep footstep = footstepPlan.getFootstep(i);
-
-         FramePose footstepPose = new FramePose();
-         footstep.getSoleFramePose(footstepPose);
-
-         Point3d location = new Point3d();
-         Quat4d orientation = new Quat4d();
-         footstepPose.getPosition(location);
-         footstepPose.getOrientation(orientation);
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
-         result.footstepDataList.add(footstepData);
-      }
-
       return result;
    }
 
