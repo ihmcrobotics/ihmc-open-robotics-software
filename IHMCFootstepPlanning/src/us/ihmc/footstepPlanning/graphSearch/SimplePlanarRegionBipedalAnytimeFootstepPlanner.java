@@ -1,18 +1,24 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.footstepPlanning.*;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.thread.ThreadTools;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+
+import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegionBipedalFootstepPlanner implements AnytimeFootstepPlanner, Runnable
 {
@@ -107,36 +113,20 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
             ThreadTools.sleep(100);
             continue;
          }
-
+         
          BipedalFootstepPlannerNode nodeToExpand = stack.pop();
-         notifyListenerNodeSelectedForExpansion(nodeToExpand);
+         boolean nodeIsAcceptableToExpand = planarRegionPotentialNextStepCalculator.checkNodeAcceptableToExpand(nodeToExpand);
 
-         if(nodeToExpand != startNode)
-         {
-            // Make sure popped node is a good one and can be expanded...
-            boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(nodeToExpand);
-            if (!snapSucceded)
-               continue;
+         if (!nodeIsAcceptableToExpand)
+            continue;
 
-            boolean goodFootstep = checkIfGoodFootstep(nodeToExpand);
-            if (!goodFootstep)
-               continue;
-
-            boolean differentFromParent = checkIfDifferentFromGrandParent(nodeToExpand);
-            {
-               if (!differentFromParent)
-                  continue;
-            }
-
-            boolean nearbyNodeAlreadyExists = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
-            if (nearbyNodeAlreadyExists)
-               continue;
-         }
-
-         setNodesCostsAndRememberIfClosestYet(nodeToExpand);
-         notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
+         boolean nearbyNodeAlreadyExists = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
+         if (nearbyNodeAlreadyExists)
+            continue;
+         
          numberOfNodesExpanded.increment();
-
+         notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
+         setNodesCostsAndRememberIfClosestYet(nodeToExpand);
 
          if (nodeToExpand.isAtGoal())
          {
@@ -168,7 +158,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    private void setNodesCostsAndRememberIfClosestYet(BipedalFootstepPlannerNode nodeToSetCostOf)
    {
       Point3d currentPosition = nodeToSetCostOf.getSolePosition();
-      Point3d goalPosition = goalPositions.get(nodeToSetCostOf.getRobotSide());
+      Point3d goalPosition = planarRegionPotentialNextStepCalculator.getGoalPosition(nodeToSetCostOf.getRobotSide());
       Vector3d currentToGoalVector = new Vector3d();
       currentToGoalVector.sub(goalPosition, currentPosition);
 
