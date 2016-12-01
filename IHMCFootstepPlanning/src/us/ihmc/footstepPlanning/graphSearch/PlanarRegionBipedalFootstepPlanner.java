@@ -23,7 +23,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
+   protected final Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
+
    protected final PlanarRegionPotentialNextStepCalculator planarRegionPotentialNextStepCalculator;
+   protected final HashMap<Integer, List<BipedalFootstepPlannerNode>> mapToAllExploredNodes = new HashMap<>();
 
    protected SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame;
 
@@ -113,9 +116,19 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return footstepPlan;
    }
 
+   protected void initialize()
+   {
+      stack.clear();
+      startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
+      stack.push(startNode);
+//      closestNodeToGoal = null;
+      mapToAllExploredNodes.clear();
+   }
+   
    @Override
    public FootstepPlanningResult plan()
    {
+      initialize();
       goalNode = null;
       footstepPlan = null;
 
@@ -129,6 +142,10 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       while ((!stack.isEmpty()) && (numberOfNodesExpanded.getIntegerValue() < maximumNumberOfNodesToExpand.getIntegerValue()))
       {
          BipedalFootstepPlannerNode nodeToExpand = stack.pop();
+
+         boolean nearbyNodeAlreadyExists = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
+         if (nearbyNodeAlreadyExists)
+            continue;
 
          numberOfNodesExpanded.increment();
          notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
@@ -161,6 +178,39 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       for (BipedalFootstepPlannerNode node : nodesToAdd)
       {
          stack.push(node);
+      }
+   }
+
+   protected boolean checkIfNearbyNodeAlreadyExistsAndStoreIfNot(BipedalFootstepPlannerNode nodeToExpand)
+   {
+      int hashCode = nodeToExpand.hashCode();
+      
+      List<BipedalFootstepPlannerNode> nodesWithThisHash = mapToAllExploredNodes.get(hashCode);
+
+      if (nodesWithThisHash == null)
+      {
+         nodesWithThisHash = new ArrayList<>();
+         nodesWithThisHash.add(nodeToExpand);
+         mapToAllExploredNodes.put(hashCode, nodesWithThisHash);
+
+         return false;
+      }
+      else
+      {
+         int size = nodesWithThisHash.size();
+//         System.out.println(size);
+         
+         for (int i = 0; i < size; i++)
+         {
+            BipedalFootstepPlannerNode nodeWithSameHash = nodesWithThisHash.get(i);
+
+            if (!nodeToExpand.isAtGoal() && nodeToExpand.equals(nodeWithSameHash))
+            {
+               return true;
+            }
+         }
+
+         return false;
       }
    }
 
