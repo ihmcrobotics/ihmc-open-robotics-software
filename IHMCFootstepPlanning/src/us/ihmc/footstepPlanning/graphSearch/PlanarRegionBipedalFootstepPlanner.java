@@ -22,7 +22,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -277,29 +276,31 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          nodeToExpand.getSoleTransform(soleZUpTransform);
          setTransformZUpPreserveX(soleZUpTransform);
 
-         // Check if goal is reachable:
-         boolean goalIsReachable = addGoalNodeIfGoalIsReachable(nodeToExpand, soleZUpTransform, stack);
-         if (goalIsReachable)
-            continue;
-
-         expandChildrenAndAddToQueue(stack, soleZUpTransform, nodeToExpand);
+         expandChildrenAndAddNodes(stack, soleZUpTransform, nodeToExpand);
       }
 
       notifyListenerSolutionWasNotFound();
       return FootstepPlanningResult.NO_PATH_EXISTS;
    }
 
-   protected boolean addGoalNodeIfGoalIsReachable(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform, Deque<BipedalFootstepPlannerNode> stack)
+   protected void expandChildrenAndAddNodes(Deque<BipedalFootstepPlannerNode> stack, RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand)
    {
       BipedalFootstepPlannerNode goalNode = this.planarRegionPotentialNextStepCalculator.computeGoalNodeIfGoalIsReachable(nodeToExpand, soleZUpTransform);
-      
       if (goalNode != null)
       {
          stack.push(goalNode);
-         return true;
+         return;
       }
+      
+      ArrayList<BipedalFootstepPlannerNode> nodesToAdd = planarRegionPotentialNextStepCalculator.computeChildrenNodes(soleZUpTransform, nodeToExpand);
 
-      return false;
+      //      Collections.shuffle(nodesToAdd);
+      Collections.reverse(nodesToAdd);
+
+      for (BipedalFootstepPlannerNode node : nodesToAdd)
+      {
+         stack.push(node);
+      } 
    }
 
    protected boolean checkIfDifferentFromGrandParent(BipedalFootstepPlannerNode nodeToExpand)
@@ -409,42 +410,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
 
       return true;
-   }
-
-   protected void expandChildrenAndAddToQueue(Deque<BipedalFootstepPlannerNode> stack, RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand)
-   {
-      ArrayList<BipedalFootstepPlannerNode> nodesToAdd = planarRegionPotentialNextStepCalculator.computeChildrenNodes(soleZUpTransform, nodeToExpand);
-
-      //      Collections.shuffle(nodesToAdd);
-      Collections.reverse(nodesToAdd);
-
-      for (BipedalFootstepPlannerNode node : nodesToAdd)
-      {
-         stack.push(node);
-      }
-   }
-
-
-   protected BipedalFootstepPlannerNode createAndAddNextNodeGivenStep(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand, Vector3d stepVectorInSoleFrame, double stepYaw)
-   {
-      Point3d stepLocationInWorld = new Point3d(stepVectorInSoleFrame);
-      soleZUpTransform.transform(stepLocationInWorld);
-
-      Vector3d stepRotationEulerInWorld = new Vector3d();
-      soleZUpTransform.getRotationEuler(stepRotationEulerInWorld);
-      //      stepRotationEulerInWorld.setZ((stepRotationEulerInWorld.getZ() + stepYaw + 2.0 * Math.PI) % Math.PI);
-      stepRotationEulerInWorld.setZ(stepRotationEulerInWorld.getZ() + stepYaw);
-
-      RigidBodyTransform nextTransform = new RigidBodyTransform();
-      nextTransform.setRotationEulerAndZeroTranslation(stepRotationEulerInWorld);
-      nextTransform.setTranslation(stepLocationInWorld.getX(), stepLocationInWorld.getY(), stepLocationInWorld.getZ());
-
-      RobotSide nextSide = nodeToExpand.getRobotSide().getOppositeSide();
-
-      BipedalFootstepPlannerNode childNode = new BipedalFootstepPlannerNode(nextSide, nextTransform);
-      childNode.setParentNode(nodeToExpand);
-      nodeToExpand.addChild(childNode);
-      return childNode;
    }
 
    protected RigidBodyTransform getSnapAndWiggleTransform(double wiggleInsideDelta, BipedalFootstepPlannerNode bipedalFootstepPlannerNode, PlanarRegion planarRegionToPack)

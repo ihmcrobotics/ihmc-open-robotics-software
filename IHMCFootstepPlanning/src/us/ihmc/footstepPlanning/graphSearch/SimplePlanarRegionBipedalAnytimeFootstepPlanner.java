@@ -152,11 +152,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          nodeToExpand.getSoleTransform(soleZUpTransform);
          setTransformZUpPreserveX(soleZUpTransform);
 
-         boolean goalIsReachable = addGoalNodeIfGoalIsReachable(nodeToExpand, soleZUpTransform, stack);
-         if (goalIsReachable)
-            continue;
-
-         expandChildrenAndAddToQueue(stack, soleZUpTransform, nodeToExpand);
+         expandChildrenAndAddNodes(stack, soleZUpTransform, nodeToExpand);
       }
 
       notifyListenerSolutionWasNotFound();
