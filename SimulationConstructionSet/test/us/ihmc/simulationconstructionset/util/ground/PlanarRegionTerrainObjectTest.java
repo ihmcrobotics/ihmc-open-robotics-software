@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
 import org.junit.Test;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -131,7 +132,31 @@ public class PlanarRegionTerrainObjectTest
    @Test(timeout = 30000)
    public void testIsClose() throws Exception
    {
-      fail();
+      Random random = new Random(1776L);
+
+      for (int i = 0; i < 100000; i++)
+      {
+         double randomXCoord = RandomTools.generateRandomDouble(random, 45.0);
+         double randomYCoord = RandomTools.generateRandomDouble(random, 45.0);
+         double randomZCoord = RandomTools.generateRandomDouble(random, 45.0);
+
+         PlanarRegion planarRegion = PlanarRegion
+               .generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10), RandomTools.generateRandomDouble(random, 30.0),
+                     random.nextInt(10));
+
+         PlanarRegionTerrainObject terrainObject = new PlanarRegionTerrainObject(planarRegion);
+
+         BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+
+         if (boundingBox3dInWorld.isXYInside(randomXCoord, randomYCoord))
+         {
+            assertTrue(terrainObject.isClose(randomXCoord, randomYCoord, randomZCoord));
+         }
+         else
+         {
+            assertFalse(terrainObject.isClose(randomXCoord, randomYCoord, randomZCoord));
+         }
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 4.0)
