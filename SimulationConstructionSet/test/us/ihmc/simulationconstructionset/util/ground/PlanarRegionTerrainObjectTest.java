@@ -6,6 +6,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.tools.testing.JUnitTools;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -65,11 +66,11 @@ public class PlanarRegionTerrainObjectTest
          if (planarRegion.isPointInsideByProjectionOntoXYPlane(randomXCoord, randomYCoord))
          {
 
-            assertEquals(planarRegionZAtXY, terrainObject.heightAt(randomXCoord, randomYCoord, randomZCoord), 1e-8);
+            assertEquals(planarRegionZAtXY, terrainObject.heightAt(randomXCoord, randomYCoord, randomZCoord), 1e-10);
          }
          else
          {
-            assertNotEquals(planarRegionZAtXY, terrainObject.heightAt(randomXCoord, randomYCoord, randomZCoord), 1e-8);
+            assertNotEquals(planarRegionZAtXY, terrainObject.heightAt(randomXCoord, randomYCoord, randomZCoord), 1e-10);
          }
       }
    }
@@ -123,13 +124,13 @@ public class PlanarRegionTerrainObjectTest
 
          if (planarRegion.isPointInsideByProjectionOntoXYPlane(randomXCoord, randomYCoord))
          {
-            assertEquals(planarRegionZAtXY, heightAt, 1e-8);
-            assertEquals(terrainObjectNormalToPack, planarRegionNormalToPack);
+            assertEquals(planarRegionZAtXY, heightAt, 1e-10);
+            JUnitTools.assertVector3dEquals("Normals are not equal!", terrainObjectNormalToPack, planarRegionNormalToPack, 1e-10);
          }
          else
          {
-            assertNotEquals(planarRegionZAtXY, heightAt, 1e-8);
-            assertEquals(terrainObjectNormalToPack, standardGroundNormal);
+            assertNotEquals(planarRegionZAtXY, heightAt, 1e-10);
+            JUnitTools.assertVector3dEquals("Normals are not equal!", standardGroundNormal, planarRegionNormalToPack, 1e-10);
          }
       }
    }
@@ -174,8 +175,8 @@ public class PlanarRegionTerrainObjectTest
          terrainObject.getBoundingBox().getMinPoint(terrainObjectBoundingBoxMinPoint);
          terrainObject.getBoundingBox().getMaxPoint(terrainObjectBoundingBoxMaxPoint);
 
-         assertEquals(planarRegionBoundingBoxMinPoint, terrainObjectBoundingBoxMinPoint);
-         assertEquals(planarRegionBoundingBoxMaxPoint, terrainObjectBoundingBoxMaxPoint);
+         JUnitTools.assertPoint3dEquals("Bounding box min points are not equal!", planarRegionBoundingBoxMinPoint, terrainObjectBoundingBoxMinPoint, 1e-10);
+         JUnitTools.assertPoint3dEquals("Bounding box max points are not equal!", planarRegionBoundingBoxMaxPoint, terrainObjectBoundingBoxMaxPoint, 1e-10);
       }
    }
 
