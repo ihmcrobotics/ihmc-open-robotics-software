@@ -53,6 +53,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    }
 
+   private final boolean setUpArms = false;
+
    private Vector3f doorOffsetPoint1 = new Vector3f(0.5f, 0.8f, 0f);
    private Vector3f doorOffsetPoint2 = new Vector3f(0.5f, 0.7f, 0f);
 
@@ -93,8 +95,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       BehaviorAction<WalkThroughDoorBehaviorState> resetRobot = new BehaviorAction<WalkThroughDoorBehaviorState>(WalkThroughDoorBehaviorState.RESET_ROBOT,
             resetRobotBehavior);
 
-      BehaviorAction<WalkThroughDoorBehaviorState> setup = new BehaviorAction<WalkThroughDoorBehaviorState>(WalkThroughDoorBehaviorState.SETUP_ROBOT, atlasPrimitiveActions.leftHandDesiredConfigurationBehavior,
-            atlasPrimitiveActions.rightHandDesiredConfigurationBehavior)
+      BehaviorAction<WalkThroughDoorBehaviorState> setup = new BehaviorAction<WalkThroughDoorBehaviorState>(WalkThroughDoorBehaviorState.SETUP_ROBOT,
+            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior, atlasPrimitiveActions.rightHandDesiredConfigurationBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -199,7 +201,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       statemachine.addStateWithDoneTransition(setup, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR);
       statemachine.addStateWithDoneTransition(searchForDoorFar, WalkThroughDoorBehaviorState.WALKING_TO_DOOR);
       statemachine.addStateWithDoneTransition(walkToDoorAction, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL);
-      statemachine.addStateWithDoneTransition(searchForDoorNear, WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK);
+      if (setUpArms)
+         statemachine.addStateWithDoneTransition(searchForDoorNear, WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK);
+      else
+         statemachine.addStateWithDoneTransition(searchForDoorNear, WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
       statemachine.addStateWithDoneTransition(setUpForWalk, WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
       statemachine.addStateWithDoneTransition(walkThroughDoor, WalkThroughDoorBehaviorState.RESET_ROBOT);
       statemachine.addStateWithDoneTransition(resetRobot, WalkThroughDoorBehaviorState.DONE);
@@ -232,11 +237,13 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       FootstepDataMessage fs1 = createRelativeFootStep(doorPose, startStep, new Point3d(0.5864031335585762, 0.592160790421584, 0.11833316262205451),
             new Quat4d(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
 
-      FootstepDataMessage fs2 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3d(0.4053278408799188, 0.23597592988662308, 0.11830896252372711),
+      FootstepDataMessage fs2 = createRelativeFootStep(doorPose, startStep.getOppositeSide(),
+            new Point3d(0.4053278408799188, 0.23597592988662308, 0.11830896252372711),
             new Quat4d(-1.5943418991263463E-13, 2.75059506574629E-13, -0.7043243641759355, 0.7098782924052293));
       FootstepDataMessage fs3 = createRelativeFootStep(doorPose, startStep, new Point3d(0.5924372369454293, -0.26851462759487155, 0.11830896252392731),
             new Quat4d(-3.236982396751798E-13, 3.899712427026468E-14, -0.7043243760613419, 0.7098782806128114));
-      FootstepDataMessage fs4 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3d(0.36887783182356804, -0.7234607322382425, 0.118308962523932),
+      FootstepDataMessage fs4 = createRelativeFootStep(doorPose, startStep.getOppositeSide(),
+            new Point3d(0.36887783182356804, -0.7234607322382425, 0.118308962523932),
             new Quat4d(1.7351711631778928E-14, -1.6924263791365571E-13, -0.7043243760613419, 0.7098782806128114));
       FootstepDataMessage fs5 = createRelativeFootStep(doorPose, startStep, new Point3d(0.5896714303877739, -0.7199905519593679, 0.11830896252393555),
             new Quat4d(2.5501844493298926E-13, -3.0463423083022023E-13, -0.7043243760613419, 0.7098782806128114));

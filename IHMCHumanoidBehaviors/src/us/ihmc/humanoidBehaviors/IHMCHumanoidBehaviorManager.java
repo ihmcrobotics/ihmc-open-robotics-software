@@ -10,6 +10,7 @@ import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBeha
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
@@ -192,6 +193,10 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
             new PickUpBallBehaviorStateMachine(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
 
+      dispatcher.addBehavior(HumanoidBehaviorType.RESET_ROBOT,
+            new ResetRobotBehavior(behaviorCommunicationBridge, yoTime));
+
+      
       dispatcher.addBehavior(HumanoidBehaviorType.TURN_VALVE,
             new TurnValveBehaviorStateMachine(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
 
