@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.graphSearch.SimplePlanarRegionBipedalAnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
 import us.ihmc.footstepPlanning.roughTerrainPlanning.SCSPlanarRegionBipedalFootstepPlannerVisualizer;
@@ -19,11 +20,13 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 {
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -41,7 +44,7 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 
       SideDependentList<FramePose> goalPoses = new SideDependentList<>();
 
-      for(RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
          FramePose footstepGoalPose = new FramePose(goalPose);
          footstepGoalPose.translate(0.0, robotSide.negateIfRightSide(0.2), 0.0);
@@ -49,22 +52,22 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
       }
 
       SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlanner = getPlanner();
-      Runnable runnable = PlanningTestTools.createAnytimePlannerRunnable(anytimePlanner, initialStanceFootPose, initialStanceSide, goalPose, flatTerrain);
+      PlanningTestTools.configureAnytimePlannerRunnable(anytimePlanner, initialStanceFootPose, initialStanceSide, goalPose, flatTerrain);
 
-      new Thread(runnable).start();
+      new Thread(anytimePlanner).start();
 
       double closestFootstepToGoal = Double.MAX_VALUE;
-      int numIterations = 100;
+      int numIterations = 10;
       FootstepPlan bestPlanYet = anytimePlanner.getBestPlanYet();
       FramePose lastFootstepPose = new FramePose();
 
-      for(int i = 0; i < numIterations; i++)
+      for (int i = 0; i < numIterations; i++)
       {
-         ThreadTools.sleep(10);
+         ThreadTools.sleep(100);
          bestPlanYet = anytimePlanner.getBestPlanYet();
 
          int numberOfFootsteps = bestPlanYet.getNumberOfSteps();
-         if(numberOfFootsteps < 2)
+         if (numberOfFootsteps < 2)
             continue;
 
          SimpleFootstep lastFootstep = bestPlanYet.getFootstep(numberOfFootsteps - 1);
@@ -87,6 +90,53 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
       }
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
+   public void testPlannerAdjustsPlanAfterExecutingFootstep()
+   {
+      PlanarRegionsList flatTerrain = PlanarRegionsListExamples.generateFlatGround(20.0, 20.0);
+
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      initialStanceFootPose.setPosition(0.0, -0.7, 0.0);
+      RobotSide initialStanceSide = RobotSide.RIGHT;
+
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(7.0, 0.7, 0.0);
+
+      SideDependentList<FramePose> goalPoses = new SideDependentList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePose footstepGoalPose = new FramePose(goalPose);
+         footstepGoalPose.translate(0.0, robotSide.negateIfRightSide(0.2), 0.0);
+         goalPoses.put(robotSide, footstepGoalPose);
+      }
+
+      SimplePlanarRegionBipedalAnytimeFootstepPlanner anytimePlanner = getPlanner();
+      PlanningTestTools.configureAnytimePlannerRunnable(anytimePlanner, initialStanceFootPose, initialStanceSide, goalPose, flatTerrain);
+
+      new Thread(anytimePlanner).start();
+      ThreadTools.sleep(500);
+
+      FootstepPlan bestPlanYet = anytimePlanner.getBestPlanYet();
+      assertTrue(bestPlanYet.getNumberOfSteps() > 3);
+
+      SimpleFootstep initialFootstepFirstPlan = bestPlanYet.getFootstep(0);
+      SimpleFootstep firstFootstepFirstPlan = bestPlanYet.getFootstep(1);
+      SimpleFootstep secondFootstepFirstPlan = bestPlanYet.getFootstep(2);
+
+      anytimePlanner.executingFootstep(initialFootstepFirstPlan);
+      anytimePlanner.executingFootstep(firstFootstepFirstPlan);
+      anytimePlanner.executingFootstep(secondFootstepFirstPlan);
+
+      ThreadTools.sleep(500);
+      bestPlanYet = anytimePlanner.getBestPlanYet();
+      assertTrue(bestPlanYet.getNumberOfSteps() > 2);
+
+      SimpleFootstep initialFootstepSecondPlan = bestPlanYet.getFootstep(0);
+      assertTrue(secondFootstepFirstPlan.epsilonEquals(initialFootstepSecondPlan, 1e-12));
+   }
+
    @Override
    public SimplePlanarRegionBipedalAnytimeFootstepPlanner getPlanner()
    {
@@ -95,6 +145,8 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 
       planner.setMaximumStepReach(0.4);
       planner.setMaximumStepZ(0.25);
+      planner.setMaximumStepXWhenForwardAndDown(0.25);
+      planner.setMaximumStepZWhenForwardAndDown(0.25);
       planner.setMaximumStepYaw(0.25);
       planner.setMinimumStepWidth(0.15);
       planner.setMinimumFootholdPercent(0.8);
@@ -108,7 +160,8 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 
       if (visualize)
       {
-         SCSPlanarRegionBipedalFootstepPlannerVisualizer visualizer = new SCSPlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame);
+         PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer
+               .createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame);
          planner.setBipedalFootstepPlannerListener(visualizer);
       }
 
@@ -120,6 +173,6 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
    @Override
    public boolean visualize()
    {
-      return true;
+      return visualize;
    }
 }

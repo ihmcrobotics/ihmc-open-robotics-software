@@ -19,7 +19,7 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.util.time.YoTimer;
+import us.ihmc.robotics.time.YoTimer;
 
 public class FindGoalBehavior extends AbstractBehavior
 {

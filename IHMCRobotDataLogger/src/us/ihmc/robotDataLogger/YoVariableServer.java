@@ -9,8 +9,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -21,14 +19,18 @@ import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
+import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 
-public class YoVariableServer implements RobotVisualizer
+public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
 {
    private static final int VARIABLE_BUFFER_CAPACITY = 128;
    private static final int CHANGED_BUFFER_CAPACITY = 128;
@@ -69,6 +71,7 @@ public class YoVariableServer implements RobotVisualizer
    
    private long uid = 0; 
    
+   private boolean sendKeepAlive = false;
    
    public YoVariableServer(Class<?> mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
@@ -100,7 +103,7 @@ public class YoVariableServer implements RobotVisualizer
       InetSocketAddress controlAddress = new InetSocketAddress(bindAddress, controlServer.getPort());
       sessionBroadcaster = new LogSessionBroadcaster(controlAddress, bindAddress, mainClazz, logSettings);
       producer = new YoVariableProducer(scheduler, sessionBroadcaster, handshakeBuilder, logModelProvider, mainBuffer,
-            buffers.values());
+            buffers.values(), sendKeepAlive);
             
       sessionBroadcaster.requestPort();
       producer.start();
@@ -109,6 +112,11 @@ public class YoVariableServer implements RobotVisualizer
       started = true;
    }
 
+   public void setSendKeepAlive(boolean sendKeepAlive)
+   {
+      this.sendKeepAlive = sendKeepAlive;
+   }
+   
    private List<JointHolder> startControlServer()
    {
       
@@ -142,6 +150,18 @@ public class YoVariableServer implements RobotVisualizer
          producer.close();
          controlServer.close();         
       }
+   }
+
+   @Override
+   public void tickAndUpdate()
+   {
+      this.tickAndUpdate(0.0);
+   }
+
+   @Override
+   public void tickAndUpdate(double timeToSetInSeconds)
+   {
+      this.update(TimeTools.secondsToNanoSeconds(timeToSetInSeconds));   
    }
 
    /**
@@ -254,4 +274,5 @@ public class YoVariableServer implements RobotVisualizer
       mainDynamicGraphicObjectsListRegistry = yoGraphicsListRegistry;
       
    }
+
 }

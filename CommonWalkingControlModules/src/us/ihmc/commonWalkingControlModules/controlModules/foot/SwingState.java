@@ -46,7 +46,7 @@ import us.ihmc.robotics.trajectories.providers.VectorProvider;
 public class SwingState extends AbstractUnconstrainedState
 {
    private final boolean useNewSwingTrajectoyOptimization;
-   private static final boolean CONTROL_TOE = false;
+   private final boolean controlToe;
 
    private final BooleanYoVariable replanTrajectory;
    private final BooleanYoVariable doContinuousReplanning;
@@ -108,6 +108,7 @@ public class SwingState extends AbstractUnconstrainedState
       controlDT = footControlHelper.getMomentumBasedController().getControlDT();
 
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
+      WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
 
       finalConfigurationProvider = new YoSE3ConfigurationProvider(namePrefix + "SwingFinal", worldFrame, registry);
       finalSwingHeightOffset = new DoubleYoVariable(namePrefix + "SwingFinalHeightOffset", registry);
@@ -125,8 +126,9 @@ public class SwingState extends AbstractUnconstrainedState
       footFrame = contactableFoot.getFrameAfterParentJoint();
       toeFrame = createToeFrame(robotSide);
 
-      controlFrame = CONTROL_TOE ? toeFrame : footFrame;
-      stanceFootFrame = CONTROL_TOE ? createToeFrame(robotSide.getOppositeSide()) : momentumBasedController.getReferenceFrames().getFootFrame(robotSide.getOppositeSide());
+      controlToe = walkingControllerParameters.controlToeDuringSwing();
+      controlFrame = controlToe ? toeFrame : footFrame;
+      stanceFootFrame = controlToe ? createToeFrame(robotSide.getOppositeSide()) : momentumBasedController.getReferenceFrames().getFootFrame(robotSide.getOppositeSide());
 
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       RigidBody rigidBody = contactableFoot.getRigidBody();
@@ -140,7 +142,6 @@ public class SwingState extends AbstractUnconstrainedState
       PositionTrajectoryGenerator touchdownTrajectoryGenerator = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
             finalConfigurationProvider, touchdownVelocityProvider, touchdownAccelerationProvider, swingTimeProvider, registry);
 
-      WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       double maxSwingHeightFromStanceFoot = 0.0;
       double minSwingHeightFromStanceFoot = 0.0;
       if (walkingControllerParameters != null)
@@ -368,7 +369,7 @@ public class SwingState extends AbstractUnconstrainedState
    public void setFootstep(Footstep footstep, double swingTime)
    {
       swingTimeProvider.setValue(swingTime);
-      if (CONTROL_TOE)
+      if (controlToe)
       {
          computeToeDesiredPose(footstep, newFootstepPose);
       }

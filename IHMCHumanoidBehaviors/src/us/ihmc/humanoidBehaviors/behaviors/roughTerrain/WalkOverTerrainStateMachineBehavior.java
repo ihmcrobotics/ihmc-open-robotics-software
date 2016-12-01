@@ -7,8 +7,8 @@ import javax.vecmath.Tuple3d;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.UserValidationExampleBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.FindGoalBehavior;
@@ -26,6 +26,8 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateComm
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -59,8 +61,8 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
    private final EnumYoVariable<RobotSide> nextSideToSwing;
 
-   public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions, FullHumanoidRobotModel fullRobotModel,
-         HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
+   public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions, LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
+                                              HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
       super("WalkOverTerrain", WalkOverTerrainState.class, yoTime, communicationBridge);
 
@@ -79,7 +81,11 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
                                                       goalDetectorBehaviorService);
 
       lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
+
       planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
+//      planHumanoidFootstepsBehavior.createAndAttachSCSListenerToPlanner();
+      planHumanoidFootstepsBehavior.createAndAttachYoVariableServerListenerToPlanner(logModelProvider, fullRobotModel);
+
       clearPlanarRegionsListBehavior = new ClearPlanarRegionsListBehavior(communicationBridge);
       takeSomeStepsBehavior = new TakeSomeStepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
       reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge);

@@ -158,4 +158,10 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
    {
    }
 
+   @Override
+   public void keepAlive()
+   {
+      
+   }
+
 }
