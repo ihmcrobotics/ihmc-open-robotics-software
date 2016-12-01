@@ -193,6 +193,7 @@ public class IHMCHumanoidBehaviorManager
       try
       {
          objectDetectorBehaviorService = new ObjectDetectorBehaviorService(behaviorCommunicationBridge, yoGraphicsListRegistry);
+         dispatcher.addBehaviorService(objectDetectorBehaviorService);
       }
       catch (Exception e)
       {

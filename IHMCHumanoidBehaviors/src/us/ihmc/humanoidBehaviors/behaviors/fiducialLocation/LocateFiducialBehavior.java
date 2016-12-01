@@ -9,8 +9,8 @@ public class LocateFiducialBehavior extends AbstractBehavior
 {
    public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, GoalDetectorBehaviorService fiducialDetectorBehaviorService)
    {
-      super(communicationBridge);
-      
+      super(fiducialDetectorBehaviorService.getClass().getSimpleName(), communicationBridge);
+
       addBehaviorService(fiducialDetectorBehaviorService);
    }
 
