@@ -22,8 +22,8 @@ public class BipedalFootstepPlannerNode
    private double costToHereFromStart;
    private double estimatedCostToGoal;
 
-   private static final double XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.3;
-   private static final double YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.3;
+   private static final double XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.02;
+   private static final double YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL = 0.04;
 
    private boolean isAtGoal = false;
 
@@ -175,19 +175,24 @@ public class BipedalFootstepPlannerNode
          otherNode.soleTransform.getTranslation(tempPointB);
          MathTools.roundToGivenPrecision(tempPointB, XY_DISTANCE_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
 
-         this.soleTransform.getRotationEuler(tempRotationVectorA);
-         double thisYaw = MathTools.roundToGivenPrecisionForAngle(tempRotationVectorA.getX(), YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
-
-         otherNode.soleTransform.getRotationEuler(tempRotationVectorB);
-         double otherYaw = MathTools.roundToGivenPrecisionForAngle(tempRotationVectorA.getX(), YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
-
          tempPointA.sub(tempPointB);
          tempPointA.setZ(0.0);
+         
+         if (!(tempPointA.length() < 1e-10)) return false;
+         
+         
+         this.soleTransform.getRotationEuler(tempRotationVectorA);
+         double thisYaw = MathTools.roundToGivenPrecisionForAngle(tempRotationVectorA.getZ(), YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
 
+         otherNode.soleTransform.getRotationEuler(tempRotationVectorB);
+         double otherYaw = MathTools.roundToGivenPrecisionForAngle(tempRotationVectorB.getZ(), YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);  
+
+         
 //         tempRotationVectorA.sub(tempRotationVectorB);
-//         double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(thisYaw, otherYaw);
+         double yawDifference = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(thisYaw, otherYaw));
+         if (!(yawDifference < 1e-10)) return false;
 
-         return (tempPointA.length() < 1e-10); //  && (Math.abs(yawDifference) < 1e-10);
+         return true;
       }
    }
 
@@ -224,5 +229,10 @@ public class BipedalFootstepPlannerNode
       if (!nodeToCheck.soleTransform.epsilonEquals(this.soleTransform, epsilon)) return false;
 
       return true;
+   }
+   
+   public String toString()
+   {
+      return soleTransform.toString();
    }
 }

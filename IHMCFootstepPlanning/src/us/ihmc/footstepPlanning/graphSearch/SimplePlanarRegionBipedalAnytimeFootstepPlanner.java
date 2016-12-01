@@ -1,10 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point3d;
@@ -22,11 +17,9 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegionBipedalFootstepPlanner implements AnytimeFootstepPlanner, Runnable
 {
-   private final Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
    private BipedalFootstepPlannerNode closestNodeToGoal = null;
    private final AtomicReference<FootstepPlan> bestPlanYet = new AtomicReference<>(null);
    private boolean stopRequested = false;
-   private final HashMap<Integer, List<BipedalFootstepPlannerNode>> mapToAllExploredNodes = new HashMap<>();
    private boolean isBestPlanYetOptimal = false;
    private boolean alreadySetPlanarRegions = false;
    private final AtomicReference<PlanarRegionsList> planarRegionsListReference = new AtomicReference<>(null);
@@ -60,8 +53,11 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 //      }
    }
 
-   private void initialize()
+   @Override
+   protected void initialize()
    {
+      super.initialize();
+      
       stack.clear();
       startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       stack.push(startNode);
@@ -179,36 +175,6 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          closestNodeToGoal = nodeToSetCostOf;
          FootstepPlan newBestPlan = new FootstepPlan(closestNodeToGoal);
          bestPlanYet.set(newBestPlan);
-      }
-   }
-
-   private boolean checkIfNearbyNodeAlreadyExistsAndStoreIfNot(BipedalFootstepPlannerNode nodeToExpand)
-   {
-      int hashCode = nodeToExpand.hashCode();
-      boolean containsHashCode = mapToAllExploredNodes.containsKey(hashCode);
-      if (!containsHashCode)
-      {
-         List<BipedalFootstepPlannerNode> nodesWithThisHash = new ArrayList<>();
-         nodesWithThisHash.add(nodeToExpand);
-         mapToAllExploredNodes.put(hashCode, nodesWithThisHash);
-
-         return false;
-      }
-      else
-      {
-         List<BipedalFootstepPlannerNode> nodesWithThisHash = mapToAllExploredNodes.get(hashCode);
-
-         for (int i = 0; i < nodesWithThisHash.size(); i++)
-         {
-            BipedalFootstepPlannerNode nodeWithSameHash = nodesWithThisHash.get(i);
-
-            if (nodeToExpand.equals(nodeWithSameHash))
-            {
-               return true;
-            }
-         }
-
-         return false;
       }
    }
 
