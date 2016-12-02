@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepPlannerOnFlatGroundTest;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
@@ -24,6 +25,14 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    public void testJustStraightLine()
    {
       super.testJustStraightLine(true);
+   }
+
+   @Override
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
+   public void testATightTurn()
+   {
+      super.testATightTurn(true);
    }
 
    @Override
@@ -55,25 +64,29 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
+      //      SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
 
-      planner.setMaximumStepReach(0.4);
-      planner.setMaximumStepZ(0.25);
-      planner.setMaximumStepXWhenForwardAndDown(0.25);
-      planner.setMaximumStepZWhenForwardAndDown(0.25);
-      planner.setMaximumStepYaw(0.25);
-      planner.setMinimumStepWidth(0.15);
-      planner.setMinimumFootholdPercent(0.8);
+      BipedalFootstepPlannerParameters parameters = planner.getParameters();
+      parameters.setMaximumStepReach(0.4);
+      parameters.setMaximumStepZ(0.25);
+      parameters.setMaximumStepXWhenForwardAndDown(0.25);
+      parameters.setMaximumStepZWhenForwardAndDown(0.25);
+      parameters.setMaximumStepYaw(0.15);
+      parameters.setMaximumStepWidth(0.4);
+      parameters.setMinimumStepWidth(0.15);
+      parameters.setMinimumFootholdPercent(0.8);
 
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;
-      planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
+      parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       if (visualize)
       {
-         PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame);
+         PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0,
+                                                                                                                                                       footPolygonsInSoleFrame);
          planner.setBipedalFootstepPlannerListener(visualizer);
       }
 

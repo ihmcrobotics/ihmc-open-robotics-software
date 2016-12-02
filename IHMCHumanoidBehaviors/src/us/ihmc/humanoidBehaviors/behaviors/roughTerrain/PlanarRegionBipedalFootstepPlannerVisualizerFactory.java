@@ -23,12 +23,13 @@ public class PlanarRegionBipedalFootstepPlannerVisualizerFactory
       YoVariableRegistry registry = new YoVariableRegistry(PlanarRegionBipedalFootstepPlannerVisualizerFactory.class.getSimpleName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame,
+      PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(10, footPolygonsInSoleFrame,
                                                                                                                                 registry, graphicsListRegistry);
 
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("PlannerScheduler");
       YoVariableServer yoVariableServer = new YoVariableServer(PlanarRegionBipedalFootstepPlannerVisualizerFactory.class, scheduler, logModelProvider,
                                                                LogSettings.FOOTSTEP_PLANNER, dtForViz);
+      yoVariableServer.setSendKeepAlive(true);
       footstepPlannerVisualizer.setTickAndUpdatable(yoVariableServer);
 
       yoVariableServer.setMainRegistry(registry, fullRobotModel, graphicsListRegistry);
@@ -43,7 +44,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizerFactory
       YoVariableRegistry registry = new YoVariableRegistry(PlanarRegionBipedalFootstepPlannerVisualizerFactory.class.getSimpleName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame,
+      PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(10, footPolygonsInSoleFrame,
                                                                                                                                 registry, graphicsListRegistry);
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Test"));
 

@@ -1,15 +1,12 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.random.RandomTools;
+
+import javax.vecmath.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
-import us.ihmc.robotics.MathTools;
+import java.util.Random;
 
 public class PlanarRegion
 {
@@ -256,7 +253,7 @@ public class PlanarRegion
 
       fromWorldToLocalTransform.transform(localPoint);
 
-      return isPointInside(new Point2d(localPoint.getX(), localPoint.getY()));
+      return isPointInside(localPoint.getX(), localPoint.getY());
    }
 
    /**
@@ -273,7 +270,47 @@ public class PlanarRegion
       if (!MathTools.isInsideBoundsInclusive(localPoint.getZ(), maximumOrthogonalDistance))
          return false;
       else
-         return isPointInside(new Point2d(localPoint.getX(), localPoint.getY()));
+         return isPointInside(localPoint.getX(), localPoint.getY());
+   }
+
+   /**
+    * Checks to see if a given point is on the plane or above it by the specified distance.
+    *
+    * @param point3dInWorld the point to check
+    * @param distanceFromPlane The distance above the plane that the point is allowed to be
+    * @return True if the point is on the plane or no more than distanceFromPlane above it.
+    */
+   public boolean isPointOnOrSlightlyAbove(Point3d point3dInWorld, double distanceFromPlane)
+   {
+      MathTools.checkIfPositive(distanceFromPlane);
+      Point3d localPoint = new Point3d();
+      fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
+
+      boolean onOrAbove = localPoint.getZ() >= 0.0;
+      boolean withinDistance = localPoint.getZ() < distanceFromPlane;
+      boolean isInsideXY = isPointInside(localPoint.getX(), localPoint.getY());
+
+      return onOrAbove && withinDistance && isInsideXY;
+   }
+
+   /**
+    * Checks to see if a given point is on the plane or below it by the specified distance.
+    *
+    * @param point3dInWorld the point to check
+    * @param distanceFromPlane The distance below the plane that the point is allowed to be
+    * @return True if the point is on the plane or no more than distanceFromPlane below it.
+    */
+   public boolean isPointOnOrSlightlyBelow(Point3d point3dInWorld, double distanceFromPlane)
+   {
+      MathTools.checkIfPositive(distanceFromPlane);
+      Point3d localPoint = new Point3d();
+      fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
+
+      boolean onOrBelow = localPoint.getZ() <= 0.0;
+      boolean withinDistance = localPoint.getZ() > (distanceFromPlane * -1.0);
+      boolean isInsideXY = isPointInside(localPoint.getX(), localPoint.getY());
+
+      return onOrBelow && withinDistance && isInsideXY;
    }
 
    /**
@@ -283,9 +320,21 @@ public class PlanarRegion
     */
    public boolean isPointInside(Point2d point2dInLocal)
    {
+      return isPointInside(point2dInLocal.x, point2dInLocal.y);
+   }
+
+   /**
+    * Given a 2D point expressed in the plane local frame, computes whether the point is in this region.
+    *
+    * @param xCoordinateInLocal x Coordinate of the 2D point in planar region local frame
+    * @param yCoordinateInLocal y Coordinate of the 2D point in planar region local frame
+    * @return true if the point is inside this region, false otherwise.
+    */
+   public boolean isPointInside(double xCoordinateInLocal, double yCoordinateInLocal)
+   {
       for (int i = 0; i < convexPolygons.size(); i++)
       {
-         if (convexPolygons.get(i).isPointInside(point2dInLocal))
+         if (convexPolygons.get(i).isPointInside(xCoordinateInLocal, yCoordinateInLocal))
             return true;
       }
       return false;
@@ -580,5 +629,26 @@ public class PlanarRegion
    public ConvexPolygon2d getConvexHull()
    {
       return convexHull;
+   }
+
+   public static PlanarRegion generatePlanarRegionFromRandomPolygonsWithRandomTransform(Random random, int numberOfRandomlyGeneratedPolygons,
+         double maxAbsoluteXYForPolygons, int numberOfPossiblePointsForPolygons)
+   {
+      List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
+
+      for (int i = 0; i < numberOfRandomlyGeneratedPolygons; i++)
+      {
+         ConvexPolygon2d randomPolygon = ConvexPolygon2d.generateRandomConvexPolygon2d(random, maxAbsoluteXYForPolygons, numberOfPossiblePointsForPolygons);
+         regionConvexPolygons.add(randomPolygon);
+      }
+
+      for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
+         convexPolygon.update();
+
+      Vector3d randomTranslation = RandomTools.generateRandomVector(random, 10.0);
+      Quat4d randomOrientation = RandomTools.generateRandomQuaternion(random, Math.toRadians(45.0));
+      RigidBodyTransform regionTransform = new RigidBodyTransform(randomOrientation, randomTranslation);
+
+      return new PlanarRegion(regionTransform, regionConvexPolygons);
    }
 }

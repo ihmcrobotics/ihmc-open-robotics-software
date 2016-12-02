@@ -24,6 +24,77 @@ import us.ihmc.tools.testing.MutationTestingTools;
 
 public class PlanarRegionTest
 {
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsPointOnOrSlightlyAbove()
+   {
+      Random random = new Random(1776L);
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      Point3d regionTranslation = new Point3d();
+      Point3d pointAbove = new Point3d();
+      Point3d pointBelow = new Point3d();
+      Vector3d regionNormal = new Vector3d();
+
+      for (int i = 0; i < 10000; i++)
+      {
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, 1, 10.0, 5);
+         planarRegion.getTransformToWorld(transformToWorld);
+
+         Point2d centroid = planarRegion.getLastConvexPolygon().getCentroid();
+         regionTranslation.set(centroid.x, centroid.y, 0.0);
+         transformToWorld.transform(regionTranslation);
+         regionTranslation.setZ(planarRegion.getPlaneZGivenXY(regionTranslation.x, regionTranslation.y));
+
+         planarRegion.getNormal(regionNormal);
+
+         regionNormal.normalize();
+         regionNormal.scale(1e-6);
+
+         pointAbove.add(regionTranslation, regionNormal);
+         pointBelow.sub(regionTranslation, regionNormal);
+
+         assertTrue(planarRegion.isPointOnOrSlightlyAbove(pointAbove, 1e-5));
+         assertFalse(planarRegion.isPointOnOrSlightlyAbove(pointBelow, 1e-5));
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsPointOnOrSlightlyBelow()
+   {
+      Random random = new Random(1776L);
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      Point3d regionTranslation = new Point3d();
+      Point3d pointAbove = new Point3d();
+      Point3d pointBelow = new Point3d();
+      Vector3d regionNormal = new Vector3d();
+
+      for (int i = 0; i < 10000; i++)
+      {
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, 1, 10.0, 5);
+         planarRegion.getTransformToWorld(transformToWorld);
+
+         Point2d centroid = planarRegion.getLastConvexPolygon().getCentroid();
+         regionTranslation.set(centroid.x, centroid.y, 0.0);
+         transformToWorld.transform(regionTranslation);
+         regionTranslation.setZ(planarRegion.getPlaneZGivenXY(regionTranslation.x, regionTranslation.y));
+
+         planarRegion.getNormal(regionNormal);
+
+         regionNormal.normalize();
+         regionNormal.scale(1e-6);
+
+         pointAbove.add(regionTranslation, regionNormal);
+         pointBelow.sub(regionTranslation, regionNormal);
+
+         assertTrue(planarRegion.isPointOnOrSlightlyBelow(pointBelow, 1e-5));
+         assertFalse(planarRegion.isPointOnOrSlightlyBelow(pointAbove, 1e-5));
+      }
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCreationOfBoundingBoxWithAllPointsGreaterThanOrigin()
@@ -573,12 +644,14 @@ public class PlanarRegionTest
          for (ConvexPolygon2d convexPolygon2d : regionConvexPolygons)
          {
             ConvexPolygon2d convexPolygon2dInWorld = convexPolygon2d.applyTransformAndProjectToXYPlaneCopy(transformToWorld);
-            for(int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
+            for (int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
             {
                Point2d vertex = convexPolygon2dInWorld.getVertex(i);
                double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.x, vertex.y);
 
-               assertTrue("Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: " + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.x, vertex.y, planeZGivenXY));
+               assertTrue(
+                     "Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
+                           + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.x, vertex.y, planeZGivenXY));
             }
          }
       }
@@ -611,7 +684,7 @@ public class PlanarRegionTest
 
       assertEquals(3.0, planeZGivenXY, 1e-7);
 
-      double angle = Math.PI/4.0;
+      double angle = Math.PI / 4.0;
       transformToWorld.setRotationEulerAndZeroTranslation(0.0, angle, 0.0);
       planarRegion = new PlanarRegion(transformToWorld, polygonList);
       xWorld = 1.3;
@@ -621,7 +694,7 @@ public class PlanarRegionTest
       assertTrue(planarRegion.isPointInside(new Point3d(0.0, 0.0, 0.0), 1e-7));
 
       // Try really close to 90 degrees
-      angle = Math.PI/2.0 - 0.001;
+      angle = Math.PI / 2.0 - 0.001;
       transformToWorld.setRotationEulerAndZeroTranslation(0.0, angle, 0.0);
       planarRegion = new PlanarRegion(transformToWorld, polygonList);
       xWorld = 1.3;
@@ -631,7 +704,7 @@ public class PlanarRegionTest
       assertTrue(planarRegion.isPointInside(new Point3d(0.0, 0.0, 0.0), 1e-7));
 
       // Exactly 90 degrees.
-      angle = Math.PI/2.0 - 0.1;
+      angle = Math.PI / 2.0 - 0.1;
       transformToWorld.setRotationEulerAndZeroTranslation(0.0, angle, 0.0);
       planarRegion = new PlanarRegion(transformToWorld, polygonList);
       xWorld = 1.3;
@@ -647,7 +720,7 @@ public class PlanarRegionTest
 
       // If we set the transform to exactly z axis having no zWorld component (exactly 90 degree rotation about y in this case), then we do get NaN.
       // However (0, 0, 0) should still be inside. As should (0, 0, 0.5)
-      transformToWorld.set(new double[]{0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0});
+      transformToWorld.set(new double[] { 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 });
       planarRegion = new PlanarRegion(transformToWorld, polygonList);
       xWorld = 1.3;
       planeZGivenXY = planarRegion.getPlaneZGivenXY(xWorld, yWorld);
@@ -678,12 +751,13 @@ public class PlanarRegionTest
    {
       for (ConvexPolygon2d convexPolygon2dInWorld : regionConvexPolygons)
       {
-         for(int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
+         for (int i = 0; i < convexPolygon2dInWorld.getNumberOfVertices(); i++)
          {
             Point2d vertex = convexPolygon2dInWorld.getVertex(i);
             double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.x, vertex.y);
 
-            assertTrue("Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: " + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.x, vertex.y, planeZGivenXY));
+            assertTrue("Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
+                  + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.x, vertex.y, planeZGivenXY));
          }
       }
    }

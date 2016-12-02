@@ -65,6 +65,11 @@ public class YoVariableClient implements LogPacketHandler
       this(LogSessionDisplay.getAnnounceRequest(remapHandler), listener, registryPrefix);
    }
 
+   public YoVariableClient(YoVariablesUpdatedListener listener, String registryPrefix, LogSessionDisplay.RobotIPToNameRemapHandler remapHandler, LogSessionDisplay.LogSessionFilter... filters)
+   {
+      this(LogSessionDisplay.getAnnounceRequest(remapHandler, filters), listener, registryPrefix);
+   }
+
    public YoVariableClient(AnnounceRequest request, final YoVariablesUpdatedListener yoVariablesUpdatedListener, String registryPrefix)
    {      
       this.serverName = request.getName();

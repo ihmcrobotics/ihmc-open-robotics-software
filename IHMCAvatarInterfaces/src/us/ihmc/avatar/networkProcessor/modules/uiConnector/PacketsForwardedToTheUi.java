@@ -5,12 +5,14 @@ import java.util.HashMap;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.DoorLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.script.ScriptBehaviorStatusPacket;
@@ -25,7 +27,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearComm
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarScanMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseMocapExperimentPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
@@ -75,6 +76,7 @@ public class PacketsForwardedToTheUi
       HandRotateAboutAxisPacket.class,
       DepthDataClearCommand.class,
       ValveLocationPacket.class,
+      DoorLocationPacket.class,
       PointCloudWorldPacket.class,
       HandJointAnglePacket.class,
       WholeBodyTrajectoryMessage.class,

@@ -15,7 +15,7 @@ apply plugin: 'java-library-distribution'
 
 if(!rootProject.name.equals('IHMCOpenRoboticsSoftware')) { evaluationDependsOn(':IHMCOpenRoboticsSoftware') }
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"

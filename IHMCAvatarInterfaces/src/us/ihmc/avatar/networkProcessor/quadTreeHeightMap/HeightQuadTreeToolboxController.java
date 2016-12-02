@@ -12,7 +12,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestLidarScanMessage;
+import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestCommand;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.LidarScanCommand;

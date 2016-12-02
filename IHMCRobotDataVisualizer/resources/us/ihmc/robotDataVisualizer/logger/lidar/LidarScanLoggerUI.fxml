@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+
+<BorderPane fx:id="mainPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
+   <bottom>
+      <TabPane prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <tabs>
+          <Tab text="Log Writer">
+               <content>
+                  <AnchorPane prefWidth="602.0">
+                     <children>
+                        <fx:include fx:id="lidarScanLogWriterControlPane" source="LidarScanLogWriterControlPane.fxml" />
+                     </children>
+                  </AnchorPane>
+               </content>
+            </Tab>
+          <Tab text="Log Reader">
+               <content>
+                  <AnchorPane prefWidth="602.0">
+                     <children>
+                        <fx:include fx:id="lidarScanLogReaderControlPane" source="LidarScanLogReaderControlPane.fxml" />
+                     </children>
+                  </AnchorPane>
+               </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </bottom>
+   <center>
+      <Pane fx:id="centerPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+   </center>
+</BorderPane>
