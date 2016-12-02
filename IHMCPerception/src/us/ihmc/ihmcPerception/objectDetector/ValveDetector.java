@@ -154,6 +154,7 @@ public class ValveDetector {
 
     private static PreprocessedImage processImage(BufferedImage image, int targetW, int targetH)
     {
+        image = normalizeBrightnessAndContrast(image);
         BufferedImage padded = image, scaled = image;
         if (image.getWidth() != targetW || image.getHeight() != targetH)
         {
@@ -193,6 +194,54 @@ public class ValveDetector {
         FloatPointer pointer = new FloatPointer(output.length);
         pointer.put(output);
         return new PreprocessedImage(pointer, tx, ty, sx, sy);
+    }
+
+    private static BufferedImage normalizeBrightnessAndContrast(BufferedImage source)
+    {
+        double avg = 0, avg2 = 0;
+        int n = source.getWidth() * source.getHeight();
+        for (int y = 0; y < source.getHeight(); y++)
+        {
+            for (int x = 0; x < source.getWidth(); x++)
+            {
+                int rgb = source.getRGB(x, y);
+                int r = (rgb >> 16) & 0xFF;
+                int g = (rgb >> 8) & 0xFF;
+                int b = rgb & 0xFF;
+                double gray = (r + g + b) / 3.0;
+                avg += gray / n;
+                avg2 += gray * gray / n;
+            }
+        }
+
+        double var = avg2 - avg * avg;
+        double stddev = Math.sqrt(var);
+
+        double expectedMean = 127;
+        double expectedStdDev = 255 / 3.0;
+
+        BufferedImage result = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < source.getHeight(); y++)
+        {
+            for (int x = 0; x < source.getWidth(); x++)
+            {
+                int rgb = source.getRGB(x, y);
+                double r = (rgb >> 16) & 0xFF;
+                double g = (rgb >> 8) & 0xFF;
+                double b = rgb & 0xFF;
+                r = ((r - avg) / stddev) * expectedStdDev + expectedMean;
+                g = ((g - avg) / stddev) * expectedStdDev + expectedMean;
+                b = ((b - avg) / stddev) * expectedStdDev + expectedMean;
+                r = Math.min(255, Math.max(0, r));
+                g = Math.min(255, Math.max(0, g));
+                b = Math.min(255, Math.max(0, b));
+                int ir = (int)r << 16;
+                int ig = (int)g << 8;
+                int ib = (int)b;
+                result.setRGB(x, y, 0xff000000 | ir | ig | ib);
+            }
+        }
+        return result;
     }
 
     private static Dimension getScaledDimension(Dimension imgSize, Dimension boundary) {
