@@ -1,13 +1,12 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.random.RandomTools;
+
+import javax.vecmath.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import javax.vecmath.*;
-
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
 
 public class PlanarRegion
 {
@@ -254,7 +253,7 @@ public class PlanarRegion
 
       fromWorldToLocalTransform.transform(localPoint);
 
-      return isPointInside(new Point2d(localPoint.getX(), localPoint.getY()));
+      return isPointInside(localPoint.getX(), localPoint.getY());
    }
 
    /**
@@ -271,7 +270,7 @@ public class PlanarRegion
       if (!MathTools.isInsideBoundsInclusive(localPoint.getZ(), maximumOrthogonalDistance))
          return false;
       else
-         return isPointInside(new Point2d(localPoint.getX(), localPoint.getY()));
+         return isPointInside(localPoint.getX(), localPoint.getY());
    }
 
    /**
@@ -289,7 +288,7 @@ public class PlanarRegion
 
       boolean onOrAbove = localPoint.getZ() >= 0.0;
       boolean withinDistance = localPoint.getZ() < distanceFromPlane;
-      boolean isInsideXY = isPointInside(new Point2d(localPoint.getX(), localPoint.getY()));
+      boolean isInsideXY = isPointInside(localPoint.getX(), localPoint.getY());
 
       return onOrAbove && withinDistance && isInsideXY;
    }
@@ -309,7 +308,7 @@ public class PlanarRegion
 
       boolean onOrBelow = localPoint.getZ() <= 0.0;
       boolean withinDistance = localPoint.getZ() > (distanceFromPlane * -1.0);
-      boolean isInsideXY = isPointInside(new Point2d(localPoint.getX(), localPoint.getY()));
+      boolean isInsideXY = isPointInside(localPoint.getX(), localPoint.getY());
 
       return onOrBelow && withinDistance && isInsideXY;
    }
@@ -321,9 +320,21 @@ public class PlanarRegion
     */
    public boolean isPointInside(Point2d point2dInLocal)
    {
+      return isPointInside(point2dInLocal.x, point2dInLocal.y);
+   }
+
+   /**
+    * Given a 2D point expressed in the plane local frame, computes whether the point is in this region.
+    *
+    * @param xCoordinateInLocal x Coordinate of the 2D point in planar region local frame
+    * @param yCoordinateInLocal y Coordinate of the 2D point in planar region local frame
+    * @return true if the point is inside this region, false otherwise.
+    */
+   public boolean isPointInside(double xCoordinateInLocal, double yCoordinateInLocal)
+   {
       for (int i = 0; i < convexPolygons.size(); i++)
       {
-         if (convexPolygons.get(i).isPointInside(point2dInLocal))
+         if (convexPolygons.get(i).isPointInside(xCoordinateInLocal, yCoordinateInLocal))
             return true;
       }
       return false;
@@ -620,11 +631,12 @@ public class PlanarRegion
       return convexHull;
    }
 
-   public static PlanarRegion generatePlanarRegionFromRandomPolygonsWithRandomTransform(Random random, int numberOfRandomlyGeneratedPolygons, double maxAbsoluteXYForPolygons, int numberOfPossiblePointsForPolygons)
+   public static PlanarRegion generatePlanarRegionFromRandomPolygonsWithRandomTransform(Random random, int numberOfRandomlyGeneratedPolygons,
+         double maxAbsoluteXYForPolygons, int numberOfPossiblePointsForPolygons)
    {
       List<ConvexPolygon2d> regionConvexPolygons = new ArrayList<>();
 
-      for(int i = 0; i < numberOfRandomlyGeneratedPolygons; i++)
+      for (int i = 0; i < numberOfRandomlyGeneratedPolygons; i++)
       {
          ConvexPolygon2d randomPolygon = ConvexPolygon2d.generateRandomConvexPolygon2d(random, maxAbsoluteXYForPolygons, numberOfPossiblePointsForPolygons);
          regionConvexPolygons.add(randomPolygon);
