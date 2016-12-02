@@ -127,6 +127,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       parameters.setMaximumStepZWhenForwardAndDown(0.10);
       
       parameters.setMaximumStepYaw(0.15); //0.25);
+      parameters.setMaximumStepWidth(0.4);
       parameters.setMinimumStepWidth(0.15);
       parameters.setMinimumFootholdPercent(0.95);
 
