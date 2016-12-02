@@ -8,7 +8,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
 {
-   private double modelScale = 1.0;
+   private final double modelScale;
    private double massScalePower = 3.0;
    
    private final double ankleHeight ;
@@ -27,15 +27,24 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
    private final SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handAttachmentPlateToWristTransforms = new SideDependentList<RigidBodyTransform>();
 
-   public AtlasPhysicalProperties()
+   public AtlasPhysicalProperties(double modelScale)
    {
+      this.modelScale = modelScale;
+
+      double footWidthScale = modelScale;
+//      if (modelScale < 1.0)
+//      {
+//         footWidthScale = modelScale + 0.5 * (1.0 - modelScale);
+//      }
+      
+      
       ankleHeight = modelScale * 0.084;                                                                      
       pelvisToFoot = modelScale * 0.887;                                                                     
-      footWidthForControl = modelScale * 0.11; //0.12; // 0.08;   //0.124887;                                
-      toeWidthForControl = modelScale * 0.085; //0.095; // 0.07;   //0.05;   //                              
+      footWidthForControl = footWidthScale * 0.11; //0.12; // 0.08;   //0.124887;                                
+      toeWidthForControl = footWidthScale * 0.085; //0.095; // 0.07;   //0.05;   //                              
       footLengthForControl = modelScale * 0.22; //0.255;                                                     
       footBackForControl = modelScale * 0.085; // 0.09; // 0.06;   //0.082;    // 0.07;                      
-      actualFootWidth = modelScale * 0.138;                                                                  
+      actualFootWidth = footWidthScale * 0.138;                                                                  
       actualFootLength = modelScale * 0.26;                                                                  
       footStartToetaperFromBack = modelScale * 0.195;                                                        
       footForward = footLengthForControl - footBackForControl; // 0.16;   //0.178;    // 0.18;  
@@ -136,10 +145,6 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
       return massScalePower;
    }
 
-   public void setModelScale(double modelScale)
-   {
-      this.modelScale = modelScale;
-   }
 
    public void setMassScalePower(double massScalePower)
    {

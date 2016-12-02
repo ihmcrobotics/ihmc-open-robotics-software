@@ -24,6 +24,18 @@ public abstract class CapturePointPlannerParameters
    /** Refers to the duration of the first transfer when starting to walk. */
    public abstract double getDoubleSupportInitialTransferDuration();
 
+   private final double modelScale;
+
+   protected CapturePointPlannerParameters()
+   {
+      this(1.0);
+   }
+
+   protected CapturePointPlannerParameters(double modelScale)
+   {
+      this.modelScale = modelScale;
+   }
+
    /** FIXME That's a hack which makes the planner slower than the swing foot. Need to get rid of it. */
    @Deprecated
    public double getAdditionalTimeForSingleSupport()
@@ -66,7 +78,7 @@ public abstract class CapturePointPlannerParameters
     */
    public double getMaxInstantaneousCapturePointErrorForStartingSwing()
    {
-      return 0.025;
+      return modelScale * 0.025;
    }
 
    /**
@@ -74,7 +86,7 @@ public abstract class CapturePointPlannerParameters
     */
    public double getMaxAllowedErrorWithoutPartialTimeFreeze()
    {
-      return 0.03;
+      return modelScale * 0.03;
    }
 
    /**
@@ -159,7 +171,7 @@ public abstract class CapturePointPlannerParameters
     */
    public double getCMPSafeDistanceAwayFromSupportEdges()
    {
-      return 0.01;
+      return modelScale * 0.01;
    }
 
    /**
@@ -196,7 +208,7 @@ public abstract class CapturePointPlannerParameters
     */
    public double getStepLengthThresholdForExitCMPOnToesWhenSteppingDown()
    {
-      return 0.15;
+      return modelScale * 0.15;
    }
 
    /**
@@ -206,7 +218,7 @@ public abstract class CapturePointPlannerParameters
     */
    public double getStepHeightThresholdForExitCMPOnToesWhenSteppingDown()
    {
-      return 0.10;
+      return modelScale * 0.10;
    }
 
    /**
@@ -215,7 +227,7 @@ public abstract class CapturePointPlannerParameters
     */
    public double getCMPSafeDistanceAwayFromToesWhenSteppingDown()
    {
-      return 0.0;
+      return modelScale * 0.0;
    }
 
    /**
