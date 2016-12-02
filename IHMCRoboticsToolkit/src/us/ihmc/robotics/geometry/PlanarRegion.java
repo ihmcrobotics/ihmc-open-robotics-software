@@ -275,6 +275,46 @@ public class PlanarRegion
    }
 
    /**
+    * Checks to see if a given point is on the plane or above it by the specified distance.
+    *
+    * @param point3dInWorld the point to check
+    * @param distanceFromPlane The distance above the plane that the point is allowed to be
+    * @return True if the point is on the plane or no more than distanceFromPlane above it.
+    */
+   public boolean isPointOnOrSlightlyAbove(Point3d point3dInWorld, double distanceFromPlane)
+   {
+      MathTools.checkIfPositive(distanceFromPlane);
+      Point3d localPoint = new Point3d();
+      fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
+
+      boolean onOrAbove = localPoint.getZ() >= 0.0;
+      boolean withinDistance = localPoint.getZ() < distanceFromPlane;
+      boolean isInsideXY = isPointInside(new Point2d(localPoint.getX(), localPoint.getY()));
+
+      return onOrAbove && withinDistance && isInsideXY;
+   }
+
+   /**
+    * Checks to see if a given point is on the plane or below it by the specified distance.
+    *
+    * @param point3dInWorld the point to check
+    * @param distanceFromPlane The distance below the plane that the point is allowed to be
+    * @return True if the point is on the plane or no more than distanceFromPlane below it.
+    */
+   public boolean isPointOnOrSlightlyBelow(Point3d point3dInWorld, double distanceFromPlane)
+   {
+      MathTools.checkIfPositive(distanceFromPlane);
+      Point3d localPoint = new Point3d();
+      fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
+
+      boolean onOrBelow = localPoint.getZ() <= 0.0;
+      boolean withinDistance = localPoint.getZ() > (distanceFromPlane * -1.0);
+      boolean isInsideXY = isPointInside(new Point2d(localPoint.getX(), localPoint.getY()));
+
+      return onOrBelow && withinDistance && isInsideXY;
+   }
+
+   /**
     * Given a 2D point expressed in the plane local frame, computes whether the point is in this region.
     * @param point2dInLocal query expressed in local coordinates.
     * @return true if the point is inside this region, false otherwise.
