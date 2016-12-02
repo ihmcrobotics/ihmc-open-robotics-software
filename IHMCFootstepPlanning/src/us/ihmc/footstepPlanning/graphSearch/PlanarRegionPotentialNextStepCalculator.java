@@ -239,7 +239,7 @@ public class PlanarRegionPotentialNextStepCalculator
       BipedalFootstepPlannerNode goalNode = computeGoalNodeIfGoalIsReachable(nodeToExpand);
       if (goalNode != null)
       {
-         boolean acceptable = checkIfNodeAcceptableScoreAndAddToList(goalNode, nodesToAdd);
+         boolean acceptable = checkIfNodeAcceptableScoreAndAddToList(goalNode, nodesToAdd, new Vector3d(), 0.0);
          if (acceptable)
             return nodesToAdd;
       }
@@ -288,11 +288,11 @@ public class PlanarRegionPotentialNextStepCalculator
       BipedalFootstepPlannerNode childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, idealStepVector, idealStepYaw);
       seeIfNodeIsAtGoal(childNode);
 
-      checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd);
+      checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw);
 
       for (double xStep = idealStepVector.getX() / 2.0; xStep < 1.6 * idealStepVector.getX(); xStep = xStep + idealStepVector.getX() / 4.0)
       {
-         for (double yStep = idealFootstepWidth; yStep < 1.6 * idealFootstepWidth; yStep = yStep + idealFootstepWidth / 4.0)
+         for (double yStep = parameters.getMinimumStepWidth(); yStep < parameters.getMaximumStepWidth(); yStep = yStep + parameters.getMaximumStepWidth() / 4.0)
          {
             //for (double thetaStep = -0.1; thetaStep < 0.1; thetaStep = thetaStep + 0.1 / 2.0)
             {
@@ -302,7 +302,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
                seeIfNodeIsAtGoal(childNode);
 
-               checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd);
+               checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw);
             }
          }
       }
@@ -315,7 +315,7 @@ public class PlanarRegionPotentialNextStepCalculator
       childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector, nextStepYaw);
 
       seeIfNodeIsAtGoal(childNode);
-      checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd);
+      checkIfNodeAcceptableScoreAndAddToList(childNode, nodesToAdd, idealStepVector, idealStepYaw);
 
       NodeScoreComparator nodeScoreComparator = new NodeScoreComparator();
 
@@ -376,7 +376,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
    double spoofScore = 0.0;
 
-   private boolean checkIfNodeAcceptableScoreAndAddToList(BipedalFootstepPlannerNode node, ArrayList<BipedalFootstepPlannerNode> nodesToAdd)
+   private boolean checkIfNodeAcceptableScoreAndAddToList(BipedalFootstepPlannerNode node, ArrayList<BipedalFootstepPlannerNode> nodesToAdd, Vector3d idealStepVector, double idealStepYaw)
    {
       boolean acceptable = checkNodeAcceptableToExpand(node);
 
@@ -394,7 +394,17 @@ public class PlanarRegionPotentialNextStepCalculator
          node.getSoleTransform(soleTransforms.get(node.getRobotSide()));
          parentNode.getSoleTransform(soleTransforms.get(parentNode.getRobotSide()));
 
-         double score = bipedalStepScorer.scoreStep(node.getRobotSide(), soleTransforms);
+         RigidBodyTransform nodeTransform = new RigidBodyTransform();
+         node.getSoleTransform(nodeTransform);
+         FramePose candidateFootPose = new FramePose(ReferenceFrame.getWorldFrame(), nodeTransform);
+         FramePose stanceFootPose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransforms.get(node.getRobotSide().getOppositeSide()));
+         FramePose swingStartFootPose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransforms.get(node.getRobotSide()));
+         FramePose idealFootstepPose = new FramePose(ReferenceFrame.getWorldFrame());
+         idealFootstepPose.set(stanceFootPose);
+         idealFootstepPose.translate(idealStepVector);
+         idealFootstepPose.setYawPitchRoll(idealStepYaw, 0.0, 0.0);
+         Point3d swingFootGoal = goalPositions.get(node.getRobotSide());
+         double score = bipedalStepScorer.scoreFootstep(stanceFootPose, swingStartFootPose, idealFootstepPose, candidateFootPose, swingFootGoal);
          node.setSingleStepScore(score);
       }
 
