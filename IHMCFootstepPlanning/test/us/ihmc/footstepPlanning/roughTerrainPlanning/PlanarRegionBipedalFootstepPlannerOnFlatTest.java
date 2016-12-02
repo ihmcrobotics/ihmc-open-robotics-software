@@ -30,6 +30,14 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
+   public void testATightTurn()
+   {
+      super.testATightTurn(true);
+   }
+
+   @Override
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testStraightLineWithInitialTurn()
    {
       super.testStraightLineWithInitialTurn(true);
@@ -56,14 +64,14 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
-//      SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
+      //      SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
 
       BipedalFootstepPlannerParameters parameters = planner.getParameters();
       parameters.setMaximumStepReach(0.4);
       parameters.setMaximumStepZ(0.25);
       parameters.setMaximumStepXWhenForwardAndDown(0.25);
       parameters.setMaximumStepZWhenForwardAndDown(0.25);
-      parameters.setMaximumStepYaw(0.25);
+      parameters.setMaximumStepYaw(0.15);
       parameters.setMinimumStepWidth(0.15);
       parameters.setMinimumFootholdPercent(0.8);
 
