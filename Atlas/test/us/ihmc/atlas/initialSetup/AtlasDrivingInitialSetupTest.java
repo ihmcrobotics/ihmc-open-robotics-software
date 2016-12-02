@@ -29,7 +29,7 @@ public class AtlasDrivingInitialSetupTest
    @Test(timeout = 30000)
    public void testLoadFile()
    {
-	   AtlasPhysicalProperties atlasPhysicalProperties = new AtlasPhysicalProperties(1);
+	   AtlasPhysicalProperties atlasPhysicalProperties = new AtlasPhysicalProperties();
       AtlasRobotModel robotModel = new AtlasRobotModel(version, DRCRobotModel.RobotTarget.SCS, false);
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       DRCRobotJointMap jointMap = new AtlasJointMap(version, atlasPhysicalProperties);
@@ -43,7 +43,7 @@ public class AtlasDrivingInitialSetupTest
    public void testFileContainsAllJoints()
    {
       boolean containsAllJoints = true;
-      AtlasPhysicalProperties atlasPhysicalProperties = new AtlasPhysicalProperties(1);
+      AtlasPhysicalProperties atlasPhysicalProperties = new AtlasPhysicalProperties();
       DRCRobotJointMap jointMap = new AtlasJointMap(version, atlasPhysicalProperties);
       try
       {

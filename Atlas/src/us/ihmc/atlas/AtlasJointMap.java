@@ -445,7 +445,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    @Override
    public double getMassScalePower()
    {
-      return 2.0;
+      return atlasPhysicalProperties.getMassScalePower();
    }
 
    public AtlasPhysicalProperties getPhysicalProperties()

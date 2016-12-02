@@ -15,6 +15,7 @@ import javax.vecmath.Vector3d;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.math3.util.Precision;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
@@ -83,9 +84,13 @@ public class RobotDescriptionFromSDFLoader
 
       RobotDescription robotDescription = loadModelFromSDF(generalizedSDFRobotModel, jointNameMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
 
-      // Scale the robotDescription before adding points from the jointMap
-      robotDescription.scale(jointNameMap.getModelScale(), jointNameMap.getMassScalePower(), Arrays.asList(jointNameMap.getHighInertiaForStableSimulationJoints()));
-      // Everything from here on will be done in "scaled robot coordinates"
+      if(!Precision.equals(jointNameMap.getModelScale(), 1.0, 1))
+      {
+         System.out.println("Scaling " + jointNameMap.getModelName() + " with factor " + jointNameMap.getModelScale());
+         // Scale the robotDescription before adding points from the jointMap
+         robotDescription.scale(jointNameMap.getModelScale(), jointNameMap.getMassScalePower(), Arrays.asList(jointNameMap.getHighInertiaForStableSimulationJoints()));
+         // Everything from here on will be done in "scaled robot coordinates"
+      }
       
       
       // Ground Contact Points from joint name map
