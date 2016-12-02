@@ -2,6 +2,7 @@ package us.ihmc.ihmcPerception.objectDetector;
 
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.caffe;
 import org.bytedeco.javacpp.caffe.Caffe;
 import org.bytedeco.javacpp.caffe.FloatBlob;
@@ -39,7 +40,7 @@ public class ValveDetector {
             weights = exportResource("/valvenet/snapshot_iter_1761.caffemodel", tempDir);
 
             String[] cudaLibs = {"libcublas.so.7.5", "libcudart.so.7.5", "libcurand.so.7.5"};
-            File cudaLibsDir = new File("./");
+            File cudaLibsDir = Loader.getTempDir();
             for (String cudaLib : cudaLibs)
             {
                if (exportResource("/" + cudaLib, cudaLibsDir.getAbsolutePath()).isEmpty())
