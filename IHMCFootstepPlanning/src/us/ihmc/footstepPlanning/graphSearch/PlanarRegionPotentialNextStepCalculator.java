@@ -259,7 +259,7 @@ public class PlanarRegionPotentialNextStepCalculator
       double idealFootstepLength = parameters.getIdealFootstepLength();
       double idealFootstepWidth = parameters.getIdealFootstepWidth();
 
-      Vector3d idealStepVector = computeIdealStepVector(parameters, soleZUpTransform, nextSide, currentToGoalVector, distance);
+      Vector3d idealStepVector = computeIdealStepVector(parameters, soleZUpTransform, nextSide, currentToGoalVector);
 
       Point3d idealStepLocationInWorld = new Point3d(idealStepVector);
       soleZUpTransform.transform(idealStepLocationInWorld);
@@ -323,24 +323,25 @@ public class PlanarRegionPotentialNextStepCalculator
       return nodesToAdd;
    }
 
-   private Vector3d computeIdealStepVector(BipedalFootstepPlannerParameters parameters, RigidBodyTransform soleZUpTransform, RobotSide nextSide,
-                                           Vector3d currentToGoalVector, double distance)
+   private static Vector3d computeIdealStepVector(BipedalFootstepPlannerParameters parameters, RigidBodyTransform soleZUpTransform, RobotSide nextSide, Vector3d currentToGoalInWorld)
    {
-      Vector3d currentToGoalInSoleFrame = new Vector3d(currentToGoalVector);
+      double distanceToGoal = currentToGoalInWorld.length();
+
+      Vector3d currentToGoalInSoleFrame = new Vector3d(currentToGoalInWorld);
       RigidBodyTransform inverseTransform = new RigidBodyTransform(soleZUpTransform);
       inverseTransform.invert();
       inverseTransform.transform(currentToGoalInSoleFrame);
 
       Vector3d idealStepVector;
 
-      if (distance > 2.0 * parameters.getMaximumStepReach())
+      if (distanceToGoal > 2.0 * parameters.getMaximumStepReach())
       {
          idealStepVector = new Vector3d(parameters.getIdealFootstepLength(), nextSide.negateIfRightSide(parameters.getIdealFootstepWidth()), 0.0);
 
          double idealYawInSoleFrame = Math.atan2(currentToGoalInSoleFrame.getY(), currentToGoalInSoleFrame.getX());
 
          double numberOfStepsToYawToGoal = Math.abs(idealYawInSoleFrame) / parameters.getMaximumStepYaw();
-         double distancePerStepToTurn = distance / numberOfStepsToYawToGoal * 0.25;
+         double distancePerStepToTurn = distanceToGoal / numberOfStepsToYawToGoal * 0.25;
 
          if (idealStepVector.getX() > distancePerStepToTurn)
          {

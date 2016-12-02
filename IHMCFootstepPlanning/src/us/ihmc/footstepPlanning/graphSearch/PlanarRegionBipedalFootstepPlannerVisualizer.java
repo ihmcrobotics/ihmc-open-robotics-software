@@ -30,7 +30,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFootstepPlannerListener
 {
    private static final double FOOTSTEP_PLANNER_YO_VARIABLE_SERVER_DT = 0.01;
-   private final int numberOfSolutionPolygons = 6;
+   private final int numberOfSolutionPolygons;
 
    private boolean verbose = false;
 
@@ -69,8 +69,10 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
    private TickAndUpdatable tickAndUpdatable;
 
-   public PlanarRegionBipedalFootstepPlannerVisualizer(SideDependentList<ConvexPolygon2d> feetPolygonsInSoleFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public PlanarRegionBipedalFootstepPlannerVisualizer(int numberOfSolutionPolygons, SideDependentList<ConvexPolygon2d> feetPolygonsInSoleFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
+      this.numberOfSolutionPolygons = numberOfSolutionPolygons;
+
       ConvexPolygon2d leftFootInSoleFrame = feetPolygonsInSoleFrame.get(RobotSide.LEFT);
       ConvexPolygon2d rightFootInSoleFrame = feetPolygonsInSoleFrame.get(RobotSide.RIGHT);
 
@@ -155,6 +157,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
          
          leftFootstepSolvedPlanViz.setPoseToNaN();
          rightFootstepSolvedPlanViz.setPoseToNaN();
+         
       }
       
       leftAcceptedFootstepSurfaceNormal = new YoFrameVector("leftAcceptedFootstepSurfaceNormal", worldFrame, registry);
@@ -329,8 +332,9 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    {
       plannerUpdateIndex.set(0);
 
+      hideExpandingFootstepViz();
+      
       setPlanVizToNaN();
-      tickAndUpdate();
 
       int numberOfSteps = footstepPlan.getNumberOfSteps();
       FramePose soleFramePose = new FramePose();
@@ -358,20 +362,25 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
          ArrayList<YoGraphicPolygon> polygonsViz = solvedPlanFootstepsViz.get(robotSide);
          YoGraphicPolygon yoGraphicPolygon = polygonsViz.get(index);
          yoGraphicPolygon.setPose(soleFramePose);
-         
+         index++;
+
          if (index >= numberOfSolutionPolygons)
          {
-            index = 0;
+            leftIndex = 0;
+            rightIndex = 0;
             tickAndUpdate();
          }
          
-         if (robotSide == RobotSide.LEFT)
-         {
-            leftIndex = index;
-         }
          else
          {
-            rightIndex = index;
+            if (robotSide == RobotSide.LEFT)
+            {
+               leftIndex = index;
+            }
+            else
+            {
+               rightIndex = index;
+            }
          }
       }
 
@@ -383,10 +392,22 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       tickAndUpdate();
    }
 
+   private void hideExpandingFootstepViz()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footstepsToExpandViz.get(robotSide).setPoseToNaN();
+         acceptedFootstepsViz.get(robotSide).setPoseToNaN();
+         rejectedFootstepsViz.get(robotSide).setPoseToNaN();
+      }
+   }
+
    @Override
    public void notifyListenerSolutionWasNotFound()
    {
       plannerUpdateIndex.set(0);
+
+      hideExpandingFootstepViz();
 
       setPlanVizToNaN();
       if (verbose)
