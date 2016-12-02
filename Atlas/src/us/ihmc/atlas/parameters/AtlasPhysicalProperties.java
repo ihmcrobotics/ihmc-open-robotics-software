@@ -42,7 +42,6 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
       this(height/ATLAS_HEIGHT);
       
       double massFactor = Math.log(weight/ATLAS_WEIGHT)/Math.log(modelScale);
-      System.out.println("Mass factor is " + massFactor);
       setMassScalePower(massFactor);
    }
    
