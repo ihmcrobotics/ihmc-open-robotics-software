@@ -203,7 +203,7 @@ public class ObjectDetectorFromCameraImages
             GeometryMath_F64.mult(pixelToNorm, bottomRight, bottomRight);
             double distance = knownWidth * 0.66f / Math.abs(bottomRight.getX() - topLeft.getX()); // TODO: detectNet output is about 1/3 smaller than the real object, this is a quick hack for now, should re-train the network
             fiducialToCamera.setTranslation(0, 0, distance);
-            fiducialToCamera.setRotation(new DenseMatrix64F(3, 3, true, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0));
+            fiducialToCamera.setRotation(new DenseMatrix64F(3, 3, true, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0));
 
             detectorPositionX.set(fiducialToCamera.getX());
             detectorPositionY.set(fiducialToCamera.getY());

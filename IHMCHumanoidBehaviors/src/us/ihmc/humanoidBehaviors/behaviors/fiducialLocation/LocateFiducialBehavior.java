@@ -1,29 +1,67 @@
 package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
+import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.robotics.geometry.FramePose;
+
+import javax.vecmath.Point3d;
+import java.text.DecimalFormat;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LocateFiducialBehavior extends AbstractBehavior
 {
-   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, GoalDetectorBehaviorService fiducialDetectorBehaviorService)
-   {
-      super(fiducialDetectorBehaviorService.getClass().getSimpleName(), communicationBridge);
+   private final GoalDetectorBehaviorService detectorBehaviorService;
+   private final AtomicBoolean done = new AtomicBoolean(false);
+   private final FramePose foundFiducialPose = new FramePose();
+   private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
-      addBehaviorService(fiducialDetectorBehaviorService);
+   public LocateFiducialBehavior(CommunicationBridgeInterface communicationBridge, GoalDetectorBehaviorService detectorBehaviorService)
+   {
+      super(detectorBehaviorService.getClass().getSimpleName(), communicationBridge);
+
+      this.detectorBehaviorService = detectorBehaviorService;
+      addBehaviorService(detectorBehaviorService);
    }
 
    @Override
    public void doControl()
    {
-      
+      if (detectorBehaviorService.getGoalHasBeenLocated())
+      {
+         detectorBehaviorService.getReportedGoalPoseWorldFrame(foundFiducialPose);
+         Point3d position = new Point3d();
+         foundFiducialPose.getPosition(position);
+
+         double x = position.getX(), y = position.getY(), z = position.getZ();
+         double yaw = Math.toDegrees(foundFiducialPose.getYaw()), pitch = Math.toDegrees(foundFiducialPose.getPitch()), roll = Math.toDegrees(foundFiducialPose.getRoll());
+
+         sendTextToSpeechPacket(String.format("Target object located at [%s, %s, %s], rotation (%s, %s, %s)",
+                                              decimalFormat.format(x),
+                                              decimalFormat.format(y),
+                                              decimalFormat.format(z),
+                                              decimalFormat.format(yaw),
+                                              decimalFormat.format(pitch),
+                                              decimalFormat.format(roll)));
+         done.set(true);
+      } else {
+         sendTextToSpeechPacket("Target object not located");
+         done.set(false);
+      }
+   }
+
+   private void sendTextToSpeechPacket(String message)
+   {
+      TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket(message);
+      textToSpeechPacket.setbeep(false);
+      sendPacketToUI(textToSpeechPacket);
    }
 
    @Override
    public boolean isDone()
    {
-      return false;
+      return done.get();
    }
 
    @Override

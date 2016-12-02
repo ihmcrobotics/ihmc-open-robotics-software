@@ -69,6 +69,11 @@ public class FindGoalBehavior extends AbstractBehavior
          fiducialDetectorBehaviorService.getReportedGoalPoseWorldFrame(foundFiducialPose);
          foundFiducialYoFramePose.set(foundFiducialPose);
          foundFiducial.set(true);
+         Point3d position = new Point3d();
+         foundFiducialPose.getPosition(position);
+         sendTextToSpeechPacket("Target object located at " + position);
+      } else {
+         sendTextToSpeechPacket("Target object not located");
       }
 
       if (headTrajectorySentTimer.totalElapsed() < 2.0)
