@@ -15,13 +15,15 @@ import javax.vecmath.Vector3d;
 public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
    private final PlanarRegion planarRegion;
+   private final double allowablePenetrationThickness;
    private final Graphics3DObject linkGraphics;
 
-   private final Point3d tempPoint3dForCheckInside = new Point3d();
+   private final Point3d tempPoint3dForCheckInside = new Point3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
-   public PlanarRegionTerrainObject(PlanarRegion planarRegion)
+   public PlanarRegionTerrainObject(PlanarRegion planarRegion, double allowablePenetrationThickness)
    {
       this.planarRegion = planarRegion;
+      this.allowablePenetrationThickness = allowablePenetrationThickness;
       this.linkGraphics = setupLinkGraphics();
    }
 
@@ -43,7 +45,11 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    {
       if(planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
       {
-         planarRegion.getNormal(normalToPack);
+         if(normalToPack != null)
+         {
+            planarRegion.getNormal(normalToPack);
+         }
+
          return planarRegion.getPlaneZGivenXY(x, y);
       }
       else
@@ -77,16 +83,23 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    @Override
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
-//      tempPoint3dForCheckInside.x = x;
-//      tempPoint3dForCheckInside.y = y;
-//      tempPoint3dForCheckInside.z = z;
+      tempPoint3dForCheckInside.x = x;
+      tempPoint3dForCheckInside.y = y;
+      tempPoint3dForCheckInside.z = z;
 
-      boolean isPointInside = planarRegion.isPointInside(tempPoint3dForCheckInside, 1e-10);
+      boolean isPointInside = planarRegion.isPointOnOrSlightlyBelow(tempPoint3dForCheckInside, allowablePenetrationThickness);
 
       if(isPointInside)
       {
-         intersectionToPack.set(tempPoint3dForCheckInside);
-         planarRegion.getNormal(normalToPack);
+         if(intersectionToPack != null)
+         {
+            intersectionToPack.set(tempPoint3dForCheckInside);
+         }
+
+         if(normalToPack != null)
+         {
+            planarRegion.getNormal(normalToPack);
+         }
       }
 
       return isPointInside;
