@@ -6,9 +6,11 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3f;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior.WalkThroughDoorBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -34,6 +36,7 @@ import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.stateMachines.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoorBehaviorState>
@@ -49,13 +52,14 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       WAITING_FOR_USER_CONFIRMATION,
       WALK_THROUGH_DOOR,
       RESET_ROBOT,
+      FAILED,
       DONE
 
    }
 
    private final boolean setUpArms = true;
 
-   private Vector3f doorOffsetPoint1 = new Vector3f(0.5f, 0.8f, 0f);
+   private Vector3f doorOffsetPoint1 = new Vector3f(0.5f, 1.9f, 0f);
    private Vector3f doorOffsetPoint2 = new Vector3f(0.5f, 0.7f, 0f);
 
    private final SearchForDoorBehavior searchForDoorBehavior;
@@ -79,7 +83,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       searchForDoorBehavior = new SearchForDoorBehavior(communicationBridge);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
-
       setupStateMachine();
    }
 
@@ -110,7 +113,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
-      //TODO setup search for ball behavior
       BehaviorAction<WalkThroughDoorBehaviorState> searchForDoorFar = new BehaviorAction<WalkThroughDoorBehaviorState>(
             WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR, searchForDoorBehavior)
       {
@@ -187,6 +189,17 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
+      BehaviorAction<WalkThroughDoorBehaviorState> failedState = new BehaviorAction<WalkThroughDoorBehaviorState>(WalkThroughDoorBehaviorState.FAILED,
+            new SimpleDoNothingBehavior(communicationBridge))
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Walking Through Door Failed");
+            sendPacket(p1);
+         }
+      };
+
       BehaviorAction<WalkThroughDoorBehaviorState> doneState = new BehaviorAction<WalkThroughDoorBehaviorState>(WalkThroughDoorBehaviorState.DONE,
             new SimpleDoNothingBehavior(communicationBridge))
       {
@@ -198,9 +211,30 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
+      StateTransitionCondition planFailedCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return walkToInteractableObjectBehavior.isDone() && !walkToInteractableObjectBehavior.succeded();
+         }
+      };
+      StateTransitionCondition planSuccededCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return walkToInteractableObjectBehavior.isDone() && walkToInteractableObjectBehavior.succeded();
+         }
+      };
+
       statemachine.addStateWithDoneTransition(setup, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR);
       statemachine.addStateWithDoneTransition(searchForDoorFar, WalkThroughDoorBehaviorState.WALKING_TO_DOOR);
-      statemachine.addStateWithDoneTransition(walkToDoorAction, WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL);
+      statemachine.addState(walkToDoorAction);
+
+      walkToDoorAction.addStateTransition(WalkThroughDoorBehaviorState.SEARCHING_FOR_DOOR_FINAL, planSuccededCondition);
+      walkToDoorAction.addStateTransition(WalkThroughDoorBehaviorState.FAILED, planFailedCondition);
+
       if (setUpArms)
          statemachine.addStateWithDoneTransition(searchForDoorNear, WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK);
       else
@@ -208,6 +242,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       statemachine.addStateWithDoneTransition(setUpForWalk, WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
       statemachine.addStateWithDoneTransition(walkThroughDoor, WalkThroughDoorBehaviorState.RESET_ROBOT);
       statemachine.addStateWithDoneTransition(resetRobot, WalkThroughDoorBehaviorState.DONE);
+      statemachine.addStateWithDoneTransition(failedState, WalkThroughDoorBehaviorState.DONE);
       statemachine.addState(doneState);
       statemachine.setStartState(WalkThroughDoorBehaviorState.SETUP_ROBOT);
 
@@ -226,7 +261,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    public FootstepDataListMessage setUpFootSteps()
    {
 
-      PoseReferenceFrame doorPose = new PoseReferenceFrame("TurnValveReferenceFrame", ReferenceFrame.getWorldFrame());
+      PoseReferenceFrame doorPose = new PoseReferenceFrame("DoorReferenceFrame", ReferenceFrame.getWorldFrame());
       doorPose.setPoseAndUpdate(new RigidBodyTransform(searchForDoorBehavior.getLocation()));
 
       RobotSide startStep = RobotSide.LEFT;
