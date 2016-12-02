@@ -1,22 +1,27 @@
 package us.ihmc.graphics3DDescription.yoGraphics;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.plotting.artifact.Artifact;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class YoGraphicAbstractShape extends YoGraphic
 {
    protected final YoFramePoint yoFramePoint;
    protected final YoFrameOrientation yoFrameOrientation;
    protected final double scale;
-   private Vector3d translationVector = new Vector3d();
+   private final Vector3d translationVector = new Vector3d();
+   private final Point3d tempPoint = new Point3d();
+   private final Quat4d tempQuaternion = new Quat4d();
 
    protected YoGraphicAbstractShape(String name, YoFramePoint framePoint, YoFrameOrientation frameOrientation, double scale)
    {
@@ -27,6 +32,17 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       this.yoFrameOrientation = frameOrientation;
 
       this.scale = scale;
+   }
+
+   public void setPose(FramePose framePose)
+   {
+      yoFramePoint.checkReferenceFrameMatch(framePose.getReferenceFrame());
+
+      framePose.getPosition(tempPoint);
+      yoFramePoint.setPoint(tempPoint);
+
+      framePose.getOrientation(tempQuaternion);
+      yoFrameOrientation.set(tempQuaternion);
    }
 
    public void setPosition(double x, double y, double z)
@@ -103,6 +119,7 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
 
    private Vector3d rotationEulerVector = new Vector3d();
 
+   @Override
    protected void computeRotationTranslation(Transform3d transform3D)
    {
       transform3D.setIdentity();
@@ -114,6 +131,7 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       transform3D.setScale(scale);
    }
 
+   @Override
    public Artifact createArtifact()
    {
       throw new RuntimeException("Implement Me!");

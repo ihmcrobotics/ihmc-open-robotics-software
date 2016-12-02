@@ -1,18 +1,17 @@
 package us.ihmc.exampleSimulations.skippy;
 
-import java.rmi.registry.Registry;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-
-import com.vividsolutions.jts.math.Vector3D;
 
 import us.ihmc.graphics3DAdapter.GroundProfile3D;
 import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
@@ -296,12 +295,13 @@ public class SkippyRobot extends Robot
       // create a LinkGraphics object to manipulate the visual representation of the link
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(0.0, 0.0, -LEG_LENGTH);
-      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.White());//Glass(0.75));//
+      linkGraphics.addCube(LEG_CUBE_LENGTH, LEG_CUBE_LENGTH, LEG_LENGTH, YoAppearance.Glass(0.75));
       /*
        * Joint
        */
-      linkGraphics.rotate(Math.PI/2,Axis.Y);
-      linkGraphics.translate(-LEG_LENGTH+LEG_CUBE_LENGTH/3, 0.0, -LEG_CUBE_LENGTH);
+      linkGraphics.identity();
+      linkGraphics.rotate(Math.PI / 2.0, Axis.Y);
+      linkGraphics.translate(0.0, 0.0, -LEG_CUBE_LENGTH);
       linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.LightSteelBlue());
       /*
        * Associate the linkGraphics object with the link object
@@ -370,7 +370,7 @@ public class SkippyRobot extends Robot
       arms.setMomentOfInertia(0.0001, SHOULDER_MOI, SHOULDER_MOI);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.rotate(Math.toRadians(90), Axis.Y);	
+      linkGraphics.rotate(Math.toRadians(90), Axis.Y);
       linkGraphics.translate(0.0, 0.0, -SHOULDER_LENGTH / 2.0);
       linkGraphics.addCylinder(SHOULDER_LENGTH, SHOULDER_RADIUS, YoAppearance.Red());
       /*
@@ -417,7 +417,7 @@ public class SkippyRobot extends Robot
    {
       return rootJointIfSkippy;
    }
-   
+
    public void setRootJointForce(double x, double y, double z)
    {
       rootJointForce.setForce(x, y, z);
@@ -467,7 +467,7 @@ public class SkippyRobot extends Robot
    {
       return footGroundContactPoint.getPositionPoint();
    }
-   
+
    public void computeFootContactForce(Vector3d tempForce){
 	  footGroundContactPoint.getForce(tempForce);
    }
@@ -502,8 +502,8 @@ public class SkippyRobot extends Robot
       this.bodyZUpFrame.setTransformAndUpdate(transform);
       return bodyZUpFrame;
    }
-   
-   public double getGravityt(){
+
+   public double getGravity(){
       return this.getGravityZ();
    }
 
@@ -538,6 +538,35 @@ public class SkippyRobot extends Robot
    {
       // TODO Auto-generated method stub
       return hipJoint.getQDDYoVariable();
+   }
+
+   Point3d tempCOMPosition = new Point3d();
+   Vector3d tempLinearMomentum = new Vector3d();
+   Vector3d tempAngularMomentum = new Vector3d();
+   /**
+    * Computes the CoM position and velocity and the ICP
+    */
+   public void computeComAndICP(double omega0, FramePoint comToPack, FrameVector comVelocityToPack, FramePoint icpToPack)
+   {
+      double totalMass = computeCOMMomentum(tempCOMPosition, tempLinearMomentum, tempAngularMomentum);
+
+      comToPack.set(tempCOMPosition);
+      tempLinearMomentum.scale(1.0 / totalMass);
+      comVelocityToPack.set(tempLinearMomentum);
+
+      icpToPack.scaleAdd(omega0, comVelocityToPack, comToPack);
+      icpToPack.setZ(0.0);
+   }
+
+   Vector3d tempHipJointAxis = new Vector3d();
+   RigidBodyTransform transformHipToWorld = new RigidBodyTransform();
+   public void getHipJointAxis(FrameVector hipAxisToPack)
+   {
+      hipJoint.getJointAxis(tempHipJointAxis);
+      hipJoint.getTransformToWorld(transformHipToWorld);
+      transformHipToWorld.transform(tempHipJointAxis);
+      hipAxisToPack.set(tempHipJointAxis);
+      hipAxisToPack.normalize();
    }
 
 }

@@ -15,6 +15,12 @@ public class RequestPlanarRegionsListMessage extends TrackablePacket<RequestPlan
       this.requestType = requestType;
    }
 
+   public RequestPlanarRegionsListMessage(RequestType requestType, PacketDestination destination)
+   {
+      this.requestType = requestType;
+      setDestination(destination);
+   }
+
    public RequestType getRequesType()
    {
       return requestType;

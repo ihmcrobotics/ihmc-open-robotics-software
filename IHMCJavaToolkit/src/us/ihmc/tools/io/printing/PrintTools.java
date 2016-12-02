@@ -114,17 +114,30 @@ public class PrintTools
    private static void print(String level, Object containingObjectOrClass, String message, boolean useSystemError)
    {
       Throwable throwable = new Throwable();
-      int lineNumber = throwable.getStackTrace()[STACK_TRACE_INDEX].getLineNumber();
       
+      int lineNumber = -1;
       String className;
       if (containingObjectOrClass == null)
       {
          String[] classNameSplit = throwable.getStackTrace()[STACK_TRACE_INDEX].getClassName().split("\\.");
          className = classNameSplit[classNameSplit.length - 1].split("\\$")[0];
+         lineNumber = throwable.getStackTrace()[STACK_TRACE_INDEX].getLineNumber();
       }
       else
       {
          className = containingObjectOrClass.getClass().getSimpleName();
+
+         for (StackTraceElement stackTraceElement : throwable.getStackTrace())
+         {
+            if (stackTraceElement.getClassName().endsWith(className))
+            {
+               lineNumber = stackTraceElement.getLineNumber();
+               break;
+            }
+         }
+
+         if (lineNumber == -1)
+            lineNumber = throwable.getStackTrace()[STACK_TRACE_INDEX].getLineNumber();
          
          if (containingObjectOrClass instanceof Class<?>)
             className = ((Class<?>) containingObjectOrClass).getSimpleName();

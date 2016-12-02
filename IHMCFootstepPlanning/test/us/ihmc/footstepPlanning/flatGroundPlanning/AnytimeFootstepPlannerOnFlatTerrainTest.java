@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.graphSearch.SimplePlanarRegionBipedalAnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
@@ -27,6 +28,8 @@ import us.ihmc.tools.thread.ThreadTools;
 public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 {
    private static final boolean visualize = false;
+   private boolean assertPlannerReturnedResult = true;
+   
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -56,6 +59,8 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 
       new Thread(anytimePlanner).start();
 
+      ThreadTools.sleep(100);
+
       double closestFootstepToGoal = Double.MAX_VALUE;
       int numIterations = 10;
       FootstepPlan bestPlanYet = anytimePlanner.getBestPlanYet();
@@ -76,12 +81,14 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 
          double newClosestDistance = lastFootstepPose.getPositionDistance(footstepGoalPose);
 
-         assertTrue(newClosestDistance <= closestFootstepToGoal);
+         if (assertPlannerReturnedResult) assertTrue("newClosestDistance = " + newClosestDistance + ", closestFootstepToGoal = " + closestFootstepToGoal, newClosestDistance <= closestFootstepToGoal);
          closestFootstepToGoal = newClosestDistance;
       }
 
       double expectedClosestDistanceToGoal = 5.5;
-      assertTrue(closestFootstepToGoal < expectedClosestDistanceToGoal);
+      if (assertPlannerReturnedResult) assertTrue(closestFootstepToGoal < expectedClosestDistanceToGoal);
+
+      ThreadTools.sleep(100);
       anytimePlanner.requestStop();
 
       if (visualize())
@@ -142,18 +149,20 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
+      BipedalFootstepPlannerParameters parameters = planner.getParameters();
 
-      planner.setMaximumStepReach(0.4);
-      planner.setMaximumStepZ(0.25);
-      planner.setMaximumStepXWhenForwardAndDown(0.25);
-      planner.setMaximumStepZWhenForwardAndDown(0.25);
-      planner.setMaximumStepYaw(0.25);
-      planner.setMinimumStepWidth(0.15);
-      planner.setMinimumFootholdPercent(0.8);
+      parameters.setMaximumStepReach(0.4);
+      parameters.setMaximumStepZ(0.25);
+      parameters.setMaximumStepXWhenForwardAndDown(0.25);
+      parameters.setMaximumStepZWhenForwardAndDown(0.25);
+      parameters.setMaximumStepYaw(0.25);
+      parameters.setMaximumStepWidth(0.4);
+      parameters.setMinimumStepWidth(0.15);
+      parameters.setMinimumFootholdPercent(0.8);
 
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;
-      planner.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
+      parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
       SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       planner.setFeetPolygons(footPolygonsInSoleFrame);
