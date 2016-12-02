@@ -272,52 +272,52 @@ public class JUnitTools
    
    public static void assertVector3dEquals(String message, Vector3d expected, Vector3d actual, double delta)
    {
-      assertEquals(message,expected.getX(), actual.getX(),delta);
-      assertEquals(message,expected.getY(), actual.getY(),delta);
-      assertEquals(message, expected.getZ(), actual.getZ(), delta);
+      assertEquals(message + " [X component]",expected.getX(), actual.getX(),delta);
+      assertEquals(message + " [Y component]",expected.getY(), actual.getY(),delta);
+      assertEquals(message + " [Z component]", expected.getZ(), actual.getZ(), delta);
    }
    
    public static void assertPoint3dEquals(String message, Point3d expected, Point3d actual, double delta)
    {
-      assertEquals(message,expected.getX(), actual.getX(),delta);
-      assertEquals(message,expected.getY(), actual.getY(),delta);
-      assertEquals(message,expected.getZ(), actual.getZ(),delta);
+      assertEquals(message + " [X component]",expected.getX(), actual.getX(),delta);
+      assertEquals(message + " [Y component]",expected.getY(), actual.getY(),delta);
+      assertEquals(message + " [Z component]",expected.getZ(), actual.getZ(),delta);
    }
    
    public static void assertPoint2dEquals(String message, Point2d expected, Point2d actual, double delta)
    {
-      assertEquals(message, expected.getX(), actual.getX(), delta);
-      assertEquals(message, expected.getY(), actual.getY(), delta);
+      assertEquals(message + " [X component]", expected.getX(), actual.getX(), delta);
+      assertEquals(message + " [Y component]", expected.getY(), actual.getY(), delta);
    }
    
    public static void assertPoint3fEquals(String message, Point3f expected, Point3f actual, double delta)
    {
-      assertEquals(message,expected.getX(), actual.getX(),delta);
-      assertEquals(message,expected.getY(), actual.getY(),delta);
-      assertEquals(message, expected.getZ(), actual.getZ(), delta);
+      assertEquals(message + " [X component]",expected.getX(), actual.getX(),delta);
+      assertEquals(message + " [Y component]",expected.getY(), actual.getY(),delta);
+      assertEquals(message + " [Z component]", expected.getZ(), actual.getZ(), delta);
    }
    
    public static void assertVector3fEquals(String message, Vector3f expected, Vector3f actual, double delta)
    {
-      assertEquals(message,expected.getX(), actual.getX(),delta);
-      assertEquals(message,expected.getY(), actual.getY(),delta);
-      assertEquals(message, expected.getZ(), actual.getZ(), delta);
+      assertEquals(message + " [X component]",expected.getX(), actual.getX(),delta);
+      assertEquals(message + " [Y component]",expected.getY(), actual.getY(),delta);
+      assertEquals(message + " [Z component]", expected.getZ(), actual.getZ(), delta);
    }
    
    public static void assertVector4dEquals(String message, Vector4d expected, Vector4d actual, double delta)
    {
-      assertEquals(message,expected.getX(), actual.getX(),delta);
-      assertEquals(message,expected.getY(), actual.getY(),delta);
-      assertEquals(message,expected.getZ(), actual.getZ(),delta);
-      assertEquals(message,expected.getW(), actual.getW(),delta);
+      assertEquals(message + " [X component]",expected.getX(), actual.getX(),delta);
+      assertEquals(message + " [Y component]",expected.getY(), actual.getY(),delta);
+      assertEquals(message + " [Z component]",expected.getZ(), actual.getZ(),delta);
+      assertEquals(message + " [W component]",expected.getW(), actual.getW(),delta);
    }
    
    public static void assertVector4fEquals(String message, Vector4f expected, Vector4f actual, double delta)
    {
-      assertEquals(message,expected.getX(), actual.getX(),delta);
-      assertEquals(message,expected.getY(), actual.getY(),delta);
-      assertEquals(message,expected.getZ(), actual.getZ(),delta);
-      assertEquals(message, expected.getW(), actual.getW(), delta);
+      assertEquals(message + " [X component]",expected.getX(), actual.getX(),delta);
+      assertEquals(message + " [Y component]",expected.getY(), actual.getY(),delta);
+      assertEquals(message + " [Z component]",expected.getZ(), actual.getZ(),delta);
+      assertEquals(message + " [W component]", expected.getW(), actual.getW(), delta);
    }
 
    /**
