@@ -1,10 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -14,6 +9,10 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.ThreadTools;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegionBipedalFootstepPlanner implements AnytimeFootstepPlanner, Runnable
 {
@@ -42,22 +41,12 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-//      if(alreadySetPlanarRegions)
-//      {
-//         return;
-//      }
-//      else
-//      {
-         planarRegionsListReference.set(planarRegionsList);
-//         alreadySetPlanarRegions = true;
-//      }
+      planarRegionsListReference.set(planarRegionsList);
    }
 
    @Override
    protected void initialize()
    {
-      super.initialize();
-      
       stack.clear();
       
       if (initialSide == null)
@@ -69,6 +58,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       stack.push(startNode);
       closestNodeToGoal = null;
       mapToAllExploredNodes.clear();
+      bestPlanYet.set(null);
    }
 
    @Override
@@ -93,33 +83,20 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    {
       return plan(true);
    }
-   
+
    public FootstepPlanningResult plan(boolean stopAndReturnWhenGoalIsFound)
    {
-//      initialize();
+      initialize();
       goalNode = null;
       footstepPlan = null;
 
       planarRegionPotentialNextStepCalculator.setStartNode(startNode);
 
-//      while(planarRegionsListReference.get() == null)
-//      {
-//         ThreadTools.sleep(100);
-//      }
-
-      checkForNewPlanarRegionsList();
-
       while (!stopRequested)
       {
-         if(requestInitialize)
-         {
-            initialize();
-            requestInitialize = false;
-         }
-
          checkForNewPlanarRegionsList();
 
-         if(stack.isEmpty())
+         if (stack.isEmpty())
          {
             if (stopAndReturnWhenGoalIsFound)
             {
@@ -130,31 +107,24 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
             ThreadTools.sleep(100);
             continue;
          }
-         
+
          BipedalFootstepPlannerNode nodeToExpand = stack.pop();
 
          boolean nearbyNodeAlreadyExists = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
          if (nearbyNodeAlreadyExists)
             continue;
-         
-         numberOfNodesExpanded.increment();
-         notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
 
          setNodesCostsAndRememberIfClosestYet(nodeToExpand);
+         notifyListenerNodeForExpansionWasAccepted(nodeToExpand);
 
          if (nodeToExpand.isAtGoal())
          {
-            if ((nodeToExpand.getParentNode() != null) && (nodeToExpand.getParentNode().isAtGoal()))
+            if ((nodeToExpand.getParentNode() != null) && (nodeToExpand.getParentNode().isAtGoal()) && stopAndReturnWhenGoalIsFound)
             {
                goalNode = nodeToExpand;
-               closestNodeToGoal = goalNode;
 
                notifyListenerSolutionWasFound(getPlan());
-
-               if (stopAndReturnWhenGoalIsFound)
-               {
-                  return FootstepPlanningResult.OPTIMAL_SOLUTION;
-               }
+               return FootstepPlanningResult.OPTIMAL_SOLUTION;
             }
          }
 
@@ -200,9 +170,6 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
       if (closestNodeToGoal == null || euclideanDistanceToGoal < closestNodeToGoal.getEstimatedCostToGoal())
       {
-         System.out.println(euclideanDistanceToGoal);
-         System.out.println(euclideanDistanceToGoal);
-         System.out.println(euclideanDistanceToGoal);
          closestNodeToGoal = nodeToSetCostOf;
          FootstepPlan newBestPlan = new FootstepPlan(closestNodeToGoal);
          bestPlanYet.set(newBestPlan);
@@ -217,6 +184,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
    @Override
    public void run()
    {
+      stopRequested = false;
       plan(false);
    }
 }
