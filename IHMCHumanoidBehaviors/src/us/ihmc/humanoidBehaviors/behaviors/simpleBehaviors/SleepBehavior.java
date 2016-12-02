@@ -44,8 +44,6 @@ public class SleepBehavior extends AbstractBehavior
    @Override
    public void onBehaviorExited()
    {
-      sleepTime = Double.MIN_VALUE;
-
    }
 
    @Override
@@ -67,6 +65,8 @@ public class SleepBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+      behaviorDoneTime = Double.NaN;
+      sleepTime = Double.MIN_VALUE;
    }
 
    @Override
