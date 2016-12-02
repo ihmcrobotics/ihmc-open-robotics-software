@@ -86,7 +86,7 @@ public class RobotDescriptionFromSDFLoader
 
       if(!Precision.equals(jointNameMap.getModelScale(), 1.0, 1))
       {
-         System.out.println("Scaling " + jointNameMap.getModelName() + " with factor " + jointNameMap.getModelScale());
+         System.out.println("Scaling " + jointNameMap.getModelName() + " with factor " + jointNameMap.getModelScale() + ", mass scale power " + jointNameMap.getMassScalePower());
          // Scale the robotDescription before adding points from the jointMap
          robotDescription.scale(jointNameMap.getModelScale(), jointNameMap.getMassScalePower(), Arrays.asList(jointNameMap.getHighInertiaForStableSimulationJoints()));
          // Everything from here on will be done in "scaled robot coordinates"

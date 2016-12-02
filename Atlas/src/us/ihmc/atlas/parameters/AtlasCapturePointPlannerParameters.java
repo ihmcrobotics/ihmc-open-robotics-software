@@ -5,11 +5,14 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 /** {@inheritDoc} */
 public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParameters
 {
+   private final double scale;
    private final boolean useTwoCMPsPerSupport;
    private final AtlasPhysicalProperties atlasPhysicalProperties;
    
    public AtlasCapturePointPlannerParameters(AtlasPhysicalProperties atlasPhysicalProperties)
    {
+      super(atlasPhysicalProperties.getModelScale());
+      scale = atlasPhysicalProperties.getModelScale();
       this.atlasPhysicalProperties = atlasPhysicalProperties;
       useTwoCMPsPerSupport = true;
    }
@@ -32,28 +35,28 @@ public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParam
    @Override
    public double getEntryCMPInsideOffset()
    {
-      return -0.005; //0.006;
+      return scale * -0.005; //0.006;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getExitCMPInsideOffset()
    {
-      return 0.025;
+      return scale * 0.025;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getEntryCMPForwardOffset()
    {
-      return 0.0;
+      return scale * 0.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getExitCMPForwardOffset()
    {
-      return 0.0;
+      return scale * 0.0;
    }
 
    /** {@inheritDoc} */
@@ -67,7 +70,7 @@ public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParam
    @Override
    public double getMaxEntryCMPForwardOffset()
    {
-      return 0.03;
+      return scale * 0.03;
    }
 
    /** {@inheritDoc} */
@@ -81,21 +84,21 @@ public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParam
    @Override
    public double getMaxExitCMPForwardOffset()
    {
-      return 0.08;
+      return scale * 0.08;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMinExitCMPForwardOffset()
    {
-      return -0.04;
+      return scale * -0.04;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getCMPSafeDistanceAwayFromSupportEdges()
    {
-      return 0.02;
+      return scale * 0.02;
    }
 
    /** {@inheritDoc} */

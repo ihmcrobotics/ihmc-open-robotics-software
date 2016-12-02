@@ -87,7 +87,7 @@ import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
-   private final static double MODEL_SCALE = 1;
+   private final static double MODEL_SCALE = 0.35;
    private final static double MODEL_MASS_SCALE_POWER = 2;
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
 
@@ -125,8 +125,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
    {
-      atlasPhysicalProperties  = new AtlasPhysicalProperties();
-      atlasPhysicalProperties.setModelScale(MODEL_SCALE);
+      atlasPhysicalProperties  = new AtlasPhysicalProperties(MODEL_SCALE);
       atlasPhysicalProperties.setMassScalePower(MODEL_MASS_SCALE_POWER);
       
       selectedVersion = atlasVersion;
