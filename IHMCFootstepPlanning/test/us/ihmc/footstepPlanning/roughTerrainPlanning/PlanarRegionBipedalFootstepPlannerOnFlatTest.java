@@ -71,7 +71,7 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
       parameters.setMaximumStepZ(0.25);
       parameters.setMaximumStepXWhenForwardAndDown(0.25);
       parameters.setMaximumStepZWhenForwardAndDown(0.25);
-      parameters.setMaximumStepYaw(0.05);
+      parameters.setMaximumStepYaw(0.15);
       parameters.setMinimumStepWidth(0.15);
       parameters.setMinimumFootholdPercent(0.8);
 
