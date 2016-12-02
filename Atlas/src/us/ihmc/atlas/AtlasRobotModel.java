@@ -87,8 +87,11 @@ import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
-   private final static double MODEL_SCALE = 0.35;
-   private final static double MODEL_MASS_SCALE_POWER = 2;
+   public final static boolean SCALE_ATLAS = true;
+   private final static double DESIRED_ATLAS_HEIGHT = 0.75;
+   private final static double DESIRED_ATLAS_WEIGHT = 35;
+   
+   
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
 
    private final AtlasRobotVersion selectedVersion;
@@ -125,8 +128,14 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
    {
-      atlasPhysicalProperties  = new AtlasPhysicalProperties(MODEL_SCALE);
-      atlasPhysicalProperties.setMassScalePower(MODEL_MASS_SCALE_POWER);
+      if(SCALE_ATLAS)
+      {
+         atlasPhysicalProperties  = new AtlasPhysicalProperties(DESIRED_ATLAS_HEIGHT, DESIRED_ATLAS_WEIGHT);
+      }
+      else
+      {
+         atlasPhysicalProperties = new AtlasPhysicalProperties();
+      }
       
       selectedVersion = atlasVersion;
       jointMap = new AtlasJointMap(selectedVersion, atlasPhysicalProperties);
@@ -344,7 +353,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 //
 //      RobotDescription robotDescription = loader.createRobotDescription(jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
-      return new HumanoidFloatingRootJointRobot(robotDescription, jointMap);
+      HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot = new HumanoidFloatingRootJointRobot(robotDescription, jointMap);
+      return humanoidFloatingRootJointRobot;
    }
 
    @Override
