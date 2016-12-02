@@ -87,7 +87,7 @@ import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
-   public final static boolean SCALE_ATLAS = true;
+   public final static boolean SCALE_ATLAS = false;
    private final static double DESIRED_ATLAS_HEIGHT = 0.66;
    private final static double DESIRED_ATLAS_WEIGHT = 15;
    
