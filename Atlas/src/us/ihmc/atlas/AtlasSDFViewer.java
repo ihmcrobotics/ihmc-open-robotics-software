@@ -4,18 +4,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.graphics3DDescription.Graphics3DObject;
 import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphics3DDescription.input.SelectedListener;
+import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class AtlasSDFViewer
 {
@@ -44,6 +50,22 @@ public class AtlasSDFViewer
       }
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
+      
+      
+
+      SelectedListener selectedListener = new SelectedListener()
+      {
+         @Override
+         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
+         {
+            System.out.println("Clicked location " +  location);
+         }
+      };
+
+      scs.attachSelectedListener(selectedListener);
+
+
+      
       scs.setGroundVisible(false);
       scs.startOnAThread();
    }

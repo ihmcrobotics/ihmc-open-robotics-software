@@ -8,8 +8,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
 {
+   private final static double ATLAS_HEIGHT = 2.0;
+   private final static double ATLAS_WEIGHT = 155.944174;
+
    private final double modelScale;
    private double massScalePower = 3.0;
+   
    
    private final double ankleHeight ;
    private final double pelvisToFoot;
@@ -27,6 +31,22 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
    private final SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handAttachmentPlateToWristTransforms = new SideDependentList<RigidBodyTransform>();
 
+   
+   public AtlasPhysicalProperties()
+   {
+      this(1.0, 3.0);
+   }
+   
+   public AtlasPhysicalProperties(double height, double weight)
+   {
+      this(height/ATLAS_HEIGHT);
+      
+      double massFactor = Math.log(weight/ATLAS_WEIGHT)/Math.log(modelScale);
+      System.out.println("Mass factor is " + massFactor);
+      setMassScalePower(massFactor);
+   }
+   
+   
    public AtlasPhysicalProperties(double modelScale)
    {
       this.modelScale = modelScale;
@@ -145,11 +165,9 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
       return massScalePower;
    }
 
-
    public void setMassScalePower(double massScalePower)
    {
       this.massScalePower = massScalePower;
    }
-   
    
 }
