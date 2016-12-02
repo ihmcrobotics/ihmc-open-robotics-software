@@ -34,18 +34,18 @@ public class PlanarRegionsListDefinedEnvironmentExample
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("PlanarRegionsListEnvironmentVisualizationRobot"));
       YoVariableRegistry robotsYoVariableRegistry = scs.getRobots()[0].getRobotsYoVariableRegistry();
-      PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList, 1e-5, true);
+      PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList, 1e-5,
+            true);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
 
-      if(visualizeNormals)
+      if (visualizeNormals)
       {
          YoGraphicsList vectors = new YoGraphicsList("NormalVectors");
-         for(int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+         for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
          {
             PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
             YoFramePoint planarRegionPointInWorld = new YoFramePoint("PlanarRegionPoint" + i, ReferenceFrame.getWorldFrame(), robotsYoVariableRegistry);
-            YoFrameVector surfaceNormal = new YoFrameVector("NormalVector" + i, ReferenceFrame.getWorldFrame(),
-                  robotsYoVariableRegistry);
+            YoFrameVector surfaceNormal = new YoFrameVector("NormalVector" + i, ReferenceFrame.getWorldFrame(), robotsYoVariableRegistry);
 
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
             Point3d translation = new Point3d();
@@ -57,22 +57,22 @@ public class PlanarRegionsListDefinedEnvironmentExample
             terrainObject3D.getHeightMapIfAvailable().heightAndNormalAt(translation.x, translation.y, translation.z, normal);
             surfaceNormal.setVector(normal);
 
-            YoGraphicVector surfaceNormalGraphic = new YoGraphicVector("PlanarRegionSurfaceNormalGraphic" + i, planarRegionPointInWorld, surfaceNormal, YoAppearance.Aqua());
+            YoGraphicVector surfaceNormalGraphic = new YoGraphicVector("PlanarRegionSurfaceNormalGraphic" + i, planarRegionPointInWorld, surfaceNormal,
+                  YoAppearance.Aqua());
             vectors.add(surfaceNormalGraphic);
          }
 
          scs.addYoGraphicsList(vectors, false);
       }
 
-      if(visualizeBoundingBoxes)
+      if (visualizeBoundingBoxes)
       {
-         for(int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+         for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
          {
             PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
             Point3d translation = new Point3d();
             planarRegion.getTransformToWorld(transformToWorld);
-
 
             Graphics3DObject boundingBoxVisualization = new Graphics3DObject();
             BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
@@ -90,7 +90,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
          }
       }
 
-      if(visualizeGroundProfile)
+      if (visualizeGroundProfile)
       {
          HeightMapWithNormals heightMap = terrainObject3D.getHeightMapIfAvailable();
          Graphics3DObject heightMapGraphics = new Graphics3DObject();
@@ -98,7 +98,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
          scs.addStaticLinkGraphics(heightMapGraphics);
       }
 
-      if(visualizeTerrainLinkGraphics)
+      if (visualizeTerrainLinkGraphics)
       {
          scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
       }
@@ -113,9 +113,10 @@ public class PlanarRegionsListDefinedEnvironmentExample
       double cinderBlockSize = 0.4;
       int courseWidthXInNumberOfBlocks = 21;
       int courseLengthYInNumberOfBlocks = 6;
-//      Random random = new Random(1776L);
+      //      Random random = new Random(1776L);
 
-      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks);
+      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples
+            .generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks);
 
       startEnvironmentVisualizationForPlanarRegionsList(planarRegionsList, true, true, true, true);
    }
