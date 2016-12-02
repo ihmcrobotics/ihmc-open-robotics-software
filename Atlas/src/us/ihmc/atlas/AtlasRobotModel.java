@@ -88,8 +88,8 @@ import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
    public final static boolean SCALE_ATLAS = true;
-   private final static double DESIRED_ATLAS_HEIGHT = 0.75;
-   private final static double DESIRED_ATLAS_WEIGHT = 35;
+   private final static double DESIRED_ATLAS_HEIGHT = 0.66;
+   private final static double DESIRED_ATLAS_WEIGHT = 15;
    
    
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);

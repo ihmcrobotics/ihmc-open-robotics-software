@@ -754,13 +754,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getDefaultTransferTime()
    {
-      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 0.8 : 3;
+      return Math.sqrt(jointMap.getModelScale()) * ((target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 0.8 : 3);
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return (target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 1.2 : 0.60;
+      return Math.sqrt(jointMap.getModelScale()) * ((target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 1.2 : 0.60);
    }
 
    /** @inheritDoc */
@@ -861,7 +861,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getDesiredTouchdownVelocity()
    {
-      return -0.3;
+      return jointMap.getModelScale() * -0.3;
    }
 
    @Override
@@ -870,10 +870,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       switch (target)
       {
          case SCS:
-            return -2.0;
+            return jointMap.getModelScale() * -2.0;
 
          default :
-            return -1.0;
+            return jointMap.getModelScale() * -1.0;
       }
    }
 
