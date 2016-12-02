@@ -55,7 +55,7 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
 
    private AtlasJointMap createJointMapWithWobblyFeet(final AtlasRobotVersion atlasVersion)
    {
-      AtlasJointMap atlasJointMap = new AtlasJointMap(atlasVersion, new AtlasPhysicalProperties(1))
+      AtlasJointMap atlasJointMap = new AtlasJointMap(atlasVersion, new AtlasPhysicalProperties())
       {
          @Override
          public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap()
