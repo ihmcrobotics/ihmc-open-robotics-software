@@ -88,7 +88,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
       lookForGoalBehavior = new FindFiducialBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, fiducialToTrack);
       sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
-      sleepBehavior.setSleepTime(10.0);
+      sleepBehavior.setSleepTime(2.0);
       lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
 
       planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
@@ -110,7 +110,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       this.registry.addChild(userValidationExampleBehavior.getYoVariableRegistry());
 
       setupStateMachine();
-      
+
       swingTime.set(1.5);
       transferTime.set(0.3);
       maxNumberOfStepsToTake.set(3);
