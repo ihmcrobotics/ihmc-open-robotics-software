@@ -44,6 +44,7 @@ dependencies {
 	
 	testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")
     testCompile ihmc.getProjectTestDependency(":IHMCUnitTesting")
+    testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 }
 
 jar {
