@@ -34,7 +34,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("PlanarRegionsListEnvironmentVisualizationRobot"));
       YoVariableRegistry robotsYoVariableRegistry = scs.getRobots()[0].getRobotsYoVariableRegistry();
-      PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList);
+      PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList, 1e-5, true);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
 
       if(visualizeNormals)
