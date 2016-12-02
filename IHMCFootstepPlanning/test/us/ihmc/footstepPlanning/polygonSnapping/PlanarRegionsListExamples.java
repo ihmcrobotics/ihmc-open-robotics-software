@@ -9,7 +9,6 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.random.RandomTools;
 
 public class PlanarRegionsListExamples
@@ -73,35 +72,9 @@ public class PlanarRegionsListExamples
          for (int y = 0; y < courseLengthYInNumberOfBlocks; y++)
          {
             int angleType = Math.abs(random.nextInt() % 3);
-            double angle = 0;
-            switch (angleType)
-            {
-            case 0:
-               angle = 0.0;
-               break;
-            case 1:
-               angle = Math.toRadians(15);
-               break;
-            case 2:
-               angle = -Math.toRadians(15);
-               break;
-            }
-            
             int axisType = Math.abs(random.nextInt() % 2);
-            Axis axis = null;
-            switch (axisType)
-            {
-            case 0:
-               axis = Axis.X;
-               break;
-            case 1:
-               axis = Axis.Y;
-               break;
-            }
             
-            generator.rotate(angle, axis);
-            generator.addCubeReferencedAtBottomMiddle(cinderBlockSize, cinderBlockSize, cinderBlockHeight);
-            generator.rotate(-angle, axis);
+            generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, angleType, axisType);
             
             generator.translate(0.0, cinderBlockSize, 0.0);
          }
@@ -123,6 +96,39 @@ public class PlanarRegionsListExamples
       generator.addRectangle(0.6, courseWidth);
       
       return generator.getPlanarRegionsList();
+   }
+
+   public static void generateSingleCiderBlock(PlanarRegionsListGenerator generator, double cinderBlockSize, double cinderBlockHeight, int angleType,
+                                                int axisType)
+   {
+      double angle = 0;
+      switch (angleType)
+      {
+      case 0:
+         angle = 0.0;
+         break;
+      case 1:
+         angle = Math.toRadians(15);
+         break;
+      case 2:
+         angle = -Math.toRadians(15);
+         break;
+      }
+
+      Axis axis = null;
+      switch (axisType)
+      {
+      case 0:
+         axis = Axis.X;
+         break;
+      case 1:
+         axis = Axis.Y;
+         break;
+      }
+
+      generator.rotate(angle, axis);
+      generator.addCubeReferencedAtBottomMiddle(cinderBlockSize, cinderBlockSize, cinderBlockHeight);
+      generator.rotate(-angle, axis);
    }
 
    public static PlanarRegionsList generateRandomObjects(Random random, int numberOfRandomObjects, double maxX, double maxY, double maxZ)

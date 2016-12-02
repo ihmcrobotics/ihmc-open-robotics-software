@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.scoring;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import javax.vecmath.Point3d;
 
@@ -23,7 +22,7 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.robotics.robotController.RobotControllerAdapter;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -41,8 +40,10 @@ public class PenalizationHeatmapStepScorerTest
    private YoVariableRegistry registry;
    private Map<Integer, YoGraphicPolygon> candidateFootstepPolygons;
    private DoubleYoVariable colorIndexYoVariable;
+   private DoubleYoVariable stanceFootPitch;
+   private DoubleYoVariable yoTime;
    private IntegerYoVariable candidateIndex;
-   
+
    private double incrementX = 0.1;
    private double incrementY = 0.05;
    private double yMin = -1.0;
@@ -50,7 +51,6 @@ public class PenalizationHeatmapStepScorerTest
    private double xMin = -0.8;
    private int numInX = (int) ((xMax - xMin) / incrementX);
    private int numInY = (int) ((xMax - yMin) / incrementY);
-   private Random random = new Random(89324823L);
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 3000000)
@@ -62,85 +62,64 @@ public class PenalizationHeatmapStepScorerTest
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       registry = scs.getRootRegistry();
+      yoTime = (DoubleYoVariable) registry.getVariable("t");
 
       DoubleYoVariable scoreYoVariable = new DoubleYoVariable("score", registry);
       DoubleYoVariable xYoVariable = new DoubleYoVariable("x", registry);
       DoubleYoVariable yYoVariable = new DoubleYoVariable("y", registry);
       colorIndexYoVariable = new DoubleYoVariable("colorIndex", registry);
+      stanceFootPitch = new DoubleYoVariable("stanceFootPitch", registry);
       candidateIndex = new IntegerYoVariable("candidateIndex", registry);
-      
+
       PenalizationHeatmapStepScorer footstepScorer = new PenalizationHeatmapStepScorer(registry, yoGraphicsListRegistry, null);
 
       candidateFootstepPolygons = new HashMap<>();
 
       scoreColorGradient = Gradient.createGradient(Color.GREEN, Color.RED, 1000);
+      stanceFootPitch.set(-0.2);
 
       defaultFootPolygon = PlanningTestTools.createDefaultFootPolygon();
       FramePose idealFramePose = new FramePose(ReferenceFrame.getWorldFrame());
-      idealFramePose.setPosition(0.4, 0.0, 0.31);
-      createFootstep("ideal", -1, YoAppearance.HotPink());
-      candidateFootstepPolygons.get(-1).setPose(idealFramePose);
+      idealFramePose.setPosition(0.45, 0.0, 0.31);
+      createStaticFootstep("ideal", idealFramePose, YoAppearance.HotPink());
       FramePose swingStartFramePose = new FramePose(ReferenceFrame.getWorldFrame());
       swingStartFramePose.setPosition(0.0, 0.0, 0.31);
-      createFootstep("swingStart", -2, YoAppearance.Blue());
-      candidateFootstepPolygons.get(-2).setPose(swingStartFramePose);
+      createStaticFootstep("swingStart", swingStartFramePose, YoAppearance.Blue());
+      FramePose stanceFramePose = new FramePose(ReferenceFrame.getWorldFrame());
+      stanceFramePose.setPosition(0.2, 0.26, 0.31);
+      stanceFramePose.setYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
+      YoGraphicPolygon stanceFootPolygon = createStaticFootstep("stance", stanceFramePose, YoAppearance.DarkGreen());
 
-      int candidateFootstepIndex = 0;
-      for (double y = yMin; y < xMax; y += incrementY)
+      for (int candidateFootstepIndex = 0; candidateFootstepIndex < numInX * numInY; candidateFootstepIndex++)
       {
-         for (double x = xMin; x < xMax; x += incrementX)
-         {
-            createFootstep("candidate", candidateFootstepIndex++, YoAppearance.Red());
-         }
+         createCandidateFootstep("candidate", candidateFootstepIndex);
       }
 
-      robot.setController(new RobotController()
+      robot.setController(new RobotControllerAdapter(new YoVariableRegistry("robotRegistry"))
       {
-         @Override
-         public void initialize()
-         {
-         }
-
-         @Override
-         public YoVariableRegistry getYoVariableRegistry()
-         {
-            return new YoVariableRegistry("blah");
-         }
-
-         @Override
-         public String getName()
-         {
-            return "blah";
-         }
-
-         @Override
-         public String getDescription()
-         {
-            return null;
-         }
-
          @Override
          public void doControl()
          {
-            DoubleYoVariable yoTime = (DoubleYoVariable) registry.getVariable("t");
-
-            candidateIndex.set((int) yoTime.getDoubleValue() % (numInX * numInY));
-            
-            double x = xMin + (((int) candidateIndex.getIntegerValue()) % numInX) * incrementX;
-            double y = yMin + (((int) candidateIndex.getIntegerValue()) / numInX) * incrementY;
+            stanceFootPolygon.setYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
+            stanceFramePose.setYawPitchRoll(0.0, stanceFootPitch.getDoubleValue(), 0.0);
 
             FramePose candidateFramePose = new FramePose(ReferenceFrame.getWorldFrame());
-            candidateFramePose.setPosition(x, y, 0.3 + (y - 0.2) * 0.2);
 
-            double score = footstepScorer.scoreFootstep(null, swingStartFramePose, idealFramePose, candidateFramePose, footstepPlannerGoal);
+            //applySlopeCandidateSet(candidateFramePose, xYoVariable, yYoVariable);
+            applyVerticalCandidateSet(candidateFramePose, xYoVariable, yYoVariable);
+
+            double score = footstepScorer.scoreFootstep(stanceFramePose, swingStartFramePose, idealFramePose, candidateFramePose, footstepPlannerGoal);
             scoreYoVariable.set(score);
-            xYoVariable.set(x);
-            yYoVariable.set(y);
 
+            if (candidateIndex.getIntegerValue() == 0)
+            {
+               for (YoGraphicPolygon candidateFootstepPolygon : candidateFootstepPolygons.values())
+               {
+                  candidateFootstepPolygon.setPoseToNaN();
+               }
+            }
             candidateFootstepPolygons.get(candidateIndex.getIntegerValue()).setPose(candidateFramePose);
             candidateFootstepPolygons.get(candidateIndex.getIntegerValue()).updateAppearance(getAppearanceForScore(scoreYoVariable.getDoubleValue()));
-            
-            scs.getStandardSimulationGUI().updateSimulationGraphics();
          }
       });
 
@@ -148,6 +127,7 @@ public class PenalizationHeatmapStepScorerTest
       scs.setCameraFix(0.0, 0.0, 0.0);
       scs.setCameraPosition(-1.0, 0.0, 30.0);
       scs.setScrollGraphsEnabled(false);
+      scs.setMaxBufferSize(16000);
       scs.startOnAThread();
 
       scs.setDT(1, 1);
@@ -159,15 +139,53 @@ public class PenalizationHeatmapStepScorerTest
       }
    }
 
-   private void createFootstep(String name, int index, AppearanceDefinition appearance)
+   private void applySlopeCandidateSet(FramePose candidateFramePose, DoubleYoVariable xYoVariable, DoubleYoVariable yYoVariable)
+   {
+      candidateIndex.set((int) yoTime.getDoubleValue() % (numInX * numInY));
+
+      double x = xMin + (((int) candidateIndex.getIntegerValue()) % numInX) * incrementX;
+      double y = yMin + (((int) candidateIndex.getIntegerValue()) / numInX) * incrementY;
+      xYoVariable.set(x);
+      yYoVariable.set(y);
+
+      candidateFramePose.setPosition(x, y, 0.3 + (y - 0.2) * 0.2);
+   }
+
+   private void applyVerticalCandidateSet(FramePose candidateFramePose, DoubleYoVariable xYoVariable, DoubleYoVariable yYoVariable)
+   {
+      double height = 1.0;
+      double verticalIncrement = 0.005;
+      
+      candidateIndex.set((int) yoTime.getDoubleValue() % (int) (height / verticalIncrement));
+
+      double x = 0.45;
+      double y = 0.0;
+      xYoVariable.set(x);
+      yYoVariable.set(y);
+
+      candidateFramePose.setPosition(x, y, candidateIndex.getIntegerValue() * verticalIncrement);
+   }
+
+   private void createCandidateFootstep(String name, int index)
    {
       YoFramePose footstepYoFramePose = new YoFramePose(name + index + "FramePose", ReferenceFrame.getWorldFrame(), registry);
-      footstepYoFramePose.setPosition(0.0, 0.0, -1.0);
+      footstepYoFramePose.setToNaN();
       YoGraphicPolygon footstepYoGraphicPolygon = new YoGraphicPolygon(name + index + "YoGraphicPolygon", footstepYoFramePose,
-                                                                       defaultFootPolygon.getNumberOfVertices(), registry, 1.0, appearance);
+                                                                       defaultFootPolygon.getNumberOfVertices(), registry, 1.0, YoAppearance.Red());
       footstepYoGraphicPolygon.updateConvexPolygon2d(defaultFootPolygon);
       candidateFootstepPolygons.put(index, footstepYoGraphicPolygon);
       yoGraphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), footstepYoGraphicPolygon);
+   }
+
+   private YoGraphicPolygon createStaticFootstep(String name, FramePose framePose, AppearanceDefinition appearance)
+   {
+      YoFramePose footstepYoFramePose = new YoFramePose(name + "FramePose", ReferenceFrame.getWorldFrame(), registry);
+      footstepYoFramePose.set(framePose);
+      YoGraphicPolygon footstepYoGraphicPolygon = new YoGraphicPolygon(name + "YoGraphicPolygon", footstepYoFramePose, defaultFootPolygon.getNumberOfVertices(),
+                                                                       registry, 1.0, appearance);
+      footstepYoGraphicPolygon.updateConvexPolygon2d(defaultFootPolygon);
+      yoGraphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), footstepYoGraphicPolygon);
+      return footstepYoGraphicPolygon;
    }
 
    private AppearanceDefinition getAppearanceForScore(double score)
