@@ -76,7 +76,163 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
       assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
    }
+   
+   public void testStepUpsAndDownsScoringDifficult(boolean assertPlannerReturnedResult)
+   {
+      double cinderBlockSize = 0.4;
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      
+      double cinderBlockHeight = 0.15;
+      
+      generator.translate(0.0, 0.0, 0.001); // avoid graphical issue
+      generator.addRectangle(0.6, 5.0); // standing platform
+      generator.translate(0.4, 0.0, 0.0); // forward to first row
+      
+      generator.translate(0.0, -0.5 * cinderBlockSize, 0.0);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(0.0, cinderBlockSize, 0.0);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 2, 1);
+      generator.translate(cinderBlockSize, -1.5 * cinderBlockSize, 0.05);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(0.0, cinderBlockSize, -0.1);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
 
+      generator.identity();
+      generator.translate(3 * cinderBlockSize, 0.0, 0.001);
+      generator.addRectangle(0.6, 5.0);
+      PlanarRegionsList cinderBlockField = generator.getPlanarRegionsList();
+      
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(3 * cinderBlockSize, -0.225, 0.0);
+
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      initialStanceFootPose.setPosition(0.0, 0.1, 0.0);
+      RobotSide initialStanceSide = RobotSide.LEFT;
+
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, cinderBlockField, assertPlannerReturnedResult);
+
+      if (visualize())
+      {
+         PlanningTestTools.visualizeAndSleep(cinderBlockField, footstepPlan, goalPose);
+      }
+
+      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+   }
+   
+   public void testCompareAfterPitchedStep(boolean assertPlannerReturnedResult, boolean pitchCinderBack)
+   {
+      double cinderBlockSize = 0.4;
+      double fieldHeight = 0.4;
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      
+      double cinderBlockHeight = 0.15;
+      
+      generator.translate(0.0, 0.0, fieldHeight); // avoid graphical issue
+      generator.addRectangle(0.6, 5.0); // standing platform
+      generator.translate(0.2 + cinderBlockSize, 0.0, 0.0); // forward to first row
+      
+      generator.translate(0.0, -0.5 * cinderBlockSize, -cinderBlockHeight);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(0.0, cinderBlockSize, 0.0);
+      if (pitchCinderBack)
+         PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 2, 1);
+      else
+         PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 1, 1);
+         
+      generator.translate(cinderBlockSize, -1.5 * cinderBlockSize, 0.03);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(0.0, cinderBlockSize, -0.06);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(cinderBlockSize, -cinderBlockSize, 0.06);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(0.0, cinderBlockSize, -0.06);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(cinderBlockSize, -cinderBlockSize, 0.06);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(0.0, cinderBlockSize, -0.06);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(cinderBlockSize, -0.5 * cinderBlockSize, 0.03);
+      if (pitchCinderBack)
+         PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 2, 1);
+      else
+         PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 1, 1);
+      generator.translate(0.0, cinderBlockSize, 0.0);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      
+      generator.translate(cinderBlockSize, -0.5 * cinderBlockSize, 0.03);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(0.0, cinderBlockSize, -0.06);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(cinderBlockSize, -cinderBlockSize, 0.06);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(0.0, cinderBlockSize, -0.06);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+
+      generator.identity();
+      generator.translate(8 * cinderBlockSize, 0.0, fieldHeight);
+      generator.addRectangle(0.6, 5.0);
+      PlanarRegionsList cinderBlockField = generator.getPlanarRegionsList();
+      
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(8 * cinderBlockSize, 0.0, fieldHeight);
+
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      initialStanceFootPose.setPosition(0.0, 0.1, fieldHeight);
+      RobotSide initialStanceSide = RobotSide.LEFT;
+
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, cinderBlockField, assertPlannerReturnedResult);
+
+      if (visualize())
+      {
+         PlanningTestTools.visualizeAndSleep(cinderBlockField, footstepPlan, goalPose);
+      }
+
+      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+   }
+   
+   public void testCompareStepBeforeGap(boolean assertPlannerReturnedResult)
+   {
+      double cinderBlockSize = 1.0;
+      double fieldHeight = 0.4;
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      
+      double cinderBlockHeight = 0.15;
+      
+      generator.translate(0.0, 0.0, fieldHeight); // avoid graphical issue
+      generator.addRectangle(0.6, 5.0); // standing platform
+      generator.translate(0.2 + cinderBlockSize, 0.0, 0.0); // forward to first row
+      
+      generator.translate(-0.2, -0.5 * cinderBlockSize, -cinderBlockHeight);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(0.0, cinderBlockSize, 0.0);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(0.2 + cinderBlockSize, -cinderBlockSize, 0.0);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+      generator.translate(0.0, cinderBlockSize, 0.0);
+      PlanarRegionsListExamples.generateSingleCiderBlock(generator, cinderBlockSize, cinderBlockHeight, 0, 0);
+         
+      generator.identity();
+      generator.translate(3 * cinderBlockSize, 0.0, fieldHeight);
+      generator.addRectangle(0.6, 5.0);
+      PlanarRegionsList cinderBlockField = generator.getPlanarRegionsList();
+      
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(3 * cinderBlockSize, 0.0, fieldHeight);
+
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      initialStanceFootPose.setPosition(0.0, 0.1, fieldHeight);
+      RobotSide initialStanceSide = RobotSide.LEFT;
+
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, cinderBlockField, assertPlannerReturnedResult);
+
+      if (visualize())
+      {
+         PlanningTestTools.visualizeAndSleep(cinderBlockField, footstepPlan, goalPose);
+      }
+
+      assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose, footstepPlan));
+   }
+   
    public void testSimpleStepOnBox()
    {
       testSimpleStepOnBox(true);

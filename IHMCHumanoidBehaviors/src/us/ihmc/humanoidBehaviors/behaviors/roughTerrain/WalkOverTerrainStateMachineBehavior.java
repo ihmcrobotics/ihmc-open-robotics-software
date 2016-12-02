@@ -11,7 +11,7 @@ import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.examples.UserValidationExampleBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.examples.GetUserValidationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FindFiducialBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior.WalkOverTerrainState;
@@ -56,7 +56,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    private final ClearPlanarRegionsListBehavior clearPlanarRegionsListBehavior;
    private final SimpleDoNothingBehavior reachedGoalBehavior;
 
-   private final UserValidationExampleBehavior userValidationExampleBehavior;
+   private final GetUserValidationBehavior userValidationExampleBehavior;
    private final ReferenceFrame midZupFrame;
 
    private final DoubleYoVariable yoTime;
@@ -88,7 +88,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
       lookForGoalBehavior = new FindFiducialBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService, fiducialToTrack);
       sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
-      sleepBehavior.setSleepTime(10.0);
+      sleepBehavior.setSleepTime(2.0);
       lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
 
       planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService);
@@ -99,7 +99,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       takeSomeStepsBehavior = new TakeSomeStepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
       reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge);
 
-      userValidationExampleBehavior = new UserValidationExampleBehavior(communicationBridge);
+      userValidationExampleBehavior = new GetUserValidationBehavior(communicationBridge);
 
       this.registry.addChild(lookForGoalBehavior.getYoVariableRegistry());
       this.registry.addChild(sleepBehavior.getYoVariableRegistry());
@@ -110,7 +110,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       this.registry.addChild(userValidationExampleBehavior.getYoVariableRegistry());
 
       setupStateMachine();
-      
+
       swingTime.set(1.5);
       transferTime.set(0.3);
       maxNumberOfStepsToTake.set(3);

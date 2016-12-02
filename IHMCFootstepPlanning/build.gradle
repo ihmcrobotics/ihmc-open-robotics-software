@@ -42,8 +42,9 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
 	compile ihmc.getProjectDependency(":ConvexOptimizationAdapter")
 	
-	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
-    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")
+    testCompile ihmc.getProjectTestDependency(":IHMCUnitTesting")
+    testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 }
 
 jar {

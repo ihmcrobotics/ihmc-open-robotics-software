@@ -29,6 +29,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -87,7 +88,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    {
       super(PlanHumanoidFootstepsBehavior.class.getSimpleName(), behaviorCommunicationBridge);
 
-      shorterGoalLength.set(1.5);
+      shorterGoalLength.set(Double.POSITIVE_INFINITY);
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
@@ -98,11 +99,8 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       nextSideToSwing.set(RobotSide.LEFT);
 
       plannerTimer = new YoTimer(yoTime);
-      plannerTimer.start();
-
       timeSinceNewPlanarRegionsTimer = new YoTimer(yoTime);
-      timeSinceNewPlanarRegionsTimer.start();
-      
+
       footstepPlannerGoalPose = new YoFramePose(prefix + "FootstepGoalPose", ReferenceFrame.getWorldFrame(), registry);
       footstepPlannerInitialStepPose = new YoFramePose(prefix + "InitialStepPose", ReferenceFrame.getWorldFrame(), registry);
 
@@ -124,7 +122,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       // Whereas a human gets on its toes nicely to avoid the limits, this is challenging with a robot. 
       // So for now, have really conservative forward and down limits on height.
       parameters.setMaximumStepXWhenForwardAndDown(0.2);
-      parameters.setMaximumStepZWhenForwardAndDown(0.10);
+      parameters.setMaximumStepZWhenForwardAndDown(0.30); // 0.10);
       
       parameters.setMaximumStepYaw(0.15); //0.25);
       parameters.setMaximumStepWidth(0.4);
@@ -208,43 +206,38 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      if (plannerTimer.totalElapsed() < 0.5)
-         return;
+      if(!plannerThreadStarted)
+      {
+         new Thread(footstepPlanner).start();
+         plannerThreadStarted = true;
+         plannerTimer.reset();
+      }
 
-      if (!requestedPlanarRegion.getBooleanValue() || (timeSinceNewPlanarRegionsTimer.totalElapsed() > 5.0))
+      if (!requestedPlanarRegion.getBooleanValue() || (timeSinceNewPlanarRegionsTimer.totalElapsed() > 2.0))
       {
          clearAndRequestPlanarRegionsList();
          requestedPlanarRegion.set(true);
+         timeSinceNewPlanarRegionsTimer.reset();
       }
 
       boolean planarRegionsListIsAvailable = updatePlannerIfPlanarRegionsListIsAvailable();
       if (planarRegionsListIsAvailable)
       {
          timeSinceNewPlanarRegionsTimer.reset();
+         plannerTimer.reset();
       }
 
-//      if (!planarRegionsListIsAvailable)
-//      {
-//         return;
-//      }
-
-      if (timeSinceNewPlanarRegionsTimer.totalElapsed() < 1.5)
+      if (plannerTimer.totalElapsed() < 1.5)
       {
          return;
       }
 
-      //TODO: Change to anytime functionality.
-//      plan = footstepPlanner.getBestPlanYet();
-      footstepPlanner.plan();
-      plan = footstepPlanner.getPlan();
-
+      plan = footstepPlanner.getBestPlanYet();
       plannerTimer.reset();
-      requestedPlanarRegion.set(false);
 
-      if (plan == null || (plan.getNumberOfSteps() == 0))
+      if (plan == null || (plan.getNumberOfSteps() <= 1))
       {
          sendTextToSpeechPacket("No Plan was found! " + failIndex++);
-         this.nextSideToSwing.set(this.nextSideToSwing.getEnumValue().getOppositeSide());
          return;
       }
 
@@ -313,6 +306,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       {
          vectorFromFeetToGoal.scale(shorterGoalLength.getDoubleValue() / vectorFromFeetToGoal.length());
       }
+
       shorterGoalPosition.set(pointBetweenFeet);
       shorterGoalPosition.add(vectorFromFeetToGoal);
       goalPose.setPosition(shorterGoalPosition);
@@ -362,7 +356,6 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       sendPacketToUI(new UIPositionCheckerPacket(new Point3d(xyGoal.getX(), xyGoal.getY(), leftFootPose.getZ()), new Quat4d()));
 
       footstepPlanner.setGoal(footstepPlannerGoal);
-
       footstepPlanner.setInitialStanceFoot(tempStanceFootPose, stanceSide);
 
       footstepPlannerGoalPose.set(goalPose);
@@ -396,15 +389,10 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      System.out.println("OnBehaviorEntered");
       plannerTimer.start();
-      plannerTimer.reset();
+      timeSinceNewPlanarRegionsTimer.start();
 
-      if(!plannerThreadStarted)
-      {
-//         new Thread(footstepPlanner).start();
-         plannerThreadStarted = true;
-      }
+      requestedPlanarRegion.set(false);
    }
 
    @Override
@@ -455,5 +443,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    @Override
    public void onBehaviorExited()
    {
+      footstepPlanner.requestStop();
+      plannerThreadStarted = false;
    }
 }
