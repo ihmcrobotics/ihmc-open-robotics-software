@@ -24,6 +24,77 @@ import us.ihmc.tools.testing.MutationTestingTools;
 
 public class PlanarRegionTest
 {
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsPointOnOrSlightlyAbove()
+   {
+      Random random = new Random(1776L);
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      Point3d regionTranslation = new Point3d();
+      Point3d pointAbove = new Point3d();
+      Point3d pointBelow = new Point3d();
+      Vector3d regionNormal = new Vector3d();
+
+      for(int i = 0; i < 10000; i++)
+      {
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, 1, 10.0, 5);
+         planarRegion.getTransformToWorld(transformToWorld);
+
+         Point2d centroid = planarRegion.getLastConvexPolygon().getCentroid();
+         regionTranslation.set(centroid.x, centroid.y, 0.0);
+         transformToWorld.transform(regionTranslation);
+         regionTranslation.setZ(planarRegion.getPlaneZGivenXY(regionTranslation.x, regionTranslation.y));
+
+         planarRegion.getNormal(regionNormal);
+
+         regionNormal.normalize();
+         regionNormal.scale(1e-6);
+
+         pointAbove.add(regionTranslation, regionNormal);
+         pointBelow.sub(regionTranslation, regionNormal);
+
+         assertTrue(planarRegion.isPointOnOrSlightlyAbove(pointAbove, 1e-5));
+         assertFalse(planarRegion.isPointOnOrSlightlyAbove(pointBelow, 1e-5));
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testIsPointOnOrSlightlyBelow()
+   {
+      Random random = new Random(1776L);
+
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      Point3d regionTranslation = new Point3d();
+      Point3d pointAbove = new Point3d();
+      Point3d pointBelow = new Point3d();
+      Vector3d regionNormal = new Vector3d();
+
+      for(int i = 0; i < 10000; i++)
+      {
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, 1, 10.0, 5);
+         planarRegion.getTransformToWorld(transformToWorld);
+
+         Point2d centroid = planarRegion.getLastConvexPolygon().getCentroid();
+         regionTranslation.set(centroid.x, centroid.y, 0.0);
+         transformToWorld.transform(regionTranslation);
+         regionTranslation.setZ(planarRegion.getPlaneZGivenXY(regionTranslation.x, regionTranslation.y));
+
+         planarRegion.getNormal(regionNormal);
+
+         regionNormal.normalize();
+         regionNormal.scale(1e-6);
+
+         pointAbove.add(regionTranslation, regionNormal);
+         pointBelow.sub(regionTranslation, regionNormal);
+
+         assertTrue(planarRegion.isPointOnOrSlightlyBelow(pointBelow, 1e-5));
+         assertFalse(planarRegion.isPointOnOrSlightlyBelow(pointAbove, 1e-5));
+      }
+   }
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCreationOfBoundingBoxWithAllPointsGreaterThanOrigin()
