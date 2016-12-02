@@ -232,7 +232,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
       // define start and goal conditions
       FramePose initialStanceFootPose = new FramePose(worldFrame);
-      initialStanceFootPose.setPosition(0.3, 0.0, 0.0);
+      initialStanceFootPose.setPosition(0.3, 0.0, 0.5);
       RobotSide initialStanceSide = RobotSide.LEFT;
       FramePose goalPose = new FramePose(worldFrame);
       goalPose.setPosition(4.4, 0.0, 0.5);
