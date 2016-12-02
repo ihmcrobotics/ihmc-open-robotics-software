@@ -34,8 +34,31 @@ public class ValveDetector {
 
         String model, weights;
         try {
-            model = exportResource("/valvenet/deploy.prototxt");
-            weights = exportResource("/valvenet/snapshot_iter_1761.caffemodel");
+            String tempDir = System.getProperty("java.io.tmpdir");
+            model = exportResource("/valvenet/deploy.prototxt", tempDir);
+            weights = exportResource("/valvenet/snapshot_iter_1761.caffemodel", tempDir);
+
+            String[] cudaLibs = {"libcublas.so.7.5", "libcudart.so.7.5", "libcurand.so.7.5"};
+            File cudaLibsDir = new File(tempDir + "/cuda75/");
+            if (!cudaLibsDir.exists())
+            {
+                if (!cudaLibsDir.mkdirs())
+                {
+                    logger.warning("Could not create directory " + cudaLibsDir + ", CUDA libraries will not be extracted");
+                }
+                else
+                {
+                    for (String cudaLib : cudaLibs)
+                    {
+                        if (exportResource("/" + cudaLib, cudaLibsDir.getAbsolutePath()).isEmpty())
+                            logger.warning("Could not extract " + cudaLib + " to " + cudaLibsDir + ". If CUDA 7.5 is not installed, object detection will likely fail with UnsatisfiedLinkError.");
+                        else
+                            logger.fine("Extracted " + cudaLib + " to " + cudaLibsDir);
+                    }
+                    System.setProperty("java.library.path", System.getProperty("java.library.path") + File.pathSeparator + cudaLibsDir.getAbsolutePath());
+                }
+            }
+
         } catch (Exception ex) {
             logger.log(Level.SEVERE, "Could not load weights: " + ex.getMessage());
             throw ex;
@@ -69,7 +92,7 @@ public class ValveDetector {
      * @return The path to the exported resource
      * @throws Exception if extraction fails
      */
-    private static String exportResource(String resourceName) throws Exception {
+    private static String exportResource(String resourceName, String outDir) throws Exception {
         InputStream stream = null;
         OutputStream resStreamOut = null;
         try {
@@ -80,9 +103,8 @@ public class ValveDetector {
 
             int readBytes;
             byte[] buffer = new byte[4096];
-            String tempDir = System.getProperty("java.io.tmpdir");
             String resourceFileName = new File(resourceName).getName();
-            File outFile = new File(tempDir + "/" + resourceFileName);
+            File outFile = new File(outDir + "/" + resourceFileName);
 
             resStreamOut = new FileOutputStream(outFile.getAbsoluteFile());
             while ((readBytes = stream.read(buffer)) > 0) {
