@@ -30,7 +30,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    @Override
    public double heightAt(double x, double y, double z)
    {
-      if(planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
+      if (planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
       {
          return planarRegion.getPlaneZGivenXY(x, y);
       }
@@ -43,9 +43,9 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
    {
-      if(planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
+      if (planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
       {
-         if(normalToPack != null)
+         if (normalToPack != null)
          {
             planarRegion.getNormal(normalToPack);
          }
@@ -89,14 +89,14 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
 
       boolean isPointInside = planarRegion.isPointOnOrSlightlyBelow(tempPoint3dForCheckInside, allowablePenetrationThickness);
 
-      if(isPointInside)
+      if (isPointInside)
       {
-         if(intersectionToPack != null)
+         if (intersectionToPack != null)
          {
             intersectionToPack.set(tempPoint3dForCheckInside);
          }
 
-         if(normalToPack != null)
+         if (normalToPack != null)
          {
             planarRegion.getNormal(normalToPack);
          }

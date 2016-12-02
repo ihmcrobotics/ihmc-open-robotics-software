@@ -178,7 +178,7 @@ public class PlanarRegionTerrainObjectTest
 
          boolean shouldGeneratePointGuaranteedOnPlane = random.nextBoolean();
 
-         if(shouldGeneratePointGuaranteedOnPlane && planarRegion.isPointInsideByProjectionOntoXYPlane(randomXCoord, randomYCoord))
+         if (shouldGeneratePointGuaranteedOnPlane && planarRegion.isPointInsideByProjectionOntoXYPlane(randomXCoord, randomYCoord))
          {
             randomZCoord = planarRegion.getPlaneZGivenXY(randomXCoord, randomYCoord) + RandomTools.generateRandomDouble(random, 1e-8);
          }
