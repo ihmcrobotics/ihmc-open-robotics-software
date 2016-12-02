@@ -1,15 +1,15 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import javax.vecmath.Point3d;
+
+import us.ihmc.robotics.geometry.FramePose;
 
 public class OrderInWhichConstructedStepScorer implements BipedalStepScorer
 {
    private double score = 0.0;
    
    @Override
-   public double scoreStep(RobotSide swingSide, SideDependentList<RigidBodyTransform> soleTransforms)
+   public double scoreFootstep(FramePose stanceFoot, FramePose swingStartFoot, FramePose idealFootstep, FramePose candidateFootstep, Point3d goal)
    {
       score = score - 1.0;
       return score;
