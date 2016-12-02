@@ -64,7 +64,7 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    {
       YoVariableRegistry registry = new YoVariableRegistry("test");
       PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(registry);
-//      SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
+      //      SimplePlanarRegionBipedalAnytimeFootstepPlanner planner = new SimplePlanarRegionBipedalAnytimeFootstepPlanner(registry);
 
       BipedalFootstepPlannerParameters parameters = planner.getParameters();
       parameters.setMaximumStepReach(0.4);
