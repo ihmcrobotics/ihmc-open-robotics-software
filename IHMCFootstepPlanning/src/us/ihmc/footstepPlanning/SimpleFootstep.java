@@ -59,6 +59,9 @@ public class SimpleFootstep
 
    public boolean epsilonEquals(SimpleFootstep otherFootstep, double epsilon)
    {
+      this.foothold.update();
+      otherFootstep.foothold.update();
+
       if (!this.robotSide.equals(otherFootstep.robotSide))
          return false;
       if (!this.soleFramePose.epsilonEquals(otherFootstep.soleFramePose, epsilon))

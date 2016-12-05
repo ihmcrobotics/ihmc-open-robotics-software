@@ -28,6 +28,8 @@ import us.ihmc.tools.thread.ThreadTools;
 public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 {
    private static final boolean visualize = false;
+   private boolean assertPlannerReturnedResult = true;
+   
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -57,6 +59,8 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 
       new Thread(anytimePlanner).start();
 
+      ThreadTools.sleep(100);
+
       double closestFootstepToGoal = Double.MAX_VALUE;
       int numIterations = 10;
       FootstepPlan bestPlanYet = anytimePlanner.getBestPlanYet();
@@ -77,12 +81,14 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
 
          double newClosestDistance = lastFootstepPose.getPositionDistance(footstepGoalPose);
 
-         assertTrue(newClosestDistance <= closestFootstepToGoal);
+         if (assertPlannerReturnedResult) assertTrue("newClosestDistance = " + newClosestDistance + ", closestFootstepToGoal = " + closestFootstepToGoal, newClosestDistance <= closestFootstepToGoal);
          closestFootstepToGoal = newClosestDistance;
       }
 
       double expectedClosestDistanceToGoal = 5.5;
-      assertTrue(closestFootstepToGoal < expectedClosestDistanceToGoal);
+      if (assertPlannerReturnedResult) assertTrue(closestFootstepToGoal < expectedClosestDistanceToGoal);
+
+      ThreadTools.sleep(100);
       anytimePlanner.requestStop();
 
       if (visualize())
@@ -150,6 +156,7 @@ public class AnytimeFootstepPlannerOnFlatTerrainTest implements PlanningTest
       parameters.setMaximumStepXWhenForwardAndDown(0.25);
       parameters.setMaximumStepZWhenForwardAndDown(0.25);
       parameters.setMaximumStepYaw(0.25);
+      parameters.setMaximumStepWidth(0.4);
       parameters.setMinimumStepWidth(0.15);
       parameters.setMinimumFootholdPercent(0.8);
 

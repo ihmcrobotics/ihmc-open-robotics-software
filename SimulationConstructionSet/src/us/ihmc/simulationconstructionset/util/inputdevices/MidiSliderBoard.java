@@ -686,7 +686,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
    public void setKnobEnum(int channel, EnumYoVariable<?> var)
    {
-      setControl(channel, var, 0.0, var.getEnumValues().length -  1, 1.0, SliderType.ENUM, ControlType.KNOB);
+      setControl(channel - 80, var, 0.0, var.getEnumValues().length -  1, 1.0, SliderType.ENUM, ControlType.KNOB);
    }
 
    public void setSliderEnum(int channel, String name, YoVariableHolder holder)

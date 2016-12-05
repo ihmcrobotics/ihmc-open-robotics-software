@@ -80,12 +80,12 @@ public class ResetRobotBehavior extends AbstractBehavior
 
       if (rightArm)
          pipeLine.submitSingleTaskStage(goHomeRightArmTask);
-      //      if(leftArm)
-      //      pipeLine.submitSingleTaskStage(goHomeLeftArmTask);
-      //      if(chest)
-      //      pipeLine.submitSingleTaskStage(goHomeChestTask);
-      //      if(pelvis)
-      //      pipeLine.submitSingleTaskStage(goHomePelvisTask);
+      if (leftArm)
+         pipeLine.submitSingleTaskStage(goHomeLeftArmTask);
+      if (chest)
+         pipeLine.submitSingleTaskStage(goHomeChestTask);
+      if (pelvis)
+         pipeLine.submitSingleTaskStage(goHomePelvisTask);
    }
 
    @Override

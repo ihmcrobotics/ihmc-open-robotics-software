@@ -46,7 +46,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
 
    private final GetLidarScanExampleBehavior getLidarScanExampleBehavior;
    private final GetVideoPacketExampleBehavior getVideoPacketExampleBehavior;
-   private final UserValidationExampleBehavior userValidationExampleBehavior;
+   private final GetUserValidationBehavior userValidationExampleBehavior;
    private final SimpleArmMotionBehavior simpleArmMotionBehavior;
    private final ResetRobotBehavior resetRobotBehavior;
    private final ReferenceFrame midZupFrame;
@@ -64,7 +64,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       //create your behaviors
       getLidarScanExampleBehavior = new GetLidarScanExampleBehavior(communicationBridge);
       getVideoPacketExampleBehavior = new GetVideoPacketExampleBehavior(communicationBridge);
-      userValidationExampleBehavior = new UserValidationExampleBehavior(communicationBridge);
+      userValidationExampleBehavior = new GetUserValidationBehavior(communicationBridge);
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       simpleArmMotionBehavior = new SimpleArmMotionBehavior(yoTime, atlasPrimitiveActions.referenceFrames, communicationBridge, atlasPrimitiveActions);
 

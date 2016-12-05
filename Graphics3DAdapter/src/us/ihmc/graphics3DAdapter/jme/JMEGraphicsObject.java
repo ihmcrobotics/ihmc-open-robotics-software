@@ -404,7 +404,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
       AppearanceDefinition appearance = graphics3dObjectAddMeshData.getAppearance();
 
       Mesh mesh = JMEMeshDataInterpreter.interpretMeshData(meshData);
-      Geometry geometry = new Geometry("MeshData", mesh);
+      Geometry geometry = new Geometry(meshData.getName()+"_Geometry", mesh);
       setGeometryMaterialBasedOnAppearance(geometry, appearance);
 
       final Node meshHolder = new Node();

@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -37,16 +37,21 @@ public class AtlasPrimitiveActions
    public final SetLidarParametersBehavior setLidarParametersBehavior;
    public final WalkToLocationBehavior walkToLocationBehavior;
    public final WholeBodyInverseKinematicsBehavior wholeBodyBehavior;
+   public final WalkToLocationPlannedBehavior walkToLocationPlannedBehavior;
    private final YoVariableRegistry behaviorRegistry;
    
    public HumanoidReferenceFrames referenceFrames;
 
-   public AtlasPrimitiveActions(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
+   public AtlasPrimitiveActions(CommunicationBridge outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
          HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime,
          WholeBodyControllerParameters wholeBodyControllerParameters, YoVariableRegistry behaviorRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.behaviorRegistry = behaviorRegistry;
+      
+      walkToLocationPlannedBehavior = new WalkToLocationPlannedBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters, yoTime);
+      addPrimitive(walkToLocationPlannedBehavior);
+      
       leftArmTrajectoryBehavior = new ArmTrajectoryBehavior("left", outgoingCommunicationBridge, yoTime);
       addPrimitive(leftArmTrajectoryBehavior);
 
