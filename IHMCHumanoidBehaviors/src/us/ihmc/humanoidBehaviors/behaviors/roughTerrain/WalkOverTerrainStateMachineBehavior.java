@@ -10,7 +10,7 @@ import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.examples.UserValidationExampleBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.examples.GetUserValidationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.FindGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
@@ -57,7 +57,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    private final ClearPlanarRegionsListBehavior clearPlanarRegionsListBehavior;
    private final SimpleDoNothingBehavior reachedGoalBehavior;
 
-   private final UserValidationExampleBehavior userValidationExampleBehavior;
+   private final GetUserValidationBehavior userValidationExampleBehavior;
    private final ReferenceFrame midZupFrame;
 
    private final DoubleYoVariable yoTime;
@@ -89,7 +89,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
                                                       goalDetectorBehaviorService);
 
       sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
-      sleepBehavior.setSleepTime(10.0);
+      sleepBehavior.setSleepTime(2.0);
       lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
 
       planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
@@ -100,7 +100,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       takeSomeStepsBehavior = new TakeSomeStepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
       reachedGoalBehavior = new SimpleDoNothingBehavior(communicationBridge);
 
-      userValidationExampleBehavior = new UserValidationExampleBehavior(communicationBridge);
+      userValidationExampleBehavior = new GetUserValidationBehavior(communicationBridge);
 
       this.registry.addChild(lookForGoalBehavior.getYoVariableRegistry());
       this.registry.addChild(sleepBehavior.getYoVariableRegistry());

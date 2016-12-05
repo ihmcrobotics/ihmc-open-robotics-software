@@ -32,7 +32,7 @@ public class DRCNetworkModuleParameters
    private boolean useKinematicsToolboxVisualizer = false;
    private boolean useFootstepPlanningToolboxVisualizer = true;
    private boolean useTextToSpeechModule = false;
-   private boolean useRobotEnvironmentAwarenessModule = false;
+   private boolean useRobotEnvironmentAwarenessModule = true;
    private boolean useHeightQuadTreeToolbox = true;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;

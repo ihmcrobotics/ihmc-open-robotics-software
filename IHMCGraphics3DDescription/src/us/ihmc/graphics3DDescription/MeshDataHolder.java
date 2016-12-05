@@ -6,6 +6,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Point3f;
+import javax.vecmath.Quat4f;
 import javax.vecmath.TexCoord2f;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple3f;
@@ -76,6 +77,13 @@ public class MeshDataHolder
    {
       Matrix3f matrix = new Matrix3f();
       matrix.set(axisAngle);
+      return rotate(input, matrix);
+   }
+
+   public static MeshDataHolder rotate(MeshDataHolder input, Quat4f quaternion)
+   {
+      Matrix3f matrix = new Matrix3f();
+      matrix.set(quaternion);
       return rotate(input, matrix);
    }
 
