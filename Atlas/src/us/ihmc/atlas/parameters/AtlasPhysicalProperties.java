@@ -34,7 +34,7 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
    
    public AtlasPhysicalProperties()
    {
-      this(1.0, 3.0);
+      this(1.0);
    }
    
    public AtlasPhysicalProperties(double height, double weight)
