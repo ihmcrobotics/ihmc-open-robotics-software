@@ -24,6 +24,9 @@ public class SkippyICPBasedController extends SimpleRobotController
 
    private final DoubleYoVariable kCapture = new DoubleYoVariable("kCapture", registry);
    private final DoubleYoVariable kMomentum = new DoubleYoVariable("kMomentum", registry);
+   private final DoubleYoVariable kAngle = new DoubleYoVariable("kAngle", registry);
+   private final DoubleYoVariable hipSetpoint = new DoubleYoVariable("hipSetpoint", registry);
+   private final DoubleYoVariable shoulderSetpoint = new DoubleYoVariable("shoulderSetpoint", registry);
 
    private final IntegerYoVariable tickCounter = new IntegerYoVariable("tickCounter", registry);
    private final IntegerYoVariable ticksForDesiredForce = new IntegerYoVariable("ticksForDesiredForce", registry);
@@ -41,6 +44,7 @@ public class SkippyICPBasedController extends SimpleRobotController
    private final FrameVector worldToHip = new FrameVector(worldFrame);
    private final FrameVector worldToShoulder = new FrameVector(worldFrame);
    private final FrameVector hipToFootDirection = new FrameVector(worldFrame);
+   private final FrameVector shoulderToFootDirection = new FrameVector(worldFrame);
    private final FrameVector hipAxis = new FrameVector(worldFrame);
    private final FrameVector shoulderAxis = new FrameVector(worldFrame);
 
@@ -64,11 +68,17 @@ public class SkippyICPBasedController extends SimpleRobotController
 
       kCapture.set(7.5);
       kMomentum.set(0.3);
+      kAngle.set(0.1);
 
       ticksForDesiredForce.set(100);
       hipAngleController.setProportionalGain(20.0);
       hipAngleController.setIntegralGain(10.0);
-      tickCounter.set(ticksForDesiredForce.getIntegerValue());
+      shoulderAngleController.setProportionalGain(0.0);
+      shoulderAngleController.setIntegralGain(0.0);
+      tickCounter.set(ticksForDesiredForce.getIntegerValue() + 1);
+      
+      hipSetpoint.set(0.6);
+      shoulderSetpoint.set(0.0);
 
       makeViz(yoGraphicsListRegistries);
    }
@@ -122,8 +132,13 @@ public class SkippyICPBasedController extends SimpleRobotController
 
       if (tickCounter.getIntegerValue() > ticksForDesiredForce.getIntegerValue())
       {
-         desiredCMP.setY(desiredCMP.getY() - kMomentum.getDoubleValue() * angularMomentum.getX());
-         desiredCMP.setX(desiredCMP.getX() - kMomentum.getDoubleValue() * angularMomentum.getY());
+         double qHip = skippy.getHipJoint().getQ();
+         double q_dHip = skippy.getHipJoint().getQ() > 0.0 ? hipSetpoint.getDoubleValue() : -hipSetpoint.getDoubleValue();
+         double hipSetpointFeedback = kAngle.getDoubleValue() * (qHip - q_dHip);
+         double shoulderSetpointFeedback = kAngle.getDoubleValue() * (skippy.getShoulderJoint().getQ() - shoulderSetpoint.getDoubleValue());
+
+         desiredCMP.setY(desiredCMP.getY() - kMomentum.getDoubleValue() * angularMomentum.getX() + hipSetpointFeedback);
+         desiredCMP.setX(desiredCMP.getX() + kMomentum.getDoubleValue() * angularMomentum.getY() + shoulderSetpointFeedback);
 
          desiredGroundReaction.sub(com, desiredCMP);
          desiredGroundReaction.normalize();
@@ -135,15 +150,30 @@ public class SkippyICPBasedController extends SimpleRobotController
 
       skippy.getHipJoint().getTranslationToWorld(worldToHip.getVector());
       skippy.getShoulderJoint().getTranslationToWorld(worldToShoulder.getVector());
+      skippy.getShoulderJointAxis(shoulderAxis);
+      skippy.getHipJointAxis(hipAxis);
       
       // hip specific:
       hipToFootDirection.sub(footLocation, worldToHip);
       hipToFootDirection.normalize();
-      skippy.getHipJointAxis(hipAxis);
       double balanceTorque = computeJointTorque(desiredGroundReaction, hipToFootDirection, hipAxis);
       double angleFeedback = computeAngleFeedbackHip();
-      skippy.getHipJoint().setTau(angleFeedback + balanceTorque);
       
+      if (Double.isNaN(angleFeedback + balanceTorque))
+         skippy.getHipJoint().setTau(0.0);
+      else
+         skippy.getHipJoint().setTau(angleFeedback + balanceTorque);
+      
+      // shoulder specific:
+      shoulderToFootDirection.sub(footLocation, worldToShoulder);
+      shoulderToFootDirection.normalize();
+      balanceTorque = -computeJointTorque(desiredGroundReaction, hipToFootDirection, shoulderAxis);
+      angleFeedback = -computeAngleFeedbackShoulder();
+      
+      if (Double.isNaN(angleFeedback + balanceTorque))
+         skippy.getShoulderJoint().setTau(0.0);
+      else
+         skippy.getShoulderJoint().setTau(angleFeedback + balanceTorque);
 
       updateViz();
    }
@@ -188,7 +218,6 @@ public class SkippyICPBasedController extends SimpleRobotController
     */
    private double computeAngleFeedbackHip()
    {
-      skippy.getHipJointAxis(hipAxis);
       double hipAngleDifference = computeAngleDifferenceInPlane(desiredGroundReaction, groundReaction, hipAxis);
       return hipAngleController.compute(hipAngleDifference, 0.0, 0.0, 0.0, dt);
    }
@@ -198,7 +227,6 @@ public class SkippyICPBasedController extends SimpleRobotController
     */
    private double computeAngleFeedbackShoulder()
    {
-      skippy.getShoulderJointAxis(shoulderAxis);
       double shoulderAngleDifference = computeAngleDifferenceInPlane(desiredGroundReaction, groundReaction, shoulderAxis);
       return shoulderAngleController.compute(shoulderAngleDifference, 0.0, 0.0, 0.0, dt);
    }
