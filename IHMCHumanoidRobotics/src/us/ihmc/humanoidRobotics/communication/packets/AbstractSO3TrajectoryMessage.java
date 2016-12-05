@@ -188,7 +188,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       selectionMatrixToPack.reshape(6, 6);
       if (selectionMatrixDiagonal == null)
       {
-         CommonOps.setIdentity(selectionMatrixToPack);
+         selectionMatrixToPack.zero();
       }
       else
       {
