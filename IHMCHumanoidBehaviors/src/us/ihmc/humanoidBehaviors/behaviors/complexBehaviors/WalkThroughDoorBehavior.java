@@ -54,7 +54,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       RESET_ROBOT,
       FAILED,
       DONE
-
    }
 
    private final boolean setUpArms = true;
@@ -314,21 +313,11 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    }
 
    @Override
-   public void onBehaviorAborted()
-   {
-      onBehaviorExited();
-   }
-
-   @Override
-   public void onBehaviorPaused()
-   {
-   }
-
-   @Override
    public void onBehaviorExited()
    {
-      // TODO Auto-generated method stub
-
+      
    }
+
+
 
 }
