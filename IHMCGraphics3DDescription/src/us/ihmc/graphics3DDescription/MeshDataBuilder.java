@@ -134,6 +134,11 @@ public class MeshDataBuilder
       addMesh(MeshDataGenerator.Cone(radius, height, DEFAULT_RES), offset);
    }
 
+   public void addLine(Tuple3f start, Point3f end, float lineWidth)
+   {
+      addMesh(MeshDataGenerator.Line(start.getX(), start.getY(), start.getZ(), end.getX(), end.getY(), end.getZ(), lineWidth));
+   }
+
    public void addLine(float x0, float y0, float z0, float xf, float yf, float zf, float lineWidth)
    {
       addMesh(MeshDataGenerator.Line(x0, y0, z0, xf, yf, zf, lineWidth));
