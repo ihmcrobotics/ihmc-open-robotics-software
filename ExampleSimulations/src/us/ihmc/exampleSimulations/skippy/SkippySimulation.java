@@ -10,7 +10,7 @@ public class SkippySimulation
 {
    public static final double DT = 0.0001;
    public static final double controlDT = 0.0001;
-   public static final double TIME = 3.0;
+   public static final double TIME = 10000.0;
    private SimulationConstructionSet sim;
 
    private static final boolean USE_ICP_BASED_CONTROLLER = true;
