@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -144,28 +145,28 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setHandLinearControlOnly(RobotSide robotSide)
    {
-      boolean[] controlledPositionAxes = new boolean[] {true, true, true};
-      boolean[] controlledOrientationAxes = new boolean[] {false, false, false};
+      double[] controlledPositionAxes = new double[] {1.0, 1.0, 1.0};
+      double[] controlledOrientationAxes = new double[] {0.0, 0.0, 0.0};
       setHandControlledAxes(robotSide, controlledPositionAxes, controlledOrientationAxes);
    }
 
    public void setHandLinearControlAndYawPitchOnly(RobotSide robotSide)
    {
-      boolean[] controlledPositionAxes = new boolean[] {true, true, true};
-      boolean[] controlledOrientationAxes = new boolean[] {false, true, true};
+      double[] controlledPositionAxes = new double[] {1.0, 1.0, 1.0};
+      double[] controlledOrientationAxes = new double[] {0.0, 1.0, 1.0};
       setHandControlledAxes(robotSide, controlledPositionAxes, controlledOrientationAxes);
    }
 
-   public void setHandControlledAxes(RobotSide robotSide, boolean[] controlledPositionAxes, boolean[] controlledOrientationAxes)
+   public void setHandControlledAxes(RobotSide robotSide, double[] controlledPositionAxes, double[] controlledOrientationAxes)
    {
       DenseMatrix64F selectionMatrix = handSelectionMatrices.get(robotSide);
       selectionMatrix.reshape(6, 6);
       selectionMatrix.zero();
+      double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes); 
 
-      for (int i = 0; i < 3; i++)
+      for (int i = 0; i < 6; i++)
       {
-         selectionMatrix.set(i, i, controlledOrientationAxes[i]);
-         selectionMatrix.set(i + 3, i, controlledPositionAxes[i]);
+         selectionMatrix.set(i, i, data[i]);
       }
    }
 
@@ -176,21 +177,21 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setChestAngularControlOnly()
    {
-      boolean[] controlledPositionAxes = new boolean[] {false, false, false};
-      boolean[] controlledOrientationAxes = new boolean[] {true, true, true};
+      double[] controlledPositionAxes = new double[] {0.0, 0.0, 0.0};
+      double[] controlledOrientationAxes = new double[] {1.0, 1.0, 1.0};
       setChestControlledAxes(controlledPositionAxes, controlledOrientationAxes);
    }
 
-   public void setChestControlledAxes(boolean[] controlledPositionAxes, boolean[] controlledOrientationAxes)
+   public void setChestControlledAxes(double[] controlledPositionAxes, double[] controlledOrientationAxes)
    {
       DenseMatrix64F selectionMatrix = chestSelectionMatrix;
       selectionMatrix.reshape(6, 6);
       selectionMatrix.zero();
+      double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes); 
 
-      for (int i = 0; i < 3; i++)
+      for (int i = 0; i < 6; i++)
       {
-         selectionMatrix.set(i, i, controlledOrientationAxes[i]);
-         selectionMatrix.set(i + 3, i, controlledPositionAxes[i]);
+         selectionMatrix.set(i, i, data[i]);
       }
    }
 
