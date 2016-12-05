@@ -29,6 +29,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private static final String modelFilename = "model.sdf";
    private static final String modelResourceBundle = "resources.zip";
    private static final String indexFilename = "robotData.dat";
+   private static final String summaryFilename = "summary.csv";
 
    private final Object synchronizer = new Object();
    private final Object timestampUpdater = new Object();
@@ -60,6 +61,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private long currentIndex = 0;
 
    private long lastReceivedTimestamp = Long.MIN_VALUE;
+   
+   private YoVariableSummarizer yoVariableSummarizer = null;
    
    public YoVariableLoggerListener(File tempDirectory, File finalDirectory, String timestamp, AnnounceRequest request, YoVariableLoggerOptions options)
    {
@@ -112,7 +115,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       return false;
    }
 
-   private void logHandshake(LogHandshake handshake)
+   private void logHandshake(LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
       File handshakeFile = new File(tempDirectory, handshakeFilename);
       try
@@ -154,6 +157,12 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
             throw new RuntimeException(e);
          }
       }
+      
+      if(handshake.createSummary)
+      {
+         yoVariableSummarizer = new YoVariableSummarizer(handshakeParser.getYoVariablesList(), handshake.summaryTriggerVariable, handshake.summarizedVariables);
+         logProperties.setSummaryFile(summaryFilename);
+      }
    }
 
    public void receivedTimestampAndData(long timestamp, ByteBuffer buffer)
@@ -168,6 +177,10 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          {
             try
             {
+               if(yoVariableSummarizer != null)
+               {
+                  yoVariableSummarizer.setBuffer(buffer);
+               }
                buffer.clear();
                compressedBuffer.clear();
                SnappyUtils.compress(buffer, compressedBuffer);
@@ -188,6 +201,11 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
                      indexChannel.force(false);
                      dataChannel.force(false);
                   }                  
+               }
+               
+               if(yoVariableSummarizer != null)
+               {
+                  yoVariableSummarizer.update();
                }
             }
             catch (IOException e)
@@ -215,6 +233,11 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          videoDataLogger.close();
       }
 
+      if(yoVariableSummarizer != null)
+      {
+         yoVariableSummarizer.writeData(new File(tempDirectory, summaryFilename));
+      }
+      
       if (!connected)
       {
          System.err.println("Never started logging, cleaning up");
@@ -297,7 +320,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
    }
 
-   public boolean populateRegistry()
+   public boolean updateYoVariables()
    {
       return false;
    }
@@ -316,7 +339,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    @Override
    public void start(LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
-      logHandshake(handshake);
+      logHandshake(handshake, handshakeParser);
 
       int bufferSize = handshakeParser.getBufferSize();
       this.compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
@@ -412,10 +435,15 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          {
             videoDataLogger.restart();
          }
+         
       }
       catch (IOException e)
       {
          e.printStackTrace();
+      }
+      if(yoVariableSummarizer != null)
+      {
+         yoVariableSummarizer.restart();
       }
       synchronized (synchronizer)
       {
