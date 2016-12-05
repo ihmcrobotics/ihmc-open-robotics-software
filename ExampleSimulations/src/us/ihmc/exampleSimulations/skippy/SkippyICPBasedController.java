@@ -1,5 +1,8 @@
 package us.ihmc.exampleSimulations.skippy;
 
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Point3d;
+
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -10,6 +13,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -77,7 +81,7 @@ public class SkippyICPBasedController extends SimpleRobotController
       shoulderAngleController.setIntegralGain(0.0);
       tickCounter.set(ticksForDesiredForce.getIntegerValue() + 1);
       
-      hipSetpoint.set(0.6);
+      hipSetpoint.set(Math.PI / 4.0);
       shoulderSetpoint.set(0.0);
 
       makeViz(yoGraphicsListRegistries);
@@ -136,9 +140,17 @@ public class SkippyICPBasedController extends SimpleRobotController
          double q_dHip = skippy.getHipJoint().getQ() > 0.0 ? hipSetpoint.getDoubleValue() : -hipSetpoint.getDoubleValue();
          double hipSetpointFeedback = kAngle.getDoubleValue() * (qHip - q_dHip);
          double shoulderSetpointFeedback = kAngle.getDoubleValue() * (skippy.getShoulderJoint().getQ() - shoulderSetpoint.getDoubleValue());
+         
+         Matrix3d rotationMatrix = new Matrix3d();
+         skippy.getRootJoints().get(0).getRotationToWorld(rotationMatrix);
+         double yaw = RotationTools.computeYaw(rotationMatrix);
+         RotationTools.convertYawPitchRollToMatrix(yaw, 0.0, 0.0, rotationMatrix);
+         Point3d angleFeedback = new Point3d(hipSetpointFeedback, shoulderSetpointFeedback, 0.0);
+         rotationMatrix.invert();
+         rotationMatrix.transform(angleFeedback);
 
-         desiredCMP.setY(desiredCMP.getY() - kMomentum.getDoubleValue() * angularMomentum.getX() + hipSetpointFeedback);
-         desiredCMP.setX(desiredCMP.getX() + kMomentum.getDoubleValue() * angularMomentum.getY() + shoulderSetpointFeedback);
+         desiredCMP.setY(desiredCMP.getY() - kMomentum.getDoubleValue() * angularMomentum.getX() + angleFeedback.x);
+         desiredCMP.setX(desiredCMP.getX() + kMomentum.getDoubleValue() * angularMomentum.getY() + angleFeedback.y);
 
          desiredGroundReaction.sub(com, desiredCMP);
          desiredGroundReaction.normalize();
