@@ -7,6 +7,7 @@ import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -26,6 +27,11 @@ public class SkippyICPBasedController extends SimpleRobotController
    private final DoubleYoVariable omega0 = new DoubleYoVariable("omega0", registry);
    private final DoubleYoVariable kCapture = new DoubleYoVariable("kCapture", registry);
    private final DoubleYoVariable hipSetpoint = new DoubleYoVariable("hipSetpoint", registry);
+
+   private final IntegerYoVariable tickCounter = new IntegerYoVariable("tickCounter", registry);
+   private final IntegerYoVariable ticksForDesiredForce = new IntegerYoVariable("ticksForDesiredForce", registry);
+   private final DoubleYoVariable angleBetweenDesiredAndActual = new DoubleYoVariable("angleBetweenDesiredAndActual", registry);
+   private final PIDController angleController = new PIDController("angleController", registry);
 
    private final FramePoint com = new FramePoint(worldFrame);
    private final FrameVector comVelocity = new FrameVector(worldFrame);
@@ -56,8 +62,14 @@ public class SkippyICPBasedController extends SimpleRobotController
       omega0.set(Math.sqrt(Z0 / Math.abs(skippy.getGravity())));
       kCapture.set(1.5);
 
+      hipSetpoint.set(skippy.getHipJoint().getQ());
       hipController.setProportionalGain(0.0);
       hipController.setDerivativeGain(0.0);
+
+      ticksForDesiredForce.set(100);
+      angleController.setProportionalGain(20.0);
+      angleController.setIntegralGain(10.0);
+      tickCounter.set(ticksForDesiredForce.getIntegerValue());
 
       makeViz(yoGraphicsListRegistries);
    }
@@ -99,13 +111,20 @@ public class SkippyICPBasedController extends SimpleRobotController
    public void doControl()
    {
       skippy.computeComAndICP(omega0.getDoubleValue(), com, comVelocity, icp);
+      skippy.computeFootContactForce(groundReaction.getVector());
       footLocation.set(skippy.computeFootLocation());
       cmpFromIcpDynamics(icp, footLocation, desiredCMP);
 
-      desiredGroundReaction.sub(com, desiredCMP);
-      desiredGroundReaction.normalize();
-      double reactionModulus = Math.abs(skippy.getGravity()) * skippy.getMass() / desiredGroundReaction.getZ();
-      desiredGroundReaction.scale(reactionModulus);
+      if (tickCounter.getIntegerValue() > ticksForDesiredForce.getIntegerValue())
+      {
+         desiredGroundReaction.sub(com, desiredCMP);
+         desiredGroundReaction.normalize();
+         double reactionModulus = Math.abs(skippy.getGravity()) * skippy.getMass() / desiredGroundReaction.getZ();
+         desiredGroundReaction.scale(reactionModulus);
+
+         tickCounter.set(0);
+      }
+      tickCounter.increment();
 
       skippy.getHipJoint().getTranslationToWorld(worldToHip.getVector());
       hipToFootDirection.sub(footLocation, worldToHip);
@@ -113,12 +132,13 @@ public class SkippyICPBasedController extends SimpleRobotController
 
       skippy.getHipJointAxis(hipAxis);
       double balanceTorque = computeJointTorque(desiredGroundReaction, hipToFootDirection, hipAxis);
-      double setpointTorque = hipController.compute(skippy.getQ_hip().getDoubleValue(), hipSetpoint.getDoubleValue(), skippy.getQd_hip().getDoubleValue(), 0.0, dt);
-      double weightAboveTorque = torqueOnHipFromTheWeightAboveIt();
-      
-      skippy.getHipJoint().setTau(balanceTorque + setpointTorque + weightAboveTorque);
-      
-      skippy.computeFootContactForce(groundReaction.getVector());
+//      double setpointTorque = hipController.compute(skippy.getQ_hip().getDoubleValue(), hipSetpoint.getDoubleValue(), skippy.getQd_hip().getDoubleValue(), 0.0, dt);
+//      double weightAboveTorque = torqueOnHipFromTheWeightAboveIt();
+//      skippy.getHipJoint().setTau(balanceTorque + setpointTorque + weightAboveTorque);
+
+      double angleFeedback = computeAngleFeedback();
+      skippy.getHipJoint().setTau(angleFeedback + balanceTorque);
+
       updateViz();
    }
 
@@ -153,8 +173,9 @@ public class SkippyICPBasedController extends SimpleRobotController
       hipToFootDirectionViz.set(hipToFootDirection);
       hipAxisViz.set(hipAxis);
    }
-   private double torqueOnHipFromTheWeightAboveIt(){
-      
+
+   private double torqueOnHipFromTheWeightAboveIt()
+   {
       FrameVector torqueFromHip = new FrameVector(worldFrame);
       FrameVector torqueFromShoulder = new FrameVector(worldFrame);
       FrameVector torqueFromHipAndShoulder = new FrameVector(worldFrame);
@@ -185,6 +206,22 @@ public class SkippyICPBasedController extends SimpleRobotController
       torqueFromHipAndShoulder.add(torqueFromHip);
       double torqueOnHipFromWeightAbove = torqueFromHipAndShoulder.dot(hipAxis);
       return torqueOnHipFromWeightAbove;
+   }
+
+   /**
+    * Controller on the angle between desired and achieved ground reaction force.
+    */
+   private double computeAngleFeedback()
+   {
+      double angleBetweenDesiredAndActual = desiredGroundReaction.angle(groundReaction);
+
+      double yDifference = groundReaction.getY() - desiredGroundReaction.getY();
+      angleBetweenDesiredAndActual = Math.signum(yDifference) * angleBetweenDesiredAndActual;
+
+      this.angleBetweenDesiredAndActual.set(angleBetweenDesiredAndActual);
+      if (Double.isNaN(angleBetweenDesiredAndActual))
+         return 0.0;
+      return angleController.compute(-angleBetweenDesiredAndActual, 0.0, 0.0, 0.0, dt);
    }
 
 }
