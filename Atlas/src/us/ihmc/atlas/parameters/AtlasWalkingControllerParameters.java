@@ -754,7 +754,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getDefaultTransferTime()
    {
-      return Math.sqrt(jointMap.getModelScale()) * ((target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 0.8 : 3);
+      return Math.sqrt(jointMap.getModelScale()) * ((target == DRCRobotModel.RobotTarget.REAL_ROBOT) ? 0.8 : 0.25);
    }
 
    @Override
