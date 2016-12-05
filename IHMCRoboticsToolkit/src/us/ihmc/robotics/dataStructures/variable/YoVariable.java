@@ -372,4 +372,6 @@ public abstract class YoVariable<T extends YoVariable<T>>
     * @return true if value changed
     */
    public abstract boolean setValue(T value, boolean notifyListeners);
+   
+   public abstract boolean isZero();
 }

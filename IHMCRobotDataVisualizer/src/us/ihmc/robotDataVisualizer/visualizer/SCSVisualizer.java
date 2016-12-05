@@ -139,7 +139,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public boolean populateRegistry()
+   public boolean updateYoVariables()
    {
       return true;
    }

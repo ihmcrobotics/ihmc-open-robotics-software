@@ -3,6 +3,7 @@ package us.ihmc.robotDataCommunication;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -29,7 +30,9 @@ public class TestYoVariableConnection
    
    private final IntegerYoVariable timeout = new IntegerYoVariable("timeout", registry);
    
-   private final YoVariableServer server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("TestYoVariableConnection"), null, LogSettings.SIMULATION, 0.001);
+   private final BooleanYoVariable startVariableSummary = new BooleanYoVariable("startVariableSummary", registry);
+   
+   private final YoVariableServer server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("TestYoVariableConnection"), null, LogSettings.TEST_LOGGER, 0.001);
    
    
    private volatile long timestamp = 0;
@@ -38,6 +41,15 @@ public class TestYoVariableConnection
    {
       server.setSendKeepAlive(true);
       server.setMainRegistry(registry, null, null);
+      
+      server.createSummary("tester.startVariableSummary");
+      server.addSummarizedVariable("tester.var1");
+      server.addSummarizedVariable("tester.var2");
+      server.addSummarizedVariable(var4);
+      
+      
+      startVariableSummary.set(false);
+      
       new ThreadTester(server).start();
       server.start();
       var4.set(5000);
