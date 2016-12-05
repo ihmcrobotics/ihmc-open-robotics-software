@@ -561,15 +561,24 @@ public class SkippyRobot extends Robot
       icpToPack.setZ(0.0);
    }
 
-   Vector3d tempHipJointAxis = new Vector3d();
-   RigidBodyTransform transformHipToWorld = new RigidBodyTransform();
+   Vector3d tempJointAxis = new Vector3d();
+   RigidBodyTransform transformJointToWorld = new RigidBodyTransform();
    public void getHipJointAxis(FrameVector hipAxisToPack)
    {
-      hipJoint.getJointAxis(tempHipJointAxis);
-      hipJoint.getTransformToWorld(transformHipToWorld);
-      transformHipToWorld.transform(tempHipJointAxis);
-      hipAxisToPack.set(tempHipJointAxis);
+      hipJoint.getJointAxis(tempJointAxis);
+      hipJoint.getTransformToWorld(transformJointToWorld);
+      transformJointToWorld.transform(tempJointAxis);
+      hipAxisToPack.set(tempJointAxis);
       hipAxisToPack.normalize();
+   }
+   
+   public void getShoulderJointAxis(FrameVector shoulderAxisToPack)
+   {
+      shoulderJoint.getJointAxis(tempJointAxis);
+      shoulderJoint.getTransformToWorld(transformJointToWorld);
+      transformJointToWorld.transform(tempJointAxis);
+      shoulderAxisToPack.set(tempJointAxis);
+      shoulderAxisToPack.normalize();
    }
 
 }

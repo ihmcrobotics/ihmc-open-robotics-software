@@ -27,8 +27,8 @@ public class SkippyICPBasedController extends SimpleRobotController
 
    private final IntegerYoVariable tickCounter = new IntegerYoVariable("tickCounter", registry);
    private final IntegerYoVariable ticksForDesiredForce = new IntegerYoVariable("ticksForDesiredForce", registry);
-   private final DoubleYoVariable angleBetweenDesiredAndActual = new DoubleYoVariable("angleBetweenDesiredAndActual", registry);
-   private final PIDController angleController = new PIDController("angleController", registry);
+   private final PIDController hipAngleController = new PIDController("hipAngleController", registry);
+   private final PIDController shoulderAngleController = new PIDController("shoulderAngleController", registry);
    private final FrameVector angularMomentum = new FrameVector(worldFrame);
 
    private final FramePoint com = new FramePoint(worldFrame);
@@ -39,18 +39,22 @@ public class SkippyICPBasedController extends SimpleRobotController
    private final FrameVector desiredGroundReaction = new FrameVector(worldFrame);
    private final FrameVector groundReaction = new FrameVector(worldFrame);
    private final FrameVector worldToHip = new FrameVector(worldFrame);
+   private final FrameVector worldToShoulder = new FrameVector(worldFrame);
    private final FrameVector hipToFootDirection = new FrameVector(worldFrame);
    private final FrameVector hipAxis = new FrameVector(worldFrame);
+   private final FrameVector shoulderAxis = new FrameVector(worldFrame);
 
    private final YoFramePoint comViz = new YoFramePoint("CoM", worldFrame, registry);
    private final YoFramePoint icpViz = new YoFramePoint("ICP", worldFrame, registry);
    private final YoFramePoint desiredCMPViz = new YoFramePoint("DesiredCMP", worldFrame, registry);
    private final YoFramePoint footLocationViz = new YoFramePoint("FootLocation", worldFrame, registry);
    private final YoFramePoint hipLocationViz = new YoFramePoint("HipLocation", worldFrame, registry);
+   private final YoFramePoint shoulderLocationViz = new YoFramePoint("ShoulderLocation", worldFrame, registry);
    private final YoFrameVector desiredGroundReactionViz = new YoFrameVector("DesiredGroundReaction", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector groundReachtionViz = new YoFrameVector("GroundReaction", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector hipToFootDirectionViz = new YoFrameVector("HipToFootDirection", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector hipAxisViz = new YoFrameVector("HipAxis", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector shoulderAxisViz = new YoFrameVector("ShoulderAxis", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector angularMomentumViz = new YoFrameVector("AngularMomentum", ReferenceFrame.getWorldFrame(), registry);
 
    public SkippyICPBasedController(SkippyRobot skippy, double dt, YoGraphicsListRegistry yoGraphicsListRegistries)
@@ -62,8 +66,8 @@ public class SkippyICPBasedController extends SimpleRobotController
       kMomentum.set(0.3);
 
       ticksForDesiredForce.set(100);
-      angleController.setProportionalGain(20.0);
-      angleController.setIntegralGain(10.0);
+      hipAngleController.setProportionalGain(20.0);
+      hipAngleController.setIntegralGain(10.0);
       tickCounter.set(ticksForDesiredForce.getIntegerValue());
 
       makeViz(yoGraphicsListRegistries);
@@ -81,7 +85,8 @@ public class SkippyICPBasedController extends SimpleRobotController
       yoGraphicsListRegistries.registerYoGraphic(listName, icpPositionYoGraphic);
       yoGraphicsListRegistries.registerArtifact(listName, icpPositionYoGraphic.createArtifact());
 
-      YoGraphicPosition desiredCMPPositionYoGraphic = new YoGraphicPosition("DesiredCMP", desiredCMPViz, 0.05, YoAppearance.Magenta(), GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition desiredCMPPositionYoGraphic = new YoGraphicPosition("DesiredCMP", desiredCMPViz, 0.05, YoAppearance.Magenta(),
+                                                                            GraphicType.BALL_WITH_ROTATED_CROSS);
       yoGraphicsListRegistries.registerYoGraphic(listName, desiredCMPPositionYoGraphic);
       yoGraphicsListRegistries.registerArtifact(listName, desiredCMPPositionYoGraphic.createArtifact());
 
@@ -89,17 +94,22 @@ public class SkippyICPBasedController extends SimpleRobotController
       yoGraphicsListRegistries.registerYoGraphic(listName, footPositionYoGraphic);
       yoGraphicsListRegistries.registerArtifact(listName, footPositionYoGraphic.createArtifact());
 
-      YoGraphicVector desiredGRFYoGraphic = new YoGraphicVector("desiredGRFYoGraphic", footLocationViz, desiredGroundReactionViz, 0.05, YoAppearance.Orange(), true);
+      YoGraphicVector desiredGRFYoGraphic = new YoGraphicVector("desiredGRFYoGraphic", footLocationViz, desiredGroundReactionViz, 0.05, YoAppearance.Orange(),
+                                                                true);
       yoGraphicsListRegistries.registerYoGraphic("desiredReactionForce", desiredGRFYoGraphic);
 
       YoGraphicVector actualGRFYoGraphic = new YoGraphicVector("actualGRFYoGraphic", footLocationViz, groundReachtionViz, 0.05, YoAppearance.DarkGreen(), true);
       yoGraphicsListRegistries.registerYoGraphic("actualReactionForce", actualGRFYoGraphic);
 
-      YoGraphicVector hipToFootPositionVectorYoGraphic = new YoGraphicVector("hipToFootPositionVector", hipLocationViz, hipToFootDirectionViz, 1.0, YoAppearance.Red(), true);
+      YoGraphicVector hipToFootPositionVectorYoGraphic = new YoGraphicVector("hipToFootPositionVector", hipLocationViz, hipToFootDirectionViz, 1.0,
+                                                                             YoAppearance.Red(), true);
       yoGraphicsListRegistries.registerYoGraphic("hipToFootPositionVector", hipToFootPositionVectorYoGraphic);
 
-      YoGraphicVector hipAxisVectorYoGraphic = new YoGraphicVector("hipAxis", hipLocationViz, hipAxisViz, 0.2, YoAppearance.Red(), true);
+      YoGraphicVector hipAxisVectorYoGraphic = new YoGraphicVector("hipAxis", hipLocationViz, hipAxisViz, 0.4, YoAppearance.Red(), true);
       yoGraphicsListRegistries.registerYoGraphic("hipAxis", hipAxisVectorYoGraphic);
+      
+      YoGraphicVector shoulderAxisVectorYoGraphic = new YoGraphicVector("shoulderAxis", shoulderLocationViz, shoulderAxisViz, 0.4, YoAppearance.Red(), true);
+      yoGraphicsListRegistries.registerYoGraphic("shoulderAxis", shoulderAxisVectorYoGraphic);
    }
 
    @Override
@@ -113,7 +123,8 @@ public class SkippyICPBasedController extends SimpleRobotController
       if (tickCounter.getIntegerValue() > ticksForDesiredForce.getIntegerValue())
       {
          desiredCMP.setY(desiredCMP.getY() - kMomentum.getDoubleValue() * angularMomentum.getX());
-         
+         desiredCMP.setX(desiredCMP.getX() - kMomentum.getDoubleValue() * angularMomentum.getY());
+
          desiredGroundReaction.sub(com, desiredCMP);
          desiredGroundReaction.normalize();
          double reactionModulus = Math.abs(skippy.getGravity()) * skippy.getMass() / desiredGroundReaction.getZ();
@@ -123,13 +134,16 @@ public class SkippyICPBasedController extends SimpleRobotController
       tickCounter.increment();
 
       skippy.getHipJoint().getTranslationToWorld(worldToHip.getVector());
+      skippy.getShoulderJoint().getTranslationToWorld(worldToShoulder.getVector());
+      
+      // hip specific:
       hipToFootDirection.sub(footLocation, worldToHip);
       hipToFootDirection.normalize();
-
       skippy.getHipJointAxis(hipAxis);
       double balanceTorque = computeJointTorque(desiredGroundReaction, hipToFootDirection, hipAxis);
-      double angleFeedback = computeAngleFeedback();
+      double angleFeedback = computeAngleFeedbackHip();
       skippy.getHipJoint().setTau(angleFeedback + balanceTorque);
+      
 
       updateViz();
    }
@@ -162,25 +176,55 @@ public class SkippyICPBasedController extends SimpleRobotController
       desiredGroundReactionViz.set(desiredGroundReaction);
       groundReachtionViz.set(groundReaction);
       hipLocationViz.set(worldToHip);
+      shoulderLocationViz.set(worldToShoulder);
       hipToFootDirectionViz.set(hipToFootDirection);
       hipAxisViz.set(hipAxis);
+      shoulderAxisViz.set(shoulderAxis);
       angularMomentumViz.set(angularMomentum);
    }
 
    /**
-    * Controller on the angle between desired and achieved ground reaction force.
+    * Controller on the angle between desired and achieved ground reaction force in the hip plane.
     */
-   private double computeAngleFeedback()
+   private double computeAngleFeedbackHip()
    {
-      double angleBetweenDesiredAndActual = desiredGroundReaction.angle(groundReaction);
-
-      double yDifference = groundReaction.getY() - desiredGroundReaction.getY();
-      angleBetweenDesiredAndActual = Math.signum(yDifference) * angleBetweenDesiredAndActual;
-
-      this.angleBetweenDesiredAndActual.set(angleBetweenDesiredAndActual);
-      if (Double.isNaN(angleBetweenDesiredAndActual))
+      skippy.getHipJointAxis(hipAxis);
+      double hipAngleDifference = computeAngleDifferenceInPlane(desiredGroundReaction, groundReaction, hipAxis);
+      return hipAngleController.compute(hipAngleDifference, 0.0, 0.0, 0.0, dt);
+   }
+   
+   /**
+    * Controller on the angle between desired and achieved ground reaction force in the shoulder plane.
+    */
+   private double computeAngleFeedbackShoulder()
+   {
+      skippy.getShoulderJointAxis(shoulderAxis);
+      double shoulderAngleDifference = computeAngleDifferenceInPlane(desiredGroundReaction, groundReaction, shoulderAxis);
+      return shoulderAngleController.compute(shoulderAngleDifference, 0.0, 0.0, 0.0, dt);
+   }
+   
+   private double computeAngleDifferenceInPlane(FrameVector vectorA, FrameVector vectorB, FrameVector planeNormal)
+   {
+      FrameVector projectedVectorA = new FrameVector();
+      FrameVector projectedVectorB = new FrameVector();
+      projectVectorInPlane(vectorA, planeNormal, projectedVectorA);
+      projectVectorInPlane(vectorB, planeNormal, projectedVectorB);
+      
+      FrameVector crosProduct = new FrameVector();
+      crosProduct.cross(planeNormal, projectedVectorA);
+      double sign = Math.signum(crosProduct.dot(projectedVectorB));
+      
+      double angle = sign * projectedVectorA.angle(projectedVectorB);
+      if (Double.isNaN(angle))
          return 0.0;
-      return angleController.compute(-angleBetweenDesiredAndActual, 0.0, 0.0, 0.0, dt);
+      return angle;
    }
 
+   private void projectVectorInPlane(FrameVector vectorToProject, FrameVector planeNormal, FrameVector projectionToPack)
+   {
+      double modulus = vectorToProject.dot(planeNormal);
+      projectionToPack.set(planeNormal);
+      projectionToPack.scale(-modulus);
+      projectionToPack.add(vectorToProject);
+   }
 }
