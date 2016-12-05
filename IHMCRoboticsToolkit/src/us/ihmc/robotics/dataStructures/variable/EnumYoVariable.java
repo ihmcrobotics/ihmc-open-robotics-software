@@ -8,10 +8,10 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
 {
    public static final int NULL_VALUE = -1;
 
-   private final Class<T> enumType;
+   private Class<T> enumType;
    private final boolean allowNullValue;
-   private final T[] enumValues;
-   private final String[] enumValuesAsString;
+   private T[] enumValues;
+   private String[] enumValuesAsString;
 
    private int valueOrdinal;
 
@@ -128,6 +128,17 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
    {
       checkIfBackedByEnum();
       return enumType;
+   }
+   
+   public void setEnumType(Class<T> enumType)
+   {
+      this.enumType = enumType;
+      enumValues = enumType.getEnumConstants();
+      enumValuesAsString = new String[enumValues.length];
+      for(int i = 0; i < enumValues.length; i++)
+      {
+         enumValuesAsString[i] = enumValues[i].toString();
+      }
    }
 
    /**
