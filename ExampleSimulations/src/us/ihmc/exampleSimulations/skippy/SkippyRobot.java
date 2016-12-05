@@ -210,7 +210,7 @@ public class SkippyRobot extends Robot
          rootJointIfSkippy.setRotationAndTranslation(transform);
 
          shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2), this, Axis.Y);
-         shoulderJoint.setDamping(0.1);
+         shoulderJoint.setDamping(0.0);
          shoulderJoint.setInitialState(initialShoulderJointAngle, 0.0);
          Link arms = createArmsTippy();
          shoulderJoint.setLink(arms);
@@ -223,7 +223,7 @@ public class SkippyRobot extends Robot
          rootJointIfSkippy.addJoint(shoulderJoint);
 
          hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
-         hipJoint.setDamping(0.0);//2.5);//0.1);
+         hipJoint.setDamping(0.0);
          hipJoint.setInitialState(2.0 * Math.PI / 8.0, 0.0);
          Link leg = createLegSkippy();
          hipJoint.setLink(leg);
@@ -546,13 +546,16 @@ public class SkippyRobot extends Robot
    /**
     * Computes the CoM position and velocity and the ICP
     */
-   public void computeComAndICP(double omega0, FramePoint comToPack, FrameVector comVelocityToPack, FramePoint icpToPack)
+   public void computeComAndICP(FramePoint comToPack, FrameVector comVelocityToPack, FramePoint icpToPack, FrameVector angularMomentumToPack)
    {
       double totalMass = computeCOMMomentum(tempCOMPosition, tempLinearMomentum, tempAngularMomentum);
+      angularMomentumToPack.set(tempAngularMomentum);
 
       comToPack.set(tempCOMPosition);
       tempLinearMomentum.scale(1.0 / totalMass);
       comVelocityToPack.set(tempLinearMomentum);
+      
+      double omega0 = Math.sqrt(comToPack.getZ() / Math.abs(getGravity()));
 
       icpToPack.scaleAdd(omega0, comVelocityToPack, comToPack);
       icpToPack.setZ(0.0);
