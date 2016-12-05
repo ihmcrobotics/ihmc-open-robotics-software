@@ -17,7 +17,14 @@ if (!rootProject.name.equals('IHMCOpenRoboticsSoftware')) {
    evaluationDependsOn(':IHMCOpenRoboticsSoftware')
 }
 
+
+compileJava {
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
+}
+
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"

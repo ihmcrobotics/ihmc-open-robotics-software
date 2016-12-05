@@ -10,20 +10,17 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.graphics3DDescription.appearance.YoAppearance;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepOverheadPath;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -32,7 +29,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.lidar.SimulatedLIDARSensorUpdateParameters;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -217,10 +213,10 @@ public class SkippyController implements RobotController
     * Debug stuff
     */
    boolean setUpFiles = false; //true;//
-   boolean trace = false;//true;// 
+   boolean trace = false;//true;//
    boolean crossProductAndPointsDistance = false;// true; //
-   boolean traceCom = true; //false;// 
-   boolean traceCmpToCom = false; //true; // 
+   boolean traceCom = true; //false;//
+   boolean traceCmpToCom = false; //true; //
    double tol = 0.1; //threshold for debug distances
 
    public SkippyController(SkippyRobot robot, RobotType robotType, String name, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistries)
@@ -238,7 +234,7 @@ public class SkippyController implements RobotController
       comToFootErrorController = new PIDController("comToFoot", controllerRegistry);
       icpToFootErrorController = new PIDController("icpToFoot", controllerRegistry);
 
-      //      hipAngleController.setProportionalGain(5.0);   
+      //      hipAngleController.setProportionalGain(5.0);
       //      hipAngleController.setDerivativeGain(0.0);
       //      hipAngleController.setIntegralGain(0.1);
       /*
@@ -304,19 +300,19 @@ public class SkippyController implements RobotController
       boolean drawCenterOfMass = true;
       boolean drawICP = true;
       boolean drawFootLocation = true;
-      boolean drawCMPFromDefinition = true; //false;// 
+      boolean drawCMPFromDefinition = true; //false;//
       boolean drawCmpFromReaction = false;// true; //
-      boolean drawCMPFromIcp = true; //false;// 
+      boolean drawCMPFromIcp = true; //false;//
       boolean drawDesiredReactionForce = true;// false;//
       boolean drawActualReactionForce = true;// false;//
       boolean drawCmpToComPositionVector = true;// false;//
-      boolean drawHipToFootPositionVector = true;//false;// 
-      boolean drawHipJointUnitVector = true;// false;// 
+      boolean drawHipToFootPositionVector = true;//false;//
+      boolean drawHipJointUnitVector = true;// false;//
       boolean drawTauHipJoint = true;// false;//
-      boolean drawShoulderToFootPositionVector = true;//false;// 
-      boolean drawShoulderJointUnitVector = true;//false;// 
+      boolean drawShoulderToFootPositionVector = true;//false;//
+      boolean drawShoulderJointUnitVector = true;//false;//
       boolean drawTauShoulderJoint = false;// true;//
-      boolean drawRateOfChangeOfAngularMomentum = true;//false;// 
+      boolean drawRateOfChangeOfAngularMomentum = true;//false;//
       /*
        * CoM
        */
@@ -470,7 +466,7 @@ public class SkippyController implements RobotController
    }
 
    /**
-    * 
+    *
     */
    public void setUpOutputFiles(boolean setFiles)
    {
@@ -816,7 +812,7 @@ public class SkippyController implements RobotController
    }
 
    /**
-    * CMP computed from definition [1] (Eq. 2 and 3) 
+    * CMP computed from definition [1] (Eq. 2 and 3)
     */
    public void cmpFromDefinition()
    {
@@ -883,8 +879,8 @@ public class SkippyController implements RobotController
       /*
        * Compute ICP
        */
-      averagedW0.set(Math.sqrt(averagedZ0.getDoubleValue() / Math.abs(robot.getGravityt())));
-      fixedW0.set(Math.sqrt(z0.getDoubleValue() / Math.abs(robot.getGravityt())));
+      averagedW0.set(Math.sqrt(averagedZ0.getDoubleValue() / Math.abs(robot.getGravity())));
+      fixedW0.set(Math.sqrt(z0.getDoubleValue() / Math.abs(robot.getGravity())));
       icp.scaleAdd(fixedW0/* averagedW0 */.getDoubleValue(), comVelocity, com);
       icp.setZ(0.0);
       /*
@@ -1469,7 +1465,7 @@ public class SkippyController implements RobotController
          if (direction == SkippyToDo.JUMP_FORWARD)
          {
             double time = stateMachine.timeInCurrentState();
-            return time > 0.5; //> 0.2;   //true; // 
+            return time > 0.5; //> 0.2;   //true; //
          }
          else
             return false;
@@ -1520,7 +1516,7 @@ public class SkippyController implements RobotController
          if (trace)
             System.out.println("RepositionToRecoverTransitionCondition");
          double time = stateMachine.timeInCurrentState();
-         return time < 0.80 && time > 0.79; //< 0.60 && time > 0.59; //< 0.70 && time > 0.69;// 
+         return time < 0.80 && time > 0.79; //< 0.60 && time > 0.59; //< 0.70 && time > 0.69;//
       }
    }
 
@@ -1731,7 +1727,7 @@ public class SkippyController implements RobotController
             /*
              * Torque on hip for keeping track the angle between torso and leg
              */
-            desiredLegToTorsoAngle.set(-0.745);//-0.5075);   
+            desiredLegToTorsoAngle.set(-0.745);//-0.5075);
             tauHipForAngleControl.set(hipAngleController.compute(robot.getQ_hip().getDoubleValue(), desiredLegToTorsoAngle.getDoubleValue(),
                                                                  -robot.getQd_hip().getDoubleValue(), 0.0, deltaT));
             /*

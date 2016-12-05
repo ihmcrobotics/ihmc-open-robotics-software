@@ -6,6 +6,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Matrix3f;
 import javax.vecmath.Point3f;
+import javax.vecmath.Quat4f;
 import javax.vecmath.TexCoord2f;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple3f;
@@ -17,6 +18,7 @@ public class MeshDataHolder
    private final TexCoord2f[] texturePoints;
    private final int[] triangleIndices;
    private final Vector3f[] vertexNormals;
+   private String name = "MeshDataHolder";
 
    public MeshDataHolder(Point3f[] vertices, TexCoord2f[] texturePoints, int[] triangleIndices, Vector3f[] vertexNormals)
    {
@@ -78,6 +80,13 @@ public class MeshDataHolder
       return rotate(input, matrix);
    }
 
+   public static MeshDataHolder rotate(MeshDataHolder input, Quat4f quaternion)
+   {
+      Matrix3f matrix = new Matrix3f();
+      matrix.set(quaternion);
+      return rotate(input, matrix);
+   }
+
    public static MeshDataHolder translate(MeshDataHolder input, float offsetX, float offsetY, float offsetZ)
    {
       Point3f[] inputVertices = input.getVertices();
@@ -136,5 +145,14 @@ public class MeshDataHolder
       System.arraycopy(array1, 0, combined, 0, array1.length);
       System.arraycopy(array2, 0, combined, array1.length, array2.length);
       return combined;
+   }
+
+   public String getName()
+   {
+      return name;
+   }
+   public void setName(String name)
+   {
+//      this.name= name;
    }
 }

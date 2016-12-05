@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -63,7 +62,7 @@ public class TwoSegmentFootstepGenerator implements FootstepGenerator
    }
 
    @Override
-   public Collection<Footstep> generateDesiredFootstepList()
+   public ArrayList<Footstep> generateDesiredFootstepList()
    {
       ArrayList<Footstep> footstepsFirstSegment = new ArrayList<Footstep>(footstepGenerator.generateDesiredFootstepList());
 

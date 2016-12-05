@@ -145,6 +145,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
       parameters.setMaximumStepXWhenForwardAndDown(0.25);
       parameters.setMaximumStepZWhenForwardAndDown(0.25);
       parameters.setMaximumStepYaw(0.25);
+      parameters.setMaximumStepWidth(0.4);
       parameters.setMinimumStepWidth(0.15);
       parameters.setMinimumFootholdPercent(0.8);
 
