@@ -4,7 +4,7 @@ import javax.vecmath.Vector3f;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine.TurnValveBehaviorState;
-import us.ihmc.humanoidBehaviors.behaviors.examples.UserValidationExampleBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.examples.GetUserValidationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -57,7 +57,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    private final ResetRobotBehavior resetRobotBehavior;
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
-   private final UserValidationExampleBehavior userValidationExampleBehavior;
+   private final GetUserValidationBehavior userValidationExampleBehavior;
 
    RobotSide side = RobotSide.RIGHT;
 
@@ -75,7 +75,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(yoTime, referenceFrames, communicationBridge, atlasPrimitiveActions);
-      userValidationExampleBehavior = new UserValidationExampleBehavior(communicationBridge);
+      userValidationExampleBehavior = new GetUserValidationBehavior(communicationBridge);
 
       setupStateMachine();
    }

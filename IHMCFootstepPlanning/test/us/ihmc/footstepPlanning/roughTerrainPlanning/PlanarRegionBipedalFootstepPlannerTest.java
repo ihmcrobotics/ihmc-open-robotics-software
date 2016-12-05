@@ -65,6 +65,28 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    {
       super.testOverCinderBlockField(true);
    }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testStepAfterPitchedUp()
+   {
+      //super.testStepUpsAndDownsScoringDifficult(!visualize);
+      super.testCompareAfterPitchedStep(!visualize, true);
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testStepAfterPitchedDown()
+   {
+      super.testCompareAfterPitchedStep(!visualize, false);
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
+   public void testStepBeforeGap()
+   {
+      super.testCompareStepBeforeGap(!visualize);
+   }
 
    @Override
    public FootstepPlanner getPlanner()
@@ -78,6 +100,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       parameters.setMaximumStepXWhenForwardAndDown(0.25);
       parameters.setMaximumStepZWhenForwardAndDown(0.25);
       parameters.setMaximumStepYaw(0.15);
+      parameters.setMaximumStepWidth(0.4);
       parameters.setMinimumStepWidth(0.15);
       parameters.setMinimumFootholdPercent(0.8);
 

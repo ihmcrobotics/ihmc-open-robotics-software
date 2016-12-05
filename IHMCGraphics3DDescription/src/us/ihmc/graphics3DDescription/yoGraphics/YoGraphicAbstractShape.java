@@ -119,6 +119,7 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
 
    private Vector3d rotationEulerVector = new Vector3d();
 
+   @Override
    protected void computeRotationTranslation(Transform3d transform3D)
    {
       transform3D.setIdentity();
@@ -130,6 +131,7 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       transform3D.setScale(scale);
    }
 
+   @Override
    public Artifact createArtifact()
    {
       throw new RuntimeException("Implement Me!");

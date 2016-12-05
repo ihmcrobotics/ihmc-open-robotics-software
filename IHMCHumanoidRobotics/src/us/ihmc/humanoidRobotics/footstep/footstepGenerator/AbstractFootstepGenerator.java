@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -79,7 +78,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    }
 
    @Override
-   public List<Footstep> generateDesiredFootstepList()
+   public ArrayList<Footstep> generateDesiredFootstepList()
    {
       ArrayList<Footstep> ret = new ArrayList<Footstep>();
       initialize();

@@ -14,6 +14,8 @@ public class PlanarRegionsListGenerator
 
    private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
 
+   private int id = 0;
+   
    public void addCubeReferencedAtCenter(double lengthX, double widthY, double heightZ)
    {
       RigidBodyTransformGenerator transformGeneratorTwo = new RigidBodyTransformGenerator(transformGenerator);
@@ -55,12 +57,14 @@ public class PlanarRegionsListGenerator
    public void addPolygon(ConvexPolygon2d polygon)
    {
       PlanarRegion planarRegion = new PlanarRegion(transformGenerator.getRigidBodyTransformCopy(), polygon);
+      planarRegion.setRegionId(id++);
       planarRegionsList.addPlanarRegion(planarRegion);
    }
 
    public void addPolygons(ArrayList<ConvexPolygon2d> polygons)
    {
       PlanarRegion planarRegion = new PlanarRegion(transformGenerator.getRigidBodyTransformCopy(), polygons);
+      planarRegion.setRegionId(id++);
       planarRegionsList.addPlanarRegion(planarRegion);
    }
 
@@ -68,6 +72,7 @@ public class PlanarRegionsListGenerator
    {
       ConvexPolygon2d rectangle = createRectanglePolygon(lengthX, widthY);
       PlanarRegion planarRegion = new PlanarRegion(transformGenerator.getRigidBodyTransformCopy(), rectangle);
+      planarRegion.setRegionId(id++);
       planarRegionsList.addPlanarRegion(planarRegion);
    }
 

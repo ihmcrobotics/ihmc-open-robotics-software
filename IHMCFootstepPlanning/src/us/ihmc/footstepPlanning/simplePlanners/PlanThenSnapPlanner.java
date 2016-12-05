@@ -79,6 +79,7 @@ public class PlanThenSnapPlanner implements FootstepPlanner
                PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon.getConvexPolygon2d(), planarRegionsList, regionToMoveTo);
          if (snapTransform == null)
             return FootstepPlanningResult.SNAPPING_FAILED;
+         solePose.setZ(0.0);
          solePose.applyTransform(snapTransform);
 
          RigidBodyTransform regionToWorld = new RigidBodyTransform();

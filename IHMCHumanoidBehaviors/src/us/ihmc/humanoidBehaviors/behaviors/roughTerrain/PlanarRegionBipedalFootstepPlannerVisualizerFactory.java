@@ -23,7 +23,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizerFactory
       YoVariableRegistry registry = new YoVariableRegistry(PlanarRegionBipedalFootstepPlannerVisualizerFactory.class.getSimpleName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame,
+      PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(10, footPolygonsInSoleFrame,
                                                                                                                                 registry, graphicsListRegistry);
 
       PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("PlannerScheduler");
@@ -44,7 +44,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizerFactory
       YoVariableRegistry registry = new YoVariableRegistry(PlanarRegionBipedalFootstepPlannerVisualizerFactory.class.getSimpleName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(footPolygonsInSoleFrame,
+      PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(10, footPolygonsInSoleFrame,
                                                                                                                                 registry, graphicsListRegistry);
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Test"));
 

@@ -52,6 +52,38 @@ public abstract class FootstepPlannerOnFlatGroundTest implements PlanningTest
       if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
    }
 
+   public void testATightTurn()
+   {
+      testJustStraightLine(true);
+   }
+
+   public void testATightTurn(boolean assertPlannerReturnedResult)
+   {
+      double xGoal = 2.0;
+      double yGoal = 4.0;
+      double yawGoal = 0.0;
+      Point2d goalPosition = new Point2d(xGoal, yGoal);
+      FramePose2d goalPose = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
+
+      double xInitialStanceFoot = 0.0;
+      double yInitialStanceFoot = 0.0;
+      double yawInitial = 0.0;
+      Point2d initialStanceFootPosition = new Point2d(xInitialStanceFoot, yInitialStanceFoot);
+      FramePose2d initialStanceFootPose = new FramePose2d(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
+      RobotSide initialStanceFootSide = RobotSide.LEFT;
+
+      FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose);
+      FramePose goalPose3d = FlatGroundPlanningUtils.poseFormPose2d(goalPose);
+      FootstepPlan footstepPlan =
+            PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose3d, initialStanceFootSide, goalPose3d, null, assertPlannerReturnedResult);
+
+      if (assertPlannerReturnedResult) assertTrue(PlanningTestTools.isGoalWithinFeet(goalPose3d, footstepPlan));
+      if (assertPlannerReturnedResult) assertTrue(footstepPlan.getNumberOfSteps() < 30);
+
+      if (visualize())
+         PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose3d);
+   }
+
    public void testStraightLineWithInitialTurn()
    {
       testStraightLineWithInitialTurn(true);

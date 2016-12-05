@@ -11,7 +11,7 @@ buildscript {
 
 apply plugin: "us.ihmc.gradle.ihmc-build"
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 version = "${getOpenRoboticsSoftwareProject().version}"
 project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
 project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
@@ -42,8 +42,9 @@ dependencies {
 	compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
 	compile ihmc.getProjectDependency(":ConvexOptimizationAdapter")
 	
-	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
-    testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")
+    testCompile ihmc.getProjectTestDependency(":IHMCUnitTesting")
+    testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 }
 
 jar {
