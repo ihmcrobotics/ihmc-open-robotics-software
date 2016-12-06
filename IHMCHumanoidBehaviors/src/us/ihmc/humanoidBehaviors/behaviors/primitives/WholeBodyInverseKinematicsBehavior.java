@@ -45,7 +45,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final BooleanYoVariable hasSentMessageToController;
 
    private final SideDependentList<DenseMatrix64F> handSelectionMatrices = new SideDependentList<>(CommonOps.identity(6), CommonOps.identity(6));
-   private final DenseMatrix64F chestSelectionMatrix = new DenseMatrix64F(CommonOps.identity(3));
+   private final DenseMatrix64F chestSelectionMatrix = new DenseMatrix64F(6,6);
    private final SideDependentList<YoFramePoint> yoDesiredHandPositions = new SideDependentList<>();
    private final SideDependentList<YoFrameQuaternion> yoDesiredHandOrientations = new SideDependentList<>();
    private final YoFrameQuaternion yoDesiredChestOrientation;
@@ -110,6 +110,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    {
       currentSolutionQuality.set(Double.POSITIVE_INFINITY);
 
+      //yoDesiredChestOrientation.setToNaN();
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          yoDesiredHandPositions.get(robotSide).setToNaN();
@@ -235,11 +237,9 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          }
       }
 
-      ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+      YoFrameQuaternion yoDesiredChestQuaternion = yoDesiredChestOrientation;
       Quat4d desiredChestOrientation = new Quat4d();
-      FrameOrientation desiredChestFrame = new FrameOrientation(chestFrame);
-      desiredChestFrame.changeFrame(worldFrame);
-      desiredChestFrame.getQuaternion(desiredChestOrientation);
+      yoDesiredChestQuaternion.get(desiredChestOrientation);
       chestTrajectoryMessage = new ChestTrajectoryMessage(0.0, desiredChestOrientation);
 
       ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
