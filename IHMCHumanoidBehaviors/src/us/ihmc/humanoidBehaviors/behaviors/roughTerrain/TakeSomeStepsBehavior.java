@@ -96,8 +96,8 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
             FootstepStatus.Status.class);
       latestFootstepStatusEnum = new SideDependentList<>(leftFootstepStatus, rightFootstepStatus);
 
-      behaviorCommunicationBridge.attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
-      behaviorCommunicationBridge.attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
+     attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
+     attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
    }
 
    @Override

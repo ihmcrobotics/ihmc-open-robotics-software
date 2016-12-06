@@ -228,20 +228,10 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    @Override
    public void onBehaviorExited()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
-      sendPacket(p1);
+
    }
 
-   @Override
-   public void onBehaviorAborted()
-   {
-      onBehaviorExited();
-   }
-
-   @Override
-   public void onBehaviorPaused()
-   {
-   }
+   
 
    @Override
    public void coactiveDataRecieved(SimpleCoactiveBehaviorDataPacket data)

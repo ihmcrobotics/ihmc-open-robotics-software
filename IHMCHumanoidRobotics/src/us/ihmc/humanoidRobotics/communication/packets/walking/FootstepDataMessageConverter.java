@@ -60,4 +60,38 @@ public class FootstepDataMessageConverter
       footstepDataListMessage.setExecutionMode(executionMode);
       return footstepDataListMessage;
    }
+   
+   public static void appendPlanToMessage(FootstepPlan footstepPlan, FootstepDataListMessage footstepDataListMessage)
+   {
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+      {
+         SimpleFootstep footstep = footstepPlan.getFootstep(i);
+
+         FramePose footstepPose = new FramePose();
+         footstep.getSoleFramePose(footstepPose);
+         Point3d location = new Point3d();
+         Quat4d orientation = new Quat4d();
+         footstepPose.getPosition(location);
+         footstepPose.getOrientation(orientation);
+
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
+         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+
+         if (footstep.hasFoothold())
+         {
+            ConvexPolygon2d foothold = new ConvexPolygon2d();
+            footstep.getFoothold(foothold);
+
+            if (foothold.getNumberOfVertices() != 4)
+               ConvexPolygonTools.limitVerticesConservative(foothold, 4);
+
+            ArrayList<Point2d> contactPoints = new ArrayList<>();
+            for (int contactPointIdx = 0; contactPointIdx < 4; contactPointIdx++)
+               contactPoints.add(new Point2d(foothold.getVertex(contactPointIdx)));
+            footstepData.setPredictedContactPoints(contactPoints);
+         }
+
+         footstepDataListMessage.add(footstepData);
+      }
+   }
 }
