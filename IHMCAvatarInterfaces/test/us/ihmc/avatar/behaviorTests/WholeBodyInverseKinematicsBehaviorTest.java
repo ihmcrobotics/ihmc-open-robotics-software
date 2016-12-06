@@ -99,8 +99,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       setupKinematicsToolboxModule();
    }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Ignore
+   @ContinuousIntegrationTest(estimatedDuration = 30.0) //TODO
    @Test(timeout = 160000)
    public void testSolvingForAHandPose() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -173,8 +173,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-  
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Ignore
+   @ContinuousIntegrationTest(estimatedDuration = 30.0) //TODO
    @Test(timeout = 160000)
    public void testSolvingForBothHandPoses() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -240,7 +240,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0) //TODO
    @Test(timeout = 160000)
    public void testSolvingForSelectionMatrices() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -299,7 +299,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       System.out.println(desiredHandPose.getRoll());
       System.out.println(currentHandPose.getRoll());
       desiredHandPose.getAxisAngleRotationToOtherPose(currentHandPose, handAngle);
-      double handAngleEpsilon = Math.toRadians(10);  //TODO
+      double handAngleEpsilon = Math.toRadians(10);  
       System.out.println(handAngle.angle);
       assertTrue(Math.abs(handAngle.angle) < handAngleEpsilon);
       
@@ -310,13 +310,13 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       assertTrue(isOrientationEqual(initialChestOrientation.getQuaternion(), finalChestOrientation.getQuaternion(), chestAngleEpsilon));
       double handPosition = desiredHandPose.getPositionDistance(currentHandPose);
-      double positionEpsilon = 1.0e-1;  //TODO
+      double positionEpsilon = 1.0e-2;  
       assertTrue(Math.abs(handPosition) < positionEpsilon);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Ignore
+   @ContinuousIntegrationTest(estimatedDuration = 30.0) //TODO
    @Test(timeout = 160000)
    public void testSolvingForHandAngularLinearControl() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -384,7 +384,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       currentHandPoseL.changeFrame(ReferenceFrame.getWorldFrame());
       double currentYawL = currentHandPoseL.getYaw();
       
-      double angleEpsilon = Math.toRadians(6);  //TODO
+      double angleEpsilon = Math.toRadians(6); 
 
       System.out.println(initialRollR);
       System.out.println(currentRollR);
@@ -404,8 +404,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Ignore  
+   @ContinuousIntegrationTest(estimatedDuration = 30.0) //TODO
    @Test(timeout = 160000)
    public void testSolvingForHandRollConstraint() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -453,7 +453,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       currentHandPose.changeFrame(ReferenceFrame.getWorldFrame());
       double currentRoll = currentHandPose.getRoll();
       
-      double angleEpsilon = Math.toRadians(5);  //TODO
+      double angleEpsilon = Math.toRadians(5); 
 
       System.out.println(initialRoll);
       System.out.println(currentRoll);
@@ -467,8 +467,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Ignore
+   @ContinuousIntegrationTest(estimatedDuration = 30.0) //TODO
    @Test(timeout = 160000)
    public void testSolvingForChestAngularControl() throws SimulationExceededMaximumTimeException, IOException
    {
