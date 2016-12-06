@@ -104,7 +104,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       footstepPlannerGoalPose = new YoFramePose(prefix + "FootstepGoalPose", ReferenceFrame.getWorldFrame(), registry);
       footstepPlannerInitialStepPose = new YoFramePose(prefix + "InitialStepPose", ReferenceFrame.getWorldFrame(), registry);
 
-      behaviorCommunicationBridge.attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
+      attachNetworkListeningQueue(planarRegionsListQueue, PlanarRegionsListMessage.class);
       
       requestedPlanarRegion.set(false);
    }
