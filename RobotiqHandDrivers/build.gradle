@@ -33,6 +33,10 @@ repositories {
     maven {
         url "http://artifactory.ihmc.us/artifactory/thirdparty/"
     }
+    
+    maven {
+        url "http://artifactory.ihmc.us/artifactory/releases/"
+   	}
 }
 
 def strings = ['ihmc', 'robotics']
