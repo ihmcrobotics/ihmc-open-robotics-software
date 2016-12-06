@@ -8,6 +8,9 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class AudioTools
 {
@@ -37,15 +40,12 @@ public class AudioTools
     * Play a clip once. Will do nothing if clip is already playing.
     */
    public static void playSoundOnce(Clip clip)
-   {
-      if (clip != null)
-      {
-         if (clip.isRunning())
-            return;
-
-         clip.setFramePosition(0);
-         clip.start();
-      }
+   {      
+      if (clip == null || clip.isRunning())
+         return;
+      
+      clip.setFramePosition(0);
+      clip.start();
    }
 
    public static Clip loadSoundClip(InputStream is)
@@ -88,6 +88,11 @@ public class AudioTools
          clip.open(stream);
 
          return clip;
+      }
+      catch (LineUnavailableException e)
+      {
+         PrintTools.warn("Plug in a speaker to hear sounds.");
+         return null;
       }
       catch (Exception e)
       {
