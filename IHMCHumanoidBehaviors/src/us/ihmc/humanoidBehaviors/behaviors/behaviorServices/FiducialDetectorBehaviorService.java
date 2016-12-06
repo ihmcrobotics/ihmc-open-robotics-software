@@ -17,7 +17,7 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
    private static final double DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS = Math.toRadians(80.0);
    private static final double DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS = Math.toRadians(45.0);
    
-   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>(20);
+   private final ConcurrentListeningQueue<VideoPacket> videoPacketQueue = new ConcurrentListeningQueue<VideoPacket>(2);
 
    private final Object fiducialDetectorFromCameraImagesConch = new Object();
    private final FiducialDetectorFromCameraImages fiducialDetectorFromCameraImages;
