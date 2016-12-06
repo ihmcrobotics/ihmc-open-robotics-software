@@ -16,6 +16,7 @@ import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
@@ -23,6 +24,7 @@ import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationKryoNetClassLists;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -353,7 +355,9 @@ public class DRCNetworkProcessor
    {
       if (parameters.isRobotEnvironmentAwerenessModuleEnabled())
       {
-         PacketCommunicator reaCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.REA_MODULE_PORT, NET_CLASS_LIST);
+         KryoObjectServer server = new KryoObjectServer(NetworkPorts.REA_MODULE_PORT.getPort(), REACommunicationKryoNetClassLists.getPublicNetClassList());
+         server.throwExceptionForUnregisteredPackets(false);
+         PacketCommunicator reaCommunicator = PacketCommunicator.createCustomPacketCommunicator(server, REACommunicationKryoNetClassLists.getPublicNetClassList());
          packetRouter.attachPacketCommunicator(PacketDestination.REA_MODULE, reaCommunicator);
          reaCommunicator.connect();
       }
