@@ -122,7 +122,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    {
       TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Walk Over Terrain Behavior");
       sendPacket(p1);
-      statemachine.setCurrentState(WalkOverTerrainState.LOOK_FOR_GOAL);
+      super.onBehaviorEntered();
    }
 
    @Override
@@ -231,6 +231,10 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 //      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN); //REACHED_GOAL);
       //      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_FOR_GOAL);
       statemachine.addStateWithDoneTransition(reachedGoalAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN);
+      
+      //the state machine will transition into this state every time the behavior starts.
+      statemachine.setStartState(WalkOverTerrainState.LOOK_FOR_GOAL);
+
    }
 
    private class ClearPlanarRegionsListBehavior extends AbstractBehavior
