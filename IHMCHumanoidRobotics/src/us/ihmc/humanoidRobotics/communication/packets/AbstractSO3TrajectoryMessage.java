@@ -135,16 +135,19 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    }
 
    /**
-    * The selectionMatrix needs to be 6x6.
+    * The selectionMatrix needs to be nx6 or nx3.
     * @param selectionMatrix
     */
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
       if (selectionMatrixDiagonal == null)
-         selectionMatrixDiagonal = new float[6];
+         selectionMatrixDiagonal = new float[3];
 
       for (int i = 0; i < selectionMatrix.getNumRows(); i++)
          selectionMatrixDiagonal[i] = (float) selectionMatrix.get(i, i);
+      
+      DenseMatrix64F inner = new DenseMatrix64F(selectionMatrix.getNumRows(), selectionMatrix.getNumRows());
+      CommonOps.multInner(selectionMatrix, inner);
    }
 
    public final int getNumberOfTrajectoryPoints()
@@ -185,15 +188,12 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    public void getSelectionMatrix(DenseMatrix64F selectionMatrixToPack)
    {
-      selectionMatrixToPack.reshape(6, 6);
-      if (selectionMatrixDiagonal == null)
+      selectionMatrixToPack.reshape(3, 6);
+      selectionMatrixToPack.zero();
+      
+      if (selectionMatrixDiagonal != null)
       {
-         selectionMatrixToPack.zero();
-      }
-      else
-      {
-         selectionMatrixToPack.zero();
-         for (int i = 0; i < 6; i++)
+         for (int i = 0; i < 3; i++)
             selectionMatrixToPack.set(i, i, selectionMatrixDiagonal[i]);
          MatrixTools.removeZeroRows(selectionMatrixToPack, 1.0e-5);
       }
