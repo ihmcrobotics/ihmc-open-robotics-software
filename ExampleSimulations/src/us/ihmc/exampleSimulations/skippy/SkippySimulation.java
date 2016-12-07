@@ -10,10 +10,10 @@ public class SkippySimulation
 {
    public static final double DT = 0.0001;
    public static final double controlDT = 0.0001;
-   public static final double TIME = 1000.0;
+   public static final double TIME = 20.0;
    private SimulationConstructionSet sim;
 
-   private static final boolean USE_ICP_BASED_CONTROLLER = true;
+   private static final boolean USE_ICP_BASED_CONTROLLER = false;//true;//     
 
    public SkippySimulation()
    {
@@ -24,7 +24,7 @@ public class SkippySimulation
 
       sim = new SimulationConstructionSet(skippy);
       sim.setGroundVisible(true);
-      sim.setDT(DT, 5);
+      sim.setDT(DT, 75);
       sim.setMaxBufferSize(128000);
       sim.setSimulateDuration(TIME);
       sim.setCameraPosition(10.0, 0.0, 2.0);
