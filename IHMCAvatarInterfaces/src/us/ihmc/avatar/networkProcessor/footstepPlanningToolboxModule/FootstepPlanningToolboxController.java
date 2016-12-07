@@ -23,8 +23,10 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
+import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.PlanarRegionBipedalFootstepPlannerVisualizerFactory;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
@@ -43,6 +45,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class FootstepPlanningToolboxController extends ToolboxController
 {
+   private final boolean visualize = true;
+
    private enum Planners
    {
       PLANAR_REGION_BIPEDAL,
@@ -54,9 +58,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<FootstepPlanningRequestPacket>(null);
    private final AtomicReference<PlanarRegionsListMessage> latestPlanarRegionsReference = new AtomicReference<PlanarRegionsListMessage>(null);
 
+   private final BooleanYoVariable usePlanarRegions = new BooleanYoVariable("usePlanarRegions", registry);
    private final BooleanYoVariable isDone = new BooleanYoVariable("isDone", registry);
    private final BooleanYoVariable requestedPlanarRegions = new BooleanYoVariable("RequestedPlanarRegions", registry);
-   private final DoubleYoVariable time = new DoubleYoVariable("ToolboxTime", registry);
+   private final DoubleYoVariable toolboxTime = new DoubleYoVariable("ToolboxTime", registry);
+   private final DoubleYoVariable timeReceivedPlanarRegion = new DoubleYoVariable("timeReceivedPlanarRegion", registry);
 
    private final PacketCommunicator packetCommunicator;
    private long plannerCount = 0;
@@ -76,8 +82,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(footPolygons));
       plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), footPolygons));
-      activePlanner.set(Planners.PLAN_THEN_SNAP);
+      activePlanner.set(Planners.PLANAR_REGION_BIPEDAL);
 
+      usePlanarRegions.set(true);
       isDone.set(true);
    }
 
@@ -89,15 +96,15 @@ public class FootstepPlanningToolboxController extends ToolboxController
       parameters.setMaximumStepReach(0.55);
       parameters.setMaximumStepZ(0.25);
 
-      parameters.setMaximumStepXWhenForwardAndDown(0.2);
-      parameters.setMaximumStepZWhenForwardAndDown(0.10);
+      parameters.setMaximumStepXWhenForwardAndDown(0.32);
+      parameters.setMaximumStepZWhenForwardAndDown(0.18);
 
       parameters.setMaximumStepYaw(0.15);
       parameters.setMaximumStepWidth(0.4);
       parameters.setMinimumStepWidth(0.15);
       parameters.setMinimumFootholdPercent(0.95);
 
-      parameters.setWiggleInsideDelta(0.08);
+      parameters.setWiggleInsideDelta(0.02);
       parameters.setMaximumXYWiggleDistance(1.0);
       parameters.setMaximumYawWiggle(0.1);
 
@@ -108,31 +115,61 @@ public class FootstepPlanningToolboxController extends ToolboxController
       planner.setFeetPolygons(footPolygons);
 
       planner.setMaximumNumberOfNodesToExpand(500);
+      
+      if (visualize)
+      {
+         SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame = planner.getFootPolygonsInSoleFrame();
+         PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01,
+                                                                                                                                                         null,
+                                                                                                                                                         null,
+                                                                                                                                                         footPolygonsInSoleFrame);
+
+         planner.setBipedalFootstepPlannerListener(listener);
+      }
+      
       return planner;
    }
 
    @Override
    protected void updateInternal()
    {
-      time.add(dt);
-
-      if (!requestedPlanarRegions.getBooleanValue())
-         requestPlanarRegions();
-
-      PlanarRegionsListMessage planarRegionsMessage = latestPlanarRegionsReference.getAndSet(null);
-      if (time.getDoubleValue() < 1.0 && planarRegionsMessage == null)
+      toolboxTime.add(dt);
+      if (toolboxTime.getDoubleValue() > 10.0)
+      {
+         reportMessage(packResult(null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
+         isDone.set(true);
          return;
+      }
 
-      sendMessageToUI("Starting To Plan: " + plannerCount + ", " + activePlanner.getEnumValue().toString());
       FootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
 
-      if (planarRegionsMessage != null)
+      if (usePlanarRegions.getBooleanValue())
       {
+         if (!requestedPlanarRegions.getBooleanValue())
+            requestPlanarRegions();
+
+         PlanarRegionsListMessage planarRegionsMessage = latestPlanarRegionsReference.getAndSet(null); 
+         
+         if (planarRegionsMessage == null)
+         {
+//            if (Math.abs(time.getDoubleValue() % 2.0) < 2.0 * dt) 
+//            {
+//               requestPlanarRegions();
+//            }
+            return;
+         }
+                  
+         timeReceivedPlanarRegion.set(toolboxTime.getDoubleValue());
          PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
          planner.setPlanarRegions(planarRegions);
       }
+
       else
+      {
          planner.setPlanarRegions(null);
+      }
+
+      sendMessageToUI("Starting To Plan: " + plannerCount + ", " + activePlanner.getEnumValue().toString());
 
       FootstepPlanningResult status = planner.plan();
       FootstepPlan footstepPlan = planner.getPlan();
@@ -158,7 +195,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
    {
       isDone.set(false);
       requestedPlanarRegions.set(false);
-      time.set(0.0);
+      toolboxTime.set(0.0);
+      timeReceivedPlanarRegion.set(0.0);
 
       FootstepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
@@ -226,6 +264,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private FootstepPlanningToolboxOutputStatus packResult(FootstepPlan footstepPlan, FootstepPlanningResult status)
    {
+      if (footstepPlan == null)
+         footstepPlan = new FootstepPlan();
+
       FootstepPlanningToolboxOutputStatus result = new FootstepPlanningToolboxOutputStatus();
       result.footstepDataList = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE);
       result.planningResult = status;
