@@ -125,7 +125,8 @@ public class SkippyRobot extends Robot
    private ExternalForcePoint balanceForce;
    public static ExternalForcePoint glueDownToGroundPoint;
 
-   private final double initialBodySidewaysLean = 0.0 * Math.PI / 48.0; //0.2
+//   private final double initialBodySidewaysLean = 0.13783;   //Limit sideways lean for IcpBasedControl to balance 
+   private final double initialBodySidewaysLean = 0.1294140625;//Limit sideways lean for FeedbackPostureControl to balance  
    private final double initialShoulderJointAngle = 0.0 * Math.PI / 6.0;
    private final double initialYawIfSkippy = 0.0* Math.PI * 0.8;
 

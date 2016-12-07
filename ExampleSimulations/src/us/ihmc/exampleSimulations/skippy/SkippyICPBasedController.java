@@ -74,7 +74,7 @@ public class SkippyICPBasedController extends SimpleRobotController
       kMomentum.set(0.3);
       kAngle.set(0.1);
 
-      ticksForDesiredForce.set(100);
+      ticksForDesiredForce.set(1000);//10);//100);
       hipAngleController.setProportionalGain(20.0);
       hipAngleController.setIntegralGain(10.0);
       shoulderAngleController.setProportionalGain(0.0);
